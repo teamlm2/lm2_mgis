@@ -1,0 +1,1097 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>UserRoleManagementDialog</class>
+ <widget class="QDialog" name="UserRoleManagementDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>850</width>
+    <height>550</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>850</width>
+    <height>550</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>850</width>
+    <height>550</height>
+   </size>
+  </property>
+  <property name="baseSize">
+   <size>
+    <width>860</width>
+    <height>550</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>User Role Management</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="resources.qrc">
+    <normaloff>:/plugins/lm2/user_role_management.png</normaloff>:/plugins/lm2/user_role_management.png</iconset>
+  </property>
+  <widget class="Line" name="line">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>10</y>
+     <width>841</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_9">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>1</y>
+     <width>231</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>User Role Management</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="close_button">
+   <property name="geometry">
+    <rect>
+     <x>730</x>
+     <y>510</y>
+     <width>70</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Close</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="help_button">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>510</y>
+     <width>81</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/plugins/lm2/help_button.png</normaloff>:/plugins/lm2/help_button.png</iconset>
+   </property>
+  </widget>
+  <widget class="Line" name="line_2">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>530</y>
+     <width>841</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
+   </property>
+  </widget>
+  <widget class="QLabel" name="username_real_lbl">
+   <property name="geometry">
+    <rect>
+     <x>220</x>
+     <y>0</y>
+     <width>121</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QTabWidget" name="tabWidget">
+   <property name="geometry">
+    <rect>
+     <x>3</x>
+     <y>21</y>
+     <width>846</width>
+     <height>489</height>
+    </rect>
+   </property>
+   <property name="currentIndex">
+    <number>0</number>
+   </property>
+   <widget class="QWidget" name="user_register_tab">
+    <attribute name="title">
+     <string>User Register</string>
+    </attribute>
+    <widget class="QGroupBox" name="groupBox">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>2</y>
+       <width>326</width>
+       <height>461</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>User Roles</string>
+     </property>
+     <widget class="QLineEdit" name="username_edit">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>122</y>
+        <width>150</width>
+        <height>20</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>103</y>
+        <width>151</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>User Name</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="password_edit">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>206</y>
+        <width>150</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="echoMode">
+       <enum>QLineEdit::Password</enum>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_2">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>187</y>
+        <width>151</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Password</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_3">
+      <property name="geometry">
+       <rect>
+        <x>170</x>
+        <y>187</y>
+        <width>151</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Retype Password</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="retype_password_edit">
+      <property name="geometry">
+       <rect>
+        <x>170</x>
+        <y>206</y>
+        <width>150</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="echoMode">
+       <enum>QLineEdit::Password</enum>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_5">
+      <property name="geometry">
+       <rect>
+        <x>170</x>
+        <y>103</y>
+        <width>151</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Surname</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="surname_edit">
+      <property name="geometry">
+       <rect>
+        <x>170</x>
+        <y>122</y>
+        <width>150</width>
+        <height>20</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="firstname_edit">
+      <property name="geometry">
+       <rect>
+        <x>170</x>
+        <y>164</y>
+        <width>150</width>
+        <height>20</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_6">
+      <property name="geometry">
+       <rect>
+        <x>170</x>
+        <y>145</y>
+        <width>151</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>First Name</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_15">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>230</y>
+        <width>151</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Phone</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="phone_edit">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>249</y>
+        <width>311</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_18">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>272</y>
+        <width>310</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Email</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="email_edit">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>291</y>
+        <width>310</width>
+        <height>20</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="get_mac_checkbox">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>319</y>
+        <width>141</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>MAC Address(es)</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="mac_address_edit">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>340</y>
+        <width>311</width>
+        <height>20</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="organization_type_cbox">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>31</y>
+        <width>300</width>
+        <height>22</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_11">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>57</y>
+        <width>300</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Organization</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_10">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>12</y>
+        <width>300</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Organization Type</string>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="organization_cbox">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>76</y>
+        <width>300</width>
+        <height>22</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="register_edit">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>164</y>
+        <width>151</width>
+        <height>20</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_17">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>144</y>
+        <width>151</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Register</string>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QGroupBox" name="groupBox_3">
+     <property name="geometry">
+      <rect>
+       <x>329</x>
+       <y>2</y>
+       <width>193</width>
+       <height>458</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>Groups</string>
+     </property>
+     <widget class="QLabel" name="label_12">
+      <property name="geometry">
+       <rect>
+        <x>6</x>
+        <y>15</y>
+        <width>181</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Groups Available</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="down_groups_button">
+      <property name="geometry">
+       <rect>
+        <x>58</x>
+        <y>224</y>
+        <width>30</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="icon">
+       <iconset resource="resources.qrc">
+        <normaloff>:/plugins/lm2/down_button.png</normaloff>:/plugins/lm2/down_button.png</iconset>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="up_groups_button">
+      <property name="geometry">
+       <rect>
+        <x>104</x>
+        <y>224</y>
+        <width>30</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="icon">
+       <iconset resource="resources.qrc">
+        <normaloff>:/plugins/lm2/up_button.png</normaloff>:/plugins/lm2/up_button.png</iconset>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_13">
+      <property name="geometry">
+       <rect>
+        <x>6</x>
+        <y>252</y>
+        <width>171</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Groups the user is a member of</string>
+      </property>
+     </widget>
+     <widget class="QListWidget" name="group_lwidget">
+      <property name="geometry">
+       <rect>
+        <x>6</x>
+        <y>33</y>
+        <width>181</width>
+        <height>180</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QListWidget" name="member_lwidget">
+      <property name="geometry">
+       <rect>
+        <x>6</x>
+        <y>270</y>
+        <width>181</width>
+        <height>180</height>
+       </rect>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QGroupBox" name="groupBox_7">
+     <property name="geometry">
+      <rect>
+       <x>526</x>
+       <y>2</y>
+       <width>311</width>
+       <height>458</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>Spatial Restrictions</string>
+     </property>
+     <widget class="QLabel" name="label_14">
+      <property name="geometry">
+       <rect>
+        <x>4</x>
+        <y>16</y>
+        <width>150</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Aimag / Duureg</string>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="aimag_cbox">
+      <property name="geometry">
+       <rect>
+        <x>4</x>
+        <y>33</y>
+        <width>150</width>
+        <height>22</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QListWidget" name="aimag_lwidget">
+      <property name="geometry">
+       <rect>
+        <x>4</x>
+        <y>109</y>
+        <width>150</width>
+        <height>101</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="down_aimag_button">
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>64</y>
+        <width>30</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="icon">
+       <iconset resource="resources.qrc">
+        <normaloff>:/plugins/lm2/down_button.png</normaloff>:/plugins/lm2/down_button.png</iconset>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="up_aimag_button">
+      <property name="geometry">
+       <rect>
+        <x>96</x>
+        <y>64</y>
+        <width>30</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="icon">
+       <iconset resource="resources.qrc">
+        <normaloff>:/plugins/lm2/up_button.png</normaloff>:/plugins/lm2/up_button.png</iconset>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_16">
+      <property name="geometry">
+       <rect>
+        <x>160</x>
+        <y>16</y>
+        <width>150</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Soum</string>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="soum_cbox">
+      <property name="geometry">
+       <rect>
+        <x>158</x>
+        <y>33</y>
+        <width>150</width>
+        <height>22</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QListWidget" name="soum_lwidget">
+      <property name="geometry">
+       <rect>
+        <x>158</x>
+        <y>109</y>
+        <width>150</width>
+        <height>101</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="up_soum_button">
+      <property name="geometry">
+       <rect>
+        <x>246</x>
+        <y>64</y>
+        <width>30</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="icon">
+       <iconset resource="resources.qrc">
+        <normaloff>:/plugins/lm2/up_button.png</normaloff>:/plugins/lm2/up_button.png</iconset>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="down_soum_button">
+      <property name="geometry">
+       <rect>
+        <x>200</x>
+        <y>64</y>
+        <width>30</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="icon">
+       <iconset resource="resources.qrc">
+        <normaloff>:/plugins/lm2/down_button.png</normaloff>:/plugins/lm2/down_button.png</iconset>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_30">
+      <property name="geometry">
+       <rect>
+        <x>6</x>
+        <y>90</y>
+        <width>146</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Granted Aimags / Duuregs</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_4">
+      <property name="geometry">
+       <rect>
+        <x>160</x>
+        <y>89</y>
+        <width>181</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Granted Soums</string>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="position_cbox">
+      <property name="geometry">
+       <rect>
+        <x>4</x>
+        <y>270</y>
+        <width>300</width>
+        <height>22</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_19">
+      <property name="geometry">
+       <rect>
+        <x>4</x>
+        <y>209</y>
+        <width>300</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Department</string>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="department_cbox">
+      <property name="geometry">
+       <rect>
+        <x>4</x>
+        <y>228</y>
+        <width>300</width>
+        <height>22</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_7">
+      <property name="geometry">
+       <rect>
+        <x>4</x>
+        <y>251</y>
+        <width>300</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Position</string>
+      </property>
+     </widget>
+     <widget class="QListWidget" name="user_role_lwidget">
+      <property name="geometry">
+       <rect>
+        <x>6</x>
+        <y>342</y>
+        <width>298</width>
+        <height>82</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="delete_button">
+      <property name="geometry">
+       <rect>
+        <x>200</x>
+        <y>300</y>
+        <width>70</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Delete</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="update_button">
+      <property name="geometry">
+       <rect>
+        <x>120</x>
+        <y>300</y>
+        <width>70</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Update</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="add_button">
+      <property name="geometry">
+       <rect>
+        <x>40</x>
+        <y>300</y>
+        <width>70</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Add</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_8">
+      <property name="geometry">
+       <rect>
+        <x>7</x>
+        <y>326</y>
+        <width>292</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Existing User Roles</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="settings_button">
+      <property name="geometry">
+       <rect>
+        <x>60</x>
+        <y>430</y>
+        <width>221</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>User Settings</string>
+      </property>
+     </widget>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="user_management_tab">
+    <attribute name="title">
+     <string>User Management</string>
+    </attribute>
+    <widget class="QTableWidget" name="user_twidget">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>40</y>
+       <width>181</width>
+       <height>281</height>
+      </rect>
+     </property>
+     <attribute name="horizontalHeaderDefaultSectionSize">
+      <number>200</number>
+     </attribute>
+     <column>
+      <property name="text">
+       <string>Employeer</string>
+      </property>
+     </column>
+    </widget>
+    <widget class="QTableWidget" name="position_twidget">
+     <property name="geometry">
+      <rect>
+       <x>199</x>
+       <y>40</y>
+       <width>221</width>
+       <height>281</height>
+      </rect>
+     </property>
+     <attribute name="horizontalHeaderDefaultSectionSize">
+      <number>250</number>
+     </attribute>
+     <column>
+      <property name="text">
+       <string>Position</string>
+      </property>
+     </column>
+    </widget>
+    <widget class="QTableWidget" name="right_grud_twidget">
+     <property name="geometry">
+      <rect>
+       <x>430</x>
+       <y>40</y>
+       <width>391</width>
+       <height>281</height>
+      </rect>
+     </property>
+     <column>
+      <property name="text">
+       <string>Rigth type</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>View</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Add</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Delete</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Edit</string>
+      </property>
+     </column>
+    </widget>
+    <widget class="QGroupBox" name="groupBox_2">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>330</y>
+       <width>811</width>
+       <height>85</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>Employeer Details</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="load_default_settings_button">
+     <property name="geometry">
+      <rect>
+       <x>650</x>
+       <y>10</y>
+       <width>171</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Load Default Settings</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="load_users_button">
+     <property name="geometry">
+      <rect>
+       <x>9</x>
+       <y>10</y>
+       <width>171</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Load All Users</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="load_position_button">
+     <property name="geometry">
+      <rect>
+       <x>199</x>
+       <y>10</y>
+       <width>171</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Load All Position</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="tab">
+    <attribute name="title">
+     <string>Right Settings</string>
+    </attribute>
+    <widget class="QTableWidget" name="settings_right_grud_twidget">
+     <property name="geometry">
+      <rect>
+       <x>270</x>
+       <y>20</y>
+       <width>551</width>
+       <height>391</height>
+      </rect>
+     </property>
+     <column>
+      <property name="text">
+       <string>Right Type English</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Right Type Mongolia</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>View</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Add</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Delete</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Edit</string>
+      </property>
+     </column>
+    </widget>
+    <widget class="QTableWidget" name="settings_position_twidget">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>20</y>
+       <width>251</width>
+       <height>391</height>
+      </rect>
+     </property>
+     <attribute name="horizontalHeaderDefaultSectionSize">
+      <number>250</number>
+     </attribute>
+     <attribute name="horizontalHeaderMinimumSectionSize">
+      <number>33</number>
+     </attribute>
+     <attribute name="verticalHeaderDefaultSectionSize">
+      <number>30</number>
+     </attribute>
+     <attribute name="verticalHeaderMinimumSectionSize">
+      <number>19</number>
+     </attribute>
+     <column>
+      <property name="text">
+       <string>Position</string>
+      </property>
+     </column>
+    </widget>
+   </widget>
+  </widget>
+  <widget class="QPushButton" name="refresh_button">
+   <property name="geometry">
+    <rect>
+     <x>550</x>
+     <y>510</y>
+     <width>70</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Refresh</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="apply_button">
+   <property name="geometry">
+    <rect>
+     <x>640</x>
+     <y>510</y>
+     <width>70</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Save</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="status_label">
+   <property name="geometry">
+    <rect>
+     <x>100</x>
+     <y>510</y>
+     <width>440</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Century Gothic</family>
+     <weight>75</weight>
+     <bold>true</bold>
+    </font>
+   </property>
+   <property name="text">
+    <string>Messages</string>
+   </property>
+  </widget>
+ </widget>
+ <tabstops>
+  <tabstop>group_lwidget</tabstop>
+  <tabstop>close_button</tabstop>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>refresh_button</tabstop>
+  <tabstop>apply_button</tabstop>
+  <tabstop>username_edit</tabstop>
+  <tabstop>password_edit</tabstop>
+  <tabstop>retype_password_edit</tabstop>
+  <tabstop>surname_edit</tabstop>
+  <tabstop>firstname_edit</tabstop>
+  <tabstop>add_button</tabstop>
+  <tabstop>update_button</tabstop>
+  <tabstop>delete_button</tabstop>
+  <tabstop>phone_edit</tabstop>
+  <tabstop>user_role_lwidget</tabstop>
+  <tabstop>position_cbox</tabstop>
+  <tabstop>settings_button</tabstop>
+  <tabstop>email_edit</tabstop>
+  <tabstop>down_groups_button</tabstop>
+  <tabstop>up_groups_button</tabstop>
+  <tabstop>help_button</tabstop>
+  <tabstop>member_lwidget</tabstop>
+  <tabstop>aimag_cbox</tabstop>
+  <tabstop>aimag_lwidget</tabstop>
+  <tabstop>down_aimag_button</tabstop>
+  <tabstop>up_aimag_button</tabstop>
+  <tabstop>soum_cbox</tabstop>
+  <tabstop>soum_lwidget</tabstop>
+  <tabstop>up_soum_button</tabstop>
+  <tabstop>down_soum_button</tabstop>
+  <tabstop>user_twidget</tabstop>
+  <tabstop>position_twidget</tabstop>
+  <tabstop>right_grud_twidget</tabstop>
+  <tabstop>load_default_settings_button</tabstop>
+  <tabstop>load_users_button</tabstop>
+  <tabstop>load_position_button</tabstop>
+  <tabstop>settings_right_grud_twidget</tabstop>
+  <tabstop>settings_position_twidget</tabstop>
+  <tabstop>department_cbox</tabstop>
+  <tabstop>get_mac_checkbox</tabstop>
+  <tabstop>mac_address_edit</tabstop>
+  <tabstop>organization_type_cbox</tabstop>
+  <tabstop>organization_cbox</tabstop>
+  <tabstop>register_edit</tabstop>
+ </tabstops>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
+ <connections/>
+</ui>

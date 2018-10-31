@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PublishConfigData" serverName="QGIS">
+    <serverData>
+      <paths name="QGIS">
+        <serverdata>
+          <mappings>
+            <mapping deploy="\lm2_mgis" local="$PROJECT_DIR$" web="lm2_mgis" />
+          </mappings>
+        </serverdata>
+      </paths>
+    </serverData>
+  </component>
+</project>

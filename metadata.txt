@@ -1,0 +1,13 @@
+[general]
+name= LM2_MGIS
+description=Land management tools for ALAGaC
+category=LM MGIS Tools
+version=1.0.0
+qgisMinimumVersion=2.0
+
+author=Soft Master LLC
+email=softmaster.aagii@gmail.com
+
+icon=view/icons/application.png
+
+class_name=LM2Plugin
