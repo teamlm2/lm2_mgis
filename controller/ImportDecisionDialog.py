@@ -470,7 +470,7 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
                     application.approved_duration = approved_duration
 
                 item = QTreeWidgetItem()
-                # item.setText(0, decision_app.application)
+
                 item.setText(0, application.app_no)
                 if int(decision_app.decision_result) == int(Constants.DECISION_RESULT_APPROVED):
                     self.item_approved.addChild(item)
