@@ -34,6 +34,8 @@ from controller.DatabaseDump import *
 from controller.WebgisUtilityDialog import *
 from view.resources_rc import *
 import qgis.core
+from qgis.core import QgsRasterLayer
+from TileLayerPlugin.tiles import BoundingBox, TileLayerDefinition
 
 class LM2Plugin:
 
@@ -821,62 +823,40 @@ class LM2Plugin:
         root = QgsProject.instance().layerTreeRoot()
         LayerUtils.refresh_layer()
 
-        # for soum in DatabaseUtils.l2_restriction_array():
-        #     layer = LayerUtils.layer_by_data_source("s" + soum, "ca_parcel")
-        #     b_layer = LayerUtils.layer_by_data_source("s" + soum, "ca_building")
-        #     plan_layer = LayerUtils.layer_by_data_source("s" + soum, "ca_plan_parcel")
-        #
-        #     sec_layer = LayerUtils.layer_by_data_source("data_landuse", "ca_sec_parcel")
-        #
-        #     if layer is None:
-        #         layer = LayerUtils.load_layer_by_name_report("ca_parcel", "parcel_id", soum)
-        #
-        #     if b_layer is None:
-        #         b_layer = LayerUtils.load_layer_by_name_report("ca_building", "building_id", soum)
-        #
-        #     if plan_layer is None:
-        #         plan_layer = LayerUtils.load_layer_by_name_report("ca_plan_parcel", "parcel_id", soum)
-        #
-        #     if sec_layer is None:
-        #         sec_layer = LayerUtils.load_layer_by_name_set_zones("ca_sec_parcel", "parcel_id", "data_landuse")
-        #         sec_layer = LayerUtils.load_layer_by_ca_sec_parcel("ca_sec_parcel", "parcel_id", "data_landuse")
-        #
-        #
-        #     if plan_layer.name() == "ca_plan_parcel":
-        #         mygroup = root.findGroup(u"Кадастрын төлөвлөгөө")
-        #         myalayer = root.findLayer(plan_layer.id())
-        #         plan_layer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))) +"/template\style/ca_plan_parcel.qml")
-        #         plan_layer.setLayerName(QApplication.translate("Plugin", "Parcel Plan")+'_'+soum)
-        #         if myalayer is None:
-        #             mygroup.addLayer(plan_layer)
-        #
-        #
-        #     if sec_layer.name() == "ca_sec_parcel":
-        #         mygroup = root.findGroup(u"Мэдээний хяналт")
-        #         myalayer = root.findLayer(sec_layer.id())
-        #         sec_layer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))) +"/template\style/ca_sec_parcel.qml")
-        #         sec_layer.setLayerName(QApplication.translate("Plugin", "Parcel Sec"))
-        #         if myalayer is None:
-        #             mygroup.addLayer(sec_layer)
-        #
-        #     if layer.name() == "ca_parcel":
-        #         mygroup = root.findGroup(u"Кадастр")
-        #         myalayer = root.findLayer(layer.id())
-        #         layer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))) +"/template\style/ca_parcel.qml")
-        #         layer.setLayerName(QApplication.translate("Plugin", "Parcel")+'_'+soum)
-        #         if myalayer is None:
-        #             mygroup.addLayer(layer)
-        #
-        #     if b_layer.name() == "ca_building":
-        #         mygroup = root.findGroup(u"Кадастр")
-        #         myalayer = root.findLayer(b_layer.id())
-        #         b_layer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))) +"/template\style/ca_building.qml")
-        #         b_layer.setLayerName(QApplication.translate("Plugin", "Building")+'_'+soum)
-        #         if myalayer is None:
-        #             mygroup.addLayer(b_layer)
-
         layers = self.iface.legendInterface().layers()
-        # layers = QgsMapLayerRegistry.instance().mapLayers()
+
+        # quri = QgsDataSourceURI()
+        # quri.setParam("layers", 'usa:states')
+        # quri.setParam("styles", 'xxx')
+        # quri.setParam("format", image / png)
+        # quri.setParam("crs", 'EPSG:4326')
+        # quri.setParam("contextualWMSLegend", '1')  # <---- here
+        # quri.setParam("url", 'https: // my_auth_enabled_server_ip / wms')
+        # rlayer = QgsRasterLayer(quri.encodedUri(), 'states', 'wms')
+        urlWithParams = "url=http://66.181.168.74:8040/geoserver/geoware/wms?service=WMS&version=1.1.0&request=GetMap&layers=geoware%3Ageo_admin_unit_level_one&bbox=87.7345511840002%2C41.5818329990001%2C119.931528%2C52.1483550000001&width=768&height=330&srs=EPSG%3A4326&format=application/openlayers"
+        rlayer = QgsRasterLayer(urlWithParams, 'geo_admin_unit_level_one', 'wms')
+        print rlayer
+        rlayer.isValid()  # Returns True this time
+        QgsMapLayerRegistry.instance().addMapLayer(rlayer)
+
+        print 'ggg'
+        mygroup = root.findGroup(u"Хил")
+        # vlayer = LayerUtils.load_layer_by_name_admin_units("au_level1", "code", "admin_units")
+        # vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))) +"/template\style/au_level1.qml")
+        # vlayer.setLayerName(QApplication.translate("Plugin", "Admin Unit Level1"))
+        mygroup.addLayer(rlayer)
+
+        plugin = qgis.utils.plugins.get("TileLayerPlugin")
+        if plugin:
+            print 'start'
+            bbox = None  # BoundingBox(-180, -85.05, 180, 85.05)
+            layerdef = TileLayerDefinition(u"title",
+                                           u"attribution",
+                                           "http://66.181.168.74:8040/geoserver/geoware/wms?service=WMS&version=1.1.0&request=GetMap&layers=geoware%3Ageo_admin_unit_level_one&bbox=87.7345511840002%2C41.5818329990001%2C119.931528%2C52.1483550000001&width=768&height=330&srs=EPSG%3A4326&format=image%2Fpng",
+                                           zmin=1,
+                                           zmax=18)
+            plugin.addTileLayer(layerdef)
+
         for layer in layers:
             if layer.name() == "ca_parcel":
                 mygroup = root.findGroup(u"Кадастр")
@@ -895,22 +875,22 @@ class LM2Plugin:
                             str(os.path.dirname(os.path.realpath(__file__))) + "/template\style/ca_parcel.qml")
                         vlayer.setLayerName(QApplication.translate("Plugin", "Parcel"))
                         mygroup.addLayer(vlayer)
-            if layer.name() == "ca_building":
-                mygroup = root.findGroup(u"Кадастр")
-                myalayer = root.findLayer(layer.id())
-                layer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))) +"/template\style/ca_building.qml")
-                layer.setLayerName(QApplication.translate("Plugin", "Building"))
-                if myalayer is None:
-                    mygroup.addLayer(layer)
-            else:
-                if layer.name() != u'Барилга' or layer.name() != 'Building':
-                    ca_building_layer = LayerUtils.layer_by_data_source("data_soums_union", "ca_building")
-                    if ca_building_layer is None:
-                        mygroup = root.findGroup(u"Кадастр")
-                        vlayer = LayerUtils.load_layer_by_name_admin_units("ca_building", "building_id", "data_soums_union")
-                        vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))) +"/template\style/ca_building.qml")
-                        vlayer.setLayerName(QApplication.translate("Plugin", "Building"))
-                        mygroup.addLayer(vlayer)
+            # if layer.name() == "ca_building":
+            #     mygroup = root.findGroup(u"Кадастр")
+            #     myalayer = root.findLayer(layer.id())
+            #     layer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))) +"/template\style/ca_building.qml")
+            #     layer.setLayerName(QApplication.translate("Plugin", "Building"))
+            #     if myalayer is None:
+            #         mygroup.addLayer(layer)
+            # else:
+            #     if layer.name() != u'Барилга' or layer.name() != 'Building':
+            #         ca_building_layer = LayerUtils.layer_by_data_source("data_soums_union", "ca_building")
+            #         if ca_building_layer is None:
+            #             mygroup = root.findGroup(u"Кадастр")
+            #             vlayer = LayerUtils.load_layer_by_name_admin_units("ca_building", "building_id", "data_soums_union")
+            #             vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))) +"/template\style/ca_building.qml")
+            #             vlayer.setLayerName(QApplication.translate("Plugin", "Building"))
+            #             mygroup.addLayer(vlayer)
             if layer.name() != u'Аймгийн хил' or layer.name() != 'Admin Unit Level1':
                 au_level1_layer = LayerUtils.layer_by_data_source("admin_units", "au_level1")
                 if au_level1_layer is None:

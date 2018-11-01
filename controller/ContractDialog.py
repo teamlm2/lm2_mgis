@@ -90,6 +90,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
         self.attribute_update = attribute_update
         self.session = SessionHandler().session_instance()
+
         self.working_soum = DatabaseUtils.working_l2_code()
         self.contract = contract
         self.item_model = None
@@ -105,11 +106,14 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         self.drop_label.itemDropped.connect(self.on_drop_label_itemDropped)
         self.close_button.clicked.connect(self.reject)
         self.contract_end_date.dateChanged.connect(self.__end_date_change)
-
+        print '00'
         self.__setup_combo_boxes()
+        print '1'
         self.__set_up_land_fee_twidget()
+        print '2'
         self.__set_up_archive_land_fee_twidget()
         self.__setup_doc_twidgets()
+        print '3'
         self.status_label.clear()
         self.is_certificate = False
         self.landfee_message_label1.setStyleSheet("QLabel {color : red;}")
@@ -119,6 +123,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
         if self.attribute_update:
             self.__setup_mapping()
+            print '4'
         else:
             try:
                 self.__generate_contract_number()

@@ -1027,7 +1027,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
 
         select = "SELECT parcel.parcel_id, app_pers.main_applicant ,app_pers.role as person_role, parcel.old_parcel_id, parcel.geo_id, parcel.landuse, person.person_register,  person.person_id, " \
                  "person.name, person.middle_name, person.first_name,  application.app_no, decision.decision_no, contract.contract_no, contract.status contract_status, " \
-                 "record.record_no, record.status record_status, parcel.address_streetname, parcel.address_khashaa, au2.code as au2_code " \
+                 "record.record_no, record.status record_status, parcel.address_streetname, parcel.address_khashaa, parcel.au2 as au2_code " \
                  "FROM data_soums_union.ca_parcel parcel " \
                  "LEFT JOIN data_soums_union.ct_application application on application.parcel = parcel.parcel_id " \
                  "LEFT JOIN data_soums_union.ct_application_person_role app_pers on application.app_id = app_pers.application " \
@@ -1037,7 +1037,6 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
                  "LEFT JOIN data_soums_union.ct_record_application_role rec_app on rec_app.application = application.app_id " \
                  "LEFT JOIN data_soums_union.ct_ownership_record record on rec_app.record = record.record_id " \
                  "LEFT JOIN data_soums_union.ct_decision_application dec_app on dec_app.application = application.app_id " \
-                 "LEFT JOIN admin_units.au_level2 au2 on ST_Within(parcel.geometry, au2.geometry) " \
                  "LEFT JOIN data_soums_union.ct_decision decision on decision.decision_id = dec_app.decision " \
                  "where  au2.code = {0}".format(current_working_soum) + "\n"
 
@@ -7694,7 +7693,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
                 vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) +"template\style/view_land_tax.qml")
                 vlayer.setLayerName(self.tr("Court"))
                 mygroup.addLayer(vlayer)
-                
+
     @pyqtSlot(QTableWidgetItem)
     def on_person_results_twidget_itemClicked(self, item):
 
@@ -7873,12 +7872,13 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         # try:
         contract_result = self.session.query(ContractSearch).filter(ContractSearch.contract_no == id).\
             filter(ContractSearch.person_role == 70).count()
-        if  contract_result > 0:
+        if contract_result > 0:
             contract_result = self.session.query(ContractSearch).filter(ContractSearch.contract_no == id). \
                 filter(ContractSearch.person_role == 70).all()
         else:
             contract_result = self.session.query(ContractSearch).filter(ContractSearch.contract_no == id).all()
         contract_date = QDate.currentDate()
+
         for contract_result in contract_result:
             soum_code = contract_result.au2_code
             if soum_code:
