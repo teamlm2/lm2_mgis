@@ -619,6 +619,7 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
     @pyqtSlot(QTableWidgetItem)
     def on_right_holder_twidget_itemClicked(self, item):
 
+        self.__clear_all()
         self.is_find_ubgis = False
         selected_row = self.right_holder_twidget.currentRow()
         person_id  = self.right_holder_twidget.item(selected_row, 1).text()
@@ -1769,6 +1770,11 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
         self.lastname_chbox.setChecked(False)
         self.firstname_chbox.setChecked(False)
         self.phone_chbox.setChecked(False)
+
+        self.person_street_name_edit.clear()
+        self.person_khashaa_edit.clear()
+        self.building_edit.clear()
+        self.apartment_edit.clear()
 
         # Decision
         self.decision_no_edit.clear()

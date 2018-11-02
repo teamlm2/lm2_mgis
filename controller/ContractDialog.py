@@ -1229,7 +1229,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             contractor_id = self.land_fee_twidget.item(row, CONTRACTOR_ID).text()
             person_id = self.land_fee_twidget.item(row, CONTRACTOR_ID).data(Qt.UserRole+1)
             print person_id
-            contractor = self.session.query(BsPerson).filter(BsPerson.person_id==person_id).one()
+            contractor = self.session.query(BsPerson).filter(BsPerson.person_register==contractor_id).one()
             fee_count = contractor.fees.filter(CtFee.contract == self.contract.contract_id).count()
             if fee_count == 0:
                 new_row = True
@@ -1247,7 +1247,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             fee.subsidized_fee_rate = float(self.subsidized_fee_rate_edit.text())
             fee.contract_no = self.contract.contract_no
             fee.person_register = contractor_id
-            fee.person = person_id
+            fee.person = contractor.person_id
             payment_frequency_desc = self.land_fee_twidget.item(row, CONTRACTOR_PAYMENT_FREQUENCY).text()
             payment_frequency = self.session.query(ClPaymentFrequency). \
                 filter(ClPaymentFrequency.description == payment_frequency_desc).one()

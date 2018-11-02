@@ -711,8 +711,8 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
                 WKTElement(parcel.geometry().exportToWkt(), srid=4326).ST_Overlaps(CaTmpParcel.geometry)) \
                 .filter(CaTmpParcel.valid_till == "infinity").count()
 
-            parcel_c = self.session.query(CaParcelTbl.parcel_id) \
-                .filter(WKTElement(parcel.geometry().exportToWkt(), srid=4326).ST_Within(CaParcelTbl.geometry)).count()
+            # parcel_c = self.session.query(CaParcelTbl.parcel_id) \
+            #     .filter(WKTElement(parcel.geometry().exportToWkt(), srid=4326).ST_Within(CaParcelTbl.geometry)).count()
 
             tmp_parcel_c = self.session.query(CaTmpParcel.parcel_id) \
                 .filter(
@@ -736,9 +736,9 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
             if tmp_parcel_c != 0:
                 PluginUtils.show_message(self, self.tr("Error"), self.tr("Ca_Tmp_Parcel layer parcel duplicate!!!"))
                 return
-            if parcel_c != 0:
-                PluginUtils.show_message(self, self.tr("Error"), self.tr("Ca_Parcel layer parcel duplicate!!!"))
-                return
+            # if parcel_c != 0:
+            #     PluginUtils.show_message(self, self.tr("Error"), self.tr("Ca_Parcel layer parcel duplicate!!!"))
+            #     return
 
             self.session.add(new_parcel)
 

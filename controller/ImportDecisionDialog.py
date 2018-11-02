@@ -600,7 +600,7 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
             #buildings that intersect
 
             buildings_to_be_inserted = self.session.query(CaTmpBuilding)\
-                .filter(CaTmpBuilding.geometry.ST_Intersects(parcel_inserted.geometry)).all()
+                .filter(CaTmpBuilding.geometry.ST_Intersects(tmp_parcel.geometry)).all()
 
             for building in buildings_to_be_inserted:
 

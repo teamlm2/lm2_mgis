@@ -60,6 +60,7 @@ from ..model.SetOrganizationAppType import *
 from ..model.SetOrganizationRightType import *
 from ..model.SdPosition import *
 from ..model.Enumerations import ApplicationType, UserRight
+from ..model.CaParcelTbl import *
 from .qt_classes.ApplicantDocumentDelegate import ApplicationDocumentDelegate
 from .qt_classes.DocumentsTableWidget import DocumentsTableWidget
 from .qt_classes.DragTableWidget import DragTableWidget
@@ -1511,7 +1512,7 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
             .filter(SetTaxAndPriceZone.geometry.ST_Contains(parcel.geometry))\
             .filter(and_(SetTaxAndPriceZone.zone_no != 50,SetTaxAndPriceZone.zone_no != 60,SetTaxAndPriceZone.zone_no != 70,SetTaxAndPriceZone.zone_no != 80)).count()
 
-        if tax_zone_count != 0:
+        if tax_zone_count == 1:
             tax_zone = self.session.query(SetTaxAndPriceZone)\
                 .filter(SetTaxAndPriceZone.geometry.ST_Contains(parcel.geometry))\
                 .filter(and_(SetTaxAndPriceZone.zone_no != 50,SetTaxAndPriceZone.zone_no != 60,SetTaxAndPriceZone.zone_no != 70,SetTaxAndPriceZone.zone_no != 80)).one()
@@ -2413,7 +2414,8 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
                 .filter(CtApplication.parcel != None).count()
             if self.parcel_edit.text() != '':
                 maintenance_count = self.session.query(CaParcelTbl).\
-                    filter(CaParcelTbl.parcel_id == self.parcel_edit.text()).\
+                    filter(CaParcelTbl.parcel_id == self.parcel_edit.text()). \
+                    filter(CaParcelTbl.valid_till == "infinity").\
                     filter(CaParcelTbl.geometry.ST_Overlaps(CaTmpParcel.geometry)).count()
             if maintenance_count > 0:
                 PluginUtils.show_error(self, self.tr("Status error"),
