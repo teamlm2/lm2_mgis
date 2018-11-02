@@ -807,7 +807,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
                  "FROM base.bs_person person " \
                  "left join data_soums_union.ct_application_person_role app_per on app_per.person = person.person_id " \
                  "left join data_soums_union.ct_application application on application.app_id = app_per.application " \
-                 "left join data_soums_union.ca_parcel parcel on parcel.parcel_id = application.parcel " \
+                 "left join data_soums_union.ca_parcel_tbl parcel on parcel.parcel_id = application.parcel " \
                  "left join data_soums_union.ca_tmp_parcel tmp_parcel on tmp_parcel.parcel_id = application.tmp_parcel " \
                  "left join data_soums_union.ct_decision_application dec_app on dec_app.application = application.app_id " \
                  "left join data_soums_union.ct_decision decision on decision.decision_id = dec_app.decision " \
@@ -849,7 +849,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
                      "LEFT JOIN data_soums_union.ct_application application ON application.app_no = con_app.application " \
                      "LEFT JOIN data_soums_union.ct_application_person_role app_pers on application.app_no = app_pers.application "\
                      "LEFT JOIN base.bs_person person ON app_pers.person = person.person_id " \
-                     "LEFT JOIN data_soums_union.ca_parcel parcel on parcel.parcel_id = application.parcel " \
+                     "LEFT JOIN data_soums_union.ca_parcel_tbl parcel on parcel.parcel_id = application.parcel " \
                      "LEFT JOIN admin_units.au_level3 au3 on ST_Within(parcel.geometry,au3.geometry) "\
                      "LEFT JOIN admin_units.au_level3 au3_person on person.address_au_level3 = au3_person.code " \
                      "LEFT JOIN codelists.cl_landuse_type landuse on parcel.landuse = landuse.code " \
@@ -894,7 +894,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
                  "left join data_soums_union.ct_application_person_role app_pers on app_pers.application = application.app_id " \
                  "left join base.bs_person person on person.person_id = app_pers.person " \
                  "left join data_soums_union.ca_tmp_parcel tmp_parcel on application.tmp_parcel = tmp_parcel.parcel_id " \
-                 "left join data_soums_union.ca_union_parcel parcel on parcel.parcel_id = application.parcel " \
+                 "left join data_soums_union.ca_parcel_tbl parcel on parcel.parcel_id = application.parcel " \
                  "where  application.au2 = {0}".format(current_working_soum)  + "\n"
 
         sql = sql + select
@@ -925,7 +925,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
                  "LEFT JOIN data_soums_union.ct_application application ON dec_app.application = application.app_id " \
                  "LEFT JOIN data_soums_union.ct_application_person_role app_pers ON application.app_id = app_pers.application " \
                  "LEFT JOIN base.bs_person person ON app_pers.person = person.person_id " \
-                 "LEFT JOIN data_soums_union.ca_parcel parcel ON parcel.parcel_id = application.parcel " \
+                 "LEFT JOIN data_soums_union.ca_parcel_tbl parcel ON parcel.parcel_id = application.parcel " \
                  "LEFT JOIN data_soums_union.ct_record_application_role rec_app ON rec_app.application = application.app_id " \
                  "LEFT JOIN data_soums_union.ct_ownership_record record ON record.record_id = rec_app.record " \
                  "LEFT JOIN data_soums_union.ct_contract_application_role con_app ON con_app.application = application.app_id " \
@@ -963,7 +963,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
                  "LEFT JOIN data_soums_union.ct_application application ON application.app_id = con_app.application " \
                  "LEFT JOIN data_soums_union.ct_application_person_role app_pers on application.app_id = app_pers.application "\
                  "LEFT JOIN base.bs_person person ON app_pers.person = person.person_id " \
-                 "LEFT JOIN data_soums_union.ca_parcel parcel on parcel.parcel_id = application.parcel " \
+                 "LEFT JOIN data_soums_union.ca_parcel_tbl parcel on parcel.parcel_id = application.parcel " \
                  "LEFT JOIN admin_units.au_level2 au2 on parcel.au2 = au2.code " \
                  "LEFT JOIN data_soums_union.ct_decision_application dec_app on dec_app.application = application.app_id " \
                  "LEFT JOIN data_soums_union.ct_decision decision on decision.decision_id = dec_app.decision " \
@@ -997,7 +997,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
                  "LEFT JOIN data_soums_union.ct_application application ON application.app_id = rec_app.application " \
                  "LEFT JOIN data_soums_union.ct_application_person_role app_pers on application.app_id = app_pers.application " \
                  "LEFT JOIN base.bs_person person ON app_pers.person = person.person_id " \
-                 "LEFT JOIN data_soums_union.ca_parcel parcel on parcel.parcel_id = application.parcel " \
+                 "LEFT JOIN data_soums_union.ca_parcel_tbl parcel on parcel.parcel_id = application.parcel " \
                  "LEFT JOIN data_soums_union.ct_decision_application dec_app on dec_app.application = application.app_id " \
                  "LEFT JOIN admin_units.au_level2 au2 on application.au2 = au2.code " \
                  "LEFT JOIN data_soums_union.ct_decision decision on decision.decision_id = dec_app.decision " \
@@ -1028,7 +1028,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         select = "SELECT parcel.parcel_id, app_pers.main_applicant ,app_pers.role as person_role, parcel.old_parcel_id, parcel.geo_id, parcel.landuse, person.person_register,  person.person_id, " \
                  "person.name, person.middle_name, person.first_name,  application.app_no, decision.decision_no, contract.contract_no, contract.status contract_status, " \
                  "record.record_no, record.status record_status, parcel.address_streetname, parcel.address_khashaa, parcel.au2 as au2_code " \
-                 "FROM data_soums_union.ca_parcel parcel " \
+                 "FROM data_soums_union.ca_parcel_tbl parcel " \
                  "LEFT JOIN data_soums_union.ct_application application on application.parcel = parcel.parcel_id " \
                  "LEFT JOIN data_soums_union.ct_application_person_role app_pers on application.app_id = app_pers.application " \
                  "LEFT JOIN base.bs_person person ON app_pers.person = person.person_id " \
@@ -1690,6 +1690,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
 
     def __search_contracts(self):
 
+        print 'adsfadsfa'
         # try:
         contracts = self.session.query(ContractSearch.contract_no, ContractSearch.contract_id).\
             filter(and_(ContractSearch.app_type != ApplicationType.right_land, ContractSearch.app_type != ApplicationType.pasture_use))
@@ -8042,7 +8043,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
                                           application.app_no, decision.decision_no, contract.contract_no, record.record_no, \
                                           record.record_date, record.right_type, contract.contract_date, parcel.valid_till, parcel.valid_from, \
                                           landuse.code2 as landuse_code2, record.status as record_status, contract.status as contract_status " \
-                         "FROM data_soums_union.ca_parcel parcel " \
+                         "FROM data_soums_union.ca_parcel_tbl parcel " \
                          "LEFT JOIN data_soums_union.ct_application application on application.parcel = parcel.parcel_id " \
                          "LEFT JOIN data_soums_union.ct_application_person_role app_pers on application.app_no = app_pers.application " \
                          "LEFT JOIN base.bs_person person ON app_pers.person = person.person_id " \
@@ -8070,7 +8071,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
                     sql_gt1 = sql_gt1 + "UNION" + "\n"
 
                 select = "SELECT parcel.parcel_id, parcel.area_m2, au1.code as au1_code,au2.code as au2_code,parcel.valid_from, parcel.valid_till, parcel.landuse, landuse.code2 as landuse_code2, parcel.geometry " \
-                         "FROM data_soums_union.ca_parcel parcel " \
+                         "FROM data_soums_union.ca_parcel_tbl parcel " \
                          "LEFT JOIN codelists.cl_landuse_type landuse on parcel.landuse = landuse.code "\
                          "LEFT JOIN admin_units.au_level1 au1 on ST_Within(parcel.geometry, au1.geometry) "\
                          "LEFT JOIN admin_units.au_level2 au2 on ST_Within(parcel.geometry, au2.geometry)".format(au_level2)  + "\n"
@@ -8129,7 +8130,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
                                           fee.area as fee_area, fee.subsidized_area, fee.fee_contract, fee_payment.amount_paid, \
                                           contract.contract_date, parcel.valid_till, parcel.valid_from, \
                                           landuse.code2 as landuse_code2, contract.status as contract_status " \
-                         "FROM data_soums_union.ca_parcel parcel " \
+                         "FROM data_soums_union.ca_parcel_tbl parcel " \
                          "LEFT JOIN data_soums_union.ct_application application on application.parcel = parcel.parcel_id " \
                          "LEFT JOIN data_soums_union.ct_application_person_role app_pers on application.app_no = app_pers.application " \
                          "LEFT JOIN data_soums_union.ct_contract_application_role con_app on con_app.application = application.app_no " \
@@ -8163,7 +8164,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
                                           tax.area as tax_area, tax.subsidized_area, tax.land_tax, tax_payment.amount_paid, \
                                           record.record_date, parcel.valid_till, parcel.valid_from, \
                                           landuse.code2 as landuse_code2, record.status as record_status " \
-                         "FROM data_soums_union.ca_parcel parcel " \
+                         "FROM data_soums_union.ca_parcel_tbl parcel " \
                          "LEFT JOIN data_soums_union.ct_application application on application.parcel = parcel.parcel_id " \
                          "LEFT JOIN data_soums_union.ct_application_person_role app_pers on application.app_no = app_pers.application " \
                          "LEFT JOIN data_soums_union.ct_record_application_role rec_app on rec_app.application = application.app_no " \

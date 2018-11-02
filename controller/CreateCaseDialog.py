@@ -13,6 +13,7 @@ from ..model.CtApplicationStatus import *
 from ..model.ClLanduseType import *
 from ..model.DatabaseHelper import DatabaseHelper
 from ..model import Constants
+from ..model.CaParcelTbl import *
 from .qt_classes.ApplicationCmbBoxDelegate import *
 from ..controller.ApplicationsDialog import *
 from ..model.ApplicationSearch import *
@@ -468,11 +469,11 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
             self.result_twidget.addTopLevelItem(main_parcel_item)
 
             try:
-                parcel_geometry = self.session.query(CaParcel.geometry).filter(CaParcel.parcel_id == parcel_id).one()
+                parcel_geometry = self.session.query(CaParcelTbl.geometry).filter(CaParcelTbl.parcel_id == parcel_id).one()
 
-                touching_parcels = self.session.query(CaParcel)\
-                    .filter(CaParcel.geometry.ST_Intersects(parcel_geometry[0]))\
-                    .filter(CaParcel.parcel_id != parcel_id).all()
+                touching_parcels = self.session.query(CaParcelTbl)\
+                    .filter(CaParcelTbl.geometry.ST_Intersects(parcel_geometry[0]))\
+                    .filter(CaParcelTbl.parcel_id != parcel_id).all()
 
             except SQLAlchemyError, e:
                 PluginUtils.show_error(self, self.tr("Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
@@ -574,8 +575,8 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
 
         if object_type == Constants.CASE_PARCEL_IDENTIFIER:
             try:
-                parcel = self.session.query(CaParcel.address_khashaa, CaParcel.address_streetname)\
-                    .filter(CaParcel.parcel_id == object_id).one()
+                parcel = self.session.query(CaParcelTbl.address_khashaa, CaParcelTbl.address_streetname)\
+                    .filter(CaParcelTbl.parcel_id == object_id).one()
 
                 self.khashaa_label.setText(parcel[0])
                 self.street_label.setText(parcel[1])
@@ -701,17 +702,17 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
             new_parcel.geometry = WKTElement(parcel.geometry().exportToWkt(), srid=4326)
             new_parcel = self.__copy_parcel_attributes(parcel, new_parcel, parcel_shape_layer)
 
-            parcel_overlap_c = self.session.query(CaParcel.parcel_id) \
-                .filter(WKTElement(parcel.geometry().exportToWkt(), srid=4326).ST_Overlaps(CaParcel.geometry)) \
-                .filter(CaParcel.valid_till == "infinity").count()
+            parcel_overlap_c = self.session.query(CaParcelTbl.parcel_id) \
+                .filter(WKTElement(parcel.geometry().exportToWkt(), srid=4326).ST_Overlaps(CaParcelTbl.geometry)) \
+                .filter(CaParcelTbl.valid_till == "infinity").count()
 
             tmp_parcel_overlap_c = self.session.query(CaTmpParcel.parcel_id) \
                 .filter(
                 WKTElement(parcel.geometry().exportToWkt(), srid=4326).ST_Overlaps(CaTmpParcel.geometry)) \
                 .filter(CaTmpParcel.valid_till == "infinity").count()
 
-            parcel_c = self.session.query(CaParcel.parcel_id) \
-                .filter(WKTElement(parcel.geometry().exportToWkt(), srid=4326).ST_Within(CaParcel.geometry)).count()
+            parcel_c = self.session.query(CaParcelTbl.parcel_id) \
+                .filter(WKTElement(parcel.geometry().exportToWkt(), srid=4326).ST_Within(CaParcelTbl.geometry)).count()
 
             tmp_parcel_c = self.session.query(CaTmpParcel.parcel_id) \
                 .filter(
@@ -889,8 +890,8 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
             try:
                 tmp_parcel_count = self.session.query(CaTmpParcel).filter(WKTElement(building.geometry().exportToWkt(), srid=4326).ST_Within(CaTmpParcel.geometry)).count()
 
-                parcel_count = self.session.query(CaParcel).filter(
-                    WKTElement(building.geometry().exportToWkt(), srid=4326).ST_Within(CaParcel.geometry)).count()
+                parcel_count = self.session.query(CaParcelTbl).filter(
+                    WKTElement(building.geometry().exportToWkt(), srid=4326).ST_Within(CaParcelTbl.geometry)).count()
 
                 if tmp_parcel_count == 0 and parcel_count == 0:
                     PluginUtils.show_message(self, self.tr('No parcel'), self.tr('This building no parcel.'))
@@ -920,8 +921,8 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
                     self.buildings_item.addChild(main_building_item)
 
                 elif parcel_count > 0:
-                    parcel = self.session.query(CaParcel).filter(
-                        WKTElement(building.geometry().exportToWkt(), srid=4326).ST_Within(CaParcel.geometry)).one()
+                    parcel = self.session.query(CaParcelTbl).filter(
+                        WKTElement(building.geometry().exportToWkt(), srid=4326).ST_Within(CaParcelTbl.geometry)).one()
                     new_building = CaBuilding()
                     new_building.geometry = WKTElement(building.geometry().exportToWkt(), srid=4326)
                     self.session.add(new_building)
@@ -975,7 +976,7 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
 
             self.create_savepoint()
 
-            parcel = self.session.query(CaParcel).filter(CaParcel.parcel_id == parcel_id).one()
+            parcel = self.session.query(CaParcelTbl).filter(CaParcelTbl.parcel_id == parcel_id).one()
             if parcel in self.ca_maintenance_case.parcels:
                 continue
             soum = DatabaseUtils.working_l2_code()

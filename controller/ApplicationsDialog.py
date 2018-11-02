@@ -1198,10 +1198,10 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
             filter(AuLevel2.code == soum_code).\
             filter(CaTmpParcel.parcel_id == parcel_id).count()
         if parcel_count == 0:
-            parcel_count = self.session.query(CaParcel.parcel_id). \
-                filter(CaParcel.geometry.ST_Within(AuLevel2.geometry)). \
+            parcel_count = self.session.query(CaParcelTbl.parcel_id). \
+                filter(CaParcelTbl.geometry.ST_Within(AuLevel2.geometry)). \
                 filter(AuLevel2.code == soum_code). \
-                filter(CaParcel.parcel_id == parcel_id).count()
+                filter(CaParcelTbl.parcel_id == parcel_id).count()
 
             if parcel_count == 0:
                 PluginUtils.show_error(self, self.tr("No Parcel found"),
@@ -1209,10 +1209,10 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
                                 .format(parcel_id))
                 return
             else:
-                parcel = self.session.query(CaParcel.parcel_id). \
-                    filter(CaParcel.geometry.ST_Within(AuLevel2.geometry)). \
+                parcel = self.session.query(CaParcelTbl.parcel_id). \
+                    filter(CaParcelTbl.geometry.ST_Within(AuLevel2.geometry)). \
                     filter(AuLevel2.code == soum_code). \
-                    filter(CaParcel.parcel_id == parcel_id).one()
+                    filter(CaParcelTbl.parcel_id == parcel_id).one()
                 status_count = self.session.query(CtApplicationStatus).\
                     join(CtApplication, CtApplicationStatus.application == CtApplication.app_id).\
                     filter(CtApplicationStatus.status > 6).\
@@ -1247,10 +1247,10 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
                 PluginUtils.show_message(self, self.tr("Maintenance Error"), self.tr("Cadastre update must be complete"))
                 return
         else:
-            parcel = self.session.query(CaParcel.parcel_id). \
-                filter(CaParcel.geometry.ST_Within(AuLevel2.geometry)). \
+            parcel = self.session.query(CaParcelTbl.parcel_id). \
+                filter(CaParcelTbl.geometry.ST_Within(AuLevel2.geometry)). \
                 filter(AuLevel2.code == soum_code). \
-                filter(CaParcel.parcel_id == parcel_id).one()
+                filter(CaParcelTbl.parcel_id == parcel_id).one()
 
         # except SQLAlchemyError, e:
         #     PluginUtils.show_error(self, self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
@@ -1463,7 +1463,7 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
             parcel = self.session.query(CaTmpParcel.parcel_id, CaTmpParcel.area_m2, CaTmpParcel.landuse, CaTmpParcel.geometry).filter_by(parcel_id=parcel_id).one()
             self.application.tmp_parcel = parcel_id
         else:
-            parcel = self.session.query(CaParcel.parcel_id, CaParcel.area_m2, CaParcel.landuse, CaParcel.geometry).filter_by(parcel_id=parcel_id).one()
+            parcel = self.session.query(CaParcelTbl.parcel_id, CaParcelTbl.area_m2, CaParcelTbl.landuse, CaParcelTbl.geometry).filter_by(parcel_id=parcel_id).one()
             self.application.parcel = parcel_id
 
         if current_app_type == ApplicationType.encroachment:
@@ -2162,8 +2162,8 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
 
         self.last_tab = current_index
 
-        if self.application_tab_widget.widget(current_index) == self.document_tab:
-            self.__update_applicant_cbox()
+        # if self.application_tab_widget.widget(current_index) == self.document_tab:
+        #     self.__update_applicant_cbox()
 
         app_type = self.application_type_cbox.itemData(self.application_type_cbox.currentIndex())
 
@@ -2412,9 +2412,9 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
                 .filter(CtApplication.app_id == self.application.app_id)\
                 .filter(CtApplication.parcel != None).count()
             if self.parcel_edit.text() != '':
-                maintenance_count = self.session.query(CaParcel).\
-                    filter(CaParcel.parcel_id == self.parcel_edit.text()).\
-                    filter(CaParcel.geometry.ST_Overlaps(CaTmpParcel.geometry)).count()
+                maintenance_count = self.session.query(CaParcelTbl).\
+                    filter(CaParcelTbl.parcel_id == self.parcel_edit.text()).\
+                    filter(CaParcelTbl.geometry.ST_Overlaps(CaTmpParcel.geometry)).count()
             if maintenance_count > 0:
                 PluginUtils.show_error(self, self.tr("Status error"),
                                     self.tr("This parcel cadastre changing!!!."))
@@ -2561,59 +2561,59 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
 
         self.create_savepoint()
 
-        try:
-            app_no = self.application_num_first_edit.text() + "-" + self.application_num_type_edit.text() + "-" \
-                     + self.application_num_middle_edit.text() + "-" + self.application_num_last_edit.text()
-            app_id = self.application.app_id
-            #check if the app_no is still valid, otherwise generate new one
-            if not self.attribute_update:
-                app_no_count = self.session.query(CtApplication).filter(CtApplication.app_no == app_no).count()
-                if app_no_count > 0:
+        # try:
+        app_no = self.application_num_first_edit.text() + "-" + self.application_num_type_edit.text() + "-" \
+                 + self.application_num_middle_edit.text() + "-" + self.application_num_last_edit.text()
+        app_id = self.application.app_id
+        #check if the app_no is still valid, otherwise generate new one
+        if not self.attribute_update:
+            app_no_count = self.session.query(CtApplication).filter(CtApplication.app_no == app_no).count()
+            if app_no_count > 0:
 
-                    self.__generate_application_number()
+                self.__generate_application_number()
 
-                    app_no = self.application_num_first_edit.text() + "-" + self.application_num_type_edit.text() + "-" \
-                     + self.application_num_middle_edit.text() + "-" + self.application_num_last_edit.text()
+                app_no = self.application_num_first_edit.text() + "-" + self.application_num_type_edit.text() + "-" \
+                 + self.application_num_middle_edit.text() + "-" + self.application_num_last_edit.text()
 
-                    PluginUtils.show_message(self, self.tr("Application Number"), self.tr("The application number was updated to the next available number."))
+                PluginUtils.show_message(self, self.tr("Application Number"), self.tr("The application number was updated to the next available number."))
 
-            self.application.app_no = app_no
-            self.application.requested_landuse = self.requested_land_use_type_cbox.itemData(self.requested_land_use_type_cbox.currentIndex())
-            #self.application.approved_landuse = self.requested_land_use_type_cbox.itemData(self.requested_land_use_type_cbox.currentIndex())
-            self.application.app_timestamp = self.date_time_date.dateTime().toString(Constants.DATABASE_DATETIME_FORMAT)
-            self.application.requested_duration = self.requested_year_spin_box.value()
-            #self.application.approved_duration = self.approved_year_spin_box.value()
-            self.application.remarks = self.remarks_text_edit.toPlainText()
-            self.application.au2 = DatabaseUtils.current_working_soum_schema()
-            self.application.au1 = DatabaseUtils.working_l1_code()
+        self.application.app_no = app_no
+        self.application.requested_landuse = self.requested_land_use_type_cbox.itemData(self.requested_land_use_type_cbox.currentIndex())
+        #self.application.approved_landuse = self.requested_land_use_type_cbox.itemData(self.requested_land_use_type_cbox.currentIndex())
+        self.application.app_timestamp = self.date_time_date.dateTime().toString(Constants.DATABASE_DATETIME_FORMAT)
+        self.application.requested_duration = self.requested_year_spin_box.value()
+        #self.application.approved_duration = self.approved_year_spin_box.value()
+        self.application.remarks = self.remarks_text_edit.toPlainText()
+        self.application.au2 = DatabaseUtils.current_working_soum_schema()
+        self.application.au1 = DatabaseUtils.working_l1_code()
 
-            rigth_type = self.rigth_type_cbox.itemData(self.rigth_type_cbox.currentIndex())
-            self.application.right_type = rigth_type
+        rigth_type = self.rigth_type_cbox.itemData(self.rigth_type_cbox.currentIndex())
+        self.application.right_type = rigth_type
 
-            parcel_id = self.parcel_edit.text()
-            parcel_count = self.session.query(CaTmpParcel).filter(CaTmpParcel.parcel_id == parcel_id).count()
-            if parcel_count != 0:
-                self.is_tmp_parcel = True
+        parcel_id = self.parcel_edit.text()
+        parcel_count = self.session.query(CaTmpParcel).filter(CaTmpParcel.parcel_id == parcel_id).count()
+        if parcel_count != 0:
+            self.is_tmp_parcel = True
 
-            status = self.session.query(func.max(CtApplicationStatus.status)).\
-                filter(CtApplicationStatus.application == self.application.app_id).one()
-            max_status = str(status).split(",")[0][1:]
-            if self.parcel_edit.text() == "":
-                self.application.parcel = None
-            else:
-                if max_status != '8':
-                    if self.is_tmp_parcel and max_status < '7':
-                        self.application.tmp_parcel = self.parcel_edit.text()
-                        parcel = self.session.query(CaTmpParcel).filter(CaTmpParcel.parcel_id == self.parcel_edit.text()).one()
-                        parcel.landuse = self.application.requested_landuse
-                    else:
-                        self.application.parcel = self.parcel_edit.text()
-                        parcel = self.session.query(CaParcel).filter(CaParcel.parcel_id == self.parcel_edit.text()).one()
-                        parcel.landuse = self.application.requested_landuse
+        status = self.session.query(func.max(CtApplicationStatus.status)).\
+            filter(CtApplicationStatus.application == self.application.app_id).one()
+        max_status = str(status).split(",")[0][1:]
+        if self.parcel_edit.text() == "":
+            self.application.parcel = None
+        else:
+            if max_status != '8':
+                if self.is_tmp_parcel and max_status < '7':
+                    self.application.tmp_parcel = self.parcel_edit.text()
+                    parcel = self.session.query(CaTmpParcel).filter(CaTmpParcel.parcel_id == self.parcel_edit.text()).one()
+                    parcel.landuse = self.application.requested_landuse
+                else:
+                    self.application.parcel = self.parcel_edit.text()
+                    parcel = self.session.query(CaParcelTbl).filter(CaParcelTbl.parcel_id == self.parcel_edit.text()).one()
+                    parcel.landuse = self.application.requested_landuse
 
-        except SQLAlchemyError, e:
-            self.rollback_to_savepoint()
-            raise LM2Exception(self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+        # except SQLAlchemyError, e:
+        #     self.rollback_to_savepoint()
+        #     raise LM2Exception(self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
 
     def __save_privatization(self):
 
@@ -3635,7 +3635,7 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
 
             application = self.session.query(CtApplication).filter(CtApplication.app_id == applicant.application).one()
             self.parcel_edit.setText(application.parcel)
-            parcel = self.session.query(CaParcel.parcel_id, CaParcel.area_m2, CaParcel.landuse, CaParcel.geometry).filter_by(parcel_id=application.parcel).one()
+            parcel = self.session.query(CaParcelTbl.parcel_id, CaParcelTbl.area_m2, CaParcelTbl.landuse, CaParcelTbl.geometry).filter_by(parcel_id=application.parcel).one()
             self.parcel_area_edit.setText(str(parcel.area_m2))
         self.found_contract_number_edit.setText(contract_no)
 
@@ -3736,7 +3736,7 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
             if current_app_type != ApplicationType.encroachment:
                 if application.parcel:
                     self.parcel_edit.setText(application.parcel)
-                    parcel = self.session.query(CaParcel.parcel_id, CaParcel.area_m2, CaParcel.landuse, CaParcel.geometry).filter_by(parcel_id=application.parcel).one()
+                    parcel = self.session.query(CaParcelTbl.parcel_id, CaParcelTbl.area_m2, CaParcelTbl.landuse, CaParcelTbl.geometry).filter_by(parcel_id=application.parcel).one()
                     self.parcel_area_edit.setText(str(parcel.area_m2))
         self.relating_record_num_edit.setText(record_no)
 
@@ -3814,7 +3814,7 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
                     PluginUtils.show_message(self, self.tr('delete please'), self.tr(
                         'Delete please the parcel. This parcel is not referenced to any applications.'))
                     return
-                parcel_count = self.session.query(CaParcel).filter_by(parcel_id=current_parcel_id).count()
+                parcel_count = self.session.query(CaParcelTbl).filter_by(parcel_id=current_parcel_id).count()
 
                 if parcel_count == 0:
                     PluginUtils.show_error(self, self.tr("Working Soum"),
@@ -3839,7 +3839,7 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
                         PluginUtils.show_error(self, self.tr("Working Soum"),
                                                 self.tr("There is already an existing application for the parcel {0}").format(current_parcel_id))
 
-                parcel = self.session.query(CaParcel).filter_by(parcel_id=current_parcel_id).one()
+                parcel = self.session.query(CaParcelTbl).filter_by(parcel_id=current_parcel_id).one()
 
         except SQLAlchemyError, e:
             PluginUtils.show_error(self, self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
@@ -4088,160 +4088,165 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
 
     def __add_new_right_holder_item(self, applicant):
 
-        main_item = QTableWidgetItem(QIcon(), "")
-        main_item.setCheckState(Qt.Checked) if applicant.main_applicant \
-            else main_item.setCheckState(Qt.Unchecked)
+        if applicant.person_ref:
+            main_item = QTableWidgetItem(QIcon(), "")
+            main_item.setCheckState(Qt.Checked) if applicant.main_applicant \
+                else main_item.setCheckState(Qt.Unchecked)
 
-        main_item.setData(Qt.UserRole, applicant.person)
+            main_item.setData(Qt.UserRole, applicant.person)
 
-        share_item = QTableWidgetItem(str(applicant.share))
-        share_item.setData(Qt.UserRole, applicant.person)
+            share_item = QTableWidgetItem(str(applicant.share))
+            share_item.setData(Qt.UserRole, applicant.person)
 
-        person_id_item = QTableWidgetItem(applicant.person_ref.person_register)
-        person_id_item.setData(Qt.UserRole, applicant.person)
-        person_id_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+            person_id_item = QTableWidgetItem(applicant.person_ref.person_register)
+            person_id_item.setData(Qt.UserRole, applicant.person)
+            person_id_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
 
-        surname_item = QTableWidgetItem(applicant.person_ref.name)
-        surname_item.setData(Qt.UserRole, applicant.person)
-        surname_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+            surname_item = QTableWidgetItem(applicant.person_ref.name)
+            surname_item.setData(Qt.UserRole, applicant.person)
+            surname_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
 
-        first_name_item = QTableWidgetItem(applicant.person_ref.first_name)
-        first_name_item.setData(Qt.UserRole, applicant.person)
-        first_name_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+            first_name_item = QTableWidgetItem(applicant.person_ref.first_name)
+            first_name_item.setData(Qt.UserRole, applicant.person)
+            first_name_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
 
-        inserted_row = self.new_right_holders_twidget.rowCount()
+            inserted_row = self.new_right_holders_twidget.rowCount()
 
-        self.new_right_holders_twidget.insertRow(inserted_row)
+            self.new_right_holders_twidget.insertRow(inserted_row)
 
-        self.new_right_holders_twidget.setItem(inserted_row, APPLICANT_MAIN, main_item)
-        self.new_right_holders_twidget.setItem(inserted_row, NEW_RIGHT_HOLDER_SHARE, share_item)
-        self.new_right_holders_twidget.setItem(inserted_row, NEW_RIGHT_HOLDER_PERSON_ID, person_id_item)
-        self.new_right_holders_twidget.setItem(inserted_row, NEW_RIGHT_HOLDER_SURNAME, surname_item)
-        self.new_right_holders_twidget.setItem(inserted_row, NEW_RIGHT_HOLDER_FIRST_NAME, first_name_item)
+            self.new_right_holders_twidget.setItem(inserted_row, APPLICANT_MAIN, main_item)
+            self.new_right_holders_twidget.setItem(inserted_row, NEW_RIGHT_HOLDER_SHARE, share_item)
+            self.new_right_holders_twidget.setItem(inserted_row, NEW_RIGHT_HOLDER_PERSON_ID, person_id_item)
+            self.new_right_holders_twidget.setItem(inserted_row, NEW_RIGHT_HOLDER_SURNAME, surname_item)
+            self.new_right_holders_twidget.setItem(inserted_row, NEW_RIGHT_HOLDER_FIRST_NAME, first_name_item)
 
     def __add_old_right_holder_item(self, applicant):
 
-        share_item = QTableWidgetItem(str(applicant.share))
-        share_item.setData(Qt.UserRole, applicant.person)
+        if applicant.person_ref:
+            share_item = QTableWidgetItem(str(applicant.share))
+            share_item.setData(Qt.UserRole, applicant.person)
 
-        person_id_item = QTableWidgetItem(applicant.person_ref.person_register)
-        person_id_item.setData(Qt.UserRole, applicant.person)
-        person_id_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+            person_id_item = QTableWidgetItem(applicant.person_ref.person_register)
+            person_id_item.setData(Qt.UserRole, applicant.person)
+            person_id_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
 
-        surname_item = QTableWidgetItem(applicant.person_ref.name)
-        surname_item.setData(Qt.UserRole, applicant.person)
-        surname_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+            surname_item = QTableWidgetItem(applicant.person_ref.name)
+            surname_item.setData(Qt.UserRole, applicant.person)
+            surname_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
 
-        first_name_item = QTableWidgetItem(applicant.person_ref.first_name)
-        first_name_item.setData(Qt.UserRole, applicant.person)
-        first_name_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+            first_name_item = QTableWidgetItem(applicant.person_ref.first_name)
+            first_name_item.setData(Qt.UserRole, applicant.person)
+            first_name_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
 
-        inserted_row = self.old_right_holders_twidget.rowCount()
+            inserted_row = self.old_right_holders_twidget.rowCount()
 
-        self.old_right_holders_twidget.insertRow(inserted_row)
-        self.old_right_holders_twidget.setItem(inserted_row, 0, share_item)
-        self.old_right_holders_twidget.setItem(inserted_row, 1, person_id_item)
-        self.old_right_holders_twidget.setItem(inserted_row, 2, surname_item)
-        self.old_right_holders_twidget.setItem(inserted_row, 3, first_name_item)
+            self.old_right_holders_twidget.insertRow(inserted_row)
+            self.old_right_holders_twidget.setItem(inserted_row, 0, share_item)
+            self.old_right_holders_twidget.setItem(inserted_row, 1, person_id_item)
+            self.old_right_holders_twidget.setItem(inserted_row, 2, surname_item)
+            self.old_right_holders_twidget.setItem(inserted_row, 3, first_name_item)
 
     def __add_mortgagee_item(self, applicant):
 
-        share_item = QTableWidgetItem(str(applicant.share))
-        share_item.setData(Qt.UserRole, applicant.person)
+        if applicant.person_ref:
+            share_item = QTableWidgetItem(str(applicant.share))
+            share_item.setData(Qt.UserRole, applicant.person)
 
-        person_id_item = QTableWidgetItem(applicant.person_ref.person_register)
-        person_id_item.setData(Qt.UserRole, applicant.person)
-        person_id_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+            person_id_item = QTableWidgetItem(applicant.person_ref.person_register)
+            person_id_item.setData(Qt.UserRole, applicant.person)
+            person_id_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
 
-        surname_item = QTableWidgetItem(applicant.person_ref.name)
-        surname_item.setData(Qt.UserRole, applicant.person)
-        surname_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+            surname_item = QTableWidgetItem(applicant.person_ref.name)
+            surname_item.setData(Qt.UserRole, applicant.person)
+            surname_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
 
-        first_name_item = QTableWidgetItem(applicant.person_ref.first_name)
-        first_name_item.setData(Qt.UserRole, applicant.person)
-        first_name_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+            first_name_item = QTableWidgetItem(applicant.person_ref.first_name)
+            first_name_item.setData(Qt.UserRole, applicant.person)
+            first_name_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
 
-        inserted_row = self.mortgage_twidget.rowCount()
+            inserted_row = self.mortgage_twidget.rowCount()
 
-        self.mortgage_twidget.insertRow(inserted_row)
-        self.mortgage_twidget.setItem(inserted_row, MORTGAGE_SHARE, share_item)
-        self.mortgage_twidget.setItem(inserted_row, MORTGAGE_PERSON_ID, person_id_item)
-        self.mortgage_twidget.setItem(inserted_row, MORTGAGE_SURNAME, surname_item)
-        self.mortgage_twidget.setItem(inserted_row, MORTGAGE_NAME, first_name_item)
+            self.mortgage_twidget.insertRow(inserted_row)
+            self.mortgage_twidget.setItem(inserted_row, MORTGAGE_SHARE, share_item)
+            self.mortgage_twidget.setItem(inserted_row, MORTGAGE_PERSON_ID, person_id_item)
+            self.mortgage_twidget.setItem(inserted_row, MORTGAGE_SURNAME, surname_item)
+            self.mortgage_twidget.setItem(inserted_row, MORTGAGE_NAME, first_name_item)
 
     def __add_co_ownership_item(self, applicant, code):
 
-        main_item = QTableWidgetItem(QIcon(), "")
-        main_item.setCheckState(Qt.Checked) if applicant.main_applicant \
-            else main_item.setCheckState(Qt.Unchecked)
+        if applicant.person_ref:
+            main_item = QTableWidgetItem(QIcon(), "")
+            main_item.setCheckState(Qt.Checked) if applicant.main_applicant \
+                else main_item.setCheckState(Qt.Unchecked)
 
-        main_item.setData(Qt.UserRole, applicant.person)
+            main_item.setData(Qt.UserRole, applicant.person)
 
-        person_id_item = QTableWidgetItem(applicant.person_ref.person_register)
-        person_id_item.setData(Qt.UserRole, applicant.person)
+            person_id_item = QTableWidgetItem(applicant.person_ref.person_register)
+            person_id_item.setData(Qt.UserRole, applicant.person)
 
-        surname_item = QTableWidgetItem(applicant.person_ref.name)
-        surname_item.setData(Qt.UserRole, applicant.person)
+            surname_item = QTableWidgetItem(applicant.person_ref.name)
+            surname_item.setData(Qt.UserRole, applicant.person)
 
-        first_name_item = QTableWidgetItem(applicant.person_ref.first_name)
-        first_name_item.setData(Qt.UserRole, applicant.person)
+            first_name_item = QTableWidgetItem(applicant.person_ref.first_name)
+            first_name_item.setData(Qt.UserRole, applicant.person)
 
-        if code == Constants.REMAINING_OWNER_CODE:
-            inserted_row = self.owners_remaining_twidget.rowCount()
-            self.owners_remaining_twidget.insertRow(inserted_row)
-            self.owners_remaining_twidget.setItem(inserted_row, CO_OWNERSHIP_MAIN, main_item)
-            self.owners_remaining_twidget.setItem(inserted_row, CO_OWNERSHIP_PERSON_ID, person_id_item)
-            self.owners_remaining_twidget.setItem(inserted_row, CO_OWNERSHIP_SURNAME, surname_item)
-            self.owners_remaining_twidget.setItem(inserted_row, CO_OWNERSHIP_FIRST_NAME, first_name_item)
+            if code == Constants.REMAINING_OWNER_CODE:
+                inserted_row = self.owners_remaining_twidget.rowCount()
+                self.owners_remaining_twidget.insertRow(inserted_row)
+                self.owners_remaining_twidget.setItem(inserted_row, CO_OWNERSHIP_MAIN, main_item)
+                self.owners_remaining_twidget.setItem(inserted_row, CO_OWNERSHIP_PERSON_ID, person_id_item)
+                self.owners_remaining_twidget.setItem(inserted_row, CO_OWNERSHIP_SURNAME, surname_item)
+                self.owners_remaining_twidget.setItem(inserted_row, CO_OWNERSHIP_FIRST_NAME, first_name_item)
 
-        elif code == Constants.GIVING_UP_OWNER_CODE:
-            inserted_row = self.owners_giving_twidget.rowCount()
-            self.owners_giving_twidget.insertRow(inserted_row)
-            self.owners_giving_twidget.setItem(inserted_row, 0, person_id_item)
-            self.owners_giving_twidget.setItem(inserted_row, 1, surname_item)
-            self.owners_giving_twidget.setItem(inserted_row, 2, first_name_item)
+            elif code == Constants.GIVING_UP_OWNER_CODE:
+                inserted_row = self.owners_giving_twidget.rowCount()
+                self.owners_giving_twidget.insertRow(inserted_row)
+                self.owners_giving_twidget.setItem(inserted_row, 0, person_id_item)
+                self.owners_giving_twidget.setItem(inserted_row, 1, surname_item)
+                self.owners_giving_twidget.setItem(inserted_row, 2, first_name_item)
 
     def __add_applicant_item(self, applicant):
 
-        try:
-            person = self.session.query(BsPerson).filter(BsPerson.person_id == (applicant.person_ref.person_id)).one()
-            self.person = person
-        except SQLAlchemyError, e:
-            PluginUtils.show_error(self, self.tr("Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
-            return
-        main_item = QTableWidgetItem(QIcon(), "")
-        main_item.setCheckState(Qt.Checked) if applicant.main_applicant \
-            else main_item.setCheckState(Qt.Unchecked)
+        if applicant.person_ref:
+            try:
+                person = self.session.query(BsPerson).filter(BsPerson.person_id == (applicant.person_ref.person_id)).one()
+                self.person = person
+            except SQLAlchemyError, e:
+                PluginUtils.show_error(self, self.tr("Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+                return
+            main_item = QTableWidgetItem(QIcon(), "")
+            main_item.setCheckState(Qt.Checked) if applicant.main_applicant \
+                else main_item.setCheckState(Qt.Unchecked)
 
-        main_item.setData(Qt.UserRole, applicant.person)
+            main_item.setData(Qt.UserRole, applicant.person)
 
-        if person.type == 20:
-            share_item = QTableWidgetItem(str(0))
-            share_item.setData(Qt.UserRole, applicant.person)
-        else:
-            share_item = QTableWidgetItem(str(applicant.share) if (applicant.share) else '0')
-            share_item.setData(Qt.UserRole, applicant.person)
+            if person.type == 20:
+                share_item = QTableWidgetItem(str(0))
+                share_item.setData(Qt.UserRole, applicant.person)
+            else:
+                share_item = QTableWidgetItem(str(applicant.share) if (applicant.share) else '0')
+                share_item.setData(Qt.UserRole, applicant.person)
 
-        person_id_item = QTableWidgetItem(applicant.person_ref.person_register)
-        person_id_item.setData(Qt.UserRole, applicant.person)
-        person_id_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+            person_id_item = QTableWidgetItem(applicant.person_ref.person_register)
+            person_id_item.setData(Qt.UserRole, applicant.person)
+            person_id_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
 
-        surname_item = QTableWidgetItem(applicant.person_ref.name)
-        surname_item.setData(Qt.UserRole, applicant.person)
-        surname_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+            surname_item = QTableWidgetItem(applicant.person_ref.name)
+            surname_item.setData(Qt.UserRole, applicant.person)
+            surname_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
 
-        first_name_item = QTableWidgetItem(applicant.person_ref.first_name)
-        first_name_item.setData(Qt.UserRole, applicant.person)
-        first_name_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+            first_name_item = QTableWidgetItem(applicant.person_ref.first_name)
+            first_name_item.setData(Qt.UserRole, applicant.person)
+            first_name_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
 
-        inserted_row = self.applicant_twidget.rowCount()
+            inserted_row = self.applicant_twidget.rowCount()
 
-        self.applicant_twidget.insertRow(inserted_row)
-        self.applicant_twidget.setItem(inserted_row, APPLICANT_MAIN, main_item)
-        self.applicant_twidget.setItem(inserted_row, APPLICANT_SHARE, share_item)
-        self.applicant_twidget.setItem(inserted_row, APPLICANT_PERSON_ID, person_id_item)
-        self.applicant_twidget.setItem(inserted_row, APPLICANT_SURNAME, surname_item)
-        self.applicant_twidget.setItem(inserted_row, APPLICANT_FIRST_NAME, first_name_item)
+            self.applicant_twidget.insertRow(inserted_row)
+            self.applicant_twidget.setItem(inserted_row, APPLICANT_MAIN, main_item)
+            self.applicant_twidget.setItem(inserted_row, APPLICANT_SHARE, share_item)
+            self.applicant_twidget.setItem(inserted_row, APPLICANT_PERSON_ID, person_id_item)
+            self.applicant_twidget.setItem(inserted_row, APPLICANT_SURNAME, surname_item)
+            self.applicant_twidget.setItem(inserted_row, APPLICANT_FIRST_NAME, first_name_item)
 
     def __add_legal_rep_item(self, legal_rep):
 
@@ -4817,12 +4822,14 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
         self.updating = True
         for applicant in self.application.stakeholders:
             if applicant.role == Constants.APPLICANT_ROLE_CODE:
-                person = self.session.query(BsPerson.person_id, BsPerson.name, BsPerson.first_name).filter_by(person_id=applicant.person).one()
-                if person.first_name is None:
-                    person_label = u"{0}".format(person.name)
-                else:
-                    person_label = u"{0}, {1}".format(person.name, person.first_name)
-                self.applicant_documents_cbox.addItem(person_label, person.person_id)
+                print applicant.person
+                if applicant.person:
+                    person = self.session.query(BsPerson.person_id, BsPerson.name, BsPerson.first_name).filter_by(person_id=applicant.person).one()
+                    if person.first_name is None:
+                        person_label = u"{0}".format(person.name)
+                    else:
+                        person_label = u"{0}, {1}".format(person.name, person.first_name)
+                    self.applicant_documents_cbox.addItem(person_label, person.person_id)
         self.updating = False
 
         # if self.applicant_documents_cbox.count() > 0:

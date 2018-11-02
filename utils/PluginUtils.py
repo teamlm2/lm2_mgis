@@ -18,7 +18,7 @@ from ..model.CaMaintenanceCase import CaMaintenanceCase
 from ..model.AuLevel1 import AuLevel1
 from ..model.AuLevel2 import AuLevel2
 from ..model.AuLevel3 import AuLevel3
-from ..model.CaParcel import CaParcel
+from ..model.CaParcelTbl import CaParcelTbl
 from ..model import SettingsConstants
 from ..model import Constants
 from ..model.SdUser import *
@@ -222,14 +222,18 @@ class PluginUtils(object):
 
         # try:
         session = SessionHandler().session_instance()
-        parcel = session.query(CaParcel).filter(CaParcel.parcel_id == parcel_id).one()
-        soum = session.query(AuLevel2.code).filter(func.ST_Covers(AuLevel2.geometry, parcel.geometry)).one()
-
+        parcel_count = session.query(CaParcelTbl).filter(CaParcelTbl.parcel_id == parcel_id).count()
+        if parcel_count == 0:
+            return None
+        else:
+            parcel = session.query(CaParcelTbl).filter(CaParcelTbl.parcel_id == parcel_id).first()
+            soum = session.query(AuLevel2.code).filter(func.ST_Covers(AuLevel2.geometry, parcel.geometry)).one()
+            return soum[0]
         # except SQLAlchemyError, e:
         #     raise LM2Exception(QApplication.translate("LM2", "Database Query Error"),
         #                        QApplication.translate("LM2", "Could not execute: {0}").format(e.message))
 
-        return soum[0]
+
 
     @staticmethod
     def layer_tolerance(map_canvas, layer):

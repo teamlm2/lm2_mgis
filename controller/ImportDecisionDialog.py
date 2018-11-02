@@ -31,6 +31,7 @@ from ..model.BsPerson import *
 from ..model.SetRole import SetRole
 from ..model.CaBuilding import *
 from ..model.Enumerations import ApplicationType
+from ..model.CaParcelTbl import *
 from .DecisionErrorDialog import DecisionErrorDialog
 from ..utils.SessionHandler import SessionHandler
 from ..utils.PluginUtils import PluginUtils
@@ -408,7 +409,7 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
                 else:
                     self.item_refused.addChild(item)
             else:
-                parcel = self.session.query(CaParcel).filter(CaParcel.parcel_id == application.parcel).one()
+                parcel = self.session.query(CaParcelTbl).filter(CaParcelTbl.parcel_id == application.parcel).one()
                 parcel.landuse = landuse
 
                 if decision_app.decision_result == Constants.DECISION_RESULT_APPROVED:
@@ -537,30 +538,30 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
 
         # Parcels with their geometry replaced
         parcels_to_replace_geometry = self.session.query(CaTmpParcel). \
-            filter(CaTmpParcel.parcel_id == CaParcel.parcel_id). \
-            filter(~CaTmpParcel.geometry.ST_Equals(CaParcel.geometry)). \
+            filter(CaTmpParcel.parcel_id == CaParcelTbl.parcel_id). \
+            filter(~CaTmpParcel.geometry.ST_Equals(CaParcelTbl.geometry)). \
             filter(CaTmpParcel.maintenance_case == maintenance_case_id). \
             filter(CaTmpParcel.parcel_id == tmp_parcel_id).all()
 
         for tmp_parcel in parcels_to_replace_geometry:
-            parcel_replace = self.session.query(CaParcel).get(tmp_parcel.parcel_id)
+            parcel_replace = self.session.query(CaParcelTbl).get(tmp_parcel.parcel_id)
             parcel_replace.geometry = tmp_parcel.geometry
 
         # Parcels to become historical: subdivided
-        historical_parcels = self.session.query(CaParcel).join(CaMaintenanceCase.parcels). \
+        historical_parcels = self.session.query(CaParcelTbl).join(CaMaintenanceCase.parcels). \
             filter(CaMaintenanceCase.id == maintenance_case_id).\
-            filter(CaParcel.geometry.ST_Transform(int(srid)).ST_Contains(CaTmpParcel.geometry.ST_Transform(int(srid)).ST_Buffer(-0.005))). \
-            filter(CaParcel.geometry.ST_Transform(int(srid)).ST_Area() != CaTmpParcel.geometry.ST_Transform(int(srid)).ST_Area()). \
+            filter(CaParcelTbl.geometry.ST_Transform(int(srid)).ST_Contains(CaTmpParcel.geometry.ST_Transform(int(srid)).ST_Buffer(-0.005))). \
+            filter(CaParcelTbl.geometry.ST_Transform(int(srid)).ST_Area() != CaTmpParcel.geometry.ST_Transform(int(srid)).ST_Area()). \
             filter(CaTmpParcel.parcel_id == tmp_parcel_id).all()
 
         for old_parcel in historical_parcels:
             old_parcel.valid_till = date.today()
 
         # Parcels to become historical: merged
-        historical_parcels = self.session.query(CaParcel).join(CaMaintenanceCase.parcels). \
+        historical_parcels = self.session.query(CaParcelTbl).join(CaMaintenanceCase.parcels). \
             filter(CaMaintenanceCase.id == maintenance_case_id). \
-            filter(CaParcel.geometry.ST_Transform(int(srid)).ST_Buffer(-0.005).ST_Within(CaTmpParcel.geometry.ST_Transform(int(srid)))). \
-            filter(CaParcel.geometry.ST_Transform(int(srid)).ST_Area() != CaTmpParcel.geometry.ST_Transform(int(srid)).ST_Area()). \
+            filter(CaParcelTbl.geometry.ST_Transform(int(srid)).ST_Buffer(-0.005).ST_Within(CaTmpParcel.geometry.ST_Transform(int(srid)))). \
+            filter(CaParcelTbl.geometry.ST_Transform(int(srid)).ST_Area() != CaTmpParcel.geometry.ST_Transform(int(srid)).ST_Area()). \
             filter(CaTmpParcel.parcel_id == tmp_parcel_id).all()
 
         for old_parcel in historical_parcels:
@@ -597,8 +598,6 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
             # self.session.flush()
 
             #buildings that intersect
-            buildings_to_be_inserted = self.session.query(CaTmpBuilding) \
-                .filter(CaTmpBuilding.geometry.ST_Intersects(parcel_inserted.geometry)).count()
 
             buildings_to_be_inserted = self.session.query(CaTmpBuilding)\
                 .filter(CaTmpBuilding.geometry.ST_Intersects(parcel_inserted.geometry)).all()
@@ -1563,9 +1562,9 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
                     person = self.session.query(BsPerson).filter(BsPerson.person_id == app_person.person).one()
                     self.surname_edit.setText(person.name)
                     self.firstname_edit.setText(person.first_name)
-            parcel_count = self.session.query(CaParcel).filter(CaParcel.parcel_id == application.parcel).count()
+            parcel_count = self.session.query(CaParcelTbl).filter(CaParcelTbl.parcel_id == application.parcel).count()
             if parcel_count == 1:
-                parcel = self.session.query(CaParcel).filter(CaParcel.parcel_id == application.parcel).one()
+                parcel = self.session.query(CaParcelTbl).filter(CaParcelTbl.parcel_id == application.parcel).one()
             else:
                 parcel = self.session.query(CaTmpParcel).filter(CaTmpParcel.parcel_id == application.tmp_parcel).one()
             self.streetname_edit.setText(parcel.address_streetname)

@@ -4,6 +4,7 @@ from PyQt4.QtGui import *
 from sqlalchemy.exc import SQLAlchemyError
 from ..model.VaTypeParcel import *
 from ..view.Ui_ManageParcelRecordsDialog import *
+from ..model.CaParcelTbl import *
 from ..utils.LayerUtils import LayerUtils
 from ..utils.PluginUtils import *
 from ..utils.SessionHandler import SessionHandler

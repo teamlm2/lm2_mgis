@@ -25,6 +25,7 @@ from ..model.Enumerations import UserRight
 from ..model.DatabaseHelper import DatabaseHelper
 from ..model.SetContractDocumentRole import *
 from ..model.SetApplicationTypeDocumentRole import *
+from ..model.CaParcelTbl import *
 from .qt_classes.IntegerSpinBoxDelegate import *
 from .qt_classes.ComboBoxDelegate import *
 from .qt_classes.RecordDocumentDelegate import RecordDocumentDelegate
@@ -385,15 +386,15 @@ class OwnRecordDialog(QDialog, Ui_OwnRecordDialog, DatabaseHelper):
 
         self.document_path_edit.setText(FilePath.ownership_file_path())
         try:
-            apps = self.session.query(CtApplication.app_no)\
-                .filter(or_(CtApplication.app_type == 2,CtApplication.app_type == 4,CtApplication.app_type == 5,CtApplication.app_type == 9,\
-                            CtApplication.app_type == 14,CtApplication.app_type == 15,CtApplication.app_type == 16,CtApplication.app_type == 20)).all()
+            # apps = self.session.query(CtApplication.app_no)\
+            #     .filter(or_(CtApplication.app_type == 2,CtApplication.app_type == 4,CtApplication.app_type == 5,CtApplication.app_type == 9,\
+            #                 CtApplication.app_type == 14,CtApplication.app_type == 15,CtApplication.app_type == 16,CtApplication.app_type == 20)).all()
             reasons = self.session.query(ClRecordCancellationReason).all()
 
-            for app in apps:
-                self.app_number_cbox.addItem(app[0])
-
-            self.app_number_cbox.setCurrentIndex(-1)
+            # for app in apps:
+            #     self.app_number_cbox.addItem(app[0])
+            #
+            # self.app_number_cbox.setCurrentIndex(-1)
 
             for reason in reasons:
                 self.other_reason_cbox.addItem(reason.description, reason.code)
@@ -422,12 +423,13 @@ class OwnRecordDialog(QDialog, Ui_OwnRecordDialog, DatabaseHelper):
 
         for record_app_role in record_app_roles:
             for rec_person_role in record_app_role.application_ref.stakeholders.all():
-                person = rec_person_role.person_ref
-                if person.first_name is None:
-                    person_label = u"{0}".format(person.name)
-                else:
-                    person_label = u"{0}, {1}".format(person.name, person.first_name)
-                self.applicant_documents_cbox.addItem(person_label, person.person_id)
+                if rec_person_role.person_ref:
+                    person = rec_person_role.person_ref
+                    if person.first_name is None:
+                        person_label = u"{0}".format(person.name)
+                    else:
+                        person_label = u"{0}, {1}".format(person.name, person.first_name)
+                    self.applicant_documents_cbox.addItem(person_label, person.person_id)
 
         self.updating = False
         self.__update_app_documents_twidget()
@@ -631,14 +633,15 @@ class OwnRecordDialog(QDialog, Ui_OwnRecordDialog, DatabaseHelper):
         row = 0
         for owner in owners:
             person = owner.person_ref
-            tax_count = person.archived_taxes.filter(CtArchivedTaxAndPrice.record == self.record.record_id). \
-                filter(CtArchivedTaxAndPrice.valid_from == begin_date).count()
-            if tax_count > 0:
-                self.archive_land_tax_twidget.setRowCount(row + 1)
-                tax = person.archived_taxes.filter(CtArchivedTaxAndPrice.record == self.record.record_id). \
-                    filter(CtArchivedTaxAndPrice.valid_from == begin_date).one()
-                self.__add_archived_tax_row(row, person, tax)
-                row += 1
+            if person:
+                tax_count = person.archived_taxes.filter(CtArchivedTaxAndPrice.record == self.record.record_id). \
+                    filter(CtArchivedTaxAndPrice.valid_from == begin_date).count()
+                if tax_count > 0:
+                    self.archive_land_tax_twidget.setRowCount(row + 1)
+                    tax = person.archived_taxes.filter(CtArchivedTaxAndPrice.record == self.record.record_id). \
+                        filter(CtArchivedTaxAndPrice.valid_from == begin_date).one()
+                    self.__add_archived_tax_row(row, person, tax)
+                    row += 1
 
         self.archive_land_tax_twidget.resizeColumnToContents(0)
         self.archive_land_tax_twidget.resizeColumnToContents(1)
@@ -695,10 +698,10 @@ class OwnRecordDialog(QDialog, Ui_OwnRecordDialog, DatabaseHelper):
             return
 
         count = self.session.query(SetBaseTaxAndPrice).\
-            filter(SetTaxAndPriceZone.geometry.ST_Contains(CaParcel.geometry)). \
-            filter(CaParcel.parcel_id == parcel_id). \
+            filter(SetTaxAndPriceZone.geometry.ST_Contains(CaParcelTbl.geometry)). \
+            filter(CaParcelTbl.parcel_id == parcel_id). \
             filter(SetBaseTaxAndPrice.tax_zone == SetTaxAndPriceZone.zone_id). \
-            filter(SetBaseTaxAndPrice.landuse == CaParcel.landuse). \
+            filter(SetBaseTaxAndPrice.landuse == CaParcelTbl.landuse). \
             count()
 
         if count == 0:
@@ -706,10 +709,10 @@ class OwnRecordDialog(QDialog, Ui_OwnRecordDialog, DatabaseHelper):
             return
 
         base_tax_and_price = self.session.query(SetBaseTaxAndPrice).\
-            filter(SetTaxAndPriceZone.geometry.ST_Contains(CaParcel.geometry)). \
-            filter(CaParcel.parcel_id == parcel_id). \
+            filter(SetTaxAndPriceZone.geometry.ST_Contains(CaParcelTbl.geometry)). \
+            filter(CaParcelTbl.parcel_id == parcel_id). \
             filter(SetBaseTaxAndPrice.tax_zone == SetTaxAndPriceZone.zone_id). \
-            filter(SetBaseTaxAndPrice.landuse == CaParcel.landuse). \
+            filter(SetBaseTaxAndPrice.landuse == CaParcelTbl.landuse). \
             one()
 
         self.base_value_edit.setText('{0}'.format(base_tax_and_price.base_value_per_m2))
@@ -734,15 +737,16 @@ class OwnRecordDialog(QDialog, Ui_OwnRecordDialog, DatabaseHelper):
         row = 0
         for owner in owners:
             person = owner.person_ref
-            tax_count = person.taxes.filter(CtTaxAndPrice.record == self.record.record_id).count()
-            if tax_count == 0:
-                self.__add_tax_row(row, owner, parcel_id, base_tax_and_price.base_value_per_m2,
-                                   base_tax_and_price.base_tax_rate,
-                                   base_tax_and_price.subsidized_area, base_tax_and_price.subsidized_tax_rate)
-            else:
-                tax = person.taxes.filter(CtTaxAndPrice.record == self.record.record_id).one()
-                self.__add_tax_row2(row, owner, tax)
-            row += 1
+            if person:
+                tax_count = person.taxes.filter(CtTaxAndPrice.record == self.record.record_id).count()
+                if tax_count == 0:
+                    self.__add_tax_row(row, owner, parcel_id, base_tax_and_price.base_value_per_m2,
+                                       base_tax_and_price.base_tax_rate,
+                                       base_tax_and_price.subsidized_area, base_tax_and_price.subsidized_tax_rate)
+                else:
+                    tax = person.taxes.filter(CtTaxAndPrice.record == self.record.record_id).one()
+                    self.__add_tax_row2(row, owner, tax)
+                row += 1
 
         self.land_tax_twidget.resizeColumnToContents(0)
         self.land_tax_twidget.resizeColumnToContents(1)
@@ -784,44 +788,45 @@ class OwnRecordDialog(QDialog, Ui_OwnRecordDialog, DatabaseHelper):
     def __add_tax_row(self, row, owner, parcel_id, base_value_per_m2, base_tax_rate, subsidized_area, subsidized_tax_rate):
 
         # TODO: fix rounding issues
-        parcel_area = self.session.query(CaParcel.area_m2).filter(CaParcel.parcel_id == parcel_id).one()[0]
-        parcel_area = round(parcel_area)
+        if owner.person_ref:
+            parcel_area = self.session.query(CaParcelTbl.area_m2).filter(CaParcelTbl.parcel_id == parcel_id).one()[0]
+            parcel_area = round(parcel_area)
 
-        item = QTableWidgetItem(u'{0}, {1}'.format(owner.person_ref.name, owner.person_ref.first_name))
-        item.setData(Qt.UserRole, owner.person_ref.person_register)
-        self.land_tax_twidget.setItem(row, OWNER_NAME, item)
-        item = QTableWidgetItem(u'{0}'.format(owner.person_ref.person_register))
-        self.__lock_item(item)
-        self.land_tax_twidget.setItem(row, OWNER_ID, item)
-        item = QTableWidgetItem('{0}'.format(owner.share))
-        self.__lock_item(item)
-        self.land_tax_twidget.setItem(row, OWNER_SHARE, item)
-        owner_area = int(round(float(owner.share) * parcel_area))
-        item = QTableWidgetItem('{0}'.format(owner_area))
-        self.__lock_item(item)
-        self.land_tax_twidget.setItem(row, OWNER_AREA, item)
+            item = QTableWidgetItem(u'{0}, {1}'.format(owner.person_ref.name, owner.person_ref.first_name))
+            item.setData(Qt.UserRole, owner.person_ref.person_register)
+            self.land_tax_twidget.setItem(row, OWNER_NAME, item)
+            item = QTableWidgetItem(u'{0}'.format(owner.person_ref.person_register))
+            self.__lock_item(item)
+            self.land_tax_twidget.setItem(row, OWNER_ID, item)
+            item = QTableWidgetItem('{0}'.format(owner.share))
+            self.__lock_item(item)
+            self.land_tax_twidget.setItem(row, OWNER_SHARE, item)
+            owner_area = int(round(float(owner.share) * parcel_area))
+            item = QTableWidgetItem('{0}'.format(owner_area))
+            self.__lock_item(item)
+            self.land_tax_twidget.setItem(row, OWNER_AREA, item)
 
-        value_calculated = owner_area * base_value_per_m2
-        # owner_subsidized_area = int(round(float(owner.share) * subsidized_area))
-        # tax_subsidized = owner_subsidized_area * base_value_per_m2 * (float(base_tax_rate) / 100) \
-        #     * (float(subsidized_tax_rate) / 100)
-        # tax_standard = (owner_area - owner_subsidized_area) * base_value_per_m2 * (float(base_tax_rate) / 100)
-        # tax_calculated = int(round(tax_subsidized if tax_standard < 0 else tax_subsidized + tax_standard))
-        tax_calculated = ((float(value_calculated) * float(base_tax_rate / 100) * float((100-subsidized_tax_rate) / 100)))
+            value_calculated = owner_area * base_value_per_m2
+            # owner_subsidized_area = int(round(float(owner.share) * subsidized_area))
+            # tax_subsidized = owner_subsidized_area * base_value_per_m2 * (float(base_tax_rate) / 100) \
+            #     * (float(subsidized_tax_rate) / 100)
+            # tax_standard = (owner_area - owner_subsidized_area) * base_value_per_m2 * (float(base_tax_rate) / 100)
+            # tax_calculated = int(round(tax_subsidized if tax_standard < 0 else tax_subsidized + tax_standard))
+            tax_calculated = ((float(value_calculated) * float(base_tax_rate / 100) * float((100-subsidized_tax_rate) / 100)))
 
-        item = QTableWidgetItem('{0}'.format(value_calculated))
-        self.__lock_item(item)
-        self.land_tax_twidget.setItem(row, OWNER_VALUE_CALCULATED, item)
-        item = QTableWidgetItem('{0}'.format(value_calculated))
-        self.land_tax_twidget.setItem(row, OWNER_PRICE_PAID, item)
-        item = QTableWidgetItem('{0}'.format(tax_calculated))
-        self.__lock_item(item)
-        self.land_tax_twidget.setItem(row, OWNER_TAX, item)
-        item = QTableWidgetItem('{0}'.format(10))
-        self.land_tax_twidget.setItem(row, OWNER_GRACE_PERIOD, item)
-        payment_frequency = self.session.query(ClPaymentFrequency).get(10)
-        item = QTableWidgetItem(u'{0}'.format(payment_frequency.description))
-        self.land_tax_twidget.setItem(row, OWNER_PAYMENT_FREQUENCY, item)
+            item = QTableWidgetItem('{0}'.format(value_calculated))
+            self.__lock_item(item)
+            self.land_tax_twidget.setItem(row, OWNER_VALUE_CALCULATED, item)
+            item = QTableWidgetItem('{0}'.format(value_calculated))
+            self.land_tax_twidget.setItem(row, OWNER_PRICE_PAID, item)
+            item = QTableWidgetItem('{0}'.format(tax_calculated))
+            self.__lock_item(item)
+            self.land_tax_twidget.setItem(row, OWNER_TAX, item)
+            item = QTableWidgetItem('{0}'.format(10))
+            self.land_tax_twidget.setItem(row, OWNER_GRACE_PERIOD, item)
+            payment_frequency = self.session.query(ClPaymentFrequency).get(10)
+            item = QTableWidgetItem(u'{0}'.format(payment_frequency.description))
+            self.land_tax_twidget.setItem(row, OWNER_PAYMENT_FREQUENCY, item)
 
     def __lock_item(self, item):
 
@@ -829,34 +834,35 @@ class OwnRecordDialog(QDialog, Ui_OwnRecordDialog, DatabaseHelper):
 
     def __add_tax_row2(self, row, owner, tax):
 
-        item = QTableWidgetItem(u'{0}, {1}'.format(owner.person_ref.name, owner.person_ref.first_name))
-        item.setData(Qt.UserRole, owner.person_ref.person_register)
-        self.__lock_item(item)
-        self.land_tax_twidget.setItem(row, OWNER_NAME, item)
-        item = QTableWidgetItem(u'{0}'.format(owner.person_ref.person_register))
-        self.__lock_item(item)
-        self.land_tax_twidget.setItem(row, OWNER_ID, item)
-        item = QTableWidgetItem('{0}'.format(tax.share))
-        self.__lock_item(item)
-        self.land_tax_twidget.setItem(row, OWNER_SHARE, item)
-        item = QTableWidgetItem('{0}'.format(tax.area))
-        self.__lock_item(item)
-        self.land_tax_twidget.setItem(row, OWNER_AREA, item)
-        item = QTableWidgetItem('{0}'.format(tax.value_calculated))
-        self.__lock_item(item)
-        self.land_tax_twidget.setItem(row, OWNER_VALUE_CALCULATED, item)
-        item = QTableWidgetItem('{0}'.format(tax.price_paid))
-        self.__lock_item(item)
-        self.land_tax_twidget.setItem(row, OWNER_PRICE_PAID, item)
-        item = QTableWidgetItem('{0}'.format(tax.land_tax))
-        self.__lock_item(item)
-        self.land_tax_twidget.setItem(row, OWNER_TAX, item)
-        item = QTableWidgetItem('{0}'.format(tax.grace_period))
-        self.__lock_item(item)
-        self.land_tax_twidget.setItem(row, OWNER_GRACE_PERIOD, item)
-        payment_frequency = self.session.query(ClPaymentFrequency).get(tax.payment_frequency)
-        item = QTableWidgetItem(u'{0}'.format(payment_frequency.description))
-        self.land_tax_twidget.setItem(row, OWNER_PAYMENT_FREQUENCY, item)
+        if owner.person_ref:
+            item = QTableWidgetItem(u'{0}, {1}'.format(owner.person_ref.name, owner.person_ref.first_name))
+            item.setData(Qt.UserRole, owner.person_ref.person_register)
+            self.__lock_item(item)
+            self.land_tax_twidget.setItem(row, OWNER_NAME, item)
+            item = QTableWidgetItem(u'{0}'.format(owner.person_ref.person_register))
+            self.__lock_item(item)
+            self.land_tax_twidget.setItem(row, OWNER_ID, item)
+            item = QTableWidgetItem('{0}'.format(tax.share))
+            self.__lock_item(item)
+            self.land_tax_twidget.setItem(row, OWNER_SHARE, item)
+            item = QTableWidgetItem('{0}'.format(tax.area))
+            self.__lock_item(item)
+            self.land_tax_twidget.setItem(row, OWNER_AREA, item)
+            item = QTableWidgetItem('{0}'.format(tax.value_calculated))
+            self.__lock_item(item)
+            self.land_tax_twidget.setItem(row, OWNER_VALUE_CALCULATED, item)
+            item = QTableWidgetItem('{0}'.format(tax.price_paid))
+            self.__lock_item(item)
+            self.land_tax_twidget.setItem(row, OWNER_PRICE_PAID, item)
+            item = QTableWidgetItem('{0}'.format(tax.land_tax))
+            self.__lock_item(item)
+            self.land_tax_twidget.setItem(row, OWNER_TAX, item)
+            item = QTableWidgetItem('{0}'.format(tax.grace_period))
+            self.__lock_item(item)
+            self.land_tax_twidget.setItem(row, OWNER_GRACE_PERIOD, item)
+            payment_frequency = self.session.query(ClPaymentFrequency).get(tax.payment_frequency)
+            item = QTableWidgetItem(u'{0}'.format(payment_frequency.description))
+            self.land_tax_twidget.setItem(row, OWNER_PAYMENT_FREQUENCY, item)
 
     def __load_application_information(self):
 
@@ -1420,7 +1426,7 @@ class OwnRecordDialog(QDialog, Ui_OwnRecordDialog, DatabaseHelper):
         area_m2 = str((area_m2))
 
         try:
-            parcel = self.session.query(CaParcel).filter(CaParcel.parcel_id == self.id_main_edit.text()).one()
+            parcel = self.session.query(CaParcelTbl).filter(CaParcelTbl.parcel_id == self.id_main_edit.text()).one()
         except SQLAlchemyError, e:
             raise LM2Exception(self.tr("Database Query Error"), self.tr("aCould not execute: {0}").format(e.message))
 

@@ -67,6 +67,7 @@ from ..model.SetCertificatePerson import *
 from ..model.SetTrainingPerson import *
 from ..model.ClTrainingLevel import *
 from ..model.SetCadastrePage import *
+from ..model.CaParcelTbl import *
 from ..utils.FileUtils import FileUtils
 from ..utils.LayerUtils import LayerUtils
 from ..utils.DatabaseUtils import DatabaseUtils
@@ -2691,10 +2692,10 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
                     # should never happen
                     continue
 
-                count = self.session.query(SetBaseFee).filter(SetFeeZone.geometry.ST_Contains(CaParcel.geometry)).\
-                    filter(CaParcel.parcel_id == parcel_id).\
+                count = self.session.query(SetBaseFee).filter(SetFeeZone.geometry.ST_Contains(CaParcelTbl.geometry)).\
+                    filter(CaParcelTbl.parcel_id == parcel_id).\
                     filter(SetBaseFee.fee_zone == SetFeeZone.zone_id).\
-                    filter(SetBaseFee.landuse == CaParcel.landuse).\
+                    filter(SetBaseFee.landuse == CaParcelTbl.landuse).\
                     count()
 
                 if count == 0:
@@ -2702,10 +2703,10 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
                     # can happen
                     continue
 
-                base_fee = self.session.query(SetBaseFee).filter(SetFeeZone.geometry.ST_Contains(CaParcel.geometry)).\
-                    filter(CaParcel.parcel_id == parcel_id).\
+                base_fee = self.session.query(SetBaseFee).filter(SetFeeZone.geometry.ST_Contains(CaParcelTbl.geometry)).\
+                    filter(CaParcelTbl.parcel_id == parcel_id).\
                     filter(SetBaseFee.fee_zone == SetFeeZone.zone_id).\
-                    filter(SetBaseFee.landuse == CaParcel.landuse).\
+                    filter(SetBaseFee.landuse == CaParcelTbl.landuse).\
                     one()
 
                 new_base_fee_per_m2 = base_fee.base_fee_per_m2
@@ -2831,10 +2832,10 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
                     # should never happen
                     continue
 
-                count = self.session.query(SetBaseTaxAndPrice).filter(SetTaxAndPriceZone.geometry.ST_Contains(CaParcel.geometry)).\
-                    filter(CaParcel.parcel_id == parcel_id).\
+                count = self.session.query(SetBaseTaxAndPrice).filter(SetTaxAndPriceZone.geometry.ST_Contains(CaParcelTbl.geometry)).\
+                    filter(CaParcelTbl.parcel_id == parcel_id).\
                     filter(SetBaseTaxAndPrice.tax_zone == SetTaxAndPriceZone.zone_id).\
-                    filter(SetBaseTaxAndPrice.landuse == CaParcel.landuse).\
+                    filter(SetBaseTaxAndPrice.landuse == CaParcelTbl.landuse).\
                     count()
 
                 if count == 0:
@@ -2842,10 +2843,10 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
                     # can happen
                     continue
 
-                base_tax_and_price = self.session.query(SetBaseTaxAndPrice).filter(SetTaxAndPriceZone.geometry.ST_Contains(CaParcel.geometry)).\
-                    filter(CaParcel.parcel_id == parcel_id).\
+                base_tax_and_price = self.session.query(SetBaseTaxAndPrice).filter(SetTaxAndPriceZone.geometry.ST_Contains(CaParcelTbl.geometry)).\
+                    filter(CaParcelTbl.parcel_id == parcel_id).\
                     filter(SetBaseTaxAndPrice.tax_zone == SetTaxAndPriceZone.zone_id).\
-                    filter(SetBaseTaxAndPrice.landuse == CaParcel.landuse).\
+                    filter(SetBaseTaxAndPrice.landuse == CaParcelTbl.landuse).\
                     one()
 
                 new_base_value_per_m2 = base_tax_and_price.base_value_per_m2

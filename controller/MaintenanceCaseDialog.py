@@ -7,6 +7,7 @@ from inspect import currentframe
 from ..view.Ui_MaintenanceCaseDialog import *
 from ..utils.LayerUtils import LayerUtils
 from ..model.CaTmpParcel import *
+from ..model.CaParcelTbl import *
 from ..model.CaMaintenanceCase import *
 from ..model.CaBuilding import *
 from ..model.CaTmpBuilding import *
