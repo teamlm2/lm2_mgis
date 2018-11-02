@@ -96,10 +96,10 @@ class ConnectionToMainDatabaseDialog(QDialog, Ui_ConnectionToMainDatabaseDialog)
 
         session = SessionHandler().session_instance()
         setRole = session.query(SetRole).filter(SetRole.user_name == user).filter(SetRole.is_active == True).one()
-        mac_address = setRole.mac_addresses
-        if mac_address != self.mac_addr:
-            PluginUtils.show_error(self, self.tr("Query Error"), self.tr("You are not permitted use for this PC !!!"))
-            return
+        # mac_address = setRole.mac_addresses
+        # if mac_address != self.mac_addr:
+        #     PluginUtils.show_error(self, self.tr("Query Error"), self.tr("You are not permitted use for this PC !!!"))
+        #     return
 
         # if setRole.pa_till < QDate.currentDate().toPyDate():
         #     self.__is_expired = True

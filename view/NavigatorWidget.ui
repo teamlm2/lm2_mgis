@@ -83,7 +83,7 @@
         <x>10</x>
         <y>60</y>
         <width>386</width>
-        <height>571</height>
+        <height>519</height>
        </rect>
       </property>
       <property name="maximumSize">
@@ -93,7 +93,7 @@
        </size>
       </property>
       <property name="currentIndex">
-       <number>2</number>
+       <number>0</number>
       </property>
       <property name="usesScrollButtons">
        <bool>true</bool>
@@ -1250,7 +1250,7 @@
           <x>5</x>
           <y>255</y>
           <width>371</width>
-          <height>281</height>
+          <height>274</height>
          </rect>
         </property>
         <property name="title">
@@ -1276,7 +1276,7 @@
          <property name="geometry">
           <rect>
            <x>197</x>
-           <y>250</y>
+           <y>246</y>
            <width>170</width>
            <height>23</height>
           </rect>
@@ -1289,7 +1289,7 @@
          <property name="geometry">
           <rect>
            <x>4</x>
-           <y>250</y>
+           <y>246</y>
            <width>170</width>
            <height>23</height>
           </rect>
@@ -1638,7 +1638,7 @@
           <x>5</x>
           <y>255</y>
           <width>371</width>
-          <height>246</height>
+          <height>233</height>
          </rect>
         </property>
         <property name="title">
@@ -1954,7 +1954,7 @@
           <x>5</x>
           <y>255</y>
           <width>371</width>
-          <height>246</height>
+          <height>232</height>
          </rect>
         </property>
         <property name="title">
@@ -2024,7 +2024,7 @@
           <x>5</x>
           <y>255</y>
           <width>371</width>
-          <height>246</height>
+          <height>239</height>
          </rect>
         </property>
         <property name="title">
@@ -3036,7 +3036,7 @@ QPushButton:disabled {
           <x>5</x>
           <y>255</y>
           <width>371</width>
-          <height>246</height>
+          <height>237</height>
          </rect>
         </property>
         <property name="title">
@@ -3469,9 +3469,9 @@ QPushButton:disabled {
         <property name="geometry">
          <rect>
           <x>10</x>
-          <y>346</y>
+          <y>345</y>
           <width>361</width>
-          <height>158</height>
+          <height>145</height>
          </rect>
         </property>
         <property name="cornerButtonEnabled">
@@ -3905,7 +3905,7 @@ QPushButton:disabled {
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>640</y>
+        <y>576</y>
         <width>381</width>
         <height>21</height>
        </rect>

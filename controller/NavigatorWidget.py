@@ -1038,7 +1038,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
                  "LEFT JOIN data_soums_union.ct_ownership_record record on rec_app.record = record.record_id " \
                  "LEFT JOIN data_soums_union.ct_decision_application dec_app on dec_app.application = application.app_id " \
                  "LEFT JOIN data_soums_union.ct_decision decision on decision.decision_id = dec_app.decision " \
-                 "where  au2.code = {0}".format(current_working_soum) + "\n"
+                 "where  parcel.au2 = {0}".format(current_working_soum) + "\n"
 
         sql = sql + select
 
@@ -1252,11 +1252,17 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         persons = self.session.query(PersonSearch)
         filter_is_set = False
         if self.name_edit.text():
+            if len(self.name_edit.text()) < 2:
+                self.error_label.setText(self.tr("find search character should be at least 2"))
+                return
             filter_is_set = True
             right_holder = "%" + self.name_edit.text() + "%"
             persons = persons.filter(or_(func.lower(PersonSearch.name).like(func.lower(right_holder)), func.lower(PersonSearch.first_name).ilike(func.lower(right_holder)), func.lower(PersonSearch.middle_name).ilike(func.lower(right_holder))))
 
         if self.personal_edit.text():
+            if len(self.personal_edit.text()) < 5:
+                self.error_label.setText(self.tr("find search character should be at least 4"))
+                return
             filter_is_set = True
             value = "%" + self.personal_edit.text() + "%"
             persons = persons.filter(PersonSearch.person_register.ilike(value))
@@ -1272,6 +1278,9 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
             persons = persons.filter(or_(PersonSearch.mobile_phone.ilike(number), PersonSearch.phone.ilike(number)))
 
         if self.person_parcel_num_edit.text():
+            if len(self.person_parcel_num_edit.text()) < 5:
+                self.error_label.setText(self.tr("find search character should be at least 4"))
+                return
             filter_is_set = True
             value = "%" + self.person_parcel_num_edit.text() + "%"
             persons_count = persons.filter(PersonSearch.parcel_id.ilike(value)).count()
@@ -1280,6 +1289,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
             else:
                 persons = persons.filter(PersonSearch.tmp_parcel_id.ilike(value))
         if self.person_application_num_edit.text():
+
             filter_is_set = True
             value = "%" + self.person_application_num_edit.text() + "%"
             persons = persons.filter(PersonSearch.app_no.ilike(value))
@@ -1405,6 +1415,9 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
                     applications = applications.filter(or_(func.lower(ApplicationSearch.name).ilike(func.lower(right_holder)), func.lower(ApplicationSearch.first_name).ilike(func.lower(right_holder)), func.lower(ApplicationSearch.middle_name).ilike(func.lower(right_holder))))
 
             if self.application_parcel_num_edit.text():
+                if len(self.application_parcel_num_edit.text()) < 5:
+                    self.error_label.setText(self.tr("find search character should be at least 4"))
+                    return
                 filter_is_set = True
                 parcel_no = "%" + self.application_parcel_num_edit.text() + "%"
                 applications_count = applications.filter(ApplicationSearch.parcel_id.ilike(parcel_no)).count()
@@ -1423,6 +1436,9 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
                 applications = applications.filter(or_(ApplicationSearch.contract_no.ilike(contract_num), ApplicationSearch.record_no.ilike(contract_num)))
 
             if self.personal_application_edit.text():
+                if len(self.personal_application_edit.text()) < 5:
+                    self.error_label.setText(self.tr("find search character should be at least 4"))
+                    return
                 filter_is_set = True
                 person_id = "%" + self.personal_application_edit.text() + "%"
                 applications = applications.filter(ApplicationSearch.person_register.ilike(person_id))
@@ -1503,10 +1519,13 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
             case_no = "%" + self.case_no_edit.text() + "%"
             maintenance_search = maintenance_search.filter(cast(CaMaintenanceCase.id, String).ilike(case_no))
 
-        # if self.case_parcel_no_edit.text():
-        #     filter_is_set = True
-        #     parcel = "%" + self.case_parcel_no_edit.text() + "%"
-        #     maintenance_search = maintenance_search.filter(CaMaintenanceCase.parcel.ilike(parcel))
+        if self.case_parcel_no_edit.text():
+            if len(self.case_parcel_no_edit.text()) < 5:
+                self.error_label.setText(self.tr("find search character should be at least 4"))
+                return
+            filter_is_set = True
+            parcel = "%" + self.case_parcel_no_edit.text() + "%"
+            maintenance_search = maintenance_search.filter(CaMaintenanceCase.parcel.ilike(parcel))
 
         if self.surveyed_by_land_officer_cbox.itemData(self.surveyed_by_land_officer_cbox.currentIndex()) != -1:
             filter_is_set = True
@@ -1532,6 +1551,9 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
             else:
                 maintenance_search = maintenance_search.filter(CaMaintenanceCase.completion_date != None)
         if self.case_right_holder_name_edit.text():
+            if len(self.case_right_holder_name_edit.text()) < 2:
+                self.error_label.setText(self.tr("find search character should be at least 2"))
+                return
             filter_is_set = True
             right_holder = self.case_right_holder_name_edit.text()
             if "," in right_holder:
@@ -1543,6 +1565,9 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
                 right_holder = "%" + self.application_right_holder_name_edit.text() + "%"
                 maintenance_search = maintenance_search.filter(or_(func.lower(BsPerson.name).ilike(func.lower(right_holder)), func.lower(BsPerson.first_name).ilike(func.lower(right_holder))))
         if self.personal_case_edit.text():
+            if len(self.personal_case_edit.text()) < 5:
+                self.error_label.setText(self.tr("find search character should be at least 4"))
+                return
             filter_is_set = True
             person_id = "%" + self.personal_case_edit.text() + "%"
             maintenance_search = maintenance_search.filter(BsPerson.person_register.ilike(person_id))
@@ -1598,11 +1623,17 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
             decisions = decisions.filter(DecisionSearch.decision_date >= python_date)
 
         if self.decision_parcel_num_edit.text():
+            if len(self.decision_parcel_num_edit.text()) < 5:
+                self.error_label.setText(self.tr("find search character should be at least 4"))
+                return
             filter_is_set = True
             parcel_num = "%" + self.decision_parcel_num_edit.text() + "%"
             decisions = decisions.filter(DecisionSearch.parcel_id.ilike(parcel_num))
 
         if self.decision_right_holder_name_edit.text():
+            if len(self.decision_right_holder_name_edit.text()) < 2:
+                self.error_label.setText(self.tr("find search character should be at least 2"))
+                return
             filter_is_set = True
             right_holder = "%" + self.decision_right_holder_name_edit.text() + "%"
             decisions = decisions.filter(or_(func.lower(DecisionSearch.name).ilike(func.lower(right_holder)), func.lower(DecisionSearch.first_name).ilike(func.lower(right_holder)), func.lower(DecisionSearch.middle_name).ilike(func.lower(right_holder))))
@@ -1618,6 +1649,9 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
             decisions = decisions.filter(or_(DecisionSearch.contract_no.ilike(contract_no), DecisionSearch.record_no.ilike(contract_no)))
 
         if self.personal_decision_edit.text():
+            if len(self.personal_decision_edit.text()) < 5:
+                self.error_label.setText(self.tr("find search character should be at least 4"))
+                return
             filter_is_set = True
             person_id = "%" + self.personal_decision_edit.text() + "%"
             decisions = decisions.filter(DecisionSearch.person_register.ilike(person_id))
@@ -1674,6 +1708,9 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
             contracts = contracts.filter(ContractSearch.contract_date >= python_date)
 
         if self.contract_parcel_num_edit.text():
+            if len(self.contract_parcel_num_edit.text()) < 5:
+                self.error_label.setText(self.tr("find search character should be at least 4"))
+                return
             filter_is_set = True
             parcel_num = "%" + self.contract_parcel_num_edit.text() + "%"
             contracts = contracts.filter(ContractSearch.parcel_id.ilike(parcel_num))
@@ -1694,6 +1731,9 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
             contracts = contracts.filter(ContractSearch.decision_no.ilike(decision_no))
 
         if self.personal_contract_edit.text():
+            if len(self.personal_contract_edit.text()) < 5:
+                self.error_label.setText(self.tr("find search character should be at least 4"))
+                return
             filter_is_set = True
             person_id = "%" + self.personal_contract_edit.text() + "%"
             contracts = contracts.filter(ContractSearch.person_register.ilike(person_id))
@@ -1758,6 +1798,9 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
                 records = records.filter(RecordSearch.record_date >= python_date)
 
             if self.record_parcel_num_edit.text():
+                if len(self.record_parcel_num_edit.text()) < 5:
+                    self.error_label.setText(self.tr("find search character should be at least 4"))
+                    return
                 filter_is_set = True
                 value = "%" + self.record_parcel_num_edit.text() + "%"
                 records = records.filter(RecordSearch.parcel_id.ilike(value))
@@ -1778,6 +1821,9 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
                 records = records.filter(RecordSearch.decision_no.ilike(value))
 
             if self.personal_record_edit.text():
+                if len(self.personal_record_edit.text()) < 5:
+                    self.error_label.setText(self.tr("find search character should be at least 4"))
+                    return
                 filter_is_set = True
                 value = "%" + self.personal_record_edit.text() + "%"
                 records = records.filter(RecordSearch.person_register.ilike(value))
@@ -1832,6 +1878,9 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
             filter_is_set = False
 
             if self.parcel_num_edit.text():
+                if len(self.parcel_num_edit.text()) < 5:
+                    self.error_label.setText(self.tr("parcel find search character should be at least 4"))
+                    return
                 filter_is_set = True
                 parcel_no = "%" + self.parcel_num_edit.text() + "%"
                 parcels = parcels.filter(ParcelSearch.parcel_id.ilike(parcel_no))
@@ -1852,6 +1901,9 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
                 parcels = parcels.filter(ParcelSearch.app_no.ilike(value))
 
             if self.parcel_right_holder_name_edit.text():
+                if len(self.personal_parcel_edit.text()) < 2:
+                    self.error_label.setText(self.tr("find search character should be at least 2"))
+                    return
                 filter_is_set = True
                 right_holder = "%" + self.parcel_right_holder_name_edit.text() + "%"
                 parcels = parcels.filter(or_(func.lower(ParcelSearch.name).ilike(func.lower(right_holder)), func.lower(ParcelSearch.first_name).ilike(func.lower(right_holder)), func.lower(ParcelSearch.middle_name).ilike(func.lower(right_holder))))
@@ -1867,6 +1919,9 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
                 parcels = parcels.filter(or_(ParcelSearch.contract_no.ilike(value), ParcelSearch.record_no.ilike(value)))
 
             if self.personal_parcel_edit.text():
+                if len(self.personal_parcel_edit.text()) < 5:
+                    self.error_label.setText(self.tr("find search character should be at least 4"))
+                    return
                 filter_is_set = True
                 value = "%" + self.personal_parcel_edit.text() + "%"
                 parcels = parcels.filter(ParcelSearch.person_register.ilike(value))
@@ -1917,6 +1972,9 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
             filter_is_set = False
 
             if self.parcel_num_edit.text():
+                if len(self.parcel_num_edit.text()) < 2:
+                    self.error_label.setText(self.tr("find search character should be at least 2"))
+                    return
                 filter_is_set = True
                 parcel_no = "%" + self.parcel_num_edit.text() + "%"
                 parcels = parcels.filter(TmpParcelSearch.parcel_id.ilike(parcel_no))
