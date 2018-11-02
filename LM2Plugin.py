@@ -35,7 +35,6 @@ from controller.WebgisUtilityDialog import *
 from view.resources_rc import *
 import qgis.core
 from qgis.core import QgsRasterLayer
-from TileLayerPlugin.tiles import BoundingBox, TileLayerDefinition
 
 class LM2Plugin:
 
