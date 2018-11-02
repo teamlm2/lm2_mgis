@@ -22,6 +22,8 @@ class CtFee(Base):
     base_fee_per_m2 = Column(Integer)
     subsidized_area = Column(Integer)
     subsidized_fee_rate = Column(Numeric)
+    contract_no = Column(String)
+    person_register = Column(String)
 
     # foreign keys:
     payment_frequency = Column(Integer, ForeignKey('cl_payment_frequency.code'))

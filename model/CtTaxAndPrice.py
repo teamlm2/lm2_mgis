@@ -22,6 +22,8 @@ class CtTaxAndPrice(Base):
     base_tax_rate = Column(Numeric)
     subsidized_area = Column(Integer)
     subsidized_tax_rate = Column(Numeric)
+    person_register = Column(String)
+    record_no = Column(String)
 
     # foreign keys:
     payment_frequency = Column(Integer, ForeignKey('cl_payment_frequency.code'))

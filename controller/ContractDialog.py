@@ -1141,8 +1141,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         # self.create_savepoint()
         # try:
         if self.active_rbutton.isChecked():
-
-            if self.contract.cancellation_date != None:
+            if self.contract.status == Constants.CONTRACT_STATUS_CANCELLED:
                 PluginUtils.show_error(self, self.tr("Error saving contract"),
                                    self.tr("This contract cancelled. You create a new contract"))
                 return
@@ -1229,8 +1228,8 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             new_row = False
             contractor_id = self.land_fee_twidget.item(row, CONTRACTOR_ID).text()
             person_id = self.land_fee_twidget.item(row, CONTRACTOR_ID).data(Qt.UserRole+1)
-
-            contractor = self.session.query(BsPerson).filter(BsPerson.person_register==contractor_id).first()
+            print person_id
+            contractor = self.session.query(BsPerson).filter(BsPerson.person_id==person_id).one()
             fee_count = contractor.fees.filter(CtFee.contract == self.contract.contract_id).count()
             if fee_count == 0:
                 new_row = True
@@ -1246,6 +1245,9 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             fee.base_fee_per_m2 = float(self.base_fee_edit.text())
             fee.subsidized_area = int(self.subsidized_area_edit.text())
             fee.subsidized_fee_rate = float(self.subsidized_fee_rate_edit.text())
+            fee.contract_no = self.contract.contract_no
+            fee.person_register = contractor_id
+            fee.person = person_id
             payment_frequency_desc = self.land_fee_twidget.item(row, CONTRACTOR_PAYMENT_FREQUENCY).text()
             payment_frequency = self.session.query(ClPaymentFrequency). \
                 filter(ClPaymentFrequency.description == payment_frequency_desc).one()

@@ -213,7 +213,7 @@ class OwnRecordDialog(QDialog, Ui_OwnRecordDialog, DatabaseHelper):
                                    self.tr("This record has no valid application assigned."))
             self.reject()
             return
-
+        self.app_id = application.app_id
         self.application_based_edit.setText(application.app_no)
         self.application_type_edit.setText(application.app_type_ref.description)
 
@@ -794,6 +794,7 @@ class OwnRecordDialog(QDialog, Ui_OwnRecordDialog, DatabaseHelper):
 
             item = QTableWidgetItem(u'{0}, {1}'.format(owner.person_ref.name, owner.person_ref.first_name))
             item.setData(Qt.UserRole, owner.person_ref.person_register)
+            item.setData(Qt.UserRole+1, owner.person_ref.person_id)
             self.land_tax_twidget.setItem(row, OWNER_NAME, item)
             item = QTableWidgetItem(u'{0}'.format(owner.person_ref.person_register))
             self.__lock_item(item)
@@ -1112,7 +1113,8 @@ class OwnRecordDialog(QDialog, Ui_OwnRecordDialog, DatabaseHelper):
             for row in range(self.land_tax_twidget.rowCount()):
                 new_row = False
                 owner_id = self.land_tax_twidget.item(row, OWNER_NAME).data(Qt.UserRole)
-                owner = self.session.query(BsPerson).filter(BsPerson.person_register == owner_id).first()
+                person_id = self.land_tax_twidget.item(row, OWNER_NAME).data(Qt.UserRole+1)
+                owner = self.session.query(BsPerson).filter(BsPerson.person_register == owner_id).one()
                 tax_count = owner.taxes.filter(CtTaxAndPrice.record == self.record.record_id).count()
                 if tax_count == 0:
                     new_row = True
@@ -1128,6 +1130,9 @@ class OwnRecordDialog(QDialog, Ui_OwnRecordDialog, DatabaseHelper):
                 tax.grace_period = int(self.land_tax_twidget.item(row, OWNER_GRACE_PERIOD).text())
                 tax.base_value_per_m2 = int(self.base_value_edit.text())
                 tax.base_tax_rate = float(self.base_tax_rate_edit.text())
+                tax.person = owner.person_id
+                tax.person_register = owner.person_register
+                tax.record_no = self.record.record_no
 
                 if not self.subsidized_area_edit.text():
                     tax.subsidized_area = int(self.subsidized_area_edit.text())
@@ -1246,6 +1251,7 @@ class OwnRecordDialog(QDialog, Ui_OwnRecordDialog, DatabaseHelper):
             .filter(CtApplicationStatus.status == 9).count()
         if self.active_rbutton.isChecked() and app_status9_count == 0:
             new_status = CtApplicationStatus()
+            print self.app_id
             new_status.application = self.app_id
             new_status.next_officer_in_charge = DatabaseUtils.current_sd_user().user_id
             new_status.officer_in_charge = DatabaseUtils.current_sd_user().user_id
@@ -1265,7 +1271,6 @@ class OwnRecordDialog(QDialog, Ui_OwnRecordDialog, DatabaseHelper):
                                                                                    "record without an assigned application."))
             return
         # try:
-
         self.record.status = self.__record_status()
         self.record.right_type = self.__record_right_type()
 
@@ -1277,7 +1282,6 @@ class OwnRecordDialog(QDialog, Ui_OwnRecordDialog, DatabaseHelper):
                 self.__save_cancellation_app()
             else:
                 self.__save_other_reason()
-
         self.record.record_begin = PluginUtils.convert_qt_date_to_python(self.ownership_begin_edit.date())
         self.record.record_date = PluginUtils.convert_qt_date_to_python(self.record_date_date.date())
         certificate_no = 0
