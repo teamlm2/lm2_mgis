@@ -536,10 +536,12 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
             self.rollback_to_savepoint()
             PluginUtils.show_message(self,  self.tr("Sql Error"), e.message)
             return
-        self.__create_person_view()
-        self.__create_application_view()
-        self.__create_parcel_view()
-        self.__create_tmp_parcel_view()
+
+        self.__load_role_settings()
+        # self.__create_person_view()
+        # self.__create_application_view()
+        # self.__create_parcel_view()
+        # self.__create_tmp_parcel_view()
 
     @pyqtSlot(int)
     def on_infinity_check_box_stateChanged(self, state):
