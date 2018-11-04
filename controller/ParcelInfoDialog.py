@@ -2611,6 +2611,7 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
             self.contract.contract_end = self.end_date.date().toString(Constants.DATABASE_DATE_FORMAT)
             self.contract.certificate_no = int(self.contract_cert_edit.text())
             self.contract.status = Constants.CONTRACT_STATUS_ACTIVE
+            self.contract.au2 = DatabaseUtils.working_l2_code()
 
             self.session.add(self.contract)
 
@@ -2630,6 +2631,7 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
             self.record.record_begin = self.decision_date.date().toString(Constants.DATABASE_DATE_FORMAT)
             self.record.certificate_no = int(self.record_cert_edit.text())
             self.record.status = Constants.RECORD_STATUS_ACTIVE
+            self.record.au2 = DatabaseUtils.working_l2_code()
 
             self.session.add(self.record)
 
@@ -2672,12 +2674,13 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
         self.decision.decision_no = decision_no
         self.decision.decision_level = decision_level
         self.decision.imported_by = DatabaseUtils.current_sd_user().user_id
+        self.decision.au2 = DatabaseUtils.working_l2_code()
 
-        decicion_app = CtDecisionApplication()
-        decicion_app.decision = self.decision.decision_id
-        decicion_app.decision_result = 10
-        decicion_app.application = self.application.app_id
-        self.decision.results.append(decicion_app)
+        decision_app = CtDecisionApplication()
+        decision_app.decision = self.decision.decision_id
+        decision_app.decision_result = 10
+        decision_app.application = self.application.app_id
+        self.decision.results.append(decision_app)
         self.session.add(self.decision)
         # self.session.flush()
 
