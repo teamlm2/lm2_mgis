@@ -55,6 +55,8 @@ class PluginUtils(object):
         application.created_at = datetime.strptime(date_time_string, Constants.PYTHON_DATETIME_FORMAT)
         application.updated_at = datetime.strptime(date_time_string, Constants.PYTHON_DATETIME_FORMAT)
         application.app_type = 1
+        application.au2 = DatabaseUtils.current_working_soum_schema()
+        application.au1 = DatabaseUtils.working_l1_code()
         # application.right_type = 1
 
         application.created_by = DatabaseUtils.current_sd_user().user_id
@@ -75,6 +77,7 @@ class PluginUtils(object):
 
         contract = CtContract()
         contract.contract_no = QDateTime.currentDateTime().toString("yyMMddhhmmss")
+        contract.au1 = DatabaseUtils.working_l1_code()
 
         session.add(contract)
 
@@ -90,6 +93,7 @@ class PluginUtils(object):
         user = session.query(SetRole).filter(SetRole.user_name == user_name).filter(SetRole.is_active == True).one()
         sd_user = session.query(SdUser).filter(SdUser.gis_user_real == user.user_name_real).one()
         ca_maintenance_case.created_by = sd_user.user_id
+        ca_maintenance_case.au1 = DatabaseUtils.working_l1_code()
         session.add(ca_maintenance_case)
         return ca_maintenance_case
 
@@ -104,6 +108,7 @@ class PluginUtils(object):
         else:
             record.record_no = record_no
 
+        record.au1 = DatabaseUtils.working_l1_code()
         session.add(record)
         return record
 

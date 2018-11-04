@@ -30,6 +30,8 @@ class CtTaxAndPricePayment(Base):
     fine_for_q4 = Column(Integer)
     record = Column(Integer, nullable=False)
     person = Column(Integer, nullable=False)
+    record_no = Column(String)
+    person_register = Column(String)
 
     # foreign keys:
     payment_type = Column(Integer, ForeignKey('cl_payment_type.code'))

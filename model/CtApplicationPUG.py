@@ -10,3 +10,4 @@ class CtApplicationPUG(Base):
 
     group_no = Column(Integer, ForeignKey('ct_person_group.group_no'), primary_key=True)
     application = Column(String, ForeignKey('ct_application.app_id'), primary_key=True)
+    app_no = Column(String)

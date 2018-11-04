@@ -13,6 +13,7 @@ class CtApplicationStatus(Base):
     status_date = Column(Date)
 
     application = Column(Integer, ForeignKey('ct_application.app_id'), primary_key=True)
+    app_no = Column(String)
     #application_ref = relationship("CtApplication")
 
     status = Column(Integer, ForeignKey('cl_application_status.code'), primary_key=True)

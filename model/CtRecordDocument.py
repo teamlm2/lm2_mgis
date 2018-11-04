@@ -10,8 +10,8 @@ class CtRecordDocument(Base):
     __tablename__ = 'ct_record_document'
 
     record = Column(Integer, ForeignKey('ct_ownership_record.record_id'), primary_key=True)
+    record_no = Column(String)
     document = Column(Integer, ForeignKey('ct_document.id'), primary_key=True)
-
     document_ref = relationship("CtDocument", backref="contracts", cascade="all")
 
     role = Column(Integer, ForeignKey('cl_document_role.code'))

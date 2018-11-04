@@ -1367,11 +1367,13 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
                     person_role_code = Constants.OLD_RIGHT_HOLDER_CODE
 
                 app_person_role = CtApplicationPersonRole()
-                app_person_role.application = self.current_application_no()
+                app_person_role.app_id = self.application.app_id
+                app_person_role.app_no = self.current_application_no()
                 app_person_role.share = applicant.share
                 app_person_role.role_ref = role_ref
                 app_person_role.role = Constants.APPLICANT_ROLE_CODE
                 app_person_role.person = person.person_id
+                app_person_role.person_register = person.person_register
                 app_person_role.person_ref = person
                 app_person_role.main_applicant = False
                 #self.session.flush()
@@ -2432,7 +2434,7 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
             PluginUtils.show_error(self, self.tr("Status error"),
                                 self.tr("Application status must be in order!."))
             return
-
+        new_status.app_no = self.application.app_no
         new_status.officer_in_charge_ref = self.__current_sd_user()
         new_status.officer_in_charge = self.__current_sd_user().user_id
         new_status.next_officer_in_charge = sd_next_officer.user_id

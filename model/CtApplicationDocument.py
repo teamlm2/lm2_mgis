@@ -12,6 +12,7 @@ class CtApplicationDocument(Base):
     document = Column(Integer, ForeignKey('ct_document.id'), primary_key=True)
     role = Column(Integer, ForeignKey('cl_document_role.code'))
     person = Column(Integer, ForeignKey('bs_person.person_id'))
+    app_no = Column(String)
 
     document_ref = relationship("CtDocument", backref="applications", cascade="all")
     person_ref = relationship("BsPerson", backref="application_documents")

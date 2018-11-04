@@ -27,6 +27,7 @@ from ..model.ClPersonRole import *
 from ..model.UbGisSubject import *
 from ..model.ClDocumentRole import *
 from ..model.CtDecision import *
+from ..model.CaParcelTbl import *
 from ..model.CtContractApplicationRole import *
 from ..model.CtRecordApplicationRole import *
 from ..model.AuLevel1 import *
@@ -2484,7 +2485,7 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
         if message_box.clickedButton() == yes_button:
             self.__save_person()
             self.__save_parcel()
-            self.__save_application_details()
+            # self.__save_application_details()
             self.__save_applicant()
             self.__save_status()
             self.__save_decision()
@@ -2499,7 +2500,7 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
 
             # return
 
-            self.session.commit()
+            self.commit()
 
     def __multi_owner_save(self, person_id):
 
@@ -2822,6 +2823,8 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
 
         if parcel_count == 0:
             parcel.parcel_id = parcel_id
+
+        # parcel = CaParcel()
         parcel.old_parcel_id = old_parcel_id
         parcel.geo_id = old_parcel_id
         parcel.landuse = landuse
@@ -2831,14 +2834,57 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
         valid_from = self.decision_date.date().toString(Constants.DATABASE_DATE_FORMAT)
         parcel.valid_from = valid_from
         parcel.geometry = ub_parcel.geometry
-
-        # if parcel_count == 0:
-            # self.session.execute("alter table s01125.ca_parcel_tbl disable trigger a_create_parcel_id;")
         self.session.add(parcel)
-        self.parcel_id =  parcel.parcel_id
         self.session.flush()
-        # self.session.execute("alter table s01125.ca_parcel_tbl enable trigger a_create_parcel_id;")
-        # self.session.commit()
+
+        app_time = self.decision_date.date().toString(Constants.DATABASE_DATE_FORMAT)
+        status_date = self.decision_date.date().toString(Constants.DATABASE_DATE_FORMAT)
+        app_no = self.__generate_application_number()
+        right_type = self.rigth_type_cbox.itemData(self.rigth_type_cbox.currentIndex())
+
+        app_type = self.application_type_cbox.itemData(self.application_type_cbox.currentIndex())
+
+        duration = self.duration_sbox.value()
+        landuse = self.parcel_landuse_cbox.itemData(self.parcel_landuse_cbox.currentIndex())
+
+        au_level1 = DatabaseUtils.working_l1_code()
+        au_level2 = DatabaseUtils.working_l2_code()
+        # try:
+        # check if the app_no is still valid, otherwise generate new one
+        self.application = CtApplication()
+
+        application_status = CtApplicationStatus()
+        application_status.ct_application = self.application
+        status = self.session.query(ClApplicationStatus).filter_by(code='1').one()
+        application_status.status = 1
+        application_status.status_ref = status
+        application_status.status_date = status_date
+        self.application.app_no = app_no
+        self.application.app_type = app_type
+        self.application.requested_landuse = landuse
+        self.application.approved_landuse = landuse
+        self.application.app_timestamp = app_time
+        self.application.requested_duration = duration
+        self.application.approved_duration = duration
+        self.application.right_type = right_type
+        self.application.created_by = DatabaseUtils.current_sd_user().user_id
+        self.application.created_at = app_time
+        self.application.updated_at = app_time
+        self.application.au1 = au_level1
+        self.application.au2 = au_level2
+        self.application.remarks = ''
+
+        # current_user = QSettings().value(SettingsConstants.USER)
+        # officer = self.session.query(SetRole).filter_by(user_name=current_user).filter(SetRole.is_active == True).one()
+        application_status.next_officer_in_charge = DatabaseUtils.current_sd_user().user_id
+        application_status.next_officer_in_charge_ref = DatabaseUtils.current_sd_user()
+        application_status.officer_in_charge_ref = DatabaseUtils.current_sd_user()
+        application_status.officer_in_charge = DatabaseUtils.current_sd_user().user_id
+        self.application.statuses.append(application_status)
+
+        self.application.parcel = parcel.parcel_id
+        self.session.add(self.application)
+        self.session.commit()
 
     def __save_application_details(self):
 
@@ -2849,23 +2895,11 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
 
         app_type = self.application_type_cbox.itemData(self.application_type_cbox.currentIndex())
 
-        # app_type = 1
-        # if right_type == 1:
-        #     app_type = 6
-        # elif right_type == 2:
-        #     app_type = 5
-        # elif right_type == 3:
-        #     app_type = 1
-
         duration = self.duration_sbox.value()
         landuse = self.parcel_landuse_cbox.itemData(self.parcel_landuse_cbox.currentIndex())
 
-        # parcel = self.session.query(CaParcel).filter(CaParcel.old_parcel_id == self.old_parcel_id_edit.text()).one()
-        if not self.parcel_id:
-            return
         au_level1 = DatabaseUtils.working_l1_code()
         au_level2 = DatabaseUtils.working_l2_code()
-        print self.parcel_id
         # try:
         # check if the app_no is still valid, otherwise generate new one
         self.application = CtApplication()
@@ -2901,7 +2935,7 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
 
         self.application.parcel = self.parcel_id
         self.session.add(self.application)
-        # self.session.flush()
+        self.session.commit()
 
         # except SQLAlchemyError, e:
         #     self.rollback_to_savepoint()

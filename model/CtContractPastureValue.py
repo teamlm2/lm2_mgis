@@ -16,6 +16,7 @@ class CtContractPastureValue(Base):
     parcel = Column(String, ForeignKey('ca_pasture_parcel.parcel_id'), primary_key=True)
     current_value = Column(Numeric)
     value_year = Column(Integer, primary_key=True)
+    contract_no = Column(String)
 
     # foreign keys:
     pasture_value = Column(Integer, ForeignKey('cl_pasture_values.code'), primary_key=True)

@@ -13,8 +13,9 @@ class CtContractApplicationRole(Base):
     __tablename__ = 'ct_contract_application_role'
 
     contract = Column(Integer, ForeignKey('ct_contract.contract_id'), primary_key=True)
-
     application = Column(Integer, ForeignKey('ct_application.app_id'), primary_key=True)
+    contract_no = Column(String)
+    app_no = Column(String)
     # application_ref = relationship("CtApplication")
 
     role = Column(Integer, ForeignKey('cl_application_role.code'))

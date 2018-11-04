@@ -35,3 +35,6 @@ class CtOwnershipRecord(Base):
     taxes = relationship("CtTaxAndPrice", backref='record_ref', lazy='dynamic', cascade="all, delete, delete-orphan")
     archived_taxes = relationship("CtArchivedTaxAndPrice", backref='record_ref',
                                  lazy='dynamic', cascade="all, delete, delete-orphan")
+
+    au2 = Column(String, ForeignKey('au_level2.code'))
+    au2_ref = relationship("AuLevel2")

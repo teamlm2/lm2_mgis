@@ -10,3 +10,4 @@ class CtContractCondition(Base):
 
     contract = Column(Integer, ForeignKey('ct_contract.contract_id'), primary_key=True)
     condition = Column(Integer, ForeignKey('cl_contract_condition.code'), primary_key=True)
+    contract_no = Column(String)

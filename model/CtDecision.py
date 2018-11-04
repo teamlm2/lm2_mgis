@@ -17,7 +17,8 @@ class CtDecision(Base):
     decision_id = Column(Integer, primary_key=True)
     decision_no = Column(String)
     decision_date = Column(Date)
-    au2 = Column(String)
+    au2 = Column(String, ForeignKey('au_level2.code'))
+    au2_ref = relationship("AuLevel2")
 
     # other foreign keys:
     decision_level = Column(Integer, ForeignKey('cl_decision_level.code'))

@@ -36,3 +36,6 @@ class CtContract(Base):
 
     conditions = relationship("CtContractCondition", backref="contract_ref",
                               lazy='dynamic', cascade="all, delete, delete-orphan")
+
+    au2 = Column(String, ForeignKey('au_level2.code'))
+    au2_ref = relationship("AuLevel2")

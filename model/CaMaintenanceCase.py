@@ -48,3 +48,6 @@ class CaMaintenanceCase(Base):
     # parcels = relationship("CaParcel", secondary=parcel_table, cascade="all, delete-orphan", lazy='dynamic', single_parent=True, passive_deletes=True)
     buildings = relationship("CaBuilding", secondary=building_table)
     applications = relationship("CtApplication", backref="maintenance_case_ref")
+
+    au2 = Column(String, ForeignKey('au_level2.code'))
+    au2_ref = relationship("AuLevel2")

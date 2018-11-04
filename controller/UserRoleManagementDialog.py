@@ -708,65 +708,63 @@ class UserRoleManagementDialog(QDialog, Ui_UserRoleManagementDialog):
             pa_till = datetime.date.max
             role_c = self.db_session.query(SetRole).filter(SetRole.user_name == user_name).count()
 
-
             if self.register_edit.text() == None or self.register_edit.text() == '':
                 PluginUtils.show_message(None, self.tr("None register"),
                                          self.tr("Register not null!"))
                 return
 
             if mode == 'ADD':
-                if role_c != 0:
-                    role_count = self.db_session.query(SetRole).filter(
-                        SetRole.user_register == self.register_edit.text()).count()
-                    # if role_count > 0:
-                    #     PluginUtils.show_message(None, self.tr("Duplicate user"),
-                    #                              self.tr("This user already registered!"))
-                        # return
-                is_active_user = False
                 if role_c == 0:
                     is_active_user = True
+                    user_name_real = self.username_edit.text() + '01'
+                    role = SetRole(user_name=user_name, surname=surname, first_name=first_name, phone=phone,
+                                   user_register=user_register,
+                                   mac_addresses=mac_addresses, position=position,
+                                   restriction_au_level1=restriction_au_level1, user_name_real=user_name_real,
+                                   employee_type=1, restriction_au_level2=restriction_au_level2, pa_from=pa_from,
+                                   pa_till=pa_till,
+                                   is_active=is_active_user, email=email, department=department,
+                                   organization=organization)
+                    self.db_session.add(role)
                 else:
                     active_role_count = self.db_session.query(SetRole).filter(SetRole.user_name == user_name).filter(SetRole.is_active == True).count()
-                    if active_role_count == 0:
-                        is_active_user = True
+                    if active_role_count == 1:
+                        # update
+                        role = self.db_session.query(SetRole).filter(SetRole.user_name == user_name).filter(
+                                SetRole.is_active == True).one()
+
+                        role.surname = surname
+                        role.first_name = first_name
+                        role.phone = phone
+                        role.user_register = user_register
+                        role.mac_addresses = mac_addresses
+                        role.employee_type = 1
+                        role.is_active = True
+                        role.position = position
+                        role.restriction_au_level1 = restriction_au_level1
+                        role.restriction_au_level2 = restriction_au_level2
+                        role.email = email
+                        role.organization = organization
+                        role.department = department
                     else:
+                        # update
                         is_active_user = False
-
-                try:
-                    count = self.db_session.query(SetRole) \
-                        .filter(SetRole.user_name == user_name) \
-                        .order_by(func.substr(SetRole.user_name_real, 11, 12).desc()).count()
-                except SQLAlchemyError, e:
-                    PluginUtils.show_error(self, self.tr("File Error"),
-                                           self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
-                    return
-
-                if count > 0:
-                    try:
-                        max_number_user = self.db_session.query(SetRole) \
-                            .filter(SetRole.user_name == user_name) \
-                            .order_by(func.substr(SetRole.user_name_real, 11, 12).desc()).first()
-                    except SQLAlchemyError, e:
-                        PluginUtils.show_error(self, self.tr("File Error"),
-                                               self.tr("Error in line {0}: {1}").format(currentframe().f_lineno,
-                                                                                        e.message))
-                        return
-
-                    user_numbers = max_number_user.user_name_real[-2:]
-                    new_user_number = (str(int(user_numbers[1]) + 1).zfill(2))
-
-                    last_user_name = user_name[:10] + new_user_number
-                    user_name_real = last_user_name
-                    employee_type = 2
-                else:
-                    user_name_real = self.username_edit.text()+'01'
-                    employee_type = 1
-
-                role = SetRole(user_name=user_name, surname=surname, first_name=first_name, phone=phone, user_register=user_register,
-                               mac_addresses=mac_addresses, position=position, restriction_au_level1=restriction_au_level1, user_name_real = user_name_real,
-                               employee_type = employee_type, restriction_au_level2=restriction_au_level2, pa_from=pa_from, pa_till=pa_till,
-                               is_active=is_active_user, email=email, department=department, organization=organization)
-                self.db_session.add(role)
+                        set_role = self.db_session.query(SetRole).filter(
+                            SetRole.user_name == user_name).filter(SetRole.is_active == True).first()
+                        role = role = self.db_session.query(SetRole).filter(SetRole.user_name_real == set_role.user_name_real).one()
+                        role.surname = surname
+                        role.first_name = first_name
+                        role.phone = phone
+                        role.user_register = user_register
+                        role.mac_addresses = mac_addresses
+                        role.employee_type = 1
+                        role.is_active = True
+                        role.position = position
+                        role.restriction_au_level1 = restriction_au_level1
+                        role.restriction_au_level2 = restriction_au_level2
+                        role.email = email
+                        role.organization = organization
+                        role.department = department
             else:
                 active_role_count = self.db_session.query(SetRole).filter(SetRole.user_name == user_name).filter(
                     SetRole.is_active == True).count()

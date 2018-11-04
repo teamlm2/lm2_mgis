@@ -13,7 +13,8 @@ class CtRecordApplicationRole(Base):
     __tablename__ = 'ct_record_application_role'
 
     record = Column(Integer, ForeignKey('ct_ownership_record.record_id'), primary_key=True)
-
+    record_no = Column(String)
+    app_no = Column(String)
     application = Column(Integer, ForeignKey('ct_application.app_id'), primary_key=True)
     application_ref = relationship("CtApplication")
 
