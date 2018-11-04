@@ -1107,7 +1107,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
             sql = sql + "UNION" + "\n"
 
         select = "SELECT row_number() over() as gid, m_case.id, m_case.completion_date, m_case.created_by, m_case.surveyed_by_land_office, m_case.surveyed_by_surveyor, " \
-                 "m_case.completed_by, parcel_case.parcel, building.building, application.app_no, '{0}' as soum, company.id as company, person.person_id, person.person_register, person.name, person.first_name " \
+                 "m_case.completed_by, parcel_case.parcel, building.building, application.app_no, m_case.au2 as soum, company.id as company, person.person_id, person.person_register, person.name, person.first_name " \
                  "FROM data_soums_union.ca_maintenance_case m_case " \
                  "left join data_soums_union.ca_parcel_maintenance_case parcel_case on parcel_case.maintenance = m_case.id " \
                  "left join data_soums_union.ca_building_maintenance_case building on building.maintenance = m_case.id " \
@@ -1115,20 +1115,20 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
                  "LEFT JOIN data_soums_union.ct_application_person_role app_pers on application.app_id = app_pers.application " \
                  "LEFT JOIN base.bs_person person ON app_pers.person = person.person_id " \
                  "left join settings.set_surveyor surveyor on m_case.surveyed_by_surveyor = surveyor.id " \
-                 "left join settings.set_survey_company company on surveyor.company = company.id "  \
+                 "left join settings.set_survey_company company on surveyor.company = company.id " \
                  "where  m_case.au2 = {0}".format(current_working_soum) + "\n"
 
         sql = sql + select
 
         sql = "{0} order by id;".format(sql)
 
-        try:
-            self.session.execute(sql)
-            self.commit()
+        # try:
+        self.session.execute(sql)
+        self.commit()
 
-        except SQLAlchemyError, e:
-            PluginUtils.show_message(self, self.tr("LM2", "Sql Error"), e.message)
-            return
+        # except SQLAlchemyError, e:
+        #     PluginUtils.show_message(self, self.tr("LM2", "Sql Error"), e.message)
+        #     return
 
     def __selected_parcel_id(self):
 
