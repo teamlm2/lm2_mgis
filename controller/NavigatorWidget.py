@@ -1500,91 +1500,78 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
 
         # try:
         # maintenance_search = self.session.query(MaintenanceSearch)
-        maintenance_search = self.session.query(CaMaintenanceCase.id, CaMaintenanceCase.completion_date, CaMaintenanceCase.created_by, CaMaintenanceCase.surveyed_by_land_office,
-                                                CaMaintenanceCase.surveyed_by_surveyor, CaMaintenanceCase.completed_by, CtApplication.app_no,
-                                                BsPerson.person_id, BsPerson.name, BsPerson.first_name). \
-            outerjoin(CtApplication, CaMaintenanceCase.id == CtApplication.maintenance_case). \
-            outerjoin(CtApplicationPersonRole, CtApplication.app_id == CtApplicationPersonRole.application). \
-            outerjoin(BsPerson, CtApplicationPersonRole.person == BsPerson.person_id). \
-            outerjoin(SetSurveyor, CaMaintenanceCase.surveyed_by_surveyor == SetSurveyor.id). \
-            outerjoin(SetSurveyCompany, SetSurveyor.company == SetSurveyCompany.id).group_by(CaMaintenanceCase.id, CaMaintenanceCase.completion_date, CaMaintenanceCase.created_by, CaMaintenanceCase.surveyed_by_land_office,
-                                                CaMaintenanceCase.surveyed_by_surveyor, CaMaintenanceCase.completed_by, CtApplication.app_no,
-                                                BsPerson.person_id, BsPerson.name, BsPerson.first_name)
+        maintenance_search = self.session.query(MaintenanceSearch)
+        filter_is_set = False
 
         if self.case_app_no_edit.text():
             filter_is_set = True
             app_no = "%" + self.case_app_no_edit.text() + "%"
-            maintenance_search = maintenance_search.filter(CtApplication.app_no.ilike(app_no))
+            maintenance_search = maintenance_search.filter(MaintenanceSearch.app_no.ilike(app_no))
 
         if self.case_completion_date_checkbox.isChecked():
             filter_is_set = True
             qt_date = self.case_completion_date_edit.date().toString(Constants.DATABASE_DATE_FORMAT)
             python_date = datetime.strptime(str(qt_date), Constants.PYTHON_DATE_FORMAT)
-            maintenance_search = maintenance_search.filter(CaMaintenanceCase.completion_date >= python_date)
+            maintenance_search = maintenance_search.filter(MaintenanceSearch.completion_date >= python_date)
 
         if self.case_no_edit.text():
             filter_is_set = True
             case_no = "%" + self.case_no_edit.text() + "%"
-            maintenance_search = maintenance_search.filter(cast(CaMaintenanceCase.id, String).ilike(case_no))
+            maintenance_search = maintenance_search.filter(cast(MaintenanceSearch.id, String).ilike(case_no))
 
         if self.case_parcel_no_edit.text():
-            if len(self.case_parcel_no_edit.text()) < 5:
-                self.error_label.setText(self.tr("find search character should be at least 4"))
-                return
             filter_is_set = True
             parcel = "%" + self.case_parcel_no_edit.text() + "%"
-            maintenance_search = maintenance_search.filter(CaMaintenanceCase.parcel.ilike(parcel))
+            maintenance_search = maintenance_search.filter(MaintenanceSearch.parcel.ilike(parcel))
 
         if self.surveyed_by_land_officer_cbox.itemData(self.surveyed_by_land_officer_cbox.currentIndex()) != -1:
             filter_is_set = True
             surveyed_by = self.surveyed_by_land_officer_cbox.itemData(self.surveyed_by_land_officer_cbox.currentIndex())
-            maintenance_search = maintenance_search.filter(CaMaintenanceCase.surveyed_by_land_office == surveyed_by)
+            maintenance_search = maintenance_search.filter(MaintenanceSearch.surveyed_by_land_office == surveyed_by)
 
         if self.finalized_by_cbox.itemData(self.finalized_by_cbox.currentIndex()) != -1:
             filter_is_set = True
             finalized_by = self.finalized_by_cbox.itemData(self.finalized_by_cbox.currentIndex())
-            maintenance_search = maintenance_search.filter(CaMaintenanceCase.completed_by == finalized_by)
+            maintenance_search = maintenance_search.filter(MaintenanceSearch.completed_by == finalized_by)
 
         if self.surveyed_by_company_cbox.itemData(self.surveyed_by_company_cbox.currentIndex()) != -1:
             filter_is_set = True
             surveyor = self.surveyed_by_company_cbox.itemData(self.surveyed_by_company_cbox.currentIndex())
 
-            maintenance_search = maintenance_search.filter(CaMaintenanceCase.surveyed_by_surveyor == surveyor)
+            maintenance_search = maintenance_search.filter(MaintenanceSearch.surveyed_by_surveyor == surveyor)
 
         if self.case_status_cbox.itemData(self.case_status_cbox.currentIndex()) != -1:
             filter_is_set = True
             status = self.case_status_cbox.itemData(self.case_status_cbox.currentIndex())
             if status == Constants.CASE_STATUS_IN_PROGRESS:
-                maintenance_search = maintenance_search.filter(CaMaintenanceCase.completion_date == None)
+                maintenance_search = maintenance_search.filter(MaintenanceSearch.completion_date == None)
             else:
-                maintenance_search = maintenance_search.filter(CaMaintenanceCase.completion_date != None)
+                maintenance_search = maintenance_search.filter(MaintenanceSearch.completion_date != None)
         if self.case_right_holder_name_edit.text():
-            if len(self.case_right_holder_name_edit.text()) < 2:
-                self.error_label.setText(self.tr("find search character should be at least 2"))
-                return
             filter_is_set = True
             right_holder = self.case_right_holder_name_edit.text()
             if "," in right_holder:
                 right_holder_strings = right_holder.split(",")
                 surname = "%" + right_holder_strings[0].strip() + "%"
                 first_name = "%" + right_holder_strings[1].strip() + "%"
-                maintenance_search = maintenance_search.filter(and_(func.lower(BsPerson.name).ilike(func.lower(surname)), func.lower(BsPerson.first_name).ilike(func.lower(first_name))))
+                maintenance_search = maintenance_search.filter(
+                    and_(func.lower(MaintenanceSearch.name).ilike(func.lower(surname)),
+                         func.lower(MaintenanceSearch.first_name).ilike(func.lower(first_name))))
             else:
                 right_holder = "%" + self.application_right_holder_name_edit.text() + "%"
-                maintenance_search = maintenance_search.filter(or_(func.lower(BsPerson.name).ilike(func.lower(right_holder)), func.lower(BsPerson.first_name).ilike(func.lower(right_holder))))
+                maintenance_search = maintenance_search.filter(
+                    or_(func.lower(MaintenanceSearch.name).ilike(func.lower(right_holder)),
+                        func.lower(MaintenanceSearch.first_name).ilike(func.lower(right_holder))))
         if self.personal_case_edit.text():
-            if len(self.personal_case_edit.text()) < 5:
-                self.error_label.setText(self.tr("find search character should be at least 4"))
-                return
             filter_is_set = True
             person_id = "%" + self.personal_case_edit.text() + "%"
-            maintenance_search = maintenance_search.filter(BsPerson.person_register.ilike(person_id))
+            maintenance_search = maintenance_search.filter(MaintenanceSearch.person_id.ilike(person_id))
 
         count = 0
 
         self.__remove_maintenance_case_items()
 
-        if maintenance_search.count() == 0:
+        if maintenance_search.distinct(MaintenanceSearch.id).count() == 0:
             self.error_label.setText(self.tr("No maintenance cases found for this search filter."))
             return
 
@@ -1592,11 +1579,11 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
             self.error_label.setText(self.tr("Please specify a search filter."))
             return
 
-        for case in maintenance_search.distinct(CaMaintenanceCase.id).all():
-            item = QTableWidgetItem(str(case.id) + self.tr(" (Soum: {0})".format(current_working_soum)))
+        for case in maintenance_search.distinct(MaintenanceSearch.id).all():
+            item = QTableWidgetItem(str(case.id) + self.tr(" (Soum: {0})".format(case.soum)))
             item.setIcon(QIcon(QPixmap(":/plugins/lm2/case.png")))
             item.setData(Qt.UserRole, case.id)
-            item.setData(Qt.UserRole + 1, str(current_working_soum))
+            item.setData(Qt.UserRole + 1, str(case.soum))
             self.case_results_twidget.insertRow(count)
             self.case_results_twidget.setItem(count, 0, item)
             count += 1

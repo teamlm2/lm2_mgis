@@ -1309,7 +1309,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
     def __condition_assigned(self, code):
 
         contract = self.session.query(CtContract).get(self.contract.contract_id)
-        count = contract.conditions.filter(CtContractCondition.condition == code).count()
+        count = contract.conditions.filter(CtContractCondition.contract == code).count()
         if count > 0:
             return True
         return False
