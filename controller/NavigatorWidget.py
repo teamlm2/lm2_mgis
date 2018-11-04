@@ -1116,7 +1116,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
                  "LEFT JOIN base.bs_person person ON app_pers.person = person.person_id " \
                  "left join settings.set_surveyor surveyor on m_case.surveyed_by_surveyor = surveyor.id " \
                  "left join settings.set_survey_company company on surveyor.company = company.id "  \
-                 "where  m_case.code = {0}".format(current_working_soum) + "\n"
+                 "where  m_case.au2 = {0}".format(current_working_soum) + "\n"
 
         sql = sql + select
 
