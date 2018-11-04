@@ -538,10 +538,15 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
             return
 
         self.__load_role_settings()
+
         # self.__create_person_view()
         # self.__create_application_view()
         # self.__create_parcel_view()
         # self.__create_tmp_parcel_view()
+        # self.__create_contract_view()
+        # self.__create_decision_view()
+        # self.__create_record_view()
+        # self.__create_maintenance_case_view()
 
     @pyqtSlot(int)
     def on_infinity_check_box_stateChanged(self, state):
@@ -917,7 +922,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         sql = ""
 
         if not sql:
-            sql = "Create temp view decision_search as" + "\n"
+            sql = "Create or replace temp view decision_search as" + "\n"
         else:
             sql = sql + "UNION" + "\n"
 
@@ -953,7 +958,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         sql = ""
 
         if not sql:
-            sql = "Create temp view contract_search as" + "\n"
+            sql = "Create or replace temp view contract_search as" + "\n"
         else:
             sql = sql + "UNION" + "\n"
 
@@ -989,7 +994,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         sql = ""
 
         if not sql:
-            sql = "Create temp view record_search as" + "\n"
+            sql = "Create or replace temp view record_search as" + "\n"
         else:
             sql = sql + "UNION" + "\n"
 
@@ -1110,7 +1115,8 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
                  "LEFT JOIN data_soums_union.ct_application_person_role app_pers on application.app_id = app_pers.application " \
                  "LEFT JOIN base.bs_person person ON app_pers.person = person.person_id " \
                  "left join settings.set_surveyor surveyor on m_case.surveyed_by_surveyor = surveyor.id " \
-                 "left join settings.set_survey_company company on surveyor.company = company.id " + "\n"
+                 "left join settings.set_survey_company company on surveyor.company = company.id "  \
+                 "where  m_case.code = {0}".format(current_working_soum) + "\n"
 
         sql = sql + select
 
