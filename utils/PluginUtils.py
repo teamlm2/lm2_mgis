@@ -77,7 +77,7 @@ class PluginUtils(object):
 
         contract = CtContract()
         contract.contract_no = QDateTime.currentDateTime().toString("yyMMddhhmmss")
-        contract.au1 = DatabaseUtils.working_l1_code()
+        contract.au2 = DatabaseUtils.working_l2_code()
 
         session.add(contract)
 
@@ -93,7 +93,7 @@ class PluginUtils(object):
         user = session.query(SetRole).filter(SetRole.user_name == user_name).filter(SetRole.is_active == True).one()
         sd_user = session.query(SdUser).filter(SdUser.gis_user_real == user.user_name_real).one()
         ca_maintenance_case.created_by = sd_user.user_id
-        ca_maintenance_case.au1 = DatabaseUtils.working_l1_code()
+        ca_maintenance_case.au2 = DatabaseUtils.working_l2_code()
         session.add(ca_maintenance_case)
         return ca_maintenance_case
 
@@ -108,7 +108,7 @@ class PluginUtils(object):
         else:
             record.record_no = record_no
 
-        record.au1 = DatabaseUtils.working_l1_code()
+        record.au2 = DatabaseUtils.working_l2_code()
         session.add(record)
         return record
 
