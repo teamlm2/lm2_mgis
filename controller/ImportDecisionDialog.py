@@ -1148,7 +1148,7 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
             .join(BsPerson, CtApplicationPersonRole.person == BsPerson.person_id)\
             .filter(or_(CtApplication.parcel != None, CtApplication.tmp_parcel != None))\
             .filter(or_(CtApplication.app_type == 15, CtApplication.app_type == 2))\
-            .filter(BsPerson.person_id.ilike(value)).all()
+            .filter(BsPerson.person_register.ilike(value)).all()
 
         for app in application:
             self.app_no = app.app_no
