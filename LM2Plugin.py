@@ -1,5 +1,6 @@
-import os.path
 # -*- encoding: utf-8 -*-
+import os.path
+
 from trace import Trace
 from controller.ConnectionToMainDatabaseDialog import *
 from controller.OfficialDocumentsDialog import OfficialDocumentsDialog
@@ -162,12 +163,12 @@ class LM2Plugin:
         self.lm_toolbar.addAction(self.print_cadastre_map_action)
         self.lm_toolbar.addAction(self.print_point_map_action)
         database = QSettings().value(SettingsConstants.DATABASE_NAME)
-        # if database:
-        #     au1 = database.split('_')[1][:2]
-        #     if au1:
-        #         if au1 == '11' or au1 == '61':
-        self.parcel_map_action.triggered.connect(self.__show_parcel_navigator_widget)
-        self.lm_toolbar.addAction(self.parcel_map_action)
+        if database:
+            au1 = database.split('_')[1][:2]
+            if au1:
+                if au1 == '11' or au1 == '61':
+                    self.parcel_map_action.triggered.connect(self.__show_parcel_navigator_widget)
+                    self.lm_toolbar.addAction(self.parcel_map_action)
         self.lm_toolbar.addSeparator()
         self.lm_toolbar.addAction(self.navigator_action)
         self.lm_toolbar.addSeparator()
@@ -320,6 +321,7 @@ class LM2Plugin:
                 self.__disable_menu()
             SessionHandler().destroy_session()
             self.is_expired = dlg.get_expired()
+            print '1'
             self.__update_database_connection(dlg.get_password(), self.is_expired)
 
     def __show_reports_dialog(self):
@@ -797,6 +799,7 @@ class LM2Plugin:
                             and not is_expired:
                         self.__create_db_session(uri.password())
                         self.__set_menu_visibility()
+                        print '2'
                         self.__refresh_layer()
                         break
 
@@ -901,23 +904,23 @@ class LM2Plugin:
                     vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))) +"/template\style/set_tax_and_price_zone.qml")
                     vlayer.setLayerName(QApplication.translate("Plugin", "Tax Zone"))
                     mygroup.addLayer(vlayer)
-            if layer.name() != u'УТХГазар' or layer.name() != 'Admin Unit MPA':
-                au_mpa_layer = LayerUtils.layer_by_data_source("admin_units", "au_mpa")
-                if au_mpa_layer is None:
-                    mygroup = root.findGroup(u"Тусгай хамгаалалттай газар")
-                    vlayer = LayerUtils.load_layer_by_name_admin_units("au_mpa", "id", "admin_units")
-                    vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))) +"/template\style/au_mpa.qml")
-                    vlayer.setLayerName(QApplication.translate("Plugin", "Admin Unit MPA"))
-                    mygroup.addLayer(vlayer)
-
-            if layer.name() != u'УТХГазрын бүс' or layer.name() != 'Admin Unit MPA Zone':
-                au_mpa_zone_layer = LayerUtils.layer_by_data_source("admin_units", "au_mpa_zone")
-                if au_mpa_zone_layer is None:
-                    mygroup = root.findGroup(u"Тусгай хамгаалалттай газар")
-                    vlayer = LayerUtils.load_layer_by_name_admin_units("au_mpa_zone", "id", "admin_units")
-                    vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))) +"/template\style/au_mpa_zone.qml")
-                    vlayer.setLayerName(QApplication.translate("Plugin", "Admin Unit MPA Zone"))
-                    mygroup.addLayer(vlayer)
+            # if layer.name() != u'УТХГазар' or layer.name() != 'Admin Unit MPA':
+            #     au_mpa_layer = LayerUtils.layer_by_data_source("admin_units", "au_mpa")
+            #     if au_mpa_layer is None:
+            #         mygroup = root.findGroup(u"Тусгай хамгаалалттай газар")
+            #         vlayer = LayerUtils.load_layer_by_name_admin_units("au_mpa", "id", "admin_units")
+            #         vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))) +"/template\style/au_mpa.qml")
+            #         vlayer.setLayerName(QApplication.translate("Plugin", "Admin Unit MPA"))
+            #         mygroup.addLayer(vlayer)
+            #
+            # if layer.name() != u'УТХГазрын бүс' or layer.name() != 'Admin Unit MPA Zone':
+            #     au_mpa_zone_layer = LayerUtils.layer_by_data_source("admin_units", "au_mpa_zone")
+            #     if au_mpa_zone_layer is None:
+            #         mygroup = root.findGroup(u"Тусгай хамгаалалттай газар")
+            #         vlayer = LayerUtils.load_layer_by_name_admin_units("au_mpa_zone", "id", "admin_units")
+            #         vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))) +"/template\style/au_mpa_zone.qml")
+            #         vlayer.setLayerName(QApplication.translate("Plugin", "Admin Unit MPA Zone"))
+            #         mygroup.addLayer(vlayer)
 
         mygroup = root.findGroup(u"Мэдээний хяналт")
         if mygroup is not None:
@@ -992,11 +995,11 @@ class LM2Plugin:
         self.__create_navigator()
         # self.__create_pasture()
         database = QSettings().value(SettingsConstants.DATABASE_NAME)
-        # if database:
-        #     au1 = database.split('_')[1][:2]
-        #     if au1:
-        #         if au1 == '11' or au1 == '61':
-        self.__create_parcel_info()
+        if database:
+            au1 = database.split('_')[1][:2]
+            if au1:
+                if au1 == '11' or au1 == '61':
+                    self.__create_parcel_info()
 
         if UserRight.cadastre_view in user_rights or UserRight.cadastre_update in user_rights:
             self.create_case_action.setEnabled(True)
