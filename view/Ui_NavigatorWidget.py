@@ -51,7 +51,7 @@ class Ui_NavigatorWidget(object):
         self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 419, 664))
         self.scrollAreaWidgetContents.setObjectName(_fromUtf8("scrollAreaWidgetContents"))
         self.tabWidget = QtGui.QTabWidget(self.scrollAreaWidgetContents)
-        self.tabWidget.setGeometry(QtCore.QRect(10, 60, 386, 519))
+        self.tabWidget.setGeometry(QtCore.QRect(10, 60, 386, 551))
         self.tabWidget.setMaximumSize(QtCore.QSize(16777215, 600))
         self.tabWidget.setUsesScrollButtons(True)
         self.tabWidget.setObjectName(_fromUtf8("tabWidget"))
@@ -1157,7 +1157,7 @@ class Ui_NavigatorWidget(object):
         NavigatorWidget.setWidget(self.dockWidgetContents)
 
         self.retranslateUi(NavigatorWidget)
-        self.tabWidget.setCurrentIndex(0)
+        self.tabWidget.setCurrentIndex(10)
         QtCore.QMetaObject.connectSlotsByName(NavigatorWidget)
         NavigatorWidget.setTabOrder(self.working_l1_cbox, self.working_l2_cbox)
         NavigatorWidget.setTabOrder(self.working_l2_cbox, self.tabWidget)

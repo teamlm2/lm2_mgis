@@ -162,13 +162,14 @@ class LM2Plugin:
         self.lm_toolbar.addAction(self.import_decision_action)
         self.lm_toolbar.addAction(self.print_cadastre_map_action)
         self.lm_toolbar.addAction(self.print_point_map_action)
-        # database = QSettings().value(SettingsConstants.DATABASE_NAME)
+        database = QSettings().value(SettingsConstants.DATABASE_NAME)
         # if database:
         #     au1 = DatabaseUtils.working_l1_code()
         #     if au1:
         #         if au1 == '11' or au1 == '61':
         self.parcel_map_action.triggered.connect(self.__show_parcel_navigator_widget)
         self.lm_toolbar.addAction(self.parcel_map_action)
+
         self.lm_toolbar.addSeparator()
         self.lm_toolbar.addAction(self.navigator_action)
         self.lm_toolbar.addSeparator()
@@ -1004,7 +1005,7 @@ class LM2Plugin:
         self.parcel_map_action.setEnabled(True)
         self.about_action.setEnabled(True)
         self.__create_navigator()
-        self.__create_pasture()
+        # self.__create_pasture()
         # database = QSettings().value(SettingsConstants.DATABASE_NAME)
         # if database:
         #     au1 = DatabaseUtils.working_l1_code()

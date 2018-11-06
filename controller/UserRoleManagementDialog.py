@@ -283,6 +283,49 @@ class UserRoleManagementDialog(QDialog, Ui_UserRoleManagementDialog):
         except (DatabaseError, SQLAlchemyError), e:
             PluginUtils.show_error(self,  self.tr("Database Error"), e.message)
 
+    @pyqtSlot(str)
+    def on_find_update_user_edit_textChanged(self, text):
+
+        value = "%" + text + "%"
+        self.user_role_lwidget.clear()
+        if self.has_privilege:
+            users = self.db_session.query(SetRole.user_name).\
+                filter(SetRole.user_name.ilike(value)).\
+                order_by(SetRole.user_name).group_by(SetRole.user_name)
+        else:
+            users = self.db_session.query(SetRole.user_name).filter(SetRole.user_name == self.__username).group_by(
+                SetRole.user_name).all()
+
+        try:
+            for user in users:
+                item = QListWidgetItem(QIcon(":/plugins/lm2/person.png"), user.user_name)
+                # if user.user_name == self.__logged_on_user():
+                item.setForeground(Qt.blue)
+                # if self.__is_db_role(user.user_name):
+                self.user_role_lwidget.addItem(item)
+
+        except (DatabaseError, SQLAlchemyError), e:
+            PluginUtils.show_error(self, self.tr("Database Error"), e.message)
+
+    @pyqtSlot(str)
+    def on_find_user_edit_textChanged(self, text):
+
+        value = "%" + text + "%"
+        self.user_twidget.setRowCount(0)
+
+        user_start = "user" + "%"
+        users = self.db_session.query(SetRole).\
+            filter(SetRole.user_name.ilike(value)).\
+            filter(SetRole.user_name.like(user_start)).all()
+
+        for user in users:
+            row = self.user_twidget.rowCount()
+            self.user_twidget.insertRow(row)
+            full_name = '(' + user.user_name_real + ') ' + user.surname[:1] + '.' + user.first_name
+            item = QTableWidgetItem(u'{0}'.format(full_name))
+            item.setData(Qt.UserRole, user.user_name_real)
+            self.user_twidget.setItem(row, 0, item)
+
     def __is_db_role(self, user_name):
 
         try:
