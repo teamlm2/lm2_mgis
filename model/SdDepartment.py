@@ -19,6 +19,10 @@ class SdDepartment(Base):
     phone = Column(String)
     website = Column(String)
     report_email = Column(String)
+    bank_name = Column(String)
+    account_no = Column(String)
+    head_surname = Column(String)
+    head_firstname = Column(String)
 
     organization = Column(String, ForeignKey('sd_organization.id'))
     organization_ref = relationship("SdOrganization")

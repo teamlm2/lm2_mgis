@@ -1146,13 +1146,14 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
         application = self.session.query(CtApplication)\
             .join(CtApplicationPersonRole, CtApplication.app_id == CtApplicationPersonRole.application)\
             .join(BsPerson, CtApplicationPersonRole.person == BsPerson.person_id)\
+            .filter(CtApplication.au2 == DatabaseUtils.working_l2_code()) \
             .filter(or_(CtApplication.parcel != None, CtApplication.tmp_parcel != None))\
             .filter(or_(CtApplication.app_type == 15, CtApplication.app_type == 2))\
             .filter(BsPerson.person_register.ilike(value)).all()
 
         for app in application:
             self.app_no = app.app_no
-            self.application_cbox.addItem(self.app_no, self.app_id)
+            self.application_cbox.addItem(self.app_no, app.app_id)
 
     def __validate_entity_id(self, text):
 

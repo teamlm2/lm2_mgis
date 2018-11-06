@@ -132,6 +132,15 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         self.__user_right_permissions()
         self.__setup_validators()
 
+        self.officer = None
+        app_status = self.session.query(CtApplicationStatus).filter(
+            CtApplicationStatus.application == self.app_id).all()
+        for p in app_status:
+            if p.status == 9:
+                self.officer = DatabaseUtils.get_sd_employee(p.officer_in_charge);
+            else:
+                self.officer = DatabaseUtils.get_sd_employee(p.officer_in_charge);
+
     def __user_right_permissions(self):
 
         user_name = QSettings().value(SettingsConstants.USER)
@@ -734,7 +743,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         item.setData(Qt.UserRole, person.person_id)
         self.__lock_item(item)
         self.archive_land_fee_twidget.setItem(row, CONTRACTOR_NAME, item)
-        item = QTableWidgetItem(u'{0}'.format(person.person_id))
+        item = QTableWidgetItem(u'{0}'.format(person.person_register))
         self.__lock_item(item)
         self.archive_land_fee_twidget.setItem(row, CONTRACTOR_ID, item)
         item = QTableWidgetItem('{0}'.format(fee.share))
@@ -2058,9 +2067,11 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             'quarterly2_fee': quarterly2_fee,
             'quarterly3_fee': quarterly3_fee,
             'quarterly4_fee': quarterly4_fee,
-            # 'bank_name': bank_name,
-            # 'account_no': account_no,
-            # 'office_address': office_address,
+            'bank_name': self.officer.department_ref.bank_name,
+            'account_no': self.officer.department_ref.account_no,
+            'office_address': self.officer.department_ref.address,
+            'office_name': self.officer.department_ref.name,
+            'office_phone': self.officer.department_ref.phone,
             'aimag': aimag_name,
             'soum': soum_name,
             'bag': bag_name,
@@ -2073,8 +2084,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             'person_account': person_account,
             'person_phone': person_phone,
             'person_email': person_email,
-            'person_id': person.person_id,
-            # 'office_phone': office_phone,
+            'person_id': person.person_register,
             'parcel_id': parcel_id,
             'duration_year': duration_year,
             'darga_position': darga_position,
@@ -2107,100 +2117,100 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         for p in app_person:
             if p.main_applicant == True:
                 person = self.session.query(BsPerson).filter(BsPerson.person_id == p.person).one()
-
-        if not self.pdf_checkbox.isChecked():
-            self.__contract_possess()
-        else:
-            contract_no = self.contract_num_edit.text()
-            contract_count = self.session.query(CtContract).filter(CtContract.contract_id == self.contract.contract_id).count()
-            if contract_count == 0:
-                PluginUtils.show_error(self, self.tr("contract error"), self.tr("not save"))
-                return
-
-
-            ok = 0
-            try:
-                app_status = self.session.query(CtApplicationStatus).filter(CtApplicationStatus.application == self.app_id).all()
-                for p in app_status:
-                    if p.status == 9:
-                        ok = 1
-                        officer = self.session.query(SetRole).filter(SetRole.user_name_real == p.officer_in_charge).one()
-            except SQLAlchemyError, e:
-                raise LM2Exception(self.tr("Database Query Error"), self.tr("aCould not execute: {0}").format(e.message))
-            if ok == 0:
-                PluginUtils.show_error(self, self.tr("contract error"), self.tr("Application status must be 9 !!!"))
-                return
-            header = "no text"
-
-            path = FileUtils.map_file_path()
-            if person.type == 10 or person.type == 20 or person.type == 30 or person.type == 40:
-                template = path + "contract_possess.qpt"
-            else:
-                template = path + "contract_use.qpt"
-
-            templateDOM = QDomDocument()
-            templateDOM.setContent(QFile(template), False)
-
-            map_canvas = QgsMapCanvas()
-
-            map_composition = QgsComposition(map_canvas.mapRenderer())
-            map_composition.loadFromTemplate(templateDOM)
-
-            map_composition.setPrintResolution(300)
-
-            default_path = r'D:/TM_LM2/contracts'
-            default_parent_path = r'D:/TM_LM2'
-            if not os.path.exists(default_parent_path):
-                os.makedirs('D:/TM_LM2')
-                os.makedirs('D:/TM_LM2/application_response')
-                os.makedirs('D:/TM_LM2/application_list')
-                os.makedirs('D:/TM_LM2/approved_decision')
-                os.makedirs('D:/TM_LM2/cad_maintenance')
-                os.makedirs('D:/TM_LM2/cad_maps')
-                os.makedirs('D:/TM_LM2/contracts')
-                os.makedirs('D:/TM_LM2/decision_draft')
-                os.makedirs('D:/TM_LM2/dumps')
-                os.makedirs('D:/TM_LM2/q_data')
-                os.makedirs('D:/TM_LM2/refused_decision')
-                os.makedirs('D:/TM_LM2/reports')
-                os.makedirs('D:/TM_LM2/training')
-            if not os.path.exists(default_path):
-                os.makedirs(default_path)
-            printer = QPrinter()
-            printer.setOutputFormat(QPrinter.PdfFormat)
-            printer.setOutputFileName(path+"contract_poss.pdf")
-            printer.setPaperSize(QSizeF(map_composition.paperWidth(), map_composition.paperHeight()), QPrinter.Millimeter)
-            printer.setFullPage(True)
-            printer.setColorMode(QPrinter.Color)
-            printer.setResolution(map_composition.printResolution())
-
-            pdfPainter = QPainter(printer)
-            paperRectMM = printer.pageRect(QPrinter.Millimeter)
-            paperRectPixel = printer.pageRect(QPrinter.DevicePixel)
-            map_composition.render(pdfPainter, paperRectPixel, paperRectMM)
-            pdfPainter.end()
-
-            contract_no = self.contract_num_edit.text()
-            fee_count = self.session.query(CtFee).filter(CtFee.contract == self.contract.contract_id).count()
-            if fee_count == 0:
-                PluginUtils.show_message(self,self.tr("Not sava contract"),self.tr("First click save button and then print contract"))
-                return
-            self.__add_aimag_name(map_composition)
-            self.__add_soum_name(map_composition)
-            self.__add_contract_no(map_composition)
-            self.__add_decision(map_composition)
-            self.__add_parcel(map_composition)
-            self.__add_fee(map_composition)
-            self.__add_contract_condition(map_composition)
-            self.__add_person_signature(map_composition)
-            # self.__add_app_status_date(map_composition)
-            self.__add_person_name(map_composition)
-            # self.__add_duration(map_composition)
-            self.__add_officer(map_composition)
-            self.__officer_info(map_composition)
-            map_composition.exportAsPDF(path + "contract_poss.pdf")
-            map_composition.exportAsPDF(default_path + "/"+contract_no[:-6]+'-'+contract_no[-5:]+".pdf")
-            QDesktopServices.openUrl(QUrl.fromLocalFile(default_path + "/"+contract_no[:-6]+'-'+contract_no[-5:]+".pdf"))
+        self.__contract_possess()
+        # if not self.pdf_checkbox.isChecked():
+        #     self.__contract_possess()
+        # else:
+        #     contract_no = self.contract_num_edit.text()
+        #     contract_count = self.session.query(CtContract).filter(CtContract.contract_id == self.contract.contract_id).count()
+        #     if contract_count == 0:
+        #         PluginUtils.show_error(self, self.tr("contract error"), self.tr("not save"))
+        #         return
+        #
+        #
+        #     ok = 0
+        #     try:
+        #         app_status = self.session.query(CtApplicationStatus).filter(CtApplicationStatus.application == self.app_id).all()
+        #         for p in app_status:
+        #             if p.status == 9:
+        #                 ok = 1
+        #                 officer = self.session.query(SetRole).filter(SetRole.user_name_real == p.officer_in_charge).one()
+        #     except SQLAlchemyError, e:
+        #         raise LM2Exception(self.tr("Database Query Error"), self.tr("aCould not execute: {0}").format(e.message))
+        #     if ok == 0:
+        #         PluginUtils.show_error(self, self.tr("contract error"), self.tr("Application status must be 9 !!!"))
+        #         return
+        #     header = "no text"
+        #
+        #     path = FileUtils.map_file_path()
+        #     if person.type == 10 or person.type == 20 or person.type == 30 or person.type == 40:
+        #         template = path + "contract_possess.qpt"
+        #     else:
+        #         template = path + "contract_use.qpt"
+        #
+        #     templateDOM = QDomDocument()
+        #     templateDOM.setContent(QFile(template), False)
+        #
+        #     map_canvas = QgsMapCanvas()
+        #
+        #     map_composition = QgsComposition(map_canvas.mapRenderer())
+        #     map_composition.loadFromTemplate(templateDOM)
+        #
+        #     map_composition.setPrintResolution(300)
+        #
+        #     default_path = r'D:/TM_LM2/contracts'
+        #     default_parent_path = r'D:/TM_LM2'
+        #     if not os.path.exists(default_parent_path):
+        #         os.makedirs('D:/TM_LM2')
+        #         os.makedirs('D:/TM_LM2/application_response')
+        #         os.makedirs('D:/TM_LM2/application_list')
+        #         os.makedirs('D:/TM_LM2/approved_decision')
+        #         os.makedirs('D:/TM_LM2/cad_maintenance')
+        #         os.makedirs('D:/TM_LM2/cad_maps')
+        #         os.makedirs('D:/TM_LM2/contracts')
+        #         os.makedirs('D:/TM_LM2/decision_draft')
+        #         os.makedirs('D:/TM_LM2/dumps')
+        #         os.makedirs('D:/TM_LM2/q_data')
+        #         os.makedirs('D:/TM_LM2/refused_decision')
+        #         os.makedirs('D:/TM_LM2/reports')
+        #         os.makedirs('D:/TM_LM2/training')
+        #     if not os.path.exists(default_path):
+        #         os.makedirs(default_path)
+        #     printer = QPrinter()
+        #     printer.setOutputFormat(QPrinter.PdfFormat)
+        #     printer.setOutputFileName(path+"contract_poss.pdf")
+        #     printer.setPaperSize(QSizeF(map_composition.paperWidth(), map_composition.paperHeight()), QPrinter.Millimeter)
+        #     printer.setFullPage(True)
+        #     printer.setColorMode(QPrinter.Color)
+        #     printer.setResolution(map_composition.printResolution())
+        #
+        #     pdfPainter = QPainter(printer)
+        #     paperRectMM = printer.pageRect(QPrinter.Millimeter)
+        #     paperRectPixel = printer.pageRect(QPrinter.DevicePixel)
+        #     map_composition.render(pdfPainter, paperRectPixel, paperRectMM)
+        #     pdfPainter.end()
+        #
+        #     contract_no = self.contract_num_edit.text()
+        #     fee_count = self.session.query(CtFee).filter(CtFee.contract == self.contract.contract_id).count()
+        #     if fee_count == 0:
+        #         PluginUtils.show_message(self,self.tr("Not sava contract"),self.tr("First click save button and then print contract"))
+        #         return
+        #     self.__add_aimag_name(map_composition)
+        #     self.__add_soum_name(map_composition)
+        #     self.__add_contract_no(map_composition)
+        #     self.__add_decision(map_composition)
+        #     self.__add_parcel(map_composition)
+        #     self.__add_fee(map_composition)
+        #     self.__add_contract_condition(map_composition)
+        #     self.__add_person_signature(map_composition)
+        #     # self.__add_app_status_date(map_composition)
+        #     self.__add_person_name(map_composition)
+        #     # self.__add_duration(map_composition)
+        #     self.__add_officer(map_composition)
+        #     self.__officer_info(map_composition)
+        #     map_composition.exportAsPDF(path + "contract_poss.pdf")
+        #     map_composition.exportAsPDF(default_path + "/"+contract_no[:-6]+'-'+contract_no[-5:]+".pdf")
+        #     QDesktopServices.openUrl(QUrl.fromLocalFile(default_path + "/"+contract_no[:-6]+'-'+contract_no[-5:]+".pdf"))
 
     # def __admin_settings(self, table_name):
     #
@@ -2503,7 +2513,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         day = print_date.day()
 
         contract_date = str(year)[-3:] + "           " + str(month) +"              " + str(day)
-        decision_value = [decision.decision_no, decision_date, app_duration, contract_date]
+        decision_value = [decision.decision_no, decision_date, app_duration, contract_date, decision.decision_level_ref.description]
         return decision_value
 
     def __add_decision(self,map_composition):
@@ -2546,10 +2556,10 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                 if person.contact_first_name != None:
                     contact_first_name = person.contact_first_name
                 if person.type == 10 or person.type == 20 or person.type == 50:
-                    name = "___________________"+person.name[:1]+"."+person.first_name + " /"+ person.person_id +"/"
+                    name = "___________________"+person.name[:1]+"."+person.first_name + " /"+ person.person_register +"/"
                     person_signature = self.__copy_label(person_signature,name,map_composition)
                 elif person.type == 30 or person.type == 40 or person.type == 60:
-                    name = "___________________"+ contact_surname[:1]+"."+ contact_first_name + " /"+ person.person_id +"/"
+                    name = "___________________"+ contact_surname[:1]+"."+ contact_first_name + " /"+ person.person_register +"/"
                     person_signature = self.__copy_label(person_signature,name,map_composition)
 
         except SQLAlchemyError, e:
@@ -2609,13 +2619,13 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             item.adjustSizeToText()
 
             item = map_composition.getComposerItemById("person_id")
-            item.setText(person.person_id)
+            item.setText(person.person_register)
             item.adjustSizeToText()
         elif person.type == 30 or person.type == 40:
             state_reg = " "
             if person.state_registration_no != None:
                 state_reg = person.state_registration_no
-            person_id = state_reg +", "+person.person_id
+            person_id = state_reg +", "+person.person_register
             item = map_composition.getComposerItemById("person_id")
             if item:
                 item.setText(person_id)
@@ -2630,7 +2640,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             state_reg = " "
             if person.state_registration_no != None:
                 state_reg = person.state_registration_no
-            person_id = state_reg +", "+person.person_id
+            person_id = state_reg +", "+person.person_register
             item = map_composition.getComposerItemById("person_id")
             item.setText(person_id)
             item.adjustSizeToText()
@@ -2643,7 +2653,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             state_reg = " "
             if person.state_registration_no != None:
                 state_reg = person.state_registration_no
-            person_id = state_reg +", "+person.person_id
+            person_id = state_reg +", "+person.person_register
             item = map_composition.getComposerItemById("company_id")
             item.setText(person_id)
             item.adjustSizeToText()
@@ -2736,19 +2746,19 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             state_reg = " "
             if person.state_registration_no != None:
                 state_reg = person.state_registration_no
-            person_id = state_reg +", "+person.person_id
+            person_id = state_reg +", "+person.person_register
             company_name = person.name
         elif person.type == 50:
             state_reg = " "
             if person.state_registration_no != None:
                 state_reg = person.state_registration_no
-            person_id = state_reg +", "+person.person_id
+            person_id = state_reg +", "+person.person_register
             company_name = person.name +", "+ person.first_name
         elif person.type == 60:
             state_reg = " "
             if person.state_registration_no != None:
                 state_reg = person.state_registration_no
-                company_id = state_reg +", "+person.person_id
+                company_id = state_reg +", "+person.person_register
             company_name = person.name
 
         local_name = ""
@@ -2780,7 +2790,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                 local_name  = person.address_town_or_local_name
             person_address = aimag_name +", "+ soum_name +", " +bag_name+", "+local_name
 
-        value = [person.person_id, family_name, surname, first_name, company_name, company_id, person_address]
+        value = [person.person_register, family_name, surname, first_name, company_name, company_id, person_address, person.country_ref.description]
         return value
 
     def __add_person_name(self,map_composition):
@@ -2838,7 +2848,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         item.adjustSizeToText()
 
         item = map_composition.getComposerItemById("person_id")
-        item.setText(person.person_id)
+        item.setText(person.person_register)
         item.adjustSizeToText()
 
         item = map_composition.getComposerItemById("person_account_no")
@@ -3563,59 +3573,60 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             PluginUtils.show_error(self, self.tr("contract error"), self.tr("must status 9"))
             return
         header = "no text"
-        if self.pdf_checkbox.isChecked():
-            path = FileUtils.map_file_path()
-            if person.type == 10 or person.type == 20:
-                template = path + "cert_person.qpt"
-            elif person.type == 30:
-                template = path + "cert_company.qpt"
-            elif person.type == 40:
-                template = path + "cert_state.qpt"
-            elif person.type == 50 or person.type == 60:
-                template = path + "cert_use.qpt"
-
-            templateDOM = QDomDocument()
-            templateDOM.setContent(QFile(template), False)
-
-            map_canvas = QgsMapCanvas()
-
-            map_composition = QgsComposition(map_canvas.mapRenderer())
-            map_composition.loadFromTemplate(templateDOM)
-
-            map_composition.setPrintResolution(300)
-
-            printer = QPrinter()
-            printer.setOutputFormat(QPrinter.PdfFormat)
-            printer.setOutputFileName(path+"certificate.pdf")
-            printer.setPaperSize(QSizeF(map_composition.paperWidth(), map_composition.paperHeight()), QPrinter.Millimeter)
-            printer.setFullPage(True)
-            printer.setColorMode(QPrinter.Color)
-            printer.setResolution(map_composition.printResolution())
-
-            pdfPainter = QPainter(printer)
-            paperRectMM = printer.pageRect(QPrinter.Millimeter)
-            paperRectPixel = printer.pageRect(QPrinter.DevicePixel)
-            map_composition.render(pdfPainter, paperRectPixel, paperRectMM)
-            pdfPainter.end()
-
-            self.__add_aimag_name_cert(map_composition)
-            self.__add_soum_name_cert(map_composition)
-            # self.__add_contract_no(map_composition)
-            self.__add_decision_cert(map_composition)
-            self.__add_parcel_cert(map_composition)
-            # self.__add_fee(map_composition)
-            # self.__add_contract_condition(map_composition)
-            # self.__add_person_signature(map_composition)
-            # # self.__add_app_status_date(map_composition)
-            self.__add_person_name_cert(map_composition)
-            self.__add_officer_cert(map_composition)
-            # self.__add_app_remarks(map_composition)
-            map_composition.exportAsPDF(path + "certificate.pdf")
-
-
-            QDesktopServices.openUrl(QUrl.fromLocalFile(path+"certificate.pdf"))
-        else:
-            self.__cert_docx_print(person)
+        self.__cert_docx_print(person)
+        # if self.pdf_checkbox.isChecked():
+        #     path = FileUtils.map_file_path()
+        #     if person.type == 10 or person.type == 20:
+        #         template = path + "cert_person.qpt"
+        #     elif person.type == 30:
+        #         template = path + "cert_company.qpt"
+        #     elif person.type == 40:
+        #         template = path + "cert_state.qpt"
+        #     elif person.type == 50 or person.type == 60:
+        #         template = path + "cert_use.qpt"
+        #
+        #     templateDOM = QDomDocument()
+        #     templateDOM.setContent(QFile(template), False)
+        #
+        #     map_canvas = QgsMapCanvas()
+        #
+        #     map_composition = QgsComposition(map_canvas.mapRenderer())
+        #     map_composition.loadFromTemplate(templateDOM)
+        #
+        #     map_composition.setPrintResolution(300)
+        #
+        #     printer = QPrinter()
+        #     printer.setOutputFormat(QPrinter.PdfFormat)
+        #     printer.setOutputFileName(path+"certificate.pdf")
+        #     printer.setPaperSize(QSizeF(map_composition.paperWidth(), map_composition.paperHeight()), QPrinter.Millimeter)
+        #     printer.setFullPage(True)
+        #     printer.setColorMode(QPrinter.Color)
+        #     printer.setResolution(map_composition.printResolution())
+        #
+        #     pdfPainter = QPainter(printer)
+        #     paperRectMM = printer.pageRect(QPrinter.Millimeter)
+        #     paperRectPixel = printer.pageRect(QPrinter.DevicePixel)
+        #     map_composition.render(pdfPainter, paperRectPixel, paperRectMM)
+        #     pdfPainter.end()
+        #
+        #     self.__add_aimag_name_cert(map_composition)
+        #     self.__add_soum_name_cert(map_composition)
+        #     # self.__add_contract_no(map_composition)
+        #     self.__add_decision_cert(map_composition)
+        #     self.__add_parcel_cert(map_composition)
+        #     # self.__add_fee(map_composition)
+        #     # self.__add_contract_condition(map_composition)
+        #     # self.__add_person_signature(map_composition)
+        #     # # self.__add_app_status_date(map_composition)
+        #     self.__add_person_name_cert(map_composition)
+        #     self.__add_officer_cert(map_composition)
+        #     # self.__add_app_remarks(map_composition)
+        #     map_composition.exportAsPDF(path + "certificate.pdf")
+        #
+        #
+        #     QDesktopServices.openUrl(QUrl.fromLocalFile(path+"certificate.pdf"))
+        # else:
+        #     self.__cert_docx_print(person)
 
 
     def __cert_docx_print(self, person):
@@ -3625,6 +3636,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         decision_date = self.__add__cert_decision()[1]
         approved_duration = self.__add__cert_decision()[2]
         contract_date = self.__add__cert_decision()[3]
+        decision_level = self.__add__cert_decision()[4]
 
         parcel_id = self.__add_cert_parcel()[0]
         parcel_address = self.__add_cert_parcel()[3]
@@ -3637,6 +3649,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         company_name = self.__add_cert_person()[4]
         company_id = self.__add_cert_person()[5]
         person_address = self.__add_cert_person()[6]
+        country = self.__add_cert_person()[7]
         officer_name = self.__add_cert_officer_name()
 
         path = FileUtils.map_file_path()
@@ -3647,9 +3660,10 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             tpl = DocxTemplate(path + 'cert_company.docx')
         elif person.type == 40:
             tpl = DocxTemplate(path + 'cert_state.docx')
-        elif person.type == 50 or person.type == 60:
-            tpl = DocxTemplate(path + 'cert_use.docx')
-
+        elif person.type == 50:
+            tpl = DocxTemplate(path + 'cert_use_person.docx')
+        elif person.type == 60 and person.type == 70:
+            tpl = DocxTemplate(path + 'cert_use_company.docx')
         context = {
             'aimag_name': aimag_name,
             'soum_name': soum_name,
@@ -3669,7 +3683,11 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             'officer_aimag': aimag_name,
             'officer_soum': soum_name,
             'area_m2': area_m2,
-            'approved_duration': approved_duration
+            'approved_duration': approved_duration,
+            'country': country,
+            'decision_level': decision_level,
+            'address_streetname': self.street_name_edit.text(),
+            'address_khashaa': self.khashaa_edit.text()
         }
         tpl.render(context)
         tpl.save(path + 'certificate.docx')
@@ -3829,7 +3847,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             .join(CtApplicationPersonRole, CtApplication.app_no == CtApplicationPersonRole.application)\
             .join(BsPerson, CtApplicationPersonRole.person == BsPerson.person_id)\
             .join(CtApplication.au2 == self.working_soum)\
-            .filter(BsPerson.person_id.ilike(value)).all()
+            .filter(BsPerson.person_register.ilike(value)).all()
 
         for app in application:
             self.app_no = app.app_no

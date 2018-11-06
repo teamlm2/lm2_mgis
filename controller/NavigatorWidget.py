@@ -13103,15 +13103,15 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
 
         khaskhaa_list = []
         street_list = []
-        try:
-            street_list = self.session.query(CaParcel.address_streetname).order_by(
-                    CaParcel.address_streetname.desc()).all()
+        # try:
+        street_list = self.session.query(CaParcel.address_streetname).order_by(
+                CaParcel.address_streetname.desc()).all()
 
-            khaskhaa_list = self.session.query(CaParcel.address_khashaa).order_by(
-                    CaParcel.address_khashaa.desc()).all()
-        except SQLAlchemyError, e:
-            PluginUtils.show_error(self, self.tr("Database Query Error"), self.tr("Could not execute: {0}").format(e.message))
-            self.reject()
+        khaskhaa_list = self.session.query(CaParcel.address_khashaa).order_by(
+                CaParcel.address_khashaa.desc()).all()
+        # except SQLAlchemyError, e:
+        #     PluginUtils.show_error(self, self.tr("Database Query Error"), self.tr("Could not execute: {0}").format(e.message))
+        #     self.reject()
 
         khaskhaa_slist = []
         street_slist = []

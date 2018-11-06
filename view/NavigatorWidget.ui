@@ -83,7 +83,7 @@
         <x>10</x>
         <y>60</y>
         <width>386</width>
-        <height>519</height>
+        <height>551</height>
        </rect>
       </property>
       <property name="maximumSize">
@@ -93,7 +93,7 @@
        </size>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>10</number>
       </property>
       <property name="usesScrollButtons">
        <bool>true</bool>

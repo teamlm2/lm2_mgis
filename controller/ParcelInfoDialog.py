@@ -214,11 +214,11 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
             .filter(SetRole.is_active == True).one()
 
         self.finish_button.setVisible(False)
-        if officer.position == 1:
-            self.finish_button.setVisible(True)
-        if officer.position == 2:
-            self.finish_button.setVisible(True)
         if officer.position == 11:
+            self.finish_button.setVisible(True)
+        if officer.position == 12:
+            self.finish_button.setVisible(True)
+        if officer.position == 13:
             self.finish_button.setVisible(True)
         # else:
         #     print 'sdak'
