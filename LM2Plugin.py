@@ -921,6 +921,17 @@ class LM2Plugin:
             #         vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))) +"/template\style/au_mpa_zone.qml")
             #         vlayer.setLayerName(QApplication.translate("Plugin", "Admin Unit MPA Zone"))
             #         mygroup.addLayer(vlayer)
+            sec_layer = LayerUtils.layer_by_data_source("data_landuse", "ca_sec_parcel")
+            if sec_layer is None:
+                sec_layer = LayerUtils.load_layer_by_name_set_zones("ca_sec_parcel", "parcel_id", "data_landuse")
+                sec_layer = LayerUtils.load_layer_by_ca_sec_parcel("ca_sec_parcel", "parcel_id", "data_landuse")
+            if sec_layer.name() == "ca_sec_parcel":
+                mygroup = root.findGroup(u"Мэдээний хяналт")
+                myalayer = root.findLayer(sec_layer.id())
+                sec_layer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))) +"/template\style/ca_sec_parcel.qml")
+                sec_layer.setLayerName(QApplication.translate("Plugin", "Parcel Sec"))
+                if myalayer is None:
+                    mygroup.addLayer(sec_layer)
 
         mygroup = root.findGroup(u"Мэдээний хяналт")
         if mygroup is not None:
