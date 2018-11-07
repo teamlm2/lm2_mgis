@@ -1040,7 +1040,7 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
             current_employee = self.session.query(SetRole) \
                 .filter(SetRole.user_name == user.user_name) \
                 .filter(SetRole.is_active == True).one()
-            app_id = self.application_cbox.itemData(self.application_cbox.currentIndex())
+
 
             self.decision = CtDecision()
             self.decision.decision_date = self.contract_date.date().toString(Constants.DATABASE_DATE_FORMAT)
@@ -1048,8 +1048,10 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
             self.decision.decision_level = 70
             self.decision.imported_by = DatabaseUtils.current_sd_user().user_id
             self.session.add(self.decision)
+            application = self.session.query(CtApplication).filter(CtApplication.app_no == self.application_cbox.currentText()).one()
+            app_id = application.app_id
 
-            dec_app_count = self.session.query(CtDecisionApplication).filter(CtDecisionApplication.application == self.application_cbox.currentText()).count()
+            dec_app_count = self.session.query(CtDecisionApplication).filter(CtDecisionApplication.application == application.app_id).count()
             if dec_app_count == 0:
                 decision_app = CtDecisionApplication()
                 decision_app.decision = self.decision.decision_id
@@ -1069,12 +1071,9 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
             app_status = CtApplicationStatus()
             app_status.next_officer_in_charge = sd_user.user_id
             app_status.officer_in_charge = sd_user.user_id
-            app_status.application = self.application_cbox.currentText()
+            app_status.application = app_id
             app_status.status_date = self.decision.decision_date
             app_status.status = Constants.APP_STATUS_APPROVED
-
-            application = self.session.query(CtApplication).\
-                        filter(CtApplication.app_no == self.application_cbox.currentText()).one()
 
             if application.tmp_parcel != None:
                 parcel = self.session.query(CaTmpParcel).filter(CaTmpParcel.parcel_id == application.tmp_parcel).one()
@@ -1145,11 +1144,13 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
 
         application = self.session.query(CtApplication)\
             .join(CtApplicationPersonRole, CtApplication.app_id == CtApplicationPersonRole.application)\
+            .join(CtApplicationStatus, CtApplication.app_id == CtApplicationStatus.application)\
             .join(BsPerson, CtApplicationPersonRole.person == BsPerson.person_id)\
             .filter(CtApplication.au2 == DatabaseUtils.working_l2_code()) \
             .filter(or_(CtApplication.parcel != None, CtApplication.tmp_parcel != None))\
             .filter(or_(CtApplication.app_type == 15, CtApplication.app_type == 2))\
-            .filter(BsPerson.person_register.ilike(value)).all()
+            .filter(BsPerson.person_register.ilike(value))\
+            .filter(CtApplicationStatus.status == 1).all()
 
         for app in application:
             self.app_no = app.app_no

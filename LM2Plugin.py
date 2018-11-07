@@ -295,6 +295,7 @@ class LM2Plugin:
 
     def __show_connection_to_main_database_dialog(self):
 
+        print '0000000000'
         if DialogInspector().dialog_visible():
             return
 
@@ -1169,13 +1170,9 @@ class LM2Plugin:
                 filter(SetUserGroupRole.user_name_real == user_name_real). \
                 filter(SetUserGroupRole.group_role == 6).count()
 
-
-
-
             user_right_temp_parcel_count = session.query(SetUserGroupRole). \
                 filter(SetUserGroupRole.user_name_real == user_name_real). \
                 filter(SetUserGroupRole.group_role == 7).count()
-
 
             for layer in layers:
                 for soum in l2_code_list:

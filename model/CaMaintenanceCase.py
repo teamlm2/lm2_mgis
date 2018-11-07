@@ -27,7 +27,7 @@ class CaMaintenanceCase(Base):
     creation_date = Column(Date)
     survey_date = Column(Date)
     completion_date = Column(Date)
-
+    case_id = Column(String)
     # foreign keys:
     created_by = Column(Integer, ForeignKey('sd_user.user_id'))
     # created_by_ref = relationship("SetRole")

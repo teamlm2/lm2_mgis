@@ -158,7 +158,7 @@ class PrintDialog(QDialog, Ui_PrintDialog):
             elif status == 30:
                 color = Qt.red
 
-        item = QTableWidgetItem(unicode(person.person_id))
+        item = QTableWidgetItem(unicode(person.person_register))
         item.setData(Qt.UserRole, application.app_no)
         item.setData(Qt.UserRole + 1, person.person_id)
         item.setBackground(color)

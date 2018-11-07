@@ -274,6 +274,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         self.__create_maintenance_case_view()
         # self.__create_parcel_view_gts()
         # self.__create_fee_unifeid_view()
+        print 'ddddddddd'
 
     def __setup_combo_boxes(self):
 
@@ -536,7 +537,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
             self.rollback_to_savepoint()
             PluginUtils.show_message(self,  self.tr("Sql Error"), e.message)
             return
-
+        self.__zoom_to_soum(l2_code)
         self.__load_role_settings()
 
         # self.__create_person_view()
@@ -547,6 +548,26 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         # self.__create_decision_view()
         # self.__create_record_view()
         # self.__create_maintenance_case_view()
+
+    def __zoom_to_soum(self, soum_code):
+
+        layer = LayerUtils.layer_by_data_source("admin_units", "au_level2")
+        if layer is None:
+            layer = LayerUtils.load_layer_by_name_admin_units("au_level2", "code", "admin_units")
+        if soum_code:
+            expression = " code = \'" + soum_code + "\'"
+            request = QgsFeatureRequest()
+            request.setFilterExpression(expression)
+            feature_ids = []
+            iterator = layer.getFeatures(request)
+
+            for feature in iterator:
+                feature_ids.append(feature.id())
+            if len(feature_ids) == 0:
+                self.error_label.setText(self.tr("No soum assigned"))
+
+            layer.setSelectedFeatures(feature_ids)
+            self.plugin.iface.mapCanvas().zoomToSelected(layer)
 
     @pyqtSlot(int)
     def on_infinity_check_box_stateChanged(self, state):
@@ -1098,7 +1119,6 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
     def __create_maintenance_case_view(self):
 
         current_working_soum = "'"+str(DatabaseUtils.current_working_soum_schema())+"'"
-
         sql = ""
 
         if not sql:
@@ -1106,7 +1126,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         else:
             sql = sql + "UNION" + "\n"
 
-        select = "SELECT row_number() over() as gid, m_case.id, m_case.completion_date, m_case.created_by, m_case.surveyed_by_land_office, m_case.surveyed_by_surveyor, " \
+        select = "SELECT row_number() over() as gid, m_case.id, m_case.case_id, m_case.completion_date, m_case.created_by, m_case.surveyed_by_land_office, m_case.surveyed_by_surveyor, " \
                  "m_case.completed_by, parcel_case.parcel, building.building, application.app_no, m_case.au2 as soum, company.id as company, person.person_id, person.person_register, person.name, person.first_name " \
                  "FROM data_soums_union.ca_maintenance_case m_case " \
                  "left join data_soums_union.ca_parcel_maintenance_case parcel_case on parcel_case.maintenance = m_case.id " \
@@ -1517,7 +1537,8 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         if self.case_no_edit.text():
             filter_is_set = True
             case_no = "%" + self.case_no_edit.text() + "%"
-            maintenance_search = maintenance_search.filter(cast(MaintenanceSearch.id, String).ilike(case_no))
+            maintenance_search = maintenance_search.\
+                filter(or_(MaintenanceSearch.case_id.ilike(case_no), cast(MaintenanceSearch.id, String).ilike(case_no)))
 
         if self.case_parcel_no_edit.text():
             filter_is_set = True
@@ -1685,7 +1706,6 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
 
     def __search_contracts(self):
 
-        print 'adsfadsfa'
         # try:
         contracts = self.session.query(ContractSearch.contract_no, ContractSearch.contract_id).\
             filter(and_(ContractSearch.app_type != ApplicationType.right_land, ContractSearch.app_type != ApplicationType.pasture_use))
@@ -7850,7 +7870,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
 
         try:
             app_result = self.session.query(ApplicationSearch).filter(ApplicationSearch.app_id == id).one()
-            print 'ok'
+
             self.application_application_num_edit.setText(app_result.app_no)
             self.application_right_holder_name_edit.setText(app_result.first_name)
             self.application_parcel_num_edit.setText(app_result.parcel_id)
@@ -7898,7 +7918,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         # try:
         maintenance_results = self.session.query(MaintenanceSearch).filter(MaintenanceSearch.id == id).all()
         for maintenance_result in maintenance_results:
-            print maintenance_result.soum
+
             self.case_no_edit.setText(str(maintenance_result.id))
             if maintenance_result.completion_date != None:
                 self.case_completion_date_edit.setDate(maintenance_result.completion_date)

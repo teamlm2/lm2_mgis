@@ -15,6 +15,7 @@ class MaintenanceSearch(Base):
     gid = Column(Integer, primary_key=True)
     id = Column(Integer)
     completion_date = Column(Date)
+    case_id = Column(String)
 
     created_by = Column(String, ForeignKey('set_role.user_name'))
     completed_by = Column(String, ForeignKey('set_role.user_name'))
