@@ -95,7 +95,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         self.street_model = None
         self.street_proxy_model = None
         self.street_completer = None
-
+        self.tabWidget.currentChanged.connect(self.__tab_widget_onChange)  # changed!
         self.contract_date.setDate(QDate.currentDate())
         self.record_date_edit.setDate(QDate.currentDate())
         self.decision_date.setDate(QDate.currentDate())
@@ -151,6 +151,32 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
 
         # while True:
         #     self.__auto_find()
+
+    def __tab_widget_onChange(self, index):
+
+        is_change = False
+        if index:
+            if index == 1:
+                self.__create_person_view()
+            if index == 2:
+                self.__create_parcel_view()
+                self.__create_tmp_parcel_view()
+            if index == 3:
+                self.__create_application_view()
+                self.__create_maintenance_case_view()
+            if index == 4:
+                self.__create_decision_view()
+            if index == 5:
+                self.__create_maintenance_case_view()
+            if index == 6:
+                self.__create_contract_view()
+            if index == 7:
+                self.__create_record_view()
+
+    @pyqtSlot(int)
+    def on_tabWidget_currentChanged(self, current_index):
+
+        print current_index
 
     def __setup_twidgets(self):
 
@@ -264,17 +290,17 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         self.from_date_edit.setDate(self.userSettings.pa_from)
         self.extent_rbutton.setChecked(True)
 
-        self.__create_person_view()
+        # self.__create_person_view()
         self.__create_application_view()
-        self.__create_parcel_view()
-        self.__create_tmp_parcel_view()
+        # self.__create_parcel_view()
+        # self.__create_tmp_parcel_view()
         self.__create_contract_view()
-        self.__create_decision_view()
+        # self.__create_decision_view()
         self.__create_record_view()
-        self.__create_maintenance_case_view()
+        # self.__create_maintenance_case_view()
         # self.__create_parcel_view_gts()
         # self.__create_fee_unifeid_view()
-        print 'ddddddddd'
+
 
     def __setup_combo_boxes(self):
 
@@ -338,29 +364,6 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
             for sd_user in sd_users:
                 self.surveyed_by_land_officer_cbox.addItem(sd_user.lastname +" "+ sd_user.firstname, sd_user.user_id)
                 self.finalized_by_cbox.addItem(sd_user.lastname +" "+ sd_user.firstname, sd_user.user_id)
-        # if cl_landofficer is not None:
-        #     for officer in cl_landofficer:
-        #         session = SessionHandler().session_instance()
-        #         try:
-        #             sql = "select rolname from pg_user join pg_auth_members on (pg_user.usesysid=pg_auth_members.member) " \
-        #                   "join pg_roles on (pg_roles.oid=pg_auth_members.roleid) where pg_user.usename=:bindName;"
-        #
-        #             result = session.execute(sql, {'bindName': officer.user_name}).fetchall()
-        #
-        #             for right_result in result:
-        #
-        #                 if right_result[0] == UserRight.cadastre_update:
-        #                     # restrictions = DatabaseUtils.working_l2_code()
-        #                     # if officer.user_name_real.find(restrictions[1:]) != -1:
-        #                         self.finalized_by_cbox.addItem(officer.user_name, officer.user_name)
-        #
-        #
-        #         except exc.SQLAlchemyError, e:
-        #             session.rollback()
-        #             raise LM2Exception(QApplication.translate("LM2", "Database Query Error"),
-        #                                QApplication.translate("LM2", "Could not execute: {0}").format(e.message))
-        #
-        #         # self.finalized_by_cbox.addItem(officer.user_name, officer.user_name)
 
         if cl_applicationstatus is not None:
             for status in cl_applicationstatus:
@@ -538,7 +541,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
             PluginUtils.show_message(self,  self.tr("Sql Error"), e.message)
             return
         self.__zoom_to_soum(l2_code)
-        self.__load_role_settings()
+        # self.__load_role_settings()
 
         # self.__create_person_view()
         # self.__create_application_view()
@@ -2676,8 +2679,8 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
             self.session.query(CaTmpParcel).filter(CaTmpParcel.maintenance_case == case_no).delete()
             self.session.query(CaTmpBuilding).filter(CaTmpBuilding.maintenance_case == case_no).delete()
             maintenance = self.session.query(CaMaintenanceCase).filter(CaMaintenanceCase.id == case_no).one()
-            maintenance.parcels.delete()
-            maintenance.buildings.delete()
+            # maintenance.parcels.delete()
+            # maintenance.buildings.delete()
             self.session.query(CaMaintenanceCase).filter(CaMaintenanceCase.id == case_no).delete()
 
             self.commit()

@@ -295,7 +295,6 @@ class LM2Plugin:
 
     def __show_connection_to_main_database_dialog(self):
 
-        print '0000000000'
         if DialogInspector().dialog_visible():
             return
 
@@ -308,22 +307,21 @@ class LM2Plugin:
                 if self.navigatorWidget.isVisible():
                     self.navigatorWidget.hide()
 
-                self.__disable_menu()
+                # self.__disable_menu()
 
             if self.parcelInfoWidget != None:
                 if self.parcelInfoWidget.isVisible():
                     self.parcelInfoWidget.hide()
 
-                self.__disable_menu()
+                # self.__disable_menu()
 
             if self.pastureWidget != None:
                 if self.pastureWidget.isVisible():
                     self.pastureWidget.hide()
 
-                self.__disable_menu()
+                # self.__disable_menu()
             SessionHandler().destroy_session()
             self.is_expired = dlg.get_expired()
-            print '1'
             self.__update_database_connection(dlg.get_password(), self.is_expired)
 
     def __show_reports_dialog(self):
@@ -800,9 +798,10 @@ class LM2Plugin:
                             and server == uri.host() and port == uri.port() and p_password == uri.password()\
                             and not is_expired:
                         self.__create_db_session(uri.password())
+
                         self.__set_menu_visibility()
-                        print '2'
                         self.__refresh_layer()
+
                         break
 
     def __set_menu_visibility(self):
@@ -1005,7 +1004,9 @@ class LM2Plugin:
         self.pasture_use_action.setEnabled(True)
         self.parcel_map_action.setEnabled(True)
         self.about_action.setEnabled(True)
+
         self.__create_navigator()
+
         # self.__create_pasture()
         # database = QSettings().value(SettingsConstants.DATABASE_NAME)
         # if database:

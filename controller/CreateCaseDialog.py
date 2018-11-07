@@ -457,6 +457,7 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
             if parcel_id in self.maintenance_parcels:
                 continue
 
+            print parcel_id
             self.maintenance_parcels.append(parcel_id)
 
             #Add main parcel to the tree
@@ -973,10 +974,9 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
                     application.maintenance_case = self.ca_maintenance_case.id
 
         for parcel_id in self.maintenance_parcels:
-
             self.create_savepoint()
 
-            parcel = self.session.query(CaParcelTbl).filter(CaParcelTbl.parcel_id == parcel_id).one()
+            parcel = self.session.query(CaParcel).filter(CaParcel.parcel_id == parcel_id).one()
             if parcel in self.ca_maintenance_case.parcels:
                 continue
             soum = DatabaseUtils.working_l2_code()
