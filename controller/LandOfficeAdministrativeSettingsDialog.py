@@ -292,10 +292,10 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
             filter(SetFeeZone.geometry.ST_Contains(AuLevel2.geometry)). \
             filter(AuLevel2.code.in_(l2_codes)). \
             order_by(SetFeeZone.location)
-        locations4 = self.session.query(SetFeeZone.location, SetFeeZone.code).distinct(). \
-            filter(SetFeeZone.geometry.ST_Contains(AuLevel2.geometry)). \
-            filter(AuLevel2.code.in_(l2_codes)). \
-            order_by(SetFeeZone.location)
+        # locations4 = self.session.query(SetFeeZone.location, SetFeeZone.code).distinct(). \
+        #     filter(SetFeeZone.geometry.ST_Contains(AuLevel2.geometry)). \
+        #     filter(AuLevel2.code.in_(l2_codes)). \
+        #     order_by(SetFeeZone.location)
 
         for location in locations1:
             self.zone_location_cbox.addItem(location[0], location[1])
@@ -303,9 +303,9 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
         #     self.zone_location_cbox.addItem(location[0], location[1])
         for location in locations3:
             self.zone_location_cbox.addItem(location[0], location[1])
-        for location in locations4:
-            if location[0]!= self.zone_location_cbox.itemText(self.zone_location_cbox.currentIndex()):
-                self.zone_location_cbox.addItem(location[0], location[1])
+        # for location in locations4:
+        #     if location[0]!= self.zone_location_cbox.itemText(self.zone_location_cbox.currentIndex()):
+        #         self.zone_location_cbox.addItem(location[0], location[1])
 
     def __set_up_taxzone_cbox(self, l1_codes, l2_codes):
 
@@ -322,10 +322,10 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
             filter(SetTaxAndPriceZone.geometry.ST_Contains(AuLevel2.geometry)). \
             filter(AuLevel2.code.in_(l2_codes)). \
             order_by(SetTaxAndPriceZone.location)
-        locations4 = self.session.query(SetTaxAndPriceZone.location, SetTaxAndPriceZone.code).distinct(). \
-            filter(SetTaxAndPriceZone.geometry.ST_Contains(AuLevel2.geometry)). \
-            filter(AuLevel2.code.in_(l2_codes)). \
-            order_by(SetTaxAndPriceZone.location)
+        # locations4 = self.session.query(SetTaxAndPriceZone.location, SetTaxAndPriceZone.code).distinct(). \
+        #     filter(SetTaxAndPriceZone.geometry.ST_Contains(AuLevel2.geometry)). \
+        #     filter(AuLevel2.code.in_(l2_codes)). \
+        #     order_by(SetTaxAndPriceZone.location)
 
         for location in locations1:
             self.zone_location_tax_cbox.addItem(location[0], location[1])
@@ -333,9 +333,9 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
         #     self.zone_location_tax_cbox.addItem(location[0], location[1])
         for location in locations3:
             self.zone_location_tax_cbox.addItem(location[0], location[1])
-        for location in locations4:
-            if location[0] != self.zone_location_tax_cbox.itemText(self.zone_location_tax_cbox.currentIndex()):
-                self.zone_location_tax_cbox.addItem(location[0], location[1])
+        # for location in locations4:
+        #     if location[0] != self.zone_location_tax_cbox.itemText(self.zone_location_tax_cbox.currentIndex()):
+        #         self.zone_location_tax_cbox.addItem(location[0], location[1])
 
     def __load_settings(self):
 
