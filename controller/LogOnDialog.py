@@ -85,21 +85,21 @@ class LogOnDialog(QDialog, Ui_LogOnDialog):
         setRole = session.query(SetRole).filter(SetRole.user_name == user).filter(SetRole.is_active == True).one()
         mac_address = setRole.mac_addresses
 
-        if self.protected_dialog == 10:
-            if mac_address != self.mac_addr and not is_role_manager:
-                PluginUtils.show_error(self, self.tr("Query Error"),
-                                       self.tr("You are not permitted use for this PC !!!"))
-                return
-        else:
-            if mac_address != self.mac_addr:
-                PluginUtils.show_error(self, self.tr("Query Error"),
-                                       self.tr("You are not permitted use for this PC !!!"))
-                return
-
-        if setRole.pa_till < QDate.currentDate().toPyDate():
-            PluginUtils.show_error(self, self.tr("User Error"),
-                                   self.tr("Your login has expired. Please extend it !!!"))
-            return
+        # if self.protected_dialog == 10:
+        #     if mac_address != self.mac_addr and not is_role_manager:
+        #         PluginUtils.show_error(self, self.tr("Query Error"),
+        #                                self.tr("You are not permitted use for this PC !!!"))
+        #         return
+        # else:
+        #     if mac_address != self.mac_addr:
+        #         PluginUtils.show_error(self, self.tr("Query Error"),
+        #                                self.tr("You are not permitted use for this PC !!!"))
+        #         return
+        #
+        # if setRole.pa_till < QDate.currentDate().toPyDate():
+        #     PluginUtils.show_error(self, self.tr("User Error"),
+        #                            self.tr("Your login has expired. Please extend it !!!"))
+        #     return
         session = SessionHandler().session_instance()
         setRole = session.query(SetRole).filter(SetRole.user_name == user).filter(
             SetRole.is_active == True).one()
