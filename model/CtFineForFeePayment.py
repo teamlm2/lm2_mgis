@@ -15,8 +15,8 @@ class CtFineForFeePayment(Base):
     year_paid_for = Column(Integer)
     contract = Column(Integer, nullable=False)
     person = Column(Integer, nullable=False)
-    contract_no = Column(String)
-    person_register = Column(String)
+    # contract_no = Column(String)
+    # person_register = Column(String)
 
     # foreign keys:
     payment_type = Column(Integer, ForeignKey('cl_payment_type.code'))

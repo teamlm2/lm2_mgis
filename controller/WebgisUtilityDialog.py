@@ -193,10 +193,10 @@ class WebgisUtilityDialog(QDialog, Ui_WebgisUtilityDialog):
         register = self.owner_twidget.item(selected_row, 3).data(Qt.UserRole)
 
         sql = "select register, ovog,ner ,hen,zahid " \
-              "from owner.ub_lpis_co info " \
+              "from data_ub.ub_lpis_co info " \
               "where oregister = :register "
 
-        result = self.session.execute(sql, {'register': register})
+        result = self.session_db.execute(sql, {'register': register})
         row = 0
         for item_row in result:
             row = self.owner_co_twidget.rowCount()
@@ -226,10 +226,10 @@ class WebgisUtilityDialog(QDialog, Ui_WebgisUtilityDialog):
 
     def __find_lpis(self, person_id):
 
-        sql = "select * from owner.ub_lpis c where (c.register = :person_id) "
+        sql = "select * from data_ub.ub_lpis c where (c.register = :person_id) "
 
         count = 0
-        results = self.session.execute(sql, {'person_id': person_id})
+        results = self.session_db.execute(sql, {'person_id': person_id})
         # print len(results)
         self.owner_twidget.setRowCount(0)
         for row in results:
@@ -272,7 +272,7 @@ class WebgisUtilityDialog(QDialog, Ui_WebgisUtilityDialog):
             item.setData(Qt.UserRole + 1, (row[12]))
             self.owner_twidget.setItem(count, 7, item)
 
-            item = QTableWidgetItem(str(row[21]))
+            item = QTableWidgetItem(unicode(row[21]))
             item.setData(Qt.UserRole, (row[21]))
             self.owner_twidget.setItem(count, 10, item)
 
@@ -291,90 +291,95 @@ class WebgisUtilityDialog(QDialog, Ui_WebgisUtilityDialog):
 
     def __find_lm(self, person_id):
 
-        sql = "select * from webgis.wg_rightholder c where (c.person_id = :person_id) and tr_type_code = 3  "
-
+        sql = ""
+        # sql = "select * from webgis.wg_rightholder c where (c.person_id = :person_id) and tr_type_code = 3  "
+        select = "SELECT parcel.parcel_id, person.name, person.first_name, person.person_register, au1.name as aimag_name, au2.name as soum_name, au3.name as bag_name, parcel.address_streetname, ' ' as gudamj_dugaar, parcel.address_khashaa, decision.decision_date, decision.decision_no, parcel.area_m2, '9' as status FROM data_soums_union.ct_ownership_record record " \
+                 "LEFT JOIN data_soums_union.ct_record_application_role rec_app on rec_app.record = record.record_id " \
+                 "LEFT JOIN data_soums_union.ct_application application ON application.app_id = rec_app.application " \
+                 "LEFT JOIN data_soums_union.ct_application_person_role app_pers on application.app_id = app_pers.application " \
+                 "LEFT JOIN base.bs_person person ON app_pers.person = person.person_id " \
+                 "LEFT JOIN data_soums_union.ca_parcel_tbl parcel on parcel.parcel_id = application.parcel " \
+                 "LEFT JOIN data_soums_union.ct_decision_application dec_app on dec_app.application = application.app_id " \
+                 "LEFT JOIN admin_units.au_level2 au2 on application.au2 = au2.code " \
+                 "LEFT JOIN data_soums_union.ct_decision decision on decision.decision_id = dec_app.decision " \
+                 "LEFT JOIN admin_units.au_level1 au1 on st_within(parcel.geometry, au1.geometry)" \
+                 "LEFT JOIN admin_units.au_level3 au3 on st_within(parcel.geometry, au3.geometry)" \
+                 "WHERE person.person_register =:person_id and application.app_type = 1 and record.record_id is not null "
+        sql = sql + select
         sql = "{0} order by parcel_id;".format(sql)
+            # sql = "{0} order by parcel_id;".format(sql)
         count = 0
-        results = self.session.execute(sql, {'person_id': person_id})
+        results = self.session_db.execute(sql, {'person_id': person_id})
         # print len(results)
         self.owner_twidget.setRowCount(0)
         for row in results:
             self.owner_twidget.insertRow(count)
-
+            # parcel_id
+            item = QTableWidgetItem((row[0]))
+            item.setData(Qt.UserRole, row[0])
+            self.owner_twidget.setItem(count, 0, item)
+            # name
             item = QTableWidgetItem((row[1]))
             item.setData(Qt.UserRole, row[1])
-            self.owner_twidget.setItem(count, 0, item)
-
-            item = QTableWidgetItem((row[5]))
-            item.setData(Qt.UserRole, row[5])
-            item.setData(Qt.UserRole + 1, (row[4]))
-            item.setData(Qt.UserRole + 2, (row[5]))
+            item.setData(Qt.UserRole + 1, (row[1]))
+            item.setData(Qt.UserRole + 2, (row[1]))
             self.owner_twidget.setItem(count, 1, item)
-
-            item = QTableWidgetItem((row[6]))
-            item.setData(Qt.UserRole, row[6])
-            item.setData(Qt.UserRole + 1, (row[6]))
+            # first_name
+            item = QTableWidgetItem((row[2]))
+            item.setData(Qt.UserRole, row[2])
+            item.setData(Qt.UserRole + 1, (row[2]))
             self.owner_twidget.setItem(count, 2, item)
-
+            # person_register
             item = QTableWidgetItem((row[3]))
             item.setData(Qt.UserRole, row[3])
             item.setData(Qt.UserRole + 1, (row[3]))
             self.owner_twidget.setItem(count, 3, item)
-
-            item = QTableWidgetItem((row[11]))
-            item.setData(Qt.UserRole, row[11])
-            item.setData(Qt.UserRole + 1, (row[11]))
+            # aimag name
+            item = QTableWidgetItem((row[4]))
+            item.setData(Qt.UserRole, row[4])
+            item.setData(Qt.UserRole + 1, (row[4]))
             self.owner_twidget.setItem(count, 4, item)
-
-            item = QTableWidgetItem((row[12]))
-            item.setData(Qt.UserRole, row[12])
-            item.setData(Qt.UserRole + 1, (row[15]))
+            # soum name
+            item = QTableWidgetItem((row[5]))
+            item.setData(Qt.UserRole, row[5])
+            item.setData(Qt.UserRole + 1, (row[5]))
             self.owner_twidget.setItem(count, 5, item)
-
-            item = QTableWidgetItem((unicode(row[13])) + u'-р баг/хороо')
-            item.setData(Qt.UserRole, row[13])
-            item.setData(Qt.UserRole + 1, (row[13]))
+            # bag name
+            item = QTableWidgetItem((unicode(row[6])) + u'-р баг/хороо')
+            item.setData(Qt.UserRole, row[6])
+            item.setData(Qt.UserRole + 1, (row[6]))
             self.owner_twidget.setItem(count, 6, item)
-
-            item = QTableWidgetItem((row[14]))
-            item.setData(Qt.UserRole, row[14])
-            item.setData(Qt.UserRole + 1, (row[14]))
+            # gudamj name
+            item = QTableWidgetItem((row[7]))
+            item.setData(Qt.UserRole, row[7])
+            item.setData(Qt.UserRole + 1, (row[7]))
             self.owner_twidget.setItem(count, 7, item)
-
-            item = QTableWidgetItem((unicode(row[15])) + u' хашаа/хаалга')
-            item.setData(Qt.UserRole, row[15])
-            item.setData(Qt.UserRole + 1, (row[15]))
-            self.owner_twidget.setItem(count, 8, item)
-
-            item = QTableWidgetItem('')
-            item.setData(Qt.UserRole, '')
-            item.setData(Qt.UserRole + 1, '')
-            self.owner_twidget.setItem(count, 9, item)
-
-            item = QTableWidgetItem(str(row[9]))
-            item.setData(Qt.UserRole, row[9])
-            self.owner_twidget.setItem(count, 10, item)
-
-            item = QTableWidgetItem(unicode(row[10]))
-            item.setData(Qt.UserRole, row[10])
-            self.owner_twidget.setItem(count, 11, item)
-
-            item = QTableWidgetItem(unicode(row[23]))
-            item.setData(Qt.UserRole, row[23])
-            self.owner_twidget.setItem(count, 12, item)
-
-            item = QTableWidgetItem(str(row[8]))
+            # gudamj dugaar
+            item = QTableWidgetItem((unicode(row[8])) + u' хашаа/хаалга')
             item.setData(Qt.UserRole, row[8])
+            item.setData(Qt.UserRole + 1, (row[8]))
+            self.owner_twidget.setItem(count, 8, item)
+            # bair dugaar
+            item = QTableWidgetItem(row[9])
+            item.setData(Qt.UserRole, row[9])
+            item.setData(Qt.UserRole + 1, row[9])
+            self.owner_twidget.setItem(count, 9, item)
+            # decision date
+            item = QTableWidgetItem(str(row[10]))
+            item.setData(Qt.UserRole, row[10])
+            self.owner_twidget.setItem(count, 10, item)
+            # decision no
+            item = QTableWidgetItem(unicode(row[11]))
+            item.setData(Qt.UserRole, row[11])
+            self.owner_twidget.setItem(count, 11, item)
+            # area
+            item = QTableWidgetItem(unicode(row[12]))
+            item.setData(Qt.UserRole, row[12])
+            self.owner_twidget.setItem(count, 12, item)
+            # status
+            item = QTableWidgetItem(str(row[13]))
+            item.setData(Qt.UserRole, row[13])
             self.owner_twidget.setItem(count, 13, item)
-
-            # item = QTableWidgetItem((row[3]) + ' (' + (row[5]) + ' ' + (row[6]) + ')')
-            # self.owner_twidget.setItem(count, 1, item)
-            #
-            # item = QTableWidgetItem((row[11]) + ' ' + (row[12]) + ' ' + (row[13]))
-            # self.owner_twidget.setItem(count, 2, item)
-            #
-            # item = QTableWidgetItem((row[14]) + ' ' + (row[15]))
-            # self.owner_twidget.setItem(count, 3, item)
 
             count += 1
 

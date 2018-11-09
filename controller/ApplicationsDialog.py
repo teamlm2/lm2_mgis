@@ -640,7 +640,13 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
             l2_code_list = setRole.restriction_au_level2.split(',')
             if soum_code in l2_code_list:
                 sd_user = self.session.query(SdUser).filter(SdUser.gis_user_real == setRole.user_name_real).first()
-                self.next_officer_in_charge_cbox.addItem(sd_user.lastname + ", " + sd_user.firstname, sd_user.user_id)
+                lastname = ''
+                firstname = ''
+                if sd_user.lastname:
+                    lastname = sd_user.lastname
+                if sd_user.firstname:
+                    firstname = sd_user.firstname
+                self.next_officer_in_charge_cbox.addItem(lastname + ", " + firstname, sd_user.user_id)
 
         officer = self.session.query(SetRole) \
             .filter(SetRole.user_name == QSettings().value(SettingsConstants.USER)) \

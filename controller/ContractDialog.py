@@ -2037,6 +2037,23 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             darga_signature = ''
             darga_position = ''
 
+        bank_name = ''
+        account_no = ''
+        department_name = ''
+        department_phone = ''
+        department_address = ''
+        if self.officer.department_ref:
+            if self.officer.department_ref.bank_name:
+                bank_name = self.officer.department_ref.bank_name
+            if self.officer.department_ref.account_no:
+                account_no = self.officer.department_ref.account_no
+            if self.officer.department_ref.name:
+                department_name = self.officer.department_ref.name
+            if self.officer.department_ref.phone:
+                department_phone = self.officer.department_ref.phone
+            if self.officer.department_ref.address:
+                department_address = self.officer.department_ref.address
+
         duration_year = self.contract_duration_edit.text()
         context = {
             'aimag_name': aimag_name,
@@ -2067,11 +2084,11 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             'quarterly2_fee': quarterly2_fee,
             'quarterly3_fee': quarterly3_fee,
             'quarterly4_fee': quarterly4_fee,
-            'bank_name': self.officer.department_ref.bank_name,
-            'account_no': self.officer.department_ref.account_no,
-            'office_address': self.officer.department_ref.address,
-            'office_name': self.officer.department_ref.name,
-            'office_phone': self.officer.department_ref.phone,
+            'bank_name': bank_name,
+            'account_no': account_no,
+            'office_address': department_address,
+            'office_name': department_name,
+            'office_phone': department_phone,
             'aimag': aimag_name,
             'soum': soum_name,
             'bag': bag_name,
@@ -2790,7 +2807,11 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                 local_name  = person.address_town_or_local_name
             person_address = aimag_name +", "+ soum_name +", " +bag_name+", "+local_name
 
-        value = [person.person_register, family_name, surname, first_name, company_name, company_id, person_address, person.country_ref.description]
+        country_desc = ''
+        if person.country_ref:
+            country_desc = person.country_ref.description
+
+        value = [person.person_register, family_name, surname, first_name, company_name, company_id, person_address, country_desc]
         return value
 
     def __add_person_name(self,map_composition):
