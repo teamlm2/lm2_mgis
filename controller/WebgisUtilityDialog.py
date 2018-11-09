@@ -25,6 +25,7 @@ class WebgisUtilityDialog(QDialog, Ui_WebgisUtilityDialog):
         self.close_button.clicked.connect(self.reject)
         self.session = None
         self.session_db = SessionHandler().session_instance()
+        self.find_ownership_button.setDisabled(False)
         self.__setup()
 
         self.progressBar.setMinimum(1)
@@ -510,16 +511,29 @@ class WebgisUtilityDialog(QDialog, Ui_WebgisUtilityDialog):
         person_middlename = ''
         officer_aimag_name = ''
         officer_soum_name = ''
+        person_address_data = ''
+        person_surname_data = ''
+        person_middlename_data = ''
+        person_firstname_data = ''
+        person_aimag_data = ''
+        person_soum_data = ''
+        person_bag_data = ''
 
         register = self.owner_twidget.item(selected_row, 3).data(Qt.UserRole)
-        person_aimag_data = self.owner_twidget.item(selected_row, 4).data(Qt.UserRole + 1)
-        person_soum_data = self.owner_twidget.item(selected_row, 5).data(Qt.UserRole+1)
-        person_bag_data = self.owner_twidget.item(selected_row, 6).data(Qt.UserRole + 1)
-        person_address_data = unicode(self.owner_twidget.item(selected_row, 7).data(Qt.UserRole + 1)) + ' ' + \
-                              unicode(self.owner_twidget.item(selected_row, 8).data(Qt.UserRole + 1)) + ' ' + unicode(self.owner_twidget.item(selected_row, 9).data(Qt.UserRole + 1))
-        person_middlename_data = self.owner_twidget.item(selected_row, 1).data(Qt.UserRole + 1)
-        person_surname_data = self.owner_twidget.item(selected_row, 1).data(Qt.UserRole + 2)
-        person_firstname_data = self.owner_twidget.item(selected_row, 2).data(Qt.UserRole + 1)
+        if self.owner_twidget.item(selected_row, 4):
+            person_aimag_data = self.owner_twidget.item(selected_row, 4).data(Qt.UserRole + 1)
+        if self.owner_twidget.item(selected_row, 5):
+            person_soum_data = self.owner_twidget.item(selected_row, 5).data(Qt.UserRole+1)
+        if self.owner_twidget.item(selected_row, 6):
+            person_bag_data = self.owner_twidget.item(selected_row, 6).data(Qt.UserRole + 1)
+        if self.owner_twidget.item(selected_row, 7) and self.owner_twidget.item(selected_row, 8) and self.owner_twidget.item(selected_row, 9):
+            person_address_data = unicode(self.owner_twidget.item(selected_row, 7).data(Qt.UserRole + 1)) + ' ' + \
+                                  unicode(self.owner_twidget.item(selected_row, 8).data(Qt.UserRole + 1)) + ' ' + unicode(self.owner_twidget.item(selected_row, 9).data(Qt.UserRole + 1))
+        if self.owner_twidget.item(selected_row, 1):
+            person_middlename_data = self.owner_twidget.item(selected_row, 1).data(Qt.UserRole + 1)
+            person_surname_data = self.owner_twidget.item(selected_row, 1).data(Qt.UserRole + 2)
+        if self.owner_twidget.item(selected_row, 2):
+            person_firstname_data = self.owner_twidget.item(selected_row, 2).data(Qt.UserRole + 1)
 
         path = FileUtils.map_file_path()
         default_path = r'D:/TM_LM2/contracts'

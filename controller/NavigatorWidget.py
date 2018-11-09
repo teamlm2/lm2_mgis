@@ -301,6 +301,20 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         # self.__create_parcel_view_gts()
         # self.__create_fee_unifeid_view()
 
+    
+    def __setup_change_combo_boxes(self):
+
+        self.office_in_charge_cbox.clear()
+        self.next_officer_in_charge_cbox.clear()
+        set_roles = self.session.query(SetRole).order_by(SetRole.user_name)
+        soum_code = DatabaseUtils.working_l2_code()
+        if set_roles is not None:
+            for role in set_roles:
+                l2_code_list = role.restriction_au_level2.split(',')
+                if soum_code in l2_code_list:
+                    # if role.user_name_real.find(restriction[1:]) != -1:
+                    self.office_in_charge_cbox.addItem(role.surname + ", " + role.first_name, role)
+                    self.next_officer_in_charge_cbox.addItem(role.surname + ", " + role.first_name, role)
 
     def __setup_combo_boxes(self):
 
@@ -543,6 +557,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         self.__zoom_to_soum(l2_code)
         self.__load_role_settings()
 
+        self.__setup_change_combo_boxes()
         # self.__create_person_view()
         # self.__create_application_view()
         # self.__create_parcel_view()
@@ -3616,7 +3631,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         self.case_finalize_button.setEnabled(False)
 
         self.till_date_edit.setEnabled(False)
-        self.infinity_check_box.setEnabled(False)
+        # self.infinity_check_box.setEnabled(False)
 
 
     def keyPressEvent(self, event):
