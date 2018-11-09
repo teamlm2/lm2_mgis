@@ -103,7 +103,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         self.application_datetime_edit.setDate(QDate.currentDate())
 
         self.__setup_combo_boxes()
-
+        self.is_au_level2 = False
         self.working_l1_cbox.currentIndexChanged.connect(self.__working_l1_changed)
         self.working_l2_cbox.currentIndexChanged.connect(self.__working_l2_changed)
         self.__setup_twidgets()
@@ -155,23 +155,23 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
     def __tab_widget_onChange(self, index):
 
         is_change = False
-        if index:
-            if index == 1:
-                self.__create_person_view()
-            if index == 2:
-                self.__create_parcel_view()
-                self.__create_tmp_parcel_view()
-            if index == 3:
-                self.__create_application_view()
-                self.__create_maintenance_case_view()
-            if index == 4:
-                self.__create_decision_view()
-            if index == 5:
-                self.__create_maintenance_case_view()
-            if index == 6:
-                self.__create_contract_view()
-            if index == 7:
-                self.__create_record_view()
+        # if index:
+        #     if index == 1:
+        #         self.__create_person_view()
+        #     if index == 2:
+        #         self.__create_parcel_view()
+        #         self.__create_tmp_parcel_view()
+        #     if index == 3:
+        #         self.__create_application_view()
+        #         self.__create_maintenance_case_view()
+        #     if index == 4:
+        #         self.__create_decision_view()
+        #     if index == 5:
+        #         self.__create_maintenance_case_view()
+        #     if index == 6:
+        #         self.__create_contract_view()
+        #     if index == 7:
+        #         self.__create_record_view()
 
     @pyqtSlot(int)
     def on_tabWidget_currentChanged(self, current_index):
@@ -290,14 +290,14 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         self.from_date_edit.setDate(self.userSettings.pa_from)
         self.extent_rbutton.setChecked(True)
 
-        # self.__create_person_view()
+        self.__create_person_view()
         self.__create_application_view()
-        # self.__create_parcel_view()
-        # self.__create_tmp_parcel_view()
+        self.__create_parcel_view()
+        self.__create_tmp_parcel_view()
         self.__create_contract_view()
-        # self.__create_decision_view()
+        self.__create_decision_view()
         self.__create_record_view()
-        # self.__create_maintenance_case_view()
+        self.__create_maintenance_case_view()
         # self.__create_parcel_view_gts()
         # self.__create_fee_unifeid_view()
 
@@ -541,7 +541,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
             PluginUtils.show_message(self,  self.tr("Sql Error"), e.message)
             return
         self.__zoom_to_soum(l2_code)
-        # self.__load_role_settings()
+        self.__load_role_settings()
 
         # self.__create_person_view()
         # self.__create_application_view()
@@ -13222,3 +13222,97 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
     def __auto_find(self):
 
         time.sleep(15)
+
+    @pyqtSlot()
+    def on_au_level1_button_clicked(self):
+
+        root = QgsProject.instance().layerTreeRoot()
+        layer = LayerUtils.layer_by_data_source("admin_units", "au_level1")
+        if layer is None:
+            mygroup = root.findGroup(u"Хил")
+            vlayer = LayerUtils.load_layer_base_layer("au_level1", "code","admin_units")
+            vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "template\style/au_level1.qml")
+
+            vlayer.setLayerName(self.tr("Admin Unit Level1"))
+            mygroup.addLayer(vlayer)
+
+    @pyqtSlot()
+    def on_au_level2_button_clicked(self):
+
+        root = QgsProject.instance().layerTreeRoot()
+        layer = LayerUtils.layer_by_data_source("admin_units", "au_level2")
+
+        # if layer is None:
+        if not self.is_au_level2:
+            mygroup = root.findGroup(u"Хил")
+            vlayer = LayerUtils.load_layer_base_layer("au_level2", "code", "admin_units")
+            vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/au_level2.qml")
+            vlayer.setLayerName(self.tr("Admin Unit Level2"))
+            mygroup.addLayer(vlayer)
+            self.is_au_level2 = True
+
+    @pyqtSlot()
+    def on_au_level3_button_clicked(self):
+
+        root = QgsProject.instance().layerTreeRoot()
+        layer = LayerUtils.layer_by_data_source("admin_units", "au_level3")
+
+        if layer is None:
+            mygroup = root.findGroup(u"Хил")
+            vlayer = LayerUtils.load_layer_base_layer("au_level3", "code", "admin_units")
+            vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/au_level3.qml")
+            vlayer.setLayerName(self.tr("Admin Unit Level3"))
+            mygroup.addLayer(vlayer)
+
+    @pyqtSlot()
+    def on_fee_tax_zone_button_clicked(self):
+
+        root = QgsProject.instance().layerTreeRoot()
+        layer = LayerUtils.layer_by_data_source("settings", "set_view_fee_zone")
+        if layer is None:
+            mygroup = root.findGroup(u"Төлбөр, татварын бүс")
+            vlayer = LayerUtils.load_layer_base_layer("set_view_fee_zone", "zone_id", "settings")
+            vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) +"/template\style/set_fee_zone.qml")
+            vlayer.setLayerName(self.tr("Fee Zone"))
+            mygroup.addLayer(vlayer)
+
+        layer = LayerUtils.layer_by_data_source("settings", "set_view_tax_zone")
+        if layer is None:
+            mygroup = root.findGroup(u"Төлбөр, татварын бүс")
+            vlayer = LayerUtils.load_layer_base_layer("set_view_tax_zone", "zone_id", "settings")
+            vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) +"/template\style/set_tax_and_price_zone.qml")
+            vlayer.setLayerName(self.tr("Tax Zone"))
+            mygroup.addLayer(vlayer)
+
+    @pyqtSlot()
+    def on_sec_zone_button_clicked(self):
+
+        root = QgsProject.instance().layerTreeRoot()
+        layer = LayerUtils.layer_by_data_source("data_landuse", "ca_sec_parcel")
+        if layer is None:
+            mygroup = root.findGroup(u"Мэдээний хяналт")
+            vlayer = LayerUtils.load_layer_base_layer("ca_sec_parcel", "parcel_id", "data_landuse")
+            vlayer.loadNamedStyle(
+                str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/ca_sec_parcel.qml")
+            vlayer.setLayerName(self.tr("Parcel Sec"))
+            mygroup.addLayer(vlayer)
+
+    @pyqtSlot()
+    def on_mpa_zone_button_clicked(self):
+
+        root = QgsProject.instance().layerTreeRoot()
+        layer = LayerUtils.layer_by_data_source("admin_units", "au_mpa")
+        if layer is None:
+            mygroup = root.findGroup(u"Тусгай хамгаалалттай газар")
+            vlayer = LayerUtils.load_layer_base_layer("au_mpa", "id", "admin_units")
+            vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/au_mpa.qml")
+            vlayer.setLayerName(self.tr("Admin Unit MPA"))
+            mygroup.addLayer(vlayer)
+
+        layer = LayerUtils.layer_by_data_source("admin_units", "au_mpa_zone")
+        if layer is None:
+            mygroup = root.findGroup(u"Тусгай хамгаалалттай газар")
+            vlayer = LayerUtils.load_layer_base_layer("au_mpa_zone", "id", "admin_units")
+            vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/au_mpa_zone.qml")
+            vlayer.setLayerName(self.tr("Admin Unit MPA Zone"))
+            mygroup.addLayer(vlayer)

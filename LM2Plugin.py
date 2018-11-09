@@ -827,7 +827,7 @@ class LM2Plugin:
         LayerUtils.refresh_layer()
 
         layers = self.iface.legendInterface().layers()
-
+        is_au_level2 = False
         for layer in layers:
             if layer.name() == "ca_parcel":
                 mygroup = root.findGroup(u"Кадастр")
@@ -862,50 +862,52 @@ class LM2Plugin:
                         vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))) +"/template\style/ca_building.qml")
                         vlayer.setLayerName(QApplication.translate("Plugin", "Building"))
                         mygroup.addLayer(vlayer)
-            if layer.name() != u'Аймгийн хил' or layer.name() != 'Admin Unit Level1':
-                au_level1_layer = LayerUtils.layer_by_data_source("admin_units", "au_level1")
-                if au_level1_layer is None:
-                    mygroup = root.findGroup(u"Хил")
-                    vlayer = LayerUtils.load_layer_by_name_admin_units("au_level1", "code", "admin_units")
-                    vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))) +"/template\style/au_level1.qml")
-                    vlayer.setLayerName(QApplication.translate("Plugin", "Admin Unit Level1"))
-                    mygroup.addLayer(vlayer)
-            if layer.name() != u'Сумын хил' or layer.name() != 'Admin Unit Level2' or layer.name() != 'au_level2':
-                au_level2_layer = LayerUtils.layer_by_data_source("admin_units", "au_level2")
-                print layer.name()
-                if au_level2_layer is None:
-                    mygroup = root.findGroup(u"Хил")
-                    vlayer = LayerUtils.load_layer_by_name_admin_units("au_level2", "code", "admin_units")
-                    vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))) +"/template\style/au_level2.qml")
-                    vlayer.setLayerName(QApplication.translate("Plugin", "Admin Unit Level2"))
-                    mygroup.addLayer(vlayer)
-            if layer.name() != u'Багийн хил' or layer.name() != 'Admin Unit Level3':
-                au_level3_layer = LayerUtils.layer_by_data_source("admin_units", "au_level3")
-                if au_level3_layer is None:
-                    mygroup = root.findGroup(u"Хил")
-                    vlayer = LayerUtils.load_layer_by_name_admin_units("au_level3", "code", "admin_units")
-                    vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))) +"/template\style/au_level3.qml")
-                    vlayer.setLayerName(QApplication.translate("Plugin", "Admin Unit Level3"))
-                    mygroup.addLayer(vlayer)
-            if layer.name() != u'Төлбөрийн бүс' or layer.name() != 'Fee Zone':
-
-                fee_zone_layer = LayerUtils.layer_by_data_source("settings", "set_view_fee_zone")
-
-                if fee_zone_layer is None:
-                    mygroup = root.findGroup(u"Төлбөр, татварын бүс")
-                    vlayer = LayerUtils.load_layer_by_name_set_zones("set_view_fee_zone", "zone_id", "settings")
-                    vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))) +"/template\style/set_fee_zone.qml")
-                    vlayer.setLayerName(QApplication.translate("Plugin", "Fee Zone"))
-                    mygroup.addLayer(vlayer)
-            if layer.name() != u'Татварын бүс' or layer.name() != 'Tax Zone':
-                tax_zone_layer = LayerUtils.layer_by_data_source("settings", "set_view_tax_zone")
-                if tax_zone_layer is None:
-                    mygroup = root.findGroup(u"Төлбөр, татварын бүс")
-
-                    vlayer = LayerUtils.load_layer_by_name_set_zones("set_view_tax_zone", "zone_id", "settings")
-                    vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))) +"/template\style/set_tax_and_price_zone.qml")
-                    vlayer.setLayerName(QApplication.translate("Plugin", "Tax Zone"))
-                    mygroup.addLayer(vlayer)
+            # if layer.name() != u'Аймгийн хил' or layer.name() != 'Admin Unit Level1':
+            #     au_level1_layer = LayerUtils.layer_by_data_source("admin_units", "au_level1")
+            #     if au_level1_layer is None:
+            #         mygroup = root.findGroup(u"Хил")
+            #         vlayer = LayerUtils.load_layer_by_name_admin_units("au_level1", "code", "admin_units")
+            #         vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))) +"/template\style/au_level1.qml")
+            #         vlayer.setLayerName(QApplication.translate("Plugin", "Admin Unit Level1"))
+            #         mygroup.addLayer(vlayer)
+            # if layer.name() != u'Сумын хил' or layer.name() != 'Admin Unit Level2':
+            #     au_level2_layer = LayerUtils.layer_by_data_source("admin_units", "au_level2")
+            #     if not is_au_level2:
+            #     # if au_level2_layer is None:
+            #         mygroup = root.findGroup(u"Хил")
+            #         vlayer = LayerUtils.load_layer_by_name_admin_units("au_level2", "code", "admin_units")
+            #         vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))) +"/template\style/au_level2.qml")
+            #         vlayer.setLayerName(QApplication.translate("Plugin", "Admin Unit Level2"))
+            #         mygroup.addLayer(vlayer)
+            #         is_au_level2 = True
+            #
+            # if layer.name() != u'Багийн хил' or layer.name() != 'Admin Unit Level3':
+            #     au_level3_layer = LayerUtils.layer_by_data_source("admin_units", "au_level3")
+            #     if au_level3_layer is None:
+            #         mygroup = root.findGroup(u"Хил")
+            #         vlayer = LayerUtils.load_layer_by_name_admin_units("au_level3", "code", "admin_units")
+            #         vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))) +"/template\style/au_level3.qml")
+            #         vlayer.setLayerName(QApplication.translate("Plugin", "Admin Unit Level3"))
+            #         mygroup.addLayer(vlayer)
+            # if layer.name() != u'Төлбөрийн бүс' or layer.name() != 'Fee Zone':
+            #
+            #     fee_zone_layer = LayerUtils.layer_by_data_source("settings", "set_view_fee_zone")
+            #
+            #     if fee_zone_layer is None:
+            #         mygroup = root.findGroup(u"Төлбөр, татварын бүс")
+            #         vlayer = LayerUtils.load_layer_by_name_set_zones("set_view_fee_zone", "zone_id", "settings")
+            #         vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))) +"/template\style/set_fee_zone.qml")
+            #         vlayer.setLayerName(QApplication.translate("Plugin", "Fee Zone"))
+            #         mygroup.addLayer(vlayer)
+            # if layer.name() != u'Татварын бүс' or layer.name() != 'Tax Zone':
+            #     tax_zone_layer = LayerUtils.layer_by_data_source("settings", "set_view_tax_zone")
+            #     if tax_zone_layer is None:
+            #         mygroup = root.findGroup(u"Төлбөр, татварын бүс")
+            #
+            #         vlayer = LayerUtils.load_layer_by_name_set_zones("set_view_tax_zone", "zone_id", "settings")
+            #         vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))) +"/template\style/set_tax_and_price_zone.qml")
+            #         vlayer.setLayerName(QApplication.translate("Plugin", "Tax Zone"))
+            #         mygroup.addLayer(vlayer)
             # if layer.name() != u'УТХГазар' or layer.name() != 'Admin Unit MPA':
             #     au_mpa_layer = LayerUtils.layer_by_data_source("admin_units", "au_mpa")
             #     if au_mpa_layer is None:
@@ -923,17 +925,17 @@ class LM2Plugin:
             #         vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))) +"/template\style/au_mpa_zone.qml")
             #         vlayer.setLayerName(QApplication.translate("Plugin", "Admin Unit MPA Zone"))
             #         mygroup.addLayer(vlayer)
-            sec_layer = LayerUtils.layer_by_data_source("data_landuse", "ca_sec_parcel")
-            if sec_layer is None:
-                sec_layer = LayerUtils.load_layer_by_name_set_zones("ca_sec_parcel", "parcel_id", "data_landuse")
-                sec_layer = LayerUtils.load_layer_by_ca_sec_parcel("ca_sec_parcel", "parcel_id", "data_landuse")
-            if sec_layer.name() == "ca_sec_parcel":
-                mygroup = root.findGroup(u"Мэдээний хяналт")
-                myalayer = root.findLayer(sec_layer.id())
-                sec_layer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))) +"/template\style/ca_sec_parcel.qml")
-                sec_layer.setLayerName(QApplication.translate("Plugin", "Parcel Sec"))
-                if myalayer is None:
-                    mygroup.addLayer(sec_layer)
+            # sec_layer = LayerUtils.layer_by_data_source("data_landuse", "ca_sec_parcel")
+            # if sec_layer is None:
+            #     sec_layer = LayerUtils.load_layer_by_name_set_zones("ca_sec_parcel", "parcel_id", "data_landuse")
+            #     sec_layer = LayerUtils.load_layer_by_ca_sec_parcel("ca_sec_parcel", "parcel_id", "data_landuse")
+            # if sec_layer.name() == "ca_sec_parcel":
+            #     mygroup = root.findGroup(u"Мэдээний хяналт")
+            #     myalayer = root.findLayer(sec_layer.id())
+            #     sec_layer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))) +"/template\style/ca_sec_parcel.qml")
+            #     sec_layer.setLayerName(QApplication.translate("Plugin", "Parcel Sec"))
+            #     if myalayer is None:
+            #         mygroup.addLayer(sec_layer)
 
         mygroup = root.findGroup(u"Мэдээний хяналт")
         if mygroup is not None:

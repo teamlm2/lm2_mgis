@@ -72,7 +72,7 @@
      <property name="geometry">
       <rect>
        <x>0</x>
-       <y>0</y>
+       <y>-33</y>
        <width>419</width>
        <height>664</height>
       </rect>
@@ -93,7 +93,7 @@
        </size>
       </property>
       <property name="currentIndex">
-       <number>10</number>
+       <number>0</number>
       </property>
       <property name="usesScrollButtons">
        <bool>true</bool>
@@ -118,9 +118,9 @@
          <property name="geometry">
           <rect>
            <x>129</x>
-           <y>87</y>
+           <y>57</y>
            <width>111</width>
-           <height>31</height>
+           <height>28</height>
           </rect>
          </property>
          <property name="text">
@@ -130,8 +130,8 @@
         <widget class="QPushButton" name="apply_button">
          <property name="geometry">
           <rect>
-           <x>254</x>
-           <y>310</y>
+           <x>10</x>
+           <y>360</y>
            <width>111</width>
            <height>23</height>
           </rect>
@@ -144,7 +144,7 @@
          <property name="geometry">
           <rect>
            <x>254</x>
-           <y>370</y>
+           <y>360</y>
            <width>111</width>
            <height>23</height>
           </rect>
@@ -156,9 +156,9 @@
         <widget class="QLabel" name="label_8">
          <property name="geometry">
           <rect>
-           <x>25</x>
-           <y>205</y>
-           <width>171</width>
+           <x>20</x>
+           <y>135</y>
+           <width>150</width>
            <height>17</height>
           </rect>
          </property>
@@ -169,9 +169,9 @@
         <widget class="QLabel" name="label_9">
          <property name="geometry">
           <rect>
-           <x>25</x>
-           <y>305</y>
-           <width>211</width>
+           <x>20</x>
+           <y>208</y>
+           <width>150</width>
            <height>17</height>
           </rect>
          </property>
@@ -182,9 +182,9 @@
         <widget class="QLabel" name="label_10">
          <property name="geometry">
           <rect>
-           <x>25</x>
-           <y>255</y>
-           <width>211</width>
+           <x>20</x>
+           <y>172</y>
+           <width>150</width>
            <height>17</height>
           </rect>
          </property>
@@ -195,8 +195,8 @@
         <widget class="QLabel" name="label_11">
          <property name="geometry">
           <rect>
-           <x>25</x>
-           <y>370</y>
+           <x>16</x>
+           <y>330</y>
            <width>71</width>
            <height>17</height>
           </rect>
@@ -208,8 +208,8 @@
         <widget class="QPushButton" name="remove_button">
          <property name="geometry">
           <rect>
-           <x>254</x>
-           <y>340</y>
+           <x>130</x>
+           <y>360</y>
            <width>111</width>
            <height>23</height>
           </rect>
@@ -224,9 +224,9 @@
          </property>
          <property name="geometry">
           <rect>
-           <x>20</x>
-           <y>220</y>
-           <width>171</width>
+           <x>15</x>
+           <y>150</y>
+           <width>150</width>
            <height>22</height>
           </rect>
          </property>
@@ -237,9 +237,9 @@
          </property>
          <property name="geometry">
           <rect>
-           <x>20</x>
-           <y>270</y>
-           <width>171</width>
+           <x>15</x>
+           <y>187</y>
+           <width>150</width>
            <height>22</height>
           </rect>
          </property>
@@ -250,9 +250,9 @@
          </property>
          <property name="geometry">
           <rect>
-           <x>20</x>
-           <y>320</y>
-           <width>171</width>
+           <x>15</x>
+           <y>223</y>
+           <width>150</width>
            <height>22</height>
           </rect>
          </property>
@@ -261,7 +261,7 @@
          <property name="geometry">
           <rect>
            <x>13</x>
-           <y>20</y>
+           <y>14</y>
            <width>321</width>
            <height>21</height>
           </rect>
@@ -280,9 +280,9 @@
          <property name="geometry">
           <rect>
            <x>13</x>
-           <y>170</y>
+           <y>120</y>
            <width>271</width>
-           <height>26</height>
+           <height>16</height>
           </rect>
          </property>
          <property name="text">
@@ -299,9 +299,9 @@
          <property name="geometry">
           <rect>
            <x>250</x>
-           <y>90</y>
+           <y>61</y>
            <width>110</width>
-           <height>22</height>
+           <height>20</height>
           </rect>
          </property>
          <property name="inputMethodHints">
@@ -324,9 +324,9 @@
          <property name="geometry">
           <rect>
            <x>10</x>
-           <y>90</y>
+           <y>62</y>
            <width>110</width>
-           <height>22</height>
+           <height>20</height>
           </rect>
          </property>
          <property name="inputMethodHints">
@@ -349,9 +349,9 @@
          <property name="geometry">
           <rect>
            <x>132</x>
-           <y>140</y>
+           <y>97</y>
            <width>110</width>
-           <height>22</height>
+           <height>20</height>
           </rect>
          </property>
          <property name="inputMethodHints">
@@ -374,9 +374,9 @@
          <property name="geometry">
           <rect>
            <x>130</x>
-           <y>41</y>
+           <y>28</y>
            <width>110</width>
-           <height>21</height>
+           <height>20</height>
           </rect>
          </property>
          <property name="inputMethodHints">
@@ -398,9 +398,9 @@
         <widget class="QLabel" name="label_29">
          <property name="geometry">
           <rect>
-           <x>200</x>
-           <y>205</y>
-           <width>171</width>
+           <x>15</x>
+           <y>246</y>
+           <width>150</width>
            <height>17</height>
           </rect>
          </property>
@@ -411,9 +411,9 @@
         <widget class="QLabel" name="khashaa_label">
          <property name="geometry">
           <rect>
-           <x>200</x>
-           <y>255</y>
-           <width>171</width>
+           <x>15</x>
+           <y>285</y>
+           <width>150</width>
            <height>17</height>
           </rect>
          </property>
@@ -427,9 +427,9 @@
          </property>
          <property name="geometry">
           <rect>
-           <x>200</x>
-           <y>220</y>
-           <width>161</width>
+           <x>15</x>
+           <y>261</y>
+           <width>150</width>
            <height>21</height>
           </rect>
          </property>
@@ -440,9 +440,9 @@
          </property>
          <property name="geometry">
           <rect>
-           <x>200</x>
-           <y>270</y>
-           <width>161</width>
+           <x>15</x>
+           <y>300</y>
+           <width>150</width>
            <height>21</height>
           </rect>
          </property>
@@ -453,8 +453,8 @@
          </property>
          <property name="geometry">
           <rect>
-           <x>115</x>
-           <y>365</y>
+           <x>80</x>
+           <y>325</y>
            <width>86</width>
            <height>24</height>
           </rect>
@@ -462,6 +462,128 @@
          <property name="maximum">
           <number>5000</number>
          </property>
+        </widget>
+        <widget class="QGroupBox" name="groupBox_2">
+         <property name="geometry">
+          <rect>
+           <x>174</x>
+           <y>123</y>
+           <width>192</width>
+           <height>234</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QGroupBox {
+     background-color: #f5f5ef; border: 1px solid black;
+     border-radius: 3px;
+}</string>
+         </property>
+         <property name="title">
+          <string>Давхарга</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+         <widget class="QPushButton" name="au_level3_button">
+          <property name="geometry">
+           <rect>
+            <x>16</x>
+            <y>80</y>
+            <width>161</width>
+            <height>23</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Баг/Хорооны хил</string>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="plan_button">
+          <property name="geometry">
+           <rect>
+            <x>16</x>
+            <y>200</y>
+            <width>161</width>
+            <height>23</height>
+           </rect>
+          </property>
+          <property name="styleSheet">
+           <string notr="true"/>
+          </property>
+          <property name="text">
+           <string>ГЗБТөлөвгөгөө</string>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="fee_tax_zone_button">
+          <property name="geometry">
+           <rect>
+            <x>16</x>
+            <y>110</y>
+            <width>161</width>
+            <height>23</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Төлбөр, Татварын бүс</string>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="au_level2_button">
+          <property name="geometry">
+           <rect>
+            <x>16</x>
+            <y>50</y>
+            <width>161</width>
+            <height>23</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Сум/Дүүргийн хил</string>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="mpa_zone_button">
+          <property name="geometry">
+           <rect>
+            <x>16</x>
+            <y>170</y>
+            <width>161</width>
+            <height>23</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Тусгай хамгаалалтай газар</string>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="sec_zone_button">
+          <property name="geometry">
+           <rect>
+            <x>16</x>
+            <y>140</y>
+            <width>161</width>
+            <height>23</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Хамгаалалтын зурвас</string>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="au_level1_button">
+          <property name="geometry">
+           <rect>
+            <x>16</x>
+            <y>20</y>
+            <width>161</width>
+            <height>23</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Аймаг/Нийслэлийн хил</string>
+          </property>
+         </widget>
         </widget>
        </widget>
        <widget class="QGroupBox" name="groupBox_6">
@@ -479,8 +601,8 @@
         <widget class="QDateEdit" name="from_date_edit">
          <property name="geometry">
           <rect>
-           <x>20</x>
-           <y>40</y>
+           <x>15</x>
+           <y>29</y>
            <width>141</width>
            <height>22</height>
           </rect>
@@ -495,8 +617,8 @@
         <widget class="QDateEdit" name="till_date_edit">
          <property name="geometry">
           <rect>
-           <x>20</x>
-           <y>90</y>
+           <x>15</x>
+           <y>65</y>
            <width>141</width>
            <height>22</height>
           </rect>
@@ -511,8 +633,8 @@
         <widget class="QCheckBox" name="infinity_check_box">
          <property name="geometry">
           <rect>
-           <x>170</x>
-           <y>90</y>
+           <x>161</x>
+           <y>66</y>
            <width>191</width>
            <height>20</height>
           </rect>
@@ -524,8 +646,8 @@
         <widget class="QPushButton" name="temp_filter_apply_button">
          <property name="geometry">
           <rect>
-           <x>254</x>
-           <y>36</y>
+           <x>250</x>
+           <y>28</y>
            <width>111</width>
            <height>23</height>
           </rect>
@@ -537,8 +659,8 @@
         <widget class="QLabel" name="label_12">
          <property name="geometry">
           <rect>
-           <x>25</x>
-           <y>25</y>
+           <x>20</x>
+           <y>14</y>
            <width>141</width>
            <height>17</height>
           </rect>
@@ -550,8 +672,8 @@
         <widget class="QLabel" name="till_to_label">
          <property name="geometry">
           <rect>
-           <x>25</x>
-           <y>75</y>
+           <x>20</x>
+           <y>50</y>
            <width>141</width>
            <height>17</height>
           </rect>
@@ -3905,7 +4027,7 @@ QPushButton:disabled {
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>576</y>
+        <y>574</y>
         <width>381</width>
         <height>21</height>
        </rect>
