@@ -542,26 +542,28 @@ class FinalizeCaseDialog(QDialog, Ui_FinalizeCaseDialog, DatabaseHelper):
     def on_address_insert_button_clicked(self):
 
         session = SessionHandler().session_instance()
-        current_item = self.maintenance_objects_twidget.selectedItems()[0]
-        object_id = current_item.data(0, Qt.UserRole)
-        object_type = current_item.data(0, Qt.UserRole + 1)
-        try:
-            if object_id != None:
-                if object_type == "parcel":
-                    tmp_parcel = session.query(CaTmpParcel).filter(CaTmpParcel.parcel_id == object_id).one()
-                    tmp_parcel.address_streetname = self.street_name_edit.text()
-                    tmp_parcel.address_khashaa = self.khashaa_edit.text()
-                    session.add(tmp_parcel)
-                elif object_type == "building":
-                    tmp_building = session.query(CaTmpBuilding).filter(CaTmpBuilding.building_id == object_id).one()
-                    tmp_building.address_streetname = self.street_name_edit.text()
-                    tmp_building.address_khashaa = self.khashaa_edit.text()
-                    session.add(tmp_building)
-            session.commit()
+        print len(self.maintenance_objects_twidget.selectedItems())
+        if len(self.maintenance_objects_twidget.selectedItems()) > 0:
+            current_item = self.maintenance_objects_twidget.selectedItems()[0]
+            object_id = current_item.data(0, Qt.UserRole)
+            object_type = current_item.data(0, Qt.UserRole + 1)
+            try:
+                if object_id != None:
+                    if object_type == "parcel":
+                        tmp_parcel = session.query(CaTmpParcel).filter(CaTmpParcel.parcel_id == object_id).one()
+                        tmp_parcel.address_streetname = self.street_name_edit.text()
+                        tmp_parcel.address_khashaa = self.khashaa_edit.text()
+                        session.add(tmp_parcel)
+                    elif object_type == "building":
+                        tmp_building = session.query(CaTmpBuilding).filter(CaTmpBuilding.building_id == object_id).one()
+                        tmp_building.address_streetname = self.street_name_edit.text()
+                        tmp_building.address_khashaa = self.khashaa_edit.text()
+                        session.add(tmp_building)
+                session.commit()
 
-        except SQLAlchemyError, e:
-            PluginUtils.show_error(self, self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
-            return
+            except SQLAlchemyError, e:
+                PluginUtils.show_error(self, self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+                return
 
     @pyqtSlot(str)
     def on_street_name_edit_textChanged(self, text):

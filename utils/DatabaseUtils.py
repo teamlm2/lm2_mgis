@@ -306,7 +306,10 @@ class DatabaseUtils():
 
         # In case of a district the level2 is empty
         if w_au_level2 is None:
-            return w_au_level1 + "00"
+            if w_au_level1 is None:
+                return "01101"
+            else:
+                return w_au_level1 + "00"
         else:
             return w_au_level2
 

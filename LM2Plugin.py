@@ -49,7 +49,7 @@ class LM2Plugin:
         self.result_feature = None
         # initialize plugin directory
         self.plugin_dir = os.path.dirname(__file__)
-
+        self.navigatorWidget = None
         override_locale = QSettings().value("locale/overrideFlag", False, type=bool)
         if not override_locale:
             locale = QLocale.system().name()

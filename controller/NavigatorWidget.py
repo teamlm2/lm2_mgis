@@ -3064,16 +3064,17 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         request.setFilterExpression(exp_string)
 
         feature_ids = []
-        iterator = vlayer.getFeatures(request)
+        if vlayer:
+            iterator = vlayer.getFeatures(request)
 
-        for feature in iterator:
-            feature_ids.append(feature.id())
+            for feature in iterator:
+                feature_ids.append(feature.id())
 
-        if len(feature_ids) == 0:
-            self.error_label.setText(self.tr("No parcel assigned"))
+            if len(feature_ids) == 0:
+                self.error_label.setText(self.tr("No parcel assigned"))
 
-        vlayer.setSelectedFeatures(feature_ids)
-        self.plugin.iface.mapCanvas().zoomToSelected(vlayer)
+            vlayer.setSelectedFeatures(feature_ids)
+            self.plugin.iface.mapCanvas().zoomToSelected(vlayer)
 
     def __zoom_to_parcels(self, parcels):
 
@@ -3142,16 +3143,17 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         exp_string = "maintenance_case = {0}".format(m_case_no)
         request.setFilterExpression(exp_string)
         feature_ids = []
-        iterator = vlayer.getFeatures(request)
+        if vlayer:
+            iterator = vlayer.getFeatures(request)
 
-        for feature in iterator:
-            feature_ids.append(feature.id())
+            for feature in iterator:
+                feature_ids.append(feature.id())
 
-        if len(feature_ids) == 0:
-            self.error_label.setText(self.tr("No parcel assigned"))
+            if len(feature_ids) == 0:
+                self.error_label.setText(self.tr("No parcel assigned"))
 
-        vlayer.setSelectedFeatures(feature_ids)
-        self.plugin.iface.mapCanvas().zoomToSelected(vlayer)
+            vlayer.setSelectedFeatures(feature_ids)
+            self.plugin.iface.mapCanvas().zoomToSelected(vlayer)
 
     @pyqtSlot()
     def on_copy_number_action_clicked(self):
