@@ -2681,6 +2681,18 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
             maintenance = self.session.query(CaMaintenanceCase).filter(CaMaintenanceCase.id == case_no).one()
             # maintenance.parcels.delete()
             # maintenance.buildings.delete()
+            # case_parcels = self.session.query(CaMaintenanceParcel).filter(
+            #     CaMaintenanceParcel.maintenance == case_no).all()
+            # for case_parcel in case_parcels:
+            #     self.session.query(CaMaintenanceParcel).filter(
+            #         CaMaintenanceParcel.maintenance == case_parcel.parcel).delete()
+            # case_buildings = self.session.query(CaMaintenanceBuilding).filter(
+            #     CaMaintenanceBuilding.maintenance == case_no).all()
+            # for case_building in case_buildings:
+            #     print case_building.building
+            #     self.session.query(CaMaintenanceBuilding).filter(
+            #         CaMaintenanceBuilding.maintenance == case_building.building).delete()
+            print case_no
             self.session.query(CaMaintenanceCase).filter(CaMaintenanceCase.id == case_no).delete()
 
             self.commit()

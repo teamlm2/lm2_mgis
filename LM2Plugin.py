@@ -870,8 +870,9 @@ class LM2Plugin:
                     vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))) +"/template\style/au_level1.qml")
                     vlayer.setLayerName(QApplication.translate("Plugin", "Admin Unit Level1"))
                     mygroup.addLayer(vlayer)
-            if layer.name() != u'Сумын хил' or layer.name() != 'Admin Unit Level2':
+            if layer.name() != u'Сумын хил' or layer.name() != 'Admin Unit Level2' or layer.name() != 'au_level2':
                 au_level2_layer = LayerUtils.layer_by_data_source("admin_units", "au_level2")
+                print layer.name()
                 if au_level2_layer is None:
                     mygroup = root.findGroup(u"Хил")
                     vlayer = LayerUtils.load_layer_by_name_admin_units("au_level2", "code", "admin_units")
@@ -1007,7 +1008,7 @@ class LM2Plugin:
 
         self.__create_navigator()
 
-        # self.__create_pasture()
+        self.__create_pasture()
         # database = QSettings().value(SettingsConstants.DATABASE_NAME)
         # if database:
         #     au1 = DatabaseUtils.working_l1_code()

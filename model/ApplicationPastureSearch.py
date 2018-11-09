@@ -17,7 +17,6 @@ class ApplicationPastureSearch(Base):
     app_timestamp = Column(Date)
     decision_no = Column(String)
     contract_no = Column(String)
-    record_no = Column(String)
     person_id = Column(String)
     name = Column(String)
     first_name = Column(String)

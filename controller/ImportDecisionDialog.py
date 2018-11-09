@@ -593,7 +593,8 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
             parcel_inserted.landuse = tmp_parcel.landuse
             maintenance_case.parcels.append(parcel_inserted)
             self.session.add(parcel_inserted)
-            self.session.commit()
+            self.session.flush()
+            # self.session.commit()
             parcel_id = parcel_inserted.parcel_id
             # self.session.flush()
 
@@ -665,12 +666,12 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
                 building_insert.address_neighbourhood = tmp_building.address_neighbourhood
                 building_insert.valid_from = date.today()
                 building_insert.geometry = tmp_building.geometry
-                self.maintenance_case.buildings.append(building_insert)
+                # self.maintenance_case.buildings.append(building_insert)
 
                 self.session.add(building_insert)
-
-                self.session.query(CaTmpBuilding). \
-                    filter(CaTmpBuilding.maintenance_case == maintenance_case_id).delete()
+                self.session.flush()
+                # self.session.query(CaTmpBuilding). \
+                #     filter(CaTmpBuilding.maintenance_case == maintenance_case_id).delete()
 
         application.tmp_parcel = None
         application.parcel = parcel_id
@@ -682,7 +683,7 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
                 filter(CtApplication.tmp_parcel == tmp_parcel_id).all()
             for app in app:
                 app.tmp_parcel = None
-            self.session.flush()
+            # self.session.flush()
             self.session.query(CaTmpParcel). \
                 filter(CaTmpParcel.maintenance_case == maintenance_case_id). \
                 filter(CaTmpParcel.parcel_id == tmp_parcel_id).delete()
@@ -1051,7 +1052,9 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
             application = self.session.query(CtApplication).filter(CtApplication.app_no == self.application_cbox.currentText()).one()
             app_id = application.app_id
 
-            dec_app_count = self.session.query(CtDecisionApplication).filter(CtDecisionApplication.application == application.app_id).count()
+            dec_app_count = self.session.query(CtDecisionApplication).\
+                filter(CtDecisionApplication.decision == self.decision.decision_id).\
+                filter(CtDecisionApplication.application == application.app_id).count()
             if dec_app_count == 0:
                 decision_app = CtDecisionApplication()
                 decision_app.decision = self.decision.decision_id
@@ -1505,6 +1508,9 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
         self.join_app_twidget.insertRow(row)
         self.join_app_twidget.setItem(row, 0, item)
 
+        decision_app_count = self.session.query(CtDecisionApplication).\
+            filter(CtDecisionApplication.application == app_instance.app_id).\
+            filter(CtDecisionApplication.decision == self.decision.decision_id).all()
         try:
             # decision_app = self.session.query(CtDecisionApplication).filter(CtDecisionApplication.decision == self.decision.decision_no).all()
             decision_app = CtDecisionApplication()

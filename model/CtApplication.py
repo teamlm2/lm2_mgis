@@ -49,7 +49,7 @@ class CtApplication(Base):
     # ub_parcel = Column(String, ForeignKey('ca_ub_parcel_tbl.old_parcel_id'))
     # ub_parcel_ref = relationship(String, ForeignKey("CaUBParcel"))
 
-    tmp_parcel = Column(String, ForeignKey('ca_tmp_parcel.parcel_id'))
+    tmp_parcel = Column(String, ForeignKey('ca_tmp_parcel_view.parcel_id'))
     tmp_parcel_ref = relationship("CaTmpParcel")
 
     maintenance_case = Column(Integer, ForeignKey('ca_maintenance_case.id'))

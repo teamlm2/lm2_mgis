@@ -152,7 +152,7 @@ class LayerUtils(object):
     def load_layer_by_name_admin_units(layer_name, id, restrictions=[]):
 
         restrictions = restrictions.split(",")
-
+        print restrictions
         if len(restrictions) > 0:
             for restriction in restrictions:
                 restriction = restriction.strip()

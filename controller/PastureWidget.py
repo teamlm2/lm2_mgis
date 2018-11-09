@@ -274,22 +274,19 @@ class PastureWidget(QDockWidget, Ui_PastureWidget, DatabaseHelper):
 
     def __create_parcel_duration_view(self):
 
-        au_level2_string = self.userSettings.restriction_au_level2
-        au_level2_list = au_level2_string.split(",")
+        current_working_soum = "'" + str(DatabaseUtils.current_working_soum_schema()) + "'"
+
         sql = ""
+        if not sql:
+            sql = "Create temp view ps_parcel_duration as" + "\n"
+        else:
+            sql = sql + "UNION" + "\n"
 
-        for au_level2 in au_level2_list:
-
-            au_level2 = au_level2.strip()
-            if not sql:
-                sql = "Create temp view ps_parcel_duration as" + "\n"
-            else:
-                sql = sql + "UNION" + "\n"
-
-            select = "SELECT * " \
-                     "FROM s{0}.ct_application_parcel_pasture pasture_parcel ".format(au_level2) + "\n"
-
-            sql = sql + select
+        select = "SELECT pasture_parcel.parcel, pasture_parcel.application, pasture_parcel.pasture, pasture_parcel.begin_month, pasture_parcel.end_month, pasture_parcel.days, pasture_parcel.app_no " \
+                 "FROM data_soums_union.ct_application_parcel_pasture pasture_parcel " \
+                 "left join data_soums_union.ct_application app on pasture_parcel.application = app.app_id " \
+                 "where  app.au2 = {0}".format(current_working_soum) + "\n"
+        sql = sql + select
         sql = "{0} order by parcel;".format(sql)
 
         # try:
@@ -301,27 +298,25 @@ class PastureWidget(QDockWidget, Ui_PastureWidget, DatabaseHelper):
 
     def __create_pug_view(self):
 
-        au_level2_string = self.userSettings.restriction_au_level2
-        au_level2_list = au_level2_string.split(",")
+        current_working_soum = "'" + str(DatabaseUtils.current_working_soum_schema()) + "'"
+
         sql = ""
 
-        for au_level2 in au_level2_list:
+        if not sql:
+            sql = "Create temp view ps_pasture_boundary as" + "\n"
+        else:
+            sql = sql + "UNION" + "\n"
 
-            au_level2 = au_level2.strip()
-            if not sql:
-                sql = "Create temp view ps_pasture_boundary as" + "\n"
-            else:
-                sql = sql + "UNION" + "\n"
+        select = "SELECT pasture_parcel.parcel_id, pasture_parcel.address_neighbourhood pasture_land_name, pasture_parcel.pasture_type, pasture_parcel.area_ga pasture_area, " \
+                 "pug.code pug_code, pug.area_ga pug_area, pug.group_name pug_name, au2.code as au2_code, au3.code as au3_code, " \
+                 "pasture_parcel.geometry parcel_geom, pug.geometry as pug_geom " \
+                 "FROM data_soums_union.ca_pasture_parcel pasture_parcel " \
+                 "left join data_soums_union.ca_pug_boundary pug on st_intersects(pasture_parcel.geometry, pug.geometry) " \
+                 "left join admin_units.au_level2 au2 on st_intersects(pasture_parcel.geometry, au2.geometry) " \
+                 "left join admin_units.au_level3 au3 on st_intersects(pasture_parcel.geometry, au3.geometry) " \
+                 "where  au2.code = {0}".format(current_working_soum) + "\n"
 
-            select = "SELECT pasture_parcel.parcel_id, pasture_parcel.address_neighbourhood pasture_land_name, pasture_parcel.pasture_type, pasture_parcel.area_ga pasture_area, " \
-                     "pug.code pug_code, pug.area_ga pug_area, pug.group_name pug_name, au2.code as au2_code, au3.code as au3_code, " \
-                     "pasture_parcel.geometry parcel_geom, pug.geometry as pug_geom " \
-                     "FROM s{0}.ca_pasture_parcel pasture_parcel " \
-                     "left join s{0}.ca_pug_boundary pug on st_intersects(pasture_parcel.geometry, pug.geometry) " \
-                     "left join admin_units.au_level2 au2 on st_intersects(pasture_parcel.geometry, au2.geometry) " \
-                     "left join admin_units.au_level3 au3 on st_intersects(pasture_parcel.geometry, au3.geometry) ".format(au_level2) + "\n"
-
-            sql = sql + select
+        sql = sql + select
         sql = "{0} order by parcel_id;".format(sql)
 
         # try:
@@ -333,37 +328,33 @@ class PastureWidget(QDockWidget, Ui_PastureWidget, DatabaseHelper):
 
     def __create_pasture_app_view(self):
 
-        au_level2_string = self.userSettings.restriction_au_level2
-        au_level2_list = au_level2_string.split(",")
+        current_working_soum = "'" + str(DatabaseUtils.current_working_soum_schema()) + "'"
+
         sql = ""
 
-        for au_level2 in au_level2_list:
+        if not sql:
+            sql = "Create temp view pasture_app_search as" + "\n"
+        else:
+            sql = sql + "UNION" + "\n"
 
-            au_level2 = au_level2.strip()
-            if not sql:
-                sql = "Create temp view pasture_app_search as" + "\n"
-            else:
-                sql = sql + "UNION" + "\n"
+        select = "SELECT application.app_no, group_member.group_no, parcel.pasture_type ,application.app_timestamp, application.app_type, status.status, status.status_date, status.officer_in_charge, status.next_officer_in_charge, decision.decision_no, " \
+                 "contract.contract_no, person.person_id, person.name, person.first_name, person.middle_name, parcel.parcel_id, tmp_parcel.parcel_id tmp_parcel_id " \
+                 "FROM data_soums_union.ct_application application " \
+                 "left join data_soums_union.ct_application_status status on status.application = application.app_id " \
+                 "left join data_soums_union.ct_decision_application dec_app on dec_app.application = application.app_id " \
+                 "left join data_soums_union.ct_decision decision on decision.decision_id = dec_app.decision " \
+                 "left join data_soums_union.ct_contract_application_role contract_app on application.app_id = contract_app.application " \
+                 "left join data_soums_union.ct_contract contract on contract_app.contract = contract.contract_id " \
+                 "left join data_soums_union.ct_application_person_role app_pers on app_pers.application = application.app_id " \
+                 "left join data_soums_union.ct_group_member group_member on group_member.person = app_pers.person " \
+                 "left join base.bs_person person on person.person_id = app_pers.person " \
+                 "left join data_soums_union.ca_tmp_parcel tmp_parcel on application.tmp_parcel = tmp_parcel.parcel_id " \
+                 "left join data_soums_union.ca_pasture_parcel parcel on parcel.parcel_id = application.parcel " \
+                 "where (application.app_type = 26 or application.app_type = 27) and application.au2 = {0}".format(current_working_soum) + "\n"
 
-            select = "SELECT application.app_no, group_member.group_no, parcel.pasture_type ,application.app_timestamp, application.app_type, status.status, status.status_date, status.officer_in_charge, status.next_officer_in_charge, decision.decision_no, " \
-                     "contract.contract_no, person.person_id, person.name, person.first_name, person.middle_name, parcel.parcel_id, tmp_parcel.parcel_id tmp_parcel_id, record.record_no " \
-                     "FROM s{0}.ct_application application " \
-                     "left join s{0}.ct_application_status status on status.application = application.app_no " \
-                     "left join s{0}.ct_decision_application dec_app on dec_app.application = application.app_no " \
-                     "left join s{0}.ct_decision decision on decision.decision_no = dec_app.decision " \
-                     "left join s{0}.ct_record_application_role rec_app on application.app_no = rec_app.application " \
-                     "left join s{0}.ct_ownership_record record on rec_app.record = record.record_no " \
-                     "left join s{0}.ct_contract_application_role contract_app on application.app_no = contract_app.application " \
-                     "left join s{0}.ct_contract contract on contract_app.contract = contract.contract_no " \
-                     "left join s{0}.ct_application_person_role app_pers on app_pers.application = application.app_no " \
-                     "left join s{0}.ct_group_member group_member on group_member.person = app_pers.person " \
-                     "left join base.bs_person person on person.person_id = app_pers.person " \
-                     "left join s{0}.ca_tmp_parcel tmp_parcel on application.tmp_parcel = tmp_parcel.parcel_id " \
-                     "left join s{0}.ca_pasture_parcel parcel on parcel.parcel_id = application.parcel ".format(au_level2) + "\n"
+        sql = sql + select
 
-            sql = sql + select
-
-        sql = "{0} where app_type = 26 or app_type = 27 order by app_no;".format(sql)
+        sql = "{0} order by app_no;".format(sql)
 
         # try:
         self.session.execute(sql)
@@ -387,7 +378,7 @@ class PastureWidget(QDockWidget, Ui_PastureWidget, DatabaseHelper):
                 sql = sql + "UNION" + "\n"
 
             select = "SELECT * " \
-                     "FROM s{0}.ca_pasture_monitoring monitoring ".format(au_level2) + "\n"
+                     "FROM data_soums_union.ca_pasture_monitoring monitoring ".format(au_level2) + "\n"
 
             sql = sql + select
 
@@ -594,11 +585,7 @@ class PastureWidget(QDockWidget, Ui_PastureWidget, DatabaseHelper):
         # try:
         applications = self.session.query(ApplicationPastureSearch)
         filter_is_set = False
-        # sub = self.session.query(ApplicationPastureSearch, func.row_number().over(partition_by=ApplicationPastureSearch.app_no,
-        #                                                                    order_by=(
-        #                                                                    desc(ApplicationPastureSearch.status_date),
-        #                                                                    desc(ApplicationPastureSearch.status))).label("row_number")).subquery()
-        # applications = applications.select_entity_from(sub).filter(sub.c.row_number == 1)
+
         applications = applications.filter(or_(ApplicationPastureSearch.app_type == ApplicationType.right_land,
                    ApplicationPastureSearch.app_type == ApplicationType.pasture_use))
         if self.pasture_group_cbox.currentIndex() != -1:
@@ -799,34 +786,34 @@ class PastureWidget(QDockWidget, Ui_PastureWidget, DatabaseHelper):
 
         monitoring_layer = LayerUtils.load_layer_by_name_pasture_monitoring("ca_pasture_monitoring", "point_id")
         natural_zone_layaer = LayerUtils.load_layer_by_name_pasture_monitoring("au_natural_zone", "code")
-        vlayer = LayerUtils.load_layer_by_name_report("ca_pug_boundary", "code", restrictions)
-        vlayer_eco = LayerUtils.load_layer_by_name_report("ca_pug_eco", "code", restrictions)
-        vlayer_parcel = LayerUtils.load_layer_by_name_report("ca_pasture_parcel", "parcel_id", restrictions)
-        vlayer_building = LayerUtils.load_layer_by_name_report("ca_pasture_building", "building_id", restrictions)
+        vlayer = LayerUtils.load_union_layer_by_name("ca_pug_boundary", "code")
+        vlayer_eco = LayerUtils.load_union_layer_by_name("ca_pug_eco", "code")
+        vlayer_parcel = LayerUtils.load_union_layer_by_name("ca_pasture_parcel", "parcel_id")
+        vlayer_building = LayerUtils.load_union_layer_by_name("ca_pasture_building", "building_id")
         # vlayer_monitoring_point = LayerUtils.load_layer_by_name_report("ca_pasture_monitoring", "point_id", restrictions)
 
         layers = self.plugin.iface.legendInterface().layers()
 
         for layer in layers:
-            if layer.name() == "PUGBuilding"+'_' + restrictions or layer.name() == u"БАХ байшин"+'_' + restrictions:
+            if layer.name() == "PUGBuilding" or layer.name() == u"БАХ байшин":
                 is_pug_building = True
         if not is_pug_building:
             mygroup.addLayer(vlayer_building)
 
         for layer in layers:
-            if layer.name() == "PUGParcel"+'_' + restrictions or layer.name() == u"БАХ нэгж талбар"+'_' + restrictions:
+            if layer.name() == "PUGParcel" or layer.name() == u"БАХ нэгж талбар":
                 is_pug_parcel = True
         if not is_pug_parcel:
             mygroup.addLayer(vlayer_parcel)
 
         for layer in layers:
-            if layer.name() == "PUGBoundary"+'_' + restrictions or layer.name() == u"БАХ-ийн хил"+'_' + restrictions:
+            if layer.name() == "PUGBoundary" or layer.name() == u"БАХ-ийн хил":
                 is_layer = True
         if not is_layer:
             mygroup.addLayer(vlayer)
 
         for layer in layers:
-            if layer.name() == "PUGEcological"+'_' + restrictions or layer.name() == u"БАХ экологийн чадавхи"+'_' + restrictions:
+            if layer.name() == "PUGEcological" or layer.name() == u"БАХ экологийн чадавхи":
                 is_eco_layer = True
         if not is_eco_layer:
             mygroup.addLayer(vlayer_eco)
@@ -844,13 +831,13 @@ class PastureWidget(QDockWidget, Ui_PastureWidget, DatabaseHelper):
         if not is_natural_zone_layer:
             mygroup.addLayer(natural_zone_layaer)
 
-        vlayer.setLayerName(QApplication.translate("Plugin", "PUGBoundary") + '_' + restrictions)
+        vlayer.setLayerName(QApplication.translate("Plugin", "PUGBoundary"))
         vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "template\style/pug_boundary.qml")
-        vlayer_eco.setLayerName(QApplication.translate("Plugin", "PUGEcological") + '_' + restrictions)
+        vlayer_eco.setLayerName(QApplication.translate("Plugin", "PUGEcological"))
         vlayer_eco.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "template\style/pug_eco.qml")
-        vlayer_parcel.setLayerName(QApplication.translate("Plugin", "PUGParcel") + '_' + restrictions)
+        vlayer_parcel.setLayerName(QApplication.translate("Plugin", "PUGParcel"))
         vlayer_parcel.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "template\style/pug_parcel.qml")
-        vlayer_building.setLayerName(QApplication.translate("Plugin", "PUGBuilding") + '_' + restrictions)
+        vlayer_building.setLayerName(QApplication.translate("Plugin", "PUGBuilding"))
 
         monitoring_layer.setLayerName(QApplication.translate("Plugin", "PastureMonitoringPoint"))
         monitoring_layer.loadNamedStyle(
