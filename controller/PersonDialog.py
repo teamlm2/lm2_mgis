@@ -577,11 +577,13 @@ class PersonDialog(QDialog, Ui_PersonDialog, DatabaseHelper):
             self.person.middle_name = self.middle_name_edit.text()
             self.person.date_of_birth = DatabaseUtils.convert_date(self.date_of_birth_date.date())
 
+        date_time_string = QDateTime.currentDateTime().toString(Constants.DATABASE_DATETIME_FORMAT)
         self.person.person_register = self.personal_id_edit.text()
         self.person.state_registration_no = self.state_register_edit.text()
         self.person.address_building_no = self.building_edit.text()
         self.person.address_entrance_no = self.entrance_edit.text()
         self.person.address_apartment_no = self.apartment_edit.text()
+        self.person.created_at = datetime.strptime(date_time_string, Constants.PYTHON_DATETIME_FORMAT)
 
         bank_id = self.bank_cbox.itemData(self.bank_cbox.currentIndex())
         if bank_id == -1:

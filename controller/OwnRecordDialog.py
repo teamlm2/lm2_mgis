@@ -923,7 +923,7 @@ class OwnRecordDialog(QDialog, Ui_OwnRecordDialog, DatabaseHelper):
 
         try:
             current_app_no = selected_application.data(Qt.UserRole)
-            app_no_count = self.session.query(CtApplication).filter_by(app_no=current_app_no).count()
+            app_no_count = self.session.query(CtApplication).filter_by(app_id=current_app_no).count()
 
             if app_no_count == 0:
                 PluginUtils.show_error(self, self.tr("Working Soum"),
@@ -932,7 +932,7 @@ class OwnRecordDialog(QDialog, Ui_OwnRecordDialog, DatabaseHelper):
                                                 "application for the parcel.").format(current_app_no))
                 return
 
-            application = self.session.query(CtApplication).filter_by(app_no=current_app_no).one()
+            application = self.session.query(CtApplication).filter_by(app_id=current_app_no).one()
 
             if not self.__validate_application(application):
                 return
@@ -1001,29 +1001,32 @@ class OwnRecordDialog(QDialog, Ui_OwnRecordDialog, DatabaseHelper):
 
     def __generate_record_number(self):
 
+        soum = DatabaseUtils.current_working_soum_schema()
         try:
             record_number_filter = "%-{0}/%".format(str(QDate.currentDate().toString("yyyy")))
 
-            count = self.session.query(CtOwnershipRecord).filter(CtOwnershipRecord.record_no != str(self.record.record_id)) \
+            count = self.session.query(CtOwnershipRecord).filter(CtOwnershipRecord.record_no != str(self.record.record_no)) \
                         .filter(CtOwnershipRecord.record_no.like("%-%"))\
-                        .filter(CtOwnershipRecord.record_no.like(record_number_filter))  \
-                        .order_by(func.substr(CtOwnershipRecord.record_no, 10, 16).desc()).count()
+                        .filter(CtOwnershipRecord.record_no.like(record_number_filter)) \
+                        .filter(CtOwnershipRecord.au2 == soum) \
+                .order_by(func.substr(CtOwnershipRecord.record_no, 10, 16).desc()).count()
             if count == 0:
                 cu_max_number = "00001"
 
             else:
                 cu_max_number = self.session.query(CtOwnershipRecord.record_no)\
-                                    .filter(CtOwnershipRecord.record_no != str(self.record.record_id)) \
+                                    .filter(CtOwnershipRecord.record_no != str(self.record.record_no)) \
                                     .filter(CtOwnershipRecord.record_no.like("%-%"))\
-                                    .filter(CtOwnershipRecord.record_no.like(record_number_filter))  \
-                                    .order_by(func.substr(CtOwnershipRecord.record_no, 10, 16).desc()).first()
+                                    .filter(CtOwnershipRecord.record_no.like(record_number_filter)) \
+                                    .filter(CtOwnershipRecord.au2 == soum) \
+                    .order_by(func.substr(CtOwnershipRecord.record_no, 10, 16).desc()).first()
 
                 cu_max_number = cu_max_number[0]
                 minus_split_number = cu_max_number.split("-")
                 slash_split_number = minus_split_number[1].split("/")
                 cu_max_number = int(slash_split_number[1]) + 1
 
-            soum = DatabaseUtils.current_working_soum_schema()
+
             year = QDate.currentDate().toString("yyyy")
             number = soum + "-" + year + "/" + str(cu_max_number).zfill(5)
 
@@ -1220,8 +1223,8 @@ class OwnRecordDialog(QDialog, Ui_OwnRecordDialog, DatabaseHelper):
     def __save_settings(self):
 
         try:
-
             self.__save_record()
+            self.__save_parcel()
             self.__save_taxes()
             return True
 
@@ -1231,6 +1234,16 @@ class OwnRecordDialog(QDialog, Ui_OwnRecordDialog, DatabaseHelper):
     def __validate_settings(self):
 
         return True
+
+    def __save_parcel(self):
+
+        parcel_id = self.id_main_edit.text()
+        if parcel_id:
+            parcel_count = self.session.query(CaParcelTbl).filter(CaParcelTbl.parcel_id == parcel_id).count()
+            if parcel_count == 1:
+                parcel = self.session.query(CaParcelTbl).filter(CaParcelTbl.parcel_id == parcel_id).one()
+                parcel.address_streetname = self.street_name_edit.text()
+                parcel.address_khashaa = self.khashaa_edit.text()
 
     @pyqtSlot()
     def on_apply_button_clicked(self):
@@ -1628,3 +1641,12 @@ class OwnRecordDialog(QDialog, Ui_OwnRecordDialog, DatabaseHelper):
             self.app_no = app.app_no
             self.app_number_cbox.addItem(self.app_no, app.app_id)
 
+    @pyqtSlot(int)
+    def on_edit_address_chbox_stateChanged(self, state):
+
+        if state == Qt.Checked:
+            self.street_name_edit.setEnabled(True)
+            self.khashaa_edit.setEnabled(True)
+        else:
+            self.street_name_edit.setEnabled(False)
+            self.khashaa_edit.setEnabled(False)

@@ -279,33 +279,35 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
 
     def __set_up_feezone_cbox(self, l1_codes, l2_codes):
 
+
         locations1 = self.session.query(SetFeeZone.location, SetFeeZone.code).distinct(). \
             filter(SetFeeZone.geometry.ST_Within(AuLevel1.geometry)). \
             filter(AuLevel1.code.in_(l1_codes)). \
-            filter(or_(AuLevel1.code.startswith('01'), AuLevel1.code.startswith('1'))). \
             order_by(SetFeeZone.location)
+            # filter(or_(AuLevel1.code.startswith('01'), AuLevel1.code.startswith('1'))). \
+
         locations2 = self.session.query(SetFeeZone.location, SetFeeZone.code).distinct(). \
-            filter(SetFeeZone.geometry.ST_Within(AuLevel2.geometry)). \
+            filter(SetFeeZone.geometry.ST_Overlaps(AuLevel2.geometry)). \
             filter(AuLevel2.code.in_(l2_codes)). \
             order_by(SetFeeZone.location)
         locations3 = self.session.query(SetFeeZone.location, SetFeeZone.code).distinct(). \
             filter(SetFeeZone.geometry.ST_Contains(AuLevel2.geometry)). \
             filter(AuLevel2.code.in_(l2_codes)). \
             order_by(SetFeeZone.location)
-        # locations4 = self.session.query(SetFeeZone.location, SetFeeZone.code).distinct(). \
-        #     filter(SetFeeZone.geometry.ST_Contains(AuLevel2.geometry)). \
-        #     filter(AuLevel2.code.in_(l2_codes)). \
-        #     order_by(SetFeeZone.location)
+        locations4 = self.session.query(SetFeeZone.location, SetFeeZone.code).distinct(). \
+            filter(SetFeeZone.geometry.ST_Intersects(AuLevel2.geometry)). \
+            filter(AuLevel2.code.in_(l2_codes)). \
+            order_by(SetFeeZone.location)
 
         for location in locations1:
             self.zone_location_cbox.addItem(location[0], location[1])
-        # for location in locations2:
-        #     self.zone_location_cbox.addItem(location[0], location[1])
+        for location in locations2:
+            self.zone_location_cbox.addItem(location[0], location[1])
         for location in locations3:
             self.zone_location_cbox.addItem(location[0], location[1])
-        # for location in locations4:
-        #     if location[0]!= self.zone_location_cbox.itemText(self.zone_location_cbox.currentIndex()):
-        #         self.zone_location_cbox.addItem(location[0], location[1])
+        for location in locations4:
+            if location[0]!= self.zone_location_cbox.itemText(self.zone_location_cbox.currentIndex()):
+                self.zone_location_cbox.addItem(location[0], location[1])
 
     def __set_up_taxzone_cbox(self, l1_codes, l2_codes):
 
@@ -322,20 +324,20 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
             filter(SetTaxAndPriceZone.geometry.ST_Contains(AuLevel2.geometry)). \
             filter(AuLevel2.code.in_(l2_codes)). \
             order_by(SetTaxAndPriceZone.location)
-        # locations4 = self.session.query(SetTaxAndPriceZone.location, SetTaxAndPriceZone.code).distinct(). \
-        #     filter(SetTaxAndPriceZone.geometry.ST_Contains(AuLevel2.geometry)). \
-        #     filter(AuLevel2.code.in_(l2_codes)). \
-        #     order_by(SetTaxAndPriceZone.location)
+        locations4 = self.session.query(SetTaxAndPriceZone.location, SetTaxAndPriceZone.code).distinct(). \
+            filter(SetTaxAndPriceZone.geometry.ST_Intersects(AuLevel2.geometry)). \
+            filter(AuLevel2.code.in_(l2_codes)). \
+            order_by(SetTaxAndPriceZone.location)
 
         for location in locations1:
             self.zone_location_tax_cbox.addItem(location[0], location[1])
-        # for location in locations2:
-        #     self.zone_location_tax_cbox.addItem(location[0], location[1])
+        for location in locations2:
+            self.zone_location_tax_cbox.addItem(location[0], location[1])
         for location in locations3:
             self.zone_location_tax_cbox.addItem(location[0], location[1])
-        # for location in locations4:
-        #     if location[0] != self.zone_location_tax_cbox.itemText(self.zone_location_tax_cbox.currentIndex()):
-        #         self.zone_location_tax_cbox.addItem(location[0], location[1])
+        for location in locations4:
+            if location[0] != self.zone_location_tax_cbox.itemText(self.zone_location_tax_cbox.currentIndex()):
+                self.zone_location_tax_cbox.addItem(location[0], location[1])
 
     def __load_settings(self):
 
@@ -449,23 +451,33 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
 
     def __save_settings(self):
 
+        index = self.tabWidget.currentIndex()
         # try:
         #     self.__save_report_settings()
-            self.__save_certificate_settings()
-            self.__save_payment_settings()
-            self.__save_logging_settings()
+        if index == 1:
             self.__save_fees()
+        if index == 2:
             self.__save_taxes()
+        if index == 3:
+            self.__save_certificate_settings()
+        if index == 6:
+            self.__save_payment_settings()
+        if index == 7:
+            self.__save_codelist_entries()
+        if index == 8:
             self.__save_companies()
             self.__save_surveyors()
-            self.__save_codelist_entries()
-            # self.__save_documents()
+        if index == 9:
+            self.__save_logging_settings()
+        if index == 10:
             self.__save_equipments()
+        if index == 11:
             self.__save_training()
-            # self.__save_certificate_person()
-            # self.__save_training_person()
+        # self.__save_documents()
+        # self.__save_certificate_person()
+        # self.__save_training_person()
 
-            return True
+        return True
         # except exc.SQLAlchemyError,  e:
         #     PluginUtils.show_error(self, self.tr("SQL Error"), e.message)
         #     return False
@@ -1986,9 +1998,10 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
     def __set_schema(self):
 
         soum_code = DatabaseUtils.working_l2_code()
-        schema_string = 's' + soum_code
-        self.session.execute(
-            "SET search_path to base, codelists, admin_units, settings, pasture, public, data_soums_union, sdplatform")
+        if soum_code:
+            schema_string = 's' + soum_code
+            self.session.execute(
+                "SET search_path to base, codelists, admin_units, settings, pasture, public, data_soums_union, sdplatform")
 
     @pyqtSlot(int)
     def on_zone_location_cbox_currentIndexChanged(self, idx):
@@ -1999,8 +2012,8 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
 
         soum_code = self.zone_location_cbox.itemData(idx, Qt.UserRole)
         self.zone_location_tax_cbox.setCurrentIndex(self.zone_location_tax_cbox.findData(soum_code))
-
-        schema_string = 's'+ soum_code
+        if soum_code:
+            schema_string = 's'+ soum_code
 
         self.session.execute(
             "SET search_path to base, codelists, admin_units, settings, pasture, public, data_soums_union, sdplatform")
@@ -2045,19 +2058,19 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
         self.landuse_code_list = list()
         del self.landuse_code_list[:]
 
-        if zone_no == 50 or zone_no == 60 or zone_no == 70 or zone_no == 80:
-            for code, description in self.session.query(ClLanduseType.code, ClLanduseType.description). \
-                    filter(ClLanduseType.code2.in_([11,12,13,14,15])).all():
-                self.landuse_code_list.append(u'{0}: {1}'.format(code, description))
-            delegate = LandUseComboBoxDelegate(FEE_LAND_USE, self.landuse_code_list, self.land_fee_twidget)
-            self.land_fee_twidget.setItemDelegateForColumn(FEE_LAND_USE, delegate)
-        else:
-            for code, description in self.session.query(ClLanduseType.code, ClLanduseType.description). \
-                    filter(ClLanduseType.code2 != 11, ClLanduseType.code2 != 12, ClLanduseType.code2 != 13 \
-                               , ClLanduseType.code2 != 14, ClLanduseType.code2 != 15).all():
-                self.landuse_code_list.append(u'{0}: {1}'.format(code, description))
-            delegate = LandUseComboBoxDelegate(FEE_LAND_USE, self.landuse_code_list, self.land_fee_twidget)
-            self.land_fee_twidget.setItemDelegateForColumn(FEE_LAND_USE, delegate)
+        # if zone_no == 50 or zone_no == 60 or zone_no == 70 or zone_no == 80:
+        #     for code, description in self.session.query(ClLanduseType.code, ClLanduseType.description). \
+        #             filter(ClLanduseType.code2.in_([11,12,13,14,15])).all():
+        #         self.landuse_code_list.append(u'{0}: {1}'.format(code, description))
+        #     delegate = LandUseComboBoxDelegate(FEE_LAND_USE, self.landuse_code_list, self.land_fee_twidget)
+        #     self.land_fee_twidget.setItemDelegateForColumn(FEE_LAND_USE, delegate)
+        # else:
+        for code, description in self.session.query(ClLanduseType.code, ClLanduseType.description). \
+                filter(ClLanduseType.code2 != 11, ClLanduseType.code2 != 12, ClLanduseType.code2 != 13 \
+                           , ClLanduseType.code2 != 14, ClLanduseType.code2 != 15).all():
+            self.landuse_code_list.append(u'{0}: {1}'.format(code, description))
+        delegate = LandUseComboBoxDelegate(FEE_LAND_USE, self.landuse_code_list, self.land_fee_twidget)
+        self.land_fee_twidget.setItemDelegateForColumn(FEE_LAND_USE, delegate)
 
     @pyqtSlot(int)
     def on_zone_location_tax_cbox_currentIndexChanged(self, idx):
@@ -2091,21 +2104,21 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
         if self.to_zone_tax_cbox.count() > 1:
             self.to_zone_tax_cbox.setCurrentIndex(1)
 
-        zone_fid = self.zones_tax_lwidget.item(self.zones_tax_lwidget.currentRow()).data(Qt.UserRole)
+            zone_fid = self.zones_tax_lwidget.item(self.zones_tax_lwidget.currentRow()).data(Qt.UserRole)
 
-        zone = self.session.query(SetTaxAndPriceZone).filter(SetTaxAndPriceZone.zone_id == zone_fid).one()
+            zone = self.session.query(SetTaxAndPriceZone).filter(SetTaxAndPriceZone.zone_id == zone_fid).one()
 
-        zone_no = zone.zone_no
-        self.landuse_code_list = list()
-        del self.landuse_code_list[:]
+            zone_no = zone.zone_no
+            self.landuse_code_list = list()
+            del self.landuse_code_list[:]
 
-        if zone_no == 50 or zone_no == 60 or zone_no == 70 or zone_no == 80:
-            for code, description in self.session.query(ClLanduseType.code, ClLanduseType.description). \
-                    filter(ClLanduseType.code2.in_([11,12,13,14,15])).all():
-                self.landuse_code_list.append(u'{0}: {1}'.format(code, description))
-            delegate = LandUseComboBoxDelegate(TAX_LAND_USE, self.landuse_code_list, self.land_tax_twidget)
-            self.land_tax_twidget.setItemDelegateForColumn(TAX_LAND_USE, delegate)
-        else:
+            # if zone_no == 50 or zone_no == 60 or zone_no == 70 or zone_no == 80:
+            #     for code, description in self.session.query(ClLanduseType.code, ClLanduseType.description). \
+            #             filter(ClLanduseType.code2.in_([11,12,13,14,15])).all():
+            #         self.landuse_code_list.append(u'{0}: {1}'.format(code, description))
+            #     delegate = LandUseComboBoxDelegate(TAX_LAND_USE, self.landuse_code_list, self.land_tax_twidget)
+            #     self.land_tax_twidget.setItemDelegateForColumn(TAX_LAND_USE, delegate)
+            # else:
             for code, description in self.session.query(ClLanduseType.code, ClLanduseType.description). \
                     filter(ClLanduseType.code2 != 11, ClLanduseType.code2 != 12, ClLanduseType.code2 != 13 \
                                , ClLanduseType.code2 != 14, ClLanduseType.code2 != 15).all():
@@ -2193,33 +2206,34 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
 
         self.update_date.setDate(QDate.currentDate())
 
-        zone_fid = self.zones_lwidget.item(self.zones_lwidget.currentRow()).data(Qt.UserRole)
+        if self.zones_lwidget.item(self.zones_lwidget.currentRow()):
+            zone_fid = self.zones_lwidget.item(self.zones_lwidget.currentRow()).data(Qt.UserRole)
 
-        zone = self.session.query(SetFeeZone).filter(SetFeeZone.zone_id == zone_fid).one()
+            zone = self.session.query(SetFeeZone).filter(SetFeeZone.zone_id == zone_fid).one()
 
-        zone_no = zone.zone_no
-        if len(self.landuse_code_list) == 0:
-            if zone_no != 50 or zone_no != 60 or zone_no != 70 or zone_no != 80:
-                for code, description in self.session.query(ClLanduseType.code, ClLanduseType.description). \
-                        filter(ClLanduseType.code2 != 11, ClLanduseType.code2 != 12, ClLanduseType.code2 != 13 \
-                               , ClLanduseType.code2 != 14, ClLanduseType.code2 != 15).all():
-                    self.landuse_code_list.append(u'{0}: {1}'.format(code, description))
-            else:
+            zone_no = zone.zone_no
+            if len(self.landuse_code_list) == 0:
+                # if zone_no != 50 or zone_no != 60 or zone_no != 70 or zone_no != 80:
+                #     for code, description in self.session.query(ClLanduseType.code, ClLanduseType.description). \
+                #             filter(ClLanduseType.code2 != 11, ClLanduseType.code2 != 12, ClLanduseType.code2 != 13 \
+                #                    , ClLanduseType.code2 != 14, ClLanduseType.code2 != 15).all():
+                #         self.landuse_code_list.append(u'{0}: {1}'.format(code, description))
+                # else:
                 for code, description in self.session.query(ClLanduseType.code, ClLanduseType.description). \
                         filter(ClLanduseType.code2.in_([11,12,13,14,15])).all():
                     self.landuse_code_list.append(u'{0}: {1}'.format(code, description))
 
-        self.__set_up_twidget(self.land_fee_twidget)
+            self.__set_up_twidget(self.land_fee_twidget)
 
-        delegate = LandUseComboBoxDelegate(FEE_LAND_USE, self.landuse_code_list, self.land_fee_twidget)
-        self.land_fee_twidget.setItemDelegateForColumn(FEE_LAND_USE, delegate)
-        # delegate = IntegerSpinBoxDelegate(FEE_BASE_FEE_PER_M2, 0, 10000, 0, 5, self.land_fee_twidget)
-        delegate = DoubleSpinBoxDelegate(FEE_BASE_FEE_PER_M2, 0, 100000.0000, 0.0001, 0.001, self.land_fee_twidget)
-        self.land_fee_twidget.setItemDelegateForColumn(FEE_BASE_FEE_PER_M2, delegate)
-        delegate = IntegerSpinBoxDelegate(FEE_SUBSIDIZED_AREA, 0, 10000, 0, 5, self.land_fee_twidget)
-        self.land_fee_twidget.setItemDelegateForColumn(FEE_SUBSIDIZED_AREA, delegate)
-        delegate = DoubleSpinBoxDelegate(FEE_SUBSIDIZED_FEE_RATE, 0, 100, 0, 0.01, self.land_fee_twidget)
-        self.land_fee_twidget.setItemDelegateForColumn(FEE_SUBSIDIZED_FEE_RATE, delegate)
+            delegate = LandUseComboBoxDelegate(FEE_LAND_USE, self.landuse_code_list, self.land_fee_twidget)
+            self.land_fee_twidget.setItemDelegateForColumn(FEE_LAND_USE, delegate)
+            # delegate = IntegerSpinBoxDelegate(FEE_BASE_FEE_PER_M2, 0, 10000, 0, 5, self.land_fee_twidget)
+            delegate = DoubleSpinBoxDelegate(FEE_BASE_FEE_PER_M2, 0, 100000.0000, 0.0001, 0.001, self.land_fee_twidget)
+            self.land_fee_twidget.setItemDelegateForColumn(FEE_BASE_FEE_PER_M2, delegate)
+            delegate = IntegerSpinBoxDelegate(FEE_SUBSIDIZED_AREA, 0, 10000, 0, 5, self.land_fee_twidget)
+            self.land_fee_twidget.setItemDelegateForColumn(FEE_SUBSIDIZED_AREA, delegate)
+            delegate = DoubleSpinBoxDelegate(FEE_SUBSIDIZED_FEE_RATE, 0, 100, 0, 0.01, self.land_fee_twidget)
+            self.land_fee_twidget.setItemDelegateForColumn(FEE_SUBSIDIZED_FEE_RATE, delegate)
 
     def __set_up_land_tax_tab(self):
 

@@ -22,6 +22,10 @@ from ..model.CaMaintenanceCase import *
 from ..model import Constants
 from ..model.SdUser import *
 from ..model.SdEmployee import *
+from ..model.SdFtpPermission import *
+from ..model.SdFtpConnection import *
+from ftplib import FTP, error_perm
+import urllib
 from ..LM2Plugin import *
 
 class DatabaseUtils():
@@ -132,6 +136,12 @@ class DatabaseUtils():
                                QApplication.translate("LM2", "Could not execute: {0}").format(e.message))
 
     @staticmethod
+    def current_date_time():
+
+        date_time_string = QDateTime.currentDateTime().toString(Constants.DATABASE_DATETIME_FORMAT)
+        return datetime.strptime(date_time_string, Constants.PYTHON_DATETIME_FORMAT)
+
+    @staticmethod
     def get_sd_user(user_id):
 
         try:
@@ -186,7 +196,6 @@ class DatabaseUtils():
 
         user_setting_result = None
         session = SessionHandler().session_instance()
-
         try:
             user_setting_result = session.query(SetRole).filter_by(user_name=name).filter(SetRole.is_active == True).one()
             session.commit()
@@ -425,3 +434,36 @@ class DatabaseUtils():
             session.rollback()
             raise LM2Exception(QApplication.translate("LM2", "Database Query Error"),
                                QApplication.translate("LM2", "Could not execute: {0}").format(e.message))
+
+    @staticmethod
+    def ftp_connect():
+
+        session = SessionHandler().session_instance()
+        au1_code = DatabaseUtils.working_l1_code()
+        ftp_permission = session.query(SdFtpPermission).filter(SdFtpPermission.aimag_code == au1_code).first()
+        if ftp_permission:
+            ftp_connection = session.query(SdFtpConnection).filter(
+                SdFtpConnection.ftp_id == ftp_permission.ftp_id).one()
+
+            ftp_host = ftp_connection.host
+            ftp_user = ftp_connection.username
+            ftp_pass = ftp_connection.password
+
+            retry = True
+            while (retry):
+                try:
+                    ftp = FTP(ftp_host)
+
+                    ftp.login(ftp_user, ftp_pass)
+                    retry = False
+                    # QMessageBox.information(None, QApplication.translate("LM2", "FTP connection"),
+                    #                         QApplication.translate("LM2",
+                    #                                                "Yeeesss babaaaaay"))
+                    return [ftp, ftp_connection]
+                except IOError as e:
+                    retry = True
+                    QMessageBox.information(None, QApplication.translate("LM2", "FTP connection"),
+                                            QApplication.translate("LM2",
+                                                                   "Error ftp connection"))
+            else:
+                return None

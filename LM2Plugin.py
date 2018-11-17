@@ -307,21 +307,17 @@ class LM2Plugin:
                 if self.navigatorWidget.isVisible():
                     self.navigatorWidget.hide()
 
-                # self.__disable_menu()
-
             if self.parcelInfoWidget != None:
                 if self.parcelInfoWidget.isVisible():
                     self.parcelInfoWidget.hide()
-
-                # self.__disable_menu()
 
             if self.pastureWidget != None:
                 if self.pastureWidget.isVisible():
                     self.pastureWidget.hide()
 
-                # self.__disable_menu()
             SessionHandler().destroy_session()
             self.is_expired = dlg.get_expired()
+
             self.__update_database_connection(dlg.get_password(), self.is_expired)
 
     def __show_reports_dialog(self):
@@ -798,10 +794,8 @@ class LM2Plugin:
                             and server == uri.host() and port == uri.port() and p_password == uri.password()\
                             and not is_expired:
                         self.__create_db_session(uri.password())
-
                         self.__set_menu_visibility()
                         self.__refresh_layer()
-
                         break
 
     def __set_menu_visibility(self):
@@ -817,7 +811,6 @@ class LM2Plugin:
             return
 
         user_right = DatabaseUtils.userright_by_name(user_name)
-
         if user_right:
             self.__enable_menu(user_right)
 
@@ -825,139 +818,28 @@ class LM2Plugin:
 
         root = QgsProject.instance().layerTreeRoot()
         LayerUtils.refresh_layer()
-
-        layers = self.iface.legendInterface().layers()
-        is_au_level2 = False
-        for layer in layers:
-            if layer.name() == "ca_parcel":
-                mygroup = root.findGroup(u"Кадастр")
-                myalayer = root.findLayer(layer.id())
-                layer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))) +"/template\style/ca_parcel.qml")
-                layer.setLayerName(QApplication.translate("Plugin", "Parcel"))
-                if myalayer is None:
-                    mygroup.addLayer(layer)
-            else:
-                if layer.name() != u'Нэгж талбар' or layer.name() != 'Parcel':
-                    ca_building_layer = LayerUtils.layer_by_data_source("data_soums_union", "ca_parcel")
-                    if ca_building_layer is None:
-                        mygroup = root.findGroup(u"Кадастр")
-                        vlayer = LayerUtils.load_layer_by_name_admin_units("ca_parcel", "parcel_id", "data_soums_union")
-                        vlayer.loadNamedStyle(
-                            str(os.path.dirname(os.path.realpath(__file__))) + "/template\style/ca_parcel.qml")
-                        vlayer.setLayerName(QApplication.translate("Plugin", "Parcel"))
-                        mygroup.addLayer(vlayer)
-            if layer.name() == "ca_building":
-                mygroup = root.findGroup(u"Кадастр")
-                myalayer = root.findLayer(layer.id())
-                layer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))) +"/template\style/ca_building.qml")
-                layer.setLayerName(QApplication.translate("Plugin", "Building"))
-                if myalayer is None:
-                    mygroup.addLayer(layer)
-            else:
-                if layer.name() != u'Барилга' or layer.name() != 'Building':
-                    ca_building_layer = LayerUtils.layer_by_data_source("data_soums_union", "ca_building")
-                    if ca_building_layer is None:
-                        mygroup = root.findGroup(u"Кадастр")
-                        vlayer = LayerUtils.load_layer_by_name_admin_units("ca_building", "building_id", "data_soums_union")
-                        vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))) +"/template\style/ca_building.qml")
-                        vlayer.setLayerName(QApplication.translate("Plugin", "Building"))
-                        mygroup.addLayer(vlayer)
-            # if layer.name() != u'Аймгийн хил' or layer.name() != 'Admin Unit Level1':
-            #     au_level1_layer = LayerUtils.layer_by_data_source("admin_units", "au_level1")
-            #     if au_level1_layer is None:
-            #         mygroup = root.findGroup(u"Хил")
-            #         vlayer = LayerUtils.load_layer_by_name_admin_units("au_level1", "code", "admin_units")
-            #         vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))) +"/template\style/au_level1.qml")
-            #         vlayer.setLayerName(QApplication.translate("Plugin", "Admin Unit Level1"))
-            #         mygroup.addLayer(vlayer)
-            # if layer.name() != u'Сумын хил' or layer.name() != 'Admin Unit Level2':
-            #     au_level2_layer = LayerUtils.layer_by_data_source("admin_units", "au_level2")
-            #     if not is_au_level2:
-            #     # if au_level2_layer is None:
-            #         mygroup = root.findGroup(u"Хил")
-            #         vlayer = LayerUtils.load_layer_by_name_admin_units("au_level2", "code", "admin_units")
-            #         vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))) +"/template\style/au_level2.qml")
-            #         vlayer.setLayerName(QApplication.translate("Plugin", "Admin Unit Level2"))
-            #         mygroup.addLayer(vlayer)
-            #         is_au_level2 = True
-            #
-            # if layer.name() != u'Багийн хил' or layer.name() != 'Admin Unit Level3':
-            #     au_level3_layer = LayerUtils.layer_by_data_source("admin_units", "au_level3")
-            #     if au_level3_layer is None:
-            #         mygroup = root.findGroup(u"Хил")
-            #         vlayer = LayerUtils.load_layer_by_name_admin_units("au_level3", "code", "admin_units")
-            #         vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))) +"/template\style/au_level3.qml")
-            #         vlayer.setLayerName(QApplication.translate("Plugin", "Admin Unit Level3"))
-            #         mygroup.addLayer(vlayer)
-            # if layer.name() != u'Төлбөрийн бүс' or layer.name() != 'Fee Zone':
-            #
-            #     fee_zone_layer = LayerUtils.layer_by_data_source("settings", "set_view_fee_zone")
-            #
-            #     if fee_zone_layer is None:
-            #         mygroup = root.findGroup(u"Төлбөр, татварын бүс")
-            #         vlayer = LayerUtils.load_layer_by_name_set_zones("set_view_fee_zone", "zone_id", "settings")
-            #         vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))) +"/template\style/set_fee_zone.qml")
-            #         vlayer.setLayerName(QApplication.translate("Plugin", "Fee Zone"))
-            #         mygroup.addLayer(vlayer)
-            # if layer.name() != u'Татварын бүс' or layer.name() != 'Tax Zone':
-            #     tax_zone_layer = LayerUtils.layer_by_data_source("settings", "set_view_tax_zone")
-            #     if tax_zone_layer is None:
-            #         mygroup = root.findGroup(u"Төлбөр, татварын бүс")
-            #
-            #         vlayer = LayerUtils.load_layer_by_name_set_zones("set_view_tax_zone", "zone_id", "settings")
-            #         vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))) +"/template\style/set_tax_and_price_zone.qml")
-            #         vlayer.setLayerName(QApplication.translate("Plugin", "Tax Zone"))
-            #         mygroup.addLayer(vlayer)
-            # if layer.name() != u'УТХГазар' or layer.name() != 'Admin Unit MPA':
-            #     au_mpa_layer = LayerUtils.layer_by_data_source("admin_units", "au_mpa")
-            #     if au_mpa_layer is None:
-            #         mygroup = root.findGroup(u"Тусгай хамгаалалттай газар")
-            #         vlayer = LayerUtils.load_layer_by_name_admin_units("au_mpa", "id", "admin_units")
-            #         vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))) +"/template\style/au_mpa.qml")
-            #         vlayer.setLayerName(QApplication.translate("Plugin", "Admin Unit MPA"))
-            #         mygroup.addLayer(vlayer)
-            #
-            # if layer.name() != u'УТХГазрын бүс' or layer.name() != 'Admin Unit MPA Zone':
-            #     au_mpa_zone_layer = LayerUtils.layer_by_data_source("admin_units", "au_mpa_zone")
-            #     if au_mpa_zone_layer is None:
-            #         mygroup = root.findGroup(u"Тусгай хамгаалалттай газар")
-            #         vlayer = LayerUtils.load_layer_by_name_admin_units("au_mpa_zone", "id", "admin_units")
-            #         vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))) +"/template\style/au_mpa_zone.qml")
-            #         vlayer.setLayerName(QApplication.translate("Plugin", "Admin Unit MPA Zone"))
-            #         mygroup.addLayer(vlayer)
-            # sec_layer = LayerUtils.layer_by_data_source("data_landuse", "ca_sec_parcel")
-            # if sec_layer is None:
-            #     sec_layer = LayerUtils.load_layer_by_name_set_zones("ca_sec_parcel", "parcel_id", "data_landuse")
-            #     sec_layer = LayerUtils.load_layer_by_ca_sec_parcel("ca_sec_parcel", "parcel_id", "data_landuse")
-            # if sec_layer.name() == "ca_sec_parcel":
-            #     mygroup = root.findGroup(u"Мэдээний хяналт")
-            #     myalayer = root.findLayer(sec_layer.id())
-            #     sec_layer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))) +"/template\style/ca_sec_parcel.qml")
-            #     sec_layer.setLayerName(QApplication.translate("Plugin", "Parcel Sec"))
-            #     if myalayer is None:
-            #         mygroup.addLayer(sec_layer)
-
-        mygroup = root.findGroup(u"Мэдээний хяналт")
-        if mygroup is not None:
-            mygroup.setVisible(False)
-        mygroup = root.findGroup(u"ГНСТайлан")
-        if mygroup is not None:
-            mygroup.setVisible(False)
-        mygroup = root.findGroup(u"Тайлан")
-        if mygroup is not None:
-            mygroup.setVisible(False)
-        mygroup = root.findGroup(u"Кадастрын өөрчлөлт")
-        if mygroup is not None:
-            mygroup.setVisible(2)
         mygroup = root.findGroup(u"Кадастр")
-        if mygroup is not None:
-            mygroup.setVisible(2)
-        mygroup = root.findGroup(u"Төлбөр, татварын бүс")
-        if mygroup is not None:
-            mygroup.setVisible(False)
-        mygroup = root.findGroup(U"Хил")
-        if mygroup is not None:
-            mygroup.setVisible(False)
+        layers = self.iface.legendInterface().layers()
+
+        vlayer = LayerUtils.layer_by_data_source("data_soums_union", "ca_parcel")
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer("ca_parcel", "parcel_id", "data_soums_union")
+        vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))) + "/template\style/ca_parcel.qml")
+        vlayer.setLayerName(QApplication.translate("Plugin", "Parcel"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            mygroup.addLayer(vlayer)
+            vlayer.setReadOnly(True)
+
+        vlayer = LayerUtils.layer_by_data_source("data_soums_union", "ca_building")
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer("ca_building", "building_id", "data_soums_union")
+        vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))) + "/template\style/ca_building.qml")
+        vlayer.setLayerName(QApplication.translate("Plugin", "Building"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            mygroup.addLayer(vlayer)
+            vlayer.setReadOnly(True)
 
         self.iface.mapCanvas().refresh()
 
@@ -1011,11 +893,7 @@ class LM2Plugin:
         self.__create_navigator()
 
         self.__create_pasture()
-        # database = QSettings().value(SettingsConstants.DATABASE_NAME)
-        # if database:
-        #     au1 = DatabaseUtils.working_l1_code()
-        #     if au1:
-        #         if au1 == '11' or au1 == '61':
+
         self.__create_parcel_info()
 
         if UserRight.cadastre_view in user_rights or UserRight.cadastre_update in user_rights:

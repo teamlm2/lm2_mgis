@@ -178,6 +178,9 @@ class Ui_OwnRecordDialog(object):
         self.khashaa_edit.setEnabled(False)
         self.khashaa_edit.setGeometry(QtCore.QRect(530, 250, 200, 20))
         self.khashaa_edit.setObjectName(_fromUtf8("khashaa_edit"))
+        self.edit_address_chbox = QtGui.QCheckBox(self.groupBox_4)
+        self.edit_address_chbox.setGeometry(QtCore.QRect(530, 14, 211, 17))
+        self.edit_address_chbox.setObjectName(_fromUtf8("edit_address_chbox"))
         self.tabWidget.addTab(self.parcel_tab, _fromUtf8(""))
         self.record_details_tab = QtGui.QWidget()
         self.record_details_tab.setObjectName(_fromUtf8("record_details_tab"))
@@ -539,7 +542,7 @@ class Ui_OwnRecordDialog(object):
         self.status_label.setObjectName(_fromUtf8("status_label"))
 
         self.retranslateUi(OwnRecordDialog)
-        self.tabWidget.setCurrentIndex(0)
+        self.tabWidget.setCurrentIndex(2)
         QtCore.QMetaObject.connectSlotsByName(OwnRecordDialog)
 
     def retranslateUi(self, OwnRecordDialog):
@@ -570,6 +573,7 @@ class Ui_OwnRecordDialog(object):
         self.label_19.setText(_translate("OwnRecordDialog", "Bag / Khoroo", None))
         self.label_20.setText(_translate("OwnRecordDialog", "Street Name", None))
         self.label_21.setText(_translate("OwnRecordDialog", "Khashaa", None))
+        self.edit_address_chbox.setText(_translate("OwnRecordDialog", "Edit address", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.parcel_tab), _translate("OwnRecordDialog", "Parcel", None))
         self.groupBox_7.setTitle(_translate("OwnRecordDialog", "Record Details", None))
         self.label_22.setText(_translate("OwnRecordDialog", "Record Number", None))

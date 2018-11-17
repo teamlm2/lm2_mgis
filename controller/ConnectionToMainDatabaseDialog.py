@@ -35,7 +35,7 @@ class ConnectionToMainDatabaseDialog(QDialog, Ui_ConnectionToMainDatabaseDialog)
         self.__password = None
         self.__is_expired = False
         self.__setup_validators()
-        self.mac_addr = self.get_mac_address()
+        # self.mac_addr = self.get_mac_address()
 
     def __setup_validators(self):
 
@@ -94,66 +94,8 @@ class ConnectionToMainDatabaseDialog(QDialog, Ui_ConnectionToMainDatabaseDialog)
             PluginUtils.show_error(self, self.tr("Query Error"), self.tr("User name or password is not correct!!!"))
             return
 
-        # session = SessionHandler().session_instance()
-        # setRole = session.query(SetRole).filter(SetRole.user_name == user).filter(SetRole.is_active == True).one()
-        # mac_address = setRole.mac_addresses
-        # if mac_address != self.mac_addr:
-        #     PluginUtils.show_error(self, self.tr("Query Error"), self.tr("You are not permitted use for this PC !!!"))
-        #     return
-
-        # if setRole.pa_till < QDate.currentDate().toPyDate():
-        #     self.__is_expired = True
-        #     PluginUtils.show_error(self, self.tr("User Error"), self.tr("Your login has expired. Please extend it !!!"))
-        #     return
-
-        source = 'D:\TM_LM2/archive/view.pdf'
-        host = QSettings().value(SettingsConstants.HOST)
-        if host != 'localhost':
-            dest_dir = 'documents'
-            username_d = 'user'+ QSettings().value(SettingsConstants.DATABASE_NAME)[-4:]
-            password_d = 'user'+ QSettings().value(SettingsConstants.DATABASE_NAME)[-4:]
-            self.wnet_connect(host, username_d, password_d)
-            # self.netcopy(host, source, dest_dir, username_d, password_d)
-
-        # if host == 'localhost':
-        #     self.__vpn_connection()
-        #     self.__backup_schedule()
-        self.__layers_permission(user, password, host, port, database)
+        # self.__layers_permission(user, password, host, port, database)
         self.reject()
-
-    # def __vpn_connection(self):
-    #
-    #     vpn_path = r'D:\TM_LM2\dumps\schedule'
-    #     if not os.path.exists(vpn_path):
-    #         os.makedirs(vpn_path)
-    #
-    #     file_path = r'D:\TM_LM2\dumps\schedule/vpn.bat'
-    #     if not os.path.isfile("D:\TM_LM2\dumps\schedule/vpn.bat"):
-    #         file_path_parent = str(os.path.dirname(os.path.realpath(__file__))[:-10])+"template/vpn.bat"
-    #         shutil.copy2(file_path_parent, file_path)
-    #
-    #     user  = QSettings().value(SettingsConstants.USER)
-    #     line_title = 'rasdial VPN_Connection '
-    #     connection_line = line_title + 'dml'+ user[-6:] +' '+ user[4:-4]+'DmL'+user[-4:]
-    #
-    #     self.__replace_line_dump_name(file_path, 0, connection_line)
-    #     QDesktopServices.openUrl(QUrl.fromLocalFile(file_path))
-
-    # def __backup_schedule(self):
-    #
-    #     vpn_path = r'D:\TM_LM2\dumps\schedule'
-    #     if not os.path.exists(vpn_path):
-    #         os.makedirs(vpn_path)
-    #
-    #     file_path = r'D:\TM_LM2\dumps\schedule/backup_soums_schedule.bat'
-    #     if not os.path.isfile("D:\TM_LM2\dumps\schedule/backup_soums_schedule.bat"):
-    #         file_path_parent = str(os.path.dirname(os.path.realpath(__file__))[:-10])+"template/backup_soums_schedule.bat"
-    #         shutil.copy2(file_path_parent, file_path)
-    #
-    #     database_name = 'SET database_name=' + self.database_edit.text()
-    #
-    #     self.__replace_line_dump_name(file_path, 7, database_name)
-        # QDesktopServices.openUrl(QUrl.fromLocalFile(file_path))
 
     def __replace_line_dump_name(self, file_name, line_num, text):
 
@@ -258,6 +200,7 @@ class ConnectionToMainDatabaseDialog(QDialog, Ui_ConnectionToMainDatabaseDialog)
                 filter(SetUserGroupRole.user_name_real == user_name_real). \
                 filter(SetUserGroupRole.group_role == 7).count()
 
+            vlayer = LayerUtils.layer_by_data_source("admin_units", "au_mpa_zone")
             for layer in layers:
                 for soum in l2_code_list:
                     if user_right_parcel_count == 1:

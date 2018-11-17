@@ -18,6 +18,8 @@ from ..model.ClPositionType import *
 from ..model.SdOrganization import *
 from ..model.SdDepartment import *
 from ..model.SdPosition import *
+from ..model.SdUser import *
+from ..model.SdEmployee import *
 from ..model.ClOrganizationType import *
 from ..model.ClGroupRole import *
 from ..model.SetPositionGroupRole import *
@@ -27,10 +29,12 @@ from ..utils.PluginUtils import *
 from ..controller.UserRoleManagementDetialDialog import *
 from uuid import getnode as get_mac
 import  commands
-import datetime
+# import datetime
+from datetime import date, datetime, timedelta
 import socket
 import sys
 import struct
+import hashlib
 
 INTERFACE_NAME = "eth0"
 class UserRoleManagementDialog(QDialog, Ui_UserRoleManagementDialog):
@@ -81,6 +85,10 @@ class UserRoleManagementDialog(QDialog, Ui_UserRoleManagementDialog):
         self.__setup_twidget()
         self.__load_default_ritht_grud()
 
+        self.tabWidget.setCurrentIndex(0)
+
+        self.tabWidget.currentChanged.connect(self.__tab_widget_onChange)  # changed!
+
     def __setup_twidget(self):
 
         self.user_twidget.setSelectionMode(QAbstractItemView.SingleSelection)
@@ -120,6 +128,11 @@ class UserRoleManagementDialog(QDialog, Ui_UserRoleManagementDialog):
         self.right_grud_twidget.setColumnWidth(3, 45)
         self.right_grud_twidget.setColumnWidth(4, 45)
 
+        self.department_twidget.setAlternatingRowColors(True)
+        self.department_twidget.setEditTriggers(QTableWidget.NoEditTriggers)
+        self.department_twidget.setSelectionBehavior(QTableWidget.SelectRows)
+        self.department_twidget.setSelectionMode(QTableWidget.SingleSelection)
+        self.department_twidget.setSortingEnabled(True)
 
     @pyqtSlot(int)
     def on_get_mac_checkbox_stateChanged(self, state):
@@ -747,8 +760,8 @@ class UserRoleManagementDialog(QDialog, Ui_UserRoleManagementDialog):
             restriction_au_level1 = restriction_au_level1[:len(restriction_au_level1)-1]
             restriction_au_level2 = restriction_au_level2[:len(restriction_au_level2)-1]
 
-            pa_from = datetime.datetime.today()
-            pa_till = datetime.date.max
+            pa_from = datetime.today()
+            pa_till = date.max
             role_c = self.db_session.query(SetRole).filter(SetRole.user_name == user_name).count()
 
             if self.register_edit.text() == None or self.register_edit.text() == '':
@@ -830,6 +843,52 @@ class UserRoleManagementDialog(QDialog, Ui_UserRoleManagementDialog):
                 role.organization = organization
                 role.department = department
 
+            # add employee and user
+
+            sd_user_count = self.db_session.query(SdUser).filter(SdUser.gis_user_real == role.user_name_real).count()
+
+            user_pass = hashlib.md5(role.user_name).hexdigest()
+
+            date_time_string = QDateTime.currentDateTime().toString(Constants.DATABASE_DATETIME_FORMAT)
+            if sd_user_count == 0:
+                sd_user = SdUser()
+                sd_user.username = role.user_name
+                sd_user.email = role.email
+                sd_user.password = user_pass
+                sd_user.firstname = role.first_name
+                sd_user.lastname = role.surname
+                sd_user.created_at = datetime.strptime(date_time_string, Constants.PYTHON_DATETIME_FORMAT)
+                sd_user.created_by = None
+                sd_user.gis_user_real = role.user_name_real
+                self.db_session.add(sd_user)
+            else:
+                sd_user = self.db_session.query(SdUser).filter(
+                    SdUser.gis_user_real == role.user_name_real).first()
+
+                sd_user.password = user_pass
+
+            sd_employee_count = self.db_session.query(SdEmployee).filter(SdEmployee.register_number == role.user_register).count()
+            if sd_employee_count == 0:
+                sd_employee = SdEmployee()
+                sd_employee.firstname =  role.first_name
+                sd_employee.lastname = role.surname
+                sd_employee.urag_name = ''
+                sd_employee.mobile_phone = role.phone
+                sd_employee.employee_type_id = 1
+                sd_employee.created_at = datetime.strptime(date_time_string, Constants.PYTHON_DATETIME_FORMAT)
+                sd_employee.email = role.email
+                sd_employee.register_number = role.user_register
+                sd_employee.department_id = role.department
+                sd_employee.position_id = role.position
+                sd_employee.user_id = sd_user.user_id
+                self.db_session.add(sd_employee)
+            else:
+                sd_employee = self.db_session.query(SdEmployee).filter(
+                    SdEmployee.register_number == role.user_register).first()
+
+                sd_employee.user_id = sd_user.user_id
+
+            self.db_session.flush()
             self.db_session.commit()
             self.__populate_user_role_lwidget()
             item = self.user_role_lwidget.findItems(user_name, Qt.MatchExactly)[0]
@@ -1686,3 +1745,160 @@ class UserRoleManagementDialog(QDialog, Ui_UserRoleManagementDialog):
 
         self.db_session.commit()
         self.__start_fade_out_timer()
+
+    def __tab_widget_onChange(self, index):
+
+        is_change = False
+        if index:
+            if index == 3:
+                self.department_organization_cbox.clear()
+                self.department_aimag_cbox.clear()
+                self.department_soum_cbox.clear()
+
+                aimag_list = self.db_session.query(AuLevel1.name, AuLevel1.code).all()
+                organzations = self.db_session.query(SdOrganization).all()
+
+                self.department_organization_cbox.addItem('*', -1)
+                self.department_aimag_cbox.addItem('*', -1)
+                self.department_soum_cbox.addItem('*', -1)
+
+                for auLevel1 in aimag_list:
+                    self.department_aimag_cbox.addItem(auLevel1.name, auLevel1.code)
+
+                working_aimag = DatabaseUtils.working_l1_code()
+                working_soum = DatabaseUtils.working_l2_code()
+                self.department_aimag_cbox.setCurrentIndex(self.department_aimag_cbox.findData(working_aimag))
+                self.department_soum_cbox.setCurrentIndex(self.department_soum_cbox.findData(working_soum))
+
+                for organzation in organzations:
+                    self.department_organization_cbox.addItem(organzation.land_office_name, organzation.id)
+
+                departments = self.db_session.query(SdDepartment).all()
+                row = 0
+                for department in departments:
+                    self.department_twidget.insertRow(row)
+
+                    item = QTableWidgetItem()
+                    item.setText(str(department.department_id))
+                    item.setData(Qt.UserRole, department.department_id)
+                    self.department_twidget.setItem(row, 0, item)
+
+                    item = QTableWidgetItem()
+                    item.setText(unicode(department.name))
+                    self.department_twidget.setItem(row, 1, item)
+
+                    item = QTableWidgetItem()
+                    item.setText(unicode(department.address))
+                    self.department_twidget.setItem(row, 2, item)
+
+                    item = QTableWidgetItem()
+                    item.setText(department.phone)
+                    self.department_twidget.setItem(row, 3, item)
+
+                    item = QTableWidgetItem()
+                    item.setText(department.fax)
+                    self.department_twidget.setItem(row, 4, item)
+
+                    item = QTableWidgetItem()
+                    item.setText(department.bank_name)
+                    self.department_twidget.setItem(row, 5, item)
+
+                    item = QTableWidgetItem()
+                    item.setText(department.account_no)
+                    self.department_twidget.setItem(row, 6, item)
+
+                    item = QTableWidgetItem()
+                    item.setText(department.report_email)
+                    self.department_twidget.setItem(row, 7, item)
+
+                    item = QTableWidgetItem()
+                    item.setText(department.website)
+                    self.department_twidget.setItem(row, 8, item)
+
+                    item = QTableWidgetItem()
+                    item.setText(department.head_surname)
+                    self.department_twidget.setItem(row, 9, item)
+
+                    item = QTableWidgetItem()
+                    item.setText(department.head_firstname)
+                    self.department_twidget.setItem(row, 10, item)
+                    if department.organization_ref:
+                        item = QTableWidgetItem()
+                        item.setText(department.organization_ref.land_office_name)
+                        self.department_twidget.setItem(row, 11, item)
+                    if department.au1_ref:
+                        item = QTableWidgetItem()
+                        item.setText(department.au1_ref.name)
+                        self.department_twidget.setItem(row, 12, item)
+                    if department.au2_ref:
+                        item = QTableWidgetItem()
+                        item.setText(department.au2_ref.name)
+                        self.department_twidget.setItem(row, 13, item)
+
+                    row = + 1
+
+                self.department_twidget.resizeColumnsToContents()
+
+    @pyqtSlot(int)
+    def on_department_load_chbox_stateChanged(self, state):
+
+        if state == Qt.Checked:
+            is_fa = True
+
+    @pyqtSlot(QTableWidgetItem)
+    def on_department_twidget_itemClicked(self, item):
+
+        current_row = self.department_twidget.currentRow()
+
+        item = self.department_twidget.item(current_row, 0)
+        department_id = item.data(Qt.UserRole)
+
+        item = self.department_twidget.item(current_row, 1)
+        self.department_name_edit.setText(item.text())
+
+        department = self.db_session.query(SdDepartment).filter(SdDepartment.department_id == department_id).one()
+
+        self.department_aimag_cbox.setCurrentIndex(self.department_aimag_cbox.findData(department.au1))
+        self.department_soum_cbox.setCurrentIndex(self.department_soum_cbox.findData(department.au2))
+        self.department_organization_cbox.setCurrentIndex(self.department_organization_cbox.findData(department.organization))
+
+        self.department_address_edit.setText(department.address)
+        self.department_phone_edit.setText(department.phone)
+        self.department_fax_edit.setText(department.fax)
+        self.department_email_edit.setText(department.report_email)
+        self.department_bank_edit.setText(department.bank_name)
+        self.department_account_edit.setText(department.account_no)
+        self.department_web_edit.setText(department.website)
+        self.department_headsurname_edit.setText(department.head_surname)
+        self.department_head_firstname_edit.setText(department.head_firstname)
+
+    @pyqtSlot(int)
+    def on_department_aimag_cbox_currentIndexChanged(self, index):
+
+        aimag = self.department_aimag_cbox.itemData(index)
+        self.department_soum_cbox.clear()
+
+        self.department_soum_cbox.addItem("*", -1)
+
+        soum_list = []
+        bag_list = []
+
+        if aimag == -1:
+            soum_list = self.db_session.query(AuLevel2).all()
+            for au_level2 in soum_list:
+                if au_level2.code[:2] == '01':
+                    self.department_soum_cbox.addItem(au_level2.name, au_level2.code)
+
+        else:
+            try:
+                if aimag:
+                    soum_list = self.db_session.query(AuLevel2.name, AuLevel2.code).filter(
+                        AuLevel2.code.like(aimag + "%")).all()
+                    for au_level2 in soum_list:
+                        self.department_soum_cbox.addItem(au_level2.name, au_level2.code)
+
+            except SQLAlchemyError, e:
+                PluginUtils.show_error(self, self.tr("Database Query Error"),
+                                       self.tr("Could not execute: {0}").format(e.message))
+                self.reject()
+

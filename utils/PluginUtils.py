@@ -91,7 +91,7 @@ class PluginUtils(object):
 
         user_name = DatabaseUtils.current_user().user_name
         user = session.query(SetRole).filter(SetRole.user_name == user_name).filter(SetRole.is_active == True).one()
-        sd_user = session.query(SdUser).filter(SdUser.gis_user_real == user.user_name_real).one()
+        sd_user = session.query(SdUser).filter(SdUser.gis_user_real == user.user_name_real).first()
         ca_maintenance_case.created_by = sd_user.user_id
         ca_maintenance_case.au2 = DatabaseUtils.working_l2_code()
         session.add(ca_maintenance_case)

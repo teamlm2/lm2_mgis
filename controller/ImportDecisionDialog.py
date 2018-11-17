@@ -1,7 +1,8 @@
 # coding=utf8
-import os
-import xlsxwriter
 __author__ = 'anna'
+
+import shutil
+
 
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
@@ -31,7 +32,6 @@ from ..model.BsPerson import *
 from ..model.SetRole import SetRole
 from ..model.CaBuilding import *
 from ..model.Enumerations import ApplicationType
-from ..model.CaParcelTbl import *
 from .DecisionErrorDialog import DecisionErrorDialog
 from ..utils.SessionHandler import SessionHandler
 from ..utils.PluginUtils import PluginUtils
@@ -39,10 +39,10 @@ from ..utils.DatabaseUtils import DatabaseUtils
 from ..utils.FileUtils import FileUtils
 from ..controller.NavigatorWidget import *
 from ..model.ApplicationSearchDecision import *
-from ..model.SdUser import *
 from ..model import SettingsConstants
 from ..utils.FilePath import *
 import shutil
+
 
 class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
 
@@ -300,6 +300,7 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
         self.decision.decision_no = s.cell(1, decision_no_column).value
         self.decision.decision_level = s.cell(1, decision_level_column).value
         self.decision.imported_by = current_employee.user_name_real
+        self.decision.au2 = DatabaseUtils.working_l2_code()
 
         self.decision_no_edit.setText(self.decision.decision_no)
         self.decision_date_edit.setText(str(self.decision.decision_date))
@@ -397,6 +398,7 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
                             maintenance_cases.append(application.maintenance_case)
 
                     self.session.add(app_status)
+                    FtpConnection.move_app_ftp_file(app_status.application)
 
                 if application.app_type in Constants.APPLICATION_TYPE_WITH_DURATION:
                     approved_duration = int(duration)
@@ -1048,6 +1050,7 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
             self.decision.decision_no = self.notary_decision_edit.text()
             self.decision.decision_level = 70
             self.decision.imported_by = DatabaseUtils.current_sd_user().user_id
+            self.decision.au2 = DatabaseUtils.working_l2_code()
             self.session.add(self.decision)
             application = self.session.query(CtApplication).filter(CtApplication.app_no == self.application_cbox.currentText()).one()
             app_id = application.app_id
@@ -1417,11 +1420,13 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
                     filter_is_set = True
                     person_id = self.person_id_find_edit.text()
                     app_count = self.session.query(CtApplicationPersonRole). \
-                        filter(CtApplicationPersonRole.person.ilike(person_id)). \
+                        join(BsPerson, CtApplicationPersonRole.person == BsPerson.person_id ).\
+                        filter(BsPerson.person_register.ilike(person_id)). \
                         filter(CtApplicationPersonRole.application == application.application).count()
                     if app_count == 1:
-                        app = self.session.query(CtApplicationPersonRole).\
-                            filter(CtApplicationPersonRole.person.ilike(person_id)).\
+                        app = self.session.query(CtApplicationPersonRole). \
+                            join(BsPerson, CtApplicationPersonRole.person == BsPerson.person_id). \
+                            filter(BsPerson.person_register.ilike(person_id)). \
                             filter(CtApplicationPersonRole.application == application.application).one()
                         app_number = app.application
                 if self.parcel_id_find_edit.text():

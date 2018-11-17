@@ -98,441 +98,6 @@
       <property name="usesScrollButtons">
        <bool>true</bool>
       </property>
-      <widget class="QWidget" name="pasture_tab">
-       <attribute name="title">
-        <string>Pasture(PUA)</string>
-       </attribute>
-       <widget class="QGroupBox" name="groupBox_18">
-        <property name="geometry">
-         <rect>
-          <x>5</x>
-          <y>30</y>
-          <width>371</width>
-          <height>277</height>
-         </rect>
-        </property>
-        <property name="autoFillBackground">
-         <bool>false</bool>
-        </property>
-        <property name="title">
-         <string>Criteria</string>
-        </property>
-        <widget class="QLineEdit" name="pasture_parcel_id_edit">
-         <property name="geometry">
-          <rect>
-           <x>190</x>
-           <y>29</y>
-           <width>170</width>
-           <height>20</height>
-          </rect>
-         </property>
-        </widget>
-        <widget class="QLineEdit" name="member_name_edit">
-         <property name="geometry">
-          <rect>
-           <x>10</x>
-           <y>188</y>
-           <width>170</width>
-           <height>20</height>
-          </rect>
-         </property>
-        </widget>
-        <widget class="QLineEdit" name="member_register_edit">
-         <property name="geometry">
-          <rect>
-           <x>10</x>
-           <y>150</y>
-           <width>170</width>
-           <height>20</height>
-          </rect>
-         </property>
-        </widget>
-        <widget class="QLineEdit" name="pasture_contract_no_edit">
-         <property name="geometry">
-          <rect>
-           <x>190</x>
-           <y>188</y>
-           <width>170</width>
-           <height>20</height>
-          </rect>
-         </property>
-        </widget>
-        <widget class="QLineEdit" name="pasture_app_no_edit">
-         <property name="geometry">
-          <rect>
-           <x>190</x>
-           <y>150</y>
-           <width>170</width>
-           <height>20</height>
-          </rect>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_62">
-         <property name="geometry">
-          <rect>
-           <x>190</x>
-           <y>11</y>
-           <width>170</width>
-           <height>16</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Parcel ID</string>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_64">
-         <property name="geometry">
-          <rect>
-           <x>10</x>
-           <y>171</y>
-           <width>170</width>
-           <height>17</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Member Name</string>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_65">
-         <property name="geometry">
-          <rect>
-           <x>10</x>
-           <y>132</y>
-           <width>170</width>
-           <height>17</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Group member register</string>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_66">
-         <property name="geometry">
-          <rect>
-           <x>190</x>
-           <y>132</y>
-           <width>170</width>
-           <height>17</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Application No</string>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_67">
-         <property name="geometry">
-          <rect>
-           <x>190</x>
-           <y>171</y>
-           <width>170</width>
-           <height>17</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Contract No</string>
-         </property>
-        </widget>
-        <widget class="QDateEdit" name="pasture_app_date_edit">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-         <property name="geometry">
-          <rect>
-           <x>190</x>
-           <y>215</y>
-           <width>91</width>
-           <height>21</height>
-          </rect>
-         </property>
-         <property name="displayFormat">
-          <string>yyyy-MM-dd</string>
-         </property>
-         <property name="calendarPopup">
-          <bool>true</bool>
-         </property>
-        </widget>
-        <widget class="QPushButton" name="pasture_clear_button">
-         <property name="geometry">
-          <rect>
-           <x>210</x>
-           <y>245</y>
-           <width>75</width>
-           <height>23</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Clear</string>
-         </property>
-        </widget>
-        <widget class="QPushButton" name="pasture_find_button">
-         <property name="geometry">
-          <rect>
-           <x>290</x>
-           <y>245</y>
-           <width>75</width>
-           <height>23</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Find</string>
-         </property>
-         <property name="default">
-          <bool>true</bool>
-         </property>
-        </widget>
-        <widget class="QCheckBox" name="pasture_date_cbox">
-         <property name="geometry">
-          <rect>
-           <x>12</x>
-           <y>216</y>
-           <width>171</width>
-           <height>20</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Application Date</string>
-         </property>
-        </widget>
-        <widget class="QLabel" name="pasture_results_label">
-         <property name="geometry">
-          <rect>
-           <x>10</x>
-           <y>247</y>
-           <width>121</width>
-           <height>20</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <family>Lucida Grande</family>
-           <pointsize>14</pointsize>
-           <weight>75</weight>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>Results:</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_68">
-         <property name="geometry">
-          <rect>
-           <x>10</x>
-           <y>10</y>
-           <width>170</width>
-           <height>17</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Pasture Group</string>
-         </property>
-        </widget>
-        <widget class="QComboBox" name="pasture_group_cbox">
-         <property name="geometry">
-          <rect>
-           <x>10</x>
-           <y>28</y>
-           <width>171</width>
-           <height>22</height>
-          </rect>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_69">
-         <property name="geometry">
-          <rect>
-           <x>10</x>
-           <y>51</y>
-           <width>170</width>
-           <height>17</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Land use type</string>
-         </property>
-        </widget>
-        <widget class="QComboBox" name="pasture_landuse_cbox">
-         <property name="geometry">
-          <rect>
-           <x>10</x>
-           <y>69</y>
-           <width>351</width>
-           <height>22</height>
-          </rect>
-         </property>
-        </widget>
-        <widget class="QComboBox" name="app_type_cbox">
-         <property name="geometry">
-          <rect>
-           <x>10</x>
-           <y>108</y>
-           <width>351</width>
-           <height>22</height>
-          </rect>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_70">
-         <property name="geometry">
-          <rect>
-           <x>10</x>
-           <y>90</y>
-           <width>170</width>
-           <height>17</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Application type</string>
-         </property>
-        </widget>
-        <widget class="QPushButton" name="delete_button">
-         <property name="geometry">
-          <rect>
-           <x>130</x>
-           <y>245</y>
-           <width>75</width>
-           <height>23</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Delete</string>
-         </property>
-        </widget>
-       </widget>
-       <widget class="QGroupBox" name="groupBox_19">
-        <property name="geometry">
-         <rect>
-          <x>6</x>
-          <y>305</y>
-          <width>371</width>
-          <height>241</height>
-         </rect>
-        </property>
-        <property name="title">
-         <string>Results</string>
-        </property>
-        <widget class="QTableWidget" name="pasture_results_twidget">
-         <property name="geometry">
-          <rect>
-           <x>5</x>
-           <y>20</y>
-           <width>361</width>
-           <height>155</height>
-          </rect>
-         </property>
-         <property name="selectionMode">
-          <enum>QAbstractItemView::ExtendedSelection</enum>
-         </property>
-        </widget>
-        <widget class="QPushButton" name="pasture_contract_view_button">
-         <property name="geometry">
-          <rect>
-           <x>256</x>
-           <y>183</y>
-           <width>111</width>
-           <height>23</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>View Contract</string>
-         </property>
-        </widget>
-        <widget class="QPushButton" name="pasture_app_view_button">
-         <property name="geometry">
-          <rect>
-           <x>130</x>
-           <y>183</y>
-           <width>121</width>
-           <height>23</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>View App</string>
-         </property>
-        </widget>
-        <widget class="QPushButton" name="pasture_layer_view_button">
-         <property name="geometry">
-          <rect>
-           <x>5</x>
-           <y>183</y>
-           <width>121</width>
-           <height>23</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Layer View/ Hide</string>
-         </property>
-        </widget>
-        <widget class="QLabel" name="error_label">
-         <property name="geometry">
-          <rect>
-           <x>10</x>
-           <y>213</y>
-           <width>351</width>
-           <height>21</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <family>Helvetica</family>
-           <pointsize>14</pointsize>
-           <weight>75</weight>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">QLabel {color : red;}
-font: 75 14pt &quot;Helvetica&quot;;</string>
-         </property>
-         <property name="text">
-          <string/>
-         </property>
-         <property name="wordWrap">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </widget>
-       <widget class="QPushButton" name="pug_register_button">
-        <property name="geometry">
-         <rect>
-          <x>4</x>
-          <y>6</y>
-          <width>121</width>
-          <height>23</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Group Register/ View</string>
-        </property>
-       </widget>
-       <widget class="QPushButton" name="pasture_app_add_button">
-        <property name="geometry">
-         <rect>
-          <x>141</x>
-          <y>6</y>
-          <width>111</width>
-          <height>23</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Application Add</string>
-        </property>
-       </widget>
-       <widget class="QPushButton" name="draft_decision_button">
-        <property name="geometry">
-         <rect>
-          <x>265</x>
-          <y>6</y>
-          <width>111</width>
-          <height>23</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Draft/ Decision</string>
-        </property>
-       </widget>
-      </widget>
       <widget class="QWidget" name="tab_2">
        <attribute name="title">
         <string>Monitoring</string>
@@ -1499,6 +1064,441 @@ font: 75 14pt &quot;Helvetica&quot;;</string>
         </property>
         <property name="text">
          <string>Point Detail</string>
+        </property>
+       </widget>
+      </widget>
+      <widget class="QWidget" name="pasture_tab">
+       <attribute name="title">
+        <string>Pasture(PUA)</string>
+       </attribute>
+       <widget class="QGroupBox" name="groupBox_18">
+        <property name="geometry">
+         <rect>
+          <x>5</x>
+          <y>30</y>
+          <width>371</width>
+          <height>277</height>
+         </rect>
+        </property>
+        <property name="autoFillBackground">
+         <bool>false</bool>
+        </property>
+        <property name="title">
+         <string>Criteria</string>
+        </property>
+        <widget class="QLineEdit" name="pasture_parcel_id_edit">
+         <property name="geometry">
+          <rect>
+           <x>190</x>
+           <y>29</y>
+           <width>170</width>
+           <height>20</height>
+          </rect>
+         </property>
+        </widget>
+        <widget class="QLineEdit" name="member_name_edit">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>188</y>
+           <width>170</width>
+           <height>20</height>
+          </rect>
+         </property>
+        </widget>
+        <widget class="QLineEdit" name="member_register_edit">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>150</y>
+           <width>170</width>
+           <height>20</height>
+          </rect>
+         </property>
+        </widget>
+        <widget class="QLineEdit" name="pasture_contract_no_edit">
+         <property name="geometry">
+          <rect>
+           <x>190</x>
+           <y>188</y>
+           <width>170</width>
+           <height>20</height>
+          </rect>
+         </property>
+        </widget>
+        <widget class="QLineEdit" name="pasture_app_no_edit">
+         <property name="geometry">
+          <rect>
+           <x>190</x>
+           <y>150</y>
+           <width>170</width>
+           <height>20</height>
+          </rect>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_62">
+         <property name="geometry">
+          <rect>
+           <x>190</x>
+           <y>11</y>
+           <width>170</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Parcel ID</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_64">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>171</y>
+           <width>170</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Member Name</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_65">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>132</y>
+           <width>170</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Group member register</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_66">
+         <property name="geometry">
+          <rect>
+           <x>190</x>
+           <y>132</y>
+           <width>170</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Application No</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_67">
+         <property name="geometry">
+          <rect>
+           <x>190</x>
+           <y>171</y>
+           <width>170</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Contract No</string>
+         </property>
+        </widget>
+        <widget class="QDateEdit" name="pasture_app_date_edit">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="geometry">
+          <rect>
+           <x>190</x>
+           <y>215</y>
+           <width>91</width>
+           <height>21</height>
+          </rect>
+         </property>
+         <property name="displayFormat">
+          <string>yyyy-MM-dd</string>
+         </property>
+         <property name="calendarPopup">
+          <bool>true</bool>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="pasture_clear_button">
+         <property name="geometry">
+          <rect>
+           <x>210</x>
+           <y>245</y>
+           <width>75</width>
+           <height>23</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Clear</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="pasture_find_button">
+         <property name="geometry">
+          <rect>
+           <x>290</x>
+           <y>245</y>
+           <width>75</width>
+           <height>23</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Find</string>
+         </property>
+         <property name="default">
+          <bool>true</bool>
+         </property>
+        </widget>
+        <widget class="QCheckBox" name="pasture_date_cbox">
+         <property name="geometry">
+          <rect>
+           <x>12</x>
+           <y>216</y>
+           <width>171</width>
+           <height>20</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Application Date</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="pasture_results_label">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>247</y>
+           <width>121</width>
+           <height>20</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <family>Lucida Grande</family>
+           <pointsize>14</pointsize>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Results:</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_68">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>10</y>
+           <width>170</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Pasture Group</string>
+         </property>
+        </widget>
+        <widget class="QComboBox" name="pasture_group_cbox">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>28</y>
+           <width>171</width>
+           <height>22</height>
+          </rect>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_69">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>51</y>
+           <width>170</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Land use type</string>
+         </property>
+        </widget>
+        <widget class="QComboBox" name="pasture_landuse_cbox">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>69</y>
+           <width>351</width>
+           <height>22</height>
+          </rect>
+         </property>
+        </widget>
+        <widget class="QComboBox" name="app_type_cbox">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>108</y>
+           <width>351</width>
+           <height>22</height>
+          </rect>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_70">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>90</y>
+           <width>170</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Application type</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="delete_button">
+         <property name="geometry">
+          <rect>
+           <x>130</x>
+           <y>245</y>
+           <width>75</width>
+           <height>23</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Delete</string>
+         </property>
+        </widget>
+       </widget>
+       <widget class="QGroupBox" name="groupBox_19">
+        <property name="geometry">
+         <rect>
+          <x>6</x>
+          <y>305</y>
+          <width>371</width>
+          <height>241</height>
+         </rect>
+        </property>
+        <property name="title">
+         <string>Results</string>
+        </property>
+        <widget class="QTableWidget" name="pasture_results_twidget">
+         <property name="geometry">
+          <rect>
+           <x>5</x>
+           <y>20</y>
+           <width>361</width>
+           <height>155</height>
+          </rect>
+         </property>
+         <property name="selectionMode">
+          <enum>QAbstractItemView::ExtendedSelection</enum>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="pasture_contract_view_button">
+         <property name="geometry">
+          <rect>
+           <x>256</x>
+           <y>183</y>
+           <width>111</width>
+           <height>23</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>View Contract</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="pasture_app_view_button">
+         <property name="geometry">
+          <rect>
+           <x>130</x>
+           <y>183</y>
+           <width>121</width>
+           <height>23</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>View App</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="pasture_layer_view_button">
+         <property name="geometry">
+          <rect>
+           <x>5</x>
+           <y>183</y>
+           <width>121</width>
+           <height>23</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Layer View/ Hide</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="error_label">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>213</y>
+           <width>351</width>
+           <height>21</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <family>Helvetica</family>
+           <pointsize>14</pointsize>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QLabel {color : red;}
+font: 75 14pt &quot;Helvetica&quot;;</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </widget>
+       <widget class="QPushButton" name="pug_register_button">
+        <property name="geometry">
+         <rect>
+          <x>4</x>
+          <y>6</y>
+          <width>121</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Group Register/ View</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pasture_app_add_button">
+        <property name="geometry">
+         <rect>
+          <x>141</x>
+          <y>6</y>
+          <width>111</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Application Add</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="draft_decision_button">
+        <property name="geometry">
+         <rect>
+          <x>265</x>
+          <y>6</y>
+          <width>111</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Draft/ Decision</string>
         </property>
        </widget>
       </widget>

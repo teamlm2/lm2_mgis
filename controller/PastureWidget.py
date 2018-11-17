@@ -77,12 +77,21 @@ class PastureWidget(QDockWidget, Ui_PastureWidget, DatabaseHelper):
 
         self.pasture_app_date_edit.setDate(QDate.currentDate())
         self.__setup_twidgets()
-        self.__load_role_settings()
+
+        self.tabWidget.currentChanged.connect(self.__tab_widget_onChange)  # changed!
+        # self.__load_role_settings()
+
         self.__setup_combo_boxes()
         self.__setup_validators()
 
         self.working_l1_cbox.currentIndexChanged.connect(self.__working_l1_changed)
         self.working_l2_cbox.currentIndexChanged.connect(self.__working_l2_changed)
+
+    def __tab_widget_onChange(self, index):
+
+        if index:
+            if index == 1:
+                self.__load_role_settings()
 
     def __setup_validators(self):
 
@@ -278,7 +287,7 @@ class PastureWidget(QDockWidget, Ui_PastureWidget, DatabaseHelper):
 
         sql = ""
         if not sql:
-            sql = "Create temp view ps_parcel_duration as" + "\n"
+            sql = "Create or replace temp view ps_parcel_duration as" + "\n"
         else:
             sql = sql + "UNION" + "\n"
 
@@ -303,7 +312,7 @@ class PastureWidget(QDockWidget, Ui_PastureWidget, DatabaseHelper):
         sql = ""
 
         if not sql:
-            sql = "Create temp view ps_pasture_boundary as" + "\n"
+            sql = "Create or replace temp view ps_pasture_boundary as" + "\n"
         else:
             sql = sql + "UNION" + "\n"
 
@@ -333,7 +342,7 @@ class PastureWidget(QDockWidget, Ui_PastureWidget, DatabaseHelper):
         sql = ""
 
         if not sql:
-            sql = "Create temp view pasture_app_search as" + "\n"
+            sql = "Create or replace temp view pasture_app_search as" + "\n"
         else:
             sql = sql + "UNION" + "\n"
 

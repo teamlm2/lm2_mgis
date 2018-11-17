@@ -92,6 +92,8 @@ class SentToGovernorDialog(QDialog, Ui_SentToGovernorDialog, DatabaseHelper):
         app_count = ""
         try:
             app_count = self.session.query(CtApplicationStatus.application, func.max(CtApplicationStatus.status_date))\
+                .join(CtApplication, CtApplicationStatus.application == CtApplication.app_id)\
+                .filter(CtApplication.au2 == DatabaseUtils.working_l2_code())\
                 .group_by(CtApplicationStatus.application)\
                 .having(func.max(CtApplicationStatus.status) == Constants.APP_STATUS_WAITING).distinct().count()
 
@@ -125,28 +127,26 @@ class SentToGovernorDialog(QDialog, Ui_SentToGovernorDialog, DatabaseHelper):
         try:
             for item in application_types:
                 self.app_type_cbox.addItem(item.description, item.code)
-            # if aimag_code == '01' or aimag_code == '12':
-            #     decision_level = self.session.query(ClDecisionLevel).filter(or_(ClDecisionLevel.code == 10, ClDecisionLevel.code == 20)).all()
-            #     for item in decision_level:
-            #         self.decision_level_cbox.addItem(item.description, item.code)
-            # else:
-            #     if soum_code == '01':
-            #         decision_level = self.session.query(ClDecisionLevel).filter(or_(ClDecisionLevel.code == 30, ClDecisionLevel.code == 40, ClDecisionLevel.code == 50, ClDecisionLevel.code == 60)).all()
-            #         for item in decision_level:
-            #             self.decision_level_cbox.addItem(item.description, item.code)
-            #         # self.decision_level_cbox.setCurrentIndex(2)
-            #     else:
-            #         decision_level = self.session.query(ClDecisionLevel).filter(or_(ClDecisionLevel.code == 40, ClDecisionLevel.code == 50, ClDecisionLevel.code == 60)).all()
-            #         for item in decision_level:
-            #             self.decision_level_cbox.addItem(item.description, item.code)
-            #         # self.decision_level_cbox.setCurrentIndex(3)
+
+            # soum_code = DatabaseUtils.working_l2_code()
+            # if set_roles is not None:
+            #     for role in set_roles:
+            #         l2_code_list = role.restriction_au_level2.split(',')
+            #         if soum_code in l2_code_list:
+            #         # if role.user_name_real.find(restrictions[1:]) != -1:
+            #             self.officer_cbox.addItem(role.surname + ", " + role.first_name, role)
+
             soum_code = DatabaseUtils.working_l2_code()
-            if set_roles is not None:
-                for role in set_roles:
-                    l2_code_list = role.restriction_au_level2.split(',')
-                    if soum_code in l2_code_list:
-                    # if role.user_name_real.find(restrictions[1:]) != -1:
-                        self.officer_cbox.addItem(role.surname + ", " + role.first_name, role)
+            for setRole in set_roles:
+                l2_code_list = setRole.restriction_au_level2.split(',')
+                if soum_code in l2_code_list:
+                    sd_user = self.session.query(SdUser).filter(SdUser.gis_user_real == setRole.user_name_real).first()
+                    lastname = ''
+                    firstname = ''
+                    if sd_user:
+                        lastname = sd_user.lastname
+                        firstname = sd_user.firstname
+                    self.officer_cbox.addItem(lastname + ", " + firstname, sd_user.user_id)
         except SQLAlchemyError, e:
             self.rollback_to_savepoint()
             raise LM2Exception(self.tr("Database Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
@@ -177,9 +177,9 @@ class SentToGovernorDialog(QDialog, Ui_SentToGovernorDialog, DatabaseHelper):
 
             applications = applications.filter(ApplicationSearch.status == status)
             if not self.officer_cbox.itemData(self.officer_cbox.currentIndex()) == -1:
-                officer = "%" + self.officer_cbox.itemData(self.officer_cbox.currentIndex()).user_name_real + "%"
+                officer = self.officer_cbox.itemData(self.officer_cbox.currentIndex())
 
-                applications = applications.filter(ApplicationSearch.next_officer_in_charge.ilike(officer))
+                applications = applications.filter(ApplicationSearch.next_officer_in_charge == officer)
 
             decision_result = self.session.query(ClDecision).filter(ClDecision.code == 20).one()
 
@@ -390,9 +390,9 @@ class SentToGovernorDialog(QDialog, Ui_SentToGovernorDialog, DatabaseHelper):
 
             applications = applications.filter(ApplicationSearch.status == status)
             if not self.officer_cbox.itemData(self.officer_cbox.currentIndex()) == -1:
-                officer = "%" + self.officer_cbox.itemData(self.officer_cbox.currentIndex()).user_name_real + "%"
+                officer = self.officer_cbox.itemData(self.officer_cbox.currentIndex())
 
-                applications = applications.filter(ApplicationSearch.officer_in_charge.ilike(officer))
+                applications = applications.filter(ApplicationSearch.officer_in_charge == officer)
 
             stati = self.session.query(CtApplicationStatus.application, func.max(CtApplicationStatus.status_date))\
                 .group_by(CtApplicationStatus.application)\

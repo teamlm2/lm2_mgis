@@ -24,3 +24,4 @@ class DecisionSearch(Base):
     app_no = Column(String)
     contract_no = Column(String)
     record_no = Column(String)
+    decision_level = Column(Integer)

@@ -87,7 +87,7 @@ class LandFeePaymentsDialog(QDialog, Ui_LandFeePaymentsDialog, DatabaseHelper):
     def __populate_contractor_cbox(self):
 
         for fee in self.contract.fees:
-
+            print fee.person
             person_id = fee.person
             for name, first_name in self.session.query(BsPerson.name, BsPerson.first_name)\
                     .filter(BsPerson.person_id == person_id):
@@ -518,11 +518,11 @@ class LandFeePaymentsDialog(QDialog, Ui_LandFeePaymentsDialog, DatabaseHelper):
         # Intersect contract duration with payment period
         sql = "select lower(daterange(contract_begin, contract_end, '[)') * daterange(:from, :to, '[)'))," \
               " upper(daterange(contract_begin, contract_end, '[)') * daterange(:from, :to, '[)')) " \
-              "from ct_contract where contract_no = :contract_no"
+              "from ct_contract where contract_id = :contract_id"
 
         result = self.session.execute(sql, {'from': period_begin,
                                             'to': period_end,
-                                            'contract_no': fee.contract})
+                                            'contract_id': fee.contract})
         for row in result:
             effective_begin = row[0]
             effective_end = row[1]
@@ -844,10 +844,51 @@ class LandFeePaymentsDialog(QDialog, Ui_LandFeePaymentsDialog, DatabaseHelper):
 
     # table = document.add_table(rows=10,cols=2,style="ColorfulList-Accent5")
 
+    def __create_fee_unifeid_view(self):
+
+        current_working_soum = "'" + str(DatabaseUtils.current_working_soum_schema()) + "'"
+
+        sql = ""
+
+        if not sql:
+            sql = "Create temp view land_fee_unified as" + "\n"
+        else:
+            sql = sql + "UNION" + "\n"
+
+        select = "SELECT contract.contract_id, contract.contract_no, payment.year_paid_for,contract.status, fee.fee_contract, sum(payment.amount_paid) as paid, person.person_id, p_paid.p_paid ,landuse.description as landuse, " \
+                    "decision.decision_date ,decision.decision_no, person.first_name, person.name, person.contact_surname, person.contact_first_name ,person.address_street_name as person_streetname, person.address_khaskhaa as person_khashaa, " \
+                    "parcel.parcel_id, contract.certificate_no, person.person_register ,au3_person.name as person_bag,au3.name as bag_name, person.mobile_phone, parcel.area_m2, application.approved_duration, parcel.address_streetname, parcel.address_khashaa " \
+                 "FROM data_soums_union.ct_contract contract " \
+                 "LEFT JOIN data_soums_union.ct_contract_application_role con_app on con_app.contract = contract.contract_id "\
+                 "LEFT JOIN data_soums_union.ct_application application ON application.app_id = con_app.application " \
+                 "LEFT JOIN data_soums_union.ct_application_person_role app_pers on application.app_id = app_pers.application "\
+                 "LEFT JOIN base.bs_person person ON app_pers.person = person.person_id " \
+                 "LEFT JOIN data_soums_union.ca_parcel_tbl parcel on parcel.parcel_id = application.parcel " \
+                 "LEFT JOIN admin_units.au_level3 au3 on ST_Within(parcel.geometry,au3.geometry) "\
+                 "LEFT JOIN admin_units.au_level3 au3_person on person.address_au_level3 = au3_person.code " \
+                 "LEFT JOIN codelists.cl_landuse_type landuse on parcel.landuse = landuse.code " \
+                 "LEFT JOIN data_soums_union.ct_fee fee on contract.contract_id = fee.contract " \
+                 "LEFT JOIN data_soums_union.ct_decision_application dec_app on dec_app.application = application.app_id " \
+                 "LEFT JOIN data_soums_union.ct_decision decision on decision.decision_id = dec_app.decision " \
+                 "LEFT JOIN (select p.contract, sum(p.amount_paid) as p_paid from data_soums_union.ct_fee_payment p where p.year_paid_for < date_part('year', NOW())::int group by p.contract) p_paid on contract.contract_id = p_paid.contract " \
+                 "LEFT JOIN data_soums_union.ct_fee_payment payment on fee.contract = payment.contract " \
+                 "where  application.au2 = {0}".format(current_working_soum) + "\n"
+
+        sql = sql + select
+        sql = "{0} group by person.person_register, contract.contract_id, contract.contract_no, payment.year_paid_for,contract.status,fee.fee_contract, person.person_id, p_paid.p_paid,decision.decision_no, decision.decision_date, contract.certificate_no, parcel.parcel_id,au3.name, application.approved_duration,landuse.description,parcel.area_m2, parcel.address_streetname, parcel.address_khashaa,au3_person.name ".format(sql)
+        sql = "{0}  order by contract_no;".format(sql)
+        # try:
+        self.session.execute(sql)
+        self.commit()
+
+        # except SQLAlchemyError, e:
+        #     PluginUtils.show_message(self, self.tr("LM2", "Sql Error"), e.message)
+        #     return
 
     @pyqtSlot()
     def on_act_print_button_clicked(self):
 
+        self.__create_fee_unifeid_view()
         person_id = self.select_contractor_cbox.itemData(self.select_contractor_cbox.currentIndex(), Qt.UserRole)
         if not person_id:
             PluginUtils.show_message(self, self.tr("Land Fee"),
@@ -966,7 +1007,7 @@ class LandFeePaymentsDialog(QDialog, Ui_LandFeePaymentsDialog, DatabaseHelper):
         cell.width = Cm(0.5)
         paragraph = cell.paragraphs[0]
         paragraph.alignment = WD_ALIGN_PARAGRAPH.LEFT
-        run = paragraph.add_run(info.person_id)
+        run = paragraph.add_run(info.person_register)
         font = run.font
         font.name = 'Calibri'
         font.size = Pt(8)
@@ -1507,7 +1548,7 @@ class LandFeePaymentsDialog(QDialog, Ui_LandFeePaymentsDialog, DatabaseHelper):
         if print_officers.phone:
             officer_phone = str(print_officers.phone)
         person_name = ''
-        if len(info.person_id) == 10:
+        if len(info.person_register) == 10:
             person_name = info.name[:1] +'.'+ info.first_name
         else:
             if not info.contact_first_name:
@@ -1567,11 +1608,11 @@ class LandFeePaymentsDialog(QDialog, Ui_LandFeePaymentsDialog, DatabaseHelper):
         # Intersect contract duration with payment period
         sql = "select lower(daterange(contract_begin, contract_end, '[)') * daterange(:from, :to, '[)'))," \
               " upper(daterange(contract_begin, contract_end, '[)') * daterange(:from, :to, '[)')) " \
-              "from ct_contract where contract_no = :contract_no"
+              "from ct_contract where contract_id = :contract_id"
 
         result = self.session.execute(sql, {'from': period_begin,
                                             'to': period_end,
-                                            'contract_no': fee.contract})
+                                            'contract_id': fee.contract})
         for row in result:
             effective_begin = row[0]
             effective_end = row[1]

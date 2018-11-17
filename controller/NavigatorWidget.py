@@ -103,14 +103,18 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         self.application_datetime_edit.setDate(QDate.currentDate())
 
         self.__setup_combo_boxes()
+
         self.is_au_level2 = False
         self.working_l1_cbox.currentIndexChanged.connect(self.__working_l1_changed)
         self.working_l2_cbox.currentIndexChanged.connect(self.__working_l2_changed)
         self.__setup_twidgets()
+
         self.__load_role_settings()
+
         # self.__setup_permissions()
         self.__user_right_permissions()
-        self.__report_setup()
+
+        # self.__report_setup()
         self.tabWidget.setCurrentIndex(0)
 
         self.year_sbox.setMinimum(1950)
@@ -142,12 +146,13 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         self.after_year_date = datetime.strptime(self.after_year_date, "%Y-%m-%d").date()
 
         self.userSettings = None
-        self.__setup_combo_box()
-        self.__load_role_setting()
+        # self.__setup_combo_box()
+        # self.__load_role_setting()
         self.progressBar.setMinimum(1)
         self.progressBar.setValue(0)
         self.progressBar.setVisible(False)
-        self.__setup_address_fill()
+
+        # self.__setup_address_fill()
 
         # while True:
         #     self.__auto_find()
@@ -155,23 +160,31 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
     def __tab_widget_onChange(self, index):
 
         is_change = False
-        # if index:
-        #     if index == 1:
-        #         self.__create_person_view()
-        #     if index == 2:
-        #         self.__create_parcel_view()
-        #         self.__create_tmp_parcel_view()
-        #     if index == 3:
+        if index:
+            if index == 1:
+                self.__setup_person_combo_boxes()
+                self.__create_person_view()
+            if index == 2:
+                self.__setup_parcel_combo_boxes()
+                self.__setup_address_fill()
+                self.__create_parcel_view()
+                self.__create_tmp_parcel_view()
+            if index == 3:
+                self.__setup_app_combo_boxes()
+                self.__create_record_view()
         #         self.__create_application_view()
         #         self.__create_maintenance_case_view()
-        #     if index == 4:
-        #         self.__create_decision_view()
-        #     if index == 5:
-        #         self.__create_maintenance_case_view()
-        #     if index == 6:
-        #         self.__create_contract_view()
-        #     if index == 7:
-        #         self.__create_record_view()
+            if index == 4:
+                self.__create_decision_view()
+            if index == 5:
+                self.__setup_maintenance_combo_boxes()
+                self.__create_maintenance_case_view()
+            if index == 6:
+                self.__create_contract_view()
+            if index == 7:
+                self.__create_record_view()
+            if index == 8:
+                self.__report_setup()
 
     @pyqtSlot(int)
     def on_tabWidget_currentChanged(self, current_index):
@@ -292,16 +305,16 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
 
         self.__create_person_view()
         self.__create_application_view()
-        self.__create_parcel_view()
-        self.__create_tmp_parcel_view()
+        # self.__create_parcel_view()
+        # self.__create_tmp_parcel_view()
         self.__create_contract_view()
-        self.__create_decision_view()
-        self.__create_record_view()
-        self.__create_maintenance_case_view()
+        # self.__create_decision_view()
+        # self.__create_record_view()
+        # self.__create_maintenance_case_view()
         # self.__create_parcel_view_gts()
         # self.__create_fee_unifeid_view()
 
-    
+
     def __setup_change_combo_boxes(self):
 
         self.office_in_charge_cbox.clear()
@@ -309,12 +322,125 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         set_roles = self.session.query(SetRole).order_by(SetRole.user_name)
         soum_code = DatabaseUtils.working_l2_code()
         if set_roles is not None:
-            for role in set_roles:
-                l2_code_list = role.restriction_au_level2.split(',')
+            # for role in set_roles:
+            #     l2_code_list = role.restriction_au_level2.split(',')
+            #     if soum_code in l2_code_list:
+            #         # if role.user_name_real.find(restriction[1:]) != -1:
+            #         self.office_in_charge_cbox.addItem(role.surname + ", " + role.first_name, role)
+            #         self.next_officer_in_charge_cbox.addItem(role.surname + ", " + role.first_name, role)
+
+            for setRole in set_roles:
+                l2_code_list = setRole.restriction_au_level2.split(',')
                 if soum_code in l2_code_list:
-                    # if role.user_name_real.find(restriction[1:]) != -1:
-                    self.office_in_charge_cbox.addItem(role.surname + ", " + role.first_name, role)
-                    self.next_officer_in_charge_cbox.addItem(role.surname + ", " + role.first_name, role)
+                    sd_user = self.session.query(SdUser).filter(SdUser.gis_user_real == setRole.user_name_real).first()
+                    lastname = ''
+                    firstname = ''
+                    if sd_user:
+                        lastname = sd_user.lastname
+                        firstname = sd_user.firstname
+                    self.office_in_charge_cbox.addItem(lastname + ", " + firstname, sd_user.user_id)
+                    self.next_officer_in_charge_cbox.addItem(lastname + ", " + firstname, sd_user.user_id)
+
+    def __setup_maintenance_combo_boxes(self):
+
+        self.surveyed_by_land_officer_cbox.clear()
+        self.finalized_by_cbox.clear()
+        self.surveyed_by_company_cbox.clear()
+        self.case_status_cbox.clear()
+        try:
+            set_surveyors = self.session.query(SetSurveyor).all()
+            sd_users = self.session.query(SdUser).all()
+        except SQLAlchemyError, e:
+            PluginUtils.show_message(self, self.tr("Sql Error"), e.message)
+            return
+        self.surveyed_by_land_officer_cbox.addItem("*", -1)
+        self.finalized_by_cbox.addItem("*", -1)
+        self.surveyed_by_company_cbox.addItem("*", -1)
+        self.case_status_cbox.addItem("*", -1)
+        self.case_status_cbox.addItem(self.tr("Completed"), Constants.CASE_STATUS_COMPLETED)
+        self.case_status_cbox.addItem(self.tr("In progress"), Constants.CASE_STATUS_IN_PROGRESS)
+
+        if set_surveyors is not None:
+            for surveryor in set_surveyors:
+                company = self.session.query(SetSurveyCompany).filter(SetSurveyCompany.id == surveryor.company).one()
+                display_name = surveryor.surname + ' ' + surveryor.first_name + ' (' + company.name + ')'
+                self.surveyed_by_company_cbox.addItem(display_name, surveryor.id)
+
+        for sd_user in sd_users:
+            self.surveyed_by_land_officer_cbox.addItem(sd_user.lastname + " " + sd_user.firstname, sd_user.user_id)
+            self.finalized_by_cbox.addItem(sd_user.lastname + " " + sd_user.firstname, sd_user.user_id)
+
+    def __setup_app_combo_boxes(self):
+
+        self.status_cbox.clear()
+        self.office_in_charge_cbox.clear()
+        self.next_officer_in_charge_cbox.clear()
+        self.app_type_cbox.clear()
+        try:
+            soum_code = DatabaseUtils.working_l2_code()
+            set_roles = self.session.query(SetRole).order_by(SetRole.user_name)
+            cl_app_type = self.session.query(ClApplicationType). \
+                filter(and_(ClApplicationType.code != ApplicationType.pasture_use,
+                            ClApplicationType.code != ApplicationType.right_land)).all()
+            cl_applicationstatus = self.session.query(ClApplicationStatus).order_by(ClApplicationStatus.code).all()
+        except SQLAlchemyError, e:
+            PluginUtils.show_message(self, self.tr("Sql Error"), e.message)
+            return
+
+        self.status_cbox.addItem("*", -1)
+        self.office_in_charge_cbox.addItem("*", -1)
+        self.next_officer_in_charge_cbox.addItem("*", -1)
+        self.app_type_cbox.addItem("*", -1)
+
+        if set_roles is not None:
+            for setRole in set_roles:
+                l2_code_list = setRole.restriction_au_level2.split(',')
+                if soum_code in l2_code_list:
+                    sd_user = self.session.query(SdUser).filter(SdUser.gis_user_real == setRole.user_name_real).first()
+                    lastname = ''
+                    firstname = ''
+                    if sd_user:
+                        lastname = sd_user.lastname
+                        firstname = sd_user.firstname
+                    self.office_in_charge_cbox.addItem(lastname + ", " + firstname, sd_user.user_id)
+                    self.next_officer_in_charge_cbox.addItem(lastname + ", " + firstname, sd_user.user_id)
+
+        if cl_app_type is not None:
+            for app_type in cl_app_type:
+                self.app_type_cbox.addItem(app_type.description, app_type)
+
+        if cl_applicationstatus is not None:
+            for status in cl_applicationstatus:
+                self.status_cbox.addItem(status.description, status)
+
+    def __setup_parcel_combo_boxes(self):
+
+        self.land_use_type_cbox.clear()
+        self.person_type_cbox.clear()
+
+        cl_landusetype = self.session.query(ClLanduseType).all()
+        self.land_use_type_cbox.addItem("*", -1)
+        if cl_landusetype is not None:
+            for landuse in cl_landusetype:
+                self.land_use_type_cbox.addItem(str(landuse.code)+':'+landuse.description, landuse.code)
+
+    def __setup_person_combo_boxes(self):
+
+        self.person_type_cbox.clear()
+        self.application_type_cbox.clear()
+        cl_app_type = self.session.query(ClApplicationType). \
+            filter(and_(ClApplicationType.code != ApplicationType.pasture_use,
+                        ClApplicationType.code != ApplicationType.right_land)).all()
+        cl_person_type = self.session.query(ClPersonType).all()
+        self.person_type_cbox.addItem("*", -1)
+        self.application_type_cbox.addItem("*", -1)
+        if cl_app_type is not None:
+            for app_type in cl_app_type:
+                self.application_type_cbox.addItem(app_type.description, app_type)
+
+        if cl_person_type is not None:
+            for type in cl_person_type:
+                self.person_type_cbox.addItem(type.description, type)
 
     def __setup_combo_boxes(self):
 
@@ -325,18 +451,10 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
             l1_code = self.working_l1_cbox.itemData(self.working_l1_cbox.currentIndex(), Qt.UserRole)
             PluginUtils.populate_au_level2_cbox(self.working_l2_cbox, l1_code, False)
 
-            cl_applicationstatus = self.session.query(ClApplicationStatus).order_by(ClApplicationStatus.code).all()
-            cl_landusetype = self.session.query(ClLanduseType).all()
             cl_landofficer = self.session.query(SetRole).all()
-            cl_app_type = self.session.query(ClApplicationType). \
-                filter(and_(ClApplicationType.code != ApplicationType.pasture_use,
-                            ClApplicationType.code != ApplicationType.right_land)).all()
-            cl_person_type = self.session.query(ClPersonType).all()
+
             cl_contract_status = self.session.query(ClContractStatus).all()
             cl_record_status = self.session.query(ClRecordStatus).all()
-
-            set_surveyors = self.session.query(SetSurveyor).all()
-            set_roles = self.session.query(SetRole).order_by(SetRole.user_name)
 
             self.working_l1_cbox.setCurrentIndex(self.working_l1_cbox.findData(DatabaseUtils.working_l1_code()))
             self.working_l2_cbox.setCurrentIndex(self.working_l2_cbox.findData(DatabaseUtils.working_l2_code()))
@@ -345,49 +463,9 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
             PluginUtils.show_message(self, self.tr("Sql Error"), e.message)
             return
 
-        self.status_cbox.addItem("*", -1)
-        self.office_in_charge_cbox.addItem("*", -1)
-        self.next_officer_in_charge_cbox.addItem("*", -1)
-        self.land_use_type_cbox.addItem("*", -1)
-        self.surveyed_by_land_officer_cbox.addItem("*", -1)
-        self.finalized_by_cbox.addItem("*", -1)
-        self.surveyed_by_company_cbox.addItem("*", -1)
-        self.app_type_cbox.addItem("*", -1)
-        self.person_type_cbox.addItem("*", -1)
-        self.application_type_cbox.addItem("*", -1)
         self.contract_status_cbox.addItem("*", -1)
         self.record_status_cbox.addItem("*", -1)
 
-        self.case_status_cbox.addItem("*", -1)
-        self.case_status_cbox.addItem(self.tr("Completed"), Constants.CASE_STATUS_COMPLETED)
-        self.case_status_cbox.addItem(self.tr("In progress"), Constants.CASE_STATUS_IN_PROGRESS)
-
-        if set_surveyors is not None:
-            for surveryor in set_surveyors:
-                company = self.session.query(SetSurveyCompany).filter(SetSurveyCompany.id == surveryor.company).one()
-                display_name = surveryor.surname + ' ' + surveryor.first_name + ' (' + company.name + ')'
-                self.surveyed_by_company_cbox.addItem(display_name, surveryor.id)
-        if cl_landofficer is not None:
-            # try:
-            # officers = self.session.query(CaMaintenanceCase.created_by).group_by(CaMaintenanceCase.created_by).all()
-            sd_users = self.session.query(SdUser).all()
-            # except exc.SQLAlchemyError, e:
-            #     self.session.rollback()
-            #     raise LM2Exception(QApplication.translate("LM2", "Database Query Error"),
-            #                        QApplication.translate("LM2", "Could not execute: {0}").format(e.message))
-            for sd_user in sd_users:
-                self.surveyed_by_land_officer_cbox.addItem(sd_user.lastname +" "+ sd_user.firstname, sd_user.user_id)
-                self.finalized_by_cbox.addItem(sd_user.lastname +" "+ sd_user.firstname, sd_user.user_id)
-
-        if cl_applicationstatus is not None:
-            for status in cl_applicationstatus:
-                self.status_cbox.addItem(status.description, status)
-
-        if cl_app_type is not None:
-            for app_type in cl_app_type:
-                self.app_type_cbox.addItem(app_type.description, app_type)
-                #person search
-                self.application_type_cbox.addItem(app_type.description, app_type)
         if cl_contract_status is not None:
             for status in cl_contract_status:
                 self.contract_status_cbox.addItem(status.description, status)
@@ -395,27 +473,6 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         if cl_record_status is not None:
             for status in cl_record_status:
                 self.record_status_cbox.addItem(status.description, status)
-
-        current_user = DatabaseUtils.current_user()
-        restrictions = current_user.restriction_au_level2.split(",")
-        soum_code = DatabaseUtils.working_l2_code()
-        # for restriction in restrictions:
-        #     restriction = restriction.strip()
-        if set_roles is not None:
-            for role in set_roles:
-                l2_code_list = role.restriction_au_level2.split(',')
-                if soum_code in l2_code_list:
-                    # if role.user_name_real.find(restriction[1:]) != -1:
-                    self.office_in_charge_cbox.addItem(role.surname + ", " + role.first_name, role)
-                    self.next_officer_in_charge_cbox.addItem(role.surname + ", " + role.first_name, role)
-
-        if cl_landusetype is not None:
-            for landuse in cl_landusetype:
-                self.land_use_type_cbox.addItem(str(landuse.code)+':'+landuse.description, landuse.code)
-
-        if cl_person_type is not None:
-            for type in cl_person_type:
-                self.person_type_cbox.addItem(type.description, type)
 
     @pyqtSlot(int)
     def on_aimag_cbox_currentIndexChanged(self, index):
@@ -542,30 +599,31 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
 
         try:
             role = DatabaseUtils.current_user()
-            if not l2_code:
-                role.working_au_level2 = None
-            else:
-                role.working_au_level2 = l2_code
+            if role:
+                if not l2_code:
+                    role.working_au_level2 = None
+                else:
+                    role.working_au_level2 = l2_code
 
-            DatabaseUtils.set_working_schema(l2_code)
-            self.commit()
+                DatabaseUtils.set_working_schema(l2_code)
+                self.commit()
 
         except SQLAlchemyError, e:
             self.rollback_to_savepoint()
             PluginUtils.show_message(self,  self.tr("Sql Error"), e.message)
             return
         self.__zoom_to_soum(l2_code)
-        self.__load_role_settings()
+        # self.__load_role_settings()
 
         self.__setup_change_combo_boxes()
-        # self.__create_person_view()
-        # self.__create_application_view()
-        # self.__create_parcel_view()
-        # self.__create_tmp_parcel_view()
-        # self.__create_contract_view()
-        # self.__create_decision_view()
-        # self.__create_record_view()
-        # self.__create_maintenance_case_view()
+        self.__create_person_view()
+        self.__create_application_view()
+        self.__create_parcel_view()
+        self.__create_tmp_parcel_view()
+        self.__create_contract_view()
+        self.__create_decision_view()
+        self.__create_record_view()
+        self.__create_maintenance_case_view()
 
     def __zoom_to_soum(self, soum_code):
 
@@ -820,16 +878,19 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
     def on_temp_filter_apply_button_clicked(self):
 
         self.create_savepoint()
+        user_name = QSettings().value(SettingsConstants.USER)
+        self.userSettings = DatabaseUtils.role_settings(user_name)
 
         try:
-            if self.infinity_check_box.isChecked():
-                self.userSettings.pa_till = date(9999, 12, 31)
-            else:
-                self.userSettings.pa_till = DatabaseUtils.convert_date(self.till_date_edit.date())
+            if self.userSettings:
+                if self.infinity_check_box.isChecked():
+                    self.userSettings.pa_till = date(9999, 12, 31)
+                else:
+                    self.userSettings.pa_till = DatabaseUtils.convert_date(self.till_date_edit.date())
 
-            self.userSettings.pa_from = DatabaseUtils.convert_date(self.from_date_edit.date())
+                self.userSettings.pa_from = DatabaseUtils.convert_date(self.from_date_edit.date())
 
-            self.commit()
+                self.commit()
 
         except SQLAlchemyError, e:
             self.rollback_to_savepoint()
@@ -965,7 +1026,8 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         else:
             sql = sql + "UNION" + "\n"
 
-        select = "SELECT decision.decision_id, decision.decision_no, decision.decision_date, person.person_id, person.person_register, person.name, person.middle_name, person.first_name, parcel.parcel_id, application.app_no, contract.contract_no, record.record_no " \
+        select = "SELECT decision.decision_id, decision.decision_no, decision.decision_level,decision.decision_date, person.person_id, " \
+                 "person.person_register, person.name, person.middle_name, person.first_name, parcel.parcel_id, application.app_no, contract.contract_no, record.record_no " \
                  "FROM data_soums_union.ct_decision decision " \
                  "LEFT JOIN data_soums_union.ct_decision_application dec_app ON dec_app.decision = decision.decision_id " \
                  "LEFT JOIN data_soums_union.ct_application application ON dec_app.application = application.app_id " \
@@ -1190,11 +1252,13 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
 
         selected_item = selected_items[0]
         decision_no = selected_item.data(Qt.UserRole)
+        decision_level = selected_item.data(Qt.UserRole+1)
         decision_no_soum = decision_no.split("-")[0]
         DatabaseUtils.set_working_schema(decision_no_soum)
 
         try:
-            decision_instance = self.session.query(CtDecision).filter_by(decision_no=decision_no).one()
+            decision_instance = self.session.query(CtDecision).filter(CtDecision.decision_no == decision_no).\
+                filter(CtDecision.decision_level == decision_level).one()
         except SQLAlchemyError, e:
             PluginUtils.show_message(self, self.tr("LM2", "Sql Error"), e.message)
             return None
@@ -1408,123 +1472,123 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
 
     def __search_applications(self):
 
-        try:
-            applications = self.session.query(ApplicationSearch)
-            filter_is_set = False
-            sub = self.session.query(ApplicationSearch, func.row_number().over(partition_by = ApplicationSearch.app_no, order_by = (desc(ApplicationSearch.status_date), desc(ApplicationSearch.status))).label("row_number")).subquery()
-            applications = applications.select_entity_from(sub).filter(sub.c.row_number == 1)
+        # try:
+        applications = self.session.query(ApplicationSearch)
+        filter_is_set = False
+        sub = self.session.query(ApplicationSearch, func.row_number().over(partition_by = ApplicationSearch.app_no, order_by = (desc(ApplicationSearch.status_date), desc(ApplicationSearch.status))).label("row_number")).subquery()
+        applications = applications.select_entity_from(sub).filter(sub.c.row_number == 1)
 
-            applications = applications. \
-                filter(and_(ApplicationSearch.app_type != ApplicationType.pasture_use,
-                            ApplicationSearch.app_type != ApplicationType.right_land))
+        applications = applications. \
+            filter(and_(ApplicationSearch.app_type != ApplicationType.pasture_use,
+                        ApplicationSearch.app_type != ApplicationType.right_land))
 
-            if self.status_cbox.currentIndex() != -1:
-                if not self.status_cbox.itemData(self.status_cbox.currentIndex()) == -1:
-                    filter_is_set = True
-                    status = self.status_cbox.itemData(self.status_cbox.currentIndex()).code
-
-                    applications = applications.filter(ApplicationSearch.status == status)
-
-            if self.office_in_charge_cbox.currentIndex() != -1:
-                if not self.office_in_charge_cbox.itemData(self.office_in_charge_cbox.currentIndex()) == -1:
-                    filter_is_set = True
-                    officer = "%" + self.office_in_charge_cbox.itemData(self.office_in_charge_cbox.currentIndex()).user_name_real + "%"
-
-                    applications = applications.filter(ApplicationSearch.officer_in_charge.ilike(officer))
-
-            if self.application_application_num_edit.text():
+        if self.status_cbox.currentIndex() != -1:
+            if not self.status_cbox.itemData(self.status_cbox.currentIndex()) == -1:
                 filter_is_set = True
-                app_no = "%" + self.application_application_num_edit.text() + "%"
-                applications = applications.filter(ApplicationSearch.app_no.ilike(app_no))
+                status = self.status_cbox.itemData(self.status_cbox.currentIndex()).code
 
-            if self.app_type_cbox.currentIndex() != -1:
-                if not self.app_type_cbox.itemData(self.app_type_cbox.currentIndex()) == -1:
-                    filter_is_set = True
-                    applications = applications.filter(ApplicationSearch.app_type == self.app_type_cbox.itemData(self.app_type_cbox.currentIndex()).code)
+                applications = applications.filter(ApplicationSearch.status == status)
 
-            if self.next_officer_in_charge_cbox.currentIndex() != -1:
-                if not self.next_officer_in_charge_cbox.itemData(self.next_officer_in_charge_cbox.currentIndex()) == -1:
-                    filter_is_set = True
-                    officer = "%" + self.next_officer_in_charge_cbox.itemData(self.next_officer_in_charge_cbox.currentIndex()).user_name_real + "%"
-                    applications = applications.filter(ApplicationSearch.next_officer_in_charge.ilike(officer))
-
-            if self.application_right_holder_name_edit.text():
+        if self.office_in_charge_cbox.currentIndex() != -1:
+            if not self.office_in_charge_cbox.itemData(self.office_in_charge_cbox.currentIndex()) == -1:
                 filter_is_set = True
-                right_holder = self.application_right_holder_name_edit.text()
-                if "," in right_holder:
-                    right_holder_strings = right_holder.split(",")
-                    surname = "%" + right_holder_strings[0].strip() + "%"
-                    first_name = "%" + right_holder_strings[1].strip() + "%"
-                    applications = applications.filter(and_(func.lower(ApplicationSearch.name).ilike(func.lower(surname)), func.lower(ApplicationSearch.first_name).ilike(func.lower(first_name))))
-                else:
-                    right_holder = "%" + self.application_right_holder_name_edit.text() + "%"
-                    applications = applications.filter(or_(func.lower(ApplicationSearch.name).ilike(func.lower(right_holder)), func.lower(ApplicationSearch.first_name).ilike(func.lower(right_holder)), func.lower(ApplicationSearch.middle_name).ilike(func.lower(right_holder))))
+                officer = self.office_in_charge_cbox.itemData(self.office_in_charge_cbox.currentIndex())
 
-            if self.application_parcel_num_edit.text():
-                if len(self.application_parcel_num_edit.text()) < 5:
-                    self.error_label.setText(self.tr("find search character should be at least 4"))
-                    return
+                applications = applications.filter(ApplicationSearch.officer_in_charge == officer)
+
+        if self.application_application_num_edit.text():
+            filter_is_set = True
+            app_no = "%" + self.application_application_num_edit.text() + "%"
+            applications = applications.filter(ApplicationSearch.app_no.ilike(app_no))
+
+        if self.app_type_cbox.currentIndex() != -1:
+            if not self.app_type_cbox.itemData(self.app_type_cbox.currentIndex()) == -1:
                 filter_is_set = True
-                parcel_no = "%" + self.application_parcel_num_edit.text() + "%"
-                applications_count = applications.filter(ApplicationSearch.parcel_id.ilike(parcel_no)).count()
-                if applications_count > 0:
-                    applications = applications.filter(ApplicationSearch.parcel_id.ilike(parcel_no))
-                else:
-                    applications = applications.filter(ApplicationSearch.tmp_parcel_id.ilike(parcel_no))
-            if self.application_decision_num_edit.text():
+                applications = applications.filter(ApplicationSearch.app_type == self.app_type_cbox.itemData(self.app_type_cbox.currentIndex()).code)
+
+        if self.next_officer_in_charge_cbox.currentIndex() != -1:
+            if not self.next_officer_in_charge_cbox.itemData(self.next_officer_in_charge_cbox.currentIndex()) == -1:
                 filter_is_set = True
-                decision_no = "%" + self.application_decision_num_edit.text() + "%"
-                applications = applications.filter(ApplicationSearch.decision_no.ilike(decision_no))
+                officer = self.next_officer_in_charge_cbox.itemData(self.next_officer_in_charge_cbox.currentIndex())
+                applications = applications.filter(ApplicationSearch.next_officer_in_charge == officer)
 
-            if self.application_contract_num_edit.text():
-                filter_is_set = True
-                contract_num = "%" + self.application_contract_num_edit.text() + "%"
-                applications = applications.filter(or_(ApplicationSearch.contract_no.ilike(contract_num), ApplicationSearch.record_no.ilike(contract_num)))
+        if self.application_right_holder_name_edit.text():
+            filter_is_set = True
+            right_holder = self.application_right_holder_name_edit.text()
+            if "," in right_holder:
+                right_holder_strings = right_holder.split(",")
+                surname = "%" + right_holder_strings[0].strip() + "%"
+                first_name = "%" + right_holder_strings[1].strip() + "%"
+                applications = applications.filter(and_(func.lower(ApplicationSearch.name).ilike(func.lower(surname)), func.lower(ApplicationSearch.first_name).ilike(func.lower(first_name))))
+            else:
+                right_holder = "%" + self.application_right_holder_name_edit.text() + "%"
+                applications = applications.filter(or_(func.lower(ApplicationSearch.name).ilike(func.lower(right_holder)), func.lower(ApplicationSearch.first_name).ilike(func.lower(right_holder)), func.lower(ApplicationSearch.middle_name).ilike(func.lower(right_holder))))
 
-            if self.personal_application_edit.text():
-                if len(self.personal_application_edit.text()) < 5:
-                    self.error_label.setText(self.tr("find search character should be at least 4"))
-                    return
-                filter_is_set = True
-                person_id = "%" + self.personal_application_edit.text() + "%"
-                applications = applications.filter(ApplicationSearch.person_register.ilike(person_id))
-
-            if self.app_date_checkbox.isChecked():
-                filter_is_set = True
-                qt_date = self.application_datetime_edit.date().toString(Constants.DATABASE_DATE_FORMAT)
-                python_date = datetime.strptime(str(qt_date), Constants.PYTHON_DATE_FORMAT)
-
-                applications = applications.filter(ApplicationSearch.app_timestamp >= python_date)
-
-            count = 0
-
-            self.__remove_application_items()
-
-            if applications.distinct(ApplicationSearch.app_no).count() == 0:
-                self.error_label.setText(self.tr("No applications found for this search filter."))
+        if self.application_parcel_num_edit.text():
+            if len(self.application_parcel_num_edit.text()) < 5:
+                self.error_label.setText(self.tr("find search character should be at least 4"))
                 return
+            filter_is_set = True
+            parcel_no = "%" + self.application_parcel_num_edit.text() + "%"
+            applications_count = applications.filter(ApplicationSearch.parcel_id.ilike(parcel_no)).count()
+            if applications_count > 0:
+                applications = applications.filter(ApplicationSearch.parcel_id.ilike(parcel_no))
+            else:
+                applications = applications.filter(ApplicationSearch.tmp_parcel_id.ilike(parcel_no))
+        if self.application_decision_num_edit.text():
+            filter_is_set = True
+            decision_no = "%" + self.application_decision_num_edit.text() + "%"
+            applications = applications.filter(ApplicationSearch.decision_no.ilike(decision_no))
 
-            elif filter_is_set is False:
-                self.error_label.setText(self.tr("Please specify a search filter."))
+        if self.application_contract_num_edit.text():
+            filter_is_set = True
+            contract_num = "%" + self.application_contract_num_edit.text() + "%"
+            applications = applications.filter(or_(ApplicationSearch.contract_no.ilike(contract_num), ApplicationSearch.record_no.ilike(contract_num)))
+
+        if self.personal_application_edit.text():
+            if len(self.personal_application_edit.text()) < 5:
+                self.error_label.setText(self.tr("find search character should be at least 4"))
                 return
+            filter_is_set = True
+            person_id = "%" + self.personal_application_edit.text() + "%"
+            applications = applications.filter(ApplicationSearch.person_register.ilike(person_id))
 
-            for application in applications.distinct(ApplicationSearch.app_no).all():
-                app_type = "" if not application.app_type_ref else application.app_type_ref.description
+        if self.app_date_checkbox.isChecked():
+            filter_is_set = True
+            qt_date = self.application_datetime_edit.date().toString(Constants.DATABASE_DATE_FORMAT)
+            python_date = datetime.strptime(str(qt_date), Constants.PYTHON_DATE_FORMAT)
 
-                item = QTableWidgetItem(str(application.app_no) + " ( " + unicode(app_type) + " )")
-                item.setIcon(QIcon(QPixmap(":/plugins/lm2/application.png")))
-                item.setData(Qt.UserRole, application.app_id)
-                item.setData(Qt.UserRole+1, application.app_no)
-                self.application_results_twidget.insertRow(count)
-                self.application_results_twidget.setItem(count, 0, item)
-                count += 1
+            applications = applications.filter(ApplicationSearch.app_timestamp >= python_date)
 
-            self.error_label.setText("")
-            self.application_results_label.setText(self.tr("Results: ") + str(count))
+        count = 0
 
-        except SQLAlchemyError, e:
-            PluginUtils.show_message(self, self.tr("LM2", "Sql Error"), e.message)
+        self.__remove_application_items()
+
+        if applications.distinct(ApplicationSearch.app_no).count() == 0:
+            self.error_label.setText(self.tr("No applications found for this search filter."))
             return
+
+        elif filter_is_set is False:
+            self.error_label.setText(self.tr("Please specify a search filter."))
+            return
+
+        for application in applications.distinct(ApplicationSearch.app_no).all():
+            app_type = "" if not application.app_type_ref else application.app_type_ref.description
+
+            item = QTableWidgetItem(str(application.app_no) + " ( " + unicode(app_type) + " )")
+            item.setIcon(QIcon(QPixmap(":/plugins/lm2/application.png")))
+            item.setData(Qt.UserRole, application.app_id)
+            item.setData(Qt.UserRole+1, application.app_no)
+            self.application_results_twidget.insertRow(count)
+            self.application_results_twidget.setItem(count, 0, item)
+            count += 1
+
+        self.error_label.setText("")
+        self.application_results_label.setText(self.tr("Results: ") + str(count))
+
+        # except SQLAlchemyError, e:
+        #     PluginUtils.show_message(self, self.tr("LM2", "Sql Error"), e.message)
+        #     return
 
     @pyqtSlot()
     def on_case_find_button_clicked(self):
@@ -1642,7 +1706,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
     def __search_decisions(self):
 
         # try:
-        decisions = self.session.query(DecisionSearch.decision_no)
+        decisions = self.session.query(DecisionSearch.decision_no,DecisionSearch.decision_level)
         filter_is_set = False
 
         if self.decision_num_edit.text():
@@ -1702,10 +1766,12 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
             self.error_label.setText(self.tr("Please specify a search filter."))
             return
 
-        for decision in decisions.distinct(DecisionSearch.decision_no).all():
-            item = QTableWidgetItem(decision.decision_no)
+        for decision in decisions.distinct(DecisionSearch.decision_no, DecisionSearch.decision_level).all():
+            decision_level = self.session.query(ClDecisionLevel).filter(ClDecisionLevel.code == decision.decision_level).one()
+            item = QTableWidgetItem(decision.decision_no +' ('+ decision_level.description +')')
             item.setIcon(QIcon(QPixmap(":/plugins/lm2/decision.png")))
             item.setData(Qt.UserRole, decision.decision_no)
+            item.setData(Qt.UserRole + 1, decision.decision_level)
             self.decision_results_twidget.insertRow(count)
             self.decision_results_twidget.setItem(count, 0, item)
             count += 1
@@ -2704,10 +2770,9 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
             # case_buildings = self.session.query(CaMaintenanceBuilding).filter(
             #     CaMaintenanceBuilding.maintenance == case_no).all()
             # for case_building in case_buildings:
-            #     print case_building.building
             #     self.session.query(CaMaintenanceBuilding).filter(
             #         CaMaintenanceBuilding.maintenance == case_building.building).delete()
-            print case_no
+
             self.session.query(CaMaintenanceCase).filter(CaMaintenanceCase.id == case_no).delete()
 
             self.commit()
@@ -3677,6 +3742,11 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
 
     # Report
     def __report_setup(self):
+
+        self.report_app_type_cbox.clear()
+        self.report_app_status_cbox.clear()
+        self.report_land_use_cbox.clear()
+        self.report_person_type_cbox.clear()
 
         self.report_begin_date.setDateTime(QDateTime().currentDateTime())
         self.report_end_date.setDateTime(QDateTime().currentDateTime())
@@ -7926,22 +7996,24 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
     def on_decision_results_twidget_itemClicked(self, item):
 
         id = item.data(Qt.UserRole)
-        try:
-            decision_result = self.session.query(DecisionSearch).filter(DecisionSearch.decision_no == id).one()
-            self.decision_num_edit.setText(decision_result.decision_no)
-            self.decision_date.setDate(decision_result.decision_date)
-            self.decision_right_holder_name_edit.setText(decision_result.first_name)
-            self.personal_decision_edit.setText(decision_result.person_register)
-            self.decision_parcel_num_edit.setText(decision_result.parcel_id)
-            self.decision_application_num_edit.setText(decision_result.app_no)
-            if decision_result.contract_no != None:
-                self.decision_contract_num_edit.setText(decision_result.contract_no)
-            else:
-                self.decision_contract_num_edit.setText(decision_result.record_no)
+        decision_level = item.data(Qt.UserRole+1)
+        # try:
+        decision_result = self.session.query(DecisionSearch).filter(DecisionSearch.decision_no == id).\
+            filter(CtDecision.decision_level == decision_level).first()
+        self.decision_num_edit.setText(decision_result.decision_no)
+        self.decision_date.setDate(decision_result.decision_date)
+        self.decision_right_holder_name_edit.setText(decision_result.first_name)
+        self.personal_decision_edit.setText(decision_result.person_register)
+        self.decision_parcel_num_edit.setText(decision_result.parcel_id)
+        self.decision_application_num_edit.setText(decision_result.app_no)
+        if decision_result.contract_no != None:
+            self.decision_contract_num_edit.setText(decision_result.contract_no)
+        else:
+            self.decision_contract_num_edit.setText(decision_result.record_no)
 
-        except SQLAlchemyError, e:
-            PluginUtils.show_error(self, self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
-            return
+        # except SQLAlchemyError, e:
+        #     PluginUtils.show_error(self, self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+        #     return
 
     @pyqtSlot(QTableWidgetItem)
     def on_case_results_twidget_itemClicked(self, item):

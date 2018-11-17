@@ -33,8 +33,14 @@ class ApplicationSearch(Base):
     status = Column(Integer, ForeignKey('cl_application_status.code'))
     status_ref = relationship("ClApplicationStatus")
 
-    officer_in_charge = Column(String, ForeignKey('set_role.user_name'))
-    officer_in_charge_ref = relationship("SetRole", foreign_keys=[officer_in_charge])
+    # officer_in_charge = Column(String, ForeignKey('set_role.user_name'))
+    # officer_in_charge_ref = relationship("SetRole", foreign_keys=[officer_in_charge])
+    #
+    # next_officer_in_charge = Column(String, ForeignKey('set_role.user_name'))
+    # next_officer_in_charge_ref = relationship("SetRole", foreign_keys=[next_officer_in_charge])
 
-    next_officer_in_charge = Column(String, ForeignKey('set_role.user_name'))
-    next_officer_in_charge_ref = relationship("SetRole", foreign_keys=[next_officer_in_charge])
+    officer_in_charge = Column(Integer, ForeignKey('sd_user.user_id'))
+    officer_in_charge_ref = relationship("SdUser", foreign_keys=[officer_in_charge], cascade="save-update")
+
+    next_officer_in_charge = Column(Integer, ForeignKey('sd_user.user_id'))
+    next_officer_in_charge_ref = relationship("SdUser", foreign_keys=[next_officer_in_charge], cascade="save-update")

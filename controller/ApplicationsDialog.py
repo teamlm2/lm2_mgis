@@ -40,6 +40,7 @@ from ..model.CtOwnershipRecord import *
 from ..model.CaTmpParcel import *
 from ..model.SetBaseTaxAndPrice import *
 from ..model.CtDecision import *
+from ..model.CtDocument import *
 from ..model.CtDecisionApplication import *
 from ..model.SetApplicationTypeDocumentRole import *
 from ..model.SetPersonTypeApplicationType import *
@@ -61,6 +62,8 @@ from ..model.SetOrganizationRightType import *
 from ..model.SdPosition import *
 from ..model.Enumerations import ApplicationType, UserRight
 from ..model.CaParcelTbl import *
+from ..model.SdFtpConnection import *
+from ..model.SdFtpPermission import *
 from .qt_classes.ApplicantDocumentDelegate import ApplicationDocumentDelegate
 from .qt_classes.DocumentsTableWidget import DocumentsTableWidget
 from .qt_classes.DragTableWidget import DragTableWidget
@@ -71,6 +74,7 @@ from ..utils.SessionHandler import SessionHandler
 from ..utils.PluginUtils import PluginUtils
 from ..utils.DatabaseUtils import DatabaseUtils
 from ..utils.FilePath import *
+from ftplib import FTP, error_perm
 
 DOC_PROVIDED_COLUMN = 0
 DOC_FILE_TYPE_COLUMN = 1
@@ -134,6 +138,8 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
         self.new_right_holders_twidget = None
         self.mortgage_twidget = None
         self.person = None
+
+        self.ftp = None
         self.is_tmp_parcel = False
         self.is_representative = False
         self.setupUi(self)
@@ -642,9 +648,8 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
                 sd_user = self.session.query(SdUser).filter(SdUser.gis_user_real == setRole.user_name_real).first()
                 lastname = ''
                 firstname = ''
-                if sd_user.lastname:
+                if sd_user:
                     lastname = sd_user.lastname
-                if sd_user.firstname:
                     firstname = sd_user.firstname
                 self.next_officer_in_charge_cbox.addItem(lastname + ", " + firstname, sd_user.user_id)
 
@@ -1670,38 +1675,22 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
 
     def __update_documents_file_twidget(self):
 
-        current_app_type = self.application_type_cbox.itemData(self.application_type_cbox.currentIndex())
-        try:
-            required_doc_types = self.session.query(SetApplicationTypeDocumentRole).filter_by(
-                application_type=current_app_type)
 
-        except SQLAlchemyError, e:
-            PluginUtils.show_error(self, self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
-            return
-
-        archive_app_path = FilePath.app_file_path()+'/'+ self.application.app_no
-        if not os.path.exists(archive_app_path):
-            os.makedirs(archive_app_path)
-
-        for file in os.listdir(archive_app_path):
-            os.listdir(archive_app_path)
-            if file.endswith(".pdf"):
-                doc_type = file[18:-4]
-                file_name = file
-                app_no = file[:17]
-
+        app_docs = self.session.query(CtApplicationDocument).filter(CtApplicationDocument.application_id == self.application.app_id).all()
+        for app_doc in app_docs:
+            document_count = self.session.query(CtDocument).filter(CtDocument.id == app_doc.document_id).count()
+            if document_count == 1:
+                document = self.session.query(CtDocument).filter(CtDocument.id == app_doc.document_id).one()
                 for i in range(self.documents_twidget.rowCount()):
                     doc_type_item = self.documents_twidget.item(i, DOC_FILE_TYPE_COLUMN)
+                    doc_type_code = doc_type_item.data(Qt.UserRole)
+                    # if len(str(doc_type_item.data(Qt.UserRole))) == 1:
+                    #     doc_type_code = '0' + str(doc_type_item.data(Qt.UserRole))
 
-                    doc_type_code = str(doc_type_item.data(Qt.UserRole))
-
-                    if len(str(doc_type_item.data(Qt.UserRole))) == 1:
-                        doc_type_code = '0'+ str(doc_type_item.data(Qt.UserRole))
-                    if len(doc_type) == 1:
-                        doc_type = '0' + doc_type
-                    if doc_type == doc_type_code and self.current_application_no() == app_no:
+                    if app_doc.role == doc_type_code:
+                        print document.name
                         item_name = self.documents_twidget.item(i, DOC_FILE_NAME_COLUMN)
-                        item_name.setText(file_name)
+                        item_name.setText(document.name)
 
                         item_provided = self.documents_twidget.item(i, DOC_PROVIDED_COLUMN)
                         item_provided.setCheckState(Qt.Checked)
@@ -1712,8 +1701,55 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
                         self.documents_twidget.setItem(i, 2, item_name)
                         self.documents_twidget.setItem(i, 3, item_open)
 
+        self.documents_twidget.resizeColumnsToContents()
+        # current_app_type = self.application_type_cbox.itemData(self.application_type_cbox.currentIndex())
+        # try:
+        #     required_doc_types = self.session.query(SetApplicationTypeDocumentRole).filter_by(
+        #         application_type=current_app_type)
+        #
+        # except SQLAlchemyError, e:
+        #     PluginUtils.show_error(self, self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+        #     return
+        #
+        # archive_app_path = FilePath.app_file_path()+'/'+ self.application.app_no
+        # if not os.path.exists(archive_app_path):
+        #     os.makedirs(archive_app_path)
+        #
+        # for file in os.listdir(archive_app_path):
+        #     os.listdir(archive_app_path)
+        #     if file.endswith(".pdf"):
+        #         doc_type = file[18:-4]
+        #         file_name = file
+        #         app_no = file[:17]
+        #
+        #         for i in range(self.documents_twidget.rowCount()):
+        #             doc_type_item = self.documents_twidget.item(i, DOC_FILE_TYPE_COLUMN)
+        #
+        #             doc_type_code = str(doc_type_item.data(Qt.UserRole))
+        #
+        #             if len(str(doc_type_item.data(Qt.UserRole))) == 1:
+        #                 doc_type_code = '0'+ str(doc_type_item.data(Qt.UserRole))
+        #             if len(doc_type) == 1:
+        #                 doc_type = '0' + doc_type
+        #             if doc_type == doc_type_code and self.current_application_no() == app_no:
+        #                 item_name = self.documents_twidget.item(i, DOC_FILE_NAME_COLUMN)
+        #                 item_name.setText(file_name)
+        #
+        #                 item_provided = self.documents_twidget.item(i, DOC_PROVIDED_COLUMN)
+        #                 item_provided.setCheckState(Qt.Checked)
+        #
+        #                 item_open = self.documents_twidget.item(i, DOC_OPEN_FILE_COLUMN)
+        #
+        #                 self.documents_twidget.setItem(i, 0, item_provided)
+        #                 self.documents_twidget.setItem(i, 2, item_name)
+        #                 self.documents_twidget.setItem(i, 3, item_open)
+
     @pyqtSlot()
     def on_load_doc_button_clicked(self):
+
+        ftp = DatabaseUtils.ftp_connect()
+        if not ftp:
+            return
 
         # self.documents_twidget.clear()
         self.__remove_document_items()
@@ -1749,7 +1785,7 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
             self.documents_twidget.setItem(row, DOC_OPEN_FILE_COLUMN, item_open)
             self.documents_twidget.setItem(row, DOC_DELETE_COLUMN, item_remove)
             self.documents_twidget.setItem(row, DOC_VIEW_COLUMN, item_view)
-
+        #
         self.__update_documents_file_twidget()
 
 
@@ -2302,7 +2338,7 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
         if selected_row is None:
             return
 
-        if self.__max_status_object().officer_in_charge != self.__current_real_user().user_name_real:
+        if self.__max_status_object().officer_in_charge != self.__current_sd_user().user_id:
             PluginUtils.show_message(self, self.tr("Application Status"),
                                      self.tr("Permission Status!!"))
             return
@@ -3420,7 +3456,7 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
             CtApplicationStatus.application == app_id).all()
         for p in app_status:
             if p.status == 1:
-                sd_officer = self.session.query(SdUser).filter(SdUser.user_id == p.officer_in_charge).one()
+                sd_officer = self.session.query(SdUser).filter(SdUser.user_id == p.next_officer_in_charge).one()
                 officer = sd_officer.gis_user_real_ref
         # except SQLAlchemyError, e:
         #     raise LM2Exception(self.tr("Database Query Error"),
@@ -3782,77 +3818,77 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
         parcel_count = self.session.query(CaTmpParcel).filter_by(parcel_id=current_parcel_id).count()
         if parcel_count != 0:
             self.is_tmp_parcel = True
-        try:
-            current_app_type = self.application_type_cbox.itemData(self.application_type_cbox.currentIndex())
+        # try:
+        current_app_type = self.application_type_cbox.itemData(self.application_type_cbox.currentIndex())
 
-            if self.is_tmp_parcel:
-                if parcel_count == 0:
+        if self.is_tmp_parcel:
+            if parcel_count == 0:
+                PluginUtils.show_error(self, self.tr("Working Soum"),
+                                        self.tr("The selected Parcel {0} is not within the working soum. "
+                                                "\n \n Change the Working soum to create a new application for "
+                                                "the parcel.").format(current_parcel_id))
+                return
+
+
+            validation_id = "app_type_{0}_drop_parcel".format(current_app_type)
+
+            set_validation = self.session.query(SetValidation).get(validation_id)
+
+            if set_validation:
+                result = self.session.execute(set_validation.sql_statement.format(current_parcel_id)).fetchall()
+
+                count = 0
+                for row in result:
+                    count = row[0]
+
+                if count != 0:
                     PluginUtils.show_error(self, self.tr("Working Soum"),
-                                            self.tr("The selected Parcel {0} is not within the working soum. "
-                                                    "\n \n Change the Working soum to create a new application for "
-                                                    "the parcel.").format(current_parcel_id))
-                    return
+                                            self.tr("There is already an existing application for the parcel {0}").format(current_parcel_id))
+
+            parcel = self.session.query(CaTmpParcel).filter_by(parcel_id=current_parcel_id).one()
+            case_id = parcel.maintenance_case
+            maintenance_case = self.session.query(CaMaintenanceCase).filter(CaMaintenanceCase.id == case_id).one()
+            if maintenance_case.completion_date is None:
+                PluginUtils.show_message(self, self.tr("Maintenance Error"), self.tr("Is not complete"))
+                return
+        else:
+            status_count = self.session.query(CtApplicationStatus). \
+                join(CtApplication, CtApplicationStatus.application == CtApplication.app_id). \
+                filter(CtApplicationStatus.status > 6). \
+                filter(CtApplication.parcel == current_parcel_id).count()
+            if status_count == 0:
+                PluginUtils.show_message(self, self.tr('delete please'), self.tr(
+                    'Delete please the parcel. This parcel is not referenced to any applications.'))
+                return
+            parcel_count = self.session.query(CaParcelTbl).filter_by(parcel_id=current_parcel_id).count()
+
+            if parcel_count == 0:
+                PluginUtils.show_error(self, self.tr("Working Soum"),
+                                        self.tr("The selected Parcel {0} is not within the working soum. "
+                                                "\n \n Change the Working soum to create a new application for "
+                                                "the parcel.").format(current_parcel_id))
+                return
 
 
-                validation_id = "app_type_{0}_drop_parcel".format(current_app_type)
+            validation_id = "app_type_{0}_drop_parcel".format(current_app_type)
 
-                set_validation = self.session.query(SetValidation).get(validation_id)
+            set_validation = self.session.query(SetValidation).get(validation_id)
 
-                if set_validation:
-                    result = self.session.execute(set_validation.sql_statement.format(current_parcel_id)).fetchall()
+            if set_validation:
+                result = self.session.execute(set_validation.sql_statement.format(current_parcel_id)).fetchall()
 
-                    count = 0
-                    for row in result:
-                        count = row[0]
+                count = 0
+                for row in result:
+                    count = row[0]
 
-                    if count != 0:
-                        PluginUtils.show_error(self, self.tr("Working Soum"),
-                                                self.tr("There is already an existing application for the parcel {0}").format(current_parcel_id))
-
-                parcel = self.session.query(CaTmpParcel).filter_by(parcel_id=current_parcel_id).one()
-                case_id = parcel.maintenance_case
-                maintenance_case = self.session.query(CaMaintenanceCase).filter(CaMaintenanceCase.id == case_id).one()
-                if maintenance_case.completion_date is None:
-                    PluginUtils.show_message(self, self.tr("Maintenance Error"), self.tr("Is not complete"))
-                    return
-            else:
-                status_count = self.session.query(CtApplicationStatus). \
-                    join(CtApplication, CtApplicationStatus.application == CtApplication.app_id). \
-                    filter(CtApplicationStatus.status > 6). \
-                    filter(CtApplication.parcel == current_parcel_id).count()
-                if status_count == 0:
-                    PluginUtils.show_message(self, self.tr('delete please'), self.tr(
-                        'Delete please the parcel. This parcel is not referenced to any applications.'))
-                    return
-                parcel_count = self.session.query(CaParcelTbl).filter_by(parcel_id=current_parcel_id).count()
-
-                if parcel_count == 0:
+                if count != 0:
                     PluginUtils.show_error(self, self.tr("Working Soum"),
-                                            self.tr("The selected Parcel {0} is not within the working soum. "
-                                                    "\n \n Change the Working soum to create a new application for "
-                                                    "the parcel.").format(current_parcel_id))
-                    return
+                                            self.tr("There is already an existing application for the parcel {0}").format(current_parcel_id))
 
-
-                validation_id = "app_type_{0}_drop_parcel".format(current_app_type)
-
-                set_validation = self.session.query(SetValidation).get(validation_id)
-
-                if set_validation:
-                    result = self.session.execute(set_validation.sql_statement.format(current_parcel_id)).fetchall()
-
-                    count = 0
-                    for row in result:
-                        count = row[0]
-
-                    if count != 0:
-                        PluginUtils.show_error(self, self.tr("Working Soum"),
-                                                self.tr("There is already an existing application for the parcel {0}").format(current_parcel_id))
-
-                parcel = self.session.query(CaParcelTbl).filter_by(parcel_id=current_parcel_id).one()
-
-        except SQLAlchemyError, e:
-            PluginUtils.show_error(self, self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+            parcel = self.session.query(CaParcelTbl).filter_by(parcel_id=current_parcel_id).one()
+        #
+        # except SQLAlchemyError, e:
+        #     PluginUtils.show_error(self, self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
 
         self.found_parcel_number_edit.setText(parcel.parcel_id)
 

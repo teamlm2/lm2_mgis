@@ -177,12 +177,14 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
     def __generate_contract_number(self):
 
+        soum = DatabaseUtils.current_working_soum_schema()
         try:
             contract_number_filter = "%-{0}/%".format(str(QDate().currentDate().toString("yyyy")))
 
             count = self.session.query(CtContract).filter(CtContract.contract_no != str(self.contract.contract_no)) \
                 .filter(CtContract.contract_no.like("%-%")) \
                 .filter(CtContract.contract_no.like(contract_number_filter)) \
+                .filter(CtContract.au2 == soum) \
                 .order_by(func.substr(CtContract.contract_no, 10, 16).desc()).count()
             if count == 0:
                 cu_max_number = "00001"
@@ -191,6 +193,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                     .filter(CtContract.contract_no != str(self.contract.contract_no)) \
                     .filter(CtContract.contract_no.like("%-%")) \
                     .filter(CtContract.contract_no.like(contract_number_filter)) \
+                    .filter(CtContract.au2 == soum) \
                     .order_by(func.substr(CtContract.contract_no, 10, 16).desc()).first()
                 cu_max_number = cu_max_number[0]
 
@@ -198,7 +201,6 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                 slash_split_number = minus_split_number[1].split("/")
                 cu_max_number = int(slash_split_number[1]) + 1
 
-            soum = DatabaseUtils.current_working_soum_schema()
             year = QDate().currentDate().toString("yyyy")
             number = soum + "-" + year + "/" + str(cu_max_number).zfill(5)
 
@@ -544,25 +546,25 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
         selected_application = selected_applications[0]
 
-        try:
-            current_app_no = selected_application.data(Qt.UserRole)
-            app_no_count = self.session.query(CtApplication).filter_by(app_no=current_app_no).count()
+        # try:
+        current_app_no = selected_application.data(Qt.UserRole)
+        app_no_count = self.session.query(CtApplication).filter_by(app_id=current_app_no).count()
 
-            if app_no_count == 0:
-                PluginUtils.show_error(self, self.tr("Working Soum"),
-                                       self.tr("The selected Application {0} is not within the working soum. \n \n "
-                                               "Change the Working soum to create a new application for the parcel.")
-                                       .format(current_app_no))
-                return
-
-            application = self.session.query(CtApplication).filter_by(app_no=current_app_no).one()
-
-            if not self.__validate_application(application):
-                return
-
-        except SQLAlchemyError, e:
-            PluginUtils.show_error(self, self.tr("Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+        if app_no_count == 0:
+            PluginUtils.show_error(self, self.tr("Working Soum"),
+                                   self.tr("The selected Application {0} is not within the working soum. \n \n "
+                                           "Change the Working soum to create a new application for the parcel.")
+                                   .format(current_app_no))
             return
+
+        application = self.session.query(CtApplication).filter_by(app_id=current_app_no).one()
+
+        if not self.__validate_application(application):
+            return
+
+        # except SQLAlchemyError, e:
+        #     PluginUtils.show_error(self, self.tr("Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+        #     return
 
         self.found_edit.setText(application.app_no)
 
@@ -626,8 +628,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         return True
         # begin = self.contract.contract_begin
         # end = PluginUtils.convert_qt_date_to_python(self.contract_end_date.date()).date()
-        # print begin
-        # print end
+
         # # if end and begin:
         # age_in_years = end.year - begin.year - ((end.month, end.day) < (begin.month, begin.day))
         # months = (end.month - begin.month - (end.day < begin.day)) % 12
@@ -1141,12 +1142,23 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
         # try:
         self.__save_contract()
+        self.__save_parcel()
         self.__save_fees()
         self.__save_conditions()
         return True
 
         # except LM2Exception, e:
         #     PluginUtils.show_error(self, self.tr("Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+
+    def __save_parcel(self):
+
+        parcel_id = self.id_main_edit.text()
+        if parcel_id:
+            parcel_count = self.session.query(CaParcelTbl).filter(CaParcelTbl.parcel_id == parcel_id).count()
+            if parcel_count == 1:
+                parcel = self.session.query(CaParcelTbl).filter(CaParcelTbl.parcel_id == parcel_id).one()
+                parcel.address_streetname = self.street_name_edit.text()
+                parcel.address_khashaa = self.khashaa_edit.text()
 
     def __save_contract(self):
 
@@ -1240,7 +1252,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             new_row = False
             contractor_id = self.land_fee_twidget.item(row, CONTRACTOR_ID).text()
             person_id = self.land_fee_twidget.item(row, CONTRACTOR_ID).data(Qt.UserRole+1)
-            print person_id
+
             contractor = self.session.query(BsPerson).filter(BsPerson.person_register==contractor_id).one()
             fee_count = contractor.fees.filter(CtFee.contract == self.contract.contract_id).count()
             if fee_count == 0:
@@ -1770,7 +1782,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             .filter(SetRole.user_name == current_user.user_name) \
             .filter(SetRole.is_active == True).one()
 
-        sd_user = self.session.query(SdUser).filter(SdUser.gis_user_real == current_employee.user_name_real).one()
+        sd_user = self.session.query(SdUser).filter(SdUser.gis_user_real == current_employee.user_name_real).first()
         app_status9_count = self.session.query(CtApplicationStatus)\
             .filter(CtApplicationStatus.application == self.app_id)\
             .filter(CtApplicationStatus.status == 9).count()
@@ -3926,3 +3938,13 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                 PluginUtils.show_message(self, self.tr('Activate contracts'), self.tr('Activate contracts!'))
                 self.active_rbutton.setChecked(True)
                 return
+
+    @pyqtSlot(int)
+    def on_edit_address_chbox_stateChanged(self, state):
+
+        if state == Qt.Checked:
+            self.street_name_edit.setEnabled(True)
+            self.khashaa_edit.setEnabled(True)
+        else:
+            self.street_name_edit.setEnabled(False)
+            self.khashaa_edit.setEnabled(False)

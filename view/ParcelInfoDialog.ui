@@ -319,7 +319,7 @@
          <string>Landuse type change</string>
         </property>
        </widget>
-       <widget class="QTabWidget" name="tabWidget_2">
+       <widget class="QTabWidget" name="person_tabwidget">
         <property name="geometry">
          <rect>
           <x>3</x>
@@ -329,7 +329,7 @@
          </rect>
         </property>
         <property name="currentIndex">
-         <number>1</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="tab_8">
          <attribute name="title">
@@ -2625,7 +2625,7 @@ QPushButton:disabled {
        <string>Find</string>
       </property>
       <property name="icon">
-       <iconset resource="C:/Users/B.Ankhbold/.qgis2/python/plugins/lm2/view/resources.qrc">
+       <iconset>
         <normaloff>:/plugins/lm2/zoom.png</normaloff>:/plugins/lm2/zoom.png</iconset>
       </property>
       <property name="autoDefault">
@@ -2931,7 +2931,7 @@ QPushButton:disabled {
   <tabstop>find_parcel_id_edit</tabstop>
   <tabstop>parcel_landuse_cbox</tabstop>
   <tabstop>find_person_id_edit</tabstop>
-  <tabstop>tabWidget_2</tabstop>
+  <tabstop>person_tabwidget</tabstop>
   <tabstop>phone_edit</tabstop>
   <tabstop>phone_chbox</tabstop>
   <tabstop>find_firstname_edit</tabstop>

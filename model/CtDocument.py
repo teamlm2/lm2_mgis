@@ -1,6 +1,6 @@
 __author__ = 'mwagner'
 
-from sqlalchemy import Column, String, Integer, Sequence, Binary
+from sqlalchemy import Column, String, Integer, Sequence, Binary, DateTime
 from Base import *
 
 
@@ -10,4 +10,9 @@ class CtDocument(Base):
 
     id = Column(Integer, Sequence('ct_document_id_seq'), primary_key=True)
     name = Column(String)
-    content = Column(Binary)
+    created_by = Column(Integer)
+    created_at = Column(DateTime)
+    updated_at = Column(DateTime)
+    file_url = Column(String)
+    ftp_id = Column(Integer)
+

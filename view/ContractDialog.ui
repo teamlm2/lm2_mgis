@@ -563,6 +563,19 @@
        <string>Parcel details will be populated automatically once an application was selected in the previous tab.</string>
       </property>
      </widget>
+     <widget class="QCheckBox" name="edit_address_chbox">
+      <property name="geometry">
+       <rect>
+        <x>510</x>
+        <y>10</y>
+        <width>211</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Edit address</string>
+      </property>
+     </widget>
     </widget>
    </widget>
    <widget class="QWidget" name="tab_3">

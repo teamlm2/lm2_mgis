@@ -63,7 +63,7 @@
     <string notr="true">QTabBar::tab { width: 150px; }</string>
    </property>
    <property name="currentIndex">
-    <number>13</number>
+    <number>3</number>
    </property>
    <property name="usesScrollButtons">
     <bool>true</bool>
@@ -693,7 +693,7 @@
        </rect>
       </property>
       <property name="text">
-       <string>Load Document</string>
+       <string>Connect to file server</string>
       </property>
      </widget>
      <widget class="QLineEdit" name="document_path_edit">

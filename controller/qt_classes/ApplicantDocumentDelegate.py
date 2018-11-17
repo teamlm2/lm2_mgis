@@ -1,12 +1,13 @@
 __author__ = 'anna'
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
-from sqlalchemy.exc import SQLAlchemyError
-from ...utils.FilePath import *
-from ...utils.PluginUtils import *
-import shutil
 import os
-import subprocess
+import shutil
+
+from sqlalchemy.exc import SQLAlchemyError
+from ...utils.FtpConnection import *
+from ...utils.FilePath import *
+from ...model.CtDocument import *
+import urllib
+import urllib2
 
 PROVIDED_COLUMN = 0
 FILE_TYPE_COLUMN = 1
@@ -50,55 +51,104 @@ class ApplicationDocumentDelegate(QStyledItemDelegate):
     def editorEvent(self, event, model, option, index):
 
         if not index is None:
+            if index.isValid() and event.type() == QEvent.MouseButtonRelease:
+                app_id = self.parent.current_application().app_id
+                role = self.widget.item(index.row(), FILE_TYPE_COLUMN).data(Qt.UserRole)
 
-            if index.isValid()\
-                    and event.type() == QEvent.MouseButtonRelease:
                 archive_app_path = FilePath.app_file_path() + '/' + str(self.parent.current_application_no())
-                if not os.path.exists(archive_app_path):
-                    os.makedirs(archive_app_path)
+                # if self.parent.current_application().parcel:
+                #     archive_ftp_path = FilePath.app_ftp_parent_path() + '/' + str(self.parent.current_application().parcel) + '/' + str(self.parent.current_application_no())
+                # else:
+                archive_ftp_path = FilePath.app_ftp_parent_path() + '/' + str(self.parent.current_application_no())
+                # if not os.path.exists(archive_app_path):
+                #     os.makedirs(archive_app_path)
                 if event.button() == Qt.RightButton:
                     return False
-
                 if index.column() == OPEN_FILE_COLUMN:
-
                     file_dialog = QFileDialog()
                     file_dialog.setFilter('PDF (*.pdf)')
                     file_dialog.setModal(True)
                     file_dialog.setFileMode(QFileDialog.ExistingFile)
                     if file_dialog.exec_():
                         selected_file = file_dialog.selectedFiles()[0]
-
                         file_info = QFileInfo(selected_file)
-
                         if QFileInfo(file_info).size()/(1024*1024) > 5:
                             PluginUtils.show_error(self.parent, self.tr("File size exceeds limit!"), self.tr("The maximum size of documents to be attached is 5 MB."))
                             return False
+                        file_name = str(self.parent.current_application_no()) + "-" + str(role).zfill(
+                            2) + "." + file_info.suffix()
+                        if DatabaseUtils.ftp_connect():
+                            ftp = DatabaseUtils.ftp_connect()
 
-                        role = self.widget.item(index.row(), FILE_TYPE_COLUMN).data(Qt.UserRole)
-                        try:
-                            file_name = str(self.parent.current_application_no()) + "-" + str(role) + "." + file_info.suffix()
+                            archive_ftp_path_role = archive_ftp_path + '/' + str(role).zfill(2)
+                            FtpConnection.chdir(archive_ftp_path_role, ftp[0])
+                            FtpConnection.upload_app_ftp_file(selected_file, file_name,ftp[0])
+                            response = urllib2.urlopen('http://66.181.168.74/api/application/document/move?app_id='+str(app_id))
+
+                            # app_doc_count = self.session.query(CtApplicationDocument).filter(
+                            #     CtApplicationDocument.application_id == app_id). \
+                            #     filter(CtApplicationDocument.role == role).count()
+                            # if app_doc_count == 0:
+                            #     doc = CtDocument()
+                            #     doc.name = file_name
+                            #     doc.created_by = DatabaseUtils.current_sd_user().user_id
+                            #     doc.created_at = DatabaseUtils.current_date_time()
+                            #     doc.updated_at = DatabaseUtils.current_date_time()
+                            #     doc.file_url = file_url_name
+                            #     doc.ftp_id = fpt[1].ftp_id
+                            #     self.session.add(doc)
+                            #     self.session.flush()
+                            #
+                            #     app_doc = CtApplicationDocument()
+                            #     app_doc.application_id = app_id
+                            #     app_doc.document_id = doc.id
+                            #     app_doc.role = role
+                            #     self.session.add(app_doc)
+                            #     self.session.flush()
+                        # try:
+
                             self.widget.item(index.row(), FILE_NAME_COLUMN).setText(file_name)
-                            shutil.copy2(selected_file, archive_app_path+'/'+file_name)
-
+                        #     shutil.copy2(selected_file, archive_app_path+'/'+file_name)
                             check_item = self.widget.item(index.row(), PROVIDED_COLUMN)
                             check_item.setCheckState(True)
-
-                        except SQLAlchemyError, e:
-                            PluginUtils.show_error(self, self.tr("File Error"), self.tr("Could not execute: {0}").format(e.message))
-                            return True
+                        #
+                        # except SQLAlchemyError, e:
+                        #     PluginUtils.show_error(self, self.tr("File Error"), self.tr("Could not execute: {0}").format(e.message))
+                        #     return True
 
                 elif index.column() == VIEW_COLUMN:
-                    try:
-                        file_name = self.widget.item(index.row(), FILE_NAME_COLUMN).text()
-                        if file_name != '':
-                            shutil.copy2(archive_app_path +'/'+file_name, FilePath.view_file_path())
-                            QDesktopServices.openUrl(QUrl.fromLocalFile(FilePath.view_file_path()))
+                    if DatabaseUtils.ftp_connect():
+                        ftp = DatabaseUtils.ftp_connect()
 
-                    except IOError, e:
-                        QMessageBox.information(None, QApplication.translate("LM2", "No parcel"),
-                                                QApplication.translate("LM2",
-                                                                       "This file is already opened. Please close re-run"))
-                        return True
+                        app_doc_count = self.session.query(CtApplicationDocument).filter(
+                                CtApplicationDocument.application_id == app_id). \
+                                filter(CtApplicationDocument.role == role).count()
+                        if app_doc_count == 1:
+                            app_doc = self.session.query(CtApplicationDocument).filter(
+                                CtApplicationDocument.application_id == app_id). \
+                                filter(CtApplicationDocument.role == role).one()
+
+                            doc = self.session.query(CtDocument).filter(CtDocument.id == app_doc.document_id).one()
+
+                            view_pdf = open(FilePath.view_file_path(), 'wb')
+                            print ftp[0].retrlines('LIST')
+                            print doc.file_url
+                            ftp[0].cwd(doc.file_url)
+                            ftp[0].retrbinary('RETR ' + doc.name, view_pdf.write)
+
+                            try:
+                                QDesktopServices.openUrl(QUrl.fromLocalFile(FilePath.view_file_path()))
+                                #
+                                # file_name = self.widget.item(index.row(), FILE_NAME_COLUMN).text()
+                                # if file_name != '':
+                                #     shutil.copy2(archive_app_path +'/'+file_name, FilePath.view_file_path())
+                                #     QDesktopServices.openUrl(QUrl.fromLocalFile(FilePath.view_file_path()))
+
+                            except IOError, e:
+                                QMessageBox.information(None, QApplication.translate("LM2", "No parcel"),
+                                                        QApplication.translate("LM2",
+                                                                               "This file is already opened. Please close re-run"))
+                                return True
 
                 elif index.column() == DELETE_COLUMN:
 
@@ -132,3 +182,21 @@ class ApplicationDocumentDelegate(QStyledItemDelegate):
                 else:
                     index.model().setData(index, 0, Qt.EditRole)
         return False
+
+    # def chdir(self, ftp_path, ftp_conn):
+    #     dirs = [d for d in ftp_path.split('/') if d != '']
+    #     for p in dirs:
+    #         self.check_dir(p, ftp_conn)
+    #
+    # def check_dir(self, dir, ftp_conn):
+    #     filelist = []
+    #     ftp_conn.retrlines('LIST', filelist.append)
+    #     found = False
+    #
+    #     for f in filelist:
+    #         if f.split()[-1] == dir and f.lower().startswith('d'):
+    #             found = True
+    #
+    #     if not found:
+    #         ftp_conn.mkd(dir)
+    #     ftp_conn.cwd(dir)

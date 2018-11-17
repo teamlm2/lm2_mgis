@@ -93,8 +93,12 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
         self.setupUi(self)
         self.__setup_validators()
         self.__setup_table_widget()
+
         self.__setup_cbox()
-        self.__setup_combo_boxes()
+
+        self.person_tabwidget.currentChanged.connect(self.__tab_widget_onChange)  # changed!
+        # self.__setup_combo_boxes()
+
         self.__setup_permissions()
         self.duration_sbox.setMaximum(60)
         self.tab_index = 0
@@ -108,6 +112,29 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
         self.contract_date.dateChanged.connect(self.on_contract_date_DateChanged)
         self.end_date.dateChanged.connect(self.on_end_date_DateChanged)
         self.own_date.dateChanged.connect(self.on_own_date_DateChanged)
+
+    def __tab_widget_onChange(self, index):
+
+        if index == 1:
+            aimag_list = []
+            try:
+                aimag_list = self.session.query(AuLevel1.name, AuLevel1.code). \
+                    filter(AuLevel1.code != '013').filter(AuLevel1.code != '012').order_by(AuLevel1.name.desc()).all()
+
+            except SQLAlchemyError, e:
+                PluginUtils.show_error(self, self.tr("Database Query Error"),
+                                       self.tr("Could not execute: {0}").format(e.message))
+                self.reject()
+
+            self.aimag_cbox.addItem("*", -1)
+
+            for auLevel1 in aimag_list:
+                self.aimag_cbox.addItem(auLevel1.name, auLevel1.code)
+
+            working_aimag = DatabaseUtils.working_l1_code()
+            working_soum = DatabaseUtils.working_l2_code()
+            self.aimag_cbox.setCurrentIndex(self.aimag_cbox.findData(working_aimag))
+            self.soum_cbox.setCurrentIndex(self.soum_cbox.findData(working_soum))
 
     @pyqtSlot(int)
     def on_soum_cbox_currentIndexChanged(self, index):
@@ -172,18 +199,16 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
 
     def __setup_combo_boxes(self):
 
+        self.aimag_cbox.clear()
         aimag_list = []
-
         try:
-            aimag_list = self.session.query(AuLevel1.name, AuLevel1.code).\
-                filter(AuLevel1.code != '013').filter(AuLevel1.code != '012').order_by(AuLevel1.name.desc()).all()
+            aimag_list = self.session.query(AuLevel1.name, AuLevel1.code).all()
 
         except SQLAlchemyError, e:
             PluginUtils.show_error(self, self.tr("Database Query Error"), self.tr("Could not execute: {0}").format(e.message))
             self.reject()
 
         self.aimag_cbox.addItem("*", -1)
-
 
         for auLevel1 in aimag_list:
             self.aimag_cbox.addItem(auLevel1.name, auLevel1.code)
@@ -275,7 +300,7 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
         self.ftp_host_edit.setText(ftp_host)
 
         try:
-            application_types = self.session.query(ClApplicationType).\
+            application_types = self.session.query(ClApplicationType). \
                 order_by(ClApplicationType.code).all()
             statuses = self.session.query(ClApplicationStatus).order_by(ClApplicationStatus.code).all()
             landuse_types = self.session.query(ClLanduseType).all()
@@ -287,12 +312,13 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
             edit_statuses = self.session.query(ClUbEditStatus).all()
 
         except SQLAlchemyError, e:
-            PluginUtils.show_error(self, self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+            PluginUtils.show_error(self, self.tr("File Error"),
+                                   self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
 
         for item in right_types:
             self.rigth_type_cbox.addItem(item.description, item.code)
 
-        for item in contract_statuses   :
+        for item in contract_statuses:
             self.contract_status_cbox.addItem(item.description, item.code)
 
         for item in decision_levels:
@@ -677,7 +703,7 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
             self.middle_name_edit.setText(middlename)
             self.first_name_edit.setText(firstname)
             self.name_edit.setText(name)
-
+            self.__update_date_of_birth(person_register)
             if len(phone) != 0:
                 phone = ', '+phone
             self.phone_edit.setText(mobile_phone + phone)
@@ -2423,10 +2449,12 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
             valid = False
 
         decision_no = self.decision_full_edit.text()
-
-        decision_count = self.session.query(CtDecision).filter(CtDecision.decision_no == decision_no).count()
+        decision_level = self.decision_level_cbox.itemData(self.decision_level_cbox.currentIndex())
+        decision_count = self.session.query(CtDecision).filter(CtDecision.decision_no == decision_no).\
+            filter(CtDecision.decision_level == decision_level).count()
         if decision_count == 1:
-            self.decision = self.session.query(CtDecision).filter(CtDecision.decision_no == decision_no).one()
+            self.decision = self.session.query(CtDecision).filter(CtDecision.decision_no == decision_no). \
+                filter(CtDecision.decision_level == decision_level).one()
             app_dec_count = self.session.query(CtDecisionApplication).filter(
                 CtDecisionApplication.decision == self.decision.decision_id).count()
             if app_dec_count > 0:
@@ -2500,7 +2528,7 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
 
             # return
 
-            self.commit()
+            # self.commit()
 
     def __multi_owner_save(self, person_id):
 
@@ -2535,13 +2563,16 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
 
     def __generate_record_number(self):
 
+        soum = DatabaseUtils.current_working_soum_schema()
         qt_date = self.own_date.date()
         try:
             record_number_filter = "%-{0}/%".format(str(qt_date.toString("yyyy")))
-
+            print record_number_filter
+            # return
             count = self.session.query(CtOwnershipRecord) \
                         .filter(CtOwnershipRecord.record_no.like("%-%"))\
                         .filter(CtOwnershipRecord.record_no.like(record_number_filter))  \
+                        .filter(CtOwnershipRecord.au2 == soum) \
                         .order_by(func.substr(CtOwnershipRecord.record_no, 10, 16).desc()).count()
             if count == 0:
                 cu_max_number = "00001"
@@ -2549,25 +2580,26 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
             else:
                 cu_max_number = self.session.query(CtOwnershipRecord.record_no)\
                                     .filter(CtOwnershipRecord.record_no.like("%-%"))\
-                                    .filter(CtOwnershipRecord.record_no.like(record_number_filter))  \
-                                    .order_by(func.substr(CtOwnershipRecord.record_no, 10, 16).desc()).first()
+                                    .filter(CtOwnershipRecord.record_no.like(record_number_filter)) \
+                                    .filter(CtOwnershipRecord.au2 == soum) \
+                    .order_by(func.substr(CtOwnershipRecord.record_no, 10, 16).desc()).first()
 
                 cu_max_number = cu_max_number[0]
                 minus_split_number = cu_max_number.split("-")
                 slash_split_number = minus_split_number[1].split("/")
                 cu_max_number = int(slash_split_number[1]) + 1
 
-            soum = DatabaseUtils.current_working_soum_schema()
             year = qt_date.toString("yyyy")
             number = soum + "-" + year + "/" + str(cu_max_number).zfill(5)
 
         except SQLAlchemyError, e:
             PluginUtils.show_error(self, self.tr("Database Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
-
+        print number
         return number
 
     def __generate_contract_number(self):
 
+        soum = DatabaseUtils.current_working_soum_schema()
         qt_date = self.contract_date.date()
         try:
             contract_number_filter = "%-{0}/%".format(str(qt_date.toString("yyyy")))
@@ -2575,6 +2607,7 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
             count = self.session.query(CtContract) \
                 .filter(CtContract.contract_no.like("%-%")) \
                 .filter(CtContract.contract_no.like(contract_number_filter)) \
+                .filter(CtContract.au2 == soum) \
                 .order_by(func.substr(CtContract.contract_no, 10, 16).desc()).count()
             if count == 0:
                 cu_max_number = "00001"
@@ -2582,6 +2615,7 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
                 cu_max_number = self.session.query(CtContract.contract_no) \
                     .filter(CtContract.contract_no.like("%-%")) \
                     .filter(CtContract.contract_no.like(contract_number_filter)) \
+                    .filter(CtContract.au2 == soum) \
                     .order_by(func.substr(CtContract.contract_no, 10, 16).desc()).first()
                 cu_max_number = cu_max_number[0]
 
@@ -2652,9 +2686,11 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
         decision_level = self.decision_level_cbox.itemData(self.decision_level_cbox.currentIndex())
         decision_no = self.decision_full_edit.text()
 
-        decision_count = self.session.query(CtDecision).filter(CtDecision.decision_no == decision_no).count()
+        decision_count = self.session.query(CtDecision).filter(CtDecision.decision_no == decision_no).\
+            filter(CtDecision.decision_level == decision_level).count()
         if decision_count == 1:
-            self.decision = self.session.query(CtDecision).filter(CtDecision.decision_no == decision_no).one()
+            self.decision = self.session.query(CtDecision).filter(CtDecision.decision_no == decision_no).\
+                filter(CtDecision.decision_level == decision_level).one()
             # app_dec_count = self.session.query(CtDecisionApplication).filter(
             #     CtDecisionApplication.decision == self.decision.decision_no).count()
             # if app_dec_count > 0:
@@ -2670,18 +2706,19 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
         else:
             self.decision = CtDecision()
 
-        self.decision.decision_date = self.decision_date.date().toString(Constants.DATABASE_DATE_FORMAT)
-        self.decision.decision_no = decision_no
-        self.decision.decision_level = decision_level
-        self.decision.imported_by = DatabaseUtils.current_sd_user().user_id
-        self.decision.au2 = DatabaseUtils.working_l2_code()
+            self.decision.decision_date = self.decision_date.date().toString(Constants.DATABASE_DATE_FORMAT)
+            self.decision.decision_no = decision_no
+            self.decision.decision_level = decision_level
+            self.decision.imported_by = DatabaseUtils.current_sd_user().user_id
+            self.decision.au2 = DatabaseUtils.working_l2_code()
+            self.session.add(self.decision)
 
         decision_app = CtDecisionApplication()
         decision_app.decision = self.decision.decision_id
         decision_app.decision_result = 10
         decision_app.application = self.application.app_id
         self.decision.results.append(decision_app)
-        self.session.add(self.decision)
+
         # self.session.flush()
 
     def __save_status(self):
@@ -2814,6 +2851,7 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
     def __save_parcel(self):
 
         parcel_id = self.parcel_id_edit.text()
+
         old_parcel_id = self.old_parcel_id_edit.text()
         ub_parcel = self.session.query(CaUBParcel).filter(CaUBParcel.old_parcel_id == old_parcel_id).one()
         landuse = self.parcel_landuse_cbox.itemData(self.parcel_landuse_cbox.currentIndex())
@@ -2821,11 +2859,25 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
         parcel_count = self.session.query(CaParcel).filter(CaParcel.parcel_id == parcel_id).count()
         if parcel_count == 1:
             parcel = self.session.query(CaParcel).filter(CaParcel.parcel_id == parcel_id).one()
+            parcel.parcel_id = None
         else:
             parcel = CaParcel()
+            if len(parcel_id) == 12:
+                parcel.parcel_id = parcel_id
 
-        if parcel_count == 0:
-            parcel.parcel_id = parcel_id
+        # parcel_id = self.parcel_id_edit.text()
+        # old_parcel_id = self.old_parcel_id_edit.text()
+        # ub_parcel = self.session.query(CaUBParcel).filter(CaUBParcel.old_parcel_id == old_parcel_id).one()
+        # landuse = self.parcel_landuse_cbox.itemData(self.parcel_landuse_cbox.currentIndex())
+        #
+        # parcel_count = self.session.query(CaParcel).filter(CaParcel.parcel_id == parcel_id).count()
+        # if parcel_count == 1:
+        #     parcel = self.session.query(CaParcel).filter(CaParcel.parcel_id == parcel_id).one()
+        # else:
+        #     parcel = CaParcel()
+        #
+        # if parcel_count == 0:
+        #     parcel.parcel_id = parcel_id
 
         # parcel = CaParcel()
         parcel.old_parcel_id = old_parcel_id
@@ -2887,7 +2939,7 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
 
         self.application.parcel = parcel.parcel_id
         self.session.add(self.application)
-        self.session.commit()
+        # self.session.commit()
 
     def __save_application_details(self):
 

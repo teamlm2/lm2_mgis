@@ -1,5 +1,6 @@
 __author__ = 'mwagner'
 
+from sqlalchemy import Column, Integer, String, ForeignKey, Date, DateTime
 from sqlalchemy.orm import relationship
 from CtArchivedFee import *
 from CtArchivedTaxAndPrice import *
@@ -32,6 +33,8 @@ class BsPerson(Base):
     address_building_no = Column(String)
     address_entrance_no = Column(String)
     address_apartment_no = Column(String)
+    created_at = Column(DateTime)
+    updated_at = Column(DateTime)
 
     # foreign keys:
     type = Column(Integer, ForeignKey('cl_person_type.code'))

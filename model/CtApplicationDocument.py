@@ -8,11 +8,11 @@ class CtApplicationDocument(Base):
 
     __tablename__ = 'ct_application_document'
 
-    application = Column(String, ForeignKey('ct_application.app_id'), primary_key=True)
-    document = Column(Integer, ForeignKey('ct_document.id'), primary_key=True)
+    application_id = Column(String, ForeignKey('ct_application.app_id'), primary_key=True)
+    document_id = Column(Integer, ForeignKey('ct_document.id'), primary_key=True)
     role = Column(Integer, ForeignKey('cl_document_role.code'))
-    person = Column(Integer, ForeignKey('bs_person.person_id'))
-    app_no = Column(String)
+    # person = Column(Integer, ForeignKey('bs_person.person_id'))
+    # app_no = Column(String)
 
     document_ref = relationship("CtDocument", backref="applications", cascade="all")
-    person_ref = relationship("BsPerson", backref="application_documents")
+    # person_ref = relationship("BsPerson", backref="application_documents")

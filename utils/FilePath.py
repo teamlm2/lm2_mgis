@@ -70,6 +70,15 @@ class FilePath(object):
             return str(archive_app_path)
 
     @staticmethod
+    def app_ftp_parent_path():
+
+        working_aimag = DatabaseUtils.working_l1_code()
+        working_soum = DatabaseUtils.working_l2_code()
+        archive_app_path = 'mgis/qgis_archive'
+
+        return archive_app_path
+
+    @staticmethod
     def cert_file_path():
 
         working_aimag = DatabaseUtils.working_l1_code()
@@ -173,7 +182,7 @@ class FilePath(object):
             # dest_dir = 'archive'
             share_path = ''.join(['\\\\', host, '\\', dest_dir.replace(':', '$')])
             archive_feetaxzone_path = share_path + '\\' + working_aimag+'\\'+working_soum+'\\feetaxzone'
-            print archive_feetaxzone_path
+
             if not os.path.exists(archive_feetaxzone_path):
                 os.makedirs(archive_feetaxzone_path)
             return str(archive_feetaxzone_path)
@@ -217,3 +226,4 @@ class FilePath(object):
             if not os.path.exists(archive_ownership_path):
                 os.makedirs(archive_ownership_path)
             return str(archive_ownership_path)
+
