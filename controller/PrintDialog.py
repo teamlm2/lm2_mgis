@@ -85,32 +85,53 @@ class PrintDialog(QDialog, Ui_PrintDialog):
         ct_applications = self.session.query(CtApplication).filter(CtApplication.parcel == self.__parcel_no).all()
 
         for application in ct_applications:
+            print application.contracts.count()
+            if application.contracts.count() > 0:
+                for contract_role in application.contracts:
 
-            for contract_role in application.contracts:
+                    if contract_role.role == Constants.APPLICATION_ROLE_CREATES:
 
-                if contract_role.role == Constants.APPLICATION_ROLE_CREATES:
+                        contract = contract_role.contract_ref
+                        # if contract.cancellation_date is None:
+                        for stakeholder in application.stakeholders:
+                            person = stakeholder.person_ref
 
-                    contract = contract_role.contract_ref
-                    # if contract.cancellation_date is None:
-                    for stakeholder in application.stakeholders:
-                        person = stakeholder.person_ref
-
-                        if stakeholder.role == Constants.APPLICANT_ROLE_CODE or stakeholder.role == Constants.REMAINING_OWNER_CODE or stakeholder.role == Constants.NEW_RIGHT_HOLDER_CODE:
-                            # self.__add_contract_person(1,contract.status, contract.contract_no, contract.contract_date, application, person)
-                                if application.app_type == 2:
-                                   if stakeholder.role == Constants.REMAINING_OWNER_CODE:
+                            if stakeholder.role == Constants.APPLICANT_ROLE_CODE or stakeholder.role == Constants.REMAINING_OWNER_CODE or stakeholder.role == Constants.NEW_RIGHT_HOLDER_CODE:
+                                # self.__add_contract_person(1,contract.status, contract.contract_no, contract.contract_date, application, person)
+                                    if application.app_type == 2:
+                                       if stakeholder.role == Constants.REMAINING_OWNER_CODE:
+                                            person = stakeholder.person_ref
+                                            self.__add_contract_person(1, contract.status, contract.contract_no,
+                                                                       contract.contract_date, application, person)
+                                    elif (application.app_type == 7 or application.app_type == 14 or application.app_type == 15):
+                                        if stakeholder.role == Constants.NEW_RIGHT_HOLDER_CODE:
+                                            person = stakeholder.person_ref
+                                            self.__add_contract_person(1, contract.status, contract.contract_no,
+                                                                       contract.contract_date, application, person)
+                                    else:
                                         person = stakeholder.person_ref
                                         self.__add_contract_person(1, contract.status, contract.contract_no,
                                                                    contract.contract_date, application, person)
-                                elif (application.app_type == 7 or application.app_type == 14 or application.app_type == 15):
-                                    if stakeholder.role == Constants.NEW_RIGHT_HOLDER_CODE:
-                                        person = stakeholder.person_ref
-                                        self.__add_contract_person(1, contract.status, contract.contract_no,
-                                                                   contract.contract_date, application, person)
-                                else:
-                                    person = stakeholder.person_ref
-                                    self.__add_contract_person(1, contract.status, contract.contract_no,
-                                                               contract.contract_date, application, person)
+            else:
+                print 'gggg'
+                for stakeholder in application.stakeholders:
+                    person = stakeholder.person_ref
+
+                    if stakeholder.role == Constants.APPLICANT_ROLE_CODE or stakeholder.role == Constants.REMAINING_OWNER_CODE or stakeholder.role == Constants.NEW_RIGHT_HOLDER_CODE:
+                        if application.app_type == 2:
+                            if stakeholder.role == Constants.REMAINING_OWNER_CODE:
+                                person = stakeholder.person_ref
+                                self.__add_contract_person(1, None, None,
+                                                           None, application, person)
+                        elif (application.app_type == 7 or application.app_type == 14 or application.app_type == 15):
+                            if stakeholder.role == Constants.NEW_RIGHT_HOLDER_CODE:
+                                person = stakeholder.person_ref
+                                self.__add_contract_person(1, None, None,
+                                                           None, application, person)
+                        else:
+                            person = stakeholder.person_ref
+                            self.__add_contract_person(1, None, None,
+                                                       None, application, person)
 
             for record_role in application.records:
                 if record_role.role == Constants.APPLICATION_ROLE_CREATES:
@@ -157,6 +178,8 @@ class PrintDialog(QDialog, Ui_PrintDialog):
                 color = Qt.green
             elif status == 30:
                 color = Qt.red
+        if not status:
+            color = Qt.blue
 
         item = QTableWidgetItem(unicode(person.person_register))
         item.setData(Qt.UserRole, application.app_no)
@@ -202,9 +225,10 @@ class PrintDialog(QDialog, Ui_PrintDialog):
                 item.setBackground(color)
                 self.right_holder_twidget.setItem(count, self.DATEOFBIRTH, item)
 
-        item = QTableWidgetItem(unicode(number))
-        item.setBackground(color)
-        self.right_holder_twidget.setItem(count, self.CONTRACTNO, item)
+        if number is not None:
+            item = QTableWidgetItem(unicode(number))
+            item.setBackground(color)
+            self.right_holder_twidget.setItem(count, self.CONTRACTNO, item)
         if date is not None:
             qt_date = PluginUtils.convert_python_date_to_qt(date)
             item = QTableWidgetItem(qt_date.toString(Constants.DATABASE_DATE_FORMAT))

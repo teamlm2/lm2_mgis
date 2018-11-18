@@ -70,6 +70,15 @@ class FilePath(object):
             return str(archive_app_path)
 
     @staticmethod
+    def app_ftp_parent_parcel_path():
+
+        working_aimag = DatabaseUtils.working_l1_code()
+        working_soum = DatabaseUtils.working_l2_code()
+        archive_app_path = 'mgis' + '\\' + working_aimag + '\\' + working_soum
+
+        return archive_app_path
+
+    @staticmethod
     def app_ftp_parent_path():
 
         working_aimag = DatabaseUtils.working_l1_code()

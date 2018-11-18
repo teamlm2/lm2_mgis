@@ -1688,7 +1688,7 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
                     #     doc_type_code = '0' + str(doc_type_item.data(Qt.UserRole))
 
                     if app_doc.role == doc_type_code:
-                        print document.name
+
                         item_name = self.documents_twidget.item(i, DOC_FILE_NAME_COLUMN)
                         item_name.setText(document.name)
 
@@ -4868,7 +4868,7 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
         self.updating = True
         for applicant in self.application.stakeholders:
             if applicant.role == Constants.APPLICANT_ROLE_CODE:
-                print applicant.person
+
                 if applicant.person:
                     person = self.session.query(BsPerson.person_id, BsPerson.name, BsPerson.first_name).filter_by(person_id=applicant.person).one()
                     if person.first_name is None:

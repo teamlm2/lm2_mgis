@@ -2535,7 +2535,8 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             raise LM2Exception(self.tr("Database Query Error"), self.tr("aCould not execute: {0}").format(e.message))
 
         decision_date = str(decision.decision_date)
-        decision_date = " "+decision_date[1:-6]+u"           " + decision_date[5:-3]+u"            " + decision_date[-2:] + u"               " + decision.decision_no[6:-5]
+
+        decision_date = " "+decision_date[2:-6]+u"           " + decision_date[5:-3]+u"            " + decision_date[-2:] + u"               " + decision.decision_no[6:-5]
 
         app_duration = self.contract_duration_edit.text()
 
@@ -2544,7 +2545,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         month = print_date.month()
         day = print_date.day()
 
-        contract_date = str(year)[-3:] + "           " + str(month) +"              " + str(day)
+        contract_date = str(year)[-2:] + "           " + str(month) +"              " + str(day)
         decision_value = [decision.decision_no, decision_date, app_duration, contract_date, decision.decision_level_ref.description]
         return decision_value
 

@@ -173,7 +173,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
                 self.__setup_app_combo_boxes()
                 self.__create_record_view()
         #         self.__create_application_view()
-        #         self.__create_maintenance_case_view()
+                self.__create_maintenance_case_view()
             if index == 4:
                 self.__create_decision_view()
             if index == 5:
@@ -201,6 +201,16 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         self.context_menu.addAction(self.copy_number_action)
         self.zoom_to_parcel_action.triggered.connect(self.on_zoom_to_parcel_action_clicked)
         self.copy_number_action.triggered.connect(self.on_copy_number_action_clicked)
+
+        self.app_context_menu = QMenu()
+        self.app_send_to_ubeg_action = QAction(QIcon(":/plugins/lm2/application.png"),
+                                       self.tr("Sent to UBEG"), self)
+        self.app_send_to_ubeg_action.triggered.connect(self.__sent_to_ubeg)
+        self.app_context_menu.addAction(self.zoom_to_parcel_action)
+        self.app_context_menu.addSeparator()
+        self.app_context_menu.addAction(self.copy_number_action)
+        self.app_context_menu.addSeparator()
+        self.app_context_menu.addAction(self.app_send_to_ubeg_action)
 
         self.contract_context_menu = QMenu()
         self.land_fee_payments_action = QAction(QIcon(":/plugins/lm2/landfeepayment.png"),
@@ -310,7 +320,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         self.__create_contract_view()
         # self.__create_decision_view()
         # self.__create_record_view()
-        # self.__create_maintenance_case_view()
+        self.__create_maintenance_case_view()
         # self.__create_parcel_view_gts()
         # self.__create_fee_unifeid_view()
 
@@ -2653,7 +2663,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         elif self.tabWidget.currentWidget() == self.application_tab:
             item = self.application_results_twidget.itemAt(point)
             if item is None: return
-            self.context_menu.exec_(self.application_results_twidget.mapToGlobal(point))
+            self.app_context_menu.exec_(self.application_results_twidget.mapToGlobal(point))
 
         elif self.tabWidget.currentWidget() == self.contract_tab:
             item = self.contract_results_twidget.itemAt(point)
@@ -13415,3 +13425,12 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         if myalayer is None:
             mygroup.addLayer(vlayer)
 
+    def __sent_to_ubeg(self):
+
+        application = self.__selected_application()
+        applications = self.session.query(CtApplicationStatus).filter(CtApplicationStatus.application == application.app_id)
+
+        sub = self.session.query(CtApplicationStatus,func.row_number().over(partition_by=CtApplicationStatus.application,order_by=(desc(CtApplicationStatus.status_date),
+                                                                  desc(CtApplicationStatus.status))).label("row_number")).subquery()
+        applications = applications.select_entity_from(sub).filter(sub.c.row_number == 1)
+        print applications.status

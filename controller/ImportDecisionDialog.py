@@ -42,7 +42,8 @@ from ..model.ApplicationSearchDecision import *
 from ..model import SettingsConstants
 from ..utils.FilePath import *
 import shutil
-
+import urllib2
+import urllib
 
 class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
 
@@ -348,6 +349,7 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
 
                 parcel.landuse = landuse
                 self.__write_changes(maintenance_case_id, tmp_parcel_id, app_no)
+
                 if decision_app.decision_result == Constants.DECISION_RESULT_APPROVED:
 
                     if parcel.parcel_id in parcel_ids.values() and application.app_type in parcel_ids.keys():
@@ -398,7 +400,6 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
                             maintenance_cases.append(application.maintenance_case)
 
                     self.session.add(app_status)
-                    FtpConnection.move_app_ftp_file(app_status.application)
 
                 if application.app_type in Constants.APPLICATION_TYPE_WITH_DURATION:
                     approved_duration = int(duration)
@@ -504,7 +505,6 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
             self.delete_document_button.setEnabled(True)
             self.view_document_button.setEnabled(True)
             self.select_file_button.setEnabled(False)
-
         # except SQLAlchemyError, e:
         #     self.rollback_to_savepoint()
         #     PluginUtils.show_error(self, self.tr("Query Error"), self.tr("Could not import xls file {0}: {1}").format(currentframe().f_lineno, e.message))
@@ -1005,6 +1005,8 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
 
         try:
             self.commit()
+            decision_no = self.decision_no_edit.text()
+            self.__decision_app_by_decision_no(decision_no)
 
         except SQLAlchemyError, e:
             self.rollback()
@@ -1635,3 +1637,48 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
             PluginUtils.show_message(self, self.tr("msg"), self.tr("successfully save"))
 
             self.join_app_twidget.setRowCount(0)
+
+    @pyqtSlot()
+    def on_sent_to_ubeg_button_clicked(self):
+
+        decision_no = self.decision_no_edit.text()
+        self.__decision_app_by_decision_no(decision_no)
+
+    def __decision_app_by_decision_no(self, decision_no):
+
+        decision_level = self.level_cbox.itemData(self.level_cbox.currentIndex())
+        decision_count = self.session.query(CtDecision).filter(CtDecision.decision_no == decision_no). \
+            filter(CtDecision.decision_level == decision_level).count()
+        if decision_count == 1:
+            decision = self.session.query(CtDecision).filter(CtDecision.decision_no == decision_no). \
+                filter(CtDecision.decision_level == decision_level).one()
+            print decision.decision_id
+            # urllib2.urlopen('http://66.181.168.74/api/geoxyp/send/decision/gasr?decision_id=' + str(decision.decision_id))
+            dec_apps_count = self.session.query(CtDecisionApplication).filter(
+                CtDecisionApplication.decision == decision.decision_id).count()
+            if dec_apps_count > 0:
+                dec_apps = self.session.query(CtDecisionApplication).filter(
+                    CtDecisionApplication.decision == decision.decision_id).all()
+                for dec_app in dec_apps:
+                    app_id = dec_app.application
+
+                    urllib2.urlopen('http://66.181.168.74/api/application/document/refolder?app_id=' + str(app_id))
+
+                    if dec_app.application:
+                        application = self.session.query(CtApplication).filter(
+                            CtApplication.app_id == dec_app.application).one()
+                        print application.app_no
+
+                        #----------
+
+                        # applications = self.session.query(ApplicationSearch)
+                        # filter_is_set = False
+                        # sub = self.session.query(ApplicationSearch,
+                        #                          func.row_number().over(partition_by=ApplicationSearch.app_no,
+                        #                                                 order_by=(desc(ApplicationSearch.status_date),
+                        #                                                           desc(
+                        #                                                               ApplicationSearch.status))).label(
+                        #                              "row_number")).subquery()
+                        # applications = applications.select_entity_from(sub).filter(sub.c.row_number == 1)
+                        #
+                        # applications = applications.filter(ApplicationSearch.status == status)

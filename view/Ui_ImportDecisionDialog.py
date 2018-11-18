@@ -2,8 +2,7 @@
 
 # Form implementation generated from reading ui file '.\ImportDecisionDialog.ui'
 #
-# Created: Fri Sep 16 16:25:18 2016
-#      by: PyQt4 UI code generator 4.10.4
+# Created by: PyQt4 UI code generator 4.11.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -176,12 +175,15 @@ class Ui_ImportDecisionDialog(object):
         self.error_details_button.setGeometry(QtCore.QRect(27, 350, 151, 23))
         self.error_details_button.setObjectName(_fromUtf8("error_details_button"))
         self.help_button = QtGui.QPushButton(self.tab)
-        self.help_button.setGeometry(QtCore.QRect(483, 395, 89, 23))
+        self.help_button.setGeometry(QtCore.QRect(360, 395, 89, 23))
         self.help_button.setObjectName(_fromUtf8("help_button"))
         self.status_label = QtGui.QLabel(self.tab)
-        self.status_label.setGeometry(QtCore.QRect(10, 390, 461, 21))
+        self.status_label.setGeometry(QtCore.QRect(10, 390, 341, 21))
         self.status_label.setText(_fromUtf8(""))
         self.status_label.setObjectName(_fromUtf8("status_label"))
+        self.sent_to_ubeg_button = QtGui.QPushButton(self.tab)
+        self.sent_to_ubeg_button.setGeometry(QtCore.QRect(462, 395, 121, 23))
+        self.sent_to_ubeg_button.setObjectName(_fromUtf8("sent_to_ubeg_button"))
         self.tabWidget.addTab(self.tab, _fromUtf8(""))
         self.tab_2 = QtGui.QWidget()
         self.tab_2.setObjectName(_fromUtf8("tab_2"))
@@ -350,6 +352,7 @@ class Ui_ImportDecisionDialog(object):
         self.label_6.setText(_translate("ImportDecisionDialog", "Imported by", None))
         self.error_details_button.setText(_translate("ImportDecisionDialog", "Error Details", None))
         self.help_button.setText(_translate("ImportDecisionDialog", "?", None))
+        self.sent_to_ubeg_button.setText(_translate("ImportDecisionDialog", "Sent to UBEG", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("ImportDecisionDialog", "Import", None))
         self.groupBox_2.setTitle(_translate("ImportDecisionDialog", "Decision", None))
         self.label_17.setText(_translate("ImportDecisionDialog", "Decision Number", None))

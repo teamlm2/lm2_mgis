@@ -581,7 +581,7 @@
     <widget class="QPushButton" name="help_button">
      <property name="geometry">
       <rect>
-       <x>483</x>
+       <x>360</x>
        <y>395</y>
        <width>89</width>
        <height>23</height>
@@ -596,12 +596,25 @@
       <rect>
        <x>10</x>
        <y>390</y>
-       <width>461</width>
+       <width>341</width>
        <height>21</height>
       </rect>
      </property>
      <property name="text">
       <string/>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="sent_to_ubeg_button">
+     <property name="geometry">
+      <rect>
+       <x>462</x>
+       <y>395</y>
+       <width>121</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Sent to UBEG</string>
      </property>
     </widget>
    </widget>

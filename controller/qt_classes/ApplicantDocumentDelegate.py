@@ -57,11 +57,9 @@ class ApplicationDocumentDelegate(QStyledItemDelegate):
 
                 archive_app_path = FilePath.app_file_path() + '/' + str(self.parent.current_application_no())
                 # if self.parent.current_application().parcel:
-                #     archive_ftp_path = FilePath.app_ftp_parent_path() + '/' + str(self.parent.current_application().parcel) + '/' + str(self.parent.current_application_no())
+                #     archive_ftp_path = FilePath.app_ftp_parent_parcel_path() + '/' + str(self.parent.current_application().parcel) + '/' + str(self.parent.current_application_no())
                 # else:
                 archive_ftp_path = FilePath.app_ftp_parent_path() + '/' + str(self.parent.current_application_no())
-                # if not os.path.exists(archive_app_path):
-                #     os.makedirs(archive_app_path)
                 if event.button() == Qt.RightButton:
                     return False
                 if index.column() == OPEN_FILE_COLUMN:
@@ -83,28 +81,31 @@ class ApplicationDocumentDelegate(QStyledItemDelegate):
                             archive_ftp_path_role = archive_ftp_path + '/' + str(role).zfill(2)
                             FtpConnection.chdir(archive_ftp_path_role, ftp[0])
                             FtpConnection.upload_app_ftp_file(selected_file, file_name,ftp[0])
-                            response = urllib2.urlopen('http://66.181.168.74/api/application/document/move?app_id='+str(app_id))
 
-                            # app_doc_count = self.session.query(CtApplicationDocument).filter(
-                            #     CtApplicationDocument.application_id == app_id). \
-                            #     filter(CtApplicationDocument.role == role).count()
-                            # if app_doc_count == 0:
-                            #     doc = CtDocument()
-                            #     doc.name = file_name
-                            #     doc.created_by = DatabaseUtils.current_sd_user().user_id
-                            #     doc.created_at = DatabaseUtils.current_date_time()
-                            #     doc.updated_at = DatabaseUtils.current_date_time()
-                            #     doc.file_url = file_url_name
-                            #     doc.ftp_id = fpt[1].ftp_id
-                            #     self.session.add(doc)
-                            #     self.session.flush()
+                            file_url_name = archive_ftp_path +'/'+ file_name
+                            # if not self.parent.current_application().parcel:
+                            urllib2.urlopen('http://66.181.168.74/api/application/document/move?app_id='+str(app_id))
+                            # else:
+                            #     app_doc_count = self.session.query(CtApplicationDocument).filter(
+                            #         CtApplicationDocument.application_id == app_id). \
+                            #         filter(CtApplicationDocument.role == role).count()
+                            #     if app_doc_count == 0:
+                            #         doc = CtDocument()
+                            #         doc.name = file_name
+                            #         doc.created_by = DatabaseUtils.current_sd_user().user_id
+                            #         doc.created_at = DatabaseUtils.current_date_time()
+                            #         doc.updated_at = DatabaseUtils.current_date_time()
+                            #         doc.file_url = file_url_name
+                            #         doc.ftp_id = ftp[1].ftp_id
+                            #         self.session.add(doc)
+                            #         self.session.flush()
                             #
-                            #     app_doc = CtApplicationDocument()
-                            #     app_doc.application_id = app_id
-                            #     app_doc.document_id = doc.id
-                            #     app_doc.role = role
-                            #     self.session.add(app_doc)
-                            #     self.session.flush()
+                            #         app_doc = CtApplicationDocument()
+                            #         app_doc.application_id = app_id
+                            #         app_doc.document_id = doc.id
+                            #         app_doc.role = role
+                            #         self.session.add(app_doc)
+                            #         self.session.flush()
                         # try:
 
                             self.widget.item(index.row(), FILE_NAME_COLUMN).setText(file_name)
@@ -119,7 +120,6 @@ class ApplicationDocumentDelegate(QStyledItemDelegate):
                 elif index.column() == VIEW_COLUMN:
                     if DatabaseUtils.ftp_connect():
                         ftp = DatabaseUtils.ftp_connect()
-
                         app_doc_count = self.session.query(CtApplicationDocument).filter(
                                 CtApplicationDocument.application_id == app_id). \
                                 filter(CtApplicationDocument.role == role).count()
@@ -127,23 +127,25 @@ class ApplicationDocumentDelegate(QStyledItemDelegate):
                             app_doc = self.session.query(CtApplicationDocument).filter(
                                 CtApplicationDocument.application_id == app_id). \
                                 filter(CtApplicationDocument.role == role).one()
-
                             doc = self.session.query(CtDocument).filter(CtDocument.id == app_doc.document_id).one()
 
-                            view_pdf = open(FilePath.view_file_path(), 'wb')
-                            print ftp[0].retrlines('LIST')
-                            print doc.file_url
-                            ftp[0].cwd(doc.file_url)
+                            archive_app_path = r'D:/TM_LM2/view.pdf'
+                            view_pdf = open(archive_app_path, 'wb')
+                            file_url = ''
+
+                            url_splits = doc.file_url.split('/')
+                            for url_split in url_splits:
+                                if not url_split.endswith('.pdf'):
+                                    if file_url == '':
+                                        file_url = url_split
+                                    else:
+                                        file_url = file_url + '/' + url_split
+                            # # for each word in the line:
+                            ftp[0].cwd(file_url)
                             ftp[0].retrbinary('RETR ' + doc.name, view_pdf.write)
 
                             try:
-                                QDesktopServices.openUrl(QUrl.fromLocalFile(FilePath.view_file_path()))
-                                #
-                                # file_name = self.widget.item(index.row(), FILE_NAME_COLUMN).text()
-                                # if file_name != '':
-                                #     shutil.copy2(archive_app_path +'/'+file_name, FilePath.view_file_path())
-                                #     QDesktopServices.openUrl(QUrl.fromLocalFile(FilePath.view_file_path()))
-
+                                QDesktopServices.openUrl(QUrl.fromLocalFile(archive_app_path))
                             except IOError, e:
                                 QMessageBox.information(None, QApplication.translate("LM2", "No parcel"),
                                                         QApplication.translate("LM2",
