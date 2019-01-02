@@ -1,3 +1,4 @@
+# -*- encoding: utf-8 -*-
 __author__ = 'ankhbold'
 
 from PyQt4.QtCore import *
@@ -548,14 +549,20 @@ class OwnRecordDialog(QDialog, Ui_OwnRecordDialog, DatabaseHelper):
             return
 
         try:
-            app_status = self.session.query(func.max(CtApplicationStatus.status)).\
-                filter(CtApplicationStatus.application == self.app_id).one()
+            app_no = self.found_edit.text()
+            count = self.session.query(CtApplication).filter(CtApplication.app_no == app_no).count()
+            if count == 1:
+                application = self.session.query(CtApplication).filter(CtApplication.app_no == app_no).one()
+                self.app_id = application.app_id
 
-            if app_status[0] < 7:
-                PluginUtils.show_error(self, self.tr("Record Error"), self.tr("First register decision and notary."))
-                return
+                app_status = self.session.query(func.max(CtApplicationStatus.status)).\
+                    filter(CtApplicationStatus.application == self.app_id).one()
 
-            application = self.session.query(CtApplication).filter_by(app_id=self.app_id).one()
+                if app_status[0] < 7:
+                    PluginUtils.show_error(self, self.tr("Record Error"), self.tr("First register decision and notary."))
+                    return
+
+                application = self.session.query(CtApplication).filter_by(app_id=self.app_id).one()
 
         except SQLAlchemyError, e:
             self.rollback()
@@ -698,7 +705,7 @@ class OwnRecordDialog(QDialog, Ui_OwnRecordDialog, DatabaseHelper):
             return
 
         count = self.session.query(SetBaseTaxAndPrice).\
-            filter(SetTaxAndPriceZone.geometry.ST_Contains(CaParcelTbl.geometry)). \
+            filter(SetTaxAndPriceZone.geometry.ST_Contains(func.ST_Centroid(CaParcelTbl.geometry))). \
             filter(CaParcelTbl.parcel_id == parcel_id). \
             filter(SetBaseTaxAndPrice.tax_zone == SetTaxAndPriceZone.zone_id). \
             filter(SetBaseTaxAndPrice.landuse == CaParcelTbl.landuse). \
@@ -709,7 +716,7 @@ class OwnRecordDialog(QDialog, Ui_OwnRecordDialog, DatabaseHelper):
             return
 
         base_tax_and_price = self.session.query(SetBaseTaxAndPrice).\
-            filter(SetTaxAndPriceZone.geometry.ST_Contains(CaParcelTbl.geometry)). \
+            filter(SetTaxAndPriceZone.geometry.ST_Contains(func.ST_Centroid(CaParcelTbl.geometry))). \
             filter(CaParcelTbl.parcel_id == parcel_id). \
             filter(SetBaseTaxAndPrice.tax_zone == SetTaxAndPriceZone.zone_id). \
             filter(SetBaseTaxAndPrice.landuse == CaParcelTbl.landuse). \
@@ -1033,6 +1040,11 @@ class OwnRecordDialog(QDialog, Ui_OwnRecordDialog, DatabaseHelper):
             self.record_number_edit.setText(number)
             self.record.record_no = number
 
+            # contract_number_filter = "%-{0}/%".format(str(year))
+            app_type = None
+            obj_type = 'contract\OwnershipRecord'
+            PluginUtils.generate_auto_app_no(str(year), app_type, soum, obj_type)
+
         except SQLAlchemyError, e:
             PluginUtils.show_error(self, self.tr("Database Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
 
@@ -1264,7 +1276,6 @@ class OwnRecordDialog(QDialog, Ui_OwnRecordDialog, DatabaseHelper):
             .filter(CtApplicationStatus.status == 9).count()
         if self.active_rbutton.isChecked() and app_status9_count == 0:
             new_status = CtApplicationStatus()
-            print self.app_id
             new_status.application = self.app_id
             new_status.next_officer_in_charge = DatabaseUtils.current_sd_user().user_id
             new_status.officer_in_charge = DatabaseUtils.current_sd_user().user_id
@@ -1635,7 +1646,7 @@ class OwnRecordDialog(QDialog, Ui_OwnRecordDialog, DatabaseHelper):
             .join(BsPerson, CtApplicationPersonRole.person == BsPerson.person_id)\
             .filter(or_(CtApplication.app_type == 2,CtApplication.app_type == 4,CtApplication.app_type == 5,CtApplication.app_type == 9,\
                             CtApplication.app_type == 14,CtApplication.app_type == 15,CtApplication.app_type == 16,CtApplication.app_type == 20))\
-            .filter(BsPerson.person_id.ilike(value)).all()
+            .filter(BsPerson.person_register.ilike(value)).all()
 
         for app in application:
             self.app_no = app.app_no

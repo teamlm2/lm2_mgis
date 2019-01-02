@@ -1,5 +1,6 @@
-__author__ = 'B.Ankhbold'
 # coding=utf8
+__author__ = 'B.Ankhbold'
+
 import os
 import xlsxwriter
 from xlsxwriter.utility import xl_rowcol_to_cell, xl_col_to_name
@@ -547,8 +548,6 @@ class ReportDialog(QDialog, Ui_ReportDialog, DatabaseHelper):
                 worksheet.write(row, column-all_landuse_count, (round(all_area_landuse,2)),format)
                 # cell = xl_rowcol_to_cell(row, column-all_landuse_count)
                 # column = xl_col_to_name(column)
-                # print cell+'-'+column
-
 
                 value_p = self.progressBar.value() + 1
                 self.progressBar.setValue(value_p)

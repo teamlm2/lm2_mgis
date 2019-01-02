@@ -1,7 +1,7 @@
-import os
+# -*- encoding: utf-8 -*-
 
 __author__ = 'anna'
-# -*- encoding: utf-8 -*-
+
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from sqlalchemy.exc import SQLAlchemyError
@@ -25,7 +25,7 @@ from ..model.LM2Exception import LM2Exception
 from ..utils.DatabaseUtils import DatabaseUtils
 from ..utils.SessionHandler import SessionHandler
 from ..utils.PluginUtils import PluginUtils
-
+import os
 
 class PersonDialog(QDialog, Ui_PersonDialog, DatabaseHelper):
     def __init__(self, person, parent=None):
@@ -480,6 +480,20 @@ class PersonDialog(QDialog, Ui_PersonDialog, DatabaseHelper):
         return text
 
     def __setup_mapping(self):
+
+        self.personal_id_edit.setEnabled(False)
+        self.middle_name_edit.setEnabled(False)
+        self.surname_company_edit.setEnabled(False)
+        self.first_name_edit.setEnabled(False)
+
+        user_name = QSettings().value(SettingsConstants.USER)
+        user_rights = DatabaseUtils.userright_by_name(user_name)
+
+        if UserRight.cadastre_update in user_rights:
+            self.personal_id_edit.setEnabled(True)
+            self.middle_name_edit.setEnabled(True)
+            self.surname_company_edit.setEnabled(True)
+            self.first_name_edit.setEnabled(True)
 
         if self.person.address_entrance_no is None:
             self.entrance_edit.setText(Constants.ENTRANCE_DEFAULT_VALUE)

@@ -1,5 +1,6 @@
-__author__ = 'topmap'
 # coding=utf8
+__author__ = 'topmap'
+
 import os
 import xlsxwriter
 from PyQt4.QtCore import *

@@ -1,3 +1,4 @@
+# -*- encoding: utf-8 -*-
 import os
 
 __author__ = 'anna'

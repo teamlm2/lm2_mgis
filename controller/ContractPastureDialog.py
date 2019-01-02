@@ -119,10 +119,8 @@ class ContractPastureDialog(QDialog, Ui_ContractPastureDialog, DatabaseHelper):
         self.drop_label = DropLabel("application", self.application_groupbox)
         self.drop_label.itemDropped.connect(self.on_drop_label_itemDropped)
         self.close_button.clicked.connect(self.reject)
-
         self.__set_up_assigned_parcel_twidget()
         self.__setup_combo_boxes()
-
         self.status_label.clear()
         self.is_certificate = False
 
@@ -272,95 +270,95 @@ class ContractPastureDialog(QDialog, Ui_ContractPastureDialog, DatabaseHelper):
 
     def __setup_mapping(self):
 
-        try:
-            self.contract_num_edit.setText(self.contract.contract_no)
-            qt_date = PluginUtils.convert_python_date_to_qt(self.contract.contract_date)
-            if qt_date is not None:
-                self.contract_date.setDate(qt_date)
+        # try:
+        self.contract_num_edit.setText(self.contract.contract_no)
+        qt_date = PluginUtils.convert_python_date_to_qt(self.contract.contract_date)
+        if qt_date is not None:
+            self.contract_date.setDate(qt_date)
 
-            contract_begin = PluginUtils.convert_python_date_to_qt(self.contract.contract_begin)
-            contract_end = PluginUtils.convert_python_date_to_qt(self.contract.contract_end)
+        contract_begin = PluginUtils.convert_python_date_to_qt(self.contract.contract_begin)
+        contract_end = PluginUtils.convert_python_date_to_qt(self.contract.contract_end)
 
-            if contract_begin is not None:
-                self.contract_begin_edit.setText(contract_begin.toString(Constants.DATABASE_DATE_FORMAT))
+        if contract_begin is not None:
+            self.contract_begin_edit.setText(contract_begin.toString(Constants.DATABASE_DATE_FORMAT))
 
-            if contract_end is not None:
-                self.contract_end_edit.setText(contract_end.toString(Constants.DATABASE_DATE_FORMAT))
-                duration = contract_end.year() - contract_begin.year()
-                self.contract_duration_edit.setText(str(duration))
-            else:
-                application_role = self.contract.application_roles.filter_by(role=Constants.APPLICATION_ROLE_CREATES).one()
-                application = application_role.application_ref
-                # decision date
-                last_decision = self.session.query(CtDecision).join(CtApplication.decision_result) \
-                    .join(CtDecisionApplication.decision_ref) \
-                    .filter(CtApplication.app_no == application.app_no) \
-                    .filter(CtDecisionApplication.decision_result == Constants.DECISION_RESULT_APPROVED) \
-                    .one()
-
-                qt_date = PluginUtils.convert_python_date_to_qt(last_decision.decision_date)
-
-                if qt_date is not None:
-                    self.contract_begin_edit.setText(qt_date.toString(Constants.DATABASE_DATE_FORMAT))
-
-                if application.app_type in Constants.APPLICATION_TYPE_WITH_DURATION:
-                    years_approved = application.approved_duration
-                    if years_approved:
-                        qt_date = PluginUtils.convert_python_date_to_qt(last_decision.decision_date)
-
-                        if qt_date is not None:
-                            dec_year = qt_date.year()
-                            end_year = dec_year + int(years_approved)
-                            end_date = QDate(end_year, qt_date.month(), qt_date.day())
-
-                            self.contract_end_edit.setText(end_date.toString(Constants.DATABASE_DATE_FORMAT))
-                            self.contract_duration_edit.setText(str(years_approved))
-            self.__load_application_information()
-
-            self.__setup_status()
-
-            if self.contract.cancellation_date:
-                qt_date = PluginUtils.convert_python_date_to_qt(self.contract.cancellation_date)
-
-                self.cancelation_date.setDate(qt_date)
-                self.cancellation_date_check_box.setCheckState(Qt.Checked)
-
-                if self.contract.cancellation_reason is not None:
-                    self.other_reason_rbutton.setChecked(True)
-                    self.other_reason_cbox.setCurrentIndex(
-                        self.other_reason_cbox.findData(self.contract.cancellation_reason))
-                else:
-                    self.application_based_rbutton.setChecked(True)
-
-                    cancellation_application_c = self.contract.application_roles\
-                        .filter_by(role=Constants.APP_ROLE_CANCEL).count()
-                    if cancellation_application_c != 0:
-                        cancellation_application = self.contract.application_roles\
-                            .filter_by(role=Constants.APP_ROLE_CANCEL).one()
-
-                        if cancellation_application is None:
-                            PluginUtils.show_error(self, self.tr("Error loading Contract"),
-                                                   self.tr("Could not load contract. Cancellation application not found"))
-                            self.reject()
-
-                        self.app_number_cbox.setCurrentIndex(
-                            self.app_number_cbox.findText(cancellation_application.application))
-                        self.type_edit.setText(cancellation_application.application_ref.app_type_ref.description)
-
+        if contract_end is not None:
+            self.contract_end_edit.setText(contract_end.toString(Constants.DATABASE_DATE_FORMAT))
+            duration = contract_end.year() - contract_begin.year()
+            self.contract_duration_edit.setText(str(duration))
+        else:
             application_role = self.contract.application_roles.filter_by(role=Constants.APPLICATION_ROLE_CREATES).one()
             application = application_role.application_ref
+            # decision date
+            last_decision = self.session.query(CtDecision).join(CtApplication.decision_result) \
+                .join(CtDecisionApplication.decision_ref) \
+                .filter(CtApplication.app_no == application.app_no) \
+                .filter(CtDecisionApplication.decision_result == Constants.DECISION_RESULT_APPROVED) \
+                .one()
 
-            if application_role is None or application is None:
-                PluginUtils.show_error(self, self.tr("Error loading Contract"),
-                                       self.tr("This contract has no valid application assigned."))
-                self.reject()
-                return
+            qt_date = PluginUtils.convert_python_date_to_qt(last_decision.decision_date)
 
-            self.application_this_contract_based_edit.setText(application.app_no)
-            self.application_type_edit.setText(application.app_type_ref.description)
+            if qt_date is not None:
+                self.contract_begin_edit.setText(qt_date.toString(Constants.DATABASE_DATE_FORMAT))
 
-        except SQLAlchemyError, e:
-            PluginUtils.show_error(self, self.tr("Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+            if application.app_type in Constants.APPLICATION_TYPE_WITH_DURATION:
+                years_approved = application.approved_duration
+                if years_approved:
+                    qt_date = PluginUtils.convert_python_date_to_qt(last_decision.decision_date)
+
+                    if qt_date is not None:
+                        dec_year = qt_date.year()
+                        end_year = dec_year + int(years_approved)
+                        end_date = QDate(end_year, qt_date.month(), qt_date.day())
+
+                        self.contract_end_edit.setText(end_date.toString(Constants.DATABASE_DATE_FORMAT))
+                        self.contract_duration_edit.setText(str(years_approved))
+        self.__load_application_information()
+
+        self.__setup_status()
+
+        if self.contract.cancellation_date:
+            qt_date = PluginUtils.convert_python_date_to_qt(self.contract.cancellation_date)
+
+            self.cancelation_date.setDate(qt_date)
+            self.cancellation_date_check_box.setCheckState(Qt.Checked)
+
+            if self.contract.cancellation_reason is not None:
+                self.other_reason_rbutton.setChecked(True)
+                self.other_reason_cbox.setCurrentIndex(
+                    self.other_reason_cbox.findData(self.contract.cancellation_reason))
+            else:
+                self.application_based_rbutton.setChecked(True)
+
+                cancellation_application_c = self.contract.application_roles\
+                    .filter_by(role=Constants.APP_ROLE_CANCEL).count()
+                if cancellation_application_c != 0:
+                    cancellation_application = self.contract.application_roles\
+                        .filter_by(role=Constants.APP_ROLE_CANCEL).one()
+
+                    if cancellation_application is None:
+                        PluginUtils.show_error(self, self.tr("Error loading Contract"),
+                                               self.tr("Could not load contract. Cancellation application not found"))
+                        self.reject()
+
+                    self.app_number_cbox.setCurrentIndex(
+                        self.app_number_cbox.findText(cancellation_application.application))
+                    self.type_edit.setText(cancellation_application.application_ref.app_type_ref.description)
+
+        application_role = self.contract.application_roles.filter_by(role=Constants.APPLICATION_ROLE_CREATES).one()
+        application = application_role.application_ref
+
+        if application_role is None or application is None:
+            PluginUtils.show_error(self, self.tr("Error loading Contract"),
+                                   self.tr("This contract has no valid application assigned."))
+            self.reject()
+            return
+
+        self.application_this_contract_based_edit.setText(application.app_no)
+        self.application_type_edit.setText(application.app_type_ref.description)
+
+        # except SQLAlchemyError, e:
+        #     PluginUtils.show_error(self, self.tr("Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
 
     def __setup_status(self):
 
@@ -376,37 +374,44 @@ class ContractPastureDialog(QDialog, Ui_ContractPastureDialog, DatabaseHelper):
     def __setup_combo_boxes(self):
 
         self.document_path_edit.setText(PasturePath.contrac_file_path())
-        try:
-            restrictions = DatabaseUtils.working_l2_code()
-            user = DatabaseUtils.current_user()
-            currect_user = user.position
-            if restrictions[3:] == '01':
-                self.print_officer_cbox.setDisabled(False)
-                print_officers = self.session.query(SetRole).filter(or_(SetRole.position == 9, SetRole.position == currect_user)).all()
-                for officer in print_officers:
-                    officer_name = officer.surname[:1]+'.'+officer.first_name
-                    self.print_officer_cbox.addItem(officer_name, officer.user_name)
+        # try:
+        restrictions = DatabaseUtils.working_l2_code()
+        user = DatabaseUtils.current_user()
+        currect_user = user.position
+        self.print_officer_cbox.setDisabled(False)
+        print_officers = self.session.query(SetRole).filter(
+            or_(SetRole.position == 5, SetRole.position == 6, SetRole.position == 7, SetRole.position == 8,
+                SetRole.position == currect_user)).all()
+        # filter(or_(SetRole.position == 9, SetRole.position == currect_user)). \
+        # filter(SetRole.is_active == True). \
+        # filter(SetRole.user_name.startswith(user_start)).all()
+        soum_code = DatabaseUtils.working_l2_code()
+        for officer in print_officers:
+            l2_code_list = officer.restriction_au_level2.split(',')
+            if soum_code in l2_code_list:
+                officer_name = officer.surname[:1] + '.' + officer.first_name
+                self.print_officer_cbox.addItem(officer_name, officer.user_name_real)
             else:
                 self.print_officer_cbox.setDisabled(True)
-            app_contract_count = self.session.query(CtContractApplicationRole).filter(CtContractApplicationRole.contract == self.contract.contract_no).count()
+        # app_contract_count = self.session.query(CtContractApplicationRole).filter(CtContractApplicationRole.contract == self.contract.contract_id).count()
 
-            if app_contract_count == 1:
-                app_contract = self.session.query(CtContractApplicationRole).filter_by(contract=self.contract.contract_no).one()
-                application = self.session.query(CtApplication).filter_by(app_no=app_contract.application).one()
-                apps = self.session.query(CtApplication.app_no).order_by(CtApplication.app_no).all()
+        # if app_contract_count == 1:
+        #     app_contract = self.session.query(CtContractApplicationRole).filter_by(contract=self.contract.contract_id).one()
+        #     application = self.session.query(CtApplication).filter_by(app_id=app_contract.application).one()
+            # apps = self.session.query(CtApplication.app_no).order_by(CtApplication.app_no).all()
 
-                for app in apps:
-                    self.app_number_cbox.addItem(app[0])
+            # for app in apps:
+            #     self.app_number_cbox.addItem(app[0])
+            #
+            # self.app_number_cbox.setCurrentIndex(-1)
 
-                self.app_number_cbox.setCurrentIndex(-1)
+        reasons = self.session.query(ClContractCancellationReason).all()
+        for reason in reasons:
+            self.other_reason_cbox.addItem(reason.description, reason.code)
 
-            reasons = self.session.query(ClContractCancellationReason).all()
-            for reason in reasons:
-                self.other_reason_cbox.addItem(reason.description, reason.code)
-
-        except SQLAlchemyError, e:
-            PluginUtils.show_error(self, self.tr("Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
-            return
+        # except SQLAlchemyError, e:
+        #     PluginUtils.show_error(self, self.tr("Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+        #     return
 
     def __copy_application_from_navigator(self):
 
@@ -498,7 +503,7 @@ class ContractPastureDialog(QDialog, Ui_ContractPastureDialog, DatabaseHelper):
         application = application_role.application_ref
 
         app_pug_parcels = self.session.query(CtApplicationPUGParcel). \
-            filter(CtApplicationPUGParcel.application == application.app_no).all()
+            filter(CtApplicationPUGParcel.application == application.app_id).all()
         for pug_parcel in app_pug_parcels:
             parcel = self.session.query(CaPastureParcel).filter(
                 CaPastureParcel.parcel_id == pug_parcel.parcel).one()
@@ -858,18 +863,18 @@ class ContractPastureDialog(QDialog, Ui_ContractPastureDialog, DatabaseHelper):
     def __save_cancellation_app(self):
 
         cancel_count = self.contract.application_roles.filter_by(role=ConstantsPasture.APPLICATION_ROLE_CANCELS).count()
-        self.contract.cancellation_reason = None
-        if cancel_count > 0:
-            # update
-            cancellation_app = self.contract.application_roles.filter_by(role=ConstantsPasture.APPLICATION_ROLE_CANCELS).one()
-            cancellation_app.application = self.app_number_cbox.currentText()
-        else:
-            # insert
-            contract_app = CtContractApplicationRole()
-            contract_app.application = self.app_number_cbox.currentText()
-            contract_app.contract = self.contract.contract_no
-            contract_app.role = ConstantsPasture.APP_ROLE_CANCEL
-            self.contract.application_roles.append(contract_app)
+        # self.contract.cancellation_reason = None
+        # if cancel_count > 0:
+        #     # update
+        #     cancellation_app = self.contract.application_roles.filter_by(role=ConstantsPasture.APPLICATION_ROLE_CANCELS).one()
+        #     cancellation_app.application = self.app_number_cbox.currentText()
+        # else:
+        #     # insert
+        #     contract_app = CtContractApplicationRole()
+        #     contract_app.application = self.app_number_cbox.currentText()
+        #     contract_app.contract = self.contract.contract_id
+        #     contract_app.role = ConstantsPasture.APP_ROLE_CANCEL
+        #     self.contract.application_roles.append(contract_app)
 
     def __save_other_reason(self):
 
@@ -900,7 +905,7 @@ class ContractPastureDialog(QDialog, Ui_ContractPastureDialog, DatabaseHelper):
 
     def __condition_assigned(self, code):
 
-        contract = self.session.query(CtContract).get(self.contract.contract_no)
+        contract = self.session.query(CtContract).get(self.contract.contract_id)
         count = contract.conditions.filter(CtContractCondition.condition == code).count()
         if count > 0:
             return True
@@ -1142,8 +1147,8 @@ class ContractPastureDialog(QDialog, Ui_ContractPastureDialog, DatabaseHelper):
 
         contract_app = CtContractApplicationRole()
         contract_app.application_ref = application
-        contract_app.application = application.app_no
-        contract_app.contract = self.contract.contract_no
+        contract_app.application = application.app_id
+        contract_app.contract = self.contract.contract_id
         contract_app.contract_ref = self.contract
 
         contract_app.role = ConstantsPasture.APPLICATION_ROLE_CREATES
@@ -1172,7 +1177,7 @@ class ContractPastureDialog(QDialog, Ui_ContractPastureDialog, DatabaseHelper):
 
         base_figures = self.session.query(CtArchivedFee.base_fee_per_m2, CtArchivedFee.subsidized_area,
                                           CtArchivedFee.subsidized_fee_rate).distinct(). \
-            filter(CtArchivedFee.contract == self.contract.contract_no). \
+            filter(CtArchivedFee.contract == self.contract.contract_id). \
             filter(CtArchivedFee.valid_from == begin_date).one()
 
         self.archive_base_fee_edit.setText('{0}'.format(base_figures.base_fee_per_m2))
@@ -1193,11 +1198,11 @@ class ContractPastureDialog(QDialog, Ui_ContractPastureDialog, DatabaseHelper):
         row = 0
         for contractor in contractors:
             person = contractor.person_ref
-            fee_count = person.archived_fees.filter(CtArchivedFee.contract == self.contract.contract_no). \
+            fee_count = person.archived_fees.filter(CtArchivedFee.contract == self.contract.contract_id). \
                 filter(CtArchivedFee.valid_from == begin_date).count()
             if fee_count > 0:
                 self.archive_land_fee_twidget.setRowCount(row + 1)
-                fee = person.archived_fees.filter(CtArchivedFee.contract == self.contract.contract_no). \
+                fee = person.archived_fees.filter(CtArchivedFee.contract == self.contract.contract_id). \
                     filter(CtArchivedFee.valid_from == begin_date).one()
                 self.__add_archived_fee_row(row, person, fee)
                 row += 1
@@ -1258,19 +1263,18 @@ class ContractPastureDialog(QDialog, Ui_ContractPastureDialog, DatabaseHelper):
 
         if not self.__save_settings():
             return
-        current_user = DatabaseUtils.current_user()
-        current_employee = self.session.query(SetRole) \
-            .filter(SetRole.user_name == current_user.user_name) \
-            .filter(SetRole.is_active == True).one()
 
+        app_no = self.application_this_contract_based_edit.text()
+        application = self.session.query(CtApplication).filter(CtApplication.app_no == app_no).one()
         app_status9_count = self.session.query(CtApplicationStatus)\
-            .filter(CtApplicationStatus.application == self.application_this_contract_based_edit.text())\
+            .filter(CtApplicationStatus.application == application.app_id)\
             .filter(CtApplicationStatus.status == 9).count()
+
         if self.active_rbutton.isChecked() and app_status9_count == 0:
             new_status = CtApplicationStatus()
-            new_status.application = self.application_this_contract_based_edit.text()
-            new_status.next_officer_in_charge = current_employee.user_name_real
-            new_status.officer_in_charge = current_employee.user_name_real
+            new_status.application = application.app_id
+            new_status.next_officer_in_charge = DatabaseUtils.current_sd_user().user_id
+            new_status.officer_in_charge = DatabaseUtils.current_sd_user().user_id
             new_status.status = 9
             new_status.status_date = self.contract.contract_date
             self.session.add(new_status)
@@ -1305,13 +1309,14 @@ class ContractPastureDialog(QDialog, Ui_ContractPastureDialog, DatabaseHelper):
         decision_date = ''
         decision_level = ''
         decision_no = ''
+        application = self.session.query(CtApplication.app_no == app_no).one()
         app_dec = self.session.query(CtDecisionApplication).filter(
-            CtDecisionApplication.application == app_no).all()
+            CtDecisionApplication.application == application.app_id).all()
         for p in app_dec:
             pp = p.decision
-        decision_c = self.session.query(CtDecision).filter(CtDecision.decision_no == pp).count()
+        decision_c = self.session.query(CtDecision).filter(CtDecision.decision_id == pp).count()
         if decision_c != 0:
-            decision = self.session.query(CtDecision).filter(CtDecision.decision_no == pp).one()
+            decision = self.session.query(CtDecision).filter(CtDecision.decision_id == pp).one()
             decision_no = decision.decision_no[6:-5]
             decision_date = str(decision.decision_date)
             decision_level = decision.decision_level
@@ -1322,12 +1327,15 @@ class ContractPastureDialog(QDialog, Ui_ContractPastureDialog, DatabaseHelper):
         app_no = self.application_this_contract_based_edit.text()
         try:
             app_status = self.session.query(CtApplicationStatus).filter(
-                CtApplicationStatus.application == app_no).all()
+                CtApplicationStatus.application == application.app_id).all()
             for p in app_status:
                 if p.status == 9:
-                    officer = self.session.query(SetRole).filter(SetRole.user_name_real == p.officer_in_charge).one()
+                    officer = DatabaseUtils.get_sd_employee(p.officer_in_charge);
+                    break
+                    # officer = self.session.query(SetRole).filter(SetRole.user_name_real == p.officer_in_charge).one()
                 else:
-                    officer = self.session.query(SetRole).filter(SetRole.user_name_real == p.officer_in_charge).one()
+                    officer = DatabaseUtils.get_sd_employee(p.officer_in_charge);
+                    # officer = self.session.query(SetRole).filter(SetRole.user_name_real == p.officer_in_charge).one()
         except SQLAlchemyError, e:
             raise LM2Exception(self.tr("Database Query Error"),
                                self.tr("aCould not execute: {0}").format(e.message))
@@ -1336,7 +1344,7 @@ class ContractPastureDialog(QDialog, Ui_ContractPastureDialog, DatabaseHelper):
 
         try:
             app_person = self.session.query(CtApplicationPersonRole).filter(
-                CtApplicationPersonRole.application == app_no).all()
+                CtApplicationPersonRole.application == application.app_id).all()
 
             for p in app_person:
                 if p.main_applicant == True:
@@ -1713,7 +1721,7 @@ class ContractPastureDialog(QDialog, Ui_ContractPastureDialog, DatabaseHelper):
         if state:
             try:
                 contract_apps = self.session.query(CtContractApplicationRole).\
-                    filter(CtContractApplicationRole.contract == self.contract.contract_no).all()
+                    filter(CtContractApplicationRole.contract == self.contract.contract_id).all()
                 for contract_app in contract_apps:
                     mortgage_count = self.session.query(CtApp8Ext).\
                         filter(CtApp8Ext.app_no == contract_app.application).count()

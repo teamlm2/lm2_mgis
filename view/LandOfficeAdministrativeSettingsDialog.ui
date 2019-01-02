@@ -7,19 +7,19 @@
     <x>0</x>
     <y>0</y>
     <width>800</width>
-    <height>470</height>
+    <height>500</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
     <width>800</width>
-    <height>470</height>
+    <height>500</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
     <width>800</width>
-    <height>470</height>
+    <height>500</height>
    </size>
   </property>
   <property name="baseSize">
@@ -35,7 +35,7 @@
    <property name="geometry">
     <rect>
      <x>720</x>
-     <y>430</y>
+     <y>469</y>
      <width>75</width>
      <height>23</height>
     </rect>
@@ -48,7 +48,7 @@
    <property name="geometry">
     <rect>
      <x>540</x>
-     <y>430</y>
+     <y>469</y>
      <width>91</width>
      <height>23</height>
     </rect>
@@ -61,13 +61,13 @@
    <property name="geometry">
     <rect>
      <x>6</x>
-     <y>8</y>
+     <y>51</y>
      <width>786</width>
      <height>416</height>
     </rect>
    </property>
    <property name="currentIndex">
-    <number>0</number>
+    <number>4</number>
    </property>
    <widget class="QWidget" name="widget">
     <attribute name="title">
@@ -1316,7 +1316,7 @@
        <x>7</x>
        <y>5</y>
        <width>766</width>
-       <height>366</height>
+       <height>381</height>
       </rect>
      </property>
      <property name="title">
@@ -1325,9 +1325,9 @@
      <widget class="QComboBox" name="certificate_type_cbox">
       <property name="geometry">
        <rect>
-        <x>20</x>
-        <y>40</y>
-        <width>411</width>
+        <x>5</x>
+        <y>15</y>
+        <width>383</width>
         <height>22</height>
        </rect>
       </property>
@@ -1335,10 +1335,10 @@
      <widget class="QTableWidget" name="certificate_range_twidget">
       <property name="geometry">
        <rect>
-        <x>20</x>
-        <y>75</y>
-        <width>676</width>
-        <height>276</height>
+        <x>5</x>
+        <y>45</y>
+        <width>760</width>
+        <height>331</height>
        </rect>
       </property>
       <column>
@@ -1376,14 +1376,34 @@
         <string>Description</string>
        </property>
       </column>
+      <column>
+       <property name="text">
+        <string>Type</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Aimag</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Soum</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Is valid</string>
+       </property>
+      </column>
      </widget>
      <widget class="QPushButton" name="add_range_button">
       <property name="geometry">
        <rect>
-        <x>710</x>
-        <y>90</y>
+        <x>405</x>
+        <y>15</y>
         <width>36</width>
-        <height>36</height>
+        <height>25</height>
        </rect>
       </property>
       <property name="text">
@@ -1393,10 +1413,10 @@
      <widget class="QPushButton" name="remove_range_button">
       <property name="geometry">
        <rect>
-        <x>710</x>
-        <y>130</y>
+        <x>460</x>
+        <y>15</y>
         <width>36</width>
-        <height>36</height>
+        <height>25</height>
        </rect>
       </property>
       <property name="text">
@@ -1409,57 +1429,11 @@
     <attribute name="title">
      <string>Cadastre Page</string>
     </attribute>
-    <widget class="QComboBox" name="cpage_aimag_cbox">
-     <property name="geometry">
-      <rect>
-       <x>30</x>
-       <y>35</y>
-       <width>166</width>
-       <height>22</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_25">
-     <property name="geometry">
-      <rect>
-       <x>30</x>
-       <y>15</y>
-       <width>151</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Aimag</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_26">
-     <property name="geometry">
-      <rect>
-       <x>210</x>
-       <y>15</y>
-       <width>151</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Soum</string>
-     </property>
-    </widget>
-    <widget class="QComboBox" name="cpage_soum_cbox">
-     <property name="geometry">
-      <rect>
-       <x>210</x>
-       <y>35</y>
-       <width>166</width>
-       <height>22</height>
-      </rect>
-     </property>
-    </widget>
     <widget class="QDateEdit" name="cpage_register_date">
      <property name="geometry">
       <rect>
        <x>30</x>
-       <y>85</y>
+       <y>25</y>
        <width>110</width>
        <height>22</height>
       </rect>
@@ -1469,7 +1443,7 @@
      <property name="geometry">
       <rect>
        <x>30</x>
-       <y>65</y>
+       <y>5</y>
        <width>111</width>
        <height>16</height>
       </rect>
@@ -1482,7 +1456,7 @@
      <property name="geometry">
       <rect>
        <x>150</x>
-       <y>65</y>
+       <y>5</y>
        <width>116</width>
        <height>16</height>
       </rect>
@@ -1495,7 +1469,7 @@
      <property name="geometry">
       <rect>
        <x>150</x>
-       <y>85</y>
+       <y>25</y>
        <width>110</width>
        <height>22</height>
       </rect>
@@ -1505,7 +1479,7 @@
      <property name="geometry">
       <rect>
        <x>275</x>
-       <y>85</y>
+       <y>25</y>
        <width>121</width>
        <height>22</height>
       </rect>
@@ -1518,7 +1492,7 @@
      <property name="geometry">
       <rect>
        <x>405</x>
-       <y>85</y>
+       <y>25</y>
        <width>121</width>
        <height>22</height>
       </rect>
@@ -1531,7 +1505,7 @@
      <property name="geometry">
       <rect>
        <x>535</x>
-       <y>85</y>
+       <y>25</y>
        <width>121</width>
        <height>22</height>
       </rect>
@@ -1544,7 +1518,7 @@
      <property name="geometry">
       <rect>
        <x>275</x>
-       <y>65</y>
+       <y>5</y>
        <width>126</width>
        <height>16</height>
       </rect>
@@ -1557,7 +1531,7 @@
      <property name="geometry">
       <rect>
        <x>405</x>
-       <y>65</y>
+       <y>5</y>
        <width>126</width>
        <height>16</height>
       </rect>
@@ -1570,7 +1544,7 @@
      <property name="geometry">
       <rect>
        <x>535</x>
-       <y>65</y>
+       <y>5</y>
        <width>126</width>
        <height>16</height>
       </rect>
@@ -1583,7 +1557,7 @@
      <property name="geometry">
       <rect>
        <x>140</x>
-       <y>130</y>
+       <y>70</y>
        <width>75</width>
        <height>23</height>
       </rect>
@@ -1596,7 +1570,7 @@
      <property name="geometry">
       <rect>
        <x>245</x>
-       <y>130</y>
+       <y>70</y>
        <width>75</width>
        <height>23</height>
       </rect>
@@ -1609,7 +1583,7 @@
      <property name="geometry">
       <rect>
        <x>355</x>
-       <y>130</y>
+       <y>70</y>
        <width>75</width>
        <height>23</height>
       </rect>
@@ -1622,9 +1596,9 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>165</y>
+       <y>105</y>
        <width>756</width>
-       <height>211</height>
+       <height>271</height>
       </rect>
      </property>
      <column>
@@ -2795,52 +2769,6 @@
        <string>Find</string>
       </property>
      </widget>
-     <widget class="QLabel" name="label_48">
-      <property name="geometry">
-       <rect>
-        <x>450</x>
-        <y>10</y>
-        <width>146</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Aimags</string>
-      </property>
-     </widget>
-     <widget class="QComboBox" name="aimags_cbox">
-      <property name="geometry">
-       <rect>
-        <x>450</x>
-        <y>30</y>
-        <width>145</width>
-        <height>22</height>
-       </rect>
-      </property>
-     </widget>
-     <widget class="QLabel" name="label_49">
-      <property name="geometry">
-       <rect>
-        <x>610</x>
-        <y>10</y>
-        <width>146</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Soums</string>
-      </property>
-     </widget>
-     <widget class="QComboBox" name="soums_cbox">
-      <property name="geometry">
-       <rect>
-        <x>610</x>
-        <y>30</y>
-        <width>145</width>
-        <height>22</height>
-       </rect>
-      </property>
-     </widget>
     </widget>
     <widget class="QPushButton" name="layer_view_button">
      <property name="geometry">
@@ -3426,7 +3354,7 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>435</y>
+     <y>470</y>
      <width>486</width>
      <height>21</height>
     </rect>
@@ -3446,13 +3374,72 @@
    <property name="geometry">
     <rect>
      <x>640</x>
-     <y>430</y>
+     <y>469</y>
      <width>75</width>
      <height>23</height>
     </rect>
    </property>
    <property name="text">
     <string>Apply</string>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="soums_cbox">
+   <property name="geometry">
+    <rect>
+     <x>190</x>
+     <y>25</y>
+     <width>166</width>
+     <height>22</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_33">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>5</y>
+     <width>151</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Aimag</string>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="aimags_cbox">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>25</y>
+     <width>166</width>
+     <height>22</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_34">
+   <property name="geometry">
+    <rect>
+     <x>190</x>
+     <y>5</y>
+     <width>151</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Soum</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="search_button">
+   <property name="geometry">
+    <rect>
+     <x>390</x>
+     <y>24</y>
+     <width>75</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>find</string>
    </property>
   </widget>
  </widget>
@@ -3532,8 +3519,6 @@
   <tabstop>load_document_button</tabstop>
   <tabstop>certificate_type_cbox</tabstop>
   <tabstop>certificate_range_twidget</tabstop>
-  <tabstop>add_range_button</tabstop>
-  <tabstop>remove_range_button</tabstop>
   <tabstop>load_off_document_button</tabstop>
   <tabstop>equipment_twidget</tabstop>
   <tabstop>id_equipment_edit</tabstop>
@@ -3555,8 +3540,6 @@
   <tabstop>users_list_cbox</tabstop>
   <tabstop>clear_button</tabstop>
   <tabstop>find_button</tabstop>
-  <tabstop>aimags_cbox</tabstop>
-  <tabstop>soums_cbox</tabstop>
   <tabstop>layer_view_button</tabstop>
   <tabstop>print_button</tabstop>
   <tabstop>training_add_button</tabstop>

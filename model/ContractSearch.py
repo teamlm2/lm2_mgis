@@ -25,6 +25,7 @@ class ContractSearch(Base):
     middle_name = Column(String)
     parcel_id = Column(String)
     app_no = Column(String)
+    app_id = Column(Integer)
     decision_no = Column(String)
     au2_code = Column(String)
     app_type = Column(Integer)

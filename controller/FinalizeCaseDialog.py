@@ -1,3 +1,4 @@
+# coding=utf8
 __author__ = 'Ankhaa'
 from inspect import currentframe
 
@@ -358,12 +359,10 @@ class FinalizeCaseDialog(QDialog, Ui_FinalizeCaseDialog, DatabaseHelper):
             .filter(CaTmpBuilding.maintenance_case == self.maintenance_case.id).count()
 
         if buildings_to_be_inserted_count != 0:
-            print self.maintenance_case.id
 
             buildings_to_be_inserted_c = self.session.query(CaTmpBuilding) \
                 .filter(CaTmpBuilding.maintenance_case == self.maintenance_case.id) \
                 .filter(CaTmpParcel.geometry.ST_Intersects(CaTmpBuilding.geometry)).count()
-            print buildings_to_be_inserted_c
 
             buildings_to_be_inserted = self.session.query(CaTmpBuilding) \
                 .filter(CaTmpBuilding.maintenance_case == self.maintenance_case.id) \
@@ -510,11 +509,6 @@ class FinalizeCaseDialog(QDialog, Ui_FinalizeCaseDialog, DatabaseHelper):
 
         os.system("hh.exe "+ str(os.path.dirname(os.path.realpath(__file__))[:-10]) +"help\output\help_lm2.chm::/html/finalize_case.htm")
 
-    @pyqtSlot(QTableWidgetItem)
-    def on_maintenance_objects_twidget_itemClicked(self, item):
-
-        print item
-
     @pyqtSlot()
     def on_maintenance_objects_twidget_itemSelectionChanged(self):
 
@@ -542,7 +536,7 @@ class FinalizeCaseDialog(QDialog, Ui_FinalizeCaseDialog, DatabaseHelper):
     def on_address_insert_button_clicked(self):
 
         session = SessionHandler().session_instance()
-        print len(self.maintenance_objects_twidget.selectedItems())
+
         if len(self.maintenance_objects_twidget.selectedItems()) > 0:
             current_item = self.maintenance_objects_twidget.selectedItems()[0]
             object_id = current_item.data(0, Qt.UserRole)

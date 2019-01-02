@@ -21,6 +21,8 @@ class CaUnionParcel(Base):
     valid_from = Column(Date)
     valid_till = Column(Date)
     geometry = Column(Geometry('POLYGON', 4326))
+    property_no = Column(String)
+    au2 = Column(String)
 
     # foreign keys:
     landuse = Column(Integer, ForeignKey('cl_landuse_type.code'))

@@ -6,11 +6,12 @@ from CtArchivedFee import *
 from CtArchivedTaxAndPrice import *
 
 
-class UbGisSubject(Base):
+class MpaGisEditSubject(Base):
 
-    __tablename__ = 'all_subject'
+    __tablename__ = 'ca_mpa_parcel_edit'
 
-    objectid = Column(Integer, primary_key=True)
+    gid = Column(Integer, primary_key=True)
+    objectid = Column(Integer)
     pid = Column(String)
     oldpid = Column(String)
     zoriulalt = Column(Date)
@@ -44,12 +45,8 @@ class UbGisSubject(Base):
     is_finish = Column(Boolean)
     finish_user = Column(String)
     finish_date = Column(Date)
-
-    person_au1 = Column(String)
-    person_au2 = Column(String)
-    person_au3 = Column(String)
-
-    person_streetname = Column(String)
-    person_khashaa = Column(String)
-    person_building_no = Column(String)
-    person_apartment_no = Column(String)
+    address_khashaa = Column(String)
+    address_streetname = Column(String)
+    address_neighbourhood = Column(String)
+    landuse_code = Column(String)
+    edit_status = Column(Integer)

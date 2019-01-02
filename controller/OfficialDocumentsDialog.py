@@ -1,3 +1,4 @@
+# -*- encoding: utf-8 -*-
 __author__ = 'anna'
 
 from ..view.Ui_OfficialDocumentsDialog import *

@@ -5,13 +5,16 @@ from sqlalchemy.exc import SQLAlchemyError
 from inspect import currentframe
 from ...model import SettingsConstants
 from ...model.LM2Exception import LM2Exception
-from ...model.CtContractDocument import CtContractDocument
+from ...model.PsPointDocument import PsPointDocument
 from ...model.CtDocument import CtDocument
 from ...utils.FileUtils import FileUtils
 from ...utils.PluginUtils import PluginUtils
 from ...utils.DatabaseUtils import DatabaseUtils
 from ...utils.SessionHandler import SessionHandler
 from ...utils.PasturePath import *
+from ...utils.FtpConnection import *
+from ...model.SdConfiguration import *
+from ...model.CtDocument import *
 import shutil
 
 PROVIDED_COLUMN = 0
@@ -72,11 +75,8 @@ class PasturePhotosDelegate(QStyledItemDelegate):
 
                 point_detail_id = self.parent.current_parent_object_no()
                 point_year = self.parent.current_parent_year()
-                default_path = default_path + '/' + point_year + '/' + point_detail_id + '/image'
-
-                if not os.path.exists(default_path):
-                    os.makedirs(default_path)
-
+                archive_ftp_path = PasturePath.app_ftp_parent_path('point') + '/' + point_year + '/' + point_detail_id + '/image'
+                role = str(self.widget.item(index.row(), FILE_TYPE_COLUMN).data(Qt.UserRole)).strip()
                 if index.column() == OPEN_FILE_COLUMN:
 
                     file_dialog = QFileDialog()
@@ -92,35 +92,110 @@ class PasturePhotosDelegate(QStyledItemDelegate):
                             PluginUtils.show_error(self.parent, self.tr("File size exceeds limit!"), self.tr("The maximum size of documents to be attached is 15 MB."))
                             return False
 
-                        role = self.widget.item(index.row(), FILE_TYPE_COLUMN).data(Qt.UserRole)
-                        try:
-                            file_name =  str(role) + "_" + point_detail_id +"." + file_info.suffix()
-                            self.widget.item(index.row(), FILE_NAME_COLUMN).setText(file_name)
+                        # try:
+                        file_name =  str(role) + "_" + point_detail_id +"." + file_info.suffix()
+                        if DatabaseUtils.ftp_connect():
+                            ftp = DatabaseUtils.ftp_connect()
 
-                            shutil.copy2(selected_file, default_path+'/'+file_name)
+                            FtpConnection.chdir(archive_ftp_path, ftp[0])
+                            FtpConnection.upload_app_ftp_file(selected_file, file_name, ftp[0])
 
-                            check_item = self.widget.item(index.row(), PROVIDED_COLUMN)
-                            check_item.setCheckState(True)
+                            file_url_name = archive_ftp_path + '/' + file_name
+                            point_doc_count = self.session.query(PsPointDocument).filter(
+                                PsPointDocument.point_detail_id == point_detail_id).filter(PsPointDocument.monitoring_year == point_year). \
+                                filter(PsPointDocument.role == role).count()
+                            if point_doc_count == 0:
+                                doc = CtDocument()
+                                doc.name = file_name
+                                doc.created_by = DatabaseUtils.current_sd_user().user_id
+                                doc.created_at = DatabaseUtils.current_date_time()
+                                doc.updated_at = DatabaseUtils.current_date_time()
+                                doc.file_url = file_url_name
+                                doc.ftp_id = ftp[1].ftp_id
+                                self.session.add(doc)
+                                self.session.flush()
 
-                        except SQLAlchemyError, e:
-                            PluginUtils.show_error(self, self.tr("File Error"), self.tr("Could not execute: {0}").format(e.message))
-                            return True
+                                point_doc = PsPointDocument()
+                                point_doc.point_detail_id = point_detail_id
+                                point_doc.document_id = doc.id
+                                point_doc.role = role
+                                point_doc.monitoring_year = point_year
+                                self.session.add(point_doc)
+                                self.session.flush()
+                                self.session.commit()
+
+                            elif point_doc_count == 1:
+                                point_doc = self.session.query(PsPointDocument).filter(
+                                    PsPointDocument.point_detail_id == point_detail_id).\
+                                    filter(PsPointDocument.monitoring_year == point_year). \
+                                    filter(PsPointDocument.role == role).one()
+
+                                doc_count = self.session.query(CtDocument).filter(
+                                    CtDocument.id == point_doc.document_id).count()
+                                if doc_count == 1:
+                                    doc = self.session.query(CtDocument).filter(
+                                        CtDocument.id == point_doc.document_id).one()
+
+                                    doc.updated_at = DatabaseUtils.current_date_time()
+                                    doc.file_url = file_url_name
+                                    doc.ftp_id = ftp[1].ftp_id
+                        self.widget.item(index.row(), FILE_NAME_COLUMN).setText(file_name)
+
+                        check_item = self.widget.item(index.row(), PROVIDED_COLUMN)
+                        check_item.setCheckState(True)
+
+                        # except SQLAlchemyError, e:
+                        #     PluginUtils.show_error(self, self.tr("File Error"), self.tr("Could not execute: {0}").format(e.message))
+                        #     return True
 
                 elif index.column() == VIEW_COLUMN:
-                    try:
-                        file_name = self.widget.item(index.row(), FILE_NAME_COLUMN).text()
-                        if file_name != '':
-                            # path = os.path.join(os.path.dirname(__file__), "/pasture/view.jpg")
-                            path = os.path.dirname(__file__) + "/pasture/view.jpg"
-                            # print path
-                            # print default_path
-                            # print file_name
-                            shutil.copy2(default_path + '/'+file_name, path)
-                            QDesktopServices.openUrl(QUrl.fromLocalFile(path))
+                    if DatabaseUtils.ftp_connect():
+                        ftp = DatabaseUtils.ftp_connect()
+                        point_doc_count = self.session.query(PsPointDocument).filter(
+                            PsPointDocument.point_detail_id == point_detail_id). \
+                            filter(PsPointDocument.monitoring_year == point_year). \
+                                filter(PsPointDocument.role == role).count()
+                        if point_doc_count == 1:
+                            point_doc = self.session.query(PsPointDocument).filter(
+                                PsPointDocument.point_detail_id == point_detail_id). \
+                                filter(PsPointDocument.monitoring_year == point_year). \
+                                filter(PsPointDocument.role == role).one()
+                            doc = self.session.query(CtDocument).filter(CtDocument.id == point_doc.document_id).one()
 
-                    except SQLAlchemyError, e:
-                            PluginUtils.show_error(self, self.tr("File Error"), self.tr("Could not execute: {0}").format(e.message))
-                            return True
+                            archive_app_path = os.path.dirname(__file__) + "/pasture/view.jpg"
+                            view_file = open(archive_app_path, 'wb')
+                            file_url = ''
+
+                            url_splits = doc.file_url.split('/')
+                            for url_split in url_splits:
+                                if not url_split.endswith('.JPG'):
+                                    if file_url == '':
+                                        file_url = url_split
+                                    else:
+                                        file_url = file_url + '/' + url_split
+                            # # for each word in the line:
+                            try:
+                                ftp[0].cwd(file_url)
+                                ftp[0].retrbinary('RETR ' + doc.name, view_file.write)
+                            except Exception, e:
+                                errorcode_string = str(e).split(None, 1)[0]
+                                if errorcode_string == '550':
+                                    QMessageBox.information(None, QApplication.translate("LM2", "Warning"),
+                                                            QApplication.translate("LM2",
+                                                                                   "Not found directory or file, Please reupload"))
+                                else:
+                                    QMessageBox.information(None, QApplication.translate("LM2", "Warning"),
+                                                            QApplication.translate("LM2",
+                                                                                   "Not found directory or file, Please reupload"))
+                                return True
+
+                            try:
+                                QDesktopServices.openUrl(QUrl.fromLocalFile(archive_app_path))
+                            except IOError, e:
+                                QMessageBox.information(None, QApplication.translate("LM2", "No parcel"),
+                                                        QApplication.translate("LM2",
+                                                                               "This file is already opened. Please close re-run"))
+                                return True
 
                 elif index.column() == DELETE_COLUMN:
 

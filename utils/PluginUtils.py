@@ -5,7 +5,6 @@ from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from qgis.core import QgsTolerance
 from datetime import date, datetime
-
 from ..model.CtApplication import CtApplication
 from ..model.CtApplicationStatus import CtApplicationStatus
 from ..model.ClApplicationStatus import ClApplicationStatus
@@ -22,6 +21,7 @@ from ..model.CaParcelTbl import CaParcelTbl
 from ..model import SettingsConstants
 from ..model import Constants
 from ..model.SdUser import *
+from ..model.SdAutoNumbers import *
 from ..utils.LM2Logger import LM2Logger
 from geoalchemy2 import func
 from sqlalchemy import func, or_, and_, desc
@@ -29,6 +29,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from ..utils.DatabaseUtils import DatabaseUtils
 from SessionHandler import SessionHandler
 import os
+import hashlib
 
 class PluginUtils(object):
 
@@ -143,26 +144,28 @@ class PluginUtils(object):
 
         cbox.clear()
         session = SessionHandler().session_instance()
+
         if l1_code != -1:
-            if with_star_entry:
-                cbox.addItem("*", -1)
-            if with_restriction:
-                l2_restrictions = DatabaseUtils.l2_restriction_array()
-                for code, name in session.query(AuLevel2.code, AuLevel2.name).filter(
-                        AuLevel2.code.in_(l2_restrictions)).filter(
-                        AuLevel2.code.startswith(l1_code)).order_by(AuLevel2.name):
-                    # if code.startswith('1') or code.startswith('01'):
-                    #     continue
-                    cbox.addItem(name, code)
-            else:
-                for code, name in session.query(AuLevel2.code, AuLevel2.name).filter(
-                        AuLevel2.code.startswith(l1_code)).order_by(AuLevel2.name):
-                    cbox.addItem(name+'_'+code, code)
-            if select_working_entry:
-                working_l2_code = DatabaseUtils.working_l2_code()
-                idx = cbox.findData(working_l2_code, Qt.UserRole)
-                if idx != -1:
-                    cbox.setCurrentIndex(idx)
+            if l1_code != None:
+                if with_star_entry:
+                    cbox.addItem("*", -1)
+                if with_restriction:
+                    l2_restrictions = DatabaseUtils.l2_restriction_array()
+                    for code, name in session.query(AuLevel2.code, AuLevel2.name).filter(
+                            AuLevel2.code.in_(l2_restrictions)).filter(
+                            AuLevel2.code.startswith(l1_code)).order_by(AuLevel2.name):
+                        # if code.startswith('1') or code.startswith('01'):
+                        #     continue
+                        cbox.addItem(name, code)
+                else:
+                    for code, name in session.query(AuLevel2.code, AuLevel2.name).filter(
+                            AuLevel2.code.startswith(l1_code)).order_by(AuLevel2.name):
+                        cbox.addItem(name+'_'+code, code)
+                if select_working_entry:
+                    working_l2_code = DatabaseUtils.working_l2_code()
+                    idx = cbox.findData(working_l2_code, Qt.UserRole)
+                    if idx != -1:
+                        cbox.setCurrentIndex(idx)
 
     @staticmethod
     def populate_au_level3_cbox(cbox, l1_or_l2_code, with_star_entry=True):
@@ -302,3 +305,98 @@ class PluginUtils(object):
         result = session.execute("SELECT log_enabled from settings.set_logging;")
         for row in result:
             return row[0]
+
+    @staticmethod
+    def generate_auto_app_no(year, app_type, soum_code, object_type):
+
+        session = SessionHandler().session_instance()
+
+        soum_filter = str(soum_code) + "-%"
+
+        if object_type == 'application\Application':
+            app_type_filter = "%-" + str(app_type).zfill(2) + "-%"
+            year_filter = "%-" + str(year)
+
+            count = session.query(SdAutoNumbers). \
+                filter(SdAutoNumbers.format.like("%-%")). \
+                filter(SdAutoNumbers.format.like(app_type_filter)). \
+                filter(SdAutoNumbers.format.like(soum_filter)). \
+                filter(SdAutoNumbers.format.like(year_filter)). \
+                filter(SdAutoNumbers.classes == object_type).count()
+            if count == 1:
+                auto_number = session.query(SdAutoNumbers). \
+                    filter(SdAutoNumbers.format.like("%-%")). \
+                    filter(SdAutoNumbers.format.like(app_type_filter)). \
+                    filter(SdAutoNumbers.format.like(soum_filter)). \
+                    filter(SdAutoNumbers.format.like(year_filter)). \
+                    filter(SdAutoNumbers.classes == object_type).one()
+                auto_number.number = auto_number.number + 1
+            else:
+                format_text = soum_code + '-' + app_type + '-' + '?' +'-'+ year
+
+                generate_name = 'a:3:{s:5:"class";s:23:"application\Application";s:6:"format";s:13:"' + format_text + '";s:6:"length";i:5;}'
+                generate_name_md5 = hashlib.md5(generate_name).hexdigest()
+                auto_number = SdAutoNumbers()
+                auto_number.name = generate_name_md5
+                auto_number.number = 1
+                auto_number.classes = object_type
+                auto_number.format = format_text
+                auto_number.length = 5
+
+                session.add(auto_number)
+        elif object_type == 'contract\Contract':
+            year_filter = "%-" + str(year) + '/%'
+            count = session.query(SdAutoNumbers). \
+                filter(SdAutoNumbers.format.like("%-%")). \
+                filter(SdAutoNumbers.format.like(soum_filter)). \
+                filter(SdAutoNumbers.format.like(year_filter)). \
+                filter(SdAutoNumbers.classes == object_type).count()
+            if count == 1:
+                auto_number = session.query(SdAutoNumbers). \
+                    filter(SdAutoNumbers.format.like("%-%")). \
+                    filter(SdAutoNumbers.format.like(soum_filter)). \
+                    filter(SdAutoNumbers.format.like(year_filter)). \
+                    filter(SdAutoNumbers.classes == object_type).one()
+                auto_number.number = auto_number.number + 1
+            else:
+                format_text = soum_code + '-' + year + '/' + '?'
+
+                generate_name = 'a:3:{s:5:"class";s:17:"contract\Contract";s:6:"format";s:12:"' + format_text + '";s:6:"length";i:5;}'
+                generate_name_md5 = hashlib.md5(generate_name).hexdigest()
+                auto_number = SdAutoNumbers()
+                auto_number.name = generate_name_md5
+                auto_number.number = 1
+                auto_number.classes = object_type
+                auto_number.format = format_text
+                auto_number.length = 5
+
+                session.add(auto_number)
+        elif object_type == 'contract\OwnershipRecord':
+            year_filter = "%-" + str(year) + '/%'
+            count = session.query(SdAutoNumbers). \
+                filter(SdAutoNumbers.format.like("%-%")). \
+                filter(SdAutoNumbers.format.like(soum_filter)). \
+                filter(SdAutoNumbers.format.like(year_filter)). \
+                filter(SdAutoNumbers.classes == object_type).count()
+            if count == 1:
+                auto_number = session.query(SdAutoNumbers). \
+                    filter(SdAutoNumbers.format.like("%-%")). \
+                    filter(SdAutoNumbers.format.like(soum_filter)). \
+                    filter(SdAutoNumbers.format.like(year_filter)). \
+                    filter(SdAutoNumbers.classes == object_type).one()
+                auto_number.number = auto_number.number + 1
+            else:
+                format_text = soum_code + '-' + year + '/' + '?'
+
+                generate_name = 'a:3:{s:5:"class";s:24:"contract\OwnershipRecord";s:6:"format";s:12:"' + format_text + '";s:6:"length";i:5;}'
+                generate_name_md5 = hashlib.md5(generate_name).hexdigest()
+                auto_number = SdAutoNumbers()
+                auto_number.name = generate_name_md5
+                auto_number.number = 1
+                auto_number.classes = object_type
+                auto_number.format = format_text
+                auto_number.length = 5
+
+                session.add(auto_number)
+        session.flush()
+        session.commit()

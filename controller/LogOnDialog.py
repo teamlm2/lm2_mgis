@@ -1,7 +1,7 @@
-import os
+# coding=utf8
 
 __author__ = 'Topmap'
-
+import os
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from sqlalchemy.exc import DatabaseError, SQLAlchemyError

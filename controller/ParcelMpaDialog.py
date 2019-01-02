@@ -9,7 +9,7 @@ from qgis.core import *
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import func, or_, and_, desc
 from decimal import Decimal
-from ..view.Ui_ParcelInfoDialog import Ui_ParcelInfoDialog
+from ..view.Ui_ParcelMpaDialog import *
 from ..controller.ParcelInfoFeeDialog import *
 from ..utils.PluginUtils import PluginUtils
 from ..utils.LayerUtils import LayerUtils
@@ -24,12 +24,11 @@ from ..model.ClPersonType import *
 from ..model.ClDecisionLevel import *
 from ..model.ClContractStatus import *
 from ..model.ClPersonRole import *
-from ..model.UbGisSubject import *
+from ..model.MpaGisEditSubject import *
 from ..model.ClDocumentRole import *
 from ..model.CtDecision import *
 from ..model.CaParcelTbl import *
 from ..model.CtContractApplicationRole import *
-from ..model.CtRecordApplicationRole import *
 from ..model.AuLevel1 import *
 from ..model.AuLevel2 import *
 from ..model.AuLevel3 import *
@@ -39,8 +38,6 @@ from ..model.SetRightTypeApplicationType import *
 from ..model.LM2Exception import LM2Exception
 from ..model.ClPositionType import *
 from ..model.ClUbEditStatus import *
-from ..model.AuMpa import *
-from ..model.AuMpaZone import *
 from ..model.Enumerations import PersonType, UserRight
 from ..model.DatabaseHelper import *
 from ..utils.SessionHandler import SessionHandler
@@ -57,7 +54,7 @@ import datetime
 from ftplib import FTP, error_perm
 from contextlib import closing
 
-class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
+class ParcelMpaDialog(QDockWidget, Ui_ParcelMpaDialog, DatabaseHelper):
 
     RIGTHTYPE, CODEIDCARD, NAME, FIRSTNAME, OLD_PARCEL_ID, PARCEL_ID, DECISION_NO, DECISION_DATE, CONTRACT_NO, CONTRACT_DATE = range(10)
 
@@ -69,20 +66,19 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
 
     def __init__(self, plugin, parent=None):
 
-        super(ParcelInfoDialog, self).__init__(parent)
+        super(ParcelMpaDialog, self).__init__(parent)
         DatabaseHelper.__init__(self)
 
-        # self.setAttribute(Qt.WA_DeleteOnClose)
         self.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
         self.plugin = plugin
         self.session = SessionHandler().session_instance()
-        self.keyPressEvent = self.newOnkeyPressEvent
+        # self.keyPressEvent = self.newOnkeyPressEvent
         self.is_find_ubgis = True
         self.parcel_id = None
-        # self.__create_subject_view()
+        self.setupUi(self)
+
         self.application = None
         self.contract = None
-        self.record = None
         self.__old_parcel_no = None
         self.__building_id_list = None
         self.__geometry = None
@@ -92,28 +88,27 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
         self.__coord_transform = None
         self.__second_page_enabled = False
         self.isSave = True
-        self.setupUi(self)
+
         self.__setup_validators()
         self.__setup_table_widget()
-
+    #
         self.__setup_cbox()
-
+    #
         self.person_tabwidget.currentChanged.connect(self.__tab_widget_onChange)  # changed!
-        # self.__setup_combo_boxes()
-
-        self.__setup_permissions()
-        self.duration_sbox.setMaximum(60)
+        self.__setup_combo_boxes()
+    #
+    #     self.__setup_permissions()
+        self.duration_sbox.setMaximum(5)
         self.tab_index = 0
         validator = QtGui.QDoubleValidator()
         self.find_x_coordinate_edit.setValidator(validator)
         self.find_y_coordinate_edit.setValidator(validator)
-        # self.__doc_tree_view()
+    #     # self.__doc_tree_view()
         self.find_tab.currentChanged.connect(self.onChangetab)
 
         self.decision_date.dateChanged.connect(self.on_decision_date_DateChanged)
         self.contract_date.dateChanged.connect(self.on_contract_date_DateChanged)
         self.end_date.dateChanged.connect(self.on_end_date_DateChanged)
-        self.own_date.dateChanged.connect(self.on_own_date_DateChanged)
 
     def __tab_widget_onChange(self, index):
 
@@ -221,62 +216,46 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
         self.soum_cbox.setCurrentIndex(self.soum_cbox.findData(working_soum))
 
 
-    def __is_aimag_tool(self):
-
-        database = QSettings().value(SettingsConstants.DATABASE_NAME)
-        if database:
-            au1 = database.split('_')[1][:2]
-            if au1:
-                if au1 != '11':
-                    self.parcel_tab_widget.removeTab(
-                        self.parcel_tab_widget.indexOf(self.legal_representative_tab))
-
-
-    def __setup_permissions(self):
-
-        user_name = QSettings().value(SettingsConstants.USER)
-        user_rights = DatabaseUtils.userright_by_name(user_name)
-        officer = self.session.query(SetRole) \
-            .filter(SetRole.user_name == QSettings().value(SettingsConstants.USER)) \
-            .filter(SetRole.is_active == True).one()
-
-        self.finish_button.setVisible(False)
-        if officer.position == 11:
-            self.finish_button.setVisible(True)
-        if officer.position == 12:
-            self.finish_button.setVisible(True)
-        if officer.position == 13:
-            self.finish_button.setVisible(True)
-        # else:
-        #     self.finish_button.setVisible(False)
-
-        # self.__disable_all()
-        #
-        # if UserRight.cadastre_update in user_rights:
-        #
-        #     self.finish_button.setEnabled(True)
-
+    # def __is_aimag_tool(self):
+    #
+    #     database = QSettings().value(SettingsConstants.DATABASE_NAME)
+    #     if database:
+    #         au1 = database.split('_')[1][:2]
+    #         if au1:
+    #             if au1 != '11':
+    #                 self.parcel_tab_widget.removeTab(
+    #                     self.parcel_tab_widget.indexOf(self.legal_representative_tab))
+    #
+    #
+    # def __setup_permissions(self):
+    #
+    #     user_name = QSettings().value(SettingsConstants.USER)
+    #     user_rights = DatabaseUtils.userright_by_name(user_name)
+    #     officer = self.session.query(SetRole) \
+    #         .filter(SetRole.user_name == QSettings().value(SettingsConstants.USER)) \
+    #         .filter(SetRole.is_active == True).one()
+    #
+    #     self.finish_button.setVisible(False)
+    #     if officer.position == 11:
+    #         self.finish_button.setVisible(True)
+    #     if officer.position == 12:
+    #         self.finish_button.setVisible(True)
+    #     if officer.position == 13:
+    #         self.finish_button.setVisible(True)
+    #     # else:
+    #     #     print 'sdak'
+    #     #     self.finish_button.setVisible(False)
+    #
+    #     # self.__disable_all()
+    #     #
+    #     # if UserRight.cadastre_update in user_rights:
+    #     #
+    #     #     self.finish_button.setEnabled(True)
+    #
     def __disable_all(self):
 
         self.finish_button.setEnabled(False)
 
-    def __create_subject_view(self):
-
-        sql = ""
-        soum_code = DatabaseUtils.working_l2_code()
-        if not sql:
-            sql = "Create temp view all_subject_search as" + "\n"
-            select = " SELECT * FROM s"+soum_code+".all_subject "
-
-            sql = sql + select
-
-        try:
-            self.session.execute(sql)
-            # self.commit()
-
-        except SQLAlchemyError, e:
-            PluginUtils.show_message(self, self.tr("LM2", "Sql Error"), e.message)
-            return
 
     def __setup_validators(self):
 
@@ -292,13 +271,8 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
         self.zoriulalt_edit.setValidator(self.numbers_validator)
 
         self.contract_cert_edit.setValidator(self.numbers_validator)
-        self.record_cert_edit.setValidator(self.numbers_validator)
 
     def __setup_cbox(self):
-
-        ftp_host = QSettings().value(SettingsConstants.FTP_IP)
-
-        self.ftp_host_edit.setText(ftp_host)
 
         # try:
         application_types = self.session.query(ClApplicationType). \
@@ -342,55 +316,13 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
         self.right_holder_twidget.setSelectionBehavior(QTableWidget.SelectRows)
         self.right_holder_twidget.setSelectionMode(QTableWidget.SingleSelection)
 
-        self.doc_twidget.setAlternatingRowColors(True)
-        self.doc_twidget.setEditTriggers(QTableWidget.NoEditTriggers)
-        self.doc_twidget.setSelectionBehavior(QTableWidget.SelectRows)
-        self.doc_twidget.setSelectionMode(QTableWidget.SingleSelection)
-
-        self.doc_twidget.horizontalHeader().resizeSection(0, 50)
-        self.doc_twidget.horizontalHeader().resizeSection(1, 250)
-        self.doc_twidget.horizontalHeader().resizeSection(2, 50)
-
-        delegate = UbDocumentViewDelegate(self.doc_twidget, self)
-        self.doc_twidget.setItemDelegate(delegate)
-
-        self.doc_info_twidget.setAlternatingRowColors(True)
-        self.doc_info_twidget.setEditTriggers(QTableWidget.NoEditTriggers)
-        self.doc_info_twidget.setSelectionBehavior(QTableWidget.SelectRows)
-        self.doc_info_twidget.cellChanged.connect(self.on_doc_info_twidget_cellChanged)
-
-        self.fee_info_twidget.setAlternatingRowColors(True)
-        self.fee_info_twidget.setEditTriggers(QTableWidget.NoEditTriggers)
-        self.fee_info_twidget.setSelectionBehavior(QTableWidget.SelectRows)
-        self.fee_info_twidget.cellChanged.connect(self.on_fee_info_twidget_cellChanged)
-
-        self.landuk_info_twidget.setAlternatingRowColors(True)
-        self.landuk_info_twidget.setEditTriggers(QTableWidget.NoEditTriggers)
-        self.landuk_info_twidget.setSelectionBehavior(QTableWidget.SelectRows)
-        self.landuk_info_twidget.cellChanged.connect(self.on_landuk_info_twidget_cellChanged)
-
-        self.landuk_mortgage_twidget.setAlternatingRowColors(True)
-        self.landuk_mortgage_twidget.setEditTriggers(QTableWidget.NoEditTriggers)
-        self.landuk_mortgage_twidget.setSelectionBehavior(QTableWidget.SelectRows)
-        # self.landuk_mortgage_twidget.cellChanged.connect(self.on_fee_info_twidget_cellChanged)
-
-        self.lpis_info_twidget.setAlternatingRowColors(True)
-        self.lpis_info_twidget.setEditTriggers(QTableWidget.NoEditTriggers)
-        self.lpis_info_twidget.setSelectionBehavior(QTableWidget.SelectRows)
-        self.lpis_info_twidget.cellChanged.connect(self.on_lpis_info_twidget_cellChanged)
-
-        self.lpis_co_owner_twidget.setAlternatingRowColors(True)
-        self.lpis_co_owner_twidget.setEditTriggers(QTableWidget.NoEditTriggers)
-        self.lpis_co_owner_twidget.setSelectionBehavior(QTableWidget.SelectRows)
-        # self.lpis_co_owner_twidget.cellChanged.connect(self.on_fee_info_twidget_cellChanged)
-
     def __update_ui(self):
 
         self.setWindowTitle(self.tr('Old Parcel ID: <{0}>. Select the decision.'.format(self.__old_parcel_no)))
         self.right_holder_twidget.clearContents()
         self.right_holder_twidget.setRowCount(0)
 
-        subjects = self.session.query(UbGisSubject).filter(UbGisSubject.oldpid == self.__old_parcel_no).all()
+        subjects = self.session.query(MpaGisEditSubject).filter(MpaGisEditSubject.gid == self.__old_parcel_no).all()
 
         for subject in subjects:
             self.__add_subject(subject)
@@ -448,7 +380,7 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
 
             item = QTableWidgetItem(unicode(subject.register))
             item.setData(Qt.UserRole, subject.register)
-            item.setData(Qt.UserRole + 1, subject.objectid)
+            item.setData(Qt.UserRole + 1, subject.gid)
             self.right_holder_twidget.setItem(count, self.CODEIDCARD, item)
 
             item = QTableWidgetItem(unicode(subject.ner))
@@ -537,27 +469,27 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
             filter_is_set = False
             self.right_holder_twidget.setRowCount(0)
 
-            subjects = self.session.query(UbGisSubject)
+            subjects = self.session.query(MpaGisEditSubject)
 
             if self.find_parcel_id_edit.text():
                 filter_is_set = True
                 value = "%" + self.find_parcel_id_edit.text() + "%"
-                subjects = subjects.filter(UbGisSubject.oldpid.like(value))
+                subjects = subjects.filter(MpaGisEditSubject.oldpid.like(value))
 
             if self.find_person_id_edit.text():
                 filter_is_set = True
                 value = "%" + self.find_person_id_edit.text() + "%"
-                subjects = subjects.filter(UbGisSubject.register.like(value))
+                subjects = subjects.filter(MpaGisEditSubject.register.like(value))
 
             if self.find_firstname_edit.text():
                 filter_is_set = True
                 value = "%"+self.find_firstname_edit.text()+"%"
-                subjects = subjects.filter(UbGisSubject.ovog.like(value))
+                subjects = subjects.filter(MpaGisEditSubject.ovog.like(value))
 
             if self.find_lastname_edit.text():
                 filter_is_set = True
                 value = "%"+self.find_lastname_edit.text()+"%"
-                subjects = subjects.filter(UbGisSubject.ner.like(value))
+                subjects = subjects.filter(MpaGisEditSubject.ner.like(value))
 
             if filter_is_set is False:
                 PluginUtils.show_message(self, self.tr("None"), self.tr("Please specify a search filter."))
@@ -570,17 +502,17 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
             filter_is_set = False
             self.right_holder_twidget.setRowCount(2)
 
-            subjects = self.session.query(UbGisSubject)
+            subjects = self.session.query(MpaGisEditSubject)
 
             if self.find_street_name_edit.text():
                 filter_is_set = True
                 value = "%" + self.find_street_name_edit.text() + "%"
-                subjects = subjects.filter(UbGisSubject.gudamj.like(value))
+                subjects = subjects.filter(MpaGisEditSubject.gudamj.like(value))
 
             if self.find_khashaa_number_edit.text():
                 filter_is_set = True
                 value = "%" + self.find_khashaa_number_edit.text() + "%"
-                subjects = subjects.filter(UbGisSubject.hashaa.like(value))
+                subjects = subjects.filter(MpaGisEditSubject.hashaa.like(value))
 
             if filter_is_set is False:
                 PluginUtils.show_message(self, self.tr("None"), self.tr("Please specify a search filter."))
@@ -637,7 +569,7 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
         if not soum:
             PluginUtils.show_message(self, self.tr("Connection Error"), self.tr("Please connect to database!!!"))
             return
-        layer = LayerUtils.layer_by_data_source("data_ub", 'ca_ub_parcel')
+        layer = LayerUtils.layer_by_data_source("data_ub", 'ca_mpa_parcel_edit_view')
 
         selected_row = self.right_holder_twidget.currentRow()
         old_parcel_id = self.right_holder_twidget.item(selected_row, 4).text()
@@ -666,9 +598,7 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
         person_type = 10
         person_register = ''
         try:
-            # subject_persons = self.session.query(UbGisSubject.utas1, UbGisSubject.utas2,UbGisSubject.heid, UbGisSubject.register, UbGisSubject.ovogner, UbGisSubject.ovog, UbGisSubject.ner, UbGisSubject.is_finish).\
-            #     filter(UbGisSubject.register.like(person_id)).group_by(UbGisSubject.utas1, UbGisSubject.utas2, UbGisSubject.heid, UbGisSubject.register, UbGisSubject.ovogner, UbGisSubject.ovog, UbGisSubject.ner).all()
-            subject_persons = self.session.query(UbGisSubject).filter(UbGisSubject.objectid == object_id).all()
+            subject_persons = self.session.query(MpaGisEditSubject).filter(MpaGisEditSubject.gid == object_id).all()
             for subject_person in subject_persons:
                 # if subject_person.is_finish:
                 #     self.edit_status_cbox.setEnabled(False)
@@ -704,22 +634,6 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
             self.middle_name_edit.setText(middlename)
             self.first_name_edit.setText(firstname)
             self.name_edit.setText(name)
-
-            #person address mapping
-            if subject_person.person_au1:
-                self.aimag_cbox.setCurrentIndex(self.aimag_cbox.findData(subject_person.person_au1))
-
-            if subject_person.person_au2:
-                self.soum_cbox.setCurrentIndex(self.soum_cbox.findData(subject_person.person_au2))
-
-            if subject_person.person_au3:
-                self.bag_cbox.setCurrentIndex(self.bag_cbox.findData(subject_person.person_au3))
-
-            self.person_street_name_edit.setText(subject_person.person_streetname)
-            self.person_khashaa_edit.setText(subject_person.person_khashaa)
-            self.building_edit.setText(subject_person.person_building_no)
-            self.apartment_edit.setText(subject_person.person_apartment_no)
-
             self.__update_date_of_birth(person_register)
             if len(phone) != 0:
                 phone = ', '+phone
@@ -734,15 +648,10 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
             neighbourhood = ''
             landuse_type = 2205
             zoriulalt = 1
-            parcel_subjects = self.session.query(UbGisSubject).filter(UbGisSubject.objectid == object_id).all()
+            parcel_subjects = self.session.query(MpaGisEditSubject).filter(MpaGisEditSubject.gid == object_id).all()
             for parcel_subject in parcel_subjects:
-                if parcel_subject.oldpid:
-                    parcel_id = parcel_subject.pid
-                    ub_parcel = self.session.query(CaUBParcel).filter(CaUBParcel.old_parcel_id == parcel_subject.oldpid).one()
-
-                    self.parcel_id_edit.setText(ub_parcel.parcel_id)
-                    self.edit_status_cbox.setCurrentIndex(self.edit_status_cbox.findData(ub_parcel.edit_status))
-                self.old_parcel_id_edit.setText(parcel_subject.oldpid)
+                self.edit_status_cbox.setCurrentIndex(self.edit_status_cbox.findData(parcel_subject.edit_status))
+                self.old_parcel_id_edit.setText(str(parcel_subject.gid))
                 if parcel_subject.gudamj:
                     street = parcel_subject.gudamj
                     neighbourhood = parcel_subject.gudamj
@@ -750,9 +659,9 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
                     khashaa = parcel_subject.hashaa
                 if parcel_subject.zoriulalt:
                     zoriulalt = parcel_subject.zoriulalt
-                landuse_type = self.__landuse_type(parcel_subject).code
+                landuse_type = parcel_subject.landuse_code
 
-            self.zoriulalt_edit.setText(zoriulalt)
+            self.zoriulalt_edit.setText(unicode(zoriulalt))
             self.streetname_edit.setText(street)
             self.khashaa_edit.setText(khashaa)
             self.neighbourhood_edit.setText(neighbourhood)
@@ -773,8 +682,6 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
             duration = 0
             contract_status = 20
 
-            record_cert_no = ''
-            record_date = None
             for subject in parcel_subjects:
                 if subject.zovshshiid:
                     decision_no = subject.zovshshiid
@@ -782,7 +689,7 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
                     decision_date = subject.zovshdate
                 if subject.gaid:
                     right_type = self.__right_type(subject).code
-                decision_level = self.__decision_level(subject).code
+                decision_level = subject.zovshbaig
                 app_type = subject.app_type
                 if right_type == 1 or right_type == 2:
                     if subject.gerid:
@@ -803,11 +710,6 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
                         end_year = int(PluginUtils.convert_python_date_to_qt(end_date).toString("yyyy"))
                         if end_year > begin_year:
                             duration = end_year - begin_year
-                else:
-                    if subject.uhid:
-                        record_cert_no = subject.uhid
-                    if subject.uhdate:
-                        record_date = subject.uhdate
 
             self.decision_no_edit.setText(decision_no)
             if decision_date:
@@ -840,26 +742,6 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
             self.duration_sbox.setValue(duration)
             self.contract_status_cbox.setCurrentIndex(self.contract_status_cbox.findData(contract_status))
 
-            # record info qt
-            self.record_cert_edit.setText(record_cert_no)
-            if record_date:
-                qt_date = PluginUtils.convert_python_date_to_qt(record_date)
-                self.own_date.setDate(qt_date)
-            else:
-                self.own_date.setDate(QDate(1900, 01, 01))
-
-            # documents
-            self.__load_doc()
-
-            # fee
-            self.__load_fee(person_id, old_parcel_id)
-
-            # landuk
-            self.__load_landuk(person_id, old_parcel_id)
-
-            # lpis
-            self.__load_lpis(person_id, old_parcel_id)
-
             # person address
             self.__load_pesron_address(person_id)
 
@@ -886,306 +768,6 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
             self.person_street_name_edit.setText((street))
             self.person_khashaa_edit.setText((khashaa))
 
-    def __load_lpis(self, person_id, old_parcel_id):
-
-        # person_id = '%'+person_id+'%'
-        # old_parcel_id = '%'+old_parcel_id+'%'
-        self.lpis_info_twidget.setRowCount(0)
-        sql = "select register, ovog, ner, utas, note,duuregid, horoo, bairshil, pid::text, zaharea, landcost, " \
-              "zahid, certid, certdate, status::text, id " \
-              "from ub_lpis where pid::text = :pid or register = :person_id "
-
-        result = self.session.execute(sql, {'pid': old_parcel_id,
-                                            'person_id': person_id})
-        row = 0
-        for item_row in result:
-            row = self.lpis_info_twidget.rowCount()
-            self.lpis_info_twidget.insertRow(row)
-            item = QTableWidgetItem()
-            item.setCheckState(Qt.Unchecked)
-            item.setText(unicode(item_row[0]))
-            item.setData(Qt.UserRole, item_row[0])
-            item.setData(Qt.UserRole+1, item_row[15])
-            self.lpis_info_twidget.setItem(row, 0, item)
-
-            item = QTableWidgetItem()
-            item.setCheckState(Qt.Unchecked)
-            item.setText(unicode(item_row[1]))
-            self.lpis_info_twidget.setItem(row, 1, item)
-
-            item = QTableWidgetItem()
-            item.setCheckState(Qt.Unchecked)
-            item.setText(unicode(item_row[2]))
-            self.lpis_info_twidget.setItem(row, 2, item)
-
-            item = QTableWidgetItem()
-            item.setCheckState(Qt.Unchecked)
-            item.setText(unicode(item_row[3]))
-            self.lpis_info_twidget.setItem(row, 3, item)
-
-            item = QTableWidgetItem()
-            item.setCheckState(Qt.Unchecked)
-            item.setText(unicode(item_row[4]))
-            self.lpis_info_twidget.setItem(row, 4, item)
-
-            item = QTableWidgetItem()
-            item.setCheckState(Qt.Unchecked)
-            item.setText(unicode(item_row[7]))
-            self.lpis_info_twidget.setItem(row, 5, item)
-
-            item = QTableWidgetItem()
-            item.setCheckState(Qt.Unchecked)
-            item.setText(unicode(item_row[8]))
-            self.lpis_info_twidget.setItem(row, 6, item)
-
-            item = QTableWidgetItem()
-            item.setCheckState(Qt.Unchecked)
-            item.setText(unicode(item_row[9]))
-            self.lpis_info_twidget.setItem(row, 7, item)
-
-            item = QTableWidgetItem()
-            item.setCheckState(Qt.Unchecked)
-            item.setText(unicode(item_row[10]))
-            self.lpis_info_twidget.setItem(row, 8, item)
-
-            item = QTableWidgetItem()
-            item.setCheckState(Qt.Unchecked)
-            item.setText(unicode(item_row[11]))
-            self.lpis_info_twidget.setItem(row, 9, item)
-            item = QTableWidgetItem()
-            item.setCheckState(Qt.Unchecked)
-            item.setText(unicode(item_row[12]))
-            self.lpis_info_twidget.setItem(row, 10, item)
-
-            item = QTableWidgetItem()
-            item.setCheckState(Qt.Unchecked)
-            item.setText(unicode(item_row[14]))
-            self.lpis_info_twidget.setItem(row, 11, item)
-
-            row =+ 1
-
-    def __load_landuk(self, person_id, old_parcel_id):
-
-        # person_id = '%'+person_id+'%'
-        # old_parcel_id = '%'+old_parcel_id+'%'
-        self.landuk_info_twidget.setRowCount(0)
-        sql = "select register, middlename, firstname, name, address, phone, " \
-              "objectid, old_pid " \
-              "from ub_landuk_info where pid::text = :pid or register = :person_id "
-
-        result = self.session.execute(sql, {'pid': old_parcel_id,
-                                            'person_id': person_id})
-        row = 0
-        for item_row in result:
-            row = self.landuk_info_twidget.rowCount()
-            self.landuk_info_twidget.insertRow(row)
-            item = QTableWidgetItem()
-            item.setCheckState(Qt.Unchecked)
-            item.setText(unicode(item_row[0]))
-            item.setData(Qt.UserRole, item_row[6])
-            item.setData(Qt.UserRole+1, item_row[7])
-            self.landuk_info_twidget.setItem(row, 0, item)
-
-            item = QTableWidgetItem()
-            item.setCheckState(Qt.Unchecked)
-            item.setText(unicode(item_row[1]))
-            self.landuk_info_twidget.setItem(row, 1, item)
-
-            item = QTableWidgetItem()
-            item.setCheckState(Qt.Unchecked)
-            item.setText(unicode(item_row[2]))
-            self.landuk_info_twidget.setItem(row, 2, item)
-
-            item = QTableWidgetItem()
-            item.setCheckState(Qt.Unchecked)
-            item.setText(unicode(item_row[3]))
-            self.landuk_info_twidget.setItem(row, 3, item)
-
-            item = QTableWidgetItem()
-            item.setCheckState(Qt.Unchecked)
-            item.setText(unicode(item_row[4]))
-            self.landuk_info_twidget.setItem(row, 4, item)
-
-            item = QTableWidgetItem()
-            item.setCheckState(Qt.Unchecked)
-            item.setText(unicode(item_row[5]))
-            self.landuk_info_twidget.setItem(row, 5, item)
-
-            row =+ 1
-
-    def __load_fee(self, person_id, old_parcel_id):
-
-        self.fee_info_twidget.setRowCount(0)
-        sql = "select register, name, phone1, phone2, phone3, phone4, phone5, phone6, phone7, phone8, phone9, phone10, phone11, phone12, " \
-              "city, district, bag, street, khashaa " \
-              "from ub_fee_person where pid = :pid or register = :person_id "
-
-        result = self.session.execute(sql, {'pid': old_parcel_id,
-                                            'person_id': person_id})
-        row = 0
-        for item_row in result:
-
-            row = self.fee_info_twidget.rowCount()
-            self.fee_info_twidget.insertRow(row)
-
-            item = QTableWidgetItem()
-            item.setCheckState(Qt.Unchecked)
-            item.setText(unicode(item_row[0]))
-            item.setData(Qt.UserRole, item_row[0])
-            self.fee_info_twidget.setItem(row, 0, item)
-
-            item = QTableWidgetItem()
-            item.setCheckState(Qt.Unchecked)
-            item.setText((item_row[1]))
-            item.setData(Qt.UserRole, item_row[1])
-            self.fee_info_twidget.setItem(row, 1, item)
-
-            phone = None
-            if item_row[2] != None and item_row[2] != '':
-                if phone:
-                    phone = phone + ', ' + item_row[2]
-                else:
-                    phone = item_row[2]
-            if item_row[3] != None and item_row[3] != '':
-                if phone:
-                    phone = phone + ', ' + item_row[3]
-                else:
-                    phone = item_row[3]
-            if item_row[4] != None and item_row[4] != '':
-                if phone:
-                    phone = phone + ', ' + item_row[4]
-                else:
-                    phone = item_row[4]
-            if item_row[5] != None and item_row[5] != '':
-                if phone:
-                    phone = phone + ', ' + item_row[5]
-                else:
-                    phone = item_row[2]
-            if item_row[6] != None and item_row[6] != '':
-                if phone:
-                    phone = phone + ', ' + item_row[6]
-                else:
-                    phone = item_row[6]
-            if item_row[7] != None and item_row[7] != '':
-                if phone:
-                    phone = phone + ', ' + item_row[7]
-                else:
-                    phone = item_row[7]
-            if item_row[8] != None and item_row[8] != '':
-                if phone:
-                    phone = phone + ', ' + item_row[8]
-                else:
-                    phone = item_row[8]
-            item = QTableWidgetItem()
-            item.setCheckState(Qt.Unchecked)
-            item.setText(phone)
-            self.fee_info_twidget.setItem(row, 2, item)
-
-            item = QTableWidgetItem()
-            item.setCheckState(Qt.Unchecked)
-            item.setText((item_row[14]))
-            item.setData(Qt.UserRole, item_row[14])
-            self.fee_info_twidget.setItem(row, 3, item)
-
-            item = QTableWidgetItem()
-            item.setCheckState(Qt.Unchecked)
-            item.setText((item_row[15]))
-            item.setData(Qt.UserRole, item_row[15])
-            self.fee_info_twidget.setItem(row, 4, item)
-
-            item = QTableWidgetItem()
-            item.setCheckState(Qt.Unchecked)
-            item.setText((item_row[16]))
-            item.setData(Qt.UserRole, item_row[16])
-            self.fee_info_twidget.setItem(row, 5, item)
-
-            item = QTableWidgetItem()
-            item.setCheckState(Qt.Unchecked)
-            item.setText((item_row[17]))
-            item.setData(Qt.UserRole, item_row[17])
-            self.fee_info_twidget.setItem(row, 6, item)
-
-            item = QTableWidgetItem()
-            item.setCheckState(Qt.Unchecked)
-            item.setText((item_row[17]))
-            item.setData(Qt.UserRole, item_row[17])
-            self.fee_info_twidget.setItem(row, 7, item)
-
-            row =+ 1
-
-    def __decision_level(self,subject):
-
-        level_code = 20
-        level_txt = unicode(subject.zovshbaig)
-        if level_txt == u'НЗД' or level_txt == u'НЗАА':
-            level_code = 10
-        elif level_txt == u'АЗД':
-            level_code = 30
-        elif level_txt == u'СЗД':
-            level_code = 40
-        elif level_txt == u'НАТ':
-            level_code = 70
-        decision_level = self.session.query(ClDecisionLevel).filter(ClDecisionLevel.code == level_code).one()
-        return decision_level
-
-    def __landuse_type(self, subject):
-
-        landuse_type = 2205
-
-        type = str(subject.zoriulalt)
-        if self.__is_number(type):
-
-            if int(type) == 1:
-                landuse_type = 2205
-            elif int(type) == 2:
-                landuse_type = 2101
-            elif int(type) == 3:
-                landuse_type = 2104
-            elif int(type) == 4:
-                landuse_type = 2105
-            elif int(type) == 5:
-                landuse_type = 2107
-            elif int(type) == 6:
-                landuse_type = 2113
-            elif int(type) == 7:
-                landuse_type = 1604
-            elif int(type) == 8:
-                landuse_type = 2119
-            elif int(type) == 9:
-                landuse_type = 3401
-            elif int(type) == 10:
-                landuse_type = 3103
-            elif int(type) == 11:
-                landuse_type = 3303
-            elif int(type) == 12:
-                landuse_type = 2111
-            elif int(type) == 13:
-                landuse_type = 2108
-            elif int(type) == 14:
-                landuse_type = 2109
-            elif int(type) == 15:
-                landuse_type = 2116
-            elif int(type) == 16:
-                landuse_type = 2117
-            elif int(type) == 17:
-                landuse_type = 2302
-            elif int(type) == 18:
-                landuse_type = 2601
-            elif int(type) == 19:
-                landuse_type = 1401
-            elif int(type) == 20:
-                landuse_type = 1607
-            elif int(type) == 21:
-                landuse_type = 1305
-            elif int(type) == 22:
-                landuse_type = 1606
-            elif int(type) == 23:
-                landuse_type = 2101
-            elif int(type) == 24:
-                landuse_type = 2111
-
-        landuse_subject = self.session.query(ClLanduseType).filter(ClLanduseType.code == landuse_type).one()
-        return  landuse_subject
 
     def __auto_correct_private_person_id(self, text):
 
@@ -1583,22 +1165,22 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
             if not self.__validate_entity_id(text):
                 self.personal_id_edit.setStyleSheet(Constants.ERROR_LINEEDIT_STYLESHEET)
 
-    @pyqtSlot(int)
-    def on_is_ftp_edit_chbox_stateChanged(self, state):
-
-        if state == Qt.Checked:
-            self.ftp_host_edit.setEnabled(True)
-        else:
-            self.ftp_host_edit.setEnabled(False)
-
-    @pyqtSlot(int)
-    def on_zoriulalt_chbox_stateChanged(self, state):
-
-        if state == Qt.Checked:
-            self.zoriulalt_edit.setEnabled(True)
-        else:
-            self.zoriulalt_edit.setEnabled(False)
-
+    # @pyqtSlot(int)
+    # def on_is_ftp_edit_chbox_stateChanged(self, state):
+    #
+    #     if state == Qt.Checked:
+    #         self.ftp_host_edit.setEnabled(True)
+    #     else:
+    #         self.ftp_host_edit.setEnabled(False)
+    #
+    # @pyqtSlot(int)
+    # def on_zoriulalt_chbox_stateChanged(self, state):
+    #
+    #     if state == Qt.Checked:
+    #         self.zoriulalt_edit.setEnabled(True)
+    #     else:
+    #         self.zoriulalt_edit.setEnabled(False)
+    #
     @pyqtSlot(int)
     def on_khashaa_chbox_stateChanged(self, state):
 
@@ -1759,22 +1341,6 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
         else:
             self.contract_status_cbox.setEnabled(False)
 
-    @pyqtSlot(int)
-    def on_own_date_chbox_stateChanged(self, state):
-
-        if state == Qt.Checked:
-            self.own_date.setEnabled(True)
-        else:
-            self.own_date.setEnabled(False)
-
-    @pyqtSlot(int)
-    def on_record_certificate_chbox_stateChanged(self, state):
-
-        if state == Qt.Checked:
-            self.record_cert_edit.setEnabled(True)
-        else:
-            self.record_cert_edit.setEnabled(False)
-
     def __clear_all(self):
 
         # Find
@@ -1843,19 +1409,10 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
         self.duration_chbox.setChecked(False)
         self.contract_status_chbox.setChecked(False)
 
-        # Ownership
-        self.record_no_edit.clear()
-        self.record_cert_edit.clear()
-        self.record_full_edit.clear()
-        self.record_no_chbox.setChecked(False)
-        self.record_certificate_chbox.setChecked(False)
-        self.own_date_chbox.setChecked(False)
-
-
     def __save_subject(self, objectid):
 
 
-        subject = self.session.query(UbGisSubject).filter(UbGisSubject.objectid == objectid).one()
+        subject = self.session.query(MpaGisEditSubject).filter(MpaGisEditSubject.gid == objectid).one()
 
         # Parcel
         subject.hashaa = self.khashaa_edit.text()
@@ -1885,87 +1442,37 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
         subject.ner = self.name_edit.text()
         subject.utas1 = self.phone_edit.text()
 
-        #person_address
-        person_au1 = None
-        person_au2 = None
-        person_au3 = None
-        if self.aimag_cbox.currentIndex() != -1:
-            person_au1 = self.aimag_cbox.itemData(self.aimag_cbox.currentIndex())
-        if self.soum_cbox.currentIndex() != -1:
-            person_au2 = self.soum_cbox.itemData(self.soum_cbox.currentIndex())
-        if self.bag_cbox.currentIndex() != -1:
-            person_au3 = self.bag_cbox.itemData(self.bag_cbox.currentIndex())
-
-        subject.person_au1 = person_au1
-        subject.person_au2 = person_au2
-        subject.person_au3 = person_au3
-
-        subject.person_streetname = self.person_street_name_edit.text()
-        subject.person_khashaa = self.person_khashaa_edit.text()
-        subject.person_building_no = self.building_edit.text()
-        subject.person_apartment_no = self.apartment_edit.text()
-
         # Decision
-        gaid = 3
-        zovshbaig = u'ДЗД'
+
         right_type = self.rigth_type_cbox.itemData(self.rigth_type_cbox.currentIndex())
         app_type = self.application_type_cbox.itemData(self.application_type_cbox.currentIndex())
         decision_level = self.decision_level_cbox.itemData(self.decision_level_cbox.currentIndex())
-        if right_type == 1:
-            gaid = 3
-        elif right_type == 2:
-            gaid = 2
-        elif right_type == 3:
-            gaid = 1
 
-        if decision_level == 10:
-            zovshbaig = u'НЗД'
-        elif decision_level == 20:
-            zovshbaig = u'ДЗД'
-        elif decision_level == 30:
-            zovshbaig = u'АЗД'
-        elif decision_level == 40:
-            zovshbaig = u'СЗД'
-        elif decision_level == 70:
-            zovshbaig = u'НАТ'
-
-        subject.gaid = gaid
-        subject.zovshbaig = zovshbaig
+        subject.gaid = right_type
+        subject.zovshbaig = decision_level
         subject.zovshshiid = self.decision_no_edit.text()
         decision_date = PluginUtils.convert_qt_date_to_python(self.decision_date.date())
         subject.zovshdate = decision_date
         subject.app_type = app_type
 
-        # Contract
-        if gaid == 2 or gaid == 3:
-            subject.gerid = self.contract_no_edit.text()
-            subject.gerchid = self.contract_cert_edit.text()
-            contract_date = PluginUtils.convert_qt_date_to_python(self.contract_date.date())
-            subject.gerdate = contract_date
-            end_date = PluginUtils.convert_qt_date_to_python(self.end_date.date())
-            subject.duusdate = end_date
+        subject.gerid = self.contract_no_edit.text()
+        subject.gerchid = self.contract_cert_edit.text()
+        contract_date = PluginUtils.convert_qt_date_to_python(self.contract_date.date())
+        subject.gerdate = contract_date
+        end_date = PluginUtils.convert_qt_date_to_python(self.end_date.date())
+        subject.duusdate = end_date
 
-        # Ownership
-        if gaid == 1:
-
-            record_date = PluginUtils.convert_qt_date_to_python(self.own_date.date())
-            subject.uhdate = record_date
-            subject.uhid = self.record_cert_edit.text()
-
-        old_parcel_id = self.old_parcel_id_edit.text()
-        ub_parcel = self.session.query(CaUBParcel).filter(CaUBParcel.old_parcel_id == old_parcel_id).one()
         edit_status = self.edit_status_cbox.itemData(self.edit_status_cbox.currentIndex())
 
-        if ub_parcel.edit_status != 10:
+        if subject.edit_status != 10:
             subject.status_date = PluginUtils.convert_qt_date_to_python(QDate.currentDate())
-
             subject.status_user = DatabaseUtils.current_user().user_name
 
         if self.edit_status_cbox.currentIndex() == -1:
-            ub_parcel.edit_status = 30
+            subject.edit_status = 30
         else:
-            ub_parcel.edit_status = edit_status
-
+            subject.edit_status = edit_status
+    #
     @pyqtSlot()
     def on_save_button_clicked(self):
 
@@ -1982,66 +1489,66 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
             self.__save_subject(object_id)
         self.session.commit()
         PluginUtils.show_message(self, self.tr("LM2", "Success"), self.tr("Success saved"))
-
-    @pyqtSlot(str)
-    def on_zoriulalt_edit_textChanged(self, text):
-
-        landuse_type = 2205
-
-        type = text
-        if self.__is_number(type):
-            if int(type) in self.zoriulalt:
-                if int(type) == 1:
-                    landuse_type = 2205
-                elif int(type) == 2:
-                    landuse_type = 2101
-                elif int(type) == 3:
-                    landuse_type = 2104
-                elif int(type) == 4:
-                    landuse_type = 2105
-                elif int(type) == 5:
-                    landuse_type = 2107
-                elif int(type) == 6:
-                    landuse_type = 2113
-                elif int(type) == 7:
-                    landuse_type = 1604
-                elif int(type) == 8:
-                    landuse_type = 2119
-                elif int(type) == 9:
-                    landuse_type = 3401
-                elif int(type) == 10:
-                    landuse_type = 3103
-                elif int(type) == 11:
-                    landuse_type = 3303
-                elif int(type) == 12:
-                    landuse_type = 2111
-                elif int(type) == 13:
-                    landuse_type = 2108
-                elif int(type) == 14:
-                    landuse_type = 2109
-                elif int(type) == 15:
-                    landuse_type = 2116
-                elif int(type) == 16:
-                    landuse_type = 2117
-                elif int(type) == 17:
-                    landuse_type = 2302
-                elif int(type) == 18:
-                    landuse_type = 2601
-                elif int(type) == 19:
-                    landuse_type = 1401
-                elif int(type) == 20:
-                    landuse_type = 1607
-                elif int(type) == 21:
-                    landuse_type = 1305
-                elif int(type) == 22:
-                    landuse_type = 1606
-                elif int(type) == 23:
-                    landuse_type = 2101
-                elif int(type) == 24:
-                    landuse_type = 2111
-
-        self.parcel_landuse_cbox.setCurrentIndex(self.parcel_landuse_cbox.findData(landuse_type))
-
+    #
+    # @pyqtSlot(str)
+    # def on_zoriulalt_edit_textChanged(self, text):
+    #
+    #     landuse_type = 2205
+    #
+    #     type = text
+    #     if self.__is_number(type):
+    #         if int(type) in self.zoriulalt:
+    #             if int(type) == 1:
+    #                 landuse_type = 2205
+    #             elif int(type) == 2:
+    #                 landuse_type = 2101
+    #             elif int(type) == 3:
+    #                 landuse_type = 2104
+    #             elif int(type) == 4:
+    #                 landuse_type = 2105
+    #             elif int(type) == 5:
+    #                 landuse_type = 2107
+    #             elif int(type) == 6:
+    #                 landuse_type = 2113
+    #             elif int(type) == 7:
+    #                 landuse_type = 1604
+    #             elif int(type) == 8:
+    #                 landuse_type = 2119
+    #             elif int(type) == 9:
+    #                 landuse_type = 3401
+    #             elif int(type) == 10:
+    #                 landuse_type = 3103
+    #             elif int(type) == 11:
+    #                 landuse_type = 3303
+    #             elif int(type) == 12:
+    #                 landuse_type = 2111
+    #             elif int(type) == 13:
+    #                 landuse_type = 2108
+    #             elif int(type) == 14:
+    #                 landuse_type = 2109
+    #             elif int(type) == 15:
+    #                 landuse_type = 2116
+    #             elif int(type) == 16:
+    #                 landuse_type = 2117
+    #             elif int(type) == 17:
+    #                 landuse_type = 2302
+    #             elif int(type) == 18:
+    #                 landuse_type = 2601
+    #             elif int(type) == 19:
+    #                 landuse_type = 1401
+    #             elif int(type) == 20:
+    #                 landuse_type = 1607
+    #             elif int(type) == 21:
+    #                 landuse_type = 1305
+    #             elif int(type) == 22:
+    #                 landuse_type = 1606
+    #             elif int(type) == 23:
+    #                 landuse_type = 2101
+    #             elif int(type) == 24:
+    #                 landuse_type = 2111
+    #
+    #     self.parcel_landuse_cbox.setCurrentIndex(self.parcel_landuse_cbox.findData(landuse_type))
+    #
     def __validate_apartment_number(self, number, object_name):
 
         if len(number) == 0:
@@ -2157,16 +1664,6 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
             if not self.__validate_certificate(text):
                 self.contract_cert_edit.setStyleSheet(Constants.ERROR_LINEEDIT_STYLESHEET)
 
-    @pyqtSlot(str)
-    def on_record_cert_edit_textChanged(self, text):
-
-        self.record_cert_edit.setStyleSheet(self.styleSheet())
-
-        right_type = self.rigth_type_cbox.itemData(self.rigth_type_cbox.currentIndex())
-        if right_type == 3:
-            if not self.__validate_certificate(text):
-                self.record_cert_edit.setStyleSheet(Constants.ERROR_LINEEDIT_STYLESHEET)
-
     @pyqtSlot(int)
     def on_duration_sbox_valueChanged(self, value):
 
@@ -2183,10 +1680,7 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
         if not self.__validate_decision_date(newDate):
             self.decision_date.setStyleSheet(Constants.ERROR_LINEEDIT_STYLESHEET)
 
-        if right_type == 3:
-            self.own_date.setDate(newDate)
-        else:
-            self.contract_date.setDate(newDate)
+        self.contract_date.setDate(newDate)
 
         au_level2 = DatabaseUtils.current_working_soum_schema()
         year_filter = str(newDate.toString("yyyy"))
@@ -2219,13 +1713,6 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
         # self.duration_sbox.setValue(duration)
         # self.duration_sbox.setMinimum(duration)
 
-    # Contract Date Changed
-    def on_own_date_DateChanged(self, newDate):
-
-        self.own_date.setStyleSheet(self.styleSheet())
-        if not self.__validate_own_date(newDate):
-            self.own_date.setStyleSheet(Constants.ERROR_LINEEDIT_STYLESHEET)
-
     def __validate_contract_date(self, newDate):
 
         right_type = self.rigth_type_cbox.itemData(self.rigth_type_cbox.currentIndex())
@@ -2243,17 +1730,6 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
             return False
         else:
             return True
-
-    def __validate_own_date(self, newDate):
-
-        right_type = self.rigth_type_cbox.itemData(self.rigth_type_cbox.currentIndex())
-        decision_date = self.decision_date.date()
-        decision_year = newDate.year()
-        if right_type == 3:
-            if (decision_year <= 1900 or QDate.currentDate() < newDate) or decision_date > newDate:
-                return False
-            else:
-                return True
 
     def __generate_application_number(self):
 
@@ -2317,20 +1793,13 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
     def __validaty_of_ubparcel(self):
 
         valid = True
-        old_parcel_id = self.old_parcel_id_edit.text()
+        old_parcel_id = int(self.old_parcel_id_edit.text())
         error_message = self.tr("The parcel info can't be saved. The following errors have been found: ")
-        ub_parcel = self.session.query(CaUBParcel).filter(CaUBParcel.old_parcel_id == old_parcel_id).one()
+        ub_parcel = self.session.query(MpaGisEditSubject).filter(MpaGisEditSubject.gid == old_parcel_id).one()
         parcel_within_count = self.session.query(CaParcel).filter(
             ub_parcel.geometry.ST_Within(CaParcel.geometry)).count()
 
         # parcel
-        validaty_result = self.__check_parcel_correct(ub_parcel.geometry, '')
-
-        if not validaty_result[0]:
-            valid = False
-            log_measage = validaty_result[1]
-            error_message = error_message + "\n \n" + log_measage
-
         if parcel_within_count > 0:
             valid = False
             parcel_error = self.tr("Duplicate Parcel.")
@@ -2467,8 +1936,7 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
         right_type = self.rigth_type_cbox.itemData(self.rigth_type_cbox.currentIndex())
         if right_type == 1 or right_type == 2:
             text = self.contract_cert_edit.text()
-        else:
-            text = self.record_cert_edit.text()
+
         if not self.__validate_certificate(text):
             valid = False
             street_error = self.tr("Certificate number error!.")
@@ -2508,17 +1976,15 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
                 app_dec = self.session.query(CtDecisionApplication).filter(
                     CtDecisionApplication.decision == self.decision.decision_id).first()
                 application = app_dec.application_ref
-                print application
-                if application:
-                    application_type = application.app_type
-                    app_type = self.application_type_cbox.itemData(self.application_type_cbox.currentIndex())
-                    if app_type != application_type:
-                        # PluginUtils.show_message(self, self.tr("LM2", "Application Type"),
-                        #                          self.tr("Can't match application type!!!"))
-                        # self.isSave = False
-                        valid = False
-                        street_error = self.tr("Can't match application type!!!")
-                        error_message = error_message + "\n \n" + street_error
+                application_type = application.app_type
+                app_type = self.application_type_cbox.itemData(self.application_type_cbox.currentIndex())
+                if app_type != application_type:
+                    # PluginUtils.show_message(self, self.tr("LM2", "Application Type"),
+                    #                          self.tr("Can't match application type!!!"))
+                    # self.isSave = False
+                    valid = False
+                    street_error = self.tr("Can't match application type!!!")
+                    error_message = error_message + "\n \n" + street_error
 
         return valid, error_message
 
@@ -2570,7 +2036,7 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
 
             selected_row = self.right_holder_twidget.currentRow()
             objectid = self.right_holder_twidget.item(selected_row, 1).data(Qt.UserRole + 1)
-            subject = self.session.query(UbGisSubject).filter(UbGisSubject.objectid == objectid).one()
+            subject = self.session.query(MpaGisEditSubject).filter(MpaGisEditSubject.gid == objectid).one()
             subject.is_finish = True
             subject.finish_user = DatabaseUtils.current_user().user_name
             subject.finish_date = PluginUtils.convert_qt_date_to_python(QDate.currentDate())
@@ -2578,75 +2044,6 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
             # return
 
             # self.commit()
-
-    def __multi_owner_save(self, person_id):
-
-        register = person_id
-
-        sql = "select register, ovog,ner ,hen,zahid " \
-              "from ub_lpis_co info " \
-              "where oregister = :register "
-
-        result = self.session.execute(sql, {'register': register})
-        row = 0
-        for item_row in result:
-            person_id = item_row[0]
-
-            name = item_row[1]
-            first_name = item_row[2]
-
-            person_count = self.session.query(BsPerson).filter(BsPerson.person_register == person_id).count()
-            if person_count > 0:
-                bs_person = self.session.query(BsPerson).filter(BsPerson.person_register == person_id).one()
-            else:
-                bs_person = BsPerson()
-
-            bs_person.person_register = person_id
-            bs_person.type = 10
-            bs_person.name = name
-            bs_person.first_name = first_name
-
-            self.session.add(bs_person)
-
-            # self.session.flush()
-
-    def __generate_record_number(self):
-
-        soum = DatabaseUtils.current_working_soum_schema()
-        qt_date = self.own_date.date()
-        try:
-            record_number_filter = "%-{0}/%".format(str(qt_date.toString("yyyy")))
-
-            # return
-            count = self.session.query(CtOwnershipRecord) \
-                        .filter(CtOwnershipRecord.record_no.like("%-%")) \
-                        .filter(CtOwnershipRecord.record_no.like(soum + "-%")) \
-                        .filter(CtOwnershipRecord.record_no.like(record_number_filter))  \
-                        .filter(CtOwnershipRecord.au2 == soum) \
-                        .order_by(func.substr(CtOwnershipRecord.record_no, 10, 16).desc()).count()
-            if count == 0:
-                cu_max_number = "00001"
-
-            else:
-                cu_max_number = self.session.query(CtOwnershipRecord.record_no)\
-                                    .filter(CtOwnershipRecord.record_no.like("%-%")) \
-                                    .filter(CtOwnershipRecord.record_no.like(soum + "-%")) \
-                                    .filter(CtOwnershipRecord.record_no.like(record_number_filter)) \
-                                    .filter(CtOwnershipRecord.au2 == soum) \
-                    .order_by(func.substr(CtOwnershipRecord.record_no, 10, 16).desc()).first()
-
-                cu_max_number = cu_max_number[0]
-                minus_split_number = cu_max_number.split("-")
-                slash_split_number = minus_split_number[1].split("/")
-                cu_max_number = int(slash_split_number[1]) + 1
-
-            year = qt_date.toString("yyyy")
-            number = soum + "-" + year + "/" + str(cu_max_number).zfill(5)
-
-        except SQLAlchemyError, e:
-            PluginUtils.show_error(self, self.tr("Database Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
-
-        return number
 
     def __generate_contract_number(self):
 
@@ -2657,7 +2054,6 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
 
             count = self.session.query(CtContract) \
                 .filter(CtContract.contract_no.like("%-%")) \
-                .filter(CtContract.contract_no.like(soum+"-%")) \
                 .filter(CtContract.contract_no.like(contract_number_filter)) \
                 .filter(CtContract.au2 == soum) \
                 .order_by(func.substr(CtContract.contract_no, 10, 16).desc()).count()
@@ -2666,7 +2062,6 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
             else:
                 cu_max_number = self.session.query(CtContract.contract_no) \
                     .filter(CtContract.contract_no.like("%-%")) \
-                    .filter(CtContract.contract_no.like(soum + "-%")) \
                     .filter(CtContract.contract_no.like(contract_number_filter)) \
                     .filter(CtContract.au2 == soum) \
                     .order_by(func.substr(CtContract.contract_no, 10, 16).desc()).first()
@@ -2702,13 +2097,6 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
 
             self.session.add(self.contract)
 
-            app_type = None
-            obj_type = 'contract\Contract'
-            qt_date = self.contract_date.date()
-            # contract_number_filter = "%-{0}/%".format(str(qt_date.toString("yyyy")))
-            year = qt_date.toString("yyyy")
-            PluginUtils.generate_auto_app_no(str(year), app_type, DatabaseUtils.working_l2_code(), obj_type)
-
             contract_app = CtContractApplicationRole()
             contract_app.application_ref = self.application
             contract_app.application = self.application.app_id
@@ -2717,33 +2105,6 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
 
             contract_app.role = Constants.APPLICATION_ROLE_CREATES
             self.contract.application_roles.append(contract_app)
-        else:
-            record_no = self.__generate_record_number()
-            self.record = CtOwnershipRecord()
-            self.record.record_no = record_no
-            self.record.record_date = self.own_date.date().toString(Constants.DATABASE_DATE_FORMAT)
-            self.record.record_begin = self.decision_date.date().toString(Constants.DATABASE_DATE_FORMAT)
-            self.record.certificate_no = int(self.record_cert_edit.text())
-            self.record.status = Constants.RECORD_STATUS_ACTIVE
-            self.record.au2 = DatabaseUtils.working_l2_code()
-
-            self.session.add(self.record)
-
-            app_type = None
-            obj_type = 'contract\OwnershipRecord'
-            qt_date = self.own_date.date()
-            # contract_number_filter = "%-{0}/%".format(str(qt_date.toString("yyyy")))
-            year = qt_date.toString("yyyy")
-            PluginUtils.generate_auto_app_no(str(year), app_type, DatabaseUtils.working_l2_code(),
-                                             obj_type)
-
-            record_app = CtRecordApplicationRole()
-            record_app.application_ref = self.application
-            record_app.application = self.application.app_id
-            record_app.record = self.record.record_id
-
-            record_app.role = Constants.APPLICATION_ROLE_CREATES
-            self.record.application_roles.append(record_app)
 
     def __save_decision(self):
 
@@ -2914,45 +2275,12 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
             self.session.add(bs_person)
         # self.session.flush()
 
-        self.__multi_owner_save(person_id)
-
-    def __check_parcel_correct(self, geometry, error_message):
-
-        organization = DatabaseUtils.current_user_organization()
-        print organization
-        valid = True
-        if not organization:
-            return
-
-        if organization == 1:
-            # Тусгай хамгаалалтай болон чөлөөт бүсд нэгж талбар оруулж болохгүй
-            count = self.session.query(AuMpa.id) \
-                .filter(geometry.ST_Intersects(AuMpa.geometry)).count()
-            if count > 0:
-                valid = False
-                parcel_error = self.tr("Parcels mpa boundary overlap!!!")
-                error_message = error_message + "\n \n" + parcel_error
-        elif organization == 3:
-            # Тусгай хамгаалалтай газар нутгаас өөр газар нэгж талбар оруулж болохгүй
-            count = self.session.query(AuMpa.id) \
-                .filter(geometry.ST_Within(AuMpa.geometry)).count()
-            print count
-            if count == 0:
-                valid = False
-                parcel_error = self.tr("Parcels out mpa boundary overlap!!!")
-                error_message = error_message + "\n \n" + parcel_error
-        elif organization == 5:
-            # Чөлөөт бүсээс өөр газар нэгж талбар оруулж болохгүй
-            print ''
-
-        return valid, error_message
-
     def __save_parcel(self):
 
         parcel_id = self.parcel_id_edit.text()
 
-        old_parcel_id = self.old_parcel_id_edit.text()
-        ub_parcel = self.session.query(CaUBParcel).filter(CaUBParcel.old_parcel_id == old_parcel_id).one()
+        old_parcel_id = int(self.old_parcel_id_edit.text())
+        ub_parcel = self.session.query(MpaGisEditSubject).filter(MpaGisEditSubject.gid == old_parcel_id).one()
         landuse = self.parcel_landuse_cbox.itemData(self.parcel_landuse_cbox.currentIndex())
 
         parcel_count = self.session.query(CaParcel).filter(CaParcel.parcel_id == parcel_id).count()
@@ -2964,21 +2292,6 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
             if len(parcel_id) == 12:
                 parcel.parcel_id = parcel_id
 
-        # parcel_id = self.parcel_id_edit.text()
-        # old_parcel_id = self.old_parcel_id_edit.text()
-        # ub_parcel = self.session.query(CaUBParcel).filter(CaUBParcel.old_parcel_id == old_parcel_id).one()
-        # landuse = self.parcel_landuse_cbox.itemData(self.parcel_landuse_cbox.currentIndex())
-        #
-        # parcel_count = self.session.query(CaParcel).filter(CaParcel.parcel_id == parcel_id).count()
-        # if parcel_count == 1:
-        #     parcel = self.session.query(CaParcel).filter(CaParcel.parcel_id == parcel_id).one()
-        # else:
-        #     parcel = CaParcel()
-        #
-        # if parcel_count == 0:
-        #     parcel.parcel_id = parcel_id
-
-        # parcel = CaParcel()
         parcel.old_parcel_id = old_parcel_id
         parcel.geo_id = old_parcel_id
         parcel.landuse = landuse
@@ -3038,12 +2351,6 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
 
         self.application.parcel = parcel.parcel_id
         self.session.add(self.application)
-
-
-        qt_date = self.decision_date.date()
-        year = str(qt_date.toString("yy"))
-        obj_type = 'application\Application'
-        PluginUtils.generate_auto_app_no(str(year), str(app_type).zfill(2), au_level2, obj_type)
         # self.session.commit()
 
     def __save_application_details(self):
@@ -3103,501 +2410,31 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
         #                        self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
 
 
-    def __doc_tree_view(self):
-
-        model = QFileSystemModel()
-        model.setRootPath(FilePath.ub_archive_path())
-
-        self.treeView.setModel(model)
-        self.treeView.setRootIndex(model.index(FilePath.ub_archive_path()))
-        self.treeView.doubleClicked.connect(self.test)
-
-        rootdir = FilePath.ub_archive_path()
-
-        for subdir, dirs, files in os.walk(rootdir):
-            for file in files:
-                print file
-                print os.path.join(subdir, file)
-                print os.path.basename(os.path.dirname(os.path.join(subdir, file)))
-
-    def test(self, signal):
-
-        file_path = self.treeView.model().filePath(signal)
-        print(file_path)
-
-    def __is_file(self, ftp ,filename):
-
-        current = ftp.pwd()
-        try:
-            ftp.cwd(filename)
-        except:
-            ftp.cwd(current)
-            return True
-        ftp.cwd(current)
-        return False
-
-    @pyqtSlot()
-    def on_ftp_connect_button_clicked(self):
-
-        # database_name = QSettings().value(SettingsConstants.DATABASE_NAME)
-        # ftp_user_code = database_name.split('_')[1]
-        # ftp_user = 'user'+ftp_user_code
-
-        ftp_user = QSettings().value(SettingsConstants.USER)[:8]
-
-        QSettings().setValue(SettingsConstants.FTP_IP, self.ftp_host_edit.text())
-        QSettings().setValue(SettingsConstants.FTP_USER, ftp_user)
-
-        ftp_host = self.ftp_host_edit.text()
-        retry = True
-        while (retry):
-            try:
-                ftp = FTP(ftp_host, ftp_user, ftp_user)
-                ftp.connect()
-                retry = False
-                self.ftp_connect_button.setEnabled(False)
-
-            except IOError as e:
-                retry = True
-                PluginUtils.show_message(self, self.tr("LM2", "FTP connection"), self.tr("Document server not connect!!!"))
-                return
-
-    @pyqtSlot()
-    def on_load_docs_button_clicked(self):
-
-        self.doc_twidget.setRowCount(0)
-        ftp_host = QSettings().value(SettingsConstants.FTP_IP)
-        ftp_user = QSettings().value(SettingsConstants.FTP_USER)
-        ftp = FTP(ftp_host, ftp_user, ftp_user)
-
-        doc_id = self.documet_cbox.itemData(self.documet_cbox.currentIndex())
-
-        files = []
-        is_find_doc = False
-        if doc_id:
-
-            try:
-                if doc_id in ftp.nlst():
-                    files = ftp.nlst(str(doc_id))
-            except error_perm:
-                is_find_doc = True
-
-            if is_find_doc:
-                try:
-                    if doc_id in ftp.nlst():
-                        files = ftp.nlst(doc_id)
-                except error_perm:
-                    is_find_doc = True
-
-            doc_no_list = []
-            docs = self.session.query(ClDocumentRole).all()
-            for doc in docs:
-                doc_code = str(doc.code)
-                if len(doc_code) == 1:
-                    doc_code = '0'+doc_code
-                doc_no_list.append(doc_code)
-            for f in files:
-                files = ftp.nlst(f)
-                for n in files:
-                    if self.__is_file(ftp, n):
-
-                        file_name = str(n.split('/')[-1])
-                        doc_no = str(n.split('/')[-2])[:2]
-                        subdir = str(n.split('/')[0]) + '/' + str(n.split('/')[1]) + '/' + str(n.split('/')[2])
-
-                        if doc_no in doc_no_list:
-                            document = self.session.query(ClDocumentRole).filter(ClDocumentRole.code == doc_no).one()
-
-                            row = self.doc_twidget.rowCount()
-                            self.doc_twidget.insertRow(row)
-
-                            item_name = QTableWidgetItem()
-                            item_name.setText(str(file_name))
-                            item_name.setData(Qt.UserRole, subdir)
-                            item_name.setData(Qt.UserRole + 1, n)
-
-                            item_description = QTableWidgetItem()
-                            item_description.setText(document.description)
-
-                            item_view = QTableWidgetItem()
-
-                            self.doc_twidget.setItem(row, 0, item_name)
-                            self.doc_twidget.setItem(row, 1, item_description)
-                            self.doc_twidget.setItem(row, 2, item_view)
-            self.__load_doc_info()
-
-    @pyqtSlot(int, int)
-    def on_lpis_info_twidget_cellChanged(self, row, column):
-
-        changed_item = self.lpis_info_twidget.item(row, column)
-        if changed_item:
-            if changed_item.checkState() == Qt.Checked:
-                if column == 0:
-                    self.personal_id_edit.setText(changed_item.text())
-                if column == 1:
-                    self.first_name_edit.setText(changed_item.text())
-                if column == 2:
-                    self.name_edit.setText(changed_item.text())
-                if column == 3:
-                    self.phone_edit.setText(changed_item.text())
-                if column == 5:
-                    self.person_street_name_edit.setText(changed_item.text())
-                if column == 6:
-                    self.parcel_id_edit.setText(changed_item.text())
-                if column == 9:
-                    self.decision_no_edit.setText(changed_item.text())
-                if column == 10:
-                    self.record_cert_edit.setText(changed_item.text())
-
-    @pyqtSlot(int, int)
-    def on_landuk_info_twidget_cellChanged(self, row, column):
-
-        changed_item = self.landuk_info_twidget.item(row, column)
-        if changed_item:
-            if changed_item.checkState() == Qt.Checked:
-                if column == 0:
-                    self.personal_id_edit.setText(changed_item.text())
-                if column == 1:
-                    self.middle_name_edit.setText(changed_item.text())
-                if column == 2:
-                    self.name_edit.setText(changed_item.text())
-                if column == 3:
-                    self.first_name_edit.setText(changed_item.text())
-                if column == 4:
-                    self.person_street_name_edit.setText(changed_item.text())
-                if column == 5:
-                    self.phone_edit.setText(changed_item.text())
-
-    @pyqtSlot(int, int)
-    def on_fee_info_twidget_cellChanged(self, row, column):
-
-        changed_item = self.fee_info_twidget.item(row, column)
-        if changed_item:
-            if changed_item.checkState() == Qt.Checked:
-                if column == 0:
-                    self.personal_id_edit.setText(changed_item.text())
-                if column == 1:
-                    self.name_edit.setText(changed_item.text())
-                if column == 2:
-                    self.phone_edit.setText(changed_item.text())
-                if column == 6:
-                    self.person_street_name_edit.setText(changed_item.text())
-                if column == 7:
-                    self.person_khashaa_edit.setText(changed_item.text())
-
-    @pyqtSlot(int, int)
-    def on_doc_info_twidget_cellChanged(self, row, column):
-
-        changed_item = self.doc_info_twidget.item(row, column)
-        if changed_item.checkState() == Qt.Checked:
-            if column == 0:
-                self.parcel_id_edit.setText(changed_item.text())
-            if column == 1:
-                decision_level = 10
-                if changed_item.text() == u'ДЗД':
-                    decision_level = 20
-                elif changed_item.text() == u'АЗД':
-                    decision_level = 30
-                elif changed_item.text() == u'СЗД':
-                    decision_level = 40
-                elif changed_item.text() == u'НАТ':
-                    decision_level = 70
-                self.decision_level_cbox.setCurrentIndex(self.decision_level_cbox.findData(decision_level))
-            if column == 2:
-                self.decision_no_edit.setText(changed_item.text())
-            if column == 3:
-                self.decision_date.setDate(changed_item.data(Qt.UserRole))
-            if column == 4:
-                self.first_name_edit.setText(changed_item.text())
-            if column == 5:
-                self.name_edit.setText(changed_item.text())
-            if column == 6:
-                self.personal_id_edit.setText(changed_item.text())
-            if column == 7:
-                self.streetname_edit.setText(changed_item.text())
-                self.neighbourhood_edit.setText(changed_item.text())
-
-    def __load_doc_info(self):
-
-        self.doc_info_twidget.setRowCount(0)
-        doc_id = self.documet_cbox.itemData(self.documet_cbox.currentIndex())
-
-        sql = "select new_block_id, decision_level, decision_no, decision_date, firstname, name, register, address " \
-              "from ub_document where document_no = :doc_id "
-
-        result = self.session.execute(sql, {'doc_id': doc_id})
-        row = 0
-        for item_row in result:
-            new_pid = item_row[0]
-
-            row = self.doc_info_twidget.rowCount()
-            self.doc_info_twidget.insertRow(row)
-
-            item = QTableWidgetItem()
-            item.setCheckState(Qt.Unchecked)
-            item.setText(unicode(new_pid))
-            item.setData(Qt.UserRole, new_pid)
-            self.doc_info_twidget.setItem(row, 0, item)
-
-            item = QTableWidgetItem()
-            item.setCheckState(Qt.Unchecked)
-            item.setText((item_row[1]))
-            item.setData(Qt.UserRole, item_row[1])
-            self.doc_info_twidget.setItem(row, 1, item)
-
-            item = QTableWidgetItem()
-            item.setCheckState(Qt.Unchecked)
-            item.setText(item_row[2])
-            item.setData(Qt.UserRole, item_row[2])
-            self.doc_info_twidget.setItem(row, 2, item)
-
-            decision_date = datetime.datetime.strptime(item_row[3], '%Y%m%d').date()
-            item = QTableWidgetItem()
-            item.setCheckState(Qt.Unchecked)
-            item.setText(str(decision_date))
-            item.setData(Qt.UserRole, decision_date)
-            self.doc_info_twidget.setItem(row, 3, item)
-
-            item = QTableWidgetItem()
-            item.setCheckState(Qt.Unchecked)
-            item.setText(item_row[4])
-            item.setData(Qt.UserRole, item_row[4])
-            self.doc_info_twidget.setItem(row, 4, item)
-
-            item = QTableWidgetItem()
-            item.setCheckState(Qt.Unchecked)
-            item.setText(item_row[5])
-            item.setData(Qt.UserRole, item_row[5])
-            self.doc_info_twidget.setItem(row, 5, item)
-
-            item = QTableWidgetItem()
-            item.setCheckState(Qt.Unchecked)
-            item.setText(item_row[6])
-            item.setData(Qt.UserRole, item_row[6])
-            self.doc_info_twidget.setItem(row, 6, item)
-
-            item = QTableWidgetItem()
-            item.setCheckState(Qt.Unchecked)
-            item.setText(item_row[7])
-            item.setData(Qt.UserRole, item_row[7])
-            self.doc_info_twidget.setItem(row, 7, item)
-
-            row =+ 1
-
-    def __load_doc(self):
-
-        self.documet_cbox.clear()
-        old_parcel_id = self.old_parcel_id_edit.text()
-        person_id = self.personal_id_edit.text()
-
-        sql = "select document_no, decision_date, register, firstname, name " \
-              "from ub_document where pid = :pid or register = :person_id "
-
-        result = self.session.execute(sql, {'pid': old_parcel_id,
-                                            'person_id': person_id})
-        for row in result:
-            doc_id = row[0]
-            doc_decs = row[1]+'-/'+unicode(row[2])+'/-'+unicode(row[4])
-            self.documet_cbox.addItem(doc_decs, doc_id)
-
-    @pyqtSlot()
-    def on_fee_view_button_clicked(self):
-
-        old_parcel_id = self.old_parcel_id_edit.text()
-        person_id = self.personal_id_edit.text()
-        is_find = False
-        if self.old_parcel_id_edit.text():
-            is_find = True
-        dialog = ParcelInfoFeeDialog(old_parcel_id, person_id, is_find)
-        dialog.exec_()
-
     @pyqtSlot()
     def on_layer_view_button_clicked(self):
 
         root = QgsProject.instance().layerTreeRoot()
 
-        restrictions = DatabaseUtils.working_l2_code()
-        if not restrictions:
-            PluginUtils.show_message(self, self.tr("Connection Error"), self.tr("Please connect to database!!!"))
-            return
-
-        mygroup = root.findGroup("UbGIS")
+        mygroup = root.findGroup(u"Тусгай хамгаалалттай газар")
         if mygroup is None:
-            mygroup = root.insertGroup(8, "UbGIS")
+            mygroup = root.insertGroup(8, u"Тусгай хамгаалалттай газар")
 
         is_pug_parcel = False
 
-        vlayer_parcel = LayerUtils.load_ub_data_layer_by_name("ca_ub_parcel", "old_parcel_id")
+        vlayer_parcel = LayerUtils.load_ub_data_layer_by_name("ca_mpa_parcel_edit_view", "gid")
 
         layers = self.plugin.iface.legendInterface().layers()
 
         for layer in layers:
-            if layer.name() == "UbGISParcel":
+            if layer.name() == "MpaParcelEdit":
                 is_pug_parcel = True
         if not is_pug_parcel:
+
             mygroup.addLayer(vlayer_parcel)
-
-        vlayer_parcel.setLayerName(QApplication.translate("Plugin", "UbGISParcel"))
+        # QgsMapLayerRegistry.instance().addMapLayer(vlayer)
+        vlayer_parcel.setLayerName(QApplication.translate("Plugin", "MpaParcelEdit"))
         vlayer_parcel.loadNamedStyle(
-            str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "template\style/ub_parcel.qml")
-
-    @pyqtSlot(QTableWidgetItem)
-    def on_landuk_info_twidget_itemClicked(self, item):
-
-        selected_row = self.landuk_info_twidget.currentRow()
-        object_id = self.landuk_info_twidget.item(selected_row, 0).data(Qt.UserRole)
-        old_pid = self.landuk_info_twidget.item(selected_row, 0).data(Qt.UserRole + 1)
-
-        sql = "select person_type_desc, country,contact_firstname,contact_lastname,contact_position, " \
-              "pid::text, zoriulalt_desc, area_m2, fee, unit_price, decision_no, decision_date, certificate_no, duration, " \
-              "right_type_desc, is_mortgage, objectid, old_pid " \
-              "from ub_landuk_info info " \
-              "where objectid = :object_id "
-
-        result = self.session.execute(sql, {'object_id': object_id})
-        for item_row in result:
-            self.landuk_person_type_edit.setText(item_row[0])
-            self.landuk_country_edit.setText(item_row[1])
-            self.contact_firstname_edit.setText(item_row[2])
-            self.contact_lastname_edit.setText(item_row[3])
-            self.contact_position_edit.setText((item_row[4]))
-            self.landuk_parcel_id_edit.setText(str(item_row[5]))
-            self.landuk_landuse_edit.setText(item_row[6])
-            self.landuk_area_edit.setText(str(item_row[7]))
-            self.landuk_fee_edit.setText(str(item_row[8]))
-            self.landuk_unit_price_edit.setText(str(item_row[9]))
-            self.landuk_deicsion_no_edit.setText(item_row[10])
-            self.landuk_certificate_edit.setText(str(item_row[12]))
-            self.landuk_duration_edit.setText(str(item_row[13]))
-            self.landuk_right_type_edit.setText(item_row[14])
-            self.is_mortgage_edit.setText(str(item_row[15]))
-
-        self.__load_landuk_bank(old_pid)
-
-    def __load_landuk_bank(self, old_pid):
-
-        self.landuk_mortgage_twidget.setRowCount(0)
-
-        sql = "select person_name, bank_name, rent_contract_no, mortgage_contract_no,mortgate_date, price, is_mortgage, objectid, old_pid " \
-              "from ub_landuk_bank bank " \
-              "where old_pid = :old_pid "
-        result = self.session.execute(sql, {'old_pid': old_pid})
-        row = 0
-        for item_row in result:
-            row = self.landuk_mortgage_twidget.rowCount()
-            self.landuk_mortgage_twidget.insertRow(row)
-            item = QTableWidgetItem()
-            item.setText(unicode(item_row[0]))
-            item.setData(Qt.UserRole, item_row[7])
-            item.setData(Qt.UserRole+1, item_row[8])
-            self.landuk_mortgage_twidget.setItem(row, 0, item)
-
-            item = QTableWidgetItem()
-            item.setText(unicode(item_row[1]))
-            self.landuk_mortgage_twidget.setItem(row, 1, item)
-
-            item = QTableWidgetItem()
-            item.setText(unicode(item_row[2]))
-            self.landuk_mortgage_twidget.setItem(row, 2, item)
-
-            item = QTableWidgetItem()
-            item.setText(unicode(item_row[3]))
-            self.landuk_mortgage_twidget.setItem(row, 3, item)
-
-            item = QTableWidgetItem()
-            item.setText(unicode(item_row[4]))
-            self.landuk_mortgage_twidget.setItem(row, 4, item)
-
-            item = QTableWidgetItem()
-            item.setText(unicode(item_row[5]))
-            self.landuk_mortgage_twidget.setItem(row, 5, item)
-
-            item = QTableWidgetItem()
-            item.setText(unicode(item_row[6]))
-            self.landuk_mortgage_twidget.setItem(row, 6, item)
-
-            row =+ 1
-
-    @pyqtSlot(int)
-    def on_landuk_search_chbox_stateChanged(self, state):
-
-        if state == Qt.Checked:
-            self.landuk_person_id_edit.setEnabled(True)
-            self.landuk_old_parcel_id_edit.setEnabled(True)
-            self.landuk_find_button.setEnabled(True)
-        else:
-            self.landuk_person_id_edit.setEnabled(False)
-            self.landuk_old_parcel_id_edit.setEnabled(False)
-            self.landuk_find_button.setEnabled(False)
-
-    @pyqtSlot(int)
-    def on_lpis_search_chbox_stateChanged(self, state):
-
-        if state == Qt.Checked:
-            self.lpis_person_id_edit.setEnabled(True)
-            self.lpis_old_parcel_id_edit.setEnabled(True)
-            self.lpis_find_button.setEnabled(True)
-        else:
-            self.lpis_person_id_edit.setEnabled(False)
-            self.lpis_old_parcel_id_edit.setEnabled(False)
-            self.lpis_find_button.setEnabled(False)
-
-    @pyqtSlot()
-    def on_landuk_find_button_clicked(self):
-
-        person_id = self.landuk_person_id_edit.text()
-        old_parcel_id = self.landuk_old_parcel_id_edit.text()
-        self.__load_landuk(person_id, old_parcel_id)
-
-    @pyqtSlot()
-    def on_lpis_find_button_clicked(self):
-
-        person_id = self.lpis_person_id_edit.text()
-        old_parcel_id = self.lpis_old_parcel_id_edit.text()
-        self.__load_lpis(person_id, old_parcel_id)
-
-    @pyqtSlot(QTableWidgetItem)
-    def on_lpis_info_twidget_itemClicked(self, item):
-
-        self.lpis_co_owner_twidget.setRowCount(0)
-
-        selected_row = self.lpis_info_twidget.currentRow()
-        if selected_row == -1:
-            return
-        register = self.lpis_info_twidget.item(selected_row, 0).data(Qt.UserRole)
-        lpis_id = self.lpis_info_twidget.item(selected_row, 0).data(Qt.UserRole + 1)
-
-        sql = "select register, ovog,ner ,hen,zahid " \
-              "from ub_lpis_co info " \
-              "where oregister = :register "
-
-        result = self.session.execute(sql, {'register': register})
-        row = 0
-        for item_row in result:
-            row = self.lpis_co_owner_twidget.rowCount()
-            self.lpis_co_owner_twidget.insertRow(row)
-            item = QTableWidgetItem()
-            item.setText(unicode(item_row[0]))
-            item.setData(Qt.UserRole, item_row[0])
-            self.lpis_co_owner_twidget.setItem(row, 0, item)
-
-            item = QTableWidgetItem()
-            item.setText(unicode(item_row[1]))
-            self.lpis_co_owner_twidget.setItem(row, 1, item)
-
-            item = QTableWidgetItem()
-            item.setText(unicode(item_row[2]))
-            self.lpis_co_owner_twidget.setItem(row, 2, item)
-
-            item = QTableWidgetItem()
-            item.setText(unicode(item_row[3]))
-            self.lpis_co_owner_twidget.setItem(row, 3, item)
-
-            item = QTableWidgetItem()
-            item.setText(unicode(item_row[4]))
-            self.lpis_co_owner_twidget.setItem(row, 4, item)
-
-            row =+ 1
+            str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "template\style/ca_mpa_edit_parcel.qml")
 
     def __find_coordinate(self, x, y):
 
@@ -3638,29 +2475,29 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
 
         return proj4Def
 
-    def newOnkeyPressEvent(self, e):
-        if self.is_find_ubgis:
-            if e.key() == QtCore.Qt.Key_Enter:
-                self.find_button.click()
-                print "User has pushed escape"
+    # def newOnkeyPressEvent(self, e):
+    #     if self.is_find_ubgis:
+    #         if e.key() == QtCore.Qt.Key_Enter:
+    #             self.find_button.click()
+    #             print "User has pushed escape"
 
 
-    def keyPressEvent(self, eventQKeyEvent):
-        key = eventQKeyEvent.key()
-        if key == QtCore.Qt.Key_F1:
-            print 'Help'
-        elif key == QtCore.Qt.Key_F5:
-            print 'Reload'
-        elif key == QtCore.Qt.Key_Left:
-            print 'Left'
-        elif key == QtCore.Qt.Key_Up:
-            print 'Up'
-        elif key == QtCore.Qt.Key_Right:
-            print 'Right'
-        elif key == QtCore.Qt.Key_Down:
-            print 'Down'
-
-    @pyqtSlot()
-    def on_current_dialog_closed(self):
-
-        DialogInspector().set_dialog_visible(False)
+    # def keyPressEvent(self, eventQKeyEvent):
+    #     key = eventQKeyEvent.key()
+    #     if key == QtCore.Qt.Key_F1:
+    #         print 'Help'
+    #     elif key == QtCore.Qt.Key_F5:
+    #         print 'Reload'
+    #     elif key == QtCore.Qt.Key_Left:
+    #         print 'Left'
+    #     elif key == QtCore.Qt.Key_Up:
+    #         print 'Up'
+    #     elif key == QtCore.Qt.Key_Right:
+    #         print 'Right'
+    #     elif key == QtCore.Qt.Key_Down:
+    #         print 'Down'
+    #
+    # @pyqtSlot()
+    # def on_current_dialog_closed(self):
+    #
+    #     DialogInspector().set_dialog_visible(False)

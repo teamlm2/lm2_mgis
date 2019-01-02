@@ -5,7 +5,9 @@ import shutil
 from sqlalchemy.exc import SQLAlchemyError
 from ...utils.FtpConnection import *
 from ...utils.FilePath import *
+from ...utils.PluginUtils import *
 from ...model.CtDocument import *
+from ...model.SdConfiguration import *
 import urllib
 import urllib2
 
@@ -84,7 +86,8 @@ class ApplicationDocumentDelegate(QStyledItemDelegate):
 
                             file_url_name = archive_ftp_path +'/'+ file_name
                             # if not self.parent.current_application().parcel:
-                            urllib2.urlopen('http://66.181.168.74/api/application/document/move?app_id='+str(app_id))
+                            conf = self.session.query(SdConfiguration).filter(SdConfiguration.code == 'ip_web_lm').one()
+                            urllib2.urlopen('http://'+conf.value+'/api/application/document/move?app_id='+str(app_id))
                             # else:
                             #     app_doc_count = self.session.query(CtApplicationDocument).filter(
                             #         CtApplicationDocument.application_id == app_id). \
@@ -141,9 +144,20 @@ class ApplicationDocumentDelegate(QStyledItemDelegate):
                                     else:
                                         file_url = file_url + '/' + url_split
                             # # for each word in the line:
-                            ftp[0].cwd(file_url)
-                            ftp[0].retrbinary('RETR ' + doc.name, view_pdf.write)
-
+                            try:
+                                ftp[0].cwd(file_url)
+                                ftp[0].retrbinary('RETR ' + doc.name, view_pdf.write)
+                            except Exception, e:
+                                errorcode_string = str(e).split(None, 1)[0]
+                                if errorcode_string == '550':
+                                    QMessageBox.information(None, QApplication.translate("LM2", "Warning"),
+                                                            QApplication.translate("LM2",
+                                                                                   "Not found directory or file, Please reupload"))
+                                else:
+                                    QMessageBox.information(None, QApplication.translate("LM2", "Warning"),
+                                                            QApplication.translate("LM2",
+                                                                                   "Not found directory or file, Please reupload"))
+                                return True
                             try:
                                 QDesktopServices.openUrl(QUrl.fromLocalFile(archive_app_path))
                             except IOError, e:

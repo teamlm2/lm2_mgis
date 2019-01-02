@@ -18,7 +18,7 @@ class CtPersonGroup(Base):
     group_name = Column(String)
     is_contract = Column(String)
     created_date = Column(Date)
-
+    au2 = Column(String)
     bags = relationship("AuLevel3", secondary=bag_table)
 
     members = relationship("CtGroupMember", backref="member_ref",

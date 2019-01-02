@@ -1,4 +1,4 @@
-import os
+# coding=utf8
 
 __author__ = 'ankhbold'
 from PyQt4.QtCore import *
@@ -34,6 +34,7 @@ from ..model.VaInfoIndustrialProduct import *
 from ..model.VaTypeProduct import *
 from ..model.VaTypeProductTime import *
 from ..model.VaTypeIndustrialProcess import *
+import os
 
 class ParcelRecordDialog(QDialog, Ui_ParcelRecordDialog):
 

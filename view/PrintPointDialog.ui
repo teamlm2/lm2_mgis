@@ -81,9 +81,9 @@
    <property name="geometry">
     <rect>
      <x>6</x>
-     <y>180</y>
+     <y>220</y>
      <width>497</width>
-     <height>407</height>
+     <height>361</height>
     </rect>
    </property>
    <property name="currentIndex">
@@ -563,7 +563,7 @@
        <x>5</x>
        <y>220</y>
        <width>481</width>
-       <height>141</height>
+       <height>111</height>
       </rect>
      </property>
      <property name="title">
@@ -573,7 +573,7 @@
       <property name="geometry">
        <rect>
         <x>180</x>
-        <y>90</y>
+        <y>80</y>
         <width>75</width>
         <height>23</height>
        </rect>
@@ -585,8 +585,8 @@
      <widget class="QWidget" name="layoutWidget">
       <property name="geometry">
        <rect>
-        <x>20</x>
-        <y>30</y>
+        <x>10</x>
+        <y>20</y>
         <width>148</width>
         <height>81</height>
        </rect>
@@ -823,6 +823,64 @@
    </property>
    <property name="text">
     <string>Total Cover</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="cover_label_2">
+   <property name="geometry">
+    <rect>
+     <x>90</x>
+     <y>200</y>
+     <width>74</width>
+     <height>13</height>
+    </rect>
+   </property>
+   <property name="cursor">
+    <cursorShape>UpArrowCursor</cursorShape>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QLabel" name="biomass_label_2">
+   <property name="geometry">
+    <rect>
+     <x>91</x>
+     <y>180</y>
+     <width>74</width>
+     <height>13</height>
+    </rect>
+   </property>
+   <property name="cursor">
+    <cursorShape>UpArrowCursor</cursorShape>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_6">
+   <property name="geometry">
+    <rect>
+     <x>11</x>
+     <y>180</y>
+     <width>74</width>
+     <height>13</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>PUG</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_7">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>200</y>
+     <width>74</width>
+     <height>13</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Pasture Type</string>
    </property>
   </widget>
  </widget>

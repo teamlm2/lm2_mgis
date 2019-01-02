@@ -1,5 +1,5 @@
-__author__ = 'B.Ankhbold'
 # coding=utf8
+__author__ = 'B.Ankhbold'
 
 from qgis.core import *
 from PyQt4.QtGui import *
@@ -131,7 +131,7 @@ class PastureWidget(QDockWidget, Ui_PastureWidget, DatabaseHelper):
 
         app = self.__selected_application()
         app_parcels = self.session.query(CtApplicationPUGParcel).\
-            filter(CtApplicationPUGParcel.application == app.app_no).all()
+            filter(CtApplicationPUGParcel.application == app.app_id).all()
 
         if app is None:
             return
@@ -196,7 +196,7 @@ class PastureWidget(QDockWidget, Ui_PastureWidget, DatabaseHelper):
 
         app_instance = self.__selected_application()
         app_contract_count = self.session.query(CtContractApplicationRole). \
-            filter(CtContractApplicationRole.application == app_instance.app_no).count()
+            filter(CtContractApplicationRole.application == app_instance.app_id).count()
 
         if app_contract_count == 0:
             DatabaseUtils.set_working_schema()
@@ -208,8 +208,8 @@ class PastureWidget(QDockWidget, Ui_PastureWidget, DatabaseHelper):
             self.current_dialog.show()
         elif app_contract_count == 1:
             app_contract = self.session.query(CtContractApplicationRole). \
-                filter(CtContractApplicationRole.application == app_instance.app_no).one()
-            contract = self.session.query(CtContract).filter_by(contract_no=app_contract.contract).one()
+                filter(CtContractApplicationRole.application == app_instance.app_id).one()
+            contract = self.session.query(CtContract).filter_by(contract_id=app_contract.contract).one()
 
             self.current_dialog = ContractPastureDialog(self.plugin, contract, self, True, self.plugin.iface.mainWindow())
             self.current_dialog.rejected.connect(self.on_current_dialog_closed)
@@ -224,7 +224,7 @@ class PastureWidget(QDockWidget, Ui_PastureWidget, DatabaseHelper):
 
         app_instance = self.__selected_application()
         app_contract_count = self.session.query(CtContractApplicationRole).\
-            filter(CtContractApplicationRole.application == app_instance.app_no).count()
+            filter(CtContractApplicationRole.application == app_instance.app_id).count()
 
         if app_contract_count == 0:
             DatabaseUtils.set_working_schema()
@@ -237,8 +237,8 @@ class PastureWidget(QDockWidget, Ui_PastureWidget, DatabaseHelper):
             self.current_dialog.show()
         elif app_contract_count == 1:
             app_contract = self.session.query(CtContractApplicationRole). \
-                filter(CtContractApplicationRole.application == app_instance.app_no).one()
-            contract = self.session.query(CtContract).filter_by(contract_no=app_contract.contract).one()
+                filter(CtContractApplicationRole.application == app_instance.app_id).one()
+            contract = self.session.query(CtContract).filter_by(contract_id=app_contract.contract).one()
 
             self.current_dialog = ContractPastureDialog(self.plugin, contract, self, True, self.plugin.iface.mainWindow())
             self.current_dialog.rejected.connect(self.on_current_dialog_closed)
@@ -291,7 +291,8 @@ class PastureWidget(QDockWidget, Ui_PastureWidget, DatabaseHelper):
         else:
             sql = sql + "UNION" + "\n"
 
-        select = "SELECT pasture_parcel.parcel, pasture_parcel.application, pasture_parcel.pasture, pasture_parcel.begin_month, pasture_parcel.end_month, pasture_parcel.days, pasture_parcel.app_no " \
+        select = "SELECT pasture_parcel.parcel, pasture_parcel.application, pasture_parcel.pasture, pasture_parcel.begin_month, " \
+                 "pasture_parcel.end_month, pasture_parcel.days, pasture_parcel.app_no " \
                  "FROM data_soums_union.ct_application_parcel_pasture pasture_parcel " \
                  "left join data_soums_union.ct_application app on pasture_parcel.application = app.app_id " \
                  "where  app.au2 = {0}".format(current_working_soum) + "\n"
@@ -346,8 +347,8 @@ class PastureWidget(QDockWidget, Ui_PastureWidget, DatabaseHelper):
         else:
             sql = sql + "UNION" + "\n"
 
-        select = "SELECT application.app_no, group_member.group_no, parcel.pasture_type ,application.app_timestamp, application.app_type, status.status, status.status_date, status.officer_in_charge, status.next_officer_in_charge, decision.decision_no, " \
-                 "contract.contract_no, person.person_id, person.name, person.first_name, person.middle_name, parcel.parcel_id, tmp_parcel.parcel_id tmp_parcel_id " \
+        select = "SELECT application.app_no,application.app_id, group_member.group_no, parcel.pasture_type ,application.app_timestamp, application.app_type, status.status, status.status_date, status.officer_in_charge, status.next_officer_in_charge, decision.decision_no, " \
+                 "contract.contract_no,contract.contract_id, person.person_id, person.person_register, person.name, person.first_name, person.middle_name, parcel.parcel_id, tmp_parcel.parcel_id tmp_parcel_id " \
                  "FROM data_soums_union.ct_application application " \
                  "left join data_soums_union.ct_application_status status on status.application = application.app_id " \
                  "left join data_soums_union.ct_decision_application dec_app on dec_app.application = application.app_id " \
@@ -433,6 +434,29 @@ class PastureWidget(QDockWidget, Ui_PastureWidget, DatabaseHelper):
             self.rollback_to_savepoint()
             PluginUtils.show_message(self,  self.tr("Sql Error"), e.message)
             return
+        self.__zoom_to_soum(l2_code)
+        self.__load_role_settings()
+        self.__setup_combo_pug()
+
+    def __zoom_to_soum(self, soum_code):
+
+        layer = LayerUtils.layer_by_data_source("admin_units", "au_level2")
+        if layer is None:
+            layer = LayerUtils.load_layer_by_name_admin_units("au_level2", "code", "admin_units")
+        if soum_code:
+            expression = " code = \'" + soum_code + "\'"
+            request = QgsFeatureRequest()
+            request.setFilterExpression(expression)
+            feature_ids = []
+            iterator = layer.getFeatures(request)
+
+            for feature in iterator:
+                feature_ids.append(feature.id())
+            if len(feature_ids) == 0:
+                self.error_label.setText(self.tr("No soum assigned"))
+
+            layer.setSelectedFeatures(feature_ids)
+            self.plugin.iface.mapCanvas().zoomToSelected(layer)
 
     def __change_workig_soum_list(self):
 
@@ -462,18 +486,28 @@ class PastureWidget(QDockWidget, Ui_PastureWidget, DatabaseHelper):
 
         role.restriction_au_level2 = schema_string
 
+    def __setup_combo_pug(self):
+
+        self.pasture_group_cbox.clear()
+        au2 = DatabaseUtils.working_l2_code()
+        ct_member_group = self.session.query(CtPersonGroup).filter(CtPersonGroup.au2 == au2).all()
+        self.pasture_group_cbox.addItem("*", -1)
+        if ct_member_group is not None:
+            for member in ct_member_group:
+                self.pasture_group_cbox.addItem(member.group_name, member.group_no)
+
     def __setup_combo_boxes(self):
 
         try:
             PluginUtils.populate_au_level1_cbox(self.working_l1_cbox, False)
-
+            au2 = DatabaseUtils.working_l2_code()
             l1_code = self.working_l1_cbox.itemData(self.working_l1_cbox.currentIndex(), Qt.UserRole)
             PluginUtils.populate_au_level2_cbox(self.working_l2_cbox, l1_code, False)
 
             cl_landusetype = self.session.query(ClLanduseType).all()
             cl_pasturetype = self.session.query(ClApplicationType).\
                 filter(or_(ClApplicationType.code == ApplicationType.pasture_use, ClApplicationType.code == ApplicationType.right_land)).all()
-            ct_member_group = self.session.query(CtPersonGroup).all()
+            ct_member_group = self.session.query(CtPersonGroup).filter(CtPersonGroup.au2 == au2).all()
 
         except SQLAlchemyError, e:
             PluginUtils.show_message(self, self.tr("Sql Error"), e.message)
@@ -507,10 +541,12 @@ class PastureWidget(QDockWidget, Ui_PastureWidget, DatabaseHelper):
         if DialogInspector().dialog_visible():
             return
 
+        l2_code = self.working_l2_cbox.itemData(self.working_l2_cbox.currentIndex(), Qt.UserRole)
+
         pug_max_id = self.session.query(CtPersonGroup). \
+            filter(CtPersonGroup.au2 == l2_code). \
             order_by(CtPersonGroup.group_no.desc()).first()
 
-        l2_code = self.working_l2_cbox.itemData(self.working_l2_cbox.currentIndex(), Qt.UserRole)
         member_code = self.pasture_group_cbox.itemData(self.pasture_group_cbox.currentIndex())
         if member_code == -1:
             if not pug_max_id:
@@ -636,7 +672,7 @@ class PastureWidget(QDockWidget, Ui_PastureWidget, DatabaseHelper):
         if self.member_register_edit.text():
             filter_is_set = True
             register_no = "%" + self.member_register_edit.text() + "%"
-            applications = applications.filter(ApplicationPastureSearch.person_id.ilike(register_no))
+            applications = applications.filter(ApplicationPastureSearch.person_register.ilike(register_no))
 
         if self.pasture_contract_no_edit.text():
             filter_is_set = True
@@ -663,7 +699,7 @@ class PastureWidget(QDockWidget, Ui_PastureWidget, DatabaseHelper):
             self.error_label.setText(self.tr("Please specify a search filter."))
             return
 
-        for application in applications.distinct(ApplicationPastureSearch.app_no, ApplicationPastureSearch.status).all():
+        for application in applications.distinct(ApplicationPastureSearch.app_no, ApplicationPastureSearch.app_id, ApplicationPastureSearch.status).all():
 
             app_type = "" if not application.app_type_ref else application.app_type_ref.description
             item = QTableWidgetItem(str(application.app_no) + " ( " + unicode(app_type) + " )")
@@ -677,6 +713,7 @@ class PastureWidget(QDockWidget, Ui_PastureWidget, DatabaseHelper):
                 item.setBackground(QtGui.QColor(249, 231, 159))
             item.setIcon(QIcon(QPixmap(":/plugins/lm2/application.png")))
             item.setData(Qt.UserRole, application.app_no)
+            item.setData(Qt.UserRole+1, application.app_id)
             self.pasture_results_twidget.insertRow(count)
             self.pasture_results_twidget.setItem(count, 0, item)
             count += 1
@@ -759,8 +796,8 @@ class PastureWidget(QDockWidget, Ui_PastureWidget, DatabaseHelper):
             app_result = self.session.query(ApplicationPastureSearch).filter(ApplicationPastureSearch.app_no == id).one()
             self.pasture_app_no_edit.setText(app_result.app_no)
             self.member_name_edit.setText(app_result.first_name)
-            self.pasture_parcel_id_edit.setText(app_result.parcel_id)
-            self.member_register_edit.setText(app_result.person_id)
+            self.pasture_parcel_id_edit.setText(app_result.person_register)
+            self.member_register_edit.setText(app_result.person_register)
             if app_result.contract_no != None:
                 self.pasture_contract_no_edit.setText(app_result.contract_no)
                 self.pasture_contract_no_edit.setStyleSheet(self.styleSheet())
@@ -1603,6 +1640,7 @@ class PastureWidget(QDockWidget, Ui_PastureWidget, DatabaseHelper):
 
         selected_item = selected_items[0]
         app_no = selected_item.data(Qt.UserRole)
+        app_id = selected_item.data(Qt.UserRole+1)
 
         message_box = QMessageBox()
         message_box.setText(self.tr("Do you want to delete the all information for application ?"))
@@ -1615,57 +1653,57 @@ class PastureWidget(QDockWidget, Ui_PastureWidget, DatabaseHelper):
             return
 
         app_pugs = self.session.query(CtApplicationPUG).\
-            filter(CtApplicationPUG.application == app_no).all()
+            filter(CtApplicationPUG.application == app_id).all()
 
         for app_pug in app_pugs:
             self.session.query(CtApplicationPUG). \
                 filter(CtApplicationPUG.group_no == app_pug.group_no).\
-                filter(CtApplicationPUG.application == app_no).delete()
+                filter(CtApplicationPUG.application == app_id).delete()
 
         app_pug_parcels = self.session.query(CtApplicationPUGParcel).\
-            filter(CtApplicationPUGParcel.application == app_no).all()
+            filter(CtApplicationPUGParcel.application == app_id).all()
 
         for app_pug_parcel in app_pug_parcels:
             self.session.query(CtApplicationPUGParcel). \
                 filter(CtApplicationPUGParcel.parcel == app_pug_parcel.parcel).\
-                filter(CtApplicationPUGParcel.application == app_no).delete()
+                filter(CtApplicationPUGParcel.application == app_id).delete()
 
         app_persons = self.session.query(CtApplicationPersonRole).\
-            filter(CtApplicationPersonRole.application == app_no).all()
+            filter(CtApplicationPersonRole.application == app_id).all()
 
         for app_person in app_persons:
             self.session.query(CtApplicationPersonRole). \
                 filter(CtApplicationPersonRole.person == app_person.person). \
                 filter(CtApplicationPersonRole.role == 10). \
-                filter(CtApplicationPersonRole.application == app_no).delete()
+                filter(CtApplicationPersonRole.application == app_id).delete()
 
         app_parcels = self.session.query(CtApplicationParcelPasture).\
-            filter(CtApplicationParcelPasture.application == app_no).all()
+            filter(CtApplicationParcelPasture.application == app_id).all()
 
         for app_parcel in app_parcels:
             self.session.query(CtApplicationParcelPasture). \
                 filter(CtApplicationParcelPasture.pasture == app_parcel.pasture). \
                 filter(CtApplicationParcelPasture.parcel == app_parcel.parcel).\
-                filter(CtApplicationParcelPasture.application == app_no).delete()
+                filter(CtApplicationParcelPasture.application == app_id).delete()
 
         app_statuses = self.session.query(CtApplicationStatus).\
-            filter(CtApplicationStatus.application == app_no).all()
+            filter(CtApplicationStatus.application == app_id).all()
 
         for app_status in app_statuses:
             self.session.query(CtApplicationStatus). \
                 filter(CtApplicationStatus.status == app_status.status).\
-                filter(CtApplicationStatus.application == app_no).delete()
+                filter(CtApplicationStatus.application == app_id).delete()
 
         app_group_boundaries = self.session.query(CtAppGroupBoundary).\
-            filter(CtAppGroupBoundary.application == app_no).all()
+            filter(CtAppGroupBoundary.application == app_id).all()
 
         for app_group_boundary in app_group_boundaries:
             self.session.query(CtAppGroupBoundary). \
                 filter(CtAppGroupBoundary.boundary_code == app_group_boundary.boundary_code). \
                 filter(CtAppGroupBoundary.group_no == app_group_boundary.group_no).\
-                filter(CtAppGroupBoundary.application == app_no).delete()
+                filter(CtAppGroupBoundary.application == app_id).delete()
 
-        self.session.query(CtApplication).filter(CtApplication.app_no == app_no).delete()
+        self.session.query(CtApplication).filter(CtApplication.app_id == app_id).delete()
 
         selected_row = self.pasture_results_twidget.currentRow()
         self.pasture_results_twidget.removeRow(selected_row)

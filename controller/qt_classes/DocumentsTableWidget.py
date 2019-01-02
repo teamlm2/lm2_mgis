@@ -10,7 +10,7 @@ class DocumentsTableWidget(QTableWidget):
 
         super(DocumentsTableWidget,  self).__init__(parent)
         self.setColumnCount(6)
-        self.setGeometry(QRect(20, 100, 701, 192))
+        self.setGeometry(QRect(20, 50, 730, 330))
         self.horizontalHeader().setDefaultSectionSize(120)
 
         self.setSelectionMode(QAbstractItemView.SingleSelection)

@@ -1,5 +1,6 @@
-__author__ = 'B.Ankhbold'
 # coding=utf8
+__author__ = 'B.Ankhbold'
+
 import os
 import xlsxwriter
 from PyQt4.QtCore import *

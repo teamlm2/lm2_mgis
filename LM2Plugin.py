@@ -9,6 +9,7 @@ from controller.UserRoleManagementDialog import *
 from controller.NavigatorWidget import *
 from controller.PastureWidget import *
 from controller.ParcelInfoDialog import *
+from controller.ParcelMpaDialog import *
 from controller.ParcelInfoFeeDialog import *
 from controller.ApplicationsDialog import *
 from controller.ContractDialog import *
@@ -19,6 +20,7 @@ from controller.CreateCaseDialog import CreateCaseDialog
 from controller.SentToGovernorDialog import *
 from controller.PrintCadastreExtractMapTool import *
 from controller.ParcelInfoExtractMapTool import *
+from controller.ParcelMpaEditMapTool import *
 from controller.PrintPointExtractMapTool import *
 from controller.AboutDialog import *
 from controller.ReportDialog import *
@@ -110,6 +112,11 @@ class LM2Plugin:
                                                  self.iface.mainWindow())
         self.parcel_map_action.setCheckable(True)
 
+        self.parcel_mpa_action = QAction(QIcon(":/plugins/lm2/mpa_logo.png"),
+                                         QApplication.translate("Plugin", "Parcel Mpa Info"),
+                                         self.iface.mainWindow())
+        self.parcel_mpa_action.setCheckable(True)
+
         self.about_action = QAction(QIcon(":/plugins/lm2/about.png"), QApplication.translate("Plugin", "About"), self.iface.mainWindow())
         self.document_action = QAction(QIcon(":/plugins/lm2/documents.png"), QApplication.translate("Plugin", "Official documents"), self.iface.mainWindow())
         self.manage_parcel_records_action = QAction(QIcon(":/plugins/lm2/landfeepayment.png"), QApplication.translate("Plugin", "Manage Parcel Record"), self.iface.mainWindow())
@@ -168,7 +175,10 @@ class LM2Plugin:
         #     if au1:
         #         if au1 == '11' or au1 == '61':
         self.parcel_map_action.triggered.connect(self.__show_parcel_navigator_widget)
+        self.parcel_mpa_action.triggered.connect(self.__show_parcel_mpa_navigator_widget)
+
         self.lm_toolbar.addAction(self.parcel_map_action)
+        self.lm_toolbar.addAction(self.parcel_mpa_action)
 
         self.lm_toolbar.addSeparator()
         self.lm_toolbar.addAction(self.navigator_action)
@@ -247,6 +257,7 @@ class LM2Plugin:
         self.navigatorWidget = None
         self.parcelInfoWidget = None
         self.pastureWidget = None
+        self.parcelMpaInfoWidget = None
         self.removeLayers()
         self.__set_menu_visibility()
         self.__setup_slots()
@@ -287,6 +298,10 @@ class LM2Plugin:
             self.iface.removeDockWidget(self.parcelInfoWidget)
             del self.parcelInfoWidget
 
+        if self.parcelMpaInfoWidget:
+            self.iface.removeDockWidget(self.parcelMpaInfoWidget)
+            del self.parcelMpaInfoWidget
+
         self.removeLayers()
 
     def __setup_slots(self):
@@ -314,6 +329,10 @@ class LM2Plugin:
             if self.pastureWidget != None:
                 if self.pastureWidget.isVisible():
                     self.pastureWidget.hide()
+
+            if self.parcelMpaInfoWidget != None:
+                if self.parcelMpaInfoWidget.isVisible():
+                    self.parcelMpaInfoWidget.hide()
 
             SessionHandler().destroy_session()
             self.is_expired = dlg.get_expired()
@@ -503,15 +522,20 @@ class LM2Plugin:
             self.navigatorWidget.show()
             self.pastureWidget.hide()
             self.parcelInfoWidget.hide()
+            self.parcelMpaInfoWidget.hide()
 
     def __show_pasture_navigator_widget(self):
 
         if self.pastureWidget.isVisible():
             self.pastureWidget.hide()
+            self.parcelMpaInfoWidget.hide()
+            self.parcelInfoWidget.hide()
             self.navigatorWidget.show()
         else:
             self.pastureWidget.show()
             self.navigatorWidget.hide()
+            self.parcelMpaInfoWidget.hide()
+            self.parcelInfoWidget.hide()
 
     def __show_parcel_navigator_widget(self):
 
@@ -519,11 +543,32 @@ class LM2Plugin:
 
         if self.parcelInfoWidget.isVisible():
             self.parcelInfoWidget.hide()
+            self.parcelMpaInfoWidget.hide()
+            self.pastureWidget.hide()
             self.navigatorWidget.show()
         else:
             self.parcelInfoWidget.show()
             self.navigatorWidget.hide()
+            self.parcelMpaInfoWidget.hide()
+            self.pastureWidget.hide()
         self.__start_parcel_info_map()
+
+    def __show_parcel_mpa_navigator_widget(self):
+
+        # self.__create_parcel_info()
+
+        if self.parcelMpaInfoWidget.isVisible():
+            self.parcelMpaInfoWidget.hide()
+            self.navigatorWidget.hide()
+            self.pastureWidget.hide()
+            self.parcelInfoWidget.hide()
+            self.navigatorWidget.show()
+        else:
+            self.parcelMpaInfoWidget.show()
+            self.navigatorWidget.hide()
+            self.pastureWidget.hide()
+            self.parcelInfoWidget.hide()
+        self.__start_parcel_mpa_map()
 
     def __navigatorVisibilityChanged(self):
 
@@ -538,6 +583,13 @@ class LM2Plugin:
             self.pasture_use_action.setChecked(True)
         else:
             self.pasture_use_action.setChecked(False)
+
+    def __mpaVisibilityChanged(self):
+
+        if self.parcelMpaInfoWidget.isVisible():
+            self.parcel_mpa_action.setChecked(True)
+        else:
+            self.parcel_mpa_action.setChecked(False)
 
     def __parcelVisibilityChanged(self):
 
@@ -670,6 +722,36 @@ class LM2Plugin:
         self.iface.mapCanvas().unsetMapTool(self.iface.mapCanvas().mapTool())
 
         mapTool = ParcelInfoExtractMapTool(self)
+
+        self.iface.mapCanvas().setMapTool(mapTool)
+        self.iface.mapCanvas().setCursor(QCursor(Qt.ArrowCursor))
+
+        self.iface.mapCanvas().setFocus(Qt.OtherFocusReason)
+
+    def __start_parcel_mpa_map(self):
+
+        soum = DatabaseUtils.working_l2_code()
+        layer = LayerUtils.layer_by_data_source("data_ub", 'ca_mpa_parcel_edit_view')
+
+        if layer is None:
+            QMessageBox.warning(self.iface.mainWindow(), QApplication.translate( "Plugin", "No <ub_parcel> layer"),
+                                QApplication.translate( "Plugin", "Layer <ub_parcel> must be added "
+                                                                  "to the table of contents first!"))
+            self.parcel_mpa_action.setChecked(False)
+            return
+
+        map_units = self.iface.mapCanvas().mapUnits()
+        if map_units != 0: # 0 = Meters
+            self.parcel_mpa_action.setChecked(False)
+            QMessageBox.warning(self.iface.mainWindow(),
+                                QApplication.translate( "Plugin", "Layer / map units not set to 'Meters'"),
+                                QApplication.translate( "Plugin", "Printing requires the layer units set to 'Meters'."
+                                                          " \n(Settings->Project Properties->General->Layer units)"))
+            return
+
+        self.iface.mapCanvas().unsetMapTool(self.iface.mapCanvas().mapTool())
+
+        mapTool = ParcelMpaEditMapTool(self)
 
         self.iface.mapCanvas().setMapTool(mapTool)
         self.iface.mapCanvas().setCursor(QCursor(Qt.ArrowCursor))
@@ -869,6 +951,19 @@ class LM2Plugin:
         QObject.connect(self.pastureWidget, SIGNAL("visibilityChanged(bool)"), self.__pastureVisibilityChanged)
         self.pastureWidget.hide()
 
+    def __create_mpa(self):
+
+        self.removeLayers()
+        # create widget
+        if self.parcelMpaInfoWidget:
+            self.iface.removeDockWidget(self.parcelMpaInfoWidget)
+            del self.parcelMpaInfoWidget
+
+        self.parcelMpaInfoWidget = ParcelMpaDialog(self)
+        self.iface.addDockWidget(Qt.RightDockWidgetArea, self.parcelMpaInfoWidget)
+        QObject.connect(self.parcelMpaInfoWidget, SIGNAL("visibilityChanged(bool)"), self.__mpaVisibilityChanged)
+        self.parcelMpaInfoWidget.hide()
+
     def __create_parcel_info(self):
 
         self.removeLayers()
@@ -893,6 +988,8 @@ class LM2Plugin:
         self.__create_navigator()
 
         self.__create_pasture()
+
+        self.__create_mpa()
 
         self.__create_parcel_info()
 

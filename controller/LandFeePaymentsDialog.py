@@ -1,5 +1,5 @@
-__author__ = 'mwagner'
 # coding=utf8
+__author__ = 'mwagner'
 
 from ..view.Ui_LandFeePaymentsDialog import *
 from ..utils.PluginUtils import *
@@ -87,7 +87,6 @@ class LandFeePaymentsDialog(QDialog, Ui_LandFeePaymentsDialog, DatabaseHelper):
     def __populate_contractor_cbox(self):
 
         for fee in self.contract.fees:
-            print fee.person
             person_id = fee.person
             for name, first_name in self.session.query(BsPerson.name, BsPerson.first_name)\
                     .filter(BsPerson.person_id == person_id):
@@ -1313,7 +1312,7 @@ class LandFeePaymentsDialog(QDialog, Ui_LandFeePaymentsDialog, DatabaseHelper):
                 amount_paid = 0
 
             fee_to_pay = self.__act_fee_to_pay_per_period(fee, date(payment_year, 1, 1), date(payment_year + 1, 1, 1))
-            # print str(payment_year) + ' - ' + str(fee_to_pay) + ' - ' + str(amount_paid)
+
             if (amount_paid + surplus_last_year) - fee_to_pay > 0:
                 surplus_last_year = (amount_paid + surplus_last_year) - fee_to_pay
             else:
@@ -1520,11 +1519,13 @@ class LandFeePaymentsDialog(QDialog, Ui_LandFeePaymentsDialog, DatabaseHelper):
         font.size = Pt(12)
         font.bold = True
 
-        report_settings = self.__admin_settings("set_report_parameter")
-
-        land_office_name = report_settings[Constants.REPORT_LAND_OFFICE_NAME]
-        bank_and_account = report_settings[Constants.REPORT_BANK] + u" банкны " + report_settings[
-            Constants.REPORT_BANK_ACCOUNT]
+        # report_settings = self.__admin_settings("set_report_parameter")
+        #
+        # land_office_name = report_settings[Constants.REPORT_LAND_OFFICE_NAME]
+        # bank_and_account = report_settings[Constants.REPORT_BANK] + u" банкны " + report_settings[
+        #     Constants.REPORT_BANK_ACCOUNT]
+        bank_and_account = ''
+        land_office_name = ''
         account_text = u'Газрын төлбөрийг ' + bank_and_account + u' тоот ' + land_office_name + u' -ын дансанд газрын төлбөр барагдуулах хуваарийн дагуу хугацаанд нь тушаана уу.'
 
         p = document.add_paragraph()

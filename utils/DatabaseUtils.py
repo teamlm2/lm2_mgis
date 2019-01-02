@@ -22,10 +22,13 @@ from ..model.CaMaintenanceCase import *
 from ..model import Constants
 from ..model.SdUser import *
 from ..model.SdEmployee import *
+from ..model.BsPerson import *
 from ..model.SdFtpPermission import *
 from ..model.SdFtpConnection import *
+from ..model.SdAutoNumbers import *
 from ftplib import FTP, error_perm
 import urllib
+import hashlib
 from ..LM2Plugin import *
 
 class DatabaseUtils():
@@ -108,6 +111,34 @@ class DatabaseUtils():
                                QApplication.translate("LM2", "Could not execute: {0}").format(e.message))
 
     @staticmethod
+    def current_user_organization():
+
+        try:
+            session = SessionHandler().session_instance()
+            user = QSettings().value(SettingsConstants.USER)
+            if not session:
+                QMessageBox.information(None, QApplication.translate("LM2", "Role Error"),
+                                        QApplication.translate("LM2", "No User Connection To Main Database"))
+                if DialogInspector().dialog_visible():
+                    return
+
+                DialogInspector().set_dialog_visible(True)
+                SessionHandler().destroy_session()
+            else:
+                set_role_count = session.query(SetRole).filter(SetRole.user_name == user).filter(SetRole.is_active == True).count()
+                if set_role_count == 0:
+                    QMessageBox.information(None, QApplication.translate("LM2", "Role Error"),
+                                            QApplication.translate("LM2", "No User Connection To Main Database"))
+                    return None
+                else:
+                    set_role = session.query(SetRole).filter(SetRole.user_name == user).filter(SetRole.is_active == True).one()
+                    return set_role.organization
+
+        except exc.SQLAlchemyError, e:
+            QMessageBox.information(None, QApplication.translate("LM2", "Database Query Error"),
+                               QApplication.translate("LM2", "Could not execute: {0}").format(e.message))
+
+    @staticmethod
     def current_sd_user():
 
         try:
@@ -165,7 +196,9 @@ class DatabaseUtils():
             else:
                 sd_user = session.query(SdUser).filter(SdUser.user_id == user_id).first()
                 set_role = session.query(SetRole).filter(SetRole.user_name_real == sd_user.gis_user_real).one()
-                sd_employee = session.query(SdEmployee).filter(func.upper(SdEmployee.register_number) == func.upper(set_role.user_register)).first()
+                sd_employee = session.query(SdEmployee). \
+                    join(BsPerson, BsPerson.person_id == SdEmployee.person_id). \
+                    filter(func.upper(BsPerson.person_register) == func.upper(set_role.user_register)).first()
 
             return sd_employee
 
@@ -402,7 +435,7 @@ class DatabaseUtils():
             new_status.next_officer_in_charge = current_user.user_name
             new_status.officer_in_charge = current_user.user_name
             new_status.status = Constants.APP_STATUS_SEND
-            new_status.status_date = datetime.now().strftime(Constants.PYTHON_DATE_FORMAT)
+            new_status.status_date = datetime.now().strftime(Constants.PYTHON_DATETIME_FORMAT)
             session.add(new_status)
 
         session.commit()

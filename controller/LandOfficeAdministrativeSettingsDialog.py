@@ -1,5 +1,6 @@
-__author__ = 'B.Ankhbold'
 # coding=utf8
+__author__ = 'B.Ankhbold'
+
 from sqlalchemy import exc, or_
 from sqlalchemy.sql import text
 from sqlalchemy.exc import SQLAlchemyError
@@ -287,15 +288,15 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
             # filter(or_(AuLevel1.code.startswith('01'), AuLevel1.code.startswith('1'))). \
 
         locations2 = self.session.query(SetFeeZone.location, SetFeeZone.code).distinct(). \
-            filter(SetFeeZone.geometry.ST_Overlaps(AuLevel2.geometry)). \
+            filter(func.ST_Centroid(SetFeeZone.geometry).ST_Overlaps(AuLevel2.geometry)). \
             filter(AuLevel2.code.in_(l2_codes)). \
             order_by(SetFeeZone.location)
         locations3 = self.session.query(SetFeeZone.location, SetFeeZone.code).distinct(). \
-            filter(SetFeeZone.geometry.ST_Contains(AuLevel2.geometry)). \
+            filter(func.ST_Centroid(SetFeeZone.geometry).ST_Contains(AuLevel2.geometry)). \
             filter(AuLevel2.code.in_(l2_codes)). \
             order_by(SetFeeZone.location)
         locations4 = self.session.query(SetFeeZone.location, SetFeeZone.code).distinct(). \
-            filter(SetFeeZone.geometry.ST_Intersects(AuLevel2.geometry)). \
+            filter(func.ST_Centroid(SetFeeZone.geometry).ST_Intersects(AuLevel2.geometry)). \
             filter(AuLevel2.code.in_(l2_codes)). \
             order_by(SetFeeZone.location)
 
@@ -312,20 +313,20 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
     def __set_up_taxzone_cbox(self, l1_codes, l2_codes):
 
         locations1 = self.session.query(SetTaxAndPriceZone.location, SetTaxAndPriceZone.code).distinct(). \
-            filter(SetTaxAndPriceZone.geometry.ST_Within(AuLevel1.geometry)). \
+            filter(func.ST_Centroid(SetTaxAndPriceZone.geometry).ST_Within(AuLevel1.geometry)). \
             filter(AuLevel1.code.in_(l1_codes)). \
             filter(or_(AuLevel1.code.startswith('01'), AuLevel1.code.startswith('1'))). \
             order_by(SetTaxAndPriceZone.location)
         locations2 = self.session.query(SetTaxAndPriceZone.location, SetTaxAndPriceZone.code).distinct(). \
-            filter(SetTaxAndPriceZone.geometry.ST_Within(AuLevel2.geometry)). \
+            filter(func.ST_Centroid(SetTaxAndPriceZone.geometry).ST_Within(AuLevel2.geometry)). \
             filter(AuLevel2.code.in_(l2_codes)). \
             order_by(SetTaxAndPriceZone.location)
         locations3 = self.session.query(SetTaxAndPriceZone.location, SetTaxAndPriceZone.code).distinct(). \
-            filter(SetTaxAndPriceZone.geometry.ST_Contains(AuLevel2.geometry)). \
+            filter(func.ST_Centroid(SetTaxAndPriceZone.geometry).ST_Contains(AuLevel2.geometry)). \
             filter(AuLevel2.code.in_(l2_codes)). \
             order_by(SetTaxAndPriceZone.location)
         locations4 = self.session.query(SetTaxAndPriceZone.location, SetTaxAndPriceZone.code).distinct(). \
-            filter(SetTaxAndPriceZone.geometry.ST_Intersects(AuLevel2.geometry)). \
+            filter(func.ST_Centroid(SetTaxAndPriceZone.geometry).ST_Intersects(AuLevel2.geometry)). \
             filter(AuLevel2.code.in_(l2_codes)). \
             order_by(SetTaxAndPriceZone.location)
 
@@ -378,21 +379,21 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
             self.certificate_type_cbox.addItem(item.description, item.code)
 
         self.certificate_range_twidget.sortItems(0, Qt.AscendingOrder)
-        self.certificate_range_twidget.resizeColumnToContents(0)
-        self.certificate_range_twidget.resizeColumnToContents(1)
-        self.certificate_range_twidget.resizeColumnToContents(2)
-        self.certificate_range_twidget.resizeColumnToContents(3)
-        self.certificate_range_twidget.resizeColumnToContents(4)
-        self.certificate_range_twidget.resizeColumnToContents(5)
-        self.certificate_range_twidget.resizeColumnToContents(6)
-
-        self.certificate_range_twidget.setColumnWidth(0, 50)
-        self.certificate_range_twidget.setColumnWidth(1, 100)
-        self.certificate_range_twidget.setColumnWidth(2, 100)
-        self.certificate_range_twidget.setColumnWidth(3, 100)
-        self.certificate_range_twidget.setColumnWidth(4, 100)
-        self.certificate_range_twidget.setColumnWidth(5, 100)
-        self.certificate_range_twidget.setColumnWidth(5, 200)
+        # self.certificate_range_twidget.resizeColumnToContents(0)
+        # self.certificate_range_twidget.resizeColumnToContents(1)
+        # self.certificate_range_twidget.resizeColumnToContents(2)
+        # self.certificate_range_twidget.resizeColumnToContents(3)
+        # self.certificate_range_twidget.resizeColumnToContents(4)
+        # self.certificate_range_twidget.resizeColumnToContents(5)
+        # self.certificate_range_twidget.resizeColumnToContents(6)
+        #
+        # self.certificate_range_twidget.setColumnWidth(0, 50)
+        # self.certificate_range_twidget.setColumnWidth(1, 100)
+        # self.certificate_range_twidget.setColumnWidth(2, 100)
+        # self.certificate_range_twidget.setColumnWidth(3, 100)
+        # self.certificate_range_twidget.setColumnWidth(4, 100)
+        # self.certificate_range_twidget.setColumnWidth(5, 100)
+        # self.certificate_range_twidget.setColumnWidth(5, 200)
         # self.training_twidget.horizontalHeader().setResizeMode(3, QHeaderView.Stretch)
 
         self.certificate_range_twidget.setAlternatingRowColors(True)
@@ -488,37 +489,37 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
     def __save_equipments(self):
 
         num_rows = self.equipment_twidget.rowCount()
-        try:
-            for row in range(num_rows):
-                item = self.equipment_twidget.item(row,0)
-                id = item.data(Qt.UserRole)
-                equipment = self.session.query(SetEquipment).filter(SetEquipment.id == id).one()
-                item = self.equipment_twidget.item(row,1)
-                equipment.type = item.data(Qt.UserRole)
-                item = self.equipment_twidget.item(row,2)
-                equipment.officer_user = item.data(Qt.UserRole)
-                item = self.equipment_twidget.item(row,3)
-                equipment.purchase_date = item.data(Qt.UserRole)
-                item = self.equipment_twidget.item(row,4)
-                equipment.given_date = item.data(Qt.UserRole)
-                item = self.equipment_twidget.item(row,5)
-                equipment.duration_date = item.data(Qt.UserRole)
-                item = self.equipment_twidget.item(row,6)
-                equipment.description = item.data(Qt.UserRole)
-                item = self.equipment_twidget.item(row,7)
-                equipment.mac_address = item.data(Qt.UserRole)
-                item = self.equipment_twidget.item(row,8)
-                equipment.seller_name = item.data(Qt.UserRole)
-                item = self.equipment_twidget.item(row,9)
-                equipment.aimag = item.data(Qt.UserRole)
-                item = self.equipment_twidget.item(row,10)
-                equipment.soum = item.data(Qt.UserRole)
+        # try:
+        for row in range(num_rows):
+            item = self.equipment_twidget.item(row,0)
+            id = item.data(Qt.UserRole)
+            equipment = self.session.query(SetEquipment).filter(SetEquipment.id == id).one()
+            item = self.equipment_twidget.item(row,1)
+            equipment.type = item.data(Qt.UserRole)
+            item = self.equipment_twidget.item(row,2)
+            equipment.officer_user = item.data(Qt.UserRole)
+            item = self.equipment_twidget.item(row,3)
+            equipment.purchase_date = item.data(Qt.UserRole)
+            item = self.equipment_twidget.item(row,4)
+            equipment.given_date = item.data(Qt.UserRole)
+            item = self.equipment_twidget.item(row,5)
+            equipment.duration_date = item.data(Qt.UserRole)
+            item = self.equipment_twidget.item(row,6)
+            equipment.description = item.data(Qt.UserRole)
+            item = self.equipment_twidget.item(row,7)
+            equipment.mac_address = item.data(Qt.UserRole)
+            item = self.equipment_twidget.item(row,8)
+            equipment.seller_name = item.data(Qt.UserRole)
+            item = self.equipment_twidget.item(row,9)
+            equipment.aimag = item.data(Qt.UserRole)
+            item = self.equipment_twidget.item(row,10)
+            equipment.soum = item.data(Qt.UserRole)
 
-                self.session.add(equipment)
+            self.session.add(equipment)
 
-        except exc.SQLAlchemyError, e:
-            PluginUtils.show_error(self, self.tr("SQL Error"), e.message)
-            raise
+        # except exc.SQLAlchemyError, e:
+        #     PluginUtils.show_error(self, self.tr("SQL Error"), e.message)
+        #     raise
         self.__equipment_clear()
 
     @pyqtSlot()
@@ -548,112 +549,113 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
         self.__search_equipment()
 
     def __search_equipment(self):
-        try:
-            equipments = self.session.query(SetEquipment)
-            filter_is_set = False
 
-            if self.equipment_desc_text.toPlainText():
+        # try:
+        equipments = self.session.query(SetEquipment)
+        filter_is_set = False
+
+        if self.equipment_desc_text.toPlainText():
+            filter_is_set = True
+            desc = "%" + self.equipment_desc_text.toPlainText() + "%"
+            equipments = equipments.filter(SetEquipment.description.ilike(desc))
+
+        if self.seller_name_edit.text():
+            filter_is_set = True
+            seller_name = "%" + self.seller_name_edit.text() + "%"
+            equipments = equipments.filter(SetEquipment.seller_name.ilike(seller_name))
+
+        if self.equipment_list_cbox.currentIndex() != -1:
+            if not self.equipment_list_cbox.itemData(self.equipment_list_cbox.currentIndex()) == -1:
                 filter_is_set = True
-                desc = "%" + self.equipment_desc_text.toPlainText() + "%"
-                equipments = equipments.filter(SetEquipment.description.ilike(desc))
+                equipment_type = self.equipment_list_cbox.itemData(self.equipment_list_cbox.currentIndex())
+                equipments = equipments.filter(SetEquipment.type == equipment_type)
 
-            if self.seller_name_edit.text():
+        if self.users_list_cbox.currentIndex() != -1:
+            if not self.users_list_cbox.itemData(self.users_list_cbox.currentIndex()) == -1:
                 filter_is_set = True
-                seller_name = "%" + self.seller_name_edit.text() + "%"
-                equipments = equipments.filter(SetEquipment.seller_name.ilike(seller_name))
+                officer = self.users_list_cbox.itemData(self.users_list_cbox.currentIndex())
+                equipments = equipments.filter(SetEquipment.officer_user == officer)
 
-            if self.equipment_list_cbox.currentIndex() != -1:
-                if not self.equipment_list_cbox.itemData(self.equipment_list_cbox.currentIndex()) == -1:
-                    filter_is_set = True
-                    equipment_type = self.equipment_list_cbox.itemData(self.equipment_list_cbox.currentIndex())
-                    equipments = equipments.filter(SetEquipment.type == equipment_type)
+        count = 0
 
-            if self.users_list_cbox.currentIndex() != -1:
-                if not self.users_list_cbox.itemData(self.users_list_cbox.currentIndex()) == -1:
-                    filter_is_set = True
-                    officer = self.users_list_cbox.itemData(self.users_list_cbox.currentIndex())
-                    equipments = equipments.filter(SetEquipment.officer_user == officer)
+        self.__remove_equipment_items()
 
-            count = 0
+        # if equipments.distinct(SetEquipment.id).count() == 0:
+        #     self.error_label.setText(self.tr("No equipments found for this search filter."))
+        #     return
 
-            self.__remove_equipment_items()
+        # elif filter_is_set is False:
+        #     self.error_label.setText(self.tr("Please specify a search filter."))
+        #     return
 
-            # if equipments.distinct(SetEquipment.id).count() == 0:
-            #     self.error_label.setText(self.tr("No equipments found for this search filter."))
-            #     return
+        for equipment in equipments.distinct(SetEquipment.id).all():
+            id_item = QTableWidgetItem(str(equipment.id))
+            # item.setIcon(QIcon(QPixmap(":/plugins/lm2/application.png")))
+            id_item.setData(Qt.UserRole, equipment.id)
 
-            # elif filter_is_set is False:
-            #     self.error_label.setText(self.tr("Please specify a search filter."))
-            #     return
+            equipment_type = equipment.type
+            equipment_type_text = equipment.type_ref.description
+            equipment_type_item = QTableWidgetItem(equipment_type_text)
+            equipment_type_item.setData(Qt.UserRole, equipment_type)
 
-            for equipment in equipments.distinct(SetEquipment.id).all():
-                id_item = QTableWidgetItem(str(equipment.id))
-                # item.setIcon(QIcon(QPixmap(":/plugins/lm2/application.png")))
-                id_item.setData(Qt.UserRole, equipment.id)
+            officer_user = equipment.officer_user
+            officer_user_text = equipment.officer_user_ref.surname[:1] + u"." + equipment.officer_user_ref.first_name
+            officer_user_item = QTableWidgetItem(officer_user_text)
+            officer_user_item.setData(Qt.UserRole, officer_user)
 
-                equipment_type = equipment.type
-                equipment_type_text = equipment.type_ref.description
-                equipment_type_item = QTableWidgetItem(equipment_type_text)
-                equipment_type_item.setData(Qt.UserRole, equipment_type)
+            decsription = equipment.description
+            decsription_item = QTableWidgetItem(decsription)
+            decsription_item.setData(Qt.UserRole, decsription)
 
-                officer_user = equipment.officer_user
-                officer_user_text = equipment.officer_user_ref.surname[:1] + u"." + equipment.officer_user_ref.first_name
-                officer_user_item = QTableWidgetItem(officer_user_text)
-                officer_user_item.setData(Qt.UserRole, officer_user)
+            purchase_date = equipment.purchase_date
+            given_date = equipment.given_date
+            duration_date = equipment.duration_date
 
-                decsription = equipment.description
-                decsription_item = QTableWidgetItem(decsription)
-                decsription_item.setData(Qt.UserRole, decsription)
+            purchase_date_item = QTableWidgetItem(str(purchase_date))
+            purchase_date_item.setData(Qt.UserRole, purchase_date)
 
-                purchase_date = equipment.purchase_date
-                given_date = equipment.given_date
-                duration_date = equipment.duration_date
+            given_date_item = QTableWidgetItem(str(given_date))
+            given_date_item.setData(Qt.UserRole, given_date)
 
-                purchase_date_item = QTableWidgetItem(str(purchase_date))
-                purchase_date_item.setData(Qt.UserRole, purchase_date)
+            duration_date_item = QTableWidgetItem(str(duration_date))
+            duration_date_item.setData(Qt.UserRole, duration_date)
 
-                given_date_item = QTableWidgetItem(str(given_date))
-                given_date_item.setData(Qt.UserRole, given_date)
+            mac_address = equipment.mac_address
+            mac_address_item = QTableWidgetItem(mac_address)
+            mac_address_item.setData(Qt.UserRole, mac_address)
 
-                duration_date_item = QTableWidgetItem(str(duration_date))
-                duration_date_item.setData(Qt.UserRole, duration_date)
+            seller_name = equipment.seller_name
+            seller_name_item = QTableWidgetItem(seller_name)
+            seller_name_item.setData(Qt.UserRole, seller_name)
 
-                mac_address = equipment.mac_address
-                mac_address_item = QTableWidgetItem(mac_address)
-                mac_address_item.setData(Qt.UserRole, mac_address)
+            aimag = equipment.aimag
+            aimag_item = QTableWidgetItem(equipment.aimag_ref.name)
+            aimag_item.setData(Qt.UserRole, aimag)
 
-                seller_name = equipment.seller_name
-                seller_name_item = QTableWidgetItem(seller_name)
-                seller_name_item.setData(Qt.UserRole, seller_name)
+            soum = equipment.soum
+            soum_item = QTableWidgetItem(equipment.soum_ref.name)
+            soum_item.setData(Qt.UserRole, soum)
 
-                aimag = equipment.aimag
-                aimag_item = QTableWidgetItem(equipment.aimag_ref.name)
-                aimag_item.setData(Qt.UserRole, aimag)
-
-                soum = equipment.soum
-                soum_item = QTableWidgetItem(equipment.soum_ref.name)
-                soum_item.setData(Qt.UserRole, soum)
-
-                self.equipment_twidget.insertRow(count)
-                self.equipment_twidget.setItem(count, 0, id_item)
-                self.equipment_twidget.setItem(count, 1, equipment_type_item)
-                self.equipment_twidget.setItem(count, 2, officer_user_item)
-                self.equipment_twidget.setItem(count, 3, purchase_date_item)
-                self.equipment_twidget.setItem(count, 4, given_date_item)
-                self.equipment_twidget.setItem(count, 5, duration_date_item)
-                self.equipment_twidget.setItem(count, 6, decsription_item)
-                self.equipment_twidget.setItem(count, 7, mac_address_item)
-                self.equipment_twidget.setItem(count, 8, seller_name_item)
-                self.equipment_twidget.setItem(count, 9, aimag_item)
-                self.equipment_twidget.setItem(count, 10, soum_item)
-                count += 1
+            self.equipment_twidget.insertRow(count)
+            self.equipment_twidget.setItem(count, 0, id_item)
+            self.equipment_twidget.setItem(count, 1, equipment_type_item)
+            self.equipment_twidget.setItem(count, 2, officer_user_item)
+            self.equipment_twidget.setItem(count, 3, purchase_date_item)
+            self.equipment_twidget.setItem(count, 4, given_date_item)
+            self.equipment_twidget.setItem(count, 5, duration_date_item)
+            self.equipment_twidget.setItem(count, 6, decsription_item)
+            self.equipment_twidget.setItem(count, 7, mac_address_item)
+            self.equipment_twidget.setItem(count, 8, seller_name_item)
+            self.equipment_twidget.setItem(count, 9, aimag_item)
+            self.equipment_twidget.setItem(count, 10, soum_item)
+            count += 1
 
             # self.error_label.setText("")
             # self.equipment_results_label.setText(self.tr("Results: ") + str(count))
 
-        except SQLAlchemyError, e:
-            PluginUtils.show_message(self, self.tr("LM2", "Sql Error"), e.message)
-            return
+        # except SQLAlchemyError, e:
+        #     PluginUtils.show_message(self, self.tr("LM2", "Sql Error"), e.message)
+        #     return
 
     def __remove_equipment_items(self):
 
@@ -667,116 +669,116 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
             PluginUtils.show_message(self, self.tr("Equipment save"), self.tr("Please Save Button click!!!"))
             return
 
-        try:
-            equipment_type = self.equipment_list_cbox.itemData(self.equipment_list_cbox.currentIndex())
-            equipment_type_text = self.equipment_list_cbox.currentText()
-            officer_user = self.users_list_cbox.itemData(self.users_list_cbox.currentIndex())
-            officer_user_text = self.users_list_cbox.currentText()
-            decsription = self.equipment_desc_text.toPlainText()
-            purchase_date = PluginUtils.convert_qt_date_to_python(self.initial_date.date())
-            given_date = PluginUtils.convert_qt_date_to_python(self.given_date.date())
-            duration_date = PluginUtils.convert_qt_date_to_python(self.duration_date.date())
-            mac_address = self.mac_address_edit.text()
-            seller_name = self.seller_name_edit.text()
-            aimag = self.aimags_cbox.itemData(self.aimags_cbox.currentIndex())
-            soum = self.soums_cbox.itemData(self.soums_cbox.currentIndex())
-            aimag_text = self.aimags_cbox.currentText()
-            soum_text = self.soums_cbox.currentText()
+        # try:
+        equipment_type = self.equipment_list_cbox.itemData(self.equipment_list_cbox.currentIndex())
+        equipment_type_text = self.equipment_list_cbox.currentText()
+        officer_user = self.users_list_cbox.itemData(self.users_list_cbox.currentIndex())
+        officer_user_text = self.users_list_cbox.currentText()
+        decsription = self.equipment_desc_text.toPlainText()
+        purchase_date = PluginUtils.convert_qt_date_to_python(self.initial_date.date())
+        given_date = PluginUtils.convert_qt_date_to_python(self.given_date.date())
+        duration_date = PluginUtils.convert_qt_date_to_python(self.duration_date.date())
+        mac_address = self.mac_address_edit.text()
+        seller_name = self.seller_name_edit.text()
+        aimag = self.aimags_cbox.itemData(self.aimags_cbox.currentIndex())
+        soum = self.soums_cbox.itemData(self.soums_cbox.currentIndex())
+        aimag_text = self.aimags_cbox.currentText()
+        soum_text = self.soums_cbox.currentText()
 
-            if equipment_type == -1:
-                PluginUtils.show_message(self, self.tr("Equipment type"), self.tr("Equipment type is none!!!"))
-                return
-            if officer_user == -1:
-                PluginUtils.show_message(self, self.tr("officer user"), self.tr("Officer user is none!!!"))
-                return
+        if equipment_type == -1:
+            PluginUtils.show_message(self, self.tr("Equipment type"), self.tr("Equipment type is none!!!"))
+            return
+        if officer_user == -1:
+            PluginUtils.show_message(self, self.tr("officer user"), self.tr("Officer user is none!!!"))
+            return
 
-            if aimag == -1:
-                PluginUtils.show_message(self, self.tr("Aimag list"), self.tr("Aimag is none!!!"))
-                return
+        if aimag == -1:
+            PluginUtils.show_message(self, self.tr("Aimag list"), self.tr("Aimag is none!!!"))
+            return
 
-            if soum == -1:
-                PluginUtils.show_message(self, self.tr("Soum list"), self.tr("Soum is none!!!"))
-                return
+        if soum == -1:
+            PluginUtils.show_message(self, self.tr("Soum list"), self.tr("Soum is none!!!"))
+            return
 
-             #session add
-            user = self.session.query(SetRole).filter(SetRole.user_name_real == officer_user).one()
+         #session add
+        user = self.session.query(SetRole).filter(SetRole.user_name_real == officer_user).one()
 
-            aimag_ref = self.session.query(AuLevel1).filter(AuLevel1.code == aimag).one()
-            soum_ref = self.session.query(AuLevel2).filter(AuLevel2.code == soum).one()
+        aimag_ref = self.session.query(AuLevel1).filter(AuLevel1.code == aimag).one()
+        soum_ref = self.session.query(AuLevel2).filter(AuLevel2.code == soum).one()
 
-            set_equipment = SetEquipment()
-            set_equipment.type = equipment_type
-            set_equipment.officer_user = officer_user
-            set_equipment.officer_user_ref = user
-            set_equipment.description = decsription
-            set_equipment.purchase_date = purchase_date
-            set_equipment.given_date = given_date
-            set_equipment.duration_date = duration_date
-            set_equipment.mac_address = mac_address
-            set_equipment.seller_name = seller_name
-            set_equipment.aimag = aimag
-            set_equipment.aimag_ref = aimag_ref
-            set_equipment.soum = soum
-            set_equipment.soum_ref = soum_ref
+        set_equipment = SetEquipment()
+        set_equipment.type = equipment_type
+        set_equipment.officer_user = officer_user
+        set_equipment.officer_user_ref = user
+        set_equipment.description = decsription
+        set_equipment.purchase_date = purchase_date
+        set_equipment.given_date = given_date
+        set_equipment.duration_date = duration_date
+        set_equipment.mac_address = mac_address
+        set_equipment.seller_name = seller_name
+        set_equipment.aimag = aimag
+        set_equipment.aimag_ref = aimag_ref
+        set_equipment.soum = soum
+        set_equipment.soum_ref = soum_ref
 
-            self.session.add(set_equipment)
-            self.session.commit()
+        self.session.add(set_equipment)
+        self.session.commit()
 
-            id = set_equipment.id
+        id = set_equipment.id
 
-            id_item = QTableWidgetItem(str(id))
-            id_item.setData(Qt.UserRole, id)
+        id_item = QTableWidgetItem(str(id))
+        id_item.setData(Qt.UserRole, id)
 
-            equipment_type_item = QTableWidgetItem(equipment_type_text)
-            equipment_type_item.setData(Qt.UserRole, equipment_type)
+        equipment_type_item = QTableWidgetItem(equipment_type_text)
+        equipment_type_item.setData(Qt.UserRole, equipment_type)
 
-            officer_user_item = QTableWidgetItem(officer_user_text)
-            officer_user_item.setData(Qt.UserRole, officer_user)
+        officer_user_item = QTableWidgetItem(officer_user_text)
+        officer_user_item.setData(Qt.UserRole, officer_user)
 
-            decsription_item = QTableWidgetItem(decsription)
-            decsription_item.setData(Qt.UserRole, decsription)
+        decsription_item = QTableWidgetItem(decsription)
+        decsription_item.setData(Qt.UserRole, decsription)
 
-            purchase_date_item = QTableWidgetItem(str(purchase_date))
-            purchase_date_item.setData(Qt.UserRole, purchase_date)
+        purchase_date_item = QTableWidgetItem(str(purchase_date))
+        purchase_date_item.setData(Qt.UserRole, purchase_date)
 
-            given_date_item = QTableWidgetItem(str(given_date))
-            given_date_item.setData(Qt.UserRole, given_date)
+        given_date_item = QTableWidgetItem(str(given_date))
+        given_date_item.setData(Qt.UserRole, given_date)
 
-            duration_date_item = QTableWidgetItem(str(duration_date))
-            duration_date_item.setData(Qt.UserRole, duration_date)
+        duration_date_item = QTableWidgetItem(str(duration_date))
+        duration_date_item.setData(Qt.UserRole, duration_date)
 
-            mac_address_item = QTableWidgetItem(mac_address)
-            mac_address_item.setData(Qt.UserRole, mac_address)
+        mac_address_item = QTableWidgetItem(mac_address)
+        mac_address_item.setData(Qt.UserRole, mac_address)
 
-            seller_name_item = QTableWidgetItem(seller_name)
-            seller_name_item.setData(Qt.UserRole, seller_name)
+        seller_name_item = QTableWidgetItem(seller_name)
+        seller_name_item.setData(Qt.UserRole, seller_name)
 
-            aimag_item = QTableWidgetItem(aimag_text)
-            aimag_item.setData(Qt.UserRole, aimag)
+        aimag_item = QTableWidgetItem(aimag_text)
+        aimag_item.setData(Qt.UserRole, aimag)
 
-            soum_item = QTableWidgetItem(soum_text)
-            soum_item.setData(Qt.UserRole, soum)
+        soum_item = QTableWidgetItem(soum_text)
+        soum_item.setData(Qt.UserRole, soum)
 
-            row = self.equipment_twidget.rowCount()
-            self.equipment_twidget.insertRow(row)
+        row = self.equipment_twidget.rowCount()
+        self.equipment_twidget.insertRow(row)
 
-            self.equipment_twidget.setItem(row, 0, id_item)
-            self.equipment_twidget.setItem(row, 1, equipment_type_item)
-            self.equipment_twidget.setItem(row, 2, officer_user_item)
-            self.equipment_twidget.setItem(row, 3, purchase_date_item)
-            self.equipment_twidget.setItem(row, 4, given_date_item)
-            self.equipment_twidget.setItem(row, 5, duration_date_item)
-            self.equipment_twidget.setItem(row, 6, decsription_item)
-            self.equipment_twidget.setItem(row, 7, mac_address_item)
-            self.equipment_twidget.setItem(row, 8, seller_name_item)
-            self.equipment_twidget.setItem(row, 9, aimag_item)
-            self.equipment_twidget.setItem(row, 10, soum_item)
+        self.equipment_twidget.setItem(row, 0, id_item)
+        self.equipment_twidget.setItem(row, 1, equipment_type_item)
+        self.equipment_twidget.setItem(row, 2, officer_user_item)
+        self.equipment_twidget.setItem(row, 3, purchase_date_item)
+        self.equipment_twidget.setItem(row, 4, given_date_item)
+        self.equipment_twidget.setItem(row, 5, duration_date_item)
+        self.equipment_twidget.setItem(row, 6, decsription_item)
+        self.equipment_twidget.setItem(row, 7, mac_address_item)
+        self.equipment_twidget.setItem(row, 8, seller_name_item)
+        self.equipment_twidget.setItem(row, 9, aimag_item)
+        self.equipment_twidget.setItem(row, 10, soum_item)
 
-            self.__equipment_clear()
+        self.__equipment_clear()
 
-        except exc.SQLAlchemyError, e:
-            PluginUtils.show_error(self, self.tr("SQL Error"), e.message)
-            raise
+        # except exc.SQLAlchemyError, e:
+        #     PluginUtils.show_error(self, self.tr("SQL Error"), e.message)
+        #     raise
 
 
     @pyqtSlot(QTableWidgetItem)
@@ -1147,11 +1149,6 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
                 PluginUtils.show_error(self, self.tr("Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
                 return
 
-    @pyqtSlot()
-    def on_equipment_find_button_clicked(self):
-
-        print "ok"
-
     @pyqtSlot(int)
     def on_users_list_cbox_currentIndexChanged(self, idx):
 
@@ -1350,9 +1347,17 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
         row = self.certificate_range_twidget.rowCount()
         self.certificate_range_twidget.insertRow(row)
         now_date = QDate.currentDate().toString("yyyy-MM-dd")
-        self.__add_certificate_range_row(row,now_date, now_date,1,50,1, self.tr('Enter training information!'), -1)
 
-    def __add_certificate_range_row(self, row, begin_date, end_date, first_range, last_range, current_no, description,id):
+        au1_code = self.aimags_cbox.itemData(self.aimags_cbox.currentIndex(), Qt.UserRole)
+        au1_name = self.aimags_cbox.currentText()
+        au2_code = self.soums_cbox.itemData(self.soums_cbox.currentIndex(), Qt.UserRole)
+        au2_name = self.soums_cbox.currentText()
+
+        type_code = self.certificate_type_cbox.itemData(self.certificate_type_cbox.currentIndex())
+        type_text = self.certificate_type_cbox.currentText()
+        self.__add_certificate_range_row(row,now_date, now_date,1,50,1, self.tr('Enter training information!'), -1, type_code, type_text, au1_code, au1_name, au2_code, au2_name)
+
+    def __add_certificate_range_row(self, row, begin_date, end_date, first_range, last_range, current_no, description,id, type_code, type_text, au1_code, au1_name, au2_code, au2_name):
 
         item = QTableWidgetItem(u'{0}'.format(row+1))
         item.setData(Qt.UserRole, id)
@@ -1376,91 +1381,46 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
         item = QTableWidgetItem('{0}'.format(description))
         self.certificate_range_twidget.setItem(row, 6, item)
 
+        item = QTableWidgetItem(unicode(type_text))
+        item.setData(Qt.UserRole, type_code)
+        self.certificate_range_twidget.setItem(row, 7, item)
+
+        item = QTableWidgetItem(unicode(au1_name))
+        item.setData(Qt.UserRole, au1_code)
+        self.certificate_range_twidget.setItem(row, 8, item)
+
+        item = QTableWidgetItem(unicode(au2_name))
+        item.setData(Qt.UserRole, au2_code)
+        self.certificate_range_twidget.setItem(row, 9, item)
+
+        item_provided = QTableWidgetItem()
+        item_provided.setCheckState(Qt.Checked)
+        item_provided.setData(Qt.UserRole, True)
+        self.certificate_range_twidget.setItem(row, 10, item_provided)
+
+        self.certificate_range_twidget.resizeColumnsToContents()
+
     @pyqtSlot(int)
     def on_certificate_type_cbox_currentIndexChanged(self, index):
+
+        au1_code = self.aimags_cbox.itemData(self.aimags_cbox.currentIndex(), Qt.UserRole)
+        au2_code = self.soums_cbox.itemData(self.soums_cbox.currentIndex(), Qt.UserRole)
 
         self.certificate_range_twidget.clearContents()
         self.certificate_range_twidget.setRowCount(0)
         certificate_type = self.certificate_type_cbox.itemData(index)
 
-        try:
-            certificate_range = self.session.query(SetCertificate).filter(SetCertificate.certificate_type == certificate_type).all()
-
-            for certificate in certificate_range:
-
-                row = self.certificate_range_twidget.rowCount()
-                self.certificate_range_twidget.insertRow(row)
-
-                item = QTableWidgetItem(u'{0}'.format(certificate.id))
-                item.setData(Qt.UserRole, certificate.id)
-                self.certificate_range_twidget.setItem(row, 0, item)
-
-                item = QTableWidgetItem(u'{0}'.format(certificate.begin_date))
-                self.certificate_range_twidget.setItem(row, 1, item)
-
-                item = QTableWidgetItem('{0}'.format(certificate.end_date))
-                self.certificate_range_twidget.setItem(row, 2, item)
-
-                item = QTableWidgetItem('{0}'.format(certificate.range_first_no))
-                self.certificate_range_twidget.setItem(row, 3, item)
-
-                item = QTableWidgetItem('{0}'.format(certificate.range_last_no))
-                self.certificate_range_twidget.setItem(row, 4, item)
-
-                item = QTableWidgetItem('{0}'.format(certificate.current_no))
-                self.certificate_range_twidget.setItem(row, 5, item)
-
-                item = QTableWidgetItem('{0}'.format(certificate.description))
-                self.certificate_range_twidget.setItem(row, 6, item)
-
-        except SQLAlchemyError, e:
-            PluginUtils.show_error(self, self.tr("Database Query Error"), self.tr("Could not execute: {0}").format(e.message))
-
-
-    def __save_certificate_settings(self):
-
-        for row in range(self.certificate_range_twidget.rowCount()):
-            new_row = False
-            cert_id = self.certificate_range_twidget.item(row, 0).data(Qt.UserRole)
-
-            if cert_id == -1:
-                new_row = True
-                certificate = SetCertificate()
-            else:
-                certificate = self.session.query(SetCertificate).filter(SetCertificate.id == cert_id).one()
-
-            certificate_type = self.certificate_type_cbox.itemData(self.certificate_type_cbox.currentIndex())
-            str_date = self.certificate_range_twidget.item(row,1).text()
-            if len(str_date) == 10:
-                begin_date = datetime.strptime(str_date, "%Y-%m-%d")
-            else:
-                begin_date = datetime.strptime(str_date[:10], "%Y-%m-%d")
-            certificate.begin_date = begin_date
-
-            str_date = self.certificate_range_twidget.item(row,2).text()
-            if len(str_date) == 10:
-                end_date = datetime.strptime(str_date, "%Y-%m-%d")
-            else:
-                end_date = datetime.strptime(str_date[:10], "%Y-%m-%d")
-            certificate.end_date = end_date
-            certificate.range_first_no = int(self.certificate_range_twidget.item(row, 3).text())
-            certificate.range_last_no = int(self.certificate_range_twidget.item(row, 4).text())
-            certificate.current_no = int(self.certificate_range_twidget.item(row, 5).text())
-            certificate.description = (self.certificate_range_twidget.item(row, 6).text())
-            certificate.certificate_type = certificate_type
-
-            if new_row:
-                self.session.add(certificate)
-        self.__read_certificate()
-
-    def __read_certificate(self):
-
-        self.certificate_range_twidget.clearContents()
-        self.certificate_range_twidget.setRowCount(0)
-        certificate_type = self.certificate_type_cbox.itemData(self.certificate_type_cbox.currentIndex())
-
         # try:
-        certificate_range = self.session.query(SetCertificate).filter(SetCertificate.certificate_type == certificate_type).all()
+        if au2_code != -1:
+            certificate_range = self.session.query(SetCertificate).\
+                filter(SetCertificate.au2 == au2_code).\
+                filter(SetCertificate.certificate_type == certificate_type).all()
+        else:
+            if au1_code != -1:
+                certificate_range = self.session.query(SetCertificate). \
+                    filter(SetCertificate.au1 == au1_code). \
+                    filter(SetCertificate.au2 == None). \
+                    filter(SetCertificate.certificate_type == certificate_type).all()
 
         for certificate in certificate_range:
 
@@ -1488,6 +1448,152 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
 
             item = QTableWidgetItem('{0}'.format(certificate.description))
             self.certificate_range_twidget.setItem(row, 6, item)
+
+            if certificate.certificate_type_ref:
+                item = QTableWidgetItem((unicode(certificate.certificate_type_ref.description)))
+                self.certificate_range_twidget.setItem(row, 7, item)
+            if certificate.au1_ref:
+                item = QTableWidgetItem((unicode(certificate.au1_ref.name)))
+                self.certificate_range_twidget.setItem(row, 8, item)
+            if certificate.au2_ref:
+                item = QTableWidgetItem((unicode(certificate.au2_ref.name)))
+                self.certificate_range_twidget.setItem(row, 9, item)
+
+            item = QTableWidgetItem()
+            if certificate.is_valid == True:
+                item.setCheckState(Qt.Checked)
+            else:
+                item.setCheckState(Qt.Unchecked)
+
+            self.certificate_range_twidget.setItem(row, 10, item)
+
+        self.certificate_range_twidget.resizeColumnsToContents()
+        # except SQLAlchemyError, e:
+        #     PluginUtils.show_error(self, self.tr("Database Query Error"), self.tr("Could not execute: {0}").format(e.message))
+
+
+    def __save_certificate_settings(self):
+
+        for row in range(self.certificate_range_twidget.rowCount()):
+            new_row = False
+            cert_id = self.certificate_range_twidget.item(row, 0).data(Qt.UserRole)
+
+            if cert_id == -1:
+                new_row = True
+                certificate = SetCertificate()
+            else:
+                certificate = self.session.query(SetCertificate).filter(SetCertificate.id == cert_id).one()
+
+            # certificate_type = self.certificate_type_cbox.itemData(self.certificate_type_cbox.currentIndex())
+
+            certificate_type = self.certificate_range_twidget.item(row, 7).data(Qt.UserRole)
+            au1_code = self.certificate_range_twidget.item(row, 8).data(Qt.UserRole)
+
+            if self.certificate_range_twidget.item(row, 9):
+                au2_code = self.certificate_range_twidget.item(row, 9).data(Qt.UserRole)
+
+            str_date = self.certificate_range_twidget.item(row,1).text()
+            if len(str_date) == 10:
+                begin_date = datetime.strptime(str_date, "%Y-%m-%d")
+            else:
+                begin_date = datetime.strptime(str_date[:10], "%Y-%m-%d")
+            certificate.begin_date = begin_date
+
+            str_date = self.certificate_range_twidget.item(row,2).text()
+            if len(str_date) == 10:
+                end_date = datetime.strptime(str_date, "%Y-%m-%d")
+            else:
+                end_date = datetime.strptime(str_date[:10], "%Y-%m-%d")
+            certificate.end_date = end_date
+            certificate.range_first_no = int(self.certificate_range_twidget.item(row, 3).text())
+            certificate.range_last_no = int(self.certificate_range_twidget.item(row, 4).text())
+            certificate.current_no = int(self.certificate_range_twidget.item(row, 5).text())
+            certificate.description = (self.certificate_range_twidget.item(row, 6).text())
+
+            is_valid_item = self.certificate_range_twidget.item(row, 10)
+            is_valid = True if is_valid_item.checkState() == Qt.Checked else False
+            certificate.is_valid = is_valid
+
+            if new_row:
+                certificate.certificate_type = certificate_type
+                certificate.au1 = au1_code
+                if self.certificate_range_twidget.item(row, 9):
+                    if au2_code != -1:
+                        certificate.au2 = au2_code
+                    else:
+                        certificate.au2 = None
+                else:
+                    certificate.au2 = None
+            if new_row:
+                self.session.add(certificate)
+
+        self.__read_certificate()
+
+    def __read_certificate(self):
+
+        self.certificate_range_twidget.clearContents()
+        self.certificate_range_twidget.setRowCount(0)
+        au1_code = self.aimags_cbox.itemData(self.aimags_cbox.currentIndex(), Qt.UserRole)
+        au2_code = self.soums_cbox.itemData(self.soums_cbox.currentIndex(), Qt.UserRole)
+        certificate_type = self.certificate_type_cbox.itemData(self.certificate_type_cbox.currentIndex())
+
+        # try:
+        certificate_range = None
+        if au2_code != -1:
+            certificate_range = self.session.query(SetCertificate). \
+                filter(SetCertificate.au2 == au2_code). \
+                filter(SetCertificate.certificate_type == certificate_type).all()
+        else:
+            if au1_code != -1:
+                certificate_range = self.session.query(SetCertificate). \
+                    filter(SetCertificate.au1 == au1_code). \
+                    filter(SetCertificate.au2 == None). \
+                    filter(SetCertificate.certificate_type == certificate_type).all()
+
+        for certificate in certificate_range:
+
+            row = self.certificate_range_twidget.rowCount()
+            self.certificate_range_twidget.insertRow(row)
+
+            item = QTableWidgetItem(u'{0}'.format(certificate.id))
+            item.setData(Qt.UserRole, certificate.id)
+            self.certificate_range_twidget.setItem(row, 0, item)
+
+            item = QTableWidgetItem(u'{0}'.format(certificate.begin_date))
+            self.certificate_range_twidget.setItem(row, 1, item)
+
+            item = QTableWidgetItem('{0}'.format(certificate.end_date))
+            self.certificate_range_twidget.setItem(row, 2, item)
+
+            item = QTableWidgetItem('{0}'.format(certificate.range_first_no))
+            self.certificate_range_twidget.setItem(row, 3, item)
+
+            item = QTableWidgetItem('{0}'.format(certificate.range_last_no))
+            self.certificate_range_twidget.setItem(row, 4, item)
+
+            item = QTableWidgetItem('{0}'.format(certificate.current_no))
+            self.certificate_range_twidget.setItem(row, 5, item)
+
+            item = QTableWidgetItem('{0}'.format(certificate.description))
+            self.certificate_range_twidget.setItem(row, 6, item)
+
+            if certificate.certificate_type_ref:
+                item = QTableWidgetItem((unicode(certificate.certificate_type_ref.description)))
+                self.certificate_range_twidget.setItem(row, 7, item)
+            if certificate.au1_ref:
+                item = QTableWidgetItem((unicode(certificate.au1_ref.name)))
+                self.certificate_range_twidget.setItem(row, 8, item)
+            if certificate.au2_ref:
+                item = QTableWidgetItem((unicode(certificate.au2_ref.name)))
+                self.certificate_range_twidget.setItem(row, 9, item)
+
+            item = QTableWidgetItem()
+            if certificate.is_valid == True:
+                item.setCheckState(Qt.Checked)
+            else:
+                item.setCheckState(Qt.Unchecked)
+
+            self.certificate_range_twidget.setItem(row, 10, item)
         # except exc.SQLAlchemyError, e:
         #     PluginUtils.show_error(self, self.tr("SQL Error"), e.message)
         #     raise
@@ -1785,14 +1891,14 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
         session.execute(
             "SET search_path to base, codelists, admin_units, settings, pasture, public, data_soums_union, sdplatform")
 
-        try:
-            certificate_set = self.session.query(SetCertificate).get(certificate_type)
-            certificate_set.range_first_no = certificate_settings[Constants.CERTIFICATE_FIRST_NUMBER]
-            certificate_set.range_last_no = certificate_settings[Constants.CERTIFICATE_LAST_NUMBER]
-            session.flush()
+        # try:
+        certificate_set = self.session.query(SetCertificate).get(certificate_type)
+        certificate_set.range_first_no = certificate_settings[Constants.CERTIFICATE_FIRST_NUMBER]
+        certificate_set.range_last_no = certificate_settings[Constants.CERTIFICATE_LAST_NUMBER]
+        session.flush()
 
-        except exc.SQLAlchemyError:
-            raise
+        # except exc.SQLAlchemyError:
+        #     raise
 
     def __write_report_settings(self, report_settings):
 
@@ -2056,7 +2162,7 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
 
         zone_no = zone.zone_no
         self.landuse_code_list = list()
-        del self.landuse_code_list[:]
+        # del self.land_fee_twidget[:]
 
         # if zone_no == 50 or zone_no == 60 or zone_no == 70 or zone_no == 80:
         #     for code, description in self.session.query(ClLanduseType.code, ClLanduseType.description). \
@@ -2065,9 +2171,7 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
         #     delegate = LandUseComboBoxDelegate(FEE_LAND_USE, self.landuse_code_list, self.land_fee_twidget)
         #     self.land_fee_twidget.setItemDelegateForColumn(FEE_LAND_USE, delegate)
         # else:
-        for code, description in self.session.query(ClLanduseType.code, ClLanduseType.description). \
-                filter(ClLanduseType.code2 != 11, ClLanduseType.code2 != 12, ClLanduseType.code2 != 13 \
-                           , ClLanduseType.code2 != 14, ClLanduseType.code2 != 15).all():
+        for code, description in self.session.query(ClLanduseType.code, ClLanduseType.description).all():
             self.landuse_code_list.append(u'{0}: {1}'.format(code, description))
         delegate = LandUseComboBoxDelegate(FEE_LAND_USE, self.landuse_code_list, self.land_fee_twidget)
         self.land_fee_twidget.setItemDelegateForColumn(FEE_LAND_USE, delegate)
@@ -2219,8 +2323,7 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
                 #                    , ClLanduseType.code2 != 14, ClLanduseType.code2 != 15).all():
                 #         self.landuse_code_list.append(u'{0}: {1}'.format(code, description))
                 # else:
-                for code, description in self.session.query(ClLanduseType.code, ClLanduseType.description). \
-                        filter(ClLanduseType.code2.in_([11,12,13,14,15])).all():
+                for code, description in self.session.query(ClLanduseType.code, ClLanduseType.description).all():
                     self.landuse_code_list.append(u'{0}: {1}'.format(code, description))
 
             self.__set_up_twidget(self.land_fee_twidget)
@@ -2245,15 +2348,14 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
 
         zone_no = zone.zone_no
         if len(self.landuse_code_list) == 0:
-            if zone_no != 50 or zone_no != 60 or zone_no != 70 or zone_no != 80:
-                for code, description in self.session.query(ClLanduseType.code, ClLanduseType.description). \
-                        filter(ClLanduseType.code2 != 11, ClLanduseType.code2 != 12, ClLanduseType.code2 != 13 \
-                               , ClLanduseType.code2 != 14, ClLanduseType.code2 != 15).all():
-                    self.landuse_code_list.append(u'{0}: {1}'.format(code, description))
-            else:
-                for code, description in self.session.query(ClLanduseType.code, ClLanduseType.description). \
-                        filter(ClLanduseType.code2.in_([11,12,13,14,15])).all():
-                    self.landuse_code_list.append(u'{0}: {1}'.format(code, description))
+            # if zone_no != 50 or zone_no != 60 or zone_no != 70 or zone_no != 80:
+            #     for code, description in self.session.query(ClLanduseType.code, ClLanduseType.description). \
+            #             filter(ClLanduseType.code2 != 11, ClLanduseType.code2 != 12, ClLanduseType.code2 != 13 \
+            #                    , ClLanduseType.code2 != 14, ClLanduseType.code2 != 15).all():
+            #         self.landuse_code_list.append(u'{0}: {1}'.format(code, description))
+            # else:
+            for code, description in self.session.query(ClLanduseType.code, ClLanduseType.description).all():
+                self.landuse_code_list.append(u'{0}: {1}'.format(code, description))
 
         self.__set_up_twidget(self.land_tax_twidget)
 
@@ -2541,46 +2643,46 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
 
         from_zone_fid = self.from_zone_cbox.itemData(from_zone_idx, Qt.UserRole)
 
-        try:
-            session = SessionHandler().session_instance()
-            soum_code = DatabaseUtils.working_l2_code()
-            schema_string = 's' + soum_code
-            session.execute(
-                "SET search_path to base, codelists, admin_units, settings, pasture, public, data_soums_union, sdplatform")
-            from_zone = self.session.query(SetFeeZone).filter(SetFeeZone.zone_id == from_zone_fid).one()
-            fee_count = len(from_zone.fees)
+        # try:
+        session = SessionHandler().session_instance()
+        soum_code = DatabaseUtils.working_l2_code()
+        schema_string = 's' + soum_code
+        session.execute(
+            "SET search_path to base, codelists, admin_units, settings, pasture, public, data_soums_union, sdplatform")
+        from_zone = self.session.query(SetFeeZone).filter(SetFeeZone.zone_id == from_zone_fid).one()
+        fee_count = len(from_zone.fees)
 
-            message = self.tr("{0} fee entries will be copied from Zone {1} to"
-                              " Zone {2} and overwrite all existing entries in Zone {2}."
-                              " Do you want to continue?".format(fee_count, self.from_zone_cbox.currentText(),
-                                                                self.to_zone_cbox.currentText()))
+        message = self.tr("{0} fee entries will be copied from Zone {1} to"
+                          " Zone {2} and overwrite all existing entries in Zone {2}."
+                          " Do you want to continue?".format(fee_count, self.from_zone_cbox.currentText(),
+                                                            self.to_zone_cbox.currentText()))
 
-            if QMessageBox.No == QMessageBox.question(None, self.tr("Copy Fee Entries"), message,
-                                                      QMessageBox.Yes | QMessageBox.No, QMessageBox.No):
-                return
+        if QMessageBox.No == QMessageBox.question(None, self.tr("Copy Fee Entries"), message,
+                                                  QMessageBox.Yes | QMessageBox.No, QMessageBox.No):
+            return
 
-            to_zone_fid = self.to_zone_cbox.itemData(to_zone_idx, Qt.UserRole)
-            to_zone = self.session.query(SetFeeZone).filter(SetFeeZone.zone_id == to_zone_fid).one()
-            fee_count = len(to_zone.fees)
-            for idx in reversed(xrange(fee_count)):
-                del to_zone.fees[idx]
-            session.flush()
+        to_zone_fid = self.to_zone_cbox.itemData(to_zone_idx, Qt.UserRole)
+        to_zone = self.session.query(SetFeeZone).filter(SetFeeZone.zone_id == to_zone_fid).one()
+        fee_count = len(to_zone.fees)
+        for idx in reversed(xrange(fee_count)):
+            del to_zone.fees[idx]
+        session.flush()
 
-            for fee in from_zone.fees:
-                new_fee = SetBaseFee(landuse=fee.landuse, base_fee_per_m2=fee.base_fee_per_m2,
-                                     subsidized_area=fee.subsidized_area,
-                                     subsidized_fee_rate=fee.subsidized_fee_rate)
-                to_zone.fees.append(new_fee)
+        for fee in from_zone.fees:
+            new_fee = SetBaseFee(landuse=fee.landuse, base_fee_per_m2=fee.base_fee_per_m2,
+                                 subsidized_area=fee.subsidized_area,
+                                 subsidized_fee_rate=fee.subsidized_fee_rate)
+            to_zone.fees.append(new_fee)
 
-            if self.zones_lwidget.currentRow() == to_zone_idx:
-                self.__read_fees(to_zone_fid)
-            else:
-                self.zones_lwidget.setCurrentRow(to_zone_idx)
+        if self.zones_lwidget.currentRow() == to_zone_idx:
+            self.__read_fees(to_zone_fid)
+        else:
+            self.zones_lwidget.setCurrentRow(to_zone_idx)
 
-            PluginUtils.show_message(self, self.tr('Copy Fee Entries'), self.tr('Copying successfully completed.'))
+        PluginUtils.show_message(self, self.tr('Copy Fee Entries'), self.tr('Copying successfully completed.'))
 
-        except exc.SQLAlchemyError, e:
-            PluginUtils.show_error(self, self.tr("SQL Error"), e.message)
+        # except exc.SQLAlchemyError, e:
+        #     PluginUtils.show_error(self, self.tr("SQL Error"), e.message)
 
     @pyqtSlot()
     def on_copy_taxes_button_clicked(self):
@@ -2601,47 +2703,47 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
 
         from_zone_fid = self.from_zone_tax_cbox.itemData(from_zone_idx, Qt.UserRole)
 
-        try:
-            session = SessionHandler().session_instance()
-            soum_code = DatabaseUtils.working_l2_code()
-            schema_string = 's' + soum_code
-            session.execute(
-                "SET search_path to base, codelists, admin_units, settings, pasture, public, data_soums_union, sdplatform")
-            from_zone = self.session.query(SetTaxAndPriceZone).filter(SetTaxAndPriceZone.zone_id == from_zone_fid).one()
-            tax_count = len(from_zone.taxes)
+        # try:
+        session = SessionHandler().session_instance()
+        soum_code = DatabaseUtils.working_l2_code()
+        schema_string = 's' + soum_code
+        session.execute(
+            "SET search_path to base, codelists, admin_units, settings, pasture, public, data_soums_union, sdplatform")
+        from_zone = self.session.query(SetTaxAndPriceZone).filter(SetTaxAndPriceZone.zone_id == from_zone_fid).one()
+        tax_count = len(from_zone.taxes)
 
-            message = self.tr("{0} tax entries will be copied from Zone {1} to"
-                              " Zone {2} and overwrite all existing entries in Zone {2}."
-                              " Do you want to continue?".format(tax_count, self.from_zone_tax_cbox.currentText(),
-                                                                self.to_zone_tax_cbox.currentText()))
+        message = self.tr("{0} tax entries will be copied from Zone {1} to"
+                          " Zone {2} and overwrite all existing entries in Zone {2}."
+                          " Do you want to continue?".format(tax_count, self.from_zone_tax_cbox.currentText(),
+                                                            self.to_zone_tax_cbox.currentText()))
 
-            if QMessageBox.No == QMessageBox.question(None, self.tr("Copy Tax Entries"), message,
-                                                      QMessageBox.Yes | QMessageBox.No, QMessageBox.No):
-                return
+        if QMessageBox.No == QMessageBox.question(None, self.tr("Copy Tax Entries"), message,
+                                                  QMessageBox.Yes | QMessageBox.No, QMessageBox.No):
+            return
 
-            to_zone_fid = self.to_zone_tax_cbox.itemData(to_zone_idx, Qt.UserRole)
-            to_zone = self.session.query(SetTaxAndPriceZone).filter(SetTaxAndPriceZone.zone_id == to_zone_fid).one()
-            tax_count = len(to_zone.taxes)
-            for idx in reversed(xrange(tax_count)):
-                del to_zone.taxes[idx]
-            session.flush()
+        to_zone_fid = self.to_zone_tax_cbox.itemData(to_zone_idx, Qt.UserRole)
+        to_zone = self.session.query(SetTaxAndPriceZone).filter(SetTaxAndPriceZone.zone_id == to_zone_fid).one()
+        tax_count = len(to_zone.taxes)
+        for idx in reversed(xrange(tax_count)):
+            del to_zone.taxes[idx]
+        session.flush()
 
-            for tax in from_zone.taxes:
-                new_tax = SetBaseTaxAndPrice(landuse=tax.landuse, base_value_per_m2=tax.base_value_per_m2,
-                                             base_tax_rate=tax.base_tax_rate,
-                                             subsidized_area=tax.subsidized_area,
-                                             subsidized_tax_rate=tax.subsidized_tax_rate)
-                to_zone.taxes.append(new_tax)
+        for tax in from_zone.taxes:
+            new_tax = SetBaseTaxAndPrice(landuse=tax.landuse, base_value_per_m2=tax.base_value_per_m2,
+                                         base_tax_rate=tax.base_tax_rate,
+                                         subsidized_area=tax.subsidized_area,
+                                         subsidized_tax_rate=tax.subsidized_tax_rate)
+            to_zone.taxes.append(new_tax)
 
-            if self.zones_tax_lwidget.currentRow() == to_zone_idx:
-                self.__read_taxes(to_zone_fid)
-            else:
-                self.zones_tax_lwidget.setCurrentRow(to_zone_idx)
+        if self.zones_tax_lwidget.currentRow() == to_zone_idx:
+            self.__read_taxes(to_zone_fid)
+        else:
+            self.zones_tax_lwidget.setCurrentRow(to_zone_idx)
 
-            PluginUtils.show_message(self, self.tr('Copy Tax Entries'), self.tr('Copying successfully completed.'))
+        PluginUtils.show_message(self, self.tr('Copy Tax Entries'), self.tr('Copying successfully completed.'))
 
-        except exc.SQLAlchemyError, e:
-            PluginUtils.show_error(self, self.tr("SQL Error"), e.message)
+        # except exc.SQLAlchemyError, e:
+        #     PluginUtils.show_error(self, self.tr("SQL Error"), e.message)
 
     @pyqtSlot("QDate")
     def on_update_date_dateChanged(self, update_date):
@@ -2680,86 +2782,86 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
         session.execute(
             "SET search_path to base, codelists, admin_units, settings, pasture, public, data_soums_union, sdplatform")
 
-        try:
-            QApplication.setOverrideCursor(QCursor(Qt.WaitCursor))
+        # try:
+        QApplication.setOverrideCursor(QCursor(Qt.WaitCursor))
 
-            self.__save_fees()
+        self.__save_fees()
 
-            update_count = 0
+        update_count = 0
 
-            # Loop over restriction array
-            l2_units = DatabaseUtils.l2_restriction_array()
+        # Loop over restriction array
+        l2_units = DatabaseUtils.l2_restriction_array()
 
 
-            session.execute("SET search_path to data_soums_union, sdplatform, base, codelists, admin_units, settings, public".format(l2_unit))
-            # Get active contracts only
-            contracts = self.session.query(CtContract).\
-                filter(update_date < func.coalesce(CtContract.cancellation_date, CtContract.contract_end)).all()
+        session.execute("SET search_path to data_soums_union, sdplatform, base, codelists, admin_units, settings, public".format(l2_unit))
+        # Get active contracts only
+        contracts = self.session.query(CtContract).\
+            filter(update_date < func.coalesce(CtContract.cancellation_date, CtContract.contract_end)).all()
 
-            for contract in contracts:
-                application_role = contract.application_roles.\
-                    filter(CtContractApplicationRole.role == Constants.APPLICATION_ROLE_CREATES).one()
-                application = application_role.application_ref
-                parcel_id = application.parcel
-                if len(parcel_id) == 0:
-                    # TODO: log something
-                    # should never happen
-                    continue
+        for contract in contracts:
+            application_role = contract.application_roles.\
+                filter(CtContractApplicationRole.role == Constants.APPLICATION_ROLE_CREATES).one()
+            application = application_role.application_ref
+            parcel_id = application.parcel
+            if len(parcel_id) == 0:
+                # TODO: log something
+                # should never happen
+                continue
 
-                count = self.session.query(SetBaseFee).filter(SetFeeZone.geometry.ST_Contains(CaParcelTbl.geometry)).\
-                    filter(CaParcelTbl.parcel_id == parcel_id).\
-                    filter(SetBaseFee.fee_zone == SetFeeZone.zone_id).\
-                    filter(SetBaseFee.landuse == CaParcelTbl.landuse).\
-                    count()
+            count = self.session.query(SetBaseFee).filter(SetFeeZone.geometry.ST_Contains(CaParcelTbl.geometry)).\
+                filter(CaParcelTbl.parcel_id == parcel_id).\
+                filter(SetBaseFee.fee_zone == SetFeeZone.zone_id).\
+                filter(SetBaseFee.landuse == CaParcelTbl.landuse).\
+                count()
 
-                if count == 0:
-                    # TODO: log something
-                    # can happen
-                    continue
+            if count == 0:
+                # TODO: log something
+                # can happen
+                continue
 
-                base_fee = self.session.query(SetBaseFee).filter(SetFeeZone.geometry.ST_Contains(CaParcelTbl.geometry)).\
-                    filter(CaParcelTbl.parcel_id == parcel_id).\
-                    filter(SetBaseFee.fee_zone == SetFeeZone.zone_id).\
-                    filter(SetBaseFee.landuse == CaParcelTbl.landuse).\
-                    one()
+            base_fee = self.session.query(SetBaseFee).filter(SetFeeZone.geometry.ST_Contains(CaParcelTbl.geometry)).\
+                filter(CaParcelTbl.parcel_id == parcel_id).\
+                filter(SetBaseFee.fee_zone == SetFeeZone.zone_id).\
+                filter(SetBaseFee.landuse == CaParcelTbl.landuse).\
+                one()
 
-                new_base_fee_per_m2 = base_fee.base_fee_per_m2
-                new_subsidized_area = base_fee.subsidized_area
-                new_subsidized_fee_rate = base_fee.subsidized_fee_rate
+            new_base_fee_per_m2 = base_fee.base_fee_per_m2
+            new_subsidized_area = base_fee.subsidized_area
+            new_subsidized_fee_rate = base_fee.subsidized_fee_rate
 
-                # Get latest archived fee
-                latest_archived_fee = contract.archived_fees.order_by(CtArchivedFee.valid_till.desc()).first()
-                if latest_archived_fee is None:
-                    valid_from = date(2010, 1, 1)
-                else:
-                    valid_from = latest_archived_fee.valid_till
+            # Get latest archived fee
+            latest_archived_fee = contract.archived_fees.order_by(CtArchivedFee.valid_till.desc()).first()
+            if latest_archived_fee is None:
+                valid_from = date(2010, 1, 1)
+            else:
+                valid_from = latest_archived_fee.valid_till
 
-                count = 0
-                for fee in contract.fees:
+            count = 0
+            for fee in contract.fees:
 
-                    if fee.base_fee_per_m2 != new_base_fee_per_m2 or\
-                            fee.subsidized_area != new_subsidized_area or\
-                            fee.subsidized_fee_rate != new_subsidized_fee_rate:
+                if fee.base_fee_per_m2 != new_base_fee_per_m2 or\
+                        fee.subsidized_area != new_subsidized_area or\
+                        fee.subsidized_fee_rate != new_subsidized_fee_rate:
 
-                        self.__archive_fee(contract, fee, valid_from, update_date)
-                        self.__update_fee(fee, new_base_fee_per_m2, new_subsidized_area, new_subsidized_fee_rate)
+                    self.__archive_fee(contract, fee, valid_from, update_date)
+                    self.__update_fee(fee, new_base_fee_per_m2, new_subsidized_area, new_subsidized_fee_rate)
 
-                        if count == 0:
-                            count += 1
+                    if count == 0:
+                        count += 1
 
-                update_count += count
+            update_count += count
 
-            session.flush()
+        session.flush()
 
-            QApplication.restoreOverrideCursor()
-            PluginUtils.show_message(self, self.tr("Update Contracts"),
-                                     self.tr('Updated {0} contracts. Click Apply to save the changes!'
-                                             .format(update_count)))
+        QApplication.restoreOverrideCursor()
+        PluginUtils.show_message(self, self.tr("Update Contracts"),
+                                 self.tr('Updated {0} contracts. Click Apply to save the changes!'
+                                         .format(update_count)))
 
-        except exc.SQLAlchemyError, e:
-            QApplication.restoreOverrideCursor()
-            self.rollback_to_savepoint()
-            PluginUtils.show_error(self, self.tr("SQL Error"), e.message)
+        # except exc.SQLAlchemyError, e:
+        #     QApplication.restoreOverrideCursor()
+        #     self.rollback_to_savepoint()
+        #     PluginUtils.show_error(self, self.tr("SQL Error"), e.message)
 
     def __archive_fee(self, contract, fee, valid_from, valid_till):
 
@@ -2815,95 +2917,95 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
         session.execute(
             "SET search_path to base, codelists, admin_units, settings, pasture, public, data_soums_union, sdplatform")
 
-        try:
-            QApplication.setOverrideCursor(QCursor(Qt.WaitCursor))
+        # try:
+        QApplication.setOverrideCursor(QCursor(Qt.WaitCursor))
 
-            self.__save_taxes()
+        self.__save_taxes()
 
-            update_count = 0
+        update_count = 0
 
-            # Loop over restriction array
-            l2_units = DatabaseUtils.l2_restriction_array()
+        # Loop over restriction array
+        l2_units = DatabaseUtils.l2_restriction_array()
 
-            session.execute("SET search_path to data_soums_union, sdplatform, base, codelists, admin_units, settings, public".format(l2_unit))
-            # Get active records only
-            records = self.session.query(CtOwnershipRecord).\
-                filter(or_(CtOwnershipRecord.cancellation_date.is_(None), update_date < CtOwnershipRecord.cancellation_date)).all()
+        session.execute("SET search_path to data_soums_union, sdplatform, base, codelists, admin_units, settings, public".format(l2_unit))
+        # Get active records only
+        records = self.session.query(CtOwnershipRecord).\
+            filter(or_(CtOwnershipRecord.cancellation_date.is_(None), update_date < CtOwnershipRecord.cancellation_date)).all()
 
-            for record in records:
-                count = record.application_roles.\
-                    filter(CtContractApplicationRole.role == Constants.APPLICATION_ROLE_CREATES).count()
-                if count == 0:
-                    # TODO: log something
-                    # should never happen
-                    continue
-                application_role = record.application_roles.\
-                    filter(CtContractApplicationRole.role == Constants.APPLICATION_ROLE_CREATES).one()
-                application = application_role.application_ref
-                parcel_id = application.parcel
-                if len(parcel_id) == 0:
-                    # TODO: log something
-                    # should never happen
-                    continue
+        for record in records:
+            count = record.application_roles.\
+                filter(CtContractApplicationRole.role == Constants.APPLICATION_ROLE_CREATES).count()
+            if count == 0:
+                # TODO: log something
+                # should never happen
+                continue
+            application_role = record.application_roles.\
+                filter(CtContractApplicationRole.role == Constants.APPLICATION_ROLE_CREATES).one()
+            application = application_role.application_ref
+            parcel_id = application.parcel
+            if len(parcel_id) == 0:
+                # TODO: log something
+                # should never happen
+                continue
 
-                count = self.session.query(SetBaseTaxAndPrice).filter(SetTaxAndPriceZone.geometry.ST_Contains(CaParcelTbl.geometry)).\
-                    filter(CaParcelTbl.parcel_id == parcel_id).\
-                    filter(SetBaseTaxAndPrice.tax_zone == SetTaxAndPriceZone.zone_id).\
-                    filter(SetBaseTaxAndPrice.landuse == CaParcelTbl.landuse).\
-                    count()
+            count = self.session.query(SetBaseTaxAndPrice).filter(SetTaxAndPriceZone.geometry.ST_Contains(CaParcelTbl.geometry)).\
+                filter(CaParcelTbl.parcel_id == parcel_id).\
+                filter(SetBaseTaxAndPrice.tax_zone == SetTaxAndPriceZone.zone_id).\
+                filter(SetBaseTaxAndPrice.landuse == CaParcelTbl.landuse).\
+                count()
 
-                if count == 0:
-                    # TODO: log something
-                    # can happen
-                    continue
+            if count == 0:
+                # TODO: log something
+                # can happen
+                continue
 
-                base_tax_and_price = self.session.query(SetBaseTaxAndPrice).filter(SetTaxAndPriceZone.geometry.ST_Contains(CaParcelTbl.geometry)).\
-                    filter(CaParcelTbl.parcel_id == parcel_id).\
-                    filter(SetBaseTaxAndPrice.tax_zone == SetTaxAndPriceZone.zone_id).\
-                    filter(SetBaseTaxAndPrice.landuse == CaParcelTbl.landuse).\
-                    one()
+            base_tax_and_price = self.session.query(SetBaseTaxAndPrice).filter(SetTaxAndPriceZone.geometry.ST_Contains(CaParcelTbl.geometry)).\
+                filter(CaParcelTbl.parcel_id == parcel_id).\
+                filter(SetBaseTaxAndPrice.tax_zone == SetTaxAndPriceZone.zone_id).\
+                filter(SetBaseTaxAndPrice.landuse == CaParcelTbl.landuse).\
+                one()
 
-                new_base_value_per_m2 = base_tax_and_price.base_value_per_m2
-                new_base_tax_rate = base_tax_and_price.base_tax_rate
-                new_subsidized_area = base_tax_and_price.subsidized_area
-                new_subsidized_tax_rate = base_tax_and_price.subsidized_tax_rate
+            new_base_value_per_m2 = base_tax_and_price.base_value_per_m2
+            new_base_tax_rate = base_tax_and_price.base_tax_rate
+            new_subsidized_area = base_tax_and_price.subsidized_area
+            new_subsidized_tax_rate = base_tax_and_price.subsidized_tax_rate
 
-                # Get latest archived tax
-                latest_archived_tax = record.archived_taxes.\
-                    order_by(CtArchivedTaxAndPrice.valid_till.desc()).first()
-                if latest_archived_tax is None:
-                    valid_from = date(2010, 1, 1)
-                else:
-                    valid_from = latest_archived_tax.valid_till
+            # Get latest archived tax
+            latest_archived_tax = record.archived_taxes.\
+                order_by(CtArchivedTaxAndPrice.valid_till.desc()).first()
+            if latest_archived_tax is None:
+                valid_from = date(2010, 1, 1)
+            else:
+                valid_from = latest_archived_tax.valid_till
 
-                count = 0
-                for tax in record.taxes:
+            count = 0
+            for tax in record.taxes:
 
-                    if tax.base_value_per_m2 != new_base_value_per_m2 or\
-                            tax.base_tax_rate != new_base_tax_rate or\
-                            tax.subsidized_area != new_subsidized_area or\
-                            tax.subsidized_tax_rate != new_subsidized_tax_rate:
+                if tax.base_value_per_m2 != new_base_value_per_m2 or\
+                        tax.base_tax_rate != new_base_tax_rate or\
+                        tax.subsidized_area != new_subsidized_area or\
+                        tax.subsidized_tax_rate != new_subsidized_tax_rate:
 
-                        self.__archive_tax(record, tax, valid_from, update_date)
-                        self.__update_tax(tax, new_base_value_per_m2, new_base_tax_rate, new_subsidized_area,
-                                          new_subsidized_tax_rate)
+                    self.__archive_tax(record, tax, valid_from, update_date)
+                    self.__update_tax(tax, new_base_value_per_m2, new_base_tax_rate, new_subsidized_area,
+                                      new_subsidized_tax_rate)
 
-                        if count == 0:
-                            count += 1
+                    if count == 0:
+                        count += 1
 
-                update_count += count
+            update_count += count
 
-            session.flush()
+        session.flush()
 
-            QApplication.restoreOverrideCursor()
-            PluginUtils.show_message(self, self.tr("Update Ownership Records"),
-                                     self.tr('Updated {0} records. Click Apply to save the changes!'
-                                             .format(update_count)))
+        QApplication.restoreOverrideCursor()
+        PluginUtils.show_message(self, self.tr("Update Ownership Records"),
+                                 self.tr('Updated {0} records. Click Apply to save the changes!'
+                                         .format(update_count)))
 
-        except exc.SQLAlchemyError, e:
-            QApplication.restoreOverrideCursor()
-            self.rollback_to_savepoint()
-            PluginUtils.show_error(self, self.tr("SQL Error"), e.message)
+        # except exc.SQLAlchemyError, e:
+        #     QApplication.restoreOverrideCursor()
+        #     self.rollback_to_savepoint()
+        #     PluginUtils.show_error(self, self.tr("SQL Error"), e.message)
 
     def __archive_tax(self, record, tax, valid_from, valid_till):
 
@@ -3047,28 +3149,28 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
 
     def __save_companies(self):
 
-        try:
-            session = SessionHandler().session_instance()
-            for row in range(self.company_twidget.rowCount()):
-                new_row = False
-                company_id = self.company_twidget.item(row, COMPANY_NAME).data(Qt.UserRole)
-                if company_id == -1:
-                    new_row = True
-                    company = SetSurveyCompany()
-                else:
-                    company = self.session.query(SetSurveyCompany).filter(SetSurveyCompany.id == company_id).one()
+        # try:
+        session = SessionHandler().session_instance()
+        for row in range(self.company_twidget.rowCount()):
+            new_row = False
+            company_id = self.company_twidget.item(row, COMPANY_NAME).data(Qt.UserRole)
+            if company_id == -1:
+                new_row = True
+                company = SetSurveyCompany()
+            else:
+                company = self.session.query(SetSurveyCompany).filter(SetSurveyCompany.id == company_id).one()
 
-                company.name = self.company_twidget.item(row, COMPANY_NAME).text()
-                company.address = self.company_twidget.item(row, COMPANY_ADDRESS).text()
+            company.name = self.company_twidget.item(row, COMPANY_NAME).text()
+            company.address = self.company_twidget.item(row, COMPANY_ADDRESS).text()
 
-                if new_row:
-                    session.add(company)
+            if new_row:
+                session.add(company)
 
-            self.__read_companies()
+        self.__read_companies()
 
-        except exc.SQLAlchemyError, e:
-            PluginUtils.show_error(self, self.tr("SQL Error"), e.message)
-            raise
+        # except exc.SQLAlchemyError, e:
+        #     PluginUtils.show_error(self, self.tr("SQL Error"), e.message)
+        #     raise
 
     @pyqtSlot()
     def on_find_company_button_clicked(self):
@@ -3122,37 +3224,37 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
         if company_id == -1 or self.company_twidget.rowCount() == 0:
             return
 
-        try:
-            session = SessionHandler().session_instance()
-            if company_id is None:
-                company_id = self.company_twidget.item(self.company_twidget.currentRow(), 0).data(Qt.UserRole)
-            # In case this method was called because a company has been deleted:
-            count = self.session.query(SetSurveyCompany).filter(SetSurveyCompany.id == company_id).count()
-            if count == 0:
-                return
-            company = self.session.query(SetSurveyCompany).filter(SetSurveyCompany.id == company_id).one()
+        # try:
+        session = SessionHandler().session_instance()
+        if company_id is None:
+            company_id = self.company_twidget.item(self.company_twidget.currentRow(), 0).data(Qt.UserRole)
+        # In case this method was called because a company has been deleted:
+        count = self.session.query(SetSurveyCompany).filter(SetSurveyCompany.id == company_id).count()
+        if count == 0:
+            return
+        company = self.session.query(SetSurveyCompany).filter(SetSurveyCompany.id == company_id).one()
 
-            for row in range(self.surveyor_twidget.rowCount()):
-                new_row = False
-                surveyor_id = self.surveyor_twidget.item(row, SURVEYOR_SURNAME).data(Qt.UserRole)
-                if surveyor_id == -1:
-                    new_row = True
-                    surveyor = SetSurveyor()
-                else:
-                    surveyor = self.session.query(SetSurveyor).filter(SetSurveyor.id == surveyor_id).one()
+        for row in range(self.surveyor_twidget.rowCount()):
+            new_row = False
+            surveyor_id = self.surveyor_twidget.item(row, SURVEYOR_SURNAME).data(Qt.UserRole)
+            if surveyor_id == -1:
+                new_row = True
+                surveyor = SetSurveyor()
+            else:
+                surveyor = self.session.query(SetSurveyor).filter(SetSurveyor.id == surveyor_id).one()
 
-                surveyor.surname = self.surveyor_twidget.item(row, SURVEYOR_SURNAME).text()
-                surveyor.first_name = self.surveyor_twidget.item(row, SURVEYOR_FIRST_NAME).text()
-                surveyor.phone = self.surveyor_twidget.item(row, SURVEYOR_PHONE).text()
+            surveyor.surname = self.surveyor_twidget.item(row, SURVEYOR_SURNAME).text()
+            surveyor.first_name = self.surveyor_twidget.item(row, SURVEYOR_FIRST_NAME).text()
+            surveyor.phone = self.surveyor_twidget.item(row, SURVEYOR_PHONE).text()
 
-                if new_row:
-                    company.surveyors.append(surveyor)
+            if new_row:
+                company.surveyors.append(surveyor)
 
-            self.__read_surveyors(company_id)
+        self.__read_surveyors(company_id)
 
-        except exc.SQLAlchemyError, e:
-            PluginUtils.show_error(self, self.tr("SQL Error"), e.message)
-            raise
+        # except exc.SQLAlchemyError, e:
+        #     PluginUtils.show_error(self, self.tr("SQL Error"), e.message)
+        #     raise
 
     @pyqtSlot()
     def on_add_document_button_clicked(self):
@@ -3324,19 +3426,17 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
         self.landuse_code_list = list()
         del self.landuse_code_list[:]
 
-        if zone_no == 50 or zone_no == 60 or zone_no == 70 or zone_no == 80:
-            for code, description in self.session.query(ClLanduseType.code, ClLanduseType.description). \
-                    filter(ClLanduseType.code2.in_([11, 12, 13, 14, 15])).all():
-                self.landuse_code_list.append(u'{0}: {1}'.format(code, description))
-            delegate = LandUseComboBoxDelegate(FEE_LAND_USE, self.landuse_code_list, self.land_fee_twidget)
-            self.land_fee_twidget.setItemDelegateForColumn(FEE_LAND_USE, delegate)
-        else:
-            for code, description in self.session.query(ClLanduseType.code, ClLanduseType.description). \
-                    filter(ClLanduseType.code2 != 11, ClLanduseType.code2 != 12, ClLanduseType.code2 != 13 \
-                    , ClLanduseType.code2 != 14, ClLanduseType.code2 != 15).all():
-                self.landuse_code_list.append(u'{0}: {1}'.format(code, description))
-            delegate = LandUseComboBoxDelegate(FEE_LAND_USE, self.landuse_code_list, self.land_fee_twidget)
-            self.land_fee_twidget.setItemDelegateForColumn(FEE_LAND_USE, delegate)
+        # if zone_no == 50 or zone_no == 60 or zone_no == 70 or zone_no == 80:
+        #     for code, description in self.session.query(ClLanduseType.code, ClLanduseType.description). \
+        #             filter(ClLanduseType.code2.in_([11, 12, 13, 14, 15])).all():
+        #         self.landuse_code_list.append(u'{0}: {1}'.format(code, description))
+        #     delegate = LandUseComboBoxDelegate(FEE_LAND_USE, self.landuse_code_list, self.land_fee_twidget)
+        #     self.land_fee_twidget.setItemDelegateForColumn(FEE_LAND_USE, delegate)
+        # else:
+        for code, description in self.session.query(ClLanduseType.code, ClLanduseType.description).all():
+            self.landuse_code_list.append(u'{0}: {1}'.format(code, description))
+        delegate = LandUseComboBoxDelegate(FEE_LAND_USE, self.landuse_code_list, self.land_fee_twidget)
+        self.land_fee_twidget.setItemDelegateForColumn(FEE_LAND_USE, delegate)
 
     @pyqtSlot()
     def on_doc_add_button_clicked(self):
@@ -3577,12 +3677,12 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
 
             sql = "{0} order by id;".format(sql)
 
-            try:
-                self.session.execute(sql)
-                self.commit()
-            except SQLAlchemyError, e:
-                PluginUtils.show_message(self, self.tr("LM2", "Sql Error"), e.message)
-                return
+            # try:
+            self.session.execute(sql)
+            self.commit()
+            # except SQLAlchemyError, e:
+            #     PluginUtils.show_message(self, self.tr("LM2", "Sql Error"), e.message)
+            #     return
 
     @pyqtSlot()
     def on_print_button_clicked(self):
@@ -4110,36 +4210,36 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
 
     def __save_training(self):
 
-        try:
-            for row in range(self.training_twidget.rowCount()):
-                new_row = False
-                training_id = self.training_twidget.item(row, 0).data(Qt.UserRole)
-                if training_id == -1:
-                    new_row = True
-                    training = SetTraining()
-                else:
-                    training = self.session.query(SetTraining).filter(SetTraining.id == training_id).one()
+        # try:
+        for row in range(self.training_twidget.rowCount()):
+            new_row = False
+            training_id = self.training_twidget.item(row, 0).data(Qt.UserRole)
+            if training_id == -1:
+                new_row = True
+                training = SetTraining()
+            else:
+                training = self.session.query(SetTraining).filter(SetTraining.id == training_id).one()
 
-                training.location = self.training_twidget.item(row,1).text()
-                str_date = self.training_twidget.item(row,2).text()
-                if len(str_date) == 10:
-                    begin_date = datetime.strptime(str_date, "%Y-%m-%d")
-                else:
-                    begin_date = datetime.strptime(str_date[:10], "%Y-%m-%d")
-                training.begin_date = begin_date
-                str_date = self.training_twidget.item(row,3).text()
-                if len(str_date) == 10:
-                    end_date = datetime.strptime(str_date, "%Y-%m-%d")
-                else:
-                    end_date = datetime.strptime(str_date[:10], "%Y-%m-%d")
-                training.end_date = end_date
-                training.description = self.training_twidget.item(row,4).text()
-                if new_row:
-                    self.session.add(training)
-            self.__read_training()
-        except exc.SQLAlchemyError, e:
-            PluginUtils.show_error(self, self.tr("SQL Error"), e.message)
-            raise
+            training.location = self.training_twidget.item(row,1).text()
+            str_date = self.training_twidget.item(row,2).text()
+            if len(str_date) == 10:
+                begin_date = datetime.strptime(str_date, "%Y-%m-%d")
+            else:
+                begin_date = datetime.strptime(str_date[:10], "%Y-%m-%d")
+            training.begin_date = begin_date
+            str_date = self.training_twidget.item(row,3).text()
+            if len(str_date) == 10:
+                end_date = datetime.strptime(str_date, "%Y-%m-%d")
+            else:
+                end_date = datetime.strptime(str_date[:10], "%Y-%m-%d")
+            training.end_date = end_date
+            training.description = self.training_twidget.item(row,4).text()
+            if new_row:
+                self.session.add(training)
+        self.__read_training()
+        # except exc.SQLAlchemyError, e:
+        #     PluginUtils.show_error(self, self.tr("SQL Error"), e.message)
+        #     raise
 
     @pyqtSlot(QTableWidgetItem)
     def on_training_twidget_itemClicked(self, item):
@@ -4374,27 +4474,27 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
 
     def __save_certificate_person(self):
 
-        try:
-            for row in range(self.person_twidget.rowCount()):
-                new_row = False
-                id = self.person_twidget.item(row, 0).data(Qt.UserRole)
-                if id == -1:
-                    new_row = True
-                    person = SetCertificatePerson()
-                else:
-                    person = self.session.query(SetCertificatePerson).filter(SetCertificatePerson.id == id).one()
+        # try:
+        for row in range(self.person_twidget.rowCount()):
+            new_row = False
+            id = self.person_twidget.item(row, 0).data(Qt.UserRole)
+            if id == -1:
+                new_row = True
+                person = SetCertificatePerson()
+            else:
+                person = self.session.query(SetCertificatePerson).filter(SetCertificatePerson.id == id).one()
 
-                person.person_id = self.person_twidget.item(row, 1).text()
-                person.surname = self.person_twidget.item(row, 2).text()
-                person.firstname = self.person_twidget.item(row, 3).text()
+            person.person_id = self.person_twidget.item(row, 1).text()
+            person.surname = self.person_twidget.item(row, 2).text()
+            person.firstname = self.person_twidget.item(row, 3).text()
 
-                if new_row:
-                    self.session.add(person)
+            if new_row:
+                self.session.add(person)
 
-            self.__read_person()
-        except exc.SQLAlchemyError, e:
-            PluginUtils.show_error(self, self.tr("SQL Error"), e.message)
-            raise
+        self.__read_person()
+        # except exc.SQLAlchemyError, e:
+        #     PluginUtils.show_error(self, self.tr("SQL Error"), e.message)
+        #     raise
 
     def __read_person(self):
 
@@ -4676,29 +4776,29 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
 
         self.cpage_register_date.setDate(QDate().currentDate())
         self.cpage_end_date.setDate(QDate().currentDate())
-        self.cpage_aimag_cbox.currentIndexChanged.connect(self.__working_l1_changed)
+        self.aimags_cbox.currentIndexChanged.connect(self.__working_l1_changed)
 
-        if self.cpage_aimag_cbox.count() == 1:
-            self.cpage_aimag_cbox.setCurrentIndex(-1)
-            self.cpage_aimag_cbox.setCurrentIndex(0)
+        if self.aimags_cbox.count() == 1:
+            self.aimags_cbox.setCurrentIndex(-1)
+            self.aimags_cbox.setCurrentIndex(0)
 
-        PluginUtils.populate_au_level1_cbox(self.cpage_aimag_cbox, False)
-        l1_code = self.cpage_aimag_cbox.itemData(self.cpage_aimag_cbox.currentIndex(), Qt.UserRole)
-        PluginUtils.populate_au_level2_cbox(self.cpage_soum_cbox, l1_code, False)
+        PluginUtils.populate_au_level1_cbox(self.aimags_cbox, False)
+        l1_code = self.aimags_cbox.itemData(self.aimags_cbox.currentIndex(), Qt.UserRole)
+        PluginUtils.populate_au_level2_cbox(self.soums_cbox, l1_code, False)
 
     def __working_l1_changed(self, index):
 
-        l1_code = self.cpage_aimag_cbox.itemData(index)
-        try:
-            PluginUtils.populate_au_level2_cbox(self.cpage_soum_cbox, l1_code, False, True, False)
-        except SQLAlchemyError, e:
-            self.rollback_to_savepoint()
-            PluginUtils.show_message(self,  self.tr("Sql Error"), e.message)
-            return
+        l1_code = self.aimags_cbox.itemData(index)
+        # try:
+        PluginUtils.populate_au_level2_cbox(self.soums_cbox, l1_code, True, True, False)
+        # except SQLAlchemyError, e:
+        #     self.rollback_to_savepoint()
+        #     PluginUtils.show_message(self,  self.tr("Sql Error"), e.message)
+        #     return
 
     def __cpage_newid(self):
 
-        au2_code = self.cpage_soum_cbox.itemData(self.cpage_soum_cbox.currentIndex(), Qt.UserRole)
+        au2_code = self.soums_cbox.itemData(self.soums_cbox.currentIndex(), Qt.UserRole)
         soum_filter = str(au2_code) + "-%"
 
         count = self.session.query(SetCadastrePage) \
@@ -4744,8 +4844,8 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
             PluginUtils.show_message(self, self.tr("Not Allowed"), self.tr("Not allowed end date."))
             return
 
-        au1_code = self.cpage_aimag_cbox.itemData(self.cpage_aimag_cbox.currentIndex(), Qt.UserRole)
-        au2_code = self.cpage_soum_cbox.itemData(self.cpage_soum_cbox.currentIndex(), Qt.UserRole)
+        au1_code = self.aimags_cbox.itemData(self.aimags_cbox.currentIndex(), Qt.UserRole)
+        au2_code = self.soums_cbox.itemData(self.soums_cbox.currentIndex(), Qt.UserRole)
 
         register_date_qt = PluginUtils.convert_qt_date_to_python(self.cpage_register_date.date())
         end_date_qt = PluginUtils.convert_qt_date_to_python(self.cpage_end_date.date())
@@ -4814,11 +4914,94 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
         self.session.add(cpage)
 
     @pyqtSlot(int)
-    def on_cpage_soum_cbox_currentIndexChanged(self, index):
+    def on_soums_cbox_currentIndexChanged(self, index):
+
+        if self.tabWidget.currentIndex() == 3:
+            self.__certificate_soum_filter()
+        elif self.tabWidget.currentIndex() == 4:
+            self.__cpage_soum_filter()
+
+    def __certificate_soum_filter(self):
+
+        au1_code = self.aimags_cbox.itemData(self.aimags_cbox.currentIndex(), Qt.UserRole)
+        au2_code = self.soums_cbox.itemData(self.soums_cbox.currentIndex(), Qt.UserRole)
+
+        self.certificate_range_twidget.clearContents()
+        self.certificate_range_twidget.setRowCount(0)
+
+        certificate_type = self.certificate_type_cbox.itemData(self.certificate_type_cbox.currentIndex())
+        certificate_range = None
+        if au2_code != -1:
+            certificate_range = self.session.query(SetCertificate).\
+                filter(SetCertificate.au2 == au2_code).\
+                filter(SetCertificate.certificate_type == certificate_type).all()
+        else:
+            if au1_code != -1:
+                certificate_range = self.session.query(SetCertificate). \
+                    filter(SetCertificate.au1 == au1_code). \
+                    filter(SetCertificate.au2 == None). \
+                    filter(SetCertificate.certificate_type == certificate_type).all()
+
+        if not certificate_range:
+            return
+
+        for certificate in certificate_range:
+
+            row = self.certificate_range_twidget.rowCount()
+            self.certificate_range_twidget.insertRow(row)
+
+            item = QTableWidgetItem(u'{0}'.format(certificate.id))
+            item.setData(Qt.UserRole, certificate.id)
+            self.certificate_range_twidget.setItem(row, 0, item)
+
+            item = QTableWidgetItem(u'{0}'.format(certificate.begin_date))
+            self.certificate_range_twidget.setItem(row, 1, item)
+
+            item = QTableWidgetItem('{0}'.format(certificate.end_date))
+            self.certificate_range_twidget.setItem(row, 2, item)
+
+            item = QTableWidgetItem('{0}'.format(certificate.range_first_no))
+            self.certificate_range_twidget.setItem(row, 3, item)
+
+            item = QTableWidgetItem('{0}'.format(certificate.range_last_no))
+            self.certificate_range_twidget.setItem(row, 4, item)
+
+            item = QTableWidgetItem('{0}'.format(certificate.current_no))
+            self.certificate_range_twidget.setItem(row, 5, item)
+
+            item = QTableWidgetItem('{0}'.format(certificate.description))
+            self.certificate_range_twidget.setItem(row, 6, item)
+
+            if certificate.certificate_type_ref:
+                item = QTableWidgetItem((unicode(certificate.certificate_type_ref.description)))
+                self.certificate_range_twidget.setItem(row, 7, item)
+            if certificate.au1_ref:
+                item = QTableWidgetItem((unicode(certificate.au1_ref.name)))
+                self.certificate_range_twidget.setItem(row, 8, item)
+            if certificate.au2_ref:
+                item = QTableWidgetItem((unicode(certificate.au2_ref.name)))
+                self.certificate_range_twidget.setItem(row, 9, item)
+
+            item = QTableWidgetItem()
+            if certificate.is_valid == True:
+                item.setCheckState(Qt.Checked)
+            else:
+                item.setCheckState(Qt.Unchecked)
+
+            self.certificate_range_twidget.setItem(row, 10, item)
+        self.certificate_range_twidget.resizeColumnsToContents()
+
+    @pyqtSlot()
+    def on_search_button_clicked(self):
+
+        self.__cpage_soum_filter()
+
+    def __cpage_soum_filter(self):
 
         self.cpage_twidget.setRowCount(0)
-        au2_code = self.cpage_soum_cbox.itemData(self.cpage_soum_cbox.currentIndex(), Qt.UserRole)
-
+        au2_code = self.soums_cbox.itemData(self.soums_cbox.currentIndex(), Qt.UserRole)
+        if au2_code == -1:
+            return
         cpages = self.session.query(SetCadastrePage).filter(SetCadastrePage.au_level2 == au2_code).all()
 
         row = 0
@@ -4860,6 +5043,7 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
             self.cpage_twidget.setItem(row, 7, item)
 
             row += 1
+        self.cpage_twidget.resizeColumnsToContents()
 
     @pyqtSlot()
     def on_cpage_edit_button_clicked(self):
@@ -4869,8 +5053,8 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
             PluginUtils.show_message(self, self.tr("Selection"), self.tr("Please choose cadastre page!!!"))
             return
 
-        au1_code = self.cpage_aimag_cbox.itemData(self.cpage_aimag_cbox.currentIndex(), Qt.UserRole)
-        au2_code = self.cpage_soum_cbox.itemData(self.cpage_soum_cbox.currentIndex(), Qt.UserRole)
+        au1_code = self.aimags_cbox.itemData(self.aimags_cbox.currentIndex(), Qt.UserRole)
+        au2_code = self.soums_cbox.itemData(self.soums_cbox.currentIndex(), Qt.UserRole)
 
         au1 = self.session.query(AuLevel1).filter(AuLevel1.code == au1_code).one()
         au2 = self.session.query(AuLevel2).filter(AuLevel2.code == au2_code).one()
@@ -4949,11 +5133,11 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
 
         item = self.cpage_twidget.item(current_row, 6)
         au1_code = item.data(Qt.UserRole)
-        self.cpage_aimag_cbox.findData(au1_code)
+        self.aimags_cbox.findData(au1_code)
 
         item = self.cpage_twidget.item(current_row, 7)
         au2_code = item.data(Qt.UserRole)
-        self.cpage_soum_cbox.findData(au2_code)
+        self.soums_cbox.findData(au2_code)
 
     @pyqtSlot()
     def on_cpage_delete_button_clicked(self):

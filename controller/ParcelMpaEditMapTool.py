@@ -1,6 +1,6 @@
 # coding=utf8
 
-__author__ = 'anna'
+__author__ = 'B.Ankhbold'
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from PyQt4.QtSql import *
@@ -11,13 +11,13 @@ from ..utils.LayerUtils import LayerUtils
 from ..utils.DatabaseUtils import DatabaseUtils
 from ..utils.PluginUtils import PluginUtils
 from ..utils.SessionHandler import SessionHandler
-from .ParcelInfoDialog import ParcelInfoDialog
+from .ParcelMpaDialog import ParcelMpaDialog
 from ..model.CaBuilding import *
-import os
+
 import math
 import locale
 
-class ParcelInfoExtractMapTool(QgsMapTool):
+class ParcelMpaEditMapTool(QgsMapTool):
 
     def __init__(self, plugin):
         """The constructor.
@@ -38,6 +38,7 @@ class ParcelInfoExtractMapTool(QgsMapTool):
         self.current_dialog = None
         self.dialog_position = None
         self.area = 0
+
     # def activate(self):
     #
     #     self.__add_layers()
@@ -67,7 +68,7 @@ class ParcelInfoExtractMapTool(QgsMapTool):
         if event.button() != Qt.LeftButton:
             return
         soum = DatabaseUtils.working_l2_code()
-        layer = LayerUtils.layer_by_data_source("data_ub", 'ca_ub_parcel')
+        layer = LayerUtils.layer_by_data_source("data_ub", 'ca_mpa_parcel_edit_view')
         result_feature = None
 
         if layer is None:
@@ -84,7 +85,7 @@ class ParcelInfoExtractMapTool(QgsMapTool):
             feature_request.setFilterRect(layerRect)
             feature_request.setFlags(QgsFeatureRequest.ExactIntersect)
 
-            idx_parcel_id = layer.dataProvider().fieldNameIndex("old_parcel_id")
+            idx_parcel_id = layer.dataProvider().fieldNameIndex("gid")
 
             for feature in layer.getFeatures(feature_request):
                 result_feature = feature
@@ -97,7 +98,7 @@ class ParcelInfoExtractMapTool(QgsMapTool):
 
             self.__select_feature(parcel_no, layer)
 
-            self.plugin.parcelInfoWidget.set_parcel_data(parcel_no, result_feature)
+            self.plugin.parcelMpaInfoWidget.set_parcel_data(parcel_no, result_feature)
 
     # def deactivate(self):
     #
@@ -113,7 +114,7 @@ class ParcelInfoExtractMapTool(QgsMapTool):
 
     def __select_feature(self, parcel_id, layer):
 
-        expression = " old_parcel_id = \'" + parcel_id + "\'"
+        expression = " gid = \'" + str(parcel_id)+ "\'"
         request = QgsFeatureRequest()
         request.setFilterExpression(expression)
         feature_ids = []

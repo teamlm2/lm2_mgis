@@ -1,5 +1,5 @@
-__author__ = 'B.Ankhbold'
 # coding=utf8
+__author__ = 'B.Ankhbold'
 import os
 import xlsxwriter
 from PyQt4.QtCore import *
@@ -26,6 +26,7 @@ from ..model.AuLevel2 import *
 from ..model.AuLevel3 import *
 from ..model.CadastrePageSearch import *
 from ..model.ClPositionType import *
+from ..model.SdPosition import *
 from ..utils.DatabaseUtils import *
 from .qt_classes.ComboBoxDelegate import *
 from .qt_classes.DropLabel import DropLabel
@@ -78,27 +79,23 @@ class CadastrePageReportDialog(QDialog, Ui_CadastrePageReportDialog, DatabaseHel
 
     def __create_cadastre_page_view(self):
 
-        user_name = QSettings().value(SettingsConstants.USER)
-        self.userSettings = DatabaseUtils.role_settings(user_name)
-        au_level2_string = self.userSettings.restriction_au_level2
-        au_level2_list = au_level2_string.split(",")
+        current_working_soum = "'" + str(DatabaseUtils.current_working_soum_schema()) + "'"
         sql = ""
 
-        for au_level2 in au_level2_list:
 
-            au_level2 = au_level2.strip()
-            if not sql:
-                sql = "Create or replace temp view cadastre_page_search as" + "\n"
-            else:
-                sql = sql + "UNION" + "\n"
+        if not sql:
+            sql = "Create or replace temp view cadastre_page_search as" + "\n"
+        else:
+            sql = sql + "UNION" + "\n"
 
-            select = "SELECT row_number() over() as id, cadastre.print_date, cadastre.cadastre_page_number, cadastre.person_id, " \
-                     "cadastre.parcel_id, person.name ||' '|| person.first_name as right_holder, parcel.address_streetname ||' - '|| parcel.address_khashaa as parcel_address " \
-                     "FROM s{0}.ct_cadastre_page cadastre " \
-                     "left join base.bs_person person on person.person_id = cadastre.person_id " \
-                     "left join s{0}.ca_parcel parcel on parcel.parcel_id = cadastre.parcel_id ".format(au_level2) + "\n"
+        select = "SELECT row_number() over() as id, cadastre.print_date, cadastre.cadastre_page_number, cadastre.person_id, person.person_register, " \
+                 "cadastre.parcel_id, person.name ||' '|| person.first_name as right_holder, parcel.address_streetname ||' - '|| parcel.address_khashaa as parcel_address " \
+                 "FROM data_soums_union.ct_cadastre_page cadastre " \
+                 "left join base.bs_person person on person.person_id = cadastre.person_id " \
+                 "left join data_soums_union.ca_parcel parcel on parcel.parcel_id = cadastre.parcel_id " \
+                 "where  parcel.au2 = {0}".format(current_working_soum) + "\n"
 
-            sql = sql + select
+        sql = sql + select
 
         sql = "{0} order by print_date;".format(sql)
 
@@ -121,7 +118,6 @@ class CadastrePageReportDialog(QDialog, Ui_CadastrePageReportDialog, DatabaseHel
     def on_find_button_clicked(self):
 
         self.cpage_twidget.setRowCount(0)
-        print self.session.query(CadastrePageSearch).count()
 
         cadastre_pages = self.session.query(CadastrePageSearch)
         filter_is_set = False
@@ -157,7 +153,7 @@ class CadastrePageReportDialog(QDialog, Ui_CadastrePageReportDialog, DatabaseHel
             item.setData(Qt.UserRole, cadastre_page.cadastre_page_number)
             self.cpage_twidget.setItem(count, 2, item)
 
-            item = QTableWidgetItem(unicode(cadastre_page.person_id))
+            item = QTableWidgetItem(unicode(cadastre_page.person_register))
             item.setData(Qt.UserRole, cadastre_page.person_id)
             self.cpage_twidget.setItem(count, 3, item)
 
@@ -253,8 +249,8 @@ class CadastrePageReportDialog(QDialog, Ui_CadastrePageReportDialog, DatabaseHel
             .filter(SetRole.user_name == user_name) \
             .filter(SetRole.is_active == True).one()
         position = officer.position
-        position = self.session.query(ClPositionType).filter(ClPositionType.code == position).one()
-        position = position.description
+        position = self.session.query(SdPosition).filter(SdPosition.position_id == position).one()
+        position = position.name
         worksheet.write(xrow + 2, xcol, u'Тайлан гаргасан:')
         worksheet.merge_range(xrow + 2, xcol + 1, xrow + 2, xcol+3, '________________/'+officer.surname[:1]+'.'+officer.first_name+'/')
 

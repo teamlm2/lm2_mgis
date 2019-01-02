@@ -72,7 +72,7 @@
      <property name="geometry">
       <rect>
        <x>0</x>
-       <y>-33</y>
+       <y>0</y>
        <width>419</width>
        <height>664</height>
       </rect>
@@ -83,7 +83,7 @@
         <x>10</x>
         <y>60</y>
         <width>386</width>
-        <height>551</height>
+        <height>561</height>
        </rect>
       </property>
       <property name="maximumSize">
@@ -108,7 +108,7 @@
           <x>5</x>
           <y>0</y>
           <width>371</width>
-          <height>396</height>
+          <height>390</height>
          </rect>
         </property>
         <property name="title">
@@ -590,7 +590,7 @@
         <property name="geometry">
          <rect>
           <x>5</x>
-          <y>396</y>
+          <y>390</y>
           <width>371</width>
           <height>131</height>
          </rect>
@@ -601,9 +601,9 @@
         <widget class="QDateEdit" name="from_date_edit">
          <property name="geometry">
           <rect>
-           <x>15</x>
-           <y>29</y>
-           <width>141</width>
+           <x>120</x>
+           <y>14</y>
+           <width>91</width>
            <height>22</height>
           </rect>
          </property>
@@ -617,9 +617,9 @@
         <widget class="QDateEdit" name="till_date_edit">
          <property name="geometry">
           <rect>
-           <x>15</x>
-           <y>65</y>
-           <width>141</width>
+           <x>120</x>
+           <y>40</y>
+           <width>91</width>
            <height>22</height>
           </rect>
          </property>
@@ -633,9 +633,9 @@
         <widget class="QCheckBox" name="infinity_check_box">
          <property name="geometry">
           <rect>
-           <x>161</x>
-           <y>66</y>
-           <width>191</width>
+           <x>20</x>
+           <y>40</y>
+           <width>91</width>
            <height>20</height>
           </rect>
          </property>
@@ -646,9 +646,9 @@
         <widget class="QPushButton" name="temp_filter_apply_button">
          <property name="geometry">
           <rect>
-           <x>250</x>
-           <y>28</y>
-           <width>111</width>
+           <x>240</x>
+           <y>40</y>
+           <width>91</width>
            <height>23</height>
           </rect>
          </property>
@@ -660,8 +660,8 @@
          <property name="geometry">
           <rect>
            <x>20</x>
-           <y>14</y>
-           <width>141</width>
+           <y>18</y>
+           <width>101</width>
            <height>17</height>
           </rect>
          </property>
@@ -669,17 +669,17 @@
           <string>From</string>
          </property>
         </widget>
-        <widget class="QLabel" name="till_to_label">
+        <widget class="QPushButton" name="mpa_edit_dialog_button">
          <property name="geometry">
           <rect>
            <x>20</x>
-           <y>50</y>
-           <width>141</width>
-           <height>17</height>
+           <y>73</y>
+           <width>311</width>
+           <height>23</height>
           </rect>
          </property>
          <property name="text">
-          <string>To</string>
+          <string>MPA parcel edit</string>
          </property>
         </widget>
        </widget>
@@ -4026,9 +4026,9 @@ QPushButton:disabled {
      <widget class="QLabel" name="error_label">
       <property name="geometry">
        <rect>
-        <x>10</x>
-        <y>574</y>
-        <width>381</width>
+        <x>20</x>
+        <y>576</y>
+        <width>374</width>
         <height>21</height>
        </rect>
       </property>

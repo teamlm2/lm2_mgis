@@ -1,5 +1,6 @@
-__author__ = 'B.Ankhbold'
 # -*- encoding: utf-8 -*-
+__author__ = 'B.Ankhbold'
+
 from PyQt4.QtXml import *
 from geoalchemy2.elements import WKTElement
 from PyQt4.QtXml import *

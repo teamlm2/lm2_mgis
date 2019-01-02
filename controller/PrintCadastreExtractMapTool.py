@@ -1,5 +1,7 @@
-__author__ = 'anna'
 # -*- encoding: utf-8 -*-
+
+__author__ = 'anna'
+
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from PyQt4.QtSql import *

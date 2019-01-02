@@ -17,7 +17,7 @@ class CtContract(Base):
     contract_end = Column(Date)
     certificate_no = Column(Integer)
     cancellation_date = Column(Date)
-
+    property_no = Column(String)
     # foreign keys:
     status = Column(Integer, ForeignKey('cl_contract_status.code'))
     status_ref = relationship("ClContractStatus")

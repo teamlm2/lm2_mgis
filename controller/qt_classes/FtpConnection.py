@@ -45,11 +45,3 @@ class FtpConnection(QStyledItemDelegate):
         if not found:
             ftp_conn.mkd(dir)
         ftp_conn.cwd(dir)
-
-    def upload_app_ftp_file(self):
-
-        print ''
-
-    def move_app_ftp_file(self, app_id):
-
-        print ''

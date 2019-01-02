@@ -1,5 +1,5 @@
-__author__ = 'anna'
 # coding=utf8
+__author__ = 'anna'
 
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
@@ -27,9 +27,11 @@ from ..model.ClPositionType import *
 from ..model.CtCadastrePage import *
 from ..model.Enumerations import ApplicationType, UserRight
 from ..model.SetCadastrePage import *
+from ..model.SdPosition import *
 import math
 import locale
 import os
+from docxtpl import DocxTemplate, RichText
 
 class PrintDialog(QDialog, Ui_PrintDialog):
 
@@ -85,7 +87,7 @@ class PrintDialog(QDialog, Ui_PrintDialog):
         ct_applications = self.session.query(CtApplication).filter(CtApplication.parcel == self.__parcel_no).all()
 
         for application in ct_applications:
-            print application.contracts.count()
+
             if application.contracts.count() > 0:
                 for contract_role in application.contracts:
 
@@ -113,7 +115,7 @@ class PrintDialog(QDialog, Ui_PrintDialog):
                                         self.__add_contract_person(1, contract.status, contract.contract_no,
                                                                    contract.contract_date, application, person)
             else:
-                print 'gggg'
+
                 for stakeholder in application.stakeholders:
                     person = stakeholder.person_ref
 
@@ -980,7 +982,7 @@ class PrintDialog(QDialog, Ui_PrintDialog):
 
         land_officer_name = DatabaseUtils.current_user()
         officer_position = land_officer_name.position
-        officer_position_text = self.session.query(ClPositionType).filter(ClPositionType.code == officer_position).one()
+        officer_position_text = self.session.query(SdPosition).filter(SdPosition.position_id == officer_position).one()
         item = map_composition.getComposerItemById("land_officer_name")
         # land_officer_name = u"{0}, {1}".format(land_officer_name.surname[:1], land_officer_name.first_name)
         land_officer_name = '............................' + land_officer_name.surname[:1] + '.' + land_officer_name.first_name
@@ -989,7 +991,7 @@ class PrintDialog(QDialog, Ui_PrintDialog):
 
         item = map_composition.getComposerItemById("organisation_department_name")
         department_name = self.department_edit.text()
-        land_organisation_department_name = '('+ officer_position_text.description + u' )'
+        land_organisation_department_name = '('+ officer_position_text.name + u' )'
         item.setText(land_organisation_department_name)
         item.adjustSizeToText()
 
@@ -1521,3 +1523,74 @@ class PrintDialog(QDialog, Ui_PrintDialog):
 
         self.session.commit()
         PluginUtils.show_message(self, self.tr("Success"), self.tr("Successfully save"))
+
+    @pyqtSlot()
+    def on_print_parcel_address_button_clicked(self):
+
+        selected_items = self.right_holder_twidget.selectedItems()
+        if len(selected_items) == 0:
+            return
+
+        selected_row = self.right_holder_twidget.row(selected_items[0])
+
+        twidget_item = self.right_holder_twidget.item(selected_row, self.FAMILYNAME)
+        if twidget_item is None:
+            return
+
+        parcel_id = self.__parcel_no
+
+        right_holder_name = twidget_item.text()
+
+        twidget_item = self.right_holder_twidget.item(selected_row, self.FIRSTNAME)
+        first_name = twidget_item.text()
+        if first_name != 'None':
+            right_holder_name += '' if first_name is None or type(first_name) == QPyNullVariant else u' овогтой ' + first_name
+
+        twidget_item = self.right_holder_twidget.item(selected_row, self.FIRSTNAME)
+        right_type = twidget_item.data(Qt.UserRole)
+
+        parcel_geometry = self.session.query(CaParcel.geometry).filter(CaParcel.parcel_id == self.__parcel_no).one()
+        admin_unit_l1_name = self.session.query(AuLevel1.name).filter(
+            AuLevel1.geometry.ST_Intersects(parcel_geometry[0])).first()
+        admin_unit_l2_name = self.session.query(AuLevel2.name).filter(
+            AuLevel2.geometry.ST_Intersects(parcel_geometry[0])).first()
+
+        land_officer_name = DatabaseUtils.current_user()
+        officer_position = land_officer_name.position
+        officer_position_text = self.session.query(SdPosition.name).filter(SdPosition.position_id == officer_position).one()
+
+        land_officer_name = u'............................' + land_officer_name.surname[
+                                                             :1] + '.' + land_officer_name.first_name
+        current_date = QDate.currentDate().toString("yyyy-MM-dd")
+        path = FileUtils.map_file_path()
+        tpl = DocxTemplate(path + 'parcel_address_spec_temp.docx')
+
+        aimag_soum_name = admin_unit_l1_name[0] + u' аймаг/нийслэлийн ' + admin_unit_l2_name[0] + u' сум/дүүргийн '
+
+        working_au1 = DatabaseUtils.working_l1_code()
+        if working_au1 == '011':
+            aimag_name = admin_unit_l2_name[0] + u' дүүргийн'
+        else:
+            aimag_name = admin_unit_l1_name[0] + u' аймгийн'
+        context = {
+            'right_type': right_type,
+            'person_full_name': right_holder_name,
+            'person_full_name': right_holder_name,
+            'parcel_id': parcel_id,
+            'aimag_soum_name': aimag_soum_name,
+            'officer_name': unicode(land_officer_name),
+            'position': unicode(officer_position_text[0]),
+            'current_date': current_date,
+            'aimag_name': aimag_name.upper()
+        }
+
+        tpl.render(context)
+
+        tpl.save(path + 'parcel_address_spec.docx')
+
+        try:
+            QDesktopServices.openUrl(
+                QUrl.fromLocalFile(path + 'parcel_address_spec.docx'))
+        except IOError, e:
+            PluginUtils.show_error(self, self.tr("Out error"),
+                                   self.tr("This file is already opened. Please close re-run"))

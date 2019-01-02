@@ -2,7 +2,6 @@
 
 __author__ = 'B.Ankhbold'
 
-
 from qgis.core import *
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
@@ -35,6 +34,7 @@ from ..model.SetTaxAndPriceZone import *
 from ..model.SetFeeZone import *
 from ..model.SetSurveyCompany import SetSurveyCompany
 from ..model.CaTmpBuilding import CaTmpBuilding
+from ..model.SdConfiguration import *
 from ..model.CaTmpParcel import CaTmpParcel
 from ..model.Enumerations import ApplicationType, UserRight, UserRight_code
 from ..model.SetApplicationTypeLanduseType import *
@@ -48,9 +48,12 @@ from ..model.ClRecordStatus import *
 from ..model.CaParcelPollution import *
 from ..model.ParcelFeeReport import *
 from ..model.ParcelTaxReport import *
+from ..model.CtApplicationDocument import *
 from ..model.DialogInspector import DialogInspector
 from ..model.FeeUnified import *
 from ..model.SetUserGroupRole import *
+from ..model.ClDocumentRole import *
+from ..controller.ParcelMpaDialog import *
 from ..controller.CadastrePageReportDialog import *
 from ..utils.DatabaseUtils import *
 from PersonDialog import PersonDialog
@@ -67,6 +70,8 @@ from datetime import timedelta
 from xlsxwriter.utility import xl_rowcol_to_cell, xl_col_to_name
 import xlsxwriter
 import time
+import urllib
+import urllib2
 
 LANDUSE_1 = u'Хөдөө аж ахуйн газар'
 LANDUSE_2 = u'Хот, тосгон, бусад суурины газар'
@@ -101,7 +106,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         self.decision_date.setDate(QDate.currentDate())
         self.case_completion_date_edit.setDate(QDate.currentDate())
         self.application_datetime_edit.setDate(QDate.currentDate())
-
+        self.pastureWidget = None
         self.__setup_combo_boxes()
 
         self.is_au_level2 = False
@@ -163,7 +168,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         if index:
             if index == 1:
                 self.__setup_person_combo_boxes()
-                self.__create_person_view()
+                # self.__create_person_view()
             if index == 2:
                 self.__setup_parcel_combo_boxes()
                 self.__setup_address_fill()
@@ -185,11 +190,6 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
                 self.__create_record_view()
             if index == 8:
                 self.__report_setup()
-
-    @pyqtSlot(int)
-    def on_tabWidget_currentChanged(self, current_index):
-
-        print current_index
 
     def __setup_twidgets(self):
 
@@ -962,17 +962,17 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
                         "decision.decision_date ,decision.decision_no, person.first_name, person.name, person.contact_surname, person.contact_first_name ,person.address_street_name as person_streetname, person.address_khaskhaa as person_khashaa, " \
                         "parcel.parcel_id, contract.certificate_no, au3_person.name as person_bag,au3.name as bag_name, person.mobile_phone, parcel.area_m2, application.approved_duration, parcel.address_streetname, parcel.address_khashaa " \
                      "FROM data_soums_union.ct_contract contract " \
-                     "LEFT JOIN data_soums_union.ct_contract_application_role con_app on con_app.contract = contract.contract_no "\
-                     "LEFT JOIN data_soums_union.ct_application application ON application.app_no = con_app.application " \
-                     "LEFT JOIN data_soums_union.ct_application_person_role app_pers on application.app_no = app_pers.application "\
+                     "LEFT JOIN data_soums_union.ct_contract_application_role con_app on con_app.contract = contract.contract_id "\
+                     "LEFT JOIN data_soums_union.ct_application application ON application.app_id = con_app.application " \
+                     "LEFT JOIN data_soums_union.ct_application_person_role app_pers on application.app_id = app_pers.application "\
                      "LEFT JOIN base.bs_person person ON app_pers.person = person.person_id " \
                      "LEFT JOIN data_soums_union.ca_parcel_tbl parcel on parcel.parcel_id = application.parcel " \
                      "LEFT JOIN admin_units.au_level3 au3 on ST_Within(parcel.geometry,au3.geometry) "\
                      "LEFT JOIN admin_units.au_level3 au3_person on person.address_au_level3 = au3_person.code " \
                      "LEFT JOIN codelists.cl_landuse_type landuse on parcel.landuse = landuse.code " \
-                     "LEFT JOIN data_soums_union.ct_fee fee on contract.contract_no = fee.contract " \
-                     "LEFT JOIN data_soums_union.ct_decision_application dec_app on dec_app.application = application.app_no " \
-                     "LEFT JOIN data_soums_union.ct_decision decision on decision.decision_no = dec_app.decision " \
+                     "LEFT JOIN data_soums_union.ct_fee fee on contract.contract_id = fee.contract " \
+                     "LEFT JOIN data_soums_union.ct_decision_application dec_app on dec_app.application = application.app_id " \
+                     "LEFT JOIN data_soums_union.ct_decision decision on decision.decision_id = dec_app.decision " \
                      "LEFT JOIN (select p.contract, sum(p.amount_paid) as p_paid from data_soums_union.ct_fee_payment p where p.year_paid_for < date_part('year', NOW())::int group by p.contract) p_paid on contract.contract_no = p_paid.contract " \
                      "LEFT JOIN data_soums_union.ct_fee_payment payment on fee.contract = payment.contract".format(au_level2)  + "\n"
 
@@ -1075,7 +1075,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
 
         select = "SELECT contract.contract_id, contract.contract_no, contract.certificate_no, contract.status ,app_pers.role as person_role,"\
                  "contract.contract_date, person.person_id, person.person_register, person.name, person.middle_name, person.first_name, "\
-                 "parcel.parcel_id, application.app_no, decision.decision_no, au2.code as au2_code, application.app_type " \
+                 "parcel.parcel_id, application.app_no, application.app_id, decision.decision_no, au2.code as au2_code, application.app_type " \
                  "FROM data_soums_union.ct_contract contract " \
                  "LEFT JOIN data_soums_union.ct_contract_application_role con_app on con_app.contract = contract.contract_id "\
                  "LEFT JOIN data_soums_union.ct_application application ON application.app_id = con_app.application " \
@@ -2392,6 +2392,16 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
             app_no = item.data(Qt.UserRole+1)
             app_id = item.data(Qt.UserRole)
 
+            app_count = self.session.query(CtApplication).filter(CtApplication.app_id == app_id).count()
+            if app_count == 0:
+                return
+
+            if app_count == 1:
+                app = self.session.query(CtApplication).filter(CtApplication.app_id == app_id).one()
+                if app.status_id > 6:
+                    PluginUtils.show_message(self, self.tr("Warning"), self.tr("Cannot delete this application."))
+                    return
+
             # try:
             self.create_savepoint()
 
@@ -2526,14 +2536,14 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
                 contract_no = item.data(Qt.UserRole)
 
                 contract_result = self.session.query(ContractSearch).filter(ContractSearch.contract_no == contract_no).one()
-                app_no = contract_result.app_no
+                app_id = contract_result.app_id
 
-                status_count = self.session.query(CtApplicationStatus).filter(CtApplicationStatus.application == app_no).\
+                status_count = self.session.query(CtApplicationStatus).filter(CtApplicationStatus.application == app_id).\
                     filter(CtApplicationStatus.status == 9).count()
 
                 self.session.query(CtContract).filter(CtContract.contract_no == item.data(Qt.UserRole)).delete()
                 if status_count == 1:
-                    self.session.query(CtApplicationStatus).filter(CtApplicationStatus.application == app_no).\
+                    self.session.query(CtApplicationStatus).filter(CtApplicationStatus.application == app_id).\
                         filter(CtApplicationStatus.status == 9).delete()
                 self.commit()
 
@@ -4210,141 +4220,105 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         begin_date = DatabaseUtils.convert_date(self.report_begin_date.date())
         end_date = DatabaseUtils.convert_date(self.report_end_date.date())
         end_date = end_date + timedelta(days=1)
-        try:
-            application = self.session.query(CtApplication).\
+        # try:
+        application = self.session.query(CtApplication).\
+            filter(CtApplication.app_timestamp.between(begin_date, end_date)).all()
+        if not self.report_app_type_cbox.itemData(self.report_app_type_cbox.currentIndex()) == -1:
+            app_type = self.report_app_type_cbox.itemData(self.report_app_type_cbox.currentIndex())
+            application = self.session.query(CtApplication).filter(CtApplication.app_type == app_type).\
                 filter(CtApplication.app_timestamp.between(begin_date, end_date)).all()
-            if not self.report_app_type_cbox.itemData(self.report_app_type_cbox.currentIndex()) == -1:
-                app_type = self.report_app_type_cbox.itemData(self.report_app_type_cbox.currentIndex())
-                application = self.session.query(CtApplication).filter(CtApplication.app_type == app_type).\
-                    filter(CtApplication.app_timestamp.between(begin_date, end_date)).all()
-            if not self.report_person_type_cbox.itemData(self.report_person_type_cbox.currentIndex()) == -1:
-                person_type = self.report_person_type_cbox.itemData(self.report_person_type_cbox.currentIndex())
-                application = self.session.query(CtApplication).\
-                    join(CtApplicationPersonRole, CtApplication.app_no == CtApplicationPersonRole.application).\
-                    join(BsPerson, CtApplicationPersonRole.person == BsPerson.person_id).filter(BsPerson.type == person_type).\
-                    filter(CtApplication.app_timestamp.between(begin_date, end_date)).all()
-            if not self.report_app_status_cbox.itemData(self.report_app_status_cbox.currentIndex()) == -1:
-                status = self.report_app_status_cbox.itemData(self.report_app_status_cbox.currentIndex())
-                application = self.session.query(CtApplication).\
-                    join(CtApplicationStatus, CtApplication.app_no == CtApplicationStatus.application).\
-                    filter(CtApplicationStatus.status == status).\
-                    filter(CtApplication.app_timestamp.between(begin_date, end_date)).all()
-            count = len(application)
-            self.progressBar.setMaximum(count)
-            for app in application:
-                app_person_count = self.session.query(CtApplicationPersonRole).filter(CtApplicationPersonRole.application == app.app_no).count()
-                if app_person_count != 0:
-                    app_person = self.session.query(CtApplicationPersonRole).filter(CtApplicationPersonRole.application == app.app_no).all()
+        if not self.report_person_type_cbox.itemData(self.report_person_type_cbox.currentIndex()) == -1:
+            person_type = self.report_person_type_cbox.itemData(self.report_person_type_cbox.currentIndex())
+            application = self.session.query(CtApplication).\
+                join(CtApplicationPersonRole, CtApplication.app_no == CtApplicationPersonRole.application).\
+                join(BsPerson, CtApplicationPersonRole.person == BsPerson.person_id).filter(BsPerson.type == person_type).\
+                filter(CtApplication.app_timestamp.between(begin_date, end_date)).all()
+        if not self.report_app_status_cbox.itemData(self.report_app_status_cbox.currentIndex()) == -1:
+            status = self.report_app_status_cbox.itemData(self.report_app_status_cbox.currentIndex())
+            application = self.session.query(CtApplication).\
+                join(CtApplicationStatus, CtApplication.app_no == CtApplicationStatus.application).\
+                filter(CtApplicationStatus.status == status).\
+                filter(CtApplication.app_timestamp.between(begin_date, end_date)).all()
+        count = len(application)
+        self.progressBar.setMaximum(count)
+        for app in application:
+            app_person_count = self.session.query(CtApplicationPersonRole).filter(CtApplicationPersonRole.application == app.app_id).count()
+            if app_person_count != 0:
+                app_person = self.session.query(CtApplicationPersonRole).filter(CtApplicationPersonRole.application == app.app_id).all()
 
-                    name = ''
-                    type = ''
-                    for app_person in app_person:
-                        if app_person.main_applicant == True:
-                            if app_person.person_ref.type == 10 or app_person.person_ref.type == 20 or app_person.person_ref.type == 50:
-                                name = app_person.person_ref.name[:1] +'.'+ app_person.person_ref.first_name
-                            elif app_person.person_ref.type == 30 or app_person.person_ref.type == 40 or app_person.person_ref.type == 60:
-                                name = app_person.person_ref.name
-                            app_doc_count = self.session.query(CtApplicationDocument)\
-                                .join(CtApplicationPersonRole, CtApplicationDocument.application == CtApplicationPersonRole.application)\
-                                .join(BsPerson, CtApplicationPersonRole.person == BsPerson.person_id)\
-                                .filter(CtApplicationDocument.application == app.app_no)\
-                                .filter(BsPerson.person_id == app_person.person).count()
-
-                    if app.app_type == 01 or app.app_type == 02 or app.app_type == 03 or app.app_type == 04 or app.app_type == 15:
-                        type = u'Ө'
-                    elif (app.app_type == 06 or app.app_type == 9 or app.app_type == 10 or app.app_type == 12 or app.app_type == 13 or app.app_type == 14)\
-                            and (app_person.person_ref.type == 50 or app_person.person_ref.type == 60):
-                        type = u'А'
-                    elif app.app_type == 05 or app.app_type == 07 or app.app_type == 8 or app.app_type == 10 or app.app_type == 0 or app.app_type == 11 \
-                        and app.app_type == 12 or app.app_type == 13 or app.app_type == 14:
-                        type = u'Э'
-
-                    worksheet.write(row, col,  app.app_no, format)
-                    worksheet.write(row, col+1,name, format)
-                    worksheet.write(row, col+2,type, format)
-                    worksheet.write(row, col+3,app_person.person_ref.person_register, format)
-                    worksheet.write(row, col+4, str(app.app_timestamp),format)
-                    worksheet.write(row, col+5, str(app_doc_count),format)
-                    worksheet.write(row, col+23, app.remarks,format)
-                    worksheet.write(row, col+24, '____',format)
-
-                    if app_doc_count != 0:
-                        app_doc = self.session.query(CtApplicationDocument)\
-                            .join(CtApplicationPersonRole, CtApplicationDocument.application == CtApplicationPersonRole.application)\
+                name = ''
+                type = ''
+                for app_person in app_person:
+                    if app_person.main_applicant == True:
+                        if app_person.person_ref.type == 10 or app_person.person_ref.type == 20 or app_person.person_ref.type == 50:
+                            name = app_person.person_ref.name[:1] +'.'+ app_person.person_ref.first_name
+                        elif app_person.person_ref.type == 30 or app_person.person_ref.type == 40 or app_person.person_ref.type == 60:
+                            name = app_person.person_ref.name
+                        app_doc_count = self.session.query(CtApplicationDocument)\
+                            .join(CtApplicationPersonRole, CtApplicationDocument.application_id == CtApplicationPersonRole.application)\
                             .join(BsPerson, CtApplicationPersonRole.person == BsPerson.person_id)\
-                            .filter(CtApplicationDocument.application == app.app_no)\
-                            .filter(BsPerson.person_id == app_person.person_ref.person_register).all()
-                        for doc in app_doc:
-                            if doc.role == 1:
-                                app_doc_1 = 1
-                            elif doc.role == 2:
-                                app_doc_2 = 1
-                            elif doc.role == 3:
-                                app_doc_3 = 1
-                            elif doc.role == 8:
-                                app_doc_4 = 1
-                            elif doc.role == 9:
-                                app_doc_5 = 1
-                            elif doc.role == 4:
-                                app_doc_6 = 1
-                            elif doc.role == 18:
-                                app_doc_7 = 1
-                            elif doc.role == 17:
-                                app_doc_8 = 1
-                            elif doc.role == 12:
-                                app_doc_9 = 1
-                            elif doc.role == 11:
-                                app_doc_10 = 1
-                            elif doc.role == 5:
-                                app_doc_11 = 1
-                            elif doc.role == 16:
-                                app_doc_12 = 1
-                            elif doc.role == 13:
-                                app_doc_13 = 1
-                            elif doc.role == 10:
-                                app_doc_14 = 1
-                            elif doc.role == 14:
-                                app_doc_15 = 1
-                            elif doc.role == 19:
-                                app_doc_16 = 1
-                            elif doc.role == 23:
-                                app_doc_17 = 1
-                            worksheet.write(row, col+6, str(app_doc_1),format)
-                            worksheet.write(row, col+7, str(app_doc_2),format)
-                            worksheet.write(row, col+8, str(app_doc_3),format)
-                            worksheet.write(row, col+9, str(app_doc_4),format)
-                            worksheet.write(row, col+10, str(app_doc_5),format)
-                            worksheet.write(row, col+11, str(app_doc_6),format)
-                            worksheet.write(row, col+12, str(app_doc_7),format)
-                            worksheet.write(row, col+13, str(app_doc_8),format)
-                            worksheet.write(row, col+14, str(app_doc_9),format)
-                            worksheet.write(row, col+15, str(app_doc_10),format)
-                            worksheet.write(row, col+16, str(app_doc_11),format)
-                            worksheet.write(row, col+17, str(app_doc_12),format)
-                            worksheet.write(row, col+18, str(app_doc_13),format)
-                            worksheet.write(row, col+19, str(app_doc_14),format)
-                            worksheet.write(row, col+20, str(app_doc_15),format)
-                            worksheet.write(row, col+21, str(app_doc_16),format)
-                            worksheet.write(row, col+22, str(app_doc_17),format)
-                        app_doc_1 = 0
-                        app_doc_2 = 0
-                        app_doc_3 = 0
-                        app_doc_4 = 0
-                        app_doc_5 = 0
-                        app_doc_6 = 0
-                        app_doc_7 = 0
-                        app_doc_8 = 0
-                        app_doc_9 = 0
-                        app_doc_10 = 0
-                        app_doc_11 = 0
-                        app_doc_12 = 0
-                        app_doc_13 = 0
-                        app_doc_14 = 0
-                        app_doc_15 = 0
-                        app_doc_16 = 0
-                        app_doc_17 = 0
-                    else:
+                            .filter(CtApplicationDocument.application_id == app.app_id)\
+                            .filter(BsPerson.person_id == app_person.person).count()
 
+                if app.app_type == 01 or app.app_type == 02 or app.app_type == 03 or app.app_type == 04 or app.app_type == 15:
+                    type = u'Ө'
+                elif (app.app_type == 06 or app.app_type == 9 or app.app_type == 10 or app.app_type == 12 or app.app_type == 13 or app.app_type == 14)\
+                        and (app_person.person_ref.type == 50 or app_person.person_ref.type == 60):
+                    type = u'А'
+                elif app.app_type == 05 or app.app_type == 07 or app.app_type == 8 or app.app_type == 10 or app.app_type == 0 or app.app_type == 11 \
+                    and app.app_type == 12 or app.app_type == 13 or app.app_type == 14:
+                    type = u'Э'
+
+                worksheet.write(row, col,  app.app_no, format)
+                worksheet.write(row, col+1,name, format)
+                worksheet.write(row, col+2,type, format)
+                worksheet.write(row, col+3,app_person.person_ref.person_register, format)
+                worksheet.write(row, col+4, str(app.app_timestamp),format)
+                worksheet.write(row, col+5, str(app_doc_count),format)
+                worksheet.write(row, col+23, app.remarks,format)
+                worksheet.write(row, col+24, '____',format)
+
+                if app_doc_count != 0:
+                    app_doc = self.session.query(CtApplicationDocument)\
+                        .join(CtApplicationPersonRole, CtApplicationDocument.application_id == CtApplicationPersonRole.application)\
+                        .join(BsPerson, CtApplicationPersonRole.person == BsPerson.person_id)\
+                        .filter(CtApplicationDocument.application_id == app.app_id)\
+                        .filter(BsPerson.person_id == app_person.person_ref.person_id).all()
+                    for doc in app_doc:
+                        if doc.role == 1:
+                            app_doc_1 = 1
+                        elif doc.role == 2:
+                            app_doc_2 = 1
+                        elif doc.role == 3:
+                            app_doc_3 = 1
+                        elif doc.role == 8:
+                            app_doc_4 = 1
+                        elif doc.role == 9:
+                            app_doc_5 = 1
+                        elif doc.role == 4:
+                            app_doc_6 = 1
+                        elif doc.role == 18:
+                            app_doc_7 = 1
+                        elif doc.role == 17:
+                            app_doc_8 = 1
+                        elif doc.role == 12:
+                            app_doc_9 = 1
+                        elif doc.role == 11:
+                            app_doc_10 = 1
+                        elif doc.role == 5:
+                            app_doc_11 = 1
+                        elif doc.role == 16:
+                            app_doc_12 = 1
+                        elif doc.role == 13:
+                            app_doc_13 = 1
+                        elif doc.role == 10:
+                            app_doc_14 = 1
+                        elif doc.role == 14:
+                            app_doc_15 = 1
+                        elif doc.role == 19:
+                            app_doc_16 = 1
+                        elif doc.role == 23:
+                            app_doc_17 = 1
                         worksheet.write(row, col+6, str(app_doc_1),format)
                         worksheet.write(row, col+7, str(app_doc_2),format)
                         worksheet.write(row, col+8, str(app_doc_3),format)
@@ -4362,14 +4336,50 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
                         worksheet.write(row, col+20, str(app_doc_15),format)
                         worksheet.write(row, col+21, str(app_doc_16),format)
                         worksheet.write(row, col+22, str(app_doc_17),format)
+                    app_doc_1 = 0
+                    app_doc_2 = 0
+                    app_doc_3 = 0
+                    app_doc_4 = 0
+                    app_doc_5 = 0
+                    app_doc_6 = 0
+                    app_doc_7 = 0
+                    app_doc_8 = 0
+                    app_doc_9 = 0
+                    app_doc_10 = 0
+                    app_doc_11 = 0
+                    app_doc_12 = 0
+                    app_doc_13 = 0
+                    app_doc_14 = 0
+                    app_doc_15 = 0
+                    app_doc_16 = 0
+                    app_doc_17 = 0
+                else:
 
-                    row += 1
-                    value_p = self.progressBar.value() + 1
-                    self.progressBar.setValue(value_p)
+                    worksheet.write(row, col+6, str(app_doc_1),format)
+                    worksheet.write(row, col+7, str(app_doc_2),format)
+                    worksheet.write(row, col+8, str(app_doc_3),format)
+                    worksheet.write(row, col+9, str(app_doc_4),format)
+                    worksheet.write(row, col+10, str(app_doc_5),format)
+                    worksheet.write(row, col+11, str(app_doc_6),format)
+                    worksheet.write(row, col+12, str(app_doc_7),format)
+                    worksheet.write(row, col+13, str(app_doc_8),format)
+                    worksheet.write(row, col+14, str(app_doc_9),format)
+                    worksheet.write(row, col+15, str(app_doc_10),format)
+                    worksheet.write(row, col+16, str(app_doc_11),format)
+                    worksheet.write(row, col+17, str(app_doc_12),format)
+                    worksheet.write(row, col+18, str(app_doc_13),format)
+                    worksheet.write(row, col+19, str(app_doc_14),format)
+                    worksheet.write(row, col+20, str(app_doc_15),format)
+                    worksheet.write(row, col+21, str(app_doc_16),format)
+                    worksheet.write(row, col+22, str(app_doc_17),format)
 
-        except SQLAlchemyError, e:
-            PluginUtils.show_error(self, self.tr("Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
-            return
+                row += 1
+                value_p = self.progressBar.value() + 1
+                self.progressBar.setValue(value_p)
+
+        # except SQLAlchemyError, e:
+        #     PluginUtils.show_error(self, self.tr("Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+        #     return
 
         try:
             workbook.close()
@@ -4472,90 +4482,90 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         begin_date = DatabaseUtils.convert_date(self.report_begin_date.date())
         end_date = DatabaseUtils.convert_date(self.report_end_date.date())
         end_date = end_date + timedelta(days=1)
-        try:
-            app_type = self.session.query(ClApplicationType). \
-                filter(and_(ClApplicationType.code != ApplicationType.pasture_use,
-                            ClApplicationType.code != ApplicationType.right_land)).all()
-            app_statuses = self.session.query(ClApplicationStatus).all()
+        # try:
+        app_type = self.session.query(ClApplicationType). \
+            filter(and_(ClApplicationType.code != ApplicationType.pasture_use,
+                        ClApplicationType.code != ApplicationType.right_land)).all()
+        app_statuses = self.session.query(ClApplicationStatus).all()
 
-            values = self.session.query(CtApplication, CtApplicationStatus).\
-                join(CtApplicationStatus, CtApplication.app_no == CtApplicationStatus.application).\
-                filter(CtApplicationStatus.status == 1).\
-                filter(CtApplication.app_timestamp.between(begin_date, end_date)).all()
+        values = self.session.query(CtApplication, CtApplicationStatus).\
+            join(CtApplicationStatus, CtApplication.app_id == CtApplicationStatus.application).\
+            filter(CtApplicationStatus.status == 1).\
+            filter(CtApplication.app_timestamp.between(begin_date, end_date)).all()
 
-            applications = self.session.query(ApplicationSearch)
+        applications = self.session.query(ApplicationSearch)
 
-            filter_is_set = False
-            sub = self.session.query(ApplicationSearch, func.row_number().over(partition_by = ApplicationSearch.app_no, order_by = (desc(ApplicationSearch.status_date), desc(ApplicationSearch.status))).label("row_number")).subquery()
-            applications = applications.select_entity_from(sub)
+        filter_is_set = False
+        sub = self.session.query(ApplicationSearch, func.row_number().over(partition_by = ApplicationSearch.app_no, order_by = (desc(ApplicationSearch.status_date), desc(ApplicationSearch.status))).label("row_number")).subquery()
+        applications = applications.select_entity_from(sub)
 
-            applications = applications. \
-                filter(and_(ApplicationSearch.app_type != ApplicationType.pasture_use,
-                            ApplicationSearch.app_type != ApplicationType.right_land))
+        applications = applications. \
+            filter(and_(ApplicationSearch.app_type != ApplicationType.pasture_use,
+                        ApplicationSearch.app_type != ApplicationType.right_land))
 
-            applications = applications. \
-                filter(and_(ApplicationSearch.app_type != ApplicationType.pasture_use,
-                            ApplicationSearch.app_type != ApplicationType.right_land))
+        applications = applications. \
+            filter(and_(ApplicationSearch.app_type != ApplicationType.pasture_use,
+                        ApplicationSearch.app_type != ApplicationType.right_land))
 
-            applications = applications. \
-                join(CtApplication, ApplicationSearch.app_no == CtApplication.app_no). \
-                filter(sub.c.row_number == 1). \
-                filter(CtApplication.app_timestamp.between(begin_date, end_date))
+        applications = applications. \
+            join(CtApplication, ApplicationSearch.app_id == CtApplication.app_id). \
+            filter(sub.c.row_number == 1). \
+            filter(CtApplication.app_timestamp.between(begin_date, end_date))
 
-            count = len(app_type)
-            self.progressBar.setMaximum(count)
-            for type in app_type:
-                for value in values:
-                    if value.CtApplication.app_type == type.code:
-                        status1 += 1
-                for status in app_statuses:
-                    if status.code != 1:
-                        applications_count = applications.filter(ApplicationSearch.status == status.code)\
-                            .filter(ApplicationSearch.app_type == type.code).count()
-                        if status.code == 2:
-                            status2 = applications_count
-                        elif status.code == 3:
-                            status3 = applications_count
-                        elif status.code == 4:
-                            status4 = applications_count
-                        elif status.code == 5:
-                            status5 = applications_count
-                        elif status.code == 6:
-                            status6 = applications_count
-                        elif status.code == 7:
-                            status7 = applications_count
-                        elif status.code == 8:
-                            status8 = applications_count
-                        elif status.code == 9:
-                            status9 = applications_count
+        count = len(app_type)
+        self.progressBar.setMaximum(count)
+        for type in app_type:
+            for value in values:
+                if value.CtApplication.app_type == type.code:
+                    status1 += 1
+            for status in app_statuses:
+                if status.code != 1:
+                    applications_count = applications.filter(ApplicationSearch.status == status.code)\
+                        .filter(ApplicationSearch.app_type == type.code).count()
+                    if status.code == 2:
+                        status2 = applications_count
+                    elif status.code == 3:
+                        status3 = applications_count
+                    elif status.code == 4:
+                        status4 = applications_count
+                    elif status.code == 5:
+                        status5 = applications_count
+                    elif status.code == 6:
+                        status6 = applications_count
+                    elif status.code == 7:
+                        status7 = applications_count
+                    elif status.code == 8:
+                        status8 = applications_count
+                    elif status.code == 9:
+                        status9 = applications_count
 
-                worksheet.write(row, col, type.description,format)
-                worksheet.write(row, col+1,status1,format)
-                worksheet.write(row, col+2,status2,format)
-                worksheet.write(row, col+3,status3,format)
-                worksheet.write(row, col+4,status4,format)
-                worksheet.write(row, col+5,status5,format)
-                worksheet.write(row, col+6,status6,format)
-                worksheet.write(row, col+7,status7,format)
-                worksheet.write(row, col+8,status8,format)
-                worksheet.write(row, col+9,status9,format)
+            worksheet.write(row, col, type.description,format)
+            worksheet.write(row, col+1,status1,format)
+            worksheet.write(row, col+2,status2,format)
+            worksheet.write(row, col+3,status3,format)
+            worksheet.write(row, col+4,status4,format)
+            worksheet.write(row, col+5,status5,format)
+            worksheet.write(row, col+6,status6,format)
+            worksheet.write(row, col+7,status7,format)
+            worksheet.write(row, col+8,status8,format)
+            worksheet.write(row, col+9,status9,format)
 
-                row += 1
-                status1 = 0
-                status2 = 0
-                status3 = 0
-                status4 = 0
-                status5 = 0
-                status6 = 0
-                status7 = 0
-                status8 = 0
-                status9 = 0
-                value_p = self.progressBar.value() + 1
-                self.progressBar.setValue(value_p)
+            row += 1
+            status1 = 0
+            status2 = 0
+            status3 = 0
+            status4 = 0
+            status5 = 0
+            status6 = 0
+            status7 = 0
+            status8 = 0
+            status9 = 0
+            value_p = self.progressBar.value() + 1
+            self.progressBar.setValue(value_p)
 
-        except SQLAlchemyError, e:
-            PluginUtils.show_error(self, self.tr("Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
-            return
+        # except SQLAlchemyError, e:
+        #     PluginUtils.show_error(self, self.tr("Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+        #     return
 
         try:
             workbook.close()
@@ -4649,77 +4659,77 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         worksheet.write('I5', u'Өргөдлийн дугаар', format)
         worksheet.write('J5', u'Өргөдлийн хугацаа', format)
 
-        try:
-            row = 5
-            col = 0
-            row_number = 1
-            khashaa = ''
-            streetname = ''
-            landuse = ''
-            person_name = ''
-            person_id = ''
-            a3_name = ''
-            person_share = 0
-            c_status = 0
+        # try:
+        row = 5
+        col = 0
+        row_number = 1
+        khashaa = ''
+        streetname = ''
+        landuse = ''
+        person_name = ''
+        person_id = ''
+        a3_name = ''
+        person_share = 0
+        c_status = 0
+        application = self.session.query(CtApplication).\
+            join(CaParcel, CtApplication.parcel == CaParcel.parcel_id).\
+            join(CtApplicationStatus, CtApplication.app_id == CtApplicationStatus.application).\
+            filter(CtApplicationStatus.status == 8).all()
+        if not self.report_app_type_cbox.itemData(self.report_app_type_cbox.currentIndex()) == -1:
+            application = self.session.query(CtApplication).\
+            join(CaParcel, CtApplication.parcel == CaParcel.parcel_id).\
+            filter(CtApplication.app_type == self.report_app_type_cbox.itemData(self.report_app_type_cbox.currentIndex())).all()
+        if not self.report_land_use_cbox.itemData(self.report_land_use_cbox.currentIndex()) == -1:
             application = self.session.query(CtApplication).\
                 join(CaParcel, CtApplication.parcel == CaParcel.parcel_id).\
-                join(CtApplicationStatus, CtApplication.app_no == CtApplicationStatus.application).\
-                filter(CtApplicationStatus.status == 8).all()
-            if not self.report_app_type_cbox.itemData(self.report_app_type_cbox.currentIndex()) == -1:
-                application = self.session.query(CtApplication).\
-                join(CaParcel, CtApplication.parcel == CaParcel.parcel_id).\
-                filter(CtApplication.app_type == self.report_app_type_cbox.itemData(self.report_app_type_cbox.currentIndex())).all()
-            if not self.report_land_use_cbox.itemData(self.report_land_use_cbox.currentIndex()) == -1:
-                application = self.session.query(CtApplication).\
-                    join(CaParcel, CtApplication.parcel == CaParcel.parcel_id).\
-                    filter(CtApplication.approved_landuse == self.report_land_use_cbox.itemData(self.report_land_use_cbox.currentIndex())).all()
-            count = len(application)
-            self.progressBar.setMaximum(count)
-            for app in application:
-                if app.parcel != None:
-                    a3 = self.session.query(AuLevel3).filter(AuLevel3.geometry.ST_Contains(app.parcel_ref.geometry)).one()
-                    a3_name = a3.name
-                parcel = self.session.query(CaParcel).filter(CaParcel.parcel_id == app.parcel_ref.parcel_id).one()
-                app_person_count = self.session.query(CtApplicationPersonRole).filter(CtApplicationPersonRole.application == app.app_no).count()
+                filter(CtApplication.approved_landuse == self.report_land_use_cbox.itemData(self.report_land_use_cbox.currentIndex())).all()
+        count = len(application)
+        self.progressBar.setMaximum(count)
+        for app in application:
+            if app.parcel != None:
+                a3 = self.session.query(AuLevel3).filter(AuLevel3.geometry.ST_Contains(app.parcel_ref.geometry)).one()
+                a3_name = a3.name
+            parcel = self.session.query(CaParcel).filter(CaParcel.parcel_id == app.parcel_ref.parcel_id).one()
+            app_person_count = self.session.query(CtApplicationPersonRole).filter(CtApplicationPersonRole.application == app.app_id).count()
 
-                if parcel.landuse != None:
-                    landuse = parcel.landuse_ref.description
-                    landuse_code = parcel.landuse_ref.code
-                if app.parcel_ref.address_khashaa != None:
-                    khashaa = app.parcel_ref.address_khashaa
-                if app.parcel_ref.address_streetname != None:
-                    app.parcel_ref.streetname = streetname
+            if parcel.landuse != None:
+                landuse = parcel.landuse_ref.description
+                landuse_code = parcel.landuse_ref.code
+            if app.parcel_ref.address_khashaa != None:
+                khashaa = app.parcel_ref.address_khashaa
+            if app.parcel_ref.address_streetname != None:
+                app.parcel_ref.streetname = streetname
 
-                if app_person_count == 1:
-                    app_person = self.session.query(CtApplicationPersonRole).filter(CtApplicationPersonRole.application == app.app_no).one()
-                    if app_person.person != None:
-                        if app_person.person_ref.type == 10 or app_person.person_ref.type == 20 or app_person.person_ref.type == 50:
-                            person_name = app_person.person_ref.name[:1] +'.'+ app_person.person_ref.first_name
-                        elif app_person.person_ref.type == 30 or app_person.person_ref.type == 40 or app_person.person_ref.type == 60:
-                            person_name = app_person.person_ref.name
-                        person_id = app_person.person_ref.person_register
-                        person_share = str(app_person.share)
-                    parcel_address = a3_name + ', '+ streetname +u' гудамж,'+ khashaa + u' хашаа'
+            if app_person_count == 1:
+                app_person = self.session.query(CtApplicationPersonRole).filter(CtApplicationPersonRole.application == app.app_id).one()
+                if app_person.person != None:
+                    if app_person.person_ref.type == 10 or app_person.person_ref.type == 20 or app_person.person_ref.type == 50:
+                        person_name = app_person.person_ref.name[:1] +'.'+ app_person.person_ref.first_name
+                    elif app_person.person_ref.type == 30 or app_person.person_ref.type == 40 or app_person.person_ref.type == 60:
+                        person_name = app_person.person_ref.name
+                    person_id = app_person.person_ref.person_register
+                    person_share = str(app_person.share)
+                parcel_address = a3_name + ', '+ streetname +u' гудамж,'+ khashaa + u' хашаа'
 
-                    worksheet.write(row, col, row_number,format)
-                    worksheet.write(row, col+1,app.parcel_ref.parcel_id,format)
-                    worksheet.write(row, col+2,app.parcel_ref.old_parcel_id,format)
-                    worksheet.write(row, col+3,parcel_address,format)
-                    worksheet.write(row, col+4,landuse,format)
-                    worksheet.write(row, col+5,person_name,format)
-                    worksheet.write(row, col+6,person_id,format)
-                    worksheet.write(row, col+7,person_share,format)
-                    worksheet.write(row, col+8,app.app_no,format)
-                    worksheet.write(row, col+9,str(app.app_timestamp),format)
+                worksheet.write(row, col, row_number,format)
+                worksheet.write(row, col+1,app.parcel_ref.parcel_id,format)
+                worksheet.write(row, col+2,app.parcel_ref.old_parcel_id,format)
+                worksheet.write(row, col+3,parcel_address,format)
+                worksheet.write(row, col+4,landuse,format)
+                worksheet.write(row, col+5,person_name,format)
+                worksheet.write(row, col+6,person_id,format)
+                worksheet.write(row, col+7,person_share,format)
+                worksheet.write(row, col+8,app.app_no,format)
+                worksheet.write(row, col+9,str(app.app_timestamp),format)
 
-                    row += 1
-                    row_number += 1
-                    value_p = self.progressBar.value() + 1
-                    self.progressBar.setValue(value_p)
+                row += 1
+                row_number += 1
+                value_p = self.progressBar.value() + 1
+                self.progressBar.setValue(value_p)
 
-        except SQLAlchemyError, e:
-            PluginUtils.show_error(self, self.tr("Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
-            return
+        # except SQLAlchemyError, e:
+        #     PluginUtils.show_error(self, self.tr("Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+        #     return
 
         try:
             workbook.close()
@@ -4815,109 +4825,94 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         worksheet.write('K5', u'Регистрийн дугаар', format)
         worksheet.write('L5', u'Хувь', format)
 
-        try:
-            row = 5
-            col = 0
-            row_number = 1
-            khashaa = ''
-            streetname = ''
-            landuse = ''
-            person_name = ''
-            person_id = ''
-            contract_no = ''
-            contract_begin = ''
-            contract_end = ''
-            contract_status = ''
-            parcel_address = ''
-            person_share = 0
-            a3_name = ''
-            c_status = 0
+        # try:
+        row = 5
+        col = 0
+        row_number = 1
+        khashaa = ''
+        streetname = ''
+        landuse = ''
+        person_name = ''
+        person_id = ''
+        contract_no = ''
+        contract_begin = ''
+        contract_end = ''
+        contract_status = ''
+        parcel_address = ''
+        person_share = 0
+        a3_name = ''
+        c_status = 0
+        application = self.session.query(CtApplication).\
+            join(CaParcel, CtApplication.parcel == CaParcel.parcel_id).all()
+        if not self.report_app_type_cbox.itemData(self.report_app_type_cbox.currentIndex()) == -1:
             application = self.session.query(CtApplication).\
-                join(CaParcel, CtApplication.parcel == CaParcel.parcel_id).all()
-            if not self.report_app_type_cbox.itemData(self.report_app_type_cbox.currentIndex()) == -1:
-                application = self.session.query(CtApplication).\
-                    join(CaParcel, CtApplication.parcel == CaParcel.parcel_id).\
-                    filter(CtApplication.app_type == self.report_app_type_cbox.itemData(self.report_app_type_cbox.currentIndex())).all()
-            if not self.report_land_use_cbox.itemData(self.report_land_use_cbox.currentIndex()) == -1:
-                application = self.session.query(CtApplication).\
-                    join(CaParcel, CtApplication.parcel == CaParcel.parcel_id).\
-                    filter(CtApplication.approved_landuse == self.report_land_use_cbox.itemData(self.report_land_use_cbox.currentIndex())).all()
-            count = len(application)
-            self.progressBar.setMaximum(count)
-            for app in application:
+                join(CaParcel, CtApplication.parcel == CaParcel.parcel_id).\
+                filter(CtApplication.app_type == self.report_app_type_cbox.itemData(self.report_app_type_cbox.currentIndex())).all()
+        if not self.report_land_use_cbox.itemData(self.report_land_use_cbox.currentIndex()) == -1:
+            application = self.session.query(CtApplication).\
+                join(CaParcel, CtApplication.parcel == CaParcel.parcel_id).\
+                filter(CtApplication.approved_landuse == self.report_land_use_cbox.itemData(self.report_land_use_cbox.currentIndex())).all()
+        count = len(application)
+        self.progressBar.setMaximum(count)
+        for app in application:
 
-                if app.parcel != None:
-                    a3_count = self.session.query(AuLevel3).filter(AuLevel3.geometry.ST_Contains(app.parcel_ref.geometry)).count()
-                    if a3_count != 0:
-                        a3 = self.session.query(AuLevel3).filter(AuLevel3.geometry.ST_Contains(app.parcel_ref.geometry)).one()
-                        a3_name = a3.name
-                parcel = self.session.query(CaParcel).filter(CaParcel.parcel_id == app.parcel_ref.parcel_id).one()
-                app_contract_count = self.session.query(CtContractApplicationRole).filter(CtContractApplicationRole.application == app.app_no).count()
+            if app.parcel != None:
+                a3_count = self.session.query(AuLevel3).filter(AuLevel3.geometry.ST_Contains(app.parcel_ref.geometry)).count()
+                if a3_count != 0:
+                    a3 = self.session.query(AuLevel3).filter(AuLevel3.geometry.ST_Contains(app.parcel_ref.geometry)).one()
+                    a3_name = a3.name
+            parcel = self.session.query(CaParcel).filter(CaParcel.parcel_id == app.parcel_ref.parcel_id).one()
+            app_contract_count = self.session.query(CtContractApplicationRole).filter(CtContractApplicationRole.application == app.app_id).count()
 
-                if app_contract_count == 1:
-                    app_contract = self.session.query(CtContractApplicationRole).filter(CtContractApplicationRole.application == app.app_no).one()
-                    contract = self.session.query(CtContract).filter(CtContract.contract_no == app_contract.contract).one()
-                    contract_no = contract.contract_no
-                    contract_begin = contract.contract_begin
-                    contract_end = str(contract.contract_end)
-                    contract_status = contract.status_ref.description
-                    c_status = contract.status_ref.code
-                    begin_date = DatabaseUtils.convert_date(self.report_begin_date.date())
-                    end_date = DatabaseUtils.convert_date(self.report_end_date.date())
-                    end_date = end_date + timedelta(days=1)
+            if app_contract_count == 1:
+                app_contract = self.session.query(CtContractApplicationRole).filter(CtContractApplicationRole.application == app.app_id).one()
+                contract = self.session.query(CtContract).filter(CtContract.contract_id == app_contract.contract).one()
+                contract_no = contract.contract_no
+                contract_begin = contract.contract_begin
+                contract_end = str(contract.contract_end)
+                contract_status = contract.status_ref.description
+                c_status = contract.status_ref.code
+                begin_date = DatabaseUtils.convert_date(self.report_begin_date.date())
+                end_date = DatabaseUtils.convert_date(self.report_end_date.date())
+                end_date = end_date + timedelta(days=1)
 
-                app_person_count = self.session.query(CtApplicationPersonRole).filter(CtApplicationPersonRole.application == app.app_no).count()
+            app_person_count = self.session.query(CtApplicationPersonRole).filter(CtApplicationPersonRole.application == app.app_id).count()
 
-                first_name = ''
-                name = ''
-                if parcel.landuse != None:
-                    landuse = parcel.landuse_ref.description
-                    landuse_code = parcel.landuse_ref.code
-                if app.parcel_ref.address_khashaa != None:
-                    khashaa = app.parcel_ref.address_khashaa
-                if app.parcel_ref.address_streetname != None:
-                    app.parcel_ref.streetname = streetname
-                if app_person_count == 1:
-                    app_person_role = self.session.query(CtApplicationPersonRole).filter(CtApplicationPersonRole.application == app.app_no).one()
-                    person_count = self.session.query(BsPerson).filter(BsPerson.person_id == app_person_role.person).count()
-                    if person_count != 0:
-                        app_person = self.session.query(BsPerson).filter(BsPerson.person_id == app_person_role.person).one()
-                        if app_person.person_id != None:
-                            if app_person.type == 10 or app_person.type == 20 or app_person.type == 50:
-                                if app_person.first_name != None:
-                                    first_name = app_person.first_name
-                                if app_person.name != None:
-                                    name = app_person.name
-                                person_name = name[:1] +'.'+ first_name
-                            elif app_person.type == 30 or app_person.type == 40 or app_person.type == 60:
-                                person_name = app_person.name
-                            person_id = app_person.person_id
-                            person_share = str(app_person_role.share)
-                        parcel_address = a3_name + ', '+ streetname +u' гудамж,'+ khashaa + u' хашаа'
+            first_name = ''
+            name = ''
+            if parcel.landuse != None:
+                landuse = parcel.landuse_ref.description
+                landuse_code = parcel.landuse_ref.code
+            if app.parcel_ref.address_khashaa != None:
+                khashaa = app.parcel_ref.address_khashaa
+            if app.parcel_ref.address_streetname != None:
+                app.parcel_ref.streetname = streetname
+            if app_person_count == 1:
+                app_person_role = self.session.query(CtApplicationPersonRole).filter(CtApplicationPersonRole.application == app.app_id).one()
+                person_count = self.session.query(BsPerson).filter(BsPerson.person_id == app_person_role.person).count()
+                if person_count != 0:
+                    app_person = self.session.query(BsPerson).filter(BsPerson.person_id == app_person_role.person).one()
+                    if app_person.person_id != None:
+                        if app_person.type == 10 or app_person.type == 20 or app_person.type == 50:
+                            if app_person.first_name != None:
+                                first_name = app_person.first_name
+                            if app_person.name != None:
+                                name = app_person.name
+                            person_name = name[:1] +'.'+ first_name
+                        elif app_person.type == 30 or app_person.type == 40 or app_person.type == 60:
+                            person_name = app_person.name
+                        person_id = app_person.person_id
+                        person_share = str(app_person_role.share)
+                    parcel_address = a3_name + ', '+ streetname +u' гудамж,'+ khashaa + u' хашаа'
 
-                if app_contract_count == 1 and contract.contract_end != None and contract.contract_end >= begin_date and contract.contract_end <= end_date:
-                    app_person_role = self.session.query(CtApplicationPersonRole).filter(CtApplicationPersonRole.application == app.app_no).one()
-                    person_count = self.session.query(BsPerson).filter(BsPerson.person_id == app_person_role.person).count()
-                    if person_count != 0:
+            if app_contract_count == 1 and contract.contract_end != None and contract.contract_end >= begin_date and contract.contract_end <= end_date:
+                app_person_role = self.session.query(CtApplicationPersonRole).filter(CtApplicationPersonRole.application == app.app_id).one()
+                person_count = self.session.query(BsPerson).filter(BsPerson.person_id == app_person_role.person).count()
+                if person_count != 0:
 
-                        app_person = self.session.query(BsPerson).filter(BsPerson.person_id == app_person_role.person).one()
-                        if not self.report_person_type_cbox.itemData(self.report_person_type_cbox.currentIndex()) == -1:
-                            if app_person.type == self.report_person_type_cbox.itemData(self.report_person_type_cbox.currentIndex()):
-                                worksheet.write(row, col, row_number,format)
-                                worksheet.write(row, col+1,app.parcel_ref.parcel_id,format)
-                                worksheet.write(row, col+2,app.parcel_ref.old_parcel_id,format)
-                                worksheet.write(row, col+3,parcel_address,format)
-                                worksheet.write(row, col+4,landuse,format)
-                                worksheet.write(row, col+5,contract_no,format)
-                                worksheet.write(row, col+6,str(contract_begin),format)
-                                worksheet.write(row, col+7,contract_end,format)
-                                worksheet.write(row, col+8,contract_status,format)
-                                worksheet.write(row, col+9,person_name,format)
-                                worksheet.write(row, col+10,person_id,format)
-                                worksheet.write(row, col+11,person_share,format)
-                                row += 1
-                                row_number += 1
-                        else:
+                    app_person = self.session.query(BsPerson).filter(BsPerson.person_id == app_person_role.person).one()
+                    if not self.report_person_type_cbox.itemData(self.report_person_type_cbox.currentIndex()) == -1:
+                        if app_person.type == self.report_person_type_cbox.itemData(self.report_person_type_cbox.currentIndex()):
                             worksheet.write(row, col, row_number,format)
                             worksheet.write(row, col+1,app.parcel_ref.parcel_id,format)
                             worksheet.write(row, col+2,app.parcel_ref.old_parcel_id,format)
@@ -4932,12 +4927,27 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
                             worksheet.write(row, col+11,person_share,format)
                             row += 1
                             row_number += 1
-                            value_p  = self.progressBar.value() + 1
-                            self.progressBar.setValue(value_p)
+                    else:
+                        worksheet.write(row, col, row_number,format)
+                        worksheet.write(row, col+1,app.parcel_ref.parcel_id,format)
+                        worksheet.write(row, col+2,app.parcel_ref.old_parcel_id,format)
+                        worksheet.write(row, col+3,parcel_address,format)
+                        worksheet.write(row, col+4,landuse,format)
+                        worksheet.write(row, col+5,contract_no,format)
+                        worksheet.write(row, col+6,str(contract_begin),format)
+                        worksheet.write(row, col+7,contract_end,format)
+                        worksheet.write(row, col+8,contract_status,format)
+                        worksheet.write(row, col+9,person_name,format)
+                        worksheet.write(row, col+10,person_id,format)
+                        worksheet.write(row, col+11,person_share,format)
+                        row += 1
+                        row_number += 1
+                        value_p  = self.progressBar.value() + 1
+                        self.progressBar.setValue(value_p)
 
-        except SQLAlchemyError, e:
-            PluginUtils.show_error(self, self.tr("Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
-            return
+        # except SQLAlchemyError, e:
+        #     PluginUtils.show_error(self, self.tr("Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+        #     return
 
         try:
             workbook.close()
@@ -5076,210 +5086,220 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         col = 0
         row_number = 1
         c_status = 0
-        try:
+        # try:
+        values = self.session.query(CtApplication,CtOwnershipRecord,CtDecisionApplication).\
+            join(CtRecordApplicationRole.application_ref).\
+            join(CtOwnershipRecord).\
+            join(CtDecisionApplication, CtApplication.app_id == CtDecisionApplication.application).\
+            filter(CtOwnershipRecord.record_date.between(begin_date, end_date)).\
+            filter(CtApplication.parcel_ref != None).all()
+        if not self.report_app_type_cbox.itemData(self.report_app_type_cbox.currentIndex()) == -1:
+            type = self.report_app_type_cbox.itemData(self.report_app_type_cbox.currentIndex())
             values = self.session.query(CtApplication,CtOwnershipRecord,CtDecisionApplication).\
-                join(CtRecordApplicationRole.application_ref).\
-                join(CtOwnershipRecord).\
-                join(CtDecisionApplication, CtApplication.app_no == CtDecisionApplication.application).\
-                filter(CtOwnershipRecord.record_date.between(begin_date, end_date)).\
-                filter(CtApplication.parcel_ref != None).all()
-            if not self.report_app_type_cbox.itemData(self.report_app_type_cbox.currentIndex()) == -1:
-                type = self.report_app_type_cbox.itemData(self.report_app_type_cbox.currentIndex())
-                values = self.session.query(CtApplication,CtOwnershipRecord,CtDecisionApplication).\
-                join(CtRecordApplicationRole.application_ref).\
-                join(CtOwnershipRecord).\
-                join(CtDecisionApplication, CtApplication.app_no == CtDecisionApplication.application).\
-                filter(CtOwnershipRecord.record_date.between(begin_date, end_date)).\
-                filter(CtApplication.app_type == type).\
-                filter(CtApplication.parcel_ref != None).all()
-            if not self.report_land_use_cbox.itemData(self.report_land_use_cbox.currentIndex()) == -1:
-                type = self.report_land_use_cbox.itemData(self.report_land_use_cbox.currentIndex())
-                values = self.session.query(CtApplication,CtOwnershipRecord,CtDecisionApplication).\
-                join(CtRecordApplicationRole.application_ref).\
-                join(CtOwnershipRecord).\
-                join(CtDecisionApplication, CtApplication.app_no == CtDecisionApplication.application).\
-                filter(CtOwnershipRecord.record_date.between(begin_date, end_date)).\
-                filter(CtApplication.approved_landuse == type).\
-                filter(CtApplication.parcel_ref != None).all()
-            if not self.report_person_type_cbox.itemData(self.report_person_type_cbox.currentIndex()) == -1:
-                type = self.report_person_type_cbox.itemData(self.report_person_type_cbox.currentIndex())
-                values = self.session.query(CtApplication,CtOwnershipRecord,CtDecisionApplication).\
-                join(CtRecordApplicationRole.application_ref).\
-                join(CtOwnershipRecord).\
-                join(CtDecisionApplication, CtApplication.app_no == CtDecisionApplication.application).\
-                join(CtApplicationPersonRole, CtApplication.app_no == CtApplicationPersonRole.application).\
-                join(BsPerson, CtApplicationPersonRole.person == BsPerson.person_id).\
-                filter(CtOwnershipRecord.record_date.between(begin_date, end_date)).\
-                filter(BsPerson.type == type).\
-                filter(CtApplication.parcel_ref != None).all()
-            if self.parcel_id.text():
-                value_like = "%" + self.parcel_id.text() + "%"
-                values = self.session.query(CtApplication,CtOwnershipRecord,CtDecisionApplication).\
-                join(CtRecordApplicationRole.application_ref).\
-                join(CtOwnershipRecord).\
-                join(CtDecisionApplication, CtApplication.app_no == CtDecisionApplication.application).\
-                join(CtApplicationPersonRole, CtApplication.app_no == CtApplicationPersonRole.application).\
-                join(BsPerson, CtApplicationPersonRole.person == BsPerson.person_id).\
-                filter(CtOwnershipRecord.record_date.between(begin_date, end_date)).\
-                filter(CtApplication.parcel.ilike(value_like)).\
-                filter(CtApplication.parcel_ref != None).all()
-            if self.person_id.text():
-                value_like = "%" + self.person_id.text() + "%"
-                values = self.session.query(CtApplication,CtOwnershipRecord,CtDecisionApplication).\
-                join(CtRecordApplicationRole.application_ref).\
-                join(CtOwnershipRecord).\
-                join(CtDecisionApplication, CtApplication.app_no == CtDecisionApplication.application).\
-                join(CtApplicationPersonRole, CtApplication.app_no == CtApplicationPersonRole.application).\
-                join(BsPerson, CtApplicationPersonRole.person == BsPerson.person_id).\
-                filter(CtOwnershipRecord.record_date.between(begin_date, end_date)).\
-                filter(BsPerson.person_register.ilike(value_like)).\
-                filter(CtApplication.parcel_ref != None).all()
+            join(CtRecordApplicationRole.application_ref).\
+            join(CtOwnershipRecord).\
+            join(CtDecisionApplication, CtApplication.app_id == CtDecisionApplication.application).\
+            filter(CtOwnershipRecord.record_date.between(begin_date, end_date)).\
+            filter(CtApplication.app_type == type).\
+            filter(CtApplication.parcel_ref != None).all()
+        if not self.report_land_use_cbox.itemData(self.report_land_use_cbox.currentIndex()) == -1:
+            type = self.report_land_use_cbox.itemData(self.report_land_use_cbox.currentIndex())
+            values = self.session.query(CtApplication,CtOwnershipRecord,CtDecisionApplication).\
+            join(CtRecordApplicationRole.application_ref).\
+            join(CtOwnershipRecord).\
+            join(CtDecisionApplication, CtApplication.app_id == CtDecisionApplication.application).\
+            filter(CtOwnershipRecord.record_date.between(begin_date, end_date)).\
+            filter(CtApplication.approved_landuse == type).\
+            filter(CtApplication.parcel_ref != None).all()
+        if not self.report_person_type_cbox.itemData(self.report_person_type_cbox.currentIndex()) == -1:
+            type = self.report_person_type_cbox.itemData(self.report_person_type_cbox.currentIndex())
+            values = self.session.query(CtApplication,CtOwnershipRecord,CtDecisionApplication).\
+            join(CtRecordApplicationRole.application_ref).\
+            join(CtOwnershipRecord).\
+            join(CtDecisionApplication, CtApplication.app_id == CtDecisionApplication.application).\
+            join(CtApplicationPersonRole, CtApplication.app_id == CtApplicationPersonRole.application).\
+            join(BsPerson, CtApplicationPersonRole.person == BsPerson.person_id).\
+            filter(CtOwnershipRecord.record_date.between(begin_date, end_date)).\
+            filter(BsPerson.type == type).\
+            filter(CtApplication.parcel_ref != None).all()
+        if self.parcel_id.text():
+            value_like = "%" + self.parcel_id.text() + "%"
+            values = self.session.query(CtApplication,CtOwnershipRecord,CtDecisionApplication).\
+            join(CtRecordApplicationRole.application_ref).\
+            join(CtOwnershipRecord).\
+            join(CtDecisionApplication, CtApplication.app_id == CtDecisionApplication.application).\
+            join(CtApplicationPersonRole, CtApplication.app_id == CtApplicationPersonRole.application).\
+            join(BsPerson, CtApplicationPersonRole.person == BsPerson.person_id).\
+            filter(CtOwnershipRecord.record_date.between(begin_date, end_date)).\
+            filter(CtApplication.parcel.ilike(value_like)).\
+            filter(CtApplication.parcel_ref != None).all()
+        if self.person_id.text():
+            value_like = "%" + self.person_id.text() + "%"
+            values = self.session.query(CtApplication,CtOwnershipRecord,CtDecisionApplication).\
+            join(CtRecordApplicationRole.application_ref).\
+            join(CtOwnershipRecord).\
+            join(CtDecisionApplication, CtApplication.app_id == CtDecisionApplication.application).\
+            join(CtApplicationPersonRole, CtApplication.app_id == CtApplicationPersonRole.application).\
+            join(BsPerson, CtApplicationPersonRole.person == BsPerson.person_id).\
+            filter(CtOwnershipRecord.record_date.between(begin_date, end_date)).\
+            filter(BsPerson.person_register.ilike(value_like)).\
+            filter(CtApplication.parcel_ref != None).all()
 
-            count = len(values)
-            self.progressBar.setMaximum(count)
-            for value in values:
+        count = len(values)
+        self.progressBar.setMaximum(count)
+        for value in values:
 
-                khashaa = ''
-                streetname = ''
-                neighbourhood = ''
-                landuse = ''
-                middle_name = ''
-                first_name = ''
-                surname = ''
-                person_address_a1 = '-'
-                person_address_a2 = '-'
-                person_address_a3 = '-'
-                person_address_street_name = '-'
-                person_address_khaskhaa = '-'
-                legal_surname = ''
-                legal_name = ''
-                legal_person_id = ''
-                owner_change = ''
-                price = ''
-                a3_name = ''
-                person_name = ''
-                person_id = ''
-                contract_no = ''
-                contract_begin = ''
-                contract_end = ''
-                contract_status = ''
+            khashaa = ''
+            streetname = ''
+            neighbourhood = ''
+            landuse = ''
+            middle_name = ''
+            first_name = ''
+            surname = ''
+            person_address_a1 = '-'
+            person_address_a2 = '-'
+            person_address_a3 = '-'
+            person_address_street_name = '-'
+            person_address_khaskhaa = '-'
+            legal_surname = ''
+            legal_name = ''
+            legal_person_id = ''
+            owner_change = ''
+            price = ''
+            a3_name = ''
+            person_name = ''
+            person_id = ''
+            contract_no = ''
+            contract_begin = ''
+            contract_end = ''
+            contract_status = ''
 
-                if value.CtApplication.approved_landuse != None:
-                    landuse = value.CtApplication.approved_landuse_ref.description
-                    landuse_code = value.CtApplication.approved_landuse_ref.code
+            if value.CtApplication.approved_landuse != None:
+                landuse = value.CtApplication.approved_landuse_ref.description
+                landuse_code = value.CtApplication.approved_landuse_ref.code
+            if value.CtApplication.parcel_ref != None:
+
                 if value.CtApplication.parcel_ref != None:
+                    khashaa = value.CtApplication.parcel_ref.address_khashaa
+                if value.CtApplication.parcel_ref != None:
+                    streetname = value.CtApplication.parcel_ref.address_streetname
+                if value.CtApplication.parcel_ref != None:
+                    neighbourhood = value.CtApplication.parcel_ref.address_neighbourhood
 
-                    if value.CtApplication.parcel_ref != None:
-                        khashaa = value.CtApplication.parcel_ref.address_khashaa
-                    if value.CtApplication.parcel_ref != None:
-                        streetname = value.CtApplication.parcel_ref.address_streetname
-                    if value.CtApplication.parcel_ref != None:
-                        neighbourhood = value.CtApplication.parcel_ref.address_neighbourhood
-
-                    app_person = self.session.query(CtApplicationPersonRole).filter(CtApplicationPersonRole.application == value.CtApplication.app_no).all()
-                    if value.CtApplication.app_type == 02:
-                        app_person = self.session.query(CtApplicationPersonRole).filter(CtApplicationPersonRole.application == value.CtApplication.app_no)\
-                                        .filter(CtApplicationPersonRole.role == 40).all()
-                    elif value.CtApplication.app_type == 15 or value.CtApplication.app_type == 14:
-                        app_person = self.session.query(CtApplicationPersonRole).filter(CtApplicationPersonRole.application == value.CtApplication.app_no)\
-                                        .filter(CtApplicationPersonRole.role == 70).all()
-                    else:
-                        app_person = self.session.query(CtApplicationPersonRole).filter(CtApplicationPersonRole.application == value.CtApplication.app_no)\
-                                        .filter(CtApplicationPersonRole.main_applicant == True).all()
-                    for person_app in app_person:
-                        person_count = self.session.query(BsPerson).filter(BsPerson.person_id == person_app.person).count()
-                        if person_count != 0:
-                            person = self.session.query(BsPerson).filter(BsPerson.person_id == person_app.person).one()
-                            a3_count = self.session.query(AuLevel3).filter(AuLevel3.geometry.ST_Contains(value.CtApplication.parcel_ref.geometry)).\
-                                filter(value.CtApplication.parcel_ref != None).count()
-                            if a3_count != 0:
-                                a3 = self.session.query(AuLevel3).filter(AuLevel3.geometry.ST_Contains(value.CtApplication.parcel_ref.geometry)).one()
-                                a3_name = a3.name
-                            tax_zone_count = self.session.query(SetTaxAndPriceZone).filter(SetTaxAndPriceZone.geometry.ST_Contains(value.CtApplication.parcel_ref.geometry)).count()
-                            if tax_zone_count == 1:
-                                tax_zone = self.session.query(SetTaxAndPriceZone).filter(SetTaxAndPriceZone.geometry.ST_Contains(value.CtApplication.parcel_ref.geometry)).one()
-                                tax_count = self.session.query(SetBaseTaxAndPrice).\
+                app_person = self.session.query(CtApplicationPersonRole).filter(CtApplicationPersonRole.application == value.CtApplication.app_id).all()
+                if value.CtApplication.app_type == 02:
+                    app_person = self.session.query(CtApplicationPersonRole).filter(CtApplicationPersonRole.application == value.CtApplication.app_id)\
+                                    .filter(CtApplicationPersonRole.role == 40).all()
+                elif value.CtApplication.app_type == 15 or value.CtApplication.app_type == 14:
+                    app_person = self.session.query(CtApplicationPersonRole).filter(CtApplicationPersonRole.application == value.CtApplication.app_id)\
+                                    .filter(CtApplicationPersonRole.role == 70).all()
+                else:
+                    app_person = self.session.query(CtApplicationPersonRole).filter(CtApplicationPersonRole.application == value.CtApplication.app_id)\
+                                    .filter(CtApplicationPersonRole.main_applicant == True).all()
+                for person_app in app_person:
+                    person_count = self.session.query(BsPerson).filter(BsPerson.person_id == person_app.person).count()
+                    if person_count != 0:
+                        person = self.session.query(BsPerson).filter(BsPerson.person_id == person_app.person).one()
+                        a3_count = self.session.query(AuLevel3).filter(AuLevel3.geometry.ST_Contains(value.CtApplication.parcel_ref.geometry)).\
+                            filter(value.CtApplication.parcel_ref != None).count()
+                        if a3_count != 0:
+                            a3 = self.session.query(AuLevel3).filter(AuLevel3.geometry.ST_Contains(value.CtApplication.parcel_ref.geometry)).one()
+                            a3_name = a3.name
+                        tax_zone_count = self.session.query(SetTaxAndPriceZone).filter(SetTaxAndPriceZone.geometry.ST_Contains(value.CtApplication.parcel_ref.geometry)).count()
+                        if tax_zone_count == 1:
+                            tax_zone = self.session.query(SetTaxAndPriceZone).filter(SetTaxAndPriceZone.geometry.ST_Contains(value.CtApplication.parcel_ref.geometry)).one()
+                            tax_count = self.session.query(SetBaseTaxAndPrice).\
+                                filter(SetBaseTaxAndPrice.tax_zone == tax_zone.zone_id).\
+                                filter(SetBaseTaxAndPrice.landuse == value.CtApplication.approved_landuse).count()
+                            if tax_count == 1:
+                                tax = self.session.query(SetBaseTaxAndPrice).\
                                     filter(SetBaseTaxAndPrice.tax_zone == tax_zone.zone_id).\
-                                    filter(SetBaseTaxAndPrice.landuse == value.CtApplication.approved_landuse).count()
-                                if tax_count == 1:
-                                    tax = self.session.query(SetBaseTaxAndPrice).\
-                                        filter(SetBaseTaxAndPrice.tax_zone == tax_zone.zone_id).\
-                                        filter(SetBaseTaxAndPrice.landuse == value.CtApplication.approved_landuse).one()
-                                    price = str(float(tax.base_value_per_m2) * value.CtApplication.parcel_ref.area_m2)
-                            if person.address_au_level3 != None:
+                                    filter(SetBaseTaxAndPrice.landuse == value.CtApplication.approved_landuse).one()
+                                price = str(float(tax.base_value_per_m2) * value.CtApplication.parcel_ref.area_m2)
+                        if person.address_au_level3 != None:
+                            person_a3_count = self.session.query(AuLevel3).filter(
+                                AuLevel3.code == person.address_au_level3).count()
+                            if person_a3_count == 1:
                                 person_a3 = self.session.query(AuLevel3).filter(AuLevel3.code == person.address_au_level3).one()
                                 person_address_a3 = person_a3.name
-                            if person.address_au_level2 != None:
-                                person_a2 = self.session.query(AuLevel2).filter(AuLevel2.code == person.address_au_level2).one()
+                        if person.address_au_level2 != None:
+                            person_a2_c = self.session.query(AuLevel2).filter(
+                                AuLevel2.code == person.address_au_level2).count()
+                            if person_a2_c == 1:
+                                person_a2 = self.session.query(AuLevel2).filter(
+                                    AuLevel2.code == person.address_au_level2).one()
                                 person_address_a2 = person_a2.name
-                            if person.address_au_level1 != None:
+                        if person.address_au_level1 != None:
+                            person_a1_count = self.session.query(AuLevel1).filter(
+                                AuLevel1.code == person.address_au_level1).count()
+                            if person_a1_count == 1:
                                 person_a1 = self.session.query(AuLevel1).filter(AuLevel1.code == person.address_au_level1).one()
                                 person_address_a1 = person_a1.name
-                            if person.address_street_name != None:
-                                person_address_street_name = person.address_street_name
-                            if person.address_khaskhaa != None:
-                                person_address_khaskhaa = person.address_khaskhaa
+                        if person.address_street_name != None:
+                            person_address_street_name = person.address_street_name
+                        if person.address_khaskhaa != None:
+                            person_address_khaskhaa = person.address_khaskhaa
 
-                            if person.type == 10 or person.type == 20 \
-                                or person.type == 50:
-                                if person.middle_name != None:
-                                    middle_name = person.middle_name
-                                if person.first_name != None:
-                                    first_name = person.first_name
-                                if person.name != None:
-                                    surname = person.name
-                            if person.type == 30 or person.type == 40 \
-                                or person.type == 60:
-                                first_name = person.name
+                        if person.type == 10 or person.type == 20 \
+                            or person.type == 50:
+                            if person.middle_name != None:
+                                middle_name = person.middle_name
+                            if person.first_name != None:
+                                first_name = person.first_name
+                            if person.name != None:
+                                surname = person.name
+                        if person.type == 30 or person.type == 40 \
+                            or person.type == 60:
+                            first_name = person.name
 
-                            if person_app.role == Constants.LEGAL_REP_ROLE_CODE:
-                                legal_surname = person.name
-                                legal_name = person.first_name
-                                legal_person_id = person.person_id
+                        if person_app.role == Constants.LEGAL_REP_ROLE_CODE:
+                            legal_surname = person.name
+                            legal_name = person.first_name
+                            legal_person_id = person.person_id
 
-                                worksheet.write(row, col+21, legal_surname, format)
-                                worksheet.write(row, col+22, legal_name, format)
-                                worksheet.write(row, col+23, legal_person_id, format)
+                            worksheet.write(row, col+21, legal_surname, format)
+                            worksheet.write(row, col+22, legal_name, format)
+                            worksheet.write(row, col+23, legal_person_id, format)
 
-                            elif person_app.role == Constants.GIVING_UP_OWNER_CODE:
-                                owner_change = u'Ха'
-                                worksheet.write(row, col+24, owner_change, format)
-                            else:
-                                worksheet.write(row, col, row_number, format)
-                                worksheet.write(row, col+1, value.CtApplication.parcel_ref.parcel_id, format)
-                                worksheet.write(row, col+2, str(value.CtApplication.parcel_ref.area_m2), format)
-                                worksheet.write(row, col+3, str(value.CtApplication.parcel_ref.area_m2/10000), format)
-                                worksheet.write(row, col+4, price, format)
-                                worksheet.write(row, col+5, landuse, format)
-                                worksheet.write(row, col+6, a3_name, format)
-                                worksheet.write(row, col+7, streetname, format)
-                                worksheet.write(row, col+8, khashaa, format)
-                                worksheet.write(row, col+9, neighbourhood, format)
-                                worksheet.write(row, col+10, middle_name, format)
-                                worksheet.write(row, col+11, surname, format)
-                                worksheet.write(row, col+12, first_name, format)
-                                worksheet.write(row, col+13, person.person_id, format)
-                                worksheet.write(row, col+14, person_address_a1, format)
-                                worksheet.write(row, col+15, person_address_a2, format)
-                                worksheet.write(row, col+16, person_address_a3, format)
-                                worksheet.write(row, col+17, person_address_street_name, format)
-                                worksheet.write(row, col+18, person_address_khaskhaa, format)
-                                worksheet.write(row, col+19, str(value.CtDecisionApplication.decision_ref.decision_date), format)
-                                worksheet.write(row, col+20, value.CtDecisionApplication.decision, format)
-                                worksheet.write(row, col+21, legal_surname, format)
-                                worksheet.write(row, col+22, legal_name, format)
-                                worksheet.write(row, col+23, legal_person_id, format)
-                                worksheet.write(row, col+24, owner_change, format)
-                                worksheet.write(row, col+25, str(value.CtOwnershipRecord.record_date), format)
-                                worksheet.write(row, col+26, u'_________', format)
-                                row += 1
-                                row_number += 1
-                                value_p = self.progressBar.value() + 1
-                                self.progressBar.setValue(value_p)
+                        elif person_app.role == Constants.GIVING_UP_OWNER_CODE:
+                            owner_change = u'Ха'
+                            worksheet.write(row, col+24, owner_change, format)
+                        else:
+                            worksheet.write(row, col, row_number, format)
+                            worksheet.write(row, col+1, value.CtApplication.parcel_ref.parcel_id, format)
+                            worksheet.write(row, col+2, str(value.CtApplication.parcel_ref.area_m2), format)
+                            worksheet.write(row, col+3, str(value.CtApplication.parcel_ref.area_m2/10000), format)
+                            worksheet.write(row, col+4, price, format)
+                            worksheet.write(row, col+5, landuse, format)
+                            worksheet.write(row, col+6, a3_name, format)
+                            worksheet.write(row, col+7, streetname, format)
+                            worksheet.write(row, col+8, khashaa, format)
+                            worksheet.write(row, col+9, neighbourhood, format)
+                            worksheet.write(row, col+10, middle_name, format)
+                            worksheet.write(row, col+11, surname, format)
+                            worksheet.write(row, col+12, first_name, format)
+                            worksheet.write(row, col+13, person.person_id, format)
+                            worksheet.write(row, col+14, person_address_a1, format)
+                            worksheet.write(row, col+15, person_address_a2, format)
+                            worksheet.write(row, col+16, person_address_a3, format)
+                            worksheet.write(row, col+17, person_address_street_name, format)
+                            worksheet.write(row, col+18, person_address_khaskhaa, format)
+                            worksheet.write(row, col+19, str(value.CtDecisionApplication.decision_ref.decision_date), format)
+                            worksheet.write(row, col+20, value.CtDecisionApplication.decision, format)
+                            worksheet.write(row, col+21, legal_surname, format)
+                            worksheet.write(row, col+22, legal_name, format)
+                            worksheet.write(row, col+23, legal_person_id, format)
+                            worksheet.write(row, col+24, owner_change, format)
+                            worksheet.write(row, col+25, str(value.CtOwnershipRecord.record_date), format)
+                            worksheet.write(row, col+26, u'_________', format)
+                            row += 1
+                            row_number += 1
+                            value_p = self.progressBar.value() + 1
+                            self.progressBar.setValue(value_p)
 
-        except SQLAlchemyError, e:
-            PluginUtils.show_error(self, self.tr("Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
-            return
+        # except SQLAlchemyError, e:
+        #     PluginUtils.show_error(self, self.tr("Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+        #     return
 
         try:
             workbook.close()
@@ -5429,224 +5449,237 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         col = 0
         row_number = 1
         c_status = 0
-        try:
+        # try:
+        values = self.session.query(CtApplication,CtContract,CtDecisionApplication).\
+            join(CtContractApplicationRole.application_ref).\
+            join(CtContract).\
+            join(CtDecisionApplication, CtApplication.app_id == CtDecisionApplication.application).\
+            filter(CtContract.contract_date.between(begin_date, end_date)).all()
+        if not self.report_app_type_cbox.itemData(self.report_app_type_cbox.currentIndex()) == -1:
+            type = self.report_app_type_cbox.itemData(self.report_app_type_cbox.currentIndex())
             values = self.session.query(CtApplication,CtContract,CtDecisionApplication).\
-                join(CtContractApplicationRole.application_ref).\
-                join(CtContract).\
-                join(CtDecisionApplication, CtApplication.app_no == CtDecisionApplication.application).\
-                filter(CtContract.contract_date.between(begin_date, end_date)).all()
-            if not self.report_app_type_cbox.itemData(self.report_app_type_cbox.currentIndex()) == -1:
-                type = self.report_app_type_cbox.itemData(self.report_app_type_cbox.currentIndex())
-                values = self.session.query(CtApplication,CtContract,CtDecisionApplication).\
-                join(CtContractApplicationRole.application_ref).\
-                join(CtContract).\
-                join(CtDecisionApplication, CtApplication.app_no == CtDecisionApplication.application).\
-                filter(CtContract.contract_date.between(begin_date, end_date)).\
-                filter(CtApplication.app_type == type).all()
-            if not self.report_land_use_cbox.itemData(self.report_land_use_cbox.currentIndex()) == -1:
-                type = self.report_land_use_cbox.itemData(self.report_land_use_cbox.currentIndex())
-                values = self.session.query(CtApplication,CtContract,CtDecisionApplication).\
-                join(CtContractApplicationRole.application_ref).\
-                join(CtContract).\
-                join(CtDecisionApplication, CtApplication.app_no == CtDecisionApplication.application).\
-                filter(CtContract.contract_date.between(begin_date, end_date)).\
-                filter(CtApplication.approved_landuse == type).all()
-            if not self.report_person_type_cbox.itemData(self.report_person_type_cbox.currentIndex()) == -1:
-                type = self.report_person_type_cbox.itemData(self.report_person_type_cbox.currentIndex())
-                values = self.session.query(CtApplication,CtContract,CtDecisionApplication).\
-                join(CtContractApplicationRole.application_ref).\
-                join(CtContract).\
-                join(CtDecisionApplication, CtApplication.app_no == CtDecisionApplication.application).\
-                join(CtApplicationPersonRole, CtApplication.app_no == CtApplicationPersonRole.application).\
-                join(BsPerson, CtApplicationPersonRole.person == BsPerson.person_id).\
-                filter(CtContract.contract_date.between(begin_date, end_date)).\
-                filter(BsPerson.type == type).all()
-            if self.parcel_id.text():
-                value_like = "%" + self.parcel_id.text() + "%"
-                values = self.session.query(CtApplication,CtContract,CtDecisionApplication).\
-                join(CtContractApplicationRole.application_ref).\
-                join(CtContract).\
-                join(CtDecisionApplication, CtApplication.app_no == CtDecisionApplication.application).\
-                join(CtApplicationPersonRole, CtApplication.app_no == CtApplicationPersonRole.application).\
-                join(BsPerson, CtApplicationPersonRole.person == BsPerson.person_id).\
-                filter(CtContract.contract_date.between(begin_date, end_date)).\
-                filter(CtApplication.parcel.ilike(value_like)).all()
-            if self.person_id.text():
-                value_like = "%" + self.person_id.text() + "%"
-                values = self.session.query(CtApplication,CtContract,CtDecisionApplication).\
-                join(CtContractApplicationRole.application_ref).\
-                join(CtContract).\
-                join(CtDecisionApplication, CtApplication.app_no == CtDecisionApplication.application).\
-                join(CtApplicationPersonRole, CtApplication.app_no == CtApplicationPersonRole.application).\
-                join(BsPerson, CtApplicationPersonRole.person == BsPerson.person_id).\
-                filter(CtContract.contract_date.between(begin_date, end_date)).\
-                filter(BsPerson.person_register.ilike(value_like)).all()
+            join(CtContractApplicationRole.application_ref).\
+            join(CtContract).\
+            join(CtDecisionApplication, CtApplication.app_id == CtDecisionApplication.application).\
+            filter(CtContract.contract_date.between(begin_date, end_date)).\
+            filter(CtApplication.app_type == type).all()
+        if not self.report_land_use_cbox.itemData(self.report_land_use_cbox.currentIndex()) == -1:
+            type = self.report_land_use_cbox.itemData(self.report_land_use_cbox.currentIndex())
+            values = self.session.query(CtApplication,CtContract,CtDecisionApplication).\
+            join(CtContractApplicationRole.application_ref).\
+            join(CtContract).\
+            join(CtDecisionApplication, CtApplication.app_id == CtDecisionApplication.application).\
+            filter(CtContract.contract_date.between(begin_date, end_date)).\
+            filter(CtApplication.approved_landuse == type).all()
+        if not self.report_person_type_cbox.itemData(self.report_person_type_cbox.currentIndex()) == -1:
+            type = self.report_person_type_cbox.itemData(self.report_person_type_cbox.currentIndex())
+            values = self.session.query(CtApplication,CtContract,CtDecisionApplication).\
+            join(CtContractApplicationRole.application_ref).\
+            join(CtContract).\
+            join(CtDecisionApplication, CtApplication.app_id == CtDecisionApplication.application).\
+            join(CtApplicationPersonRole, CtApplication.app_id == CtApplicationPersonRole.application).\
+            join(BsPerson, CtApplicationPersonRole.person == BsPerson.person_id).\
+            filter(CtContract.contract_date.between(begin_date, end_date)).\
+            filter(BsPerson.type == type).all()
+        if self.parcel_id.text():
+            value_like = "%" + self.parcel_id.text() + "%"
+            values = self.session.query(CtApplication,CtContract,CtDecisionApplication).\
+            join(CtContractApplicationRole.application_ref).\
+            join(CtContract).\
+            join(CtDecisionApplication, CtApplication.app_id == CtDecisionApplication.application).\
+            join(CtApplicationPersonRole, CtApplication.app_id == CtApplicationPersonRole.application).\
+            join(BsPerson, CtApplicationPersonRole.person == BsPerson.person_id).\
+            filter(CtContract.contract_date.between(begin_date, end_date)).\
+            filter(CtApplication.parcel.ilike(value_like)).all()
+        if self.person_id.text():
+            value_like = "%" + self.person_id.text() + "%"
+            values = self.session.query(CtApplication,CtContract,CtDecisionApplication).\
+            join(CtContractApplicationRole.application_ref).\
+            join(CtContract).\
+            join(CtDecisionApplication, CtApplication.app_id == CtDecisionApplication.application).\
+            join(CtApplicationPersonRole, CtApplication.app_id == CtApplicationPersonRole.application).\
+            join(BsPerson, CtApplicationPersonRole.person == BsPerson.person_id).\
+            filter(CtContract.contract_date.between(begin_date, end_date)).\
+            filter(BsPerson.person_register.ilike(value_like)).all()
 
-            count = len(values)
-            self.progressBar.setMaximum(count)
-            for value in values:
+        count = len(values)
+        self.progressBar.setMaximum(count)
+        for value in values:
 
-                khashaa = ''
-                streetname = ''
-                neighbourhood = ''
-                landuse = ''
-                middle_name = ''
-                first_name = ''
-                surname = ''
-                person_address_a1 = '-'
-                person_address_a2 = '-'
-                person_address_a3 = '-'
-                person_address_street_name = '-'
-                person_address_khaskhaa = '-'
-                extend_time = ''
-                new_certificate_no = ''
-                new_landuse_type = ''
-                transfer_type = ''
-                legal_surname = ''
-                legal_name = ''
-                legal_person_id = ''
-                owner_change = ''
-                price = ''
-                person_name = ''
-                person_id = ''
-                contract_no = ''
-                certificate_no = ''
-                contract_time = ''
-                app_remarks = ''
-                a3_name = ''
-                contract_begin = ''
-                contract_end = ''
-                contract_status = ''
+            khashaa = ''
+            streetname = ''
+            neighbourhood = ''
+            landuse = ''
+            middle_name = ''
+            first_name = ''
+            surname = ''
+            person_address_a1 = '-'
+            person_address_a2 = '-'
+            person_address_a3 = '-'
+            person_address_street_name = '-'
+            person_address_khaskhaa = '-'
+            extend_time = ''
+            new_certificate_no = ''
+            new_landuse_type = ''
+            transfer_type = ''
+            legal_surname = ''
+            legal_name = ''
+            legal_person_id = ''
+            owner_change = ''
+            price = ''
+            person_name = ''
+            person_id = ''
+            contract_no = ''
+            certificate_no = ''
+            contract_time = ''
+            app_remarks = ''
+            a3_name = ''
+            contract_begin = ''
+            contract_end = ''
+            contract_status = ''
 
-                if value.CtApplication.approved_landuse != None:
-                    landuse = value.CtApplication.approved_landuse_ref.description
-                    landuse_code = value.CtApplication.approved_landuse_ref.code
-                if value.CtApplication.parcel_ref.address_khashaa != None:
-                    khashaa = value.CtApplication.parcel_ref.address_khashaa
-                if value.CtApplication.parcel_ref.address_streetname != None:
-                    streetname = value.CtApplication.parcel_ref.address_streetname
-                if value.CtApplication.parcel_ref.address_neighbourhood != None:
-                    neighbourhood = value.CtApplication.parcel_ref.address_neighbourhood
-                if value.CtContract.contract_no != None:
-                    contract_no = value.CtContract.contract_no
-                if value.CtContract.certificate_no != None:
-                    certificate_no = str(value.CtContract.certificate_no)
-                if value.CtContract.contract_begin != None and value.CtContract.contract_end != None:
-                    contract_time = str(value.CtContract.contract_end.year - value.CtContract.contract_begin.year)
-                if value.CtApplication.remarks != None:
-                    app_remarks = value.CtApplication.remarks
+            if value.CtApplication.approved_landuse != None:
+                landuse = value.CtApplication.approved_landuse_ref.description
+                landuse_code = value.CtApplication.approved_landuse_ref.code
+            if value.CtApplication.parcel_ref.address_khashaa != None:
+                khashaa = value.CtApplication.parcel_ref.address_khashaa
+            if value.CtApplication.parcel_ref.address_streetname != None:
+                streetname = value.CtApplication.parcel_ref.address_streetname
+            if value.CtApplication.parcel_ref.address_neighbourhood != None:
+                neighbourhood = value.CtApplication.parcel_ref.address_neighbourhood
+            if value.CtContract.contract_no != None:
+                contract_no = value.CtContract.contract_no
+            if value.CtContract.certificate_no != None:
+                certificate_no = str(value.CtContract.certificate_no)
+            if value.CtContract.contract_begin != None and value.CtContract.contract_end != None:
+                contract_time = str(value.CtContract.contract_end.year - value.CtContract.contract_begin.year)
+            if value.CtApplication.remarks != None:
+                app_remarks = value.CtApplication.remarks
 
-                app_person = self.session.query(CtApplicationPersonRole).filter(CtApplicationPersonRole.application == value.CtApplication.app_no).all()
-                if value.CtApplication.app_type == 05 or value.CtApplication.app_type == 8 or value.CtApplication.app_type == 9 or value.CtApplication.app_type == 10 or value.CtApplication.app_type == 11:
-                    app_person = self.session.query(CtApplicationPersonRole).filter(CtApplicationPersonRole.application == value.CtApplication.app_no)\
-                                        .filter(CtApplicationPersonRole.main_applicant == True).all()
-                elif value.CtApplication.app_type == 07 or value.CtApplication.app_type == 14:
-                    app_person = self.session.query(CtApplicationPersonRole).filter(CtApplicationPersonRole.application == value.CtApplication.app_no)\
-                                        .filter(CtApplicationPersonRole.role == 70).all()
+            app_person = self.session.query(CtApplicationPersonRole).filter(CtApplicationPersonRole.application == value.CtApplication.app_id).all()
+            if value.CtApplication.app_type == 05 or value.CtApplication.app_type == 8 or value.CtApplication.app_type == 9 or value.CtApplication.app_type == 10 or value.CtApplication.app_type == 11:
+                app_person = self.session.query(CtApplicationPersonRole).filter(CtApplicationPersonRole.application == value.CtApplication.app_id)\
+                                    .filter(CtApplicationPersonRole.main_applicant == True).all()
+            elif value.CtApplication.app_type == 07 or value.CtApplication.app_type == 14:
+                app_person = self.session.query(CtApplicationPersonRole).filter(CtApplicationPersonRole.application == value.CtApplication.app_id)\
+                                    .filter(CtApplicationPersonRole.role == 70).all()
 
-                for person_app in app_person:
-                    person_count = self.session.query(BsPerson).filter(BsPerson.person_id == person_app.person).count()
-                    if person_count != 0:
-                        person = self.session.query(BsPerson).filter(BsPerson.person_id == person_app.person).one()
-                        a3_count = self.session.query(AuLevel3).filter(AuLevel3.geometry.ST_Contains(value.CtApplication.parcel_ref.geometry)).count()
-                        if a3_count != 0:
-                            a3 = self.session.query(AuLevel3).filter(AuLevel3.geometry.ST_Contains(value.CtApplication.parcel_ref.geometry)).one()
-                            a3_name = a3.name
-                        tax_zone_count = self.session.query(SetTaxAndPriceZone).filter(SetTaxAndPriceZone.geometry.ST_Contains(value.CtApplication.parcel_ref.geometry)).count()
-                        if tax_zone_count == 1:
-                            tax_zone = self.session.query(SetTaxAndPriceZone).filter(SetTaxAndPriceZone.geometry.ST_Contains(value.CtApplication.parcel_ref.geometry)).one()
-                            tax_count = self.session.query(SetBaseTaxAndPrice).filter(SetBaseTaxAndPrice.tax_zone == tax_zone.zone_id).count()
-                            if tax_count == 1:
-                                tax = self.session.query(SetBaseTaxAndPrice).filter(SetBaseTaxAndPrice.tax_zone == tax_zone.zone_id).one()
-                                price = str(float(tax.base_value_per_m2) * value.CtApplication.parcel_ref.area_m2)
-                        if person.address_au_level3 != None:
-                            person_a3 = self.session.query(AuLevel3).filter(AuLevel3.code == person.address_au_level3).one()
+            for person_app in app_person:
+                person_count = self.session.query(BsPerson).filter(BsPerson.person_id == person_app.person).count()
+                if person_count != 0:
+                    person = self.session.query(BsPerson).filter(BsPerson.person_id == person_app.person).one()
+                    a3_count = self.session.query(AuLevel3).filter(AuLevel3.geometry.ST_Contains(value.CtApplication.parcel_ref.geometry)).count()
+                    if a3_count != 0:
+                        a3 = self.session.query(AuLevel3).filter(AuLevel3.geometry.ST_Contains(value.CtApplication.parcel_ref.geometry)).one()
+                        a3_name = a3.name
+                    tax_zone_count = self.session.query(SetTaxAndPriceZone).filter(SetTaxAndPriceZone.geometry.ST_Contains(value.CtApplication.parcel_ref.geometry)).count()
+                    if tax_zone_count == 1:
+                        tax_zone = self.session.query(SetTaxAndPriceZone).filter(SetTaxAndPriceZone.geometry.ST_Contains(value.CtApplication.parcel_ref.geometry)).one()
+                        tax_count = self.session.query(SetBaseTaxAndPrice).filter(SetBaseTaxAndPrice.tax_zone == tax_zone.zone_id).count()
+                        if tax_count == 1:
+                            tax = self.session.query(SetBaseTaxAndPrice).filter(SetBaseTaxAndPrice.tax_zone == tax_zone.zone_id).one()
+                            price = str(float(tax.base_value_per_m2) * value.CtApplication.parcel_ref.area_m2)
+                    if person.address_au_level3 != None:
+                        person_a3_count = self.session.query(AuLevel3).filter(
+                            AuLevel3.code == person.address_au_level3).count()
+                        if person_a3_count == 1:
+                            person_a3 = self.session.query(AuLevel3).filter(
+                                AuLevel3.code == person.address_au_level3).one()
                             person_address_a3 = person_a3.name
-                        if person.address_au_level2 != None:
-                            person_a2 = self.session.query(AuLevel2).filter(AuLevel2.code == person.address_au_level2).one()
+                    if person.address_au_level2 != None:
+                        person_a2_c = self.session.query(AuLevel2).filter(
+                            AuLevel2.code == person.address_au_level2).count()
+                        if person_a2_c == 1:
+                            person_a2 = self.session.query(AuLevel2).filter(
+                                AuLevel2.code == person.address_au_level2).one()
                             person_address_a2 = person_a2.name
-                        if person.address_au_level1 != None:
-                            person_a1 = self.session.query(AuLevel1).filter(AuLevel1.code == person.address_au_level1).one()
+                        person_address_a2 = person_a2.name
+                    if person.address_au_level1 != None:
+                        person_a1_count = self.session.query(AuLevel1).filter(
+                            AuLevel1.code == person.address_au_level1).count()
+                        if person_a1_count == 1:
+                            person_a1 = self.session.query(AuLevel1).filter(
+                                AuLevel1.code == person.address_au_level1).one()
                             person_address_a1 = person_a1.name
-                        if person.address_street_name != None:
-                            person_address_street_name = person.address_street_name
-                        if person.address_khaskhaa != None:
-                            person_address_khaskhaa = person.address_khaskhaa
+                    if person.address_street_name != None:
+                        person_address_street_name = person.address_street_name
+                    if person.address_khaskhaa != None:
+                        person_address_khaskhaa = person.address_khaskhaa
 
-                        if person.type == 10 or person.type == 20 \
-                            or person.type == 50:
-                            if person.middle_name != None:
-                                middle_name = person.middle_name
-                            if person.first_name != None:
-                                first_name = person.first_name
-                            if person.name != None:
-                                surname = person.name
-                        if person.type == 30 or person.type == 40 \
-                            or person.type == 60:
-                            first_name = person.name
+                    if person.type == 10 or person.type == 20 \
+                        or person.type == 50:
+                        if person.middle_name != None:
+                            middle_name = person.middle_name
+                        if person.first_name != None:
+                            first_name = person.first_name
+                        if person.name != None:
+                            surname = person.name
+                    if person.type == 30 or person.type == 40 \
+                        or person.type == 60:
+                        first_name = person.name
 
-                        if value.CtApplication.app_type == 10:
-                            extend_time = str(value.CtApplication.approved_duration)
-                        if value.CtApplication.app_type == 12:
-                            new_certificate_no = value.CtContract.certificate_no
-                        if value.CtApplication.app_type == 9:
-                            new_landuse_type = value.CtApplication.approved_landuse_ref.description
-                        if value.CtApplication.app_type == 7:
-                            transfer_count = self.session.query(CtApp15Ext).filter(CtApp15Ext.app_no == value.CtApplication.app_no).count()
-                            if transfer_count == 1:
-                                transfer = self.session.query(CtApp15Ext).filter(CtApp15Ext.app_no == value.CtApplication.app_no).one()
-                                if transfer.transfer_type == 10:
-                                    transfer_type = u'Х'
-                                elif transfer.transfer_type == 20:
-                                    transfer_type = u'Б'
-                                elif transfer.transfer_type == 30:
-                                    transfer_type = u'Ө'
-                                elif transfer.transfer_type == 40:
-                                    transfer_type = u'Д'
-                            # decision_app = self.session.query(CtDec
-                            # isionApplication).filter(CtDecisionApplication.application)
+                    if value.CtApplication.app_type == 10:
+                        extend_time = str(value.CtApplication.approved_duration)
+                    if value.CtApplication.app_type == 12:
+                        new_certificate_no = value.CtContract.certificate_no
+                    if value.CtApplication.app_type == 9:
+                        new_landuse_type = value.CtApplication.approved_landuse_ref.description
+                    if value.CtApplication.app_type == 7:
+                        transfer_count = self.session.query(CtApp15Ext).filter(CtApp15Ext.app_id == value.CtApplication.app_id).count()
+                        if transfer_count == 1:
+                            transfer = self.session.query(CtApp15Ext).filter(CtApp15Ext.app_id == value.CtApplication.app_id).one()
+                            if transfer.transfer_type == 10:
+                                transfer_type = u'Х'
+                            elif transfer.transfer_type == 20:
+                                transfer_type = u'Б'
+                            elif transfer.transfer_type == 30:
+                                transfer_type = u'Ө'
+                            elif transfer.transfer_type == 40:
+                                transfer_type = u'Д'
+                        # decision_app = self.session.query(CtDec
+                        # isionApplication).filter(CtDecisionApplication.application)
 
-                        worksheet.write(row, col, row_number, format)
-                        worksheet.write(row, col+1, value.CtApplication.parcel_ref.parcel_id, format)
-                        worksheet.write(row, col+2, str(value.CtApplication.parcel_ref.area_m2), format)
-                        worksheet.write(row, col+3, str(value.CtApplication.parcel_ref.area_m2/10000), format)
-                        worksheet.write(row, col+4, price, format)
-                        worksheet.write(row, col+5, landuse, format)
-                        worksheet.write(row, col+6, a3_name, format)
-                        worksheet.write(row, col+7, streetname, format)
-                        worksheet.write(row, col+8, khashaa, format)
-                        worksheet.write(row, col+9, neighbourhood, format)
-                        worksheet.write(row, col+10, middle_name, format)
-                        worksheet.write(row, col+11, surname, format)
-                        worksheet.write(row, col+12, first_name, format)
-                        worksheet.write(row, col+13, person.person_id, format)
-                        worksheet.write(row, col+14, person_address_a1, format)
-                        worksheet.write(row, col+15, person_address_a2, format)
-                        worksheet.write(row, col+16, person_address_a3, format)
-                        worksheet.write(row, col+17, person_address_street_name, format)
-                        worksheet.write(row, col+18, person_address_khaskhaa, format)
-                        worksheet.write(row, col+19, str(value.CtDecisionApplication.decision_ref.decision_date), format)
-                        worksheet.write(row, col+20, value.CtDecisionApplication.decision, format)
-                        worksheet.write(row, col+21, certificate_no, format)
-                        worksheet.write(row, col+22, contract_no, format)
-                        worksheet.write(row, col+23, contract_time, format)
-                        worksheet.write(row, col+24, extend_time, format)
-                        worksheet.write(row, col+25, str(new_certificate_no), format)
-                        worksheet.write(row, col+26, new_landuse_type, format)
-                        worksheet.write(row, col+27, transfer_type, format)
-                        worksheet.write(row, col+28, '', format)
-                        worksheet.write(row, col+29, '', format)
-                        worksheet.write(row, col+30, app_remarks, format)
-                        worksheet.write(row, col+31, str(value.CtContract.contract_date), format)
-                        worksheet.write(row, col+32, u'_________', format)
-                        row += 1
-                        row_number += 1
-                        value_p = self.progressBar.value() + 1
-                        self.progressBar.setValue(value_p)
+                    worksheet.write(row, col, row_number, format)
+                    worksheet.write(row, col+1, value.CtApplication.parcel_ref.parcel_id, format)
+                    worksheet.write(row, col+2, str(value.CtApplication.parcel_ref.area_m2), format)
+                    worksheet.write(row, col+3, str(value.CtApplication.parcel_ref.area_m2/10000), format)
+                    worksheet.write(row, col+4, price, format)
+                    worksheet.write(row, col+5, landuse, format)
+                    worksheet.write(row, col+6, a3_name, format)
+                    worksheet.write(row, col+7, streetname, format)
+                    worksheet.write(row, col+8, khashaa, format)
+                    worksheet.write(row, col+9, neighbourhood, format)
+                    worksheet.write(row, col+10, middle_name, format)
+                    worksheet.write(row, col+11, surname, format)
+                    worksheet.write(row, col+12, first_name, format)
+                    worksheet.write(row, col+13, person.person_id, format)
+                    worksheet.write(row, col+14, person_address_a1, format)
+                    worksheet.write(row, col+15, person_address_a2, format)
+                    worksheet.write(row, col+16, person_address_a3, format)
+                    worksheet.write(row, col+17, person_address_street_name, format)
+                    worksheet.write(row, col+18, person_address_khaskhaa, format)
+                    worksheet.write(row, col+19, str(value.CtDecisionApplication.decision_ref.decision_date), format)
+                    worksheet.write(row, col+20, value.CtDecisionApplication.decision, format)
+                    worksheet.write(row, col+21, certificate_no, format)
+                    worksheet.write(row, col+22, contract_no, format)
+                    worksheet.write(row, col+23, contract_time, format)
+                    worksheet.write(row, col+24, extend_time, format)
+                    worksheet.write(row, col+25, str(new_certificate_no), format)
+                    worksheet.write(row, col+26, new_landuse_type, format)
+                    worksheet.write(row, col+27, transfer_type, format)
+                    worksheet.write(row, col+28, '', format)
+                    worksheet.write(row, col+29, '', format)
+                    worksheet.write(row, col+30, app_remarks, format)
+                    worksheet.write(row, col+31, str(value.CtContract.contract_date), format)
+                    worksheet.write(row, col+32, u'_________', format)
+                    row += 1
+                    row_number += 1
+                    value_p = self.progressBar.value() + 1
+                    self.progressBar.setValue(value_p)
 
-        except SQLAlchemyError, e:
-            PluginUtils.show_error(self, self.tr("Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
-            return
+        # except SQLAlchemyError, e:
+        #     PluginUtils.show_error(self, self.tr("Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+        #     return
         try:
             workbook.close()
             QDesktopServices.openUrl(QUrl.fromLocalFile(default_path + "/" + restrictions + "-" + "book_for_land_possess.xlsx"))
@@ -5795,222 +5828,235 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         col = 0
         row_number = 1
         c_status = 0
-        try:
+        # try:
+        values = self.session.query(CtApplication,CtContract,CtDecisionApplication).\
+            join(CtContractApplicationRole.application_ref).\
+            join(CtContract).\
+            join(CtDecisionApplication, CtApplication.app_id == CtDecisionApplication.application).\
+            filter(CtContract.contract_date.between(begin_date, end_date)).\
+            filter(CtApplication.app_type == 6).all()
+        if not self.report_app_type_cbox.itemData(self.report_app_type_cbox.currentIndex()) == -1:
+            type = self.report_app_type_cbox.itemData(self.report_app_type_cbox.currentIndex())
             values = self.session.query(CtApplication,CtContract,CtDecisionApplication).\
-                join(CtContractApplicationRole.application_ref).\
-                join(CtContract).\
-                join(CtDecisionApplication, CtApplication.app_no == CtDecisionApplication.application).\
-                filter(CtContract.contract_date.between(begin_date, end_date)).\
-                filter(CtApplication.app_type == 6).all()
-            if not self.report_app_type_cbox.itemData(self.report_app_type_cbox.currentIndex()) == -1:
-                type = self.report_app_type_cbox.itemData(self.report_app_type_cbox.currentIndex())
-                values = self.session.query(CtApplication,CtContract,CtDecisionApplication).\
-                join(CtContractApplicationRole.application_ref).\
-                join(CtContract).\
-                join(CtDecisionApplication, CtApplication.app_no == CtDecisionApplication.application).\
-                filter(CtContract.contract_date.between(begin_date, end_date)).\
-                filter(CtApplication.app_type == type).\
-                filter(CtApplication.app_type == 6).all()
-            if not self.report_land_use_cbox.itemData(self.report_land_use_cbox.currentIndex()) == -1:
-                type = self.report_land_use_cbox.itemData(self.report_land_use_cbox.currentIndex())
-                values = self.session.query(CtApplication,CtContract,CtDecisionApplication).\
-                join(CtContractApplicationRole.application_ref).\
-                join(CtContract).\
-                join(CtDecisionApplication, CtApplication.app_no == CtDecisionApplication.application).\
-                filter(CtContract.contract_date.between(begin_date, end_date)).\
-                filter(CtApplication.approved_landuse == type).\
-                filter(CtApplication.app_type == 6).all()
-            if not self.report_person_type_cbox.itemData(self.report_person_type_cbox.currentIndex()) == -1:
-                type = self.report_person_type_cbox.itemData(self.report_person_type_cbox.currentIndex())
-                values = self.session.query(CtApplication,CtContract,CtDecisionApplication).\
-                join(CtContractApplicationRole.application_ref).\
-                join(CtContract).\
-                join(CtDecisionApplication, CtApplication.app_no == CtDecisionApplication.application).\
-                join(CtApplicationPersonRole, CtApplication.app_no == CtApplicationPersonRole.application).\
-                join(BsPerson, CtApplicationPersonRole.person == BsPerson.person_id).\
-                filter(CtContract.contract_date.between(begin_date, end_date)).\
-                filter(BsPerson.type == type).\
-                filter(CtApplication.app_type == 6).all()
-            if self.parcel_id.text():
-                value_like = "%" + self.parcel_id.text() + "%"
-                values = self.session.query(CtApplication,CtContract,CtDecisionApplication).\
-                join(CtContractApplicationRole.application_ref).\
-                join(CtContract).\
-                join(CtDecisionApplication, CtApplication.app_no == CtDecisionApplication.application).\
-                join(CtApplicationPersonRole, CtApplication.app_no == CtApplicationPersonRole.application).\
-                join(BsPerson, CtApplicationPersonRole.person == BsPerson.person_id).\
-                filter(CtContract.contract_date.between(begin_date, end_date)).\
-                filter(CtApplication.parcel.ilike(value_like)).\
-                filter(CtApplication.app_type == 6).all()
-            if self.person_id.text():
-                value_like = "%" + self.person_id.text() + "%"
-                values = self.session.query(CtApplication,CtContract,CtDecisionApplication).\
-                join(CtContractApplicationRole.application_ref).\
-                join(CtContract).\
-                join(CtDecisionApplication, CtApplication.app_no == CtDecisionApplication.application).\
-                join(CtApplicationPersonRole, CtApplication.app_no == CtApplicationPersonRole.application).\
-                join(BsPerson, CtApplicationPersonRole.person == BsPerson.person_id).\
-                filter(CtContract.contract_date.between(begin_date, end_date)).\
-                filter(BsPerson.person_register.ilike(value_like)).\
-                filter(CtApplication.app_type == 6).all()
+            join(CtContractApplicationRole.application_ref).\
+            join(CtContract).\
+            join(CtDecisionApplication, CtApplication.app_id == CtDecisionApplication.application).\
+            filter(CtContract.contract_date.between(begin_date, end_date)).\
+            filter(CtApplication.app_type == type).\
+            filter(CtApplication.app_type == 6).all()
+        if not self.report_land_use_cbox.itemData(self.report_land_use_cbox.currentIndex()) == -1:
+            type = self.report_land_use_cbox.itemData(self.report_land_use_cbox.currentIndex())
+            values = self.session.query(CtApplication,CtContract,CtDecisionApplication).\
+            join(CtContractApplicationRole.application_ref).\
+            join(CtContract).\
+            join(CtDecisionApplication, CtApplication.app_id == CtDecisionApplication.application).\
+            filter(CtContract.contract_date.between(begin_date, end_date)).\
+            filter(CtApplication.approved_landuse == type).\
+            filter(CtApplication.app_type == 6).all()
+        if not self.report_person_type_cbox.itemData(self.report_person_type_cbox.currentIndex()) == -1:
+            type = self.report_person_type_cbox.itemData(self.report_person_type_cbox.currentIndex())
+            values = self.session.query(CtApplication,CtContract,CtDecisionApplication).\
+            join(CtContractApplicationRole.application_ref).\
+            join(CtContract).\
+            join(CtDecisionApplication, CtApplication.app_id == CtDecisionApplication.application).\
+            join(CtApplicationPersonRole, CtApplication.app_id == CtApplicationPersonRole.application).\
+            join(BsPerson, CtApplicationPersonRole.person == BsPerson.person_id).\
+            filter(CtContract.contract_date.between(begin_date, end_date)).\
+            filter(BsPerson.type == type).\
+            filter(CtApplication.app_type == 6).all()
+        if self.parcel_id.text():
+            value_like = "%" + self.parcel_id.text() + "%"
+            values = self.session.query(CtApplication,CtContract,CtDecisionApplication).\
+            join(CtContractApplicationRole.application_ref).\
+            join(CtContract).\
+            join(CtDecisionApplication, CtApplication.app_id == CtDecisionApplication.application).\
+            join(CtApplicationPersonRole, CtApplication.app_id == CtApplicationPersonRole.application).\
+            join(BsPerson, CtApplicationPersonRole.person == BsPerson.person_id).\
+            filter(CtContract.contract_date.between(begin_date, end_date)).\
+            filter(CtApplication.parcel.ilike(value_like)).\
+            filter(CtApplication.app_type == 6).all()
+        if self.person_id.text():
+            value_like = "%" + self.person_id.text() + "%"
+            values = self.session.query(CtApplication,CtContract,CtDecisionApplication).\
+            join(CtContractApplicationRole.application_ref).\
+            join(CtContract).\
+            join(CtDecisionApplication, CtApplication.app_id == CtDecisionApplication.application).\
+            join(CtApplicationPersonRole, CtApplication.app_id == CtApplicationPersonRole.application).\
+            join(BsPerson, CtApplicationPersonRole.person == BsPerson.person_id).\
+            filter(CtContract.contract_date.between(begin_date, end_date)).\
+            filter(BsPerson.person_register.ilike(value_like)).\
+            filter(CtApplication.app_type == 6).all()
 
-            count = len(values)
-            self.progressBar.setMaximum(count)
-            for value in values:
+        count = len(values)
+        self.progressBar.setMaximum(count)
+        for value in values:
 
-                khashaa = ''
-                streetname = ''
-                neighbourhood = ''
-                landuse = ''
-                middle_name = ''
-                first_name = ''
-                surname = ''
-                person_address_a1 = '-'
-                person_address_a2 = '-'
-                person_address_a3 = '-'
-                person_address_street_name = '-'
-                person_address_khaskhaa = '-'
-                extend_time = ''
-                new_certificate_no = ''
-                new_landuse_type = ''
-                transfer_type = ''
-                a3_name = ''
-                legal_surname = ''
-                legal_name = ''
-                legal_person_id = ''
-                owner_change = ''
-                price = ''
-                person_name = ''
-                person_id = ''
-                contract_no = ''
-                certificate_no = ''
-                contract_time = ''
-                app_remarks = ''
-                contract_begin = ''
-                contract_end = ''
-                contract_status = ''
+            khashaa = ''
+            streetname = ''
+            neighbourhood = ''
+            landuse = ''
+            middle_name = ''
+            first_name = ''
+            surname = ''
+            person_address_a1 = '-'
+            person_address_a2 = '-'
+            person_address_a3 = '-'
+            person_address_street_name = '-'
+            person_address_khaskhaa = '-'
+            extend_time = ''
+            new_certificate_no = ''
+            new_landuse_type = ''
+            transfer_type = ''
+            a3_name = ''
+            legal_surname = ''
+            legal_name = ''
+            legal_person_id = ''
+            owner_change = ''
+            price = ''
+            person_name = ''
+            person_id = ''
+            contract_no = ''
+            certificate_no = ''
+            contract_time = ''
+            app_remarks = ''
+            contract_begin = ''
+            contract_end = ''
+            contract_status = ''
 
-                if value.CtApplication.approved_landuse != None:
-                    landuse = value.CtApplication.approved_landuse_ref.description
-                    landuse_code = value.CtApplication.approved_landuse_ref.code
-                if value.CtApplication.parcel_ref.address_khashaa != None:
-                    khashaa = value.CtApplication.parcel_ref.address_khashaa
-                if value.CtApplication.parcel_ref.address_streetname != None:
-                    streetname = value.CtApplication.parcel_ref.address_streetname
-                if value.CtApplication.parcel_ref.address_neighbourhood != None:
-                    neighbourhood = value.CtApplication.parcel_ref.address_neighbourhood
-                if value.CtContract.contract_no != None:
-                    contract_no = value.CtContract.contract_no
-                if value.CtContract.certificate_no != None:
-                    certificate_no = str(value.CtContract.certificate_no)
-                if value.CtContract.contract_begin != None and value.CtContract.contract_end != None:
-                    contract_time = str(value.CtContract.contract_end.year - value.CtContract.contract_begin.year)
-                if value.CtApplication.remarks != None:
-                    app_remarks = value.CtApplication.remarks
+            if value.CtApplication.approved_landuse != None:
+                landuse = value.CtApplication.approved_landuse_ref.description
+                landuse_code = value.CtApplication.approved_landuse_ref.code
+            if value.CtApplication.parcel_ref.address_khashaa != None:
+                khashaa = value.CtApplication.parcel_ref.address_khashaa
+            if value.CtApplication.parcel_ref.address_streetname != None:
+                streetname = value.CtApplication.parcel_ref.address_streetname
+            if value.CtApplication.parcel_ref.address_neighbourhood != None:
+                neighbourhood = value.CtApplication.parcel_ref.address_neighbourhood
+            if value.CtContract.contract_no != None:
+                contract_no = value.CtContract.contract_no
+            if value.CtContract.certificate_no != None:
+                certificate_no = str(value.CtContract.certificate_no)
+            if value.CtContract.contract_begin != None and value.CtContract.contract_end != None:
+                contract_time = str(value.CtContract.contract_end.year - value.CtContract.contract_begin.year)
+            if value.CtApplication.remarks != None:
+                app_remarks = value.CtApplication.remarks
 
-                app_person = self.session.query(CtApplicationPersonRole).filter(CtApplicationPersonRole.application == value.CtApplication.app_no).all()
-                for person_app in app_person:
-                    person_count = self.session.query(BsPerson).filter(BsPerson.person_id == person_app.person).count()
-                    if person_count != 0:
-                        person = self.session.query(BsPerson).filter(BsPerson.person_id == person_app.person).one()
-                        a3_count = self.session.query(AuLevel3).filter(AuLevel3.geometry.ST_Contains(value.CtApplication.parcel_ref.geometry)).count()
-                        if a3_count != 0:
-                            a3 = self.session.query(AuLevel3).filter(AuLevel3.geometry.ST_Contains(value.CtApplication.parcel_ref.geometry)).one()
-                            a3_name = a3.name
-                        tax_zone_count = self.session.query(SetTaxAndPriceZone).filter(SetTaxAndPriceZone.geometry.ST_Contains(value.CtApplication.parcel_ref.geometry)).count()
-                        if tax_zone_count == 1:
-                            tax_zone = self.session.query(SetTaxAndPriceZone).filter(SetTaxAndPriceZone.geometry.ST_Contains(value.CtApplication.parcel_ref.geometry)).one()
-                            tax_count = self.session.query(SetBaseTaxAndPrice).filter(SetBaseTaxAndPrice.tax_zone == tax_zone.zone_id).count()
-                            if tax_count == 1:
-                                tax = self.session.query(SetBaseTaxAndPrice).filter(SetBaseTaxAndPrice.tax_zone == tax_zone.zone_id).one()
-                                price = str(float(tax.base_value_per_m2) * value.CtApplication.parcel_ref.area_m2)
-                        if person.address_au_level3 != None:
-                            person_a3 = self.session.query(AuLevel3).filter(AuLevel3.code == person.address_au_level3).one()
+            app_person = self.session.query(CtApplicationPersonRole).filter(CtApplicationPersonRole.application == value.CtApplication.app_id).all()
+            for person_app in app_person:
+                person_count = self.session.query(BsPerson).filter(BsPerson.person_id == person_app.person).count()
+                if person_count != 0:
+                    person = self.session.query(BsPerson).filter(BsPerson.person_id == person_app.person).one()
+                    a3_count = self.session.query(AuLevel3).filter(AuLevel3.geometry.ST_Contains(value.CtApplication.parcel_ref.geometry)).count()
+                    if a3_count != 0:
+                        a3 = self.session.query(AuLevel3).filter(AuLevel3.geometry.ST_Contains(value.CtApplication.parcel_ref.geometry)).one()
+                        a3_name = a3.name
+                    tax_zone_count = self.session.query(SetTaxAndPriceZone).filter(SetTaxAndPriceZone.geometry.ST_Contains(value.CtApplication.parcel_ref.geometry)).count()
+                    if tax_zone_count == 1:
+                        tax_zone = self.session.query(SetTaxAndPriceZone).filter(SetTaxAndPriceZone.geometry.ST_Contains(value.CtApplication.parcel_ref.geometry)).one()
+                        tax_count = self.session.query(SetBaseTaxAndPrice).filter(SetBaseTaxAndPrice.tax_zone == tax_zone.zone_id).count()
+                        if tax_count == 1:
+                            tax = self.session.query(SetBaseTaxAndPrice).filter(SetBaseTaxAndPrice.tax_zone == tax_zone.zone_id).one()
+                            price = str(float(tax.base_value_per_m2) * value.CtApplication.parcel_ref.area_m2)
+                    if person.address_au_level3 != None:
+                        person_a3_count = self.session.query(AuLevel3).filter(
+                            AuLevel3.code == person.address_au_level3).count()
+                        if person_a3_count == 1:
+                            person_a3 = self.session.query(AuLevel3).filter(
+                                AuLevel3.code == person.address_au_level3).one()
                             person_address_a3 = person_a3.name
-                        if person.address_au_level2 != None:
-                            person_a2 = self.session.query(AuLevel2).filter(AuLevel2.code == person.address_au_level2).one()
+                    if person.address_au_level2 != None:
+                        person_a2_c = self.session.query(AuLevel2).filter(
+                            AuLevel2.code == person.address_au_level2).count()
+                        if person_a2_c == 1:
+                            person_a2 = self.session.query(AuLevel2).filter(
+                                AuLevel2.code == person.address_au_level2).one()
                             person_address_a2 = person_a2.name
-                        if person.address_au_level1 != None:
-                            person_a1 = self.session.query(AuLevel1).filter(AuLevel1.code == person.address_au_level1).one()
+                        person_address_a2 = person_a2.name
+                    if person.address_au_level1 != None:
+                        person_a1_count = self.session.query(AuLevel1).filter(
+                            AuLevel1.code == person.address_au_level1).count()
+                        if person_a1_count == 1:
+                            person_a1 = self.session.query(AuLevel1).filter(
+                                AuLevel1.code == person.address_au_level1).one()
                             person_address_a1 = person_a1.name
-                        if person.address_street_name != None:
-                            person_address_street_name = person.address_street_name
-                        if person.address_khaskhaa != None:
-                            person_address_khaskhaa = person.address_khaskhaa
+                    if person.address_street_name != None:
+                        person_address_street_name = person.address_street_name
+                    if person.address_khaskhaa != None:
+                        person_address_khaskhaa = person.address_khaskhaa
 
-                        if person.type == 10 or person.type == 20 \
-                            or person.person_ref.type == 50:
-                            if person.person_ref.middle_name != None:
-                                middle_name = person.person_ref.middle_name
-                            if person.person_ref.first_name != None:
-                                first_name = person.person_ref.first_name
-                            if person.person_ref.name != None:
-                                surname = person.person_ref.name
-                        if person.type == 30 or person.type == 40 \
-                            or person.type == 60:
-                            first_name = person.name
+                    if person.type == 10 or person.type == 20 \
+                        or person.type == 50:
+                        if person.middle_name != None:
+                            middle_name = person.middle_name
+                        if person.first_name != None:
+                            first_name = person.first_name
+                        if person.name != None:
+                            surname = person.name
+                    if person.type == 30 or person.type == 40 \
+                        or person.type == 60:
+                        first_name = person.name
 
-                        if value.CtApplication.app_type == 10:
-                            extend_time = str(value.CtApplication.approved_duration)
-                        if value.CtApplication.app_type == 12:
-                            new_certificate_no = value.CtContract.certificate_no
-                        if value.CtApplication.app_type == 9:
-                            new_landuse_type = value.CtApplication.approved_landuse_ref.description
-                        if value.CtApplication.app_type == 7:
-                            transfer_count = self.session.query(CtApp15Ext).filter(CtApp15Ext.app_no == value.CtApplication.app_no).count()
-                            if transfer_count == 1:
-                                transfer = self.session.query(CtApp15Ext).filter(CtApp15Ext.app_no == value.CtApplication.app_no).one()
-                                if transfer.transfer_type == 10:
-                                    transfer_type = u'Х'
-                                elif transfer.transfer_type == 20:
-                                    transfer_type = u'Б'
-                                elif transfer.transfer_type == 30:
-                                    transfer_type = u'Ө'
-                                elif transfer.transfer_type == 40:
-                                    transfer_type = u'Д'
-                        if person_app.main_applicant == True:
-                            worksheet.write(row, col, row_number, format)
-                            worksheet.write(row, col+1, value.CtApplication.parcel_ref.parcel_id, format)
-                            worksheet.write(row, col+2, str(value.CtApplication.parcel_ref.area_m2), format)
-                            worksheet.write(row, col+3, str(value.CtApplication.parcel_ref.area_m2/10000), format)
-                            worksheet.write(row, col+4, price, format)
-                            worksheet.write(row, col+5, landuse, format)
-                            worksheet.write(row, col+6, a3_name, format)
-                            worksheet.write(row, col+7, streetname, format)
-                            worksheet.write(row, col+8, khashaa, format)
-                            worksheet.write(row, col+9, neighbourhood, format)
-                            worksheet.write(row, col+10, middle_name, format)
-                            worksheet.write(row, col+11, surname, format)
-                            worksheet.write(row, col+12, first_name, format)
-                            worksheet.write(row, col+13, person.person_id, format)
-                            worksheet.write(row, col+14, person_address_a1, format)
-                            worksheet.write(row, col+15, person_address_a2, format)
-                            worksheet.write(row, col+16, person_address_a3, format)
-                            worksheet.write(row, col+17, person_address_street_name, format)
-                            worksheet.write(row, col+18, person_address_khaskhaa, format)
-                            worksheet.write(row, col+19, str(value.CtDecisionApplication.decision_ref.decision_date), format)
-                            worksheet.write(row, col+20, value.CtDecisionApplication.decision, format)
-                            worksheet.write(row, col+21, certificate_no, format)
-                            worksheet.write(row, col+22, contract_no, format)
-                            worksheet.write(row, col+23, contract_time, format)
-                            worksheet.write(row, col+24, extend_time, format)
-                            worksheet.write(row, col+25, str(new_certificate_no), format)
-                            worksheet.write(row, col+26, new_landuse_type, format)
-                            worksheet.write(row, col+27, transfer_type, format)
-                            worksheet.write(row, col+28, '', format)
-                            worksheet.write(row, col+29, '', format)
-                            worksheet.write(row, col+30, '', format)
-                            worksheet.write(row, col+31, app_remarks, format)
-                            worksheet.write(row, col+32, str(value.CtContract.contract_date), format)
-                            worksheet.write(row, col+33, u'_________', format)
-                            row += 1
-                            row_number += 1
-                            value_p = self.progressBar.value() + 1
-                            self.progressBar.setValue(value_p)
+                    if value.CtApplication.app_type == 10:
+                        extend_time = str(value.CtApplication.approved_duration)
+                    if value.CtApplication.app_type == 12:
+                        new_certificate_no = value.CtContract.certificate_no
+                    if value.CtApplication.app_type == 9:
+                        new_landuse_type = value.CtApplication.approved_landuse_ref.description
+                    if value.CtApplication.app_type == 7:
+                        transfer_count = self.session.query(CtApp15Ext).filter(CtApp15Ext.app_id == value.CtApplication.app_id).count()
+                        if transfer_count == 1:
+                            transfer = self.session.query(CtApp15Ext).filter(CtApp15Ext.app_id == value.CtApplication.app_id).one()
+                            if transfer.transfer_type == 10:
+                                transfer_type = u'Х'
+                            elif transfer.transfer_type == 20:
+                                transfer_type = u'Б'
+                            elif transfer.transfer_type == 30:
+                                transfer_type = u'Ө'
+                            elif transfer.transfer_type == 40:
+                                transfer_type = u'Д'
+                    if person_app.main_applicant == True:
+                        worksheet.write(row, col, row_number, format)
+                        worksheet.write(row, col+1, value.CtApplication.parcel_ref.parcel_id, format)
+                        worksheet.write(row, col+2, str(value.CtApplication.parcel_ref.area_m2), format)
+                        worksheet.write(row, col+3, str(value.CtApplication.parcel_ref.area_m2/10000), format)
+                        worksheet.write(row, col+4, price, format)
+                        worksheet.write(row, col+5, landuse, format)
+                        worksheet.write(row, col+6, a3_name, format)
+                        worksheet.write(row, col+7, streetname, format)
+                        worksheet.write(row, col+8, khashaa, format)
+                        worksheet.write(row, col+9, neighbourhood, format)
+                        worksheet.write(row, col+10, middle_name, format)
+                        worksheet.write(row, col+11, surname, format)
+                        worksheet.write(row, col+12, first_name, format)
+                        worksheet.write(row, col+13, person.person_id, format)
+                        worksheet.write(row, col+14, person_address_a1, format)
+                        worksheet.write(row, col+15, person_address_a2, format)
+                        worksheet.write(row, col+16, person_address_a3, format)
+                        worksheet.write(row, col+17, person_address_street_name, format)
+                        worksheet.write(row, col+18, person_address_khaskhaa, format)
+                        worksheet.write(row, col+19, str(value.CtDecisionApplication.decision_ref.decision_date), format)
+                        worksheet.write(row, col+20, value.CtDecisionApplication.decision, format)
+                        worksheet.write(row, col+21, certificate_no, format)
+                        worksheet.write(row, col+22, contract_no, format)
+                        worksheet.write(row, col+23, contract_time, format)
+                        worksheet.write(row, col+24, extend_time, format)
+                        worksheet.write(row, col+25, str(new_certificate_no), format)
+                        worksheet.write(row, col+26, new_landuse_type, format)
+                        worksheet.write(row, col+27, transfer_type, format)
+                        worksheet.write(row, col+28, '', format)
+                        worksheet.write(row, col+29, '', format)
+                        worksheet.write(row, col+30, '', format)
+                        worksheet.write(row, col+31, app_remarks, format)
+                        worksheet.write(row, col+32, str(value.CtContract.contract_date), format)
+                        worksheet.write(row, col+33, u'_________', format)
+                        row += 1
+                        row_number += 1
+                        value_p = self.progressBar.value() + 1
+                        self.progressBar.setValue(value_p)
 
-        except SQLAlchemyError, e:
-            PluginUtils.show_error(self, self.tr("Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
-            return
+        # except SQLAlchemyError, e:
+        #     PluginUtils.show_error(self, self.tr("Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+        #     return
 
         try:
             workbook.close()
@@ -6152,206 +6198,218 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         col = 0
         row_number = 1
         c_status = 0
-        try:
+        # try:
+        values = self.session.query(CtApplication,CtOwnershipRecord,CtDecisionApplication).\
+            join(CtRecordApplicationRole.application_ref).\
+            join(CtOwnershipRecord).\
+            join(CtDecisionApplication, CtApplication.app_id == CtDecisionApplication.application).\
+            filter(CtOwnershipRecord.record_date.between(begin_date, end_date)).all()
+        if not self.report_app_type_cbox.itemData(self.report_app_type_cbox.currentIndex()) == -1:
+            type = self.report_app_type_cbox.itemData(self.report_app_type_cbox.currentIndex())
             values = self.session.query(CtApplication,CtOwnershipRecord,CtDecisionApplication).\
-                join(CtRecordApplicationRole.application_ref).\
-                join(CtOwnershipRecord).\
-                join(CtDecisionApplication, CtApplication.app_no == CtDecisionApplication.application).\
-                filter(CtOwnershipRecord.record_date.between(begin_date, end_date)).all()
-            if not self.report_app_type_cbox.itemData(self.report_app_type_cbox.currentIndex()) == -1:
-                type = self.report_app_type_cbox.itemData(self.report_app_type_cbox.currentIndex())
-                values = self.session.query(CtApplication,CtOwnershipRecord,CtDecisionApplication).\
-                join(CtRecordApplicationRole.application_ref).\
-                join(CtOwnershipRecord).\
-                join(CtDecisionApplication, CtApplication.app_no == CtDecisionApplication.application).\
-                filter(CtOwnershipRecord.record_date.between(begin_date, end_date)).\
-                filter(CtApplication.app_type == type).all()
-            if not self.report_land_use_cbox.itemData(self.report_land_use_cbox.currentIndex()) == -1:
-                type = self.report_land_use_cbox.itemData(self.report_land_use_cbox.currentIndex())
-                values = self.session.query(CtApplication,CtOwnershipRecord,CtDecisionApplication).\
-                join(CtRecordApplicationRole.application_ref).\
-                join(CtOwnershipRecord).\
-                join(CtDecisionApplication, CtApplication.app_no == CtDecisionApplication.application).\
-                filter(CtOwnershipRecord.record_date.between(begin_date, end_date)).\
-                filter(CtApplication.approved_landuse == type).all()
-            if not self.report_person_type_cbox.itemData(self.report_person_type_cbox.currentIndex()) == -1:
-                type = self.report_person_type_cbox.itemData(self.report_person_type_cbox.currentIndex())
-                values = self.session.query(CtApplication,CtOwnershipRecord,CtDecisionApplication).\
-                join(CtRecordApplicationRole.application_ref).\
-                join(CtOwnershipRecord).\
-                join(CtDecisionApplication, CtApplication.app_no == CtDecisionApplication.application).\
-                join(CtApplicationPersonRole, CtApplication.app_no == CtApplicationPersonRole.application).\
-                join(BsPerson, CtApplicationPersonRole.person == BsPerson.person_id).\
-                filter(CtOwnershipRecord.record_date.between(begin_date, end_date)).\
-                filter(BsPerson.type == type).all()
+            join(CtRecordApplicationRole.application_ref).\
+            join(CtOwnershipRecord).\
+            join(CtDecisionApplication, CtApplication.app_id == CtDecisionApplication.application).\
+            filter(CtOwnershipRecord.record_date.between(begin_date, end_date)).\
+            filter(CtApplication.app_type == type).all()
+        if not self.report_land_use_cbox.itemData(self.report_land_use_cbox.currentIndex()) == -1:
+            type = self.report_land_use_cbox.itemData(self.report_land_use_cbox.currentIndex())
+            values = self.session.query(CtApplication,CtOwnershipRecord,CtDecisionApplication).\
+            join(CtRecordApplicationRole.application_ref).\
+            join(CtOwnershipRecord).\
+            join(CtDecisionApplication, CtApplication.app_id == CtDecisionApplication.application).\
+            filter(CtOwnershipRecord.record_date.between(begin_date, end_date)).\
+            filter(CtApplication.approved_landuse == type).all()
+        if not self.report_person_type_cbox.itemData(self.report_person_type_cbox.currentIndex()) == -1:
+            type = self.report_person_type_cbox.itemData(self.report_person_type_cbox.currentIndex())
+            values = self.session.query(CtApplication,CtOwnershipRecord,CtDecisionApplication).\
+            join(CtRecordApplicationRole.application_ref).\
+            join(CtOwnershipRecord).\
+            join(CtDecisionApplication, CtApplication.app_id == CtDecisionApplication.application).\
+            join(CtApplicationPersonRole, CtApplication.app_id == CtApplicationPersonRole.application).\
+            join(BsPerson, CtApplicationPersonRole.person == BsPerson.person_id).\
+            filter(CtOwnershipRecord.record_date.between(begin_date, end_date)).\
+            filter(BsPerson.type == type).all()
 
-            count = len(values)
-            self.progressBar.setMaximum(count)
-            for value in values:
-                khashaa = ''
-                streetname = ''
-                neighbourhood = ''
-                landuse = ''
-                middle_name = ''
-                first_name = ''
-                surname = ''
-                person_address_a1 = '-'
-                person_address_a2 = '-'
-                person_address_a3 = '-'
-                person_address_street_name = '-'
-                person_address_khaskhaa = '-'
-                price = 0
-                base_tax = 0
-                bas_tax_amount = 0
-                subsidized_tax_rate = 0
-                base_tax_rate = 0
-                subsidized_tax_amount = 0
-                tax_to_pay_for_current_year = 0
-                paid_for_current_year = 0
-                surplus = 0
-                partial = 0
-                tax_left_to_pay = 0
-                tax_right_to_pay = 0
-                tax_pay = 0
-                a3_name = ''
-                if value.CtApplication.approved_landuse != None:
-                    landuse = value.CtApplication.approved_landuse_ref.description
-                    landuse_code = value.CtApplication.approved_landuse_ref.code
-                if value.CtApplication.parcel_ref != None:
-                    if value.CtApplication.parcel_ref.address_khashaa != None:
-                        khashaa = value.CtApplication.parcel_ref.address_khashaa
-                    if value.CtApplication.parcel_ref.address_streetname != None:
-                        streetname = value.CtApplication.parcel_ref.address_streetname
-                    if value.CtApplication.parcel_ref.address_neighbourhood != None:
-                        neighbourhood = value.CtApplication.parcel_ref.address_neighbourhood
+        count = len(values)
+        self.progressBar.setMaximum(count)
+        for value in values:
+            khashaa = ''
+            streetname = ''
+            neighbourhood = ''
+            landuse = ''
+            middle_name = ''
+            first_name = ''
+            surname = ''
+            person_address_a1 = '-'
+            person_address_a2 = '-'
+            person_address_a3 = '-'
+            person_address_street_name = '-'
+            person_address_khaskhaa = '-'
+            price = 0
+            base_tax = 0
+            bas_tax_amount = 0
+            subsidized_tax_rate = 0
+            base_tax_rate = 0
+            subsidized_tax_amount = 0
+            tax_to_pay_for_current_year = 0
+            paid_for_current_year = 0
+            surplus = 0
+            partial = 0
+            tax_left_to_pay = 0
+            tax_right_to_pay = 0
+            tax_pay = 0
+            a3_name = ''
+            if value.CtApplication.approved_landuse != None:
+                landuse = value.CtApplication.approved_landuse_ref.description
+                landuse_code = value.CtApplication.approved_landuse_ref.code
+            if value.CtApplication.parcel_ref != None:
+                if value.CtApplication.parcel_ref.address_khashaa != None:
+                    khashaa = value.CtApplication.parcel_ref.address_khashaa
+                if value.CtApplication.parcel_ref.address_streetname != None:
+                    streetname = value.CtApplication.parcel_ref.address_streetname
+                if value.CtApplication.parcel_ref.address_neighbourhood != None:
+                    neighbourhood = value.CtApplication.parcel_ref.address_neighbourhood
 
-                    app_person = self.session.query(CtApplicationPersonRole).filter(CtApplicationPersonRole.application == value.CtApplication.app_no).all()
-                    for person_app in app_person:
-                        person_count = self.session.query(BsPerson).filter(BsPerson.person_id == person_app.person).count()
-                        if person_count != 0:
-                            person = self.session.query(BsPerson).filter(BsPerson.person_id == person_app.person).one()
-                            a3_count = self.session.query(AuLevel3).filter(AuLevel3.geometry.ST_Contains(value.CtApplication.parcel_ref.geometry)).count()
-                            if a3_count != 0:
-                                a3 = self.session.query(AuLevel3).filter(AuLevel3.geometry.ST_Contains(value.CtApplication.parcel_ref.geometry)).one()
-                                a3_name = a3.name
-                            tax_zone_count = self.session.query(SetTaxAndPriceZone).filter(SetTaxAndPriceZone.geometry.ST_Contains(value.CtApplication.parcel_ref.geometry)).count()
+                app_person = self.session.query(CtApplicationPersonRole).filter(CtApplicationPersonRole.application == value.CtApplication.app_id).all()
+                for person_app in app_person:
+                    person_count = self.session.query(BsPerson).filter(BsPerson.person_id == person_app.person).count()
+                    if person_count != 0:
+                        person = self.session.query(BsPerson).filter(BsPerson.person_id == person_app.person).one()
+                        a3_count = self.session.query(AuLevel3).filter(AuLevel3.geometry.ST_Contains(value.CtApplication.parcel_ref.geometry)).count()
+                        if a3_count != 0:
+                            a3 = self.session.query(AuLevel3).filter(AuLevel3.geometry.ST_Contains(value.CtApplication.parcel_ref.geometry)).one()
+                            a3_name = a3.name
+                        tax_zone_count = self.session.query(SetTaxAndPriceZone).filter(SetTaxAndPriceZone.geometry.ST_Contains(value.CtApplication.parcel_ref.geometry)).count()
+                        if str(value.CtApplication.parcel_ref.landuse)[:1] == '1':
+                            tax_zone_count = self.session.query(SetTaxAndPriceZone).filter(SetTaxAndPriceZone.geometry.ST_Contains(value.CtApplication.parcel_ref.geometry)).\
+                                filter(or_(SetTaxAndPriceZone.zone_no == 50, SetTaxAndPriceZone.zone_no == 60, SetTaxAndPriceZone.zone_no == 70, SetTaxAndPriceZone.zone_no == 80)).count()
+                        else:
+                            tax_zone_count = self.session.query(SetTaxAndPriceZone).filter(SetTaxAndPriceZone.geometry.ST_Contains(value.CtApplication.parcel_ref.geometry)).\
+                                filter(and_(SetTaxAndPriceZone.zone_no != 50, SetTaxAndPriceZone.zone_no != 60, SetTaxAndPriceZone.zone_no != 70, SetTaxAndPriceZone.zone_no != 80)).count()
+                        if tax_zone_count == 1:
                             if str(value.CtApplication.parcel_ref.landuse)[:1] == '1':
-                                tax_zone_count = self.session.query(SetTaxAndPriceZone).filter(SetTaxAndPriceZone.geometry.ST_Contains(value.CtApplication.parcel_ref.geometry)).\
-                                    filter(or_(SetTaxAndPriceZone.zone_no == 50, SetTaxAndPriceZone.zone_no == 60, SetTaxAndPriceZone.zone_no == 70, SetTaxAndPriceZone.zone_no == 80)).count()
+                                tax_zone = self.session.query(SetTaxAndPriceZone).filter(SetTaxAndPriceZone.geometry.ST_Contains(value.CtApplication.parcel_ref.geometry)).\
+                                    filter(or_(SetTaxAndPriceZone.zone_no == 50, SetTaxAndPriceZone.zone_no == 60, SetTaxAndPriceZone.zone_no == 70, SetTaxAndPriceZone.zone_no == 80)).one()
                             else:
-                                tax_zone_count = self.session.query(SetTaxAndPriceZone).filter(SetTaxAndPriceZone.geometry.ST_Contains(value.CtApplication.parcel_ref.geometry)).\
-                                    filter(and_(SetTaxAndPriceZone.zone_no != 50, SetTaxAndPriceZone.zone_no != 60, SetTaxAndPriceZone.zone_no != 70, SetTaxAndPriceZone.zone_no != 80)).count()
-                            if tax_zone_count == 1:
-                                if str(value.CtApplication.parcel_ref.landuse)[:1] == '1':
-                                    tax_zone = self.session.query(SetTaxAndPriceZone).filter(SetTaxAndPriceZone.geometry.ST_Contains(value.CtApplication.parcel_ref.geometry)).\
-                                        filter(or_(SetTaxAndPriceZone.zone_no == 50, SetTaxAndPriceZone.zone_no == 60, SetTaxAndPriceZone.zone_no == 70, SetTaxAndPriceZone.zone_no == 80)).one()
-                                else:
-                                    tax_zone = self.session.query(SetTaxAndPriceZone).filter(SetTaxAndPriceZone.geometry.ST_Contains(value.CtApplication.parcel_ref.geometry)).\
-                                        filter(and_(SetTaxAndPriceZone.zone_no != 50, SetTaxAndPriceZone.zone_no != 60, SetTaxAndPriceZone.zone_no != 70, SetTaxAndPriceZone.zone_no != 80)).one()
-                                tax_count = self.session.query(SetBaseTaxAndPrice).\
+                                tax_zone = self.session.query(SetTaxAndPriceZone).filter(SetTaxAndPriceZone.geometry.ST_Contains(value.CtApplication.parcel_ref.geometry)).\
+                                    filter(and_(SetTaxAndPriceZone.zone_no != 50, SetTaxAndPriceZone.zone_no != 60, SetTaxAndPriceZone.zone_no != 70, SetTaxAndPriceZone.zone_no != 80)).one()
+                            tax_count = self.session.query(SetBaseTaxAndPrice).\
+                                filter(SetBaseTaxAndPrice.tax_zone == tax_zone.zone_id).\
+                                filter(SetBaseTaxAndPrice.landuse == value.CtApplication.approved_landuse).count()
+                            if tax_count == 1:
+
+                                tax = self.session.query(SetBaseTaxAndPrice).\
                                     filter(SetBaseTaxAndPrice.tax_zone == tax_zone.zone_id).\
-                                    filter(SetBaseTaxAndPrice.landuse == value.CtApplication.approved_landuse).count()
-                                if tax_count == 1:
+                                    filter(SetBaseTaxAndPrice.landuse == value.CtApplication.approved_landuse).one()
+                                price = float(tax.base_value_per_m2) * value.CtApplication.parcel_ref.area_m2
+                                base_tax = price*float(tax.base_tax_rate)/100
 
-                                    tax = self.session.query(SetBaseTaxAndPrice).\
-                                        filter(SetBaseTaxAndPrice.tax_zone == tax_zone.zone_id).\
-                                        filter(SetBaseTaxAndPrice.landuse == value.CtApplication.approved_landuse).one()
-                                    price = float(tax.base_value_per_m2) * value.CtApplication.parcel_ref.area_m2
-                                    base_tax = price*float(tax.base_tax_rate)/100
+                                subsidized_tax_rate = float(tax.subsidized_tax_rate)
+                                subsidized_tax_amount = base_tax*subsidized_tax_rate/100
+                                bas_tax_amount = base_tax - subsidized_tax_amount
+                                base_tax_rate = tax.base_tax_rate
+                                payment_year = self.year_sbox.value()
+                                tax_c = self.session.query(CtTaxAndPrice).filter(CtTaxAndPrice.person == person.person_id)\
+                                                                        .filter(CtTaxAndPrice.record == value.CtOwnershipRecord.record_id).count()
+                                if tax_c == 1:
+                                    tax = self.session.query(CtTaxAndPrice).filter(CtTaxAndPrice.person == person.person_id)\
+                                                                        .filter(CtTaxAndPrice.record == value.CtOwnershipRecord.record_id).one()
 
-                                    subsidized_tax_rate = float(tax.subsidized_tax_rate)
-                                    subsidized_tax_amount = base_tax*subsidized_tax_rate/100
-                                    bas_tax_amount = base_tax - subsidized_tax_amount
-                                    base_tax_rate = tax.base_tax_rate
-                                    payment_year = self.year_sbox.value()
-                                    tax_c = self.session.query(CtTaxAndPrice).filter(CtTaxAndPrice.person == person.person_id)\
-                                                                            .filter(CtTaxAndPrice.record == value.CtOwnershipRecord.record_no).count()
-                                    if tax_c == 1:
-                                        tax = self.session.query(CtTaxAndPrice).filter(CtTaxAndPrice.person == person.person_id)\
-                                                                            .filter(CtTaxAndPrice.record == value.CtOwnershipRecord.record_no).one()
+                                    tax_to_pay_for_current_year = \
+                                        self.__tax_to_pay_per_period(tax, date(payment_year, 1, 1), date(payment_year+1, 1, 1))
 
-                                        tax_to_pay_for_current_year = \
-                                            self.__tax_to_pay_per_period(tax, date(payment_year, 1, 1), date(payment_year+1, 1, 1))
+                                    paid_for_current_year = self.session.query(func.sum(CtTaxAndPricePayment.amount_paid))\
+                                        .filter(CtTaxAndPricePayment.record == tax.record).filter(CtTaxAndPricePayment.person == tax.person)\
+                                        .filter(CtTaxAndPricePayment.year_paid_for == payment_year).scalar()
 
-                                        paid_for_current_year = self.session.query(func.sum(CtTaxAndPricePayment.amount_paid))\
-                                            .filter(CtTaxAndPricePayment.record == tax.record).filter(CtTaxAndPricePayment.person == tax.person)\
-                                            .filter(CtTaxAndPricePayment.year_paid_for == payment_year).scalar()
+                                    if paid_for_current_year is None:
+                                        paid_for_current_year = 0
 
-                                        if paid_for_current_year is None:
-                                            paid_for_current_year = 0
+                                    partial = self.__sum_year_amount_paid(tax, value.CtOwnershipRecord)
+                                    surplus = self.__surplus_from_previous_years(tax, value.CtOwnershipRecord)
+                                    if surplus < 0:
+                                        surplus = 0
 
-                                        partial = self.__sum_year_amount_paid(tax, value.CtOwnershipRecord)
-                                        surplus = self.__surplus_from_previous_years(tax, value.CtOwnershipRecord)
-                                        if surplus < 0:
-                                            surplus = 0
+                                    tax_left_to_pay = tax_to_pay_for_current_year - (paid_for_current_year + surplus)
 
-                                        tax_left_to_pay = tax_to_pay_for_current_year - (paid_for_current_year + surplus)
+                                    tax_pay = tax_to_pay_for_current_year - surplus + partial
 
-                                        tax_pay = tax_to_pay_for_current_year - surplus + partial
-
-                            if person.address_au_level3 != None:
-                                person_a3 = self.session.query(AuLevel3).filter(AuLevel3.code == person.address_au_level3).one()
+                        if person.address_au_level3 != None:
+                            person_a3_count = self.session.query(AuLevel3).filter(
+                                AuLevel3.code == person.address_au_level3).count()
+                            if person_a3_count == 1:
+                                person_a3 = self.session.query(AuLevel3).filter(
+                                    AuLevel3.code == person.address_au_level3).one()
                                 person_address_a3 = person_a3.name
-                            if person.address_au_level2 != None:
-                                person_a2 = self.session.query(AuLevel2).filter(AuLevel2.code == person.address_au_level2).one()
+                        if person.address_au_level2 != None:
+                            person_a2_c = self.session.query(AuLevel2).filter(
+                                AuLevel2.code == person.address_au_level2).count()
+                            if person_a2_c == 1:
+                                person_a2 = self.session.query(AuLevel2).filter(
+                                    AuLevel2.code == person.address_au_level2).one()
                                 person_address_a2 = person_a2.name
-                            if person.address_au_level1 != None:
-                                person_a1 = self.session.query(AuLevel1).filter(AuLevel1.code == person.address_au_level1).one()
+                        if person.address_au_level1 != None:
+                            person_a1_count = self.session.query(AuLevel1).filter(
+                                AuLevel1.code == person.address_au_level1).count()
+                            if person_a1_count == 1:
+                                person_a1 = self.session.query(AuLevel1).filter(
+                                    AuLevel1.code == person.address_au_level1).one()
                                 person_address_a1 = person_a1.name
-                            if person.address_street_name != None:
-                                person_address_street_name = person.address_street_name
-                            if person.address_khaskhaa != None:
-                                person_address_khaskhaa = person.address_khaskhaa
+                        if person.address_street_name != None:
+                            person_address_street_name = person.address_street_name
+                        if person.address_khaskhaa != None:
+                            person_address_khaskhaa = person.address_khaskhaa
 
-                            if person.type == 10 or person.type == 20 \
-                                or person.type == 50:
-                                if person.middle_name != None:
-                                    middle_name = person.middle_name
-                                if person.first_name != None:
-                                    first_name = person.first_name
-                                if person.name != None:
-                                    surname = person.name
-                            if person.type == 30 or person.type == 40 \
-                                or person.type == 60:
-                                first_name = person.name
+                        if person.type == 10 or person.type == 20 \
+                            or person.type == 50:
+                            if person.middle_name != None:
+                                middle_name = person.middle_name
+                            if person.first_name != None:
+                                first_name = person.first_name
+                            if person.name != None:
+                                surname = person.name
+                        if person.type == 30 or person.type == 40 \
+                            or person.type == 60:
+                            first_name = person.name
 
-                            if person_app.main_applicant == True:
-                                worksheet.write(row, col, row_number, format)
-                                worksheet.write(row, col+1, value.CtApplication.parcel_ref.parcel_id, format)
-                                worksheet.write(row, col+2, str(value.CtApplication.parcel_ref.area_m2), format)
-                                worksheet.write(row, col+3, str(value.CtApplication.parcel_ref.area_m2/10000), format)
-                                worksheet.write(row, col+4, str(price), format)
-                                worksheet.write(row, col+5, landuse, format)
-                                worksheet.write(row, col+6, a3_name, format)
-                                worksheet.write(row, col+7, streetname, format)
-                                worksheet.write(row, col+8, khashaa, format)
-                                worksheet.write(row, col+9, neighbourhood, format)
-                                worksheet.write(row, col+10, middle_name, format)
-                                worksheet.write(row, col+11, surname, format)
-                                worksheet.write(row, col+12, first_name, format)
-                                worksheet.write(row, col+13, person.person_id, format)
-                                worksheet.write(row, col+14, person_address_a1, format)
-                                worksheet.write(row, col+15, person_address_a2, format)
-                                worksheet.write(row, col+16, person_address_a3, format)
-                                worksheet.write(row, col+17, person_address_street_name, format)
-                                worksheet.write(row, col+18, person_address_khaskhaa, format)
-                                worksheet.write(row, col+19, str(base_tax), format)
-                                worksheet.write(row, col+20, str(base_tax_rate), format)
-                                worksheet.write(row, col+21, str(subsidized_tax_rate), format)
-                                worksheet.write(row, col+22, str(subsidized_tax_amount), format)
-                                worksheet.write(row, col+23, str(tax_to_pay_for_current_year), format)
-                                worksheet.write(row, col+24, str(surplus), format)
-                                worksheet.write(row, col+25, str(partial), format)
-                                worksheet.write(row, col+26, str(tax_pay), format)
+                        if person_app.main_applicant == True:
+                            worksheet.write(row, col, row_number, format)
+                            worksheet.write(row, col+1, value.CtApplication.parcel_ref.parcel_id, format)
+                            worksheet.write(row, col+2, str(value.CtApplication.parcel_ref.area_m2), format)
+                            worksheet.write(row, col+3, str(value.CtApplication.parcel_ref.area_m2/10000), format)
+                            worksheet.write(row, col+4, str(price), format)
+                            worksheet.write(row, col+5, landuse, format)
+                            worksheet.write(row, col+6, a3_name, format)
+                            worksheet.write(row, col+7, streetname, format)
+                            worksheet.write(row, col+8, khashaa, format)
+                            worksheet.write(row, col+9, neighbourhood, format)
+                            worksheet.write(row, col+10, middle_name, format)
+                            worksheet.write(row, col+11, surname, format)
+                            worksheet.write(row, col+12, first_name, format)
+                            worksheet.write(row, col+13, person.person_id, format)
+                            worksheet.write(row, col+14, person_address_a1, format)
+                            worksheet.write(row, col+15, person_address_a2, format)
+                            worksheet.write(row, col+16, person_address_a3, format)
+                            worksheet.write(row, col+17, person_address_street_name, format)
+                            worksheet.write(row, col+18, person_address_khaskhaa, format)
+                            worksheet.write(row, col+19, str(base_tax), format)
+                            worksheet.write(row, col+20, str(base_tax_rate), format)
+                            worksheet.write(row, col+21, str(subsidized_tax_rate), format)
+                            worksheet.write(row, col+22, str(subsidized_tax_amount), format)
+                            worksheet.write(row, col+23, str(tax_to_pay_for_current_year), format)
+                            worksheet.write(row, col+24, str(surplus), format)
+                            worksheet.write(row, col+25, str(partial), format)
+                            worksheet.write(row, col+26, str(tax_pay), format)
 
-                                row += 1
-                                row_number += 1
-                                value_p = self.progressBar.value() + 1
-                                self.progressBar.setValue(value_p)
+                            row += 1
+                            row_number += 1
+                            value_p = self.progressBar.value() + 1
+                            self.progressBar.setValue(value_p)
 
-        except SQLAlchemyError, e:
-            PluginUtils.show_error(self, self.tr("Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
-            return
+        # except SQLAlchemyError, e:
+        #     PluginUtils.show_error(self, self.tr("Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+        #     return
 
         try:
             workbook.close()
@@ -6495,11 +6553,11 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         # Intersect record duration with payment period
         sql = "select lower(daterange(record_begin, 'infinity', '[)') * daterange(:from, :to, '[)'))," \
               " upper(daterange(record_begin, 'infinity', '[)') * daterange(:from, :to, '[)')) " \
-              "from ct_ownership_record where record_no = :record_no"
+              "from ct_ownership_record where record_id = :record_id"
 
         result = self.session.execute(sql, {'from': period_begin,
                                             'to': period_end,
-                                            'record_no': tax.record})
+                                            'record_id': tax.record})
         for row in result:
             effective_begin = row[0]
             effective_end = row[1]
@@ -6673,214 +6731,226 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         col = 0
         row_number = 1
         c_status = 0
-        try:
+        # try:
+        values = self.session.query(CtApplication,CtOwnershipRecord,CtDecisionApplication).\
+            join(CtRecordApplicationRole.application_ref).\
+            join(CtOwnershipRecord).\
+            join(CtDecisionApplication, CtApplication.app_id == CtDecisionApplication.application).\
+            filter(CtOwnershipRecord.record_date.between(begin_date, end_date)).all()
+        if not self.report_app_type_cbox.itemData(self.report_app_type_cbox.currentIndex()) == -1:
+            type = self.report_app_type_cbox.itemData(self.report_app_type_cbox.currentIndex())
             values = self.session.query(CtApplication,CtOwnershipRecord,CtDecisionApplication).\
-                join(CtRecordApplicationRole.application_ref).\
-                join(CtOwnershipRecord).\
-                join(CtDecisionApplication, CtApplication.app_no == CtDecisionApplication.application).\
-                filter(CtOwnershipRecord.record_date.between(begin_date, end_date)).all()
-            if not self.report_app_type_cbox.itemData(self.report_app_type_cbox.currentIndex()) == -1:
-                type = self.report_app_type_cbox.itemData(self.report_app_type_cbox.currentIndex())
-                values = self.session.query(CtApplication,CtOwnershipRecord,CtDecisionApplication).\
-                join(CtRecordApplicationRole.application_ref).\
-                join(CtOwnershipRecord).\
-                join(CtDecisionApplication, CtApplication.app_no == CtDecisionApplication.application).\
-                filter(CtOwnershipRecord.record_date.between(begin_date, end_date)).\
-                filter(CtApplication.app_type == type).all()
-            if not self.report_land_use_cbox.itemData(self.report_land_use_cbox.currentIndex()) == -1:
-                type = self.report_land_use_cbox.itemData(self.report_land_use_cbox.currentIndex())
-                values = self.session.query(CtApplication,CtOwnershipRecord,CtDecisionApplication).\
-                join(CtRecordApplicationRole.application_ref).\
-                join(CtOwnershipRecord).\
-                join(CtDecisionApplication, CtApplication.app_no == CtDecisionApplication.application).\
-                filter(CtOwnershipRecord.record_date.between(begin_date, end_date)).\
-                filter(CtApplication.approved_landuse == type).all()
-            if not self.report_person_type_cbox.itemData(self.report_person_type_cbox.currentIndex()) == -1:
-                type = self.report_person_type_cbox.itemData(self.report_person_type_cbox.currentIndex())
-                values = self.session.query(CtApplication,CtOwnershipRecord,CtDecisionApplication).\
-                join(CtRecordApplicationRole.application_ref).\
-                join(CtOwnershipRecord).\
-                join(CtDecisionApplication, CtApplication.app_no == CtDecisionApplication.application).\
-                join(CtApplicationPersonRole, CtApplication.app_no == CtApplicationPersonRole.application).\
-                join(BsPerson, CtApplicationPersonRole.person == BsPerson.person_id).\
-                filter(CtOwnershipRecord.record_date.between(begin_date, end_date)).\
-                filter(BsPerson.type == type).all()
+            join(CtRecordApplicationRole.application_ref).\
+            join(CtOwnershipRecord).\
+            join(CtDecisionApplication, CtApplication.app_id == CtDecisionApplication.application).\
+            filter(CtOwnershipRecord.record_date.between(begin_date, end_date)).\
+            filter(CtApplication.app_type == type).all()
+        if not self.report_land_use_cbox.itemData(self.report_land_use_cbox.currentIndex()) == -1:
+            type = self.report_land_use_cbox.itemData(self.report_land_use_cbox.currentIndex())
+            values = self.session.query(CtApplication,CtOwnershipRecord,CtDecisionApplication).\
+            join(CtRecordApplicationRole.application_ref).\
+            join(CtOwnershipRecord).\
+            join(CtDecisionApplication, CtApplication.app_id == CtDecisionApplication.application).\
+            filter(CtOwnershipRecord.record_date.between(begin_date, end_date)).\
+            filter(CtApplication.approved_landuse == type).all()
+        if not self.report_person_type_cbox.itemData(self.report_person_type_cbox.currentIndex()) == -1:
+            type = self.report_person_type_cbox.itemData(self.report_person_type_cbox.currentIndex())
+            values = self.session.query(CtApplication,CtOwnershipRecord,CtDecisionApplication).\
+            join(CtRecordApplicationRole.application_ref).\
+            join(CtOwnershipRecord).\
+            join(CtDecisionApplication, CtApplication.app_id == CtDecisionApplication.application).\
+            join(CtApplicationPersonRole, CtApplication.app_id == CtApplicationPersonRole.application).\
+            join(BsPerson, CtApplicationPersonRole.person == BsPerson.person_id).\
+            filter(CtOwnershipRecord.record_date.between(begin_date, end_date)).\
+            filter(BsPerson.type == type).all()
 
-            count = len(values)
-            self.progressBar.setMaximum(count)
-            for value in values:
-                khashaa = ''
-                streetname = ''
-                neighbourhood = ''
-                landuse = ''
-                middle_name = ''
-                first_name = ''
-                surname = ''
-                person_address_a1 = '-'
-                person_address_a2 = '-'
-                person_address_a3 = '-'
-                person_address_street_name = '-'
-                person_address_khaskhaa = '-'
-                price = 0
-                base_tax = 0
-                bas_tax_amount = 0
-                subsidized_tax_rate = 0
-                base_tax_rate = 0
-                subsidized_tax_amount = 0
-                tax_to_pay_for_current_year = 0
-                paid_for_current_year = 0
-                surplus = 0
-                partial = 0
-                paid_difference = 0
-                potential_fine_for_current_year = 0
-                surplus_and_partial = 0
-                tax_left_to_pay = 0
-                tax_right_to_pay = 0
-                a3_name = ''
-                tax_pay = 0
-                if value.CtApplication.approved_landuse != None:
-                    landuse = value.CtApplication.approved_landuse_ref.description
-                    landuse_code = value.CtApplication.approved_landuse_ref.code
-                if value.CtApplication.parcel and value.CtApplication.parcel_ref:
-                    if value.CtApplication.parcel_ref.address_khashaa != None:
-                        khashaa = value.CtApplication.parcel_ref.address_khashaa
-                    if value.CtApplication.parcel_ref.address_streetname != None:
-                        streetname = value.CtApplication.parcel_ref.address_streetname
-                    if value.CtApplication.parcel_ref.address_neighbourhood != None:
-                        neighbourhood = value.CtApplication.parcel_ref.address_neighbourhood
+        count = len(values)
+        self.progressBar.setMaximum(count)
+        for value in values:
+            khashaa = ''
+            streetname = ''
+            neighbourhood = ''
+            landuse = ''
+            middle_name = ''
+            first_name = ''
+            surname = ''
+            person_address_a1 = '-'
+            person_address_a2 = '-'
+            person_address_a3 = '-'
+            person_address_street_name = '-'
+            person_address_khaskhaa = '-'
+            price = 0
+            base_tax = 0
+            bas_tax_amount = 0
+            subsidized_tax_rate = 0
+            base_tax_rate = 0
+            subsidized_tax_amount = 0
+            tax_to_pay_for_current_year = 0
+            paid_for_current_year = 0
+            surplus = 0
+            partial = 0
+            paid_difference = 0
+            potential_fine_for_current_year = 0
+            surplus_and_partial = 0
+            tax_left_to_pay = 0
+            tax_right_to_pay = 0
+            a3_name = ''
+            tax_pay = 0
+            if value.CtApplication.approved_landuse != None:
+                landuse = value.CtApplication.approved_landuse_ref.description
+                landuse_code = value.CtApplication.approved_landuse_ref.code
+            if value.CtApplication.parcel and value.CtApplication.parcel_ref:
+                if value.CtApplication.parcel_ref.address_khashaa != None:
+                    khashaa = value.CtApplication.parcel_ref.address_khashaa
+                if value.CtApplication.parcel_ref.address_streetname != None:
+                    streetname = value.CtApplication.parcel_ref.address_streetname
+                if value.CtApplication.parcel_ref.address_neighbourhood != None:
+                    neighbourhood = value.CtApplication.parcel_ref.address_neighbourhood
 
-                    app_person = self.session.query(CtApplicationPersonRole).filter(CtApplicationPersonRole.application == value.CtApplication.app_no).all()
-                    for person_app in app_person:
-                        person_count = self.session.query(BsPerson).filter(BsPerson.person_id == person_app.person).count()
-                        if person_count != 0:
-                            person = self.session.query(BsPerson).filter(BsPerson.person_id == person_app.person).one()
-                            a3_count = self.session.query(AuLevel3).filter(AuLevel3.geometry.ST_Contains(value.CtApplication.parcel_ref.geometry)).count()
-                            if a3_count != 0:
-                                a3 = self.session.query(AuLevel3).filter(AuLevel3.geometry.ST_Contains(value.CtApplication.parcel_ref.geometry)).one()
-                                a3_name = a3.name
+                app_person = self.session.query(CtApplicationPersonRole).filter(CtApplicationPersonRole.application == value.CtApplication.app_id).all()
+                for person_app in app_person:
+                    person_count = self.session.query(BsPerson).filter(BsPerson.person_id == person_app.person).count()
+                    if person_count != 0:
+                        person = self.session.query(BsPerson).filter(BsPerson.person_id == person_app.person).one()
+                        a3_count = self.session.query(AuLevel3).filter(AuLevel3.geometry.ST_Contains(value.CtApplication.parcel_ref.geometry)).count()
+                        if a3_count != 0:
+                            a3 = self.session.query(AuLevel3).filter(AuLevel3.geometry.ST_Contains(value.CtApplication.parcel_ref.geometry)).one()
+                            a3_name = a3.name
+                        if str(value.CtApplication.parcel_ref.landuse)[:1] == '1':
+                            tax_zone_count = self.session.query(SetTaxAndPriceZone).filter(SetTaxAndPriceZone.geometry.ST_Contains(value.CtApplication.parcel_ref.geometry)).\
+                                filter(or_(SetTaxAndPriceZone.zone_no == 50, SetTaxAndPriceZone.zone_no == 60, SetTaxAndPriceZone.zone_no == 70, SetTaxAndPriceZone.zone_no == 80)).count()
+                        else:
+                            tax_zone_count = self.session.query(SetTaxAndPriceZone).filter(SetTaxAndPriceZone.geometry.ST_Contains(value.CtApplication.parcel_ref.geometry)).\
+                                filter(and_(SetTaxAndPriceZone.zone_no != 50, SetTaxAndPriceZone.zone_no != 60, SetTaxAndPriceZone.zone_no != 70, SetTaxAndPriceZone.zone_no != 80)).count()
+                        if tax_zone_count == 1:
                             if str(value.CtApplication.parcel_ref.landuse)[:1] == '1':
-                                tax_zone_count = self.session.query(SetTaxAndPriceZone).filter(SetTaxAndPriceZone.geometry.ST_Contains(value.CtApplication.parcel_ref.geometry)).\
-                                    filter(or_(SetTaxAndPriceZone.zone_no == 50, SetTaxAndPriceZone.zone_no == 60, SetTaxAndPriceZone.zone_no == 70, SetTaxAndPriceZone.zone_no == 80)).count()
+                                tax_zone = self.session.query(SetTaxAndPriceZone).filter(SetTaxAndPriceZone.geometry.ST_Contains(value.CtApplication.parcel_ref.geometry)).\
+                                    filter(or_(SetTaxAndPriceZone.zone_no == 50, SetTaxAndPriceZone.zone_no == 60, SetTaxAndPriceZone.zone_no == 70, SetTaxAndPriceZone.zone_no == 80)).one()
                             else:
-                                tax_zone_count = self.session.query(SetTaxAndPriceZone).filter(SetTaxAndPriceZone.geometry.ST_Contains(value.CtApplication.parcel_ref.geometry)).\
-                                    filter(and_(SetTaxAndPriceZone.zone_no != 50, SetTaxAndPriceZone.zone_no != 60, SetTaxAndPriceZone.zone_no != 70, SetTaxAndPriceZone.zone_no != 80)).count()
-                            if tax_zone_count == 1:
-                                if str(value.CtApplication.parcel_ref.landuse)[:1] == '1':
-                                    tax_zone = self.session.query(SetTaxAndPriceZone).filter(SetTaxAndPriceZone.geometry.ST_Contains(value.CtApplication.parcel_ref.geometry)).\
-                                        filter(or_(SetTaxAndPriceZone.zone_no == 50, SetTaxAndPriceZone.zone_no == 60, SetTaxAndPriceZone.zone_no == 70, SetTaxAndPriceZone.zone_no == 80)).one()
-                                else:
-                                    tax_zone = self.session.query(SetTaxAndPriceZone).filter(SetTaxAndPriceZone.geometry.ST_Contains(value.CtApplication.parcel_ref.geometry)).\
-                                    filter(and_(SetTaxAndPriceZone.zone_no != 50, SetTaxAndPriceZone.zone_no != 60, SetTaxAndPriceZone.zone_no != 70, SetTaxAndPriceZone.zone_no != 80)).one()
-                                tax_count = self.session.query(SetBaseTaxAndPrice).\
+                                tax_zone = self.session.query(SetTaxAndPriceZone).filter(SetTaxAndPriceZone.geometry.ST_Contains(value.CtApplication.parcel_ref.geometry)).\
+                                filter(and_(SetTaxAndPriceZone.zone_no != 50, SetTaxAndPriceZone.zone_no != 60, SetTaxAndPriceZone.zone_no != 70, SetTaxAndPriceZone.zone_no != 80)).one()
+                            tax_count = self.session.query(SetBaseTaxAndPrice).\
+                                filter(SetBaseTaxAndPrice.tax_zone == tax_zone.zone_id).\
+                                filter(SetBaseTaxAndPrice.landuse == value.CtApplication.approved_landuse).count()
+                            if tax_count == 1:
+
+                                tax = self.session.query(SetBaseTaxAndPrice).\
                                     filter(SetBaseTaxAndPrice.tax_zone == tax_zone.zone_id).\
-                                    filter(SetBaseTaxAndPrice.landuse == value.CtApplication.approved_landuse).count()
-                                if tax_count == 1:
+                                    filter(SetBaseTaxAndPrice.landuse == value.CtApplication.approved_landuse).one()
+                                price = float(tax.base_value_per_m2) * value.CtApplication.parcel_ref.area_m2
+                                base_tax = price*float(tax.base_tax_rate)/100
 
-                                    tax = self.session.query(SetBaseTaxAndPrice).\
-                                        filter(SetBaseTaxAndPrice.tax_zone == tax_zone.zone_id).\
-                                        filter(SetBaseTaxAndPrice.landuse == value.CtApplication.approved_landuse).one()
-                                    price = float(tax.base_value_per_m2) * value.CtApplication.parcel_ref.area_m2
-                                    base_tax = price*float(tax.base_tax_rate)/100
+                                subsidized_tax_rate = float(tax.subsidized_tax_rate)
+                                subsidized_tax_amount = base_tax*subsidized_tax_rate/100
+                                bas_tax_amount = base_tax - subsidized_tax_amount
 
-                                    subsidized_tax_rate = float(tax.subsidized_tax_rate)
-                                    subsidized_tax_amount = base_tax*subsidized_tax_rate/100
-                                    bas_tax_amount = base_tax - subsidized_tax_amount
+                                payment_year = self.year_sbox.value()
+                                tax_c = self.session.query(CtTaxAndPrice).filter(CtTaxAndPrice.person == person.person_id)\
+                                                                        .filter(CtTaxAndPrice.record == value.CtOwnershipRecord.record_id).count()
+                                if tax_c == 1:
+                                    tax = self.session.query(CtTaxAndPrice).filter(CtTaxAndPrice.person == person.person_id)\
+                                                                        .filter(CtTaxAndPrice.record == value.CtOwnershipRecord.record_id).one()
 
-                                    payment_year = self.year_sbox.value()
-                                    tax_c = self.session.query(CtTaxAndPrice).filter(CtTaxAndPrice.person == person.person_id)\
-                                                                            .filter(CtTaxAndPrice.record == value.CtOwnershipRecord.record_no).count()
-                                    if tax_c == 1:
-                                        tax = self.session.query(CtTaxAndPrice).filter(CtTaxAndPrice.person == person.person_id)\
-                                                                            .filter(CtTaxAndPrice.record == value.CtOwnershipRecord.record_no).one()
+                                    tax_to_pay_for_current_year = \
+                                        self.__tax_to_pay_per_period(tax, date(payment_year, 1, 1), date(payment_year+1, 1, 1))
 
-                                        tax_to_pay_for_current_year = \
-                                            self.__tax_to_pay_per_period(tax, date(payment_year, 1, 1), date(payment_year+1, 1, 1))
+                                    paid_for_current_year = self.session.query(func.sum(CtTaxAndPricePayment.amount_paid))\
+                                        .filter(CtTaxAndPricePayment.record == tax.record).filter(CtTaxAndPricePayment.person == tax.person)\
+                                        .filter(CtTaxAndPricePayment.year_paid_for == payment_year).scalar()
 
-                                        paid_for_current_year = self.session.query(func.sum(CtTaxAndPricePayment.amount_paid))\
-                                            .filter(CtTaxAndPricePayment.record == tax.record).filter(CtTaxAndPricePayment.person == tax.person)\
-                                            .filter(CtTaxAndPricePayment.year_paid_for == payment_year).scalar()
+                                    if paid_for_current_year is None:
+                                        paid_for_current_year = 0
 
-                                        if paid_for_current_year is None:
-                                            paid_for_current_year = 0
+                                    partial = self.__sum_year_amount_paid(tax, value.CtOwnershipRecord)
+                                    surplus = self.__surplus_from_previous_years(tax, value.CtOwnershipRecord)
+                                    if surplus < 0:
+                                        surplus = 0
 
-                                        partial = self.__sum_year_amount_paid(tax, value.CtOwnershipRecord)
-                                        surplus = self.__surplus_from_previous_years(tax, value.CtOwnershipRecord)
-                                        if surplus < 0:
-                                            surplus = 0
+                                    tax_left_to_pay = tax_to_pay_for_current_year - (paid_for_current_year + surplus)
 
-                                        tax_left_to_pay = tax_to_pay_for_current_year - (paid_for_current_year + surplus)
+                                    potential_fine_for_current_year = self.__potential_fine_for_year(tax, payment_year)
+                                    tax_pay = tax_to_pay_for_current_year - surplus + partial + paid_difference
 
-                                        potential_fine_for_current_year = self.__potential_fine_for_year(tax, payment_year)
-                                        tax_pay = tax_to_pay_for_current_year - surplus + partial + paid_difference
+                                    paid_difference = paid_for_current_year - tax_pay
 
-                                        paid_difference = paid_for_current_year - tax_pay
-
-                            if person.address_au_level3 != None:
-                                person_a3 = self.session.query(AuLevel3).filter(AuLevel3.code == person.address_au_level3).one()
+                        if person.address_au_level3 != None:
+                            person_a3_count = self.session.query(AuLevel3).filter(
+                                AuLevel3.code == person.address_au_level3).count()
+                            if person_a3_count == 1:
+                                person_a3 = self.session.query(AuLevel3).filter(
+                                    AuLevel3.code == person.address_au_level3).one()
                                 person_address_a3 = person_a3.name
-                            if person.address_au_level2 != None:
-                                person_a2 = self.session.query(AuLevel2).filter(AuLevel2.code == person.address_au_level2).one()
+                        if person.address_au_level2 != None:
+                            person_a2_c = self.session.query(AuLevel2).filter(
+                                AuLevel2.code == person.address_au_level2).count()
+                            if person_a2_c == 1:
+                                person_a2 = self.session.query(AuLevel2).filter(
+                                    AuLevel2.code == person.address_au_level2).one()
                                 person_address_a2 = person_a2.name
-                            if person.address_au_level1 != None:
-                                person_a1 = self.session.query(AuLevel1).filter(AuLevel1.code == person.address_au_level1).one()
+                        if person.address_au_level1 != None:
+                            person_a1_count = self.session.query(AuLevel1).filter(
+                                AuLevel1.code == person.address_au_level1).count()
+                            if person_a1_count == 1:
+                                person_a1 = self.session.query(AuLevel1).filter(
+                                    AuLevel1.code == person.address_au_level1).one()
                                 person_address_a1 = person_a1.name
-                            if person.address_street_name != None:
-                                person_address_street_name = person.address_street_name
-                            if person.address_khaskhaa != None:
-                                person_address_khaskhaa = person.address_khaskhaa
+                        if person.address_street_name != None:
+                            person_address_street_name = person.address_street_name
+                        if person.address_khaskhaa != None:
+                            person_address_khaskhaa = person.address_khaskhaa
 
-                            if person.type == 10 or person.type == 20 \
-                                or person.type == 50:
-                                if person.middle_name != None:
-                                    middle_name = person.middle_name
-                                if person.first_name != None:
-                                    first_name = person.first_name
-                                if person.name != None:
-                                    surname = person.name
-                            if person.type == 30 or person.type == 40 \
-                                or person.type == 60:
-                                first_name = person.name
+                        if person.type == 10 or person.type == 20 \
+                            or person.type == 50:
+                            if person.middle_name != None:
+                                middle_name = person.middle_name
+                            if person.first_name != None:
+                                first_name = person.first_name
+                            if person.name != None:
+                                surname = person.name
+                        if person.type == 30 or person.type == 40 \
+                            or person.type == 60:
+                            first_name = person.name
 
-                            if person_app.main_applicant == True:
-                                worksheet.write(row, col, row_number, format)
-                                worksheet.write(row, col+1, value.CtApplication.parcel_ref.parcel_id, format)
-                                worksheet.write(row, col+2, str(value.CtApplication.parcel_ref.area_m2), format)
-                                worksheet.write(row, col+3, str(value.CtApplication.parcel_ref.area_m2/10000), format)
-                                worksheet.write(row, col+4, str(price), format)
-                                worksheet.write(row, col+5, landuse, format)
-                                worksheet.write(row, col+6, a3_name, format)
-                                worksheet.write(row, col+7, streetname, format)
-                                worksheet.write(row, col+8, khashaa, format)
-                                worksheet.write(row, col+9, neighbourhood, format)
-                                worksheet.write(row, col+10, middle_name, format)
-                                worksheet.write(row, col+11, surname, format)
-                                worksheet.write(row, col+12, first_name, format)
-                                worksheet.write(row, col+13, person.person_id, format)
-                                worksheet.write(row, col+14, person_address_a1, format)
-                                worksheet.write(row, col+15, person_address_a2, format)
-                                worksheet.write(row, col+16, person_address_a3, format)
-                                worksheet.write(row, col+17, person_address_street_name, format)
-                                worksheet.write(row, col+18, person_address_khaskhaa, format)
-                                worksheet.write(row, col+19, str(surplus), format)
-                                worksheet.write(row, col+20, str(partial), format)
-                                worksheet.write(row, col+21, str(tax_to_pay_for_current_year), format)
-                                worksheet.write(row, col+22, str(''), format)
-                                worksheet.write(row, col+23, str(potential_fine_for_current_year), format)
-                                worksheet.write(row, col+24, str(tax_pay), format)
-                                worksheet.write(row, col+25, str(''), format)
-                                worksheet.write(row, col+26, str(''), format)
-                                worksheet.write(row, col+27, str(''), format)
-                                worksheet.write(row, col+28, str(paid_for_current_year), format)
-                                worksheet.write(row, col+29, str(paid_difference), format)
+                        if person_app.main_applicant == True:
+                            worksheet.write(row, col, row_number, format)
+                            worksheet.write(row, col+1, value.CtApplication.parcel_ref.parcel_id, format)
+                            worksheet.write(row, col+2, str(value.CtApplication.parcel_ref.area_m2), format)
+                            worksheet.write(row, col+3, str(value.CtApplication.parcel_ref.area_m2/10000), format)
+                            worksheet.write(row, col+4, str(price), format)
+                            worksheet.write(row, col+5, landuse, format)
+                            worksheet.write(row, col+6, a3_name, format)
+                            worksheet.write(row, col+7, streetname, format)
+                            worksheet.write(row, col+8, khashaa, format)
+                            worksheet.write(row, col+9, neighbourhood, format)
+                            worksheet.write(row, col+10, middle_name, format)
+                            worksheet.write(row, col+11, surname, format)
+                            worksheet.write(row, col+12, first_name, format)
+                            worksheet.write(row, col+13, person.person_id, format)
+                            worksheet.write(row, col+14, person_address_a1, format)
+                            worksheet.write(row, col+15, person_address_a2, format)
+                            worksheet.write(row, col+16, person_address_a3, format)
+                            worksheet.write(row, col+17, person_address_street_name, format)
+                            worksheet.write(row, col+18, person_address_khaskhaa, format)
+                            worksheet.write(row, col+19, str(surplus), format)
+                            worksheet.write(row, col+20, str(partial), format)
+                            worksheet.write(row, col+21, str(tax_to_pay_for_current_year), format)
+                            worksheet.write(row, col+22, str(''), format)
+                            worksheet.write(row, col+23, str(potential_fine_for_current_year), format)
+                            worksheet.write(row, col+24, str(tax_pay), format)
+                            worksheet.write(row, col+25, str(''), format)
+                            worksheet.write(row, col+26, str(''), format)
+                            worksheet.write(row, col+27, str(''), format)
+                            worksheet.write(row, col+28, str(paid_for_current_year), format)
+                            worksheet.write(row, col+29, str(paid_difference), format)
 
-                                row += 1
-                                row_number += 1
-                                value_p = self.progressBar.value() + 1
-                                self.progressBar.setValue(value_p)
+                            row += 1
+                            row_number += 1
+                            value_p = self.progressBar.value() + 1
+                            self.progressBar.setValue(value_p)
 
-        except SQLAlchemyError, e:
-            PluginUtils.show_error(self, self.tr("Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
-            return
+        # except SQLAlchemyError, e:
+        #     PluginUtils.show_error(self, self.tr("Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+        #     return
 
         try:
             workbook.close()
@@ -7129,14 +7199,14 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         values = self.session.query(CtApplication,CtContract,CtDecisionApplication).\
             join(CtContractApplicationRole.application_ref).\
             join(CtContract).\
-            join(CtDecisionApplication, CtApplication.app_no == CtDecisionApplication.application).\
+            join(CtDecisionApplication, CtApplication.app_id == CtDecisionApplication.application).\
             filter(CtContract.contract_begin.between(begin_date, end_date)).all()
         if not self.report_app_type_cbox.itemData(self.report_app_type_cbox.currentIndex()) == -1:
             type = self.report_app_type_cbox.itemData(self.report_app_type_cbox.currentIndex())
             values = self.session.query(CtApplication,CtContract,CtDecisionApplication).\
             join(CtContractApplicationRole.application_ref).\
             join(CtContract).\
-            join(CtDecisionApplication, CtApplication.app_no == CtDecisionApplication.application).\
+            join(CtDecisionApplication, CtApplication.app_id == CtDecisionApplication.application).\
             filter(CtContract.contract_begin.between(begin_date, end_date)).\
             filter(CtApplication.app_type == type).all()
         if not self.report_land_use_cbox.itemData(self.report_land_use_cbox.currentIndex()) == -1:
@@ -7144,7 +7214,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
             values = self.session.query(CtApplication,CtContract,CtDecisionApplication).\
             join(CtContractApplicationRole.application_ref).\
             join(CtContract).\
-            join(CtDecisionApplication, CtApplication.app_no == CtDecisionApplication.application).\
+            join(CtDecisionApplication, CtApplication.app_id == CtDecisionApplication.application).\
             filter(CtContract.contract_begin.between(begin_date, end_date)).\
             filter(CtApplication.approved_landuse == type).all()
         if not self.report_person_type_cbox.itemData(self.report_person_type_cbox.currentIndex()) == -1:
@@ -7152,8 +7222,8 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
             values = self.session.query(CtApplication,CtContract,CtDecisionApplication).\
             join(CtContractApplicationRole.application_ref).\
             join(CtContract).\
-            join(CtDecisionApplication, CtApplication.app_no == CtDecisionApplication.application).\
-            join(CtApplicationPersonRole, CtApplication.app_no == CtApplicationPersonRole.application).\
+            join(CtDecisionApplication, CtApplication.app_id == CtDecisionApplication.application).\
+            join(CtApplicationPersonRole, CtApplication.app_id == CtApplicationPersonRole.application).\
             join(BsPerson, CtApplicationPersonRole.person == BsPerson.person_id).\
             filter(CtContract.contract_begin.between(begin_date, end_date)).\
             filter(BsPerson.type == type).all()
@@ -7206,7 +7276,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
                     if value.CtApplication.parcel_ref.address_neighbourhood:
                         neighbourhood = value.CtApplication.parcel_ref.address_neighbourhood
 
-                app_person = self.session.query(CtApplicationPersonRole).filter(CtApplicationPersonRole.application == value.CtApplication.app_no).all()
+                app_person = self.session.query(CtApplicationPersonRole).filter(CtApplicationPersonRole.application == value.CtApplication.app_id).all()
                 for person_app in app_person:
                     person_count = self.session.query(BsPerson).filter(BsPerson.person_id == person_app.person).count()
                     if person_count != 0:
@@ -7238,11 +7308,11 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
                                 payment_year = self.year_sbox.value()
 
                                 fee_c = self.session.query(CtFee).filter(CtFee.person == person.person_id)\
-                                                                 .filter(CtFee.contract == value.CtContract.contract_no).count()
+                                                                 .filter(CtFee.contract == value.CtContract.contract_id).count()
                                 if value.CtContract.contract_end and value.CtContract.contract_begin:
                                     if fee_c == 1 and (value.CtContract.contract_end.year-value.CtContract.contract_begin.year) > 1:
                                         fee = self.session.query(CtFee).filter(CtFee.person == person.person_id)\
-                                                                        .filter(CtFee.contract == value.CtContract.contract_no).one()
+                                                                        .filter(CtFee.contract == value.CtContract.contract_id).one()
                                         fee_to_pay_for_current_year = \
                                             self.__fee_to_pay_per_period(fee, date(payment_year, 1, 1), date(payment_year+1, 1, 1))
 
@@ -7812,7 +7882,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
             tmp_parcel_layer = LayerUtils.layer_by_data_source("data_soums_union", "view_land_users_list")
             if tmp_parcel_layer is None:
                 mygroup = root.findGroup(u"Тайлан")
-                vlayer = LayerUtils.load_layer_by_name_report("view_land_users_list", "parcel_id", restrictions)
+                vlayer = LayerUtils.load_union_layer_by_name("view_land_users_list", "parcel_id")
                 vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) +"template\style/view_land_users.qml")
                 vlayer.setLayerName(self.tr("Land users list"))
                 mygroup.addLayer(vlayer)
@@ -7820,7 +7890,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
             tmp_parcel_layer = LayerUtils.layer_by_data_source("data_soums_union", "view_land_possessors_list")
             if tmp_parcel_layer is None:
                 mygroup = root.findGroup(u"Тайлан")
-                vlayer = LayerUtils.load_layer_by_name_report("view_land_possessors_list", "parcel_id", restrictions)
+                vlayer = LayerUtils.load_union_layer_by_name("view_land_possessors_list", "parcel_id")
                 vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) +"template\style/view_possessors.qml")
                 vlayer.setLayerName(self.tr("Land possessors list"))
                 mygroup.addLayer(vlayer)
@@ -7828,7 +7898,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
             tmp_parcel_layer = LayerUtils.layer_by_data_source("data_soums_union", "view_land_ownerships_list")
             if tmp_parcel_layer is None:
                 mygroup = root.findGroup(u"Тайлан")
-                vlayer = LayerUtils.load_layer_by_name_report("view_land_ownerships_list", "parcel_id", restrictions)
+                vlayer = LayerUtils.load_union_layer_by_name("view_land_ownerships_list", "parcel_id")
                 vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) +"template\style/view_land_ownership.qml")
                 vlayer.setLayerName(self.tr("Land ownerships list"))
                 mygroup.addLayer(vlayer)
@@ -8057,6 +8127,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
     def on_contract_results_twidget_itemClicked(self, item):
 
         id = item.data(Qt.UserRole)
+
         # try:
         contract_result = self.session.query(ContractSearch).filter(ContractSearch.contract_no == id).\
             filter(ContractSearch.person_role == 70).count()
@@ -8174,15 +8245,15 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
                                           landuse.code2 as landuse_code2, record.status as record_status, contract.status as contract_status " \
                          "FROM data_soums_union.ca_parcel_tbl parcel " \
                          "LEFT JOIN data_soums_union.ct_application application on application.parcel = parcel.parcel_id " \
-                         "LEFT JOIN data_soums_union.ct_application_person_role app_pers on application.app_no = app_pers.application " \
+                         "LEFT JOIN data_soums_union.ct_application_person_role app_pers on application.app_id = app_pers.application " \
                          "LEFT JOIN base.bs_person person ON app_pers.person = person.person_id " \
-                         "LEFT JOIN data_soums_union.ct_contract_application_role con_app on con_app.application = application.app_no " \
-                         "LEFT JOIN data_soums_union.ct_contract contract on con_app.contract = contract.contract_no " \
-                         "LEFT JOIN data_soums_union.ct_record_application_role rec_app on rec_app.application = application.app_no " \
-                         "LEFT JOIN data_soums_union.ct_ownership_record record on rec_app.record = record.record_no " \
-                         "LEFT JOIN data_soums_union.ct_decision_application dec_app on dec_app.application = application.app_no " \
-                         "LEFT JOIN data_soums_union.ct_decision decision on decision.decision_no = dec_app.application "\
-                         "LEFT JOIN data_soums_union.ct_app1_ext app1_ext on application.app_no = app1_ext.app_no "\
+                         "LEFT JOIN data_soums_union.ct_contract_application_role con_app on con_app.application = application.app_id " \
+                         "LEFT JOIN data_soums_union.ct_contract contract on con_app.contract = contract.contract_id " \
+                         "LEFT JOIN data_soums_union.ct_record_application_role rec_app on rec_app.application = application.app_id " \
+                         "LEFT JOIN data_soums_union.ct_ownership_record record on rec_app.record = record.record_id " \
+                         "LEFT JOIN data_soums_union.ct_decision_application dec_app on dec_app.application = application.app_id " \
+                         "LEFT JOIN data_soums_union.ct_decision decision on decision.decision_id = dec_app.decision "\
+                         "LEFT JOIN data_soums_union.ct_app1_ext app1_ext on application.app_id = app1_ext.app_id "\
                          "LEFT JOIN codelists.cl_landuse_type landuse on parcel.landuse = landuse.code "\
                          "LEFT JOIN admin_units.au_level1 au1 on ST_Within(parcel.geometry, au1.geometry) "\
                          "LEFT JOIN admin_units.au_level2 au2 on ST_Within(parcel.geometry, au2.geometry)".format(au_level2)  + "\n"
@@ -8261,10 +8332,10 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
                                           landuse.code2 as landuse_code2, contract.status as contract_status " \
                          "FROM data_soums_union.ca_parcel_tbl parcel " \
                          "LEFT JOIN data_soums_union.ct_application application on application.parcel = parcel.parcel_id " \
-                         "LEFT JOIN data_soums_union.ct_application_person_role app_pers on application.app_no = app_pers.application " \
-                         "LEFT JOIN data_soums_union.ct_contract_application_role con_app on con_app.application = application.app_no " \
-                         "LEFT JOIN data_soums_union.ct_contract contract on con_app.contract = contract.contract_no " \
-                         "LEFT JOIN data_soums_union.ct_fee fee on contract.contract_no = fee.contract " \
+                         "LEFT JOIN data_soums_union.ct_application_person_role app_pers on application.app_id = app_pers.application " \
+                         "LEFT JOIN data_soums_union.ct_contract_application_role con_app on con_app.application = application.app_id " \
+                         "LEFT JOIN data_soums_union.ct_contract contract on con_app.contract = contract.contract_id " \
+                         "LEFT JOIN data_soums_union.ct_fee fee on contract.contract_id = fee.contract " \
                          "LEFT JOIN data_soums_union.ct_fee_payment fee_payment on fee.person = fee_payment.person " \
                          "LEFT JOIN codelists.cl_landuse_type landuse on parcel.landuse = landuse.code "\
                          "LEFT JOIN admin_units.au_level1 au1 on ST_Within(parcel.geometry, au1.geometry) "\
@@ -8295,10 +8366,10 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
                                           landuse.code2 as landuse_code2, record.status as record_status " \
                          "FROM data_soums_union.ca_parcel_tbl parcel " \
                          "LEFT JOIN data_soums_union.ct_application application on application.parcel = parcel.parcel_id " \
-                         "LEFT JOIN data_soums_union.ct_application_person_role app_pers on application.app_no = app_pers.application " \
-                         "LEFT JOIN data_soums_union.ct_record_application_role rec_app on rec_app.application = application.app_no " \
-                         "LEFT JOIN data_soums_union.ct_ownership_record record on rec_app.record = record.record_no " \
-                         "LEFT JOIN data_soums_union.ct_tax_and_price tax on record.record_no = tax.record " \
+                         "LEFT JOIN data_soums_union.ct_application_person_role app_pers on application.app_id = app_pers.application " \
+                         "LEFT JOIN data_soums_union.ct_record_application_role rec_app on rec_app.application = application.app_id " \
+                         "LEFT JOIN data_soums_union.ct_ownership_record record on rec_app.record = record.record_id " \
+                         "LEFT JOIN data_soums_union.ct_tax_and_price tax on record.record_id = tax.record " \
                          "LEFT JOIN data_soums_union.ct_tax_and_price_payment tax_payment on tax.person = tax_payment.person " \
                          "LEFT JOIN codelists.cl_landuse_type landuse on parcel.landuse = landuse.code "\
                          "LEFT JOIN admin_units.au_level1 au1 on ST_Within(parcel.geometry, au1.geometry) "\
@@ -12924,7 +12995,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
             tmp_parcel_layer = LayerUtils.layer_by_data_source("data_soums_union", "view_gt1_report")
             if tmp_parcel_layer is None:
                  mygroup = root.findGroup(u"ГНСТайлан")
-                 vlayer = LayerUtils.load_layer_by_name_report("view_gt1_report", "parcel_id", restrictions)
+                 vlayer = LayerUtils.load_union_layer_by_name("view_gt1_report", "gid")
                  vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) +"template\style/gt1_report.qml")
                  vlayer.setLayerName(self.tr("Gt1 report layer"))
                  mygroup.addLayer(vlayer)
@@ -12932,7 +13003,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
             tmp_parcel_layer = LayerUtils.layer_by_data_source("data_soums_union", "view_gt2_report")
             if tmp_parcel_layer is None:
                 mygroup = root.findGroup(u"ГНСТайлан")
-                vlayer = LayerUtils.load_layer_by_name_report("view_gt2_report", "parcel_id", restrictions)
+                vlayer = LayerUtils.load_union_layer_by_name("view_gt2_report", "parcel_id")
                 vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) +"template\style/gt2_report.qml")
                 vlayer.setLayerName(self.tr("Gt2 report layer"))
                 mygroup.addLayer(vlayer)
@@ -13428,9 +13499,103 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
     def __sent_to_ubeg(self):
 
         application = self.__selected_application()
-        applications = self.session.query(CtApplicationStatus).filter(CtApplicationStatus.application == application.app_id)
+        # status = self.session.query(func.max(CtApplicationStatus.status)).\
+        #     filter(CtApplicationStatus.application == application.app_id).one()
+        # max_status = str(status).split(",")[0][1:]
 
-        sub = self.session.query(CtApplicationStatus,func.row_number().over(partition_by=CtApplicationStatus.application,order_by=(desc(CtApplicationStatus.status_date),
-                                                                  desc(CtApplicationStatus.status))).label("row_number")).subquery()
-        applications = applications.select_entity_from(sub).filter(sub.c.row_number == 1)
-        print applications.status
+        max_status = self.session.query(CtApplicationStatus.status). \
+            filter(CtApplicationStatus.application == application.app_id). \
+            order_by(CtApplicationStatus.app_status_id.desc()).first()
+
+        max_status = str(max_status).split(",")[0][1:]
+
+        if max_status == '10':
+            PluginUtils.show_message(self, self.tr("Information"),
+                                     self.tr("Already send to UBEG."))
+            return
+
+        if max_status == '11':
+            PluginUtils.show_message(self, self.tr("Information"),
+                                     self.tr("Property id has arrived."))
+            return
+
+        if max_status == '7' or max_status == '9' or max_status == '12':
+            ubeg_doc_list = []
+            is_ubeg_docs = self.session.query(ClDocumentRole).filter(ClDocumentRole.is_ubeg_required == True).all()
+            for is_ubeg_doc in is_ubeg_docs:
+                ubeg_doc_list.append(is_ubeg_doc.code)
+
+            app_doc_list = []
+            app_docs = self.session.query(CtApplicationDocument).filter(CtApplicationDocument.application_id == application.app_id).all()
+            for app_doc in app_docs:
+                app_doc_list.append(app_doc.role)
+
+            if all(i in app_doc_list for i in ubeg_doc_list):
+            # if ubeg_doc_list in app_doc_list:
+                conf = self.session.query(SdConfiguration).filter(SdConfiguration.code == 'ip_web_lm').one()
+
+                urllib2.urlopen('http://'+conf.value+'/api/geoxyp/send/application/gasr?app_id=' + str(application.app_id)+ '&user_id=' + str(DatabaseUtils.current_sd_user().user_id))
+
+                PluginUtils.show_message(self, self.tr("Sucsess"),
+                                         self.tr("Sucsess send to UBEG."))
+                return
+            else:
+                PluginUtils.show_message(self, self.tr("Sent Warning"),
+                                         self.tr("Can not send to UBEG. Attachment is incomplete for application!"))
+                return
+        else:
+            PluginUtils.show_message(self, self.tr("Sent Warning"), self.tr("Can not send to UBEG. The status is wrong for application!"))
+            return
+
+    @pyqtSlot()
+    def on_mpa_edit_dialog_button_clicked(self):
+
+        # self.mpa_edit_dialog_button.setVisible(False)
+        # employee = DatabaseUtils.get_sd_employee(DatabaseUtils.current_sd_user().user_id)
+        #
+        # if employee.department_ref.organization != 3:
+        #     PluginUtils.show_message(self, self.tr("Sent Warning"),
+        #                              self.tr("Permited edit Mpa parcel data"))
+        #     return
+        # self.__create_mpa_edit()
+        # root = QgsProject.instance().layerTreeRoot()
+        #
+        # restrictions = DatabaseUtils.working_l2_code()
+        # if not restrictions:
+        #     PluginUtils.show_message(self, self.tr("Connection Error"), self.tr("Please connect to database!!!"))
+        #     return
+
+        # mygroup = root.findGroup("UbGIS")
+        # if mygroup is None:
+        #     mygroup = root.insertGroup(8, "UbGIS")
+        #
+        # is_pug_parcel = False
+
+        vlayer_parcel = LayerUtils.load_ub_data_layer_by_name("ca_mpa_parcel_edit_view", "gid")
+        QgsMapLayerRegistry.instance().addMapLayer(vlayer_parcel)
+        # layers = self.plugin.iface.legendInterface().layers()
+        #
+        # for layer in layers:
+        #     if layer.name() == "MpaEditParcel":
+        #         is_pug_parcel = True
+        # if not is_pug_parcel:
+        #     mygroup.addLayer(vlayer_parcel)
+
+        # vlayer_parcel.setLayerName(QApplication.translate("Plugin", "MpaEditParcel"))
+        # vlayer_parcel.loadNamedStyle(
+        #     str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "template\style/ub_parcel.qml")
+
+    def __create_mpa_edit(self):
+
+        # dialog = ParcelMpaDialog()
+        # dialog.show()
+        # self.removeLayers()
+        # # create widget
+        # if self.mpaWidget:
+        #     self.iface.removeDockWidget(self.mpaWidget)
+        #     del self.mpaWidget
+        #
+        self.mpaWidget = ParcelMpaDialog(self)
+        self.plugin.iface.addDockWidget(Qt.RightDockWidgetArea, self.mpaWidget)
+        # QObject.connect(self.mpaWidget, SIGNAL("visibilityChanged(bool)"), self.__pastureVisibilityChanged)
+        self.mpaWidget.hide()

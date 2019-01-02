@@ -18,7 +18,6 @@ class FtpConnection():
     def chdir(ftp_path, ftp_conn):
         dirs = [d for d in ftp_path.split('/') if d != '']
         for p in dirs:
-            print p
             FtpConnection.check_dir(p, ftp_conn)
 
     @staticmethod
@@ -33,7 +32,6 @@ class FtpConnection():
                 found = True
 
         if not found:
-            print dir
             ftp_conn.mkd(dir)
         ftp_conn.cwd(dir)
 

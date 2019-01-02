@@ -1,5 +1,6 @@
-__author__ = 'B.Ankhbold'
 # -*- encoding: utf-8 -*-
+__author__ = 'B.Ankhbold'
+
 from PyQt4.QtXml import *
 from geoalchemy2.elements import WKTElement
 from PyQt4.QtXml import *
@@ -61,6 +62,8 @@ from ..model.PsPastureSoilEvaluation import *
 from ..model.PsFormulaTypeLandForm import *
 from ..model.PsPastureComparisonFormula import *
 from ..model.PsPastureEvaluationFormula import *
+from ..model.PsPointDocument import *
+from ..model.CtDocument import *
 from ..model.CtApplicationParcelPasture import *
 from ..model.CtContract import *
 from ..model.CtContractApplicationRole import *
@@ -196,7 +199,6 @@ class PastureMonitoringValueDialog(QDialog, Ui_PastureMonitoringValueDialog, Dat
         #
         #     if self.is_cover_value_load:
         #         return
-        #     print 'change'
         #
         #     row_count = range(self.pasture_values_twidget.rowCount())
         #     cover_value = 0
@@ -233,7 +235,7 @@ class PastureMonitoringValueDialog(QDialog, Ui_PastureMonitoringValueDialog, Dat
         #
         #     person_id = item.data(Qt.UserRole)
         #     for applicant in self.application.stakeholders:
-        #         if person_id == applicant.person_ref.person_register:
+        #         if person_id == applicant.person_ref.person_id:
         #             applicant.share = Decimal(item_share.text())
 
     def __setup_combo_boxes(self):
@@ -763,65 +765,64 @@ class PastureMonitoringValueDialog(QDialog, Ui_PastureMonitoringValueDialog, Dat
     def __load_point_detail_search(self):
 
         soum_code = DatabaseUtils.working_l2_code()
-        if soum_code:
-            value = soum_code + '%'
-            try:
-                point_details = self.session.query(PsPointDetail). \
-                    filter(PsPointDetail.point_detail_id.ilike(value))
-                if self.pug_boundary_cbox.currentIndex() != -1:
-                    if not self.pug_boundary_cbox.itemData(self.pug_boundary_cbox.currentIndex()) == -1:
-                        pug_id = self.pug_boundary_cbox.itemData(self.pug_boundary_cbox.currentIndex(), Qt.UserRole)
-                        pug = self.session.query(CaPUGBoundary).filter(CaPUGBoundary.code == pug_id).one()
+        value = soum_code + '%'
+        try:
+            point_details = self.session.query(PsPointDetail). \
+                filter(PsPointDetail.point_detail_id.ilike(value))
+            if self.pug_boundary_cbox.currentIndex() != -1:
+                if not self.pug_boundary_cbox.itemData(self.pug_boundary_cbox.currentIndex()) == -1:
+                    pug_id = self.pug_boundary_cbox.itemData(self.pug_boundary_cbox.currentIndex(), Qt.UserRole)
+                    pug = self.session.query(CaPUGBoundary).filter(CaPUGBoundary.code == pug_id).one()
 
-                        point_details = self.session.query(PsPointDetail) \
-                            .join(PsPointDetailPoints, PsPointDetail.point_detail_id == PsPointDetailPoints.point_detail_id) \
-                            .join(CaPastureMonitoring, PsPointDetailPoints.point_id == CaPastureMonitoring.point_id) \
-                            .filter(CaPastureMonitoring.geometry.ST_Intersects(pug.geometry))
-                if self.parcel_cbox.currentIndex() != -1:
-                    if not self.parcel_cbox.itemData(self.parcel_cbox.currentIndex()) == -1:
-                        parcel_id = self.parcel_cbox.itemData(self.parcel_cbox.currentIndex(), Qt.UserRole)
-                        parcel = self.session.query(CaPastureParcel).filter(
-                            CaPastureParcel.parcel_id == parcel_id).one()
+                    point_details = self.session.query(PsPointDetail) \
+                        .join(PsPointDetailPoints, PsPointDetail.point_detail_id == PsPointDetailPoints.point_detail_id) \
+                        .join(CaPastureMonitoring, PsPointDetailPoints.point_id == CaPastureMonitoring.point_id) \
+                        .filter(CaPastureMonitoring.geometry.ST_Intersects(pug.geometry))
+            if self.parcel_cbox.currentIndex() != -1:
+                if not self.parcel_cbox.itemData(self.parcel_cbox.currentIndex()) == -1:
+                    parcel_id = self.parcel_cbox.itemData(self.parcel_cbox.currentIndex(), Qt.UserRole)
+                    parcel = self.session.query(CaPastureParcel).filter(
+                        CaPastureParcel.parcel_id == parcel_id).one()
 
-                        point_details = self.session.query(PsPointDetail) \
-                            .join(PsPointDetailPoints, PsPointDetail.point_detail_id == PsPointDetailPoints.point_detail_id) \
-                            .join(CaPastureMonitoring, PsPointDetailPoints.point_id == CaPastureMonitoring.point_id) \
-                            .filter(CaPastureMonitoring.geometry.ST_Intersects(parcel.geometry))
+                    point_details = self.session.query(PsPointDetail) \
+                        .join(PsPointDetailPoints, PsPointDetail.point_detail_id == PsPointDetailPoints.point_detail_id) \
+                        .join(CaPastureMonitoring, PsPointDetailPoints.point_id == CaPastureMonitoring.point_id) \
+                        .filter(CaPastureMonitoring.geometry.ST_Intersects(parcel.geometry))
 
-                count = 0
-                for point_detail in point_details:
-                    self.point_detail_twidget.insertRow(count)
+            count = 0
+            for point_detail in point_details:
+                self.point_detail_twidget.insertRow(count)
 
-                    item = QTableWidgetItem(point_detail.point_detail_id)
-                    item.setData(Qt.UserRole, point_detail.point_detail_id)
+                item = QTableWidgetItem(point_detail.point_detail_id)
+                item.setData(Qt.UserRole, point_detail.point_detail_id)
 
-                    self.point_detail_twidget.setItem(count, 0, item)
+                self.point_detail_twidget.setItem(count, 0, item)
 
-                    item = QTableWidgetItem(str(point_detail.register_date))
-                    item.setData(Qt.UserRole, point_detail.register_date)
+                item = QTableWidgetItem(str(point_detail.register_date))
+                item.setData(Qt.UserRole, point_detail.register_date)
 
-                    self.point_detail_twidget.setItem(count, 1, item)
+                self.point_detail_twidget.setItem(count, 1, item)
 
-                    item = QTableWidgetItem(unicode(point_detail.land_name))
-                    item.setData(Qt.UserRole, point_detail.land_name)
+                item = QTableWidgetItem(unicode(point_detail.land_name))
+                item.setData(Qt.UserRole, point_detail.land_name)
 
-                    self.point_detail_twidget.setItem(count, 2, item)
+                self.point_detail_twidget.setItem(count, 2, item)
 
-                    land_form = self.session.query(ClLandForm).filter(ClLandForm.code == point_detail.land_form).one()
+                land_form = self.session.query(ClLandForm).filter(ClLandForm.code == point_detail.land_form).one()
 
-                    item = QTableWidgetItem(unicode(land_form.description))
-                    item.setData(Qt.UserRole, land_form.code)
+                item = QTableWidgetItem(unicode(land_form.description))
+                item.setData(Qt.UserRole, land_form.code)
 
-                    self.point_detail_twidget.setItem(count, 3, item)
+                self.point_detail_twidget.setItem(count, 3, item)
 
-                    item = QTableWidgetItem(str(point_detail.elevation))
-                    item.setData(Qt.UserRole, point_detail.elevation)
+                item = QTableWidgetItem(str(point_detail.elevation))
+                item.setData(Qt.UserRole, point_detail.elevation)
 
-                    self.point_detail_twidget.setItem(count, 4, item)
+                self.point_detail_twidget.setItem(count, 4, item)
 
-            except SQLAlchemyError, e:
-                PluginUtils.show_message(self, self.tr("LM2", "Sql Error"), e.message)
-                return
+        except SQLAlchemyError, e:
+            PluginUtils.show_message(self, self.tr("LM2", "Sql Error"), e.message)
+            return
 
     def __load_reserve_all_points(self):
 
@@ -2744,8 +2745,6 @@ class PastureMonitoringValueDialog(QDialog, Ui_PastureMonitoringValueDialog, Dat
                 self.photos_twidget.setItem(row, 4, item_open)
                 self.photos_twidget.setItem(row, 5, item_delete)
 
-            self.__update_around_photo_twidget()
-
         if self.cover_photo_rbutton.isChecked():
             for i in range(9):
                 desc = 'cover_' + str(i + 1)
@@ -2775,34 +2774,25 @@ class PastureMonitoringValueDialog(QDialog, Ui_PastureMonitoringValueDialog, Dat
                 self.photos_twidget.setItem(row, 4, item_open)
                 self.photos_twidget.setItem(row, 5, item_delete)
 
-            self.__update_cover_photo_twidget()
+        self.__update_around_photo_twidget()
 
     def __update_around_photo_twidget(self):
 
-        file_path = PasturePath.pasture_photo_file_path()
         point_detail_id = self.point_detail_id
         point_year = self.point_year
-        file_path = file_path + '/' + point_year + '/' + point_detail_id + '/image'
-        if not os.path.exists(file_path):
-            os.makedirs(file_path)
 
-        for file in os.listdir(file_path):
-            os.listdir(file_path)
-
-            if file.endswith(".JPG") or file.endswith(".jpg"):
-
-                file_name_split = file.split('_')
-                photo_type = file_name_split[0] + '_' + file_name_split[1]
-                file_name = file
-                file_point_detail_id = file_name_split[2]
-                file_point_detail_id = file_point_detail_id.split('.')[0]
-                for i in range(4):
+        point_docs = self.session.query(PsPointDocument).filter(
+            PsPointDocument.point_detail_id == point_detail_id).filter(PsPointDocument.monitoring_year == point_year).all()
+        for point_doc in point_docs:
+            document_count = self.session.query(CtDocument).filter(CtDocument.id == point_doc.document_id).count()
+            if document_count == 1:
+                document = self.session.query(CtDocument).filter(CtDocument.id == point_doc.document_id).one()
+                for i in range(self.photos_twidget.rowCount()):
                     photo_type_item = self.photos_twidget.item(i, DOC_TYPE_COLUMN)
                     photo_type_code = str(photo_type_item.data(Qt.UserRole))
-
-                    if photo_type == photo_type_code and point_detail_id == file_point_detail_id:
+                    if str(point_doc.role).strip() == str(photo_type_code).strip():
                         item_name = self.photos_twidget.item(i, DOC_NAME_COLUMN)
-                        item_name.setText(file_name)
+                        item_name.setText(document.name)
 
                         item_provided = self.photos_twidget.item(i, DOC_PROVIDED_COLUMN)
                         item_provided.setCheckState(Qt.Checked)
@@ -2816,6 +2806,38 @@ class PastureMonitoringValueDialog(QDialog, Ui_PastureMonitoringValueDialog, Dat
                         self.photos_twidget.setItem(i, DOC_REMOVE_COLUMN, item_remove)
                         self.photos_twidget.setItem(i, DOC_VIEW_COLUMN, item_view)
                         self.photos_twidget.setItem(i, DOC_NAME_COLUMN, item_name)
+
+        self.photos_twidget.resizeColumnsToContents()
+        # for file in os.listdir(file_path):
+        #     os.listdir(file_path)
+        #
+        #     if file.endswith(".JPG") or file.endswith(".jpg"):
+        #
+        #         file_name_split = file.split('_')
+        #         photo_type = file_name_split[0] + '_' + file_name_split[1]
+        #         file_name = file
+        #         file_point_detail_id = file_name_split[2]
+        #         file_point_detail_id = file_point_detail_id.split('.')[0]
+        #         for i in range(4):
+        #             photo_type_item = self.photos_twidget.item(i, DOC_TYPE_COLUMN)
+        #             photo_type_code = str(photo_type_item.data(Qt.UserRole))
+        #
+        #             if photo_type == photo_type_code and point_detail_id == file_point_detail_id:
+        #                 item_name = self.photos_twidget.item(i, DOC_NAME_COLUMN)
+        #                 item_name.setText(file_name)
+        #
+        #                 item_provided = self.photos_twidget.item(i, DOC_PROVIDED_COLUMN)
+        #                 item_provided.setCheckState(Qt.Checked)
+        #
+        #                 item_open = self.photos_twidget.item(i, DOC_OPEN_COLUMN)
+        #                 item_remove = self.photos_twidget.item(i, DOC_REMOVE_COLUMN)
+        #                 item_view = self.photos_twidget.item(i, DOC_VIEW_COLUMN)
+        #
+        #                 self.photos_twidget.setItem(i, DOC_PROVIDED_COLUMN, item_provided)
+        #                 self.photos_twidget.setItem(i, DOC_OPEN_COLUMN, item_open)
+        #                 self.photos_twidget.setItem(i, DOC_REMOVE_COLUMN, item_remove)
+        #                 self.photos_twidget.setItem(i, DOC_VIEW_COLUMN, item_view)
+        #                 self.photos_twidget.setItem(i, DOC_NAME_COLUMN, item_name)
 
     def __update_cover_photo_twidget(self):
 
@@ -3779,10 +3801,10 @@ class PastureMonitoringValueDialog(QDialog, Ui_PastureMonitoringValueDialog, Dat
         #     is_valid = False
         #     return
 
-        if self.__load_urgats() == 0:
-            PluginUtils.show_message(self, self.tr("Can't"), self.tr("Bio mass value zero!!!"))
-            is_valid = False
-            return
+        # if self.__load_urgats() == 0:
+        #     PluginUtils.show_message(self, self.tr("Can't"), self.tr("Bio mass value zero!!!"))
+        #     is_valid = False
+        #     return
 
         if not self.__load_rc():
             PluginUtils.show_message(self, self.tr("Can't"), self.tr("Can not calculate RC!!!"))
@@ -3802,13 +3824,13 @@ class PastureMonitoringValueDialog(QDialog, Ui_PastureMonitoringValueDialog, Dat
             is_valid = False
             return
 
-        if self.__load_urgats() == 0:
-            is_valid = False
-            return
+        # if self.__load_urgats() == 0:
+        #     is_valid = False
+        #     return
 
-        if not self.__load_rc():
-            is_valid = False
-            return
+        # if not self.__load_rc():
+        #     is_valid = False
+        #     return
         return is_valid
 
     @pyqtSlot()
@@ -3842,9 +3864,8 @@ class PastureMonitoringValueDialog(QDialog, Ui_PastureMonitoringValueDialog, Dat
     @pyqtSlot()
     def on_calc_refresh_button_clicked(self):
 
-        if not self.__calc_validate():
-            return
-
+        # if not self.__calc_validate():
+        #     return
 
         area_ga = 0
         biomass = None
@@ -3860,34 +3881,43 @@ class PastureMonitoringValueDialog(QDialog, Ui_PastureMonitoringValueDialog, Dat
         if self.calc_duration_sbox.value():
             duration = int(self.duration_days_edit.text())
         biomass = self.__load_urgats()
-        rc_id = self.__load_rc().id
-        rc_code = self.__load_rc().rc_code
-        rc_precent = self.__load_rc().rc_precent
+
+        if duration > 0:
+            self.calc_duration_sbox.setValue(duration)
+        else:
+            duration = self.calc_duration_sbox.value()
 
         sheep_unit_plant = self.__load_sheep_unit_biomass()
         sheep_unit = self.__load_live_stock_convert()
+        self.calc_sheep_unit_sbox.setValue(sheep_unit)
+        self.calc_sheep_unit_plant_sbox.setValue(sheep_unit_plant)
+
+        if not self.__calc_validate():
+            return
+        if self.__load_rc():
+            rc_id = self.__load_rc().id
+            rc_code = self.__load_rc().rc_code
+            rc_precent = self.__load_rc().rc_precent
+            rc_precent = float(rc_precent) / 100
+            biomass_present = float(biomass) * rc_precent
+
+
         if area_ga > 0:
             self.calc_area_sbox.setValue(area_ga)
         else:
             area_ga = self.calc_area_sbox.value()
         self.calc_biomass_sbox.setValue(biomass)
-        self.calc_rc_edit.setText(rc_code)
-        self.calc_rc_precent_sbox.setValue(rc_precent)
-        if duration > 0:
-            self.calc_duration_sbox.setValue(duration)
-        else:
-            duration = self.calc_duration_sbox.value()
-        self.calc_sheep_unit_sbox.setValue(sheep_unit)
-        self.calc_sheep_unit_plant_sbox.setValue(sheep_unit_plant)
 
-        rc_precent = float(rc_precent) / 100
-        biomass_present = float(biomass) * rc_precent
+        d2 = 0
         if sheep_unit_plant == 0 or rc_precent == 0:
             d1 = 0
         else:
             d1 = (float(biomass) / float(sheep_unit_plant)) * (rc_precent)
             d1_100ga = d1 * 100
-            d2 = ((1 / d1))
+            if d1 == 0:
+                d1 = 0
+            else:
+                d2 = ((1 / d1))
             d3 = float(area_ga * biomass_present) / float(sheep_unit_plant)
             unelgee = d3 - float(sheep_unit)
 
@@ -3899,87 +3929,99 @@ class PastureMonitoringValueDialog(QDialog, Ui_PastureMonitoringValueDialog, Dat
             self.calc_d3_edit.setText(str(round(d3, 2)))
             self.calc_unelgee_edit.setText(str(round(unelgee, 2)))
 
+        self.calc_rc_edit.setText(rc_code)
+        self.calc_rc_precent_sbox.setValue(rc_precent)
+
     def __daats_value_save(self):
 
         if not self.__calc_validate_save():
-            return
+            area_ga = float(self.calc_area_sbox.value())
+            duration = int(self.calc_duration_sbox.value())
+            # return
+        else:
+            area_ga = float(self.calc_area_sbox.value())
+            duration = int(self.calc_duration_sbox.value())
 
-        area_ga = float(self.calc_area_sbox.value())
-        biomass = self.__load_urgats()
-        rc_id = self.__load_rc().id
-        rc_code = self.__load_rc().rc_code
-        rc_precent = self.__load_rc().rc_precent
-        duration = int(self.calc_duration_sbox.value())
-        sheep_unit_plant = self.__load_sheep_unit_biomass()
-        sheep_unit = self.__load_live_stock_convert()
-        rc_precent_d = rc_precent
+        if self.__load_rc():
+            rc_id = self.__load_rc().id
+            rc_code = self.__load_rc().rc_code
+            rc_precent = self.__load_rc().rc_precent
 
-        rc_precent = float(rc_precent) / 100
-        biomass_present = float(biomass) * rc_precent
-        d1 = (float(biomass) / float(sheep_unit_plant)) * (rc_precent)
-        d1_100ga = d1 * 100
-        d2 = ((1 / d1))
-        d3 = float(area_ga * biomass_present) / float(sheep_unit_plant)
-        unelgee = d3 - float(sheep_unit)
+            biomass = self.__load_urgats()
 
-        self.calc_d1_edit.setText(str(round(d1, 2)))
-        self.calc_d1_100ga_edit.setText(str(round(d1_100ga, 2)))
-        self.calc_d2_edit.setText(str(round(d2, 2)))
-        self.calc_d3_edit.setText(str(round(d3, 2)))
-        self.calc_unelgee_edit.setText(str(round(unelgee, 2)))
+            sheep_unit_plant = self.__load_sheep_unit_biomass()
+            sheep_unit = self.__load_live_stock_convert()
+            rc_precent_d = rc_precent
+            d2 = 0
+            rc_precent = float(rc_precent) / 100
+            biomass_present = float(biomass) * rc_precent
+            d1 = (float(biomass) / float(sheep_unit_plant)) * (rc_precent)
+            d1_100ga = d1 * 100
+            if d1 == 0:
+                d1 = 0
+            else:
+                d2 = ((1 / d1))
+            d3 = float(area_ga * biomass_present) / float(sheep_unit_plant)
+            unelgee = d3 - float(sheep_unit)
 
-        monitoring_date_qt = PluginUtils.convert_qt_date_to_python(self.calc_date_edit.date())
+            self.calc_d1_edit.setText(str(round(d1, 2)))
+            self.calc_d1_100ga_edit.setText(str(round(d1_100ga, 2)))
+            self.calc_d2_edit.setText(str(round(d2, 2)))
+            self.calc_d3_edit.setText(str(round(d3, 2)))
+            self.calc_unelgee_edit.setText(str(round(unelgee, 2)))
 
-        begin_month_text = self.begin_month_date.text()
-        end_month_text = self.end_month_date.text()
+            monitoring_date_qt = PluginUtils.convert_qt_date_to_python(self.calc_date_edit.date())
 
-        daats_count = self.session.query(PsPointDaatsValue). \
-            filter(PsPointDaatsValue.point_detail_id == self.point_detail_id). \
-            filter(PsPointDaatsValue.monitoring_year == self.print_year_sbox.value()).count()
-        print daats_count
-        if daats_count == 0:
-            daats = PsPointDaatsValue()
-            daats.point_detail_id = self.point_detail_id
-            daats.monitoring_year = self.print_year_sbox.value()
-            daats.register_date = monitoring_date_qt
-            daats.area_ga = area_ga
-            daats.duration = duration
-            daats.rc = rc_code
-            daats.rc_precent = rc_precent_d
-            daats.sheep_unit = sheep_unit
-            daats.sheep_unit_plant = sheep_unit_plant
-            daats.biomass = biomass
-            daats.d1 = d1
-            daats.d1_100ga = d1_100ga
-            daats.d2 = d2
-            daats.d3 = d3
-            daats.unelgee = unelgee
-            daats.rc_id = rc_id
-            daats.begin_month = begin_month_text
-            daats.end_month = end_month_text
+            begin_month_text = self.begin_month_date.text()
+            end_month_text = self.end_month_date.text()
 
-            self.session.add(daats)
-        elif daats_count == 1:
-            daats = self.session.query(PsPointDaatsValue). \
+            daats_count = self.session.query(PsPointDaatsValue). \
                 filter(PsPointDaatsValue.point_detail_id == self.point_detail_id). \
-                filter(PsPointDaatsValue.monitoring_year == self.print_year_sbox.value()).one()
-            print monitoring_date_qt
-            daats.register_date = monitoring_date_qt
-            daats.area_ga = area_ga
-            daats.duration = duration
-            daats.rc = rc_code
-            daats.rc_precent = rc_precent_d
-            daats.sheep_unit = sheep_unit
-            daats.sheep_unit_plant = sheep_unit_plant
-            daats.biomass = biomass
-            daats.d1 = d1
-            daats.d1_100ga = d1_100ga
-            daats.d2 = d2
-            daats.d3 = d3
-            daats.unelgee = unelgee
-            daats.rc_id = rc_id
-            daats.begin_month = begin_month_text
-            daats.end_month = end_month_text
+                filter(PsPointDaatsValue.monitoring_year == self.print_year_sbox.value()).count()
+
+            if daats_count == 0:
+                daats = PsPointDaatsValue()
+                daats.point_detail_id = self.point_detail_id
+                daats.monitoring_year = self.print_year_sbox.value()
+                daats.register_date = monitoring_date_qt
+                daats.area_ga = area_ga
+                daats.duration = duration
+                daats.rc = rc_code
+                daats.rc_precent = rc_precent_d
+                daats.sheep_unit = sheep_unit
+                daats.sheep_unit_plant = sheep_unit_plant
+                daats.biomass = biomass
+                daats.d1 = d1
+                daats.d1_100ga = d1_100ga
+                daats.d2 = d2
+                daats.d3 = d3
+                daats.unelgee = unelgee
+                daats.rc_id = rc_id
+                daats.begin_month = begin_month_text
+                daats.end_month = end_month_text
+
+                self.session.add(daats)
+            elif daats_count == 1:
+                daats = self.session.query(PsPointDaatsValue). \
+                    filter(PsPointDaatsValue.point_detail_id == self.point_detail_id). \
+                    filter(PsPointDaatsValue.monitoring_year == self.print_year_sbox.value()).one()
+
+                daats.register_date = monitoring_date_qt
+                daats.area_ga = area_ga
+                daats.duration = duration
+                daats.rc = rc_code
+                daats.rc_precent = rc_precent_d
+                daats.sheep_unit = sheep_unit
+                daats.sheep_unit_plant = sheep_unit_plant
+                daats.biomass = biomass
+                daats.d1 = d1
+                daats.d1_100ga = d1_100ga
+                daats.d2 = d2
+                daats.d3 = d3
+                daats.unelgee = unelgee
+                daats.rc_id = rc_id
+                daats.begin_month = begin_month_text
+                daats.end_month = end_month_text
 
     def __photo_count(self, point_detail_id):
 

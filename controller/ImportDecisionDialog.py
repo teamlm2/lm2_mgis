@@ -32,6 +32,7 @@ from ..model.BsPerson import *
 from ..model.SetRole import SetRole
 from ..model.CaBuilding import *
 from ..model.Enumerations import ApplicationType
+from ..model.SdConfiguration import SdConfiguration
 from .DecisionErrorDialog import DecisionErrorDialog
 from ..utils.SessionHandler import SessionHandler
 from ..utils.PluginUtils import PluginUtils
@@ -315,16 +316,17 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
             # app_no = s.cell(row, application_no_column).value
             app = self.session.query(CtApplication).filter(CtApplication.app_no == s.cell(row, application_no_column).value).one()
             app_no = app.app_id
+
             current_decision_no = s.cell(row, decision_no_column).value
             duration = s.cell(1, application_duration_column).value
             landuse = s.cell(row, landuse_column).value
 
-            if not self.__validate_row(decision_result, app_no, current_decision_no, self.decision.decision_no,
-                                       duration, landuse):
+            if not self.__validate_row(decision_result, app.app_no, current_decision_no, self.decision.decision_no,
+                                       duration, landuse, app.app_id):
                 item = QTreeWidgetItem()
-                item.setText(0, app_no)
+                item.setText(0, app.app_no)
                 self.item_skipped.addChild(item)
-                self.import_button.setEnabled(False)
+                # self.import_button.setEnabled(False)
                 self.error_details_button.setEnabled(True)
                 continue
 
@@ -357,7 +359,7 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
                                                self.tr("There are two approved applications of the same type for the parcel {0}. ").format(parcel.parcel_id))
 
                         item = QTreeWidgetItem()
-                        item.setText(0, app_no)
+                        item.setText(0, app.app_no)
                         self.item_skipped.addChild(item)
                         self.import_button.setEnabled(False)
                         self.error_details_button.setEnabled(True)
@@ -378,7 +380,7 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
                         .filter(CtApplicationStatus.status == Constants.APP_STATUS_REFUSED).count()
                     if count > 0:
                         application_result_exists = True
-                sd_user = self.session.query(SdUser).filter(SdUser.gis_user_real == current_employee.user_name_real).one()
+                sd_user = self.session.query(SdUser).filter(SdUser.gis_user_real == current_employee.user_name_real).first()
                 if not application_result_exists:
 
                     app_status = CtApplicationStatus()
@@ -770,7 +772,7 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
 
         return True
 
-    def __validate_row(self, decision_result, app_no, current_decision_no, decision_no, duration, landuse):
+    def __validate_row(self, decision_result, app_no, current_decision_no, decision_no, duration, landuse, app_id):
 
         #1st: decision result is type of integer
         #2cnd: decision id exists
@@ -823,7 +825,7 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
                 valid_row = False
                 count += 1
 
-        application_count = self.session.query(CtApplication).filter_by(app_id=app_no).count()
+        application_count = self.session.query(CtApplication).filter_by(app_id=app_id).count()
         if application_count == 0:
             self.error_list[app_no + " # " + str(count)] = \
                 self.tr("The application {0} does not exist. Import will be skipped.").format(app_no)
@@ -833,7 +835,7 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
 
         elif application_count == 1:
 
-            application = self.session.query(CtApplication).filter(CtApplication.app_id == app_no).one()
+            application = self.session.query(CtApplication).filter(CtApplication.app_id == app_id).one()
 
             if application.app_type in Constants.APPLICATION_TYPE_WITH_DURATION:
                 try:
@@ -850,8 +852,7 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
                     count += 1
 
             if application.decision_result is not None:
-                self.error_list[app_no + " # " + str(count)] = \
-                    self.tr("There is already a decision for the application {0}.").format(app_no)
+                self.error_list[app_no + " # " + str(count)] = self.tr("There is already a decision for the application {0}.").format(app_no)
                 valid_row = False
                 count += 1
 
@@ -1625,7 +1626,7 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
                 new_status.next_officer_in_charge = DatabaseUtils.current_sd_user().user_id
                 new_status.officer_in_charge = DatabaseUtils.current_sd_user().user_id
                 new_status.status = Constants.APP_STATUS_APPROVED
-                new_status.status_date = datetime.now().strftime(Constants.PYTHON_DATE_FORMAT)
+                new_status.status_date = datetime.now().strftime(Constants.PYTHON_DATETIME_FORMAT)
                 self.session.add(new_status)
                 row +=1
                 # except SQLAlchemyError, e:
@@ -1652,8 +1653,7 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
         if decision_count == 1:
             decision = self.session.query(CtDecision).filter(CtDecision.decision_no == decision_no). \
                 filter(CtDecision.decision_level == decision_level).one()
-            print decision.decision_id
-            # urllib2.urlopen('http://66.181.168.74/api/geoxyp/send/decision/gasr?decision_id=' + str(decision.decision_id))
+
             dec_apps_count = self.session.query(CtDecisionApplication).filter(
                 CtDecisionApplication.decision == decision.decision_id).count()
             if dec_apps_count > 0:
@@ -1661,13 +1661,12 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
                     CtDecisionApplication.decision == decision.decision_id).all()
                 for dec_app in dec_apps:
                     app_id = dec_app.application
-
-                    urllib2.urlopen('http://66.181.168.74/api/application/document/refolder?app_id=' + str(app_id))
+                    conf = self.session.query(SdConfiguration).filter(SdConfiguration.code == 'ip_web_lm').one()
+                    urllib2.urlopen('http://'+conf.value+'/api/application/document/refolder?app_id=' + str(app_id))
 
                     if dec_app.application:
                         application = self.session.query(CtApplication).filter(
                             CtApplication.app_id == dec_app.application).one()
-                        print application.app_no
 
                         #----------
 

@@ -30,8 +30,7 @@ class DropLabel(QLabel):
         if widget is not None:
 
             object_name = widget.objectName()
-            print object_name
-            print self.drop_type
+
             # if self.drop_type in object_name:
 
             event.acceptProposedAction()

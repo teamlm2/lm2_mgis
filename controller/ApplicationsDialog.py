@@ -169,10 +169,11 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
 
         self.contract_court_end_date_edit.setDate(QDate.currentDate())
         self.record_court_end_date_edit.setDate(QDate.currentDate())
-
+        self.is_status_disable = False
         self.__setup_combo_boxes()
         self.__setup_ui()
         self.__setup_permissions()
+
 
     #public functions
     def current_document_applicant(self):
@@ -193,7 +194,6 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
 
     def __setup_ui(self):
 
-        self.document_path_edit.setText(FilePath.app_file_path())
         self.share_spinbox = QDoubleSpinBox()
         self.share_spinbox.setDecimals(2)
         self.share_spinbox.setMaximum(1.0)
@@ -247,6 +247,16 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
             .filter(CtApplicationStatus.status >= 7).count()
         if status_count_7 > 0:
             self.status_cbox.removeItem(self.status_cbox.findData(8))
+
+        max_status = self.session.query(func.max(CtApplicationStatus.status)). \
+            filter(CtApplicationStatus.application == self.application.app_id).one()
+        mas_status = int(str(max_status).split(",")[0][1:])
+
+        if mas_status > 6:
+            self.is_status_disable = True
+            self.add_button.setEnabled(False)
+            self.update_button.setEnabled(False)
+            self.delete_button.setEnabled(False)
 
         # except SQLAlchemyError, e:
         #     self.rollback_to_savepoint()
@@ -397,9 +407,10 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
             self.representatives_remove_button.setEnabled(True)
             if not self.unassign_button.isEnabled() is False:
                 self.unassign_button.setEnabled(True)
-            self.add_button.setEnabled(True)
-            self.delete_button.setEnabled(True)
-            self.update_button.setEnabled(True)
+            if not self.is_status_disable:
+                self.add_button.setEnabled(True)
+                self.delete_button.setEnabled(True)
+                self.update_button.setEnabled(True)
             self.accept_parcel_number_button.setEnabled(True)
             self.up_button.setEnabled(True)
             self.down_button.setEnabled(True)
@@ -453,8 +464,13 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
         try:
             applicants_new = self.application.stakeholders.filter(
                 CtApplicationPersonRole.role == Constants.NEW_RIGHT_HOLDER_CODE).all()
+            applicants_old_count = self.application.stakeholders.filter(
+                CtApplicationPersonRole.role == Constants.OLD_RIGHT_HOLDER_CODE).count()
             applicants_old = self.application.stakeholders.filter(
                 CtApplicationPersonRole.role == Constants.OLD_RIGHT_HOLDER_CODE).all()
+
+            applicants = self.application.stakeholders.filter(
+                CtApplicationPersonRole.role == Constants.APPLICANT_ROLE_CODE).all()
 
         except SQLAlchemyError, e:
             raise LM2Exception(self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
@@ -462,8 +478,12 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
         for applicant in applicants_new:
             self.__add_new_right_holder_item(applicant)
 
-        for applicant in applicants_old:
-            self.__add_old_right_holder_item(applicant)
+        if applicants_old_count == 0:
+            for applicant in applicants:
+                self.__add_old_right_holder_item(applicant)
+        else:
+            for applicant in applicants_old:
+                self.__add_old_right_holder_item(applicant)
 
     @pyqtSlot(int, int)
     def on_new_right_holder_twidget_cellChanged(self, row, column):
@@ -586,14 +606,23 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
         self.application_status_twidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.application_status_twidget.setSortingEnabled(True)
 
-        status = self.session.query(func.max(CtApplicationStatus.status)). \
-            filter(CtApplicationStatus.application == self.application.app_id).one()
-        max_status = str(status).split(",")[0][1:]
-        self.status_cbox.setCurrentIndex(self.status_cbox.findData(str(int(max_status)+1)))
-        for status in self.application.statuses:
+        # status = self.session.query(func.max(CtApplicationStatus.status)). \
+        #     filter(CtApplicationStatus.application == self.application.app_id).one()
+        # max_status = str(status).split(",")[0][1:]
+        # self.status_cbox.setCurrentIndex(self.status_cbox.findData(str(int(max_status)+1)))
+
+        app_status = self.session.query(CtApplicationStatus).\
+            filter(CtApplicationStatus.application == self.application.app_id) .\
+            order_by(CtApplicationStatus.app_status_id.desc()).first()
+        self.status_cbox.setCurrentIndex(self.status_cbox.findData(str(int(app_status.status) + 1)))
+
+        app_statuses = self.session.query(CtApplicationStatus). \
+            filter(CtApplicationStatus.application == self.application.app_id). \
+            order_by(CtApplicationStatus.app_status_id.desc()).all()
+        for status in app_statuses:
             self.__add_application_status_item(status)
 
-        self.application_status_twidget.sortItems(0, Qt.AscendingOrder)
+        self.application_status_twidget.sortItems(1, Qt.AscendingOrder)
         self.__update_decision_tab()
 
 
@@ -616,7 +645,7 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
             filter(SetOrganizationAppType.organization == self.current_user.organization).\
             filter(and_(ClApplicationType.code != ApplicationType.pasture_use, ClApplicationType.code != ApplicationType.right_land)).\
             order_by(ClApplicationType.code).all()
-        statuses = self.session.query(ClApplicationStatus).order_by(ClApplicationStatus.code).all()
+        statuses = self.session.query(ClApplicationStatus).filter(ClApplicationStatus.code < 10).order_by(ClApplicationStatus.code).all()
         transfer_type = self.session.query(ClTransferType).all()
 
         set_roles = self.session.query(SetRole). \
@@ -1688,7 +1717,6 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
                     #     doc_type_code = '0' + str(doc_type_item.data(Qt.UserRole))
 
                     if app_doc.role == doc_type_code:
-
                         item_name = self.documents_twidget.item(i, DOC_FILE_NAME_COLUMN)
                         item_name.setText(document.name)
 
@@ -1700,6 +1728,11 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
                         self.documents_twidget.setItem(i, 0, item_provided)
                         self.documents_twidget.setItem(i, 2, item_name)
                         self.documents_twidget.setItem(i, 3, item_open)
+
+                        if app_doc.is_send:
+                            item_name.setBackground(Qt.green)
+                            item_provided.setBackground(Qt.green)
+                            item_open.setBackground(Qt.green)
 
         self.documents_twidget.resizeColumnsToContents()
         # current_app_type = self.application_type_cbox.itemData(self.application_type_cbox.currentIndex())
@@ -1772,10 +1805,15 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
 
             item_name = QTableWidgetItem("")
             item_name.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+            if docType.document_role_ref.is_ubeg_required:
+                item_doc_type.setBackground(Qt.yellow)
+                item_doc_type.setBackground(Qt.yellow)
+                item_name.setBackground(Qt.yellow)
 
             item_open = QTableWidgetItem("")
             item_remove = QTableWidgetItem("")
             item_view = QTableWidgetItem("")
+
             row = self.documents_twidget.rowCount()
 
             self.documents_twidget.insertRow(row)
@@ -2218,10 +2256,12 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
                 or app_type == ApplicationType.encroachment \
                 or app_type == ApplicationType.possession_right_use_right:
 
-            self.old_right_holders_twidget.setRowCount(0)
 
-            for applicant in self.application.stakeholders.filter(CtApplicationPersonRole.role == Constants.OLD_RIGHT_HOLDER_CODE):
-                self.__add_old_right_holder_item(applicant)
+            count = self.application.stakeholders.filter(CtApplicationPersonRole.role == Constants.OLD_RIGHT_HOLDER_CODE).count()
+            if count > 0:
+                self.old_right_holders_twidget.setRowCount(0)
+                for applicant in self.application.stakeholders.filter(CtApplicationPersonRole.role == Constants.OLD_RIGHT_HOLDER_CODE):
+                    self.__add_old_right_holder_item(applicant)
 
     @pyqtSlot(int)
     def on_rigth_type_cbox_currentIndexChanged(self, index):
@@ -2253,7 +2293,7 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
 
         current_row = self.application_status_twidget.currentRow()
         status_item = self.application_status_twidget.item(current_row, 0)
-
+        app_status_id = status_item.data(Qt.UserRole+1)
         if status_item is None:
             return
 
@@ -2265,10 +2305,16 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
         self.next_officer_in_charge_cbox.setCurrentIndex(
             self.next_officer_in_charge_cbox.findData(next_officer_item.data(Qt.UserRole)))
 
-        status = self.session.query(func.max(CtApplicationStatus.status)).\
+        status_count = self.session.query(CtApplicationStatus).filter(CtApplicationStatus.app_status_id == app_status_id).count()
+        if status_count == 1:
+            status = self.session.query(CtApplicationStatus).filter(
+                CtApplicationStatus.app_status_id == app_status_id).one()
+            self.status_desc_lbl.setText(status.description)
+
+        max_status = self.session.query(func.max(CtApplicationStatus.status)).\
             filter(CtApplicationStatus.application == self.application.app_id).one()
-        mas_status = str(status).split(",")[0][1:]
-        if mas_status == '7':
+        mas_status = int(str(max_status).split(",")[0][1:])
+        if mas_status > 6:
             self.add_button.setEnabled(False)
             self.update_button.setEnabled(False)
             self.delete_button.setEnabled(False)
@@ -2482,7 +2528,8 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
         new_status.next_officer_in_charge = sd_next_officer.user_id
         new_status.next_officer_in_charge_ref = sd_next_officer
         ui_date = self.status_date_date.date()
-        new_status.status_date = date(ui_date.year(), ui_date.month(), ui_date.day())
+        # new_status.status_date = date(ui_date.year(), ui_date.month(), ui_date.day())
+        new_status.status_date = self.status_date_date.dateTime().toString(Constants.DATABASE_DATETIME_FORMAT)
         new_status.status = status_id
         new_status.status_ref = status
 
@@ -2521,7 +2568,7 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
 
     def __max_application_status(self):
 
-        status = self.session.query(func.max(CtApplicationStatus.status)). \
+        status = self.session.query(func.max(CtApplicationStatus.app_status_id)). \
             filter(CtApplicationStatus.application == self.application.app_id).one()
         max_status = str(status).split(",")[0][1:]
         return int(max_status)
@@ -2530,7 +2577,7 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
 
         status = self.session.query(CtApplicationStatus).\
             filter(CtApplicationStatus.application == self.application.app_id).\
-            filter(CtApplicationStatus.status == self.__max_application_status()).one()
+            filter(CtApplicationStatus.app_status_id == self.__max_application_status()).one()
         return status
 
     @pyqtSlot()
@@ -2623,6 +2670,13 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
 
                 PluginUtils.show_message(self, self.tr("Application Number"), self.tr("The application number was updated to the next available number."))
 
+                soum_code = self.application_num_first_edit.text()
+                app_type = self.application_num_type_edit.text()
+                year = self.application_num_last_edit.text()
+                # year_filter = "%-" + str(year)
+                obj_type = 'application\Application'
+                PluginUtils.generate_auto_app_no(year, app_type, soum_code, obj_type)
+
         self.application.app_no = app_no
         self.application.requested_landuse = self.requested_land_use_type_cbox.itemData(self.requested_land_use_type_cbox.currentIndex())
         #self.application.approved_landuse = self.requested_land_use_type_cbox.itemData(self.requested_land_use_type_cbox.currentIndex())
@@ -2641,9 +2695,15 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
         if parcel_count != 0:
             self.is_tmp_parcel = True
 
-        status = self.session.query(func.max(CtApplicationStatus.status)).\
-            filter(CtApplicationStatus.application == self.application.app_id).one()
-        max_status = str(status).split(",")[0][1:]
+        # status = self.session.query(func.max(CtApplicationStatus.app_status_id)).\
+        #     filter(CtApplicationStatus.application == self.application.app_id).one()
+
+        max_status = self.session.query(CtApplicationStatus.status). \
+            filter(CtApplicationStatus.application == self.application.app_id). \
+            order_by(CtApplicationStatus.app_status_id.desc()).first()
+
+        max_status = str(max_status).split(",")[0][1:]
+
         if self.parcel_edit.text() == "":
             self.application.parcel = None
         else:
@@ -2687,29 +2747,51 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
 
         self.create_savepoint()
 
-        try:
-            if self.application.app15ext is None:
+        # try:
+        if self.application.app15ext is None:
 
-                self.application.app15ext = CtApp15Ext()
+            self.application.app15ext = CtApp15Ext()
 
-            self.application.app15ext.transfer_type = self.type_of_transfer_cbox.itemData(
-                self.type_of_transfer_cbox.currentIndex())
+        self.application.app15ext.transfer_type = self.type_of_transfer_cbox.itemData(
+            self.type_of_transfer_cbox.currentIndex())
 
-            for row in range(self.old_right_holders_twidget.rowCount()):
+        for row in range(self.old_right_holders_twidget.rowCount()):
 
-                share_item = self.old_right_holders_twidget.item(row, OLD_RIGHT_HOLDER_SHARE)
-                person_id = share_item.data(Qt.UserRole)
+            share_item = self.old_right_holders_twidget.item(row, OLD_RIGHT_HOLDER_SHARE)
+            person_id = share_item.data(Qt.UserRole)
+            applicant_count = self.application.stakeholders.filter(
+                CtApplicationPersonRole.role == Constants.OLD_RIGHT_HOLDER_CODE) \
+                .filter(CtApplicationPersonRole.person == person_id).count()
+            if applicant_count == 0:
+                app_person_role = CtApplicationPersonRole()
+                app_person_role.application = self.application.app_id
+                app_person_role.share = Decimal(0.0)
+                app_person_role.role = Constants.OLD_RIGHT_HOLDER_CODE
+                app_person_role.person = person_id
+                app_person_role.main_applicant = False
+            else:
                 applicant = self.application.stakeholders.filter(
                     CtApplicationPersonRole.role == Constants.OLD_RIGHT_HOLDER_CODE) \
                     .filter(CtApplicationPersonRole.person == person_id).one()
                 applicant.share = Decimal(share_item.text())
 
-            for row in range(self.new_right_holders_twidget.rowCount()):
+        for row in range(self.new_right_holders_twidget.rowCount()):
 
-                share_item = self.new_right_holders_twidget.item(row, NEW_RIGHT_HOLDER_SHARE)
-                main_item = self.new_right_holders_twidget.item(row, NEW_RIGHT_HOLDER_MAIN)
-                main = True if main_item.checkState() == Qt.Checked else False
-                person_id = share_item.data(Qt.UserRole)
+            share_item = self.new_right_holders_twidget.item(row, NEW_RIGHT_HOLDER_SHARE)
+            main_item = self.new_right_holders_twidget.item(row, NEW_RIGHT_HOLDER_MAIN)
+            main = True if main_item.checkState() == Qt.Checked else False
+            person_id = share_item.data(Qt.UserRole)
+            applicant_count = self.application.stakeholders.filter(
+                CtApplicationPersonRole.role == Constants.NEW_RIGHT_HOLDER_CODE) \
+                .filter(CtApplicationPersonRole.person == person_id).count()
+            if applicant_count == 0:
+                app_person_role = CtApplicationPersonRole()
+                app_person_role.application = self.application.app_id
+                app_person_role.share = Decimal(0.0)
+                app_person_role.role = Constants.OLD_RIGHT_HOLDER_CODE
+                app_person_role.person = person_id
+                app_person_role.main_applicant = False
+            else:
                 applicant = self.application.stakeholders.filter(
                     CtApplicationPersonRole.role == Constants.NEW_RIGHT_HOLDER_CODE) \
                     .filter(CtApplicationPersonRole.person == person_id).one()
@@ -2717,44 +2799,66 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
                 applicant.main_applicant = main
                 applicant.share = Decimal(share_item.text())
 
-        except SQLAlchemyError, e:
-            self.rollback_to_savepoint()
-            raise LM2Exception(self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+        # except SQLAlchemyError, e:
+        #     self.rollback_to_savepoint()
+        #     raise LM2Exception(self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
 
     def __save_transfer_possession(self):
 
         self.create_savepoint()
 
-        try:
+        # try:
 
-            for row in range(self.old_right_holders_twidget.rowCount()):
+        for row in range(self.old_right_holders_twidget.rowCount()):
 
-                share_item = self.old_right_holders_twidget.item(row, OLD_RIGHT_HOLDER_SHARE)
-                person_id = share_item.data(Qt.UserRole)
+            share_item = self.old_right_holders_twidget.item(row, OLD_RIGHT_HOLDER_SHARE)
+            person_id = share_item.data(Qt.UserRole)
 
+            applicant_count = self.application.stakeholders.filter(
+                CtApplicationPersonRole.role == Constants.OLD_RIGHT_HOLDER_CODE) \
+                .filter(CtApplicationPersonRole.person == person_id).count()
+            if applicant_count == 0:
+                app_person_role = CtApplicationPersonRole()
+                app_person_role.application = self.application.app_id
+                app_person_role.share = Decimal(0.0)
+                app_person_role.role = Constants.OLD_RIGHT_HOLDER_CODE
+                app_person_role.person = person_id
+                app_person_role.main_applicant = False
+            else:
                 applicant = self.application.stakeholders.filter(
                     CtApplicationPersonRole.role == Constants.OLD_RIGHT_HOLDER_CODE) \
                     .filter(CtApplicationPersonRole.person == person_id).one()
                 applicant.share = Decimal(share_item.text())
 
-            for row in range(self.new_right_holders_twidget.rowCount()):
+        for row in range(self.new_right_holders_twidget.rowCount()):
 
-                item = self.new_right_holders_twidget.item(row, NEW_RIGHT_HOLDER_MAIN)
-                person_id = item.data(Qt.UserRole)
-                main = True if item.checkState() == Qt.Checked else False
+            item = self.new_right_holders_twidget.item(row, NEW_RIGHT_HOLDER_MAIN)
+            person_id = item.data(Qt.UserRole)
+            main = True if item.checkState() == Qt.Checked else False
 
-                share_item = self.new_right_holders_twidget.item(row, NEW_RIGHT_HOLDER_SHARE)
-                person_id = share_item.data(Qt.UserRole)
+            share_item = self.new_right_holders_twidget.item(row, NEW_RIGHT_HOLDER_SHARE)
+            person_id = share_item.data(Qt.UserRole)
 
+            applicant_count = self.application.stakeholders.filter(
+                CtApplicationPersonRole.role == Constants.NEW_RIGHT_HOLDER_CODE) \
+                .filter(CtApplicationPersonRole.person == person_id).count()
+            if applicant_count == 0:
+                app_person_role = CtApplicationPersonRole()
+                app_person_role.application = self.application.app_id
+                app_person_role.share = Decimal(0.0)
+                app_person_role.role = Constants.NEW_RIGHT_HOLDER_CODE
+                app_person_role.person = person_id
+                app_person_role.main_applicant = False
+            else:
                 applicant = self.application.stakeholders.filter(
                     CtApplicationPersonRole.role == Constants.NEW_RIGHT_HOLDER_CODE) \
                     .filter(CtApplicationPersonRole.person == person_id).one()
                 applicant.main_applicant = main
                 applicant.share = Decimal(share_item.text())
 
-        except SQLAlchemyError, e:
-            self.rollback_to_savepoint()
-            raise LM2Exception(self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+        # except SQLAlchemyError, e:
+        #     self.rollback_to_savepoint()
+        #     raise LM2Exception(self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
 
     def __save_applicants(self):
 
@@ -2855,32 +2959,32 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
 
         self.create_savepoint()
 
-        try:
+        # try:
 
-            if self.application.app8ext is None:
-                self.application.app8ext = CtApp8Ext()
+        if self.application.app8ext is None:
+            self.application.app8ext = CtApp8Ext()
 
-            self.application.app8ext.end_mortgage_period = self.mortgage_end_date_edit.date().toString(
-                Constants.DATABASE_DATE_FORMAT)
-            self.application.app8ext.start_mortgage_period = self.mortgage_start_date_edit.date().toString(
-                Constants.DATABASE_DATE_FORMAT)
-            self.application.app8ext.mortgage_type = self.mortgage_type_cbox.itemData(
-                self.mortgage_type_cbox.currentIndex())
-            self.application.app8ext.mortgage_status = self.mortgage_status_cbox.itemData(
-                self.mortgage_status_cbox.currentIndex())
+        self.application.app8ext.end_mortgage_period = self.mortgage_end_date_edit.date().toString(
+            Constants.DATABASE_DATE_FORMAT)
+        self.application.app8ext.start_mortgage_period = self.mortgage_start_date_edit.date().toString(
+            Constants.DATABASE_DATE_FORMAT)
+        self.application.app8ext.mortgage_type = self.mortgage_type_cbox.itemData(
+            self.mortgage_type_cbox.currentIndex())
+        self.application.app8ext.mortgage_status = self.mortgage_status_cbox.itemData(
+            self.mortgage_status_cbox.currentIndex())
 
-            for row in range(self.mortgage_twidget.rowCount()):
+        for row in range(self.mortgage_twidget.rowCount()):
 
-                item = self.mortgage_twidget.item(row, MORTGAGE_SHARE)
+            item = self.mortgage_twidget.item(row, MORTGAGE_SHARE)
 
-                mortgagee = self.application.stakeholders.filter_by(role=Constants.MORTGAGEE_ROLE_CODE) \
-                    .filter_by(person=item.data(Qt.UserRole)).one()
+            mortgagee = self.application.stakeholders.filter_by(role=Constants.MORTGAGEE_ROLE_CODE) \
+                .filter_by(person=item.data(Qt.UserRole)).one()
 
-                mortgagee.share = Decimal(item.text())
+            mortgagee.share = Decimal(item.text())
 
-        except SQLAlchemyError, e:
-            self.rollback_to_savepoint()
-            raise LM2Exception(self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+        # except SQLAlchemyError, e:
+        #     self.rollback_to_savepoint()
+        #     raise LM2Exception(self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
 
     def __landuse_per_application_type(self, app_type):
 
@@ -4328,7 +4432,12 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
 
         item_status = QTableWidgetItem(status.status_ref.description)
         item_status.setData(Qt.UserRole, status.status_ref.code)
-        item_date = QTableWidgetItem(status.status_date.isoformat())
+        item_status.setData(Qt.UserRole+1, status.app_status_id)
+        item_date = QTableWidgetItem(str(status.status_date))
+        if status.status_ref.color:
+            item_date.setBackground(QtGui.QColor(status.status_ref.color))
+        if status.status_ref.color:
+            item_status.setBackground(QtGui.QColor(status.status_ref.color))
 
         if status.next_officer_in_charge_ref:
             next_officer = status.next_officer_in_charge_ref.lastname + ", " + status.next_officer_in_charge_ref.firstname
@@ -4336,9 +4445,13 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
 
             item_next_officer = QTableWidgetItem(next_officer)
             item_next_officer.setData(Qt.UserRole, status.next_officer_in_charge)
+            if status.status_ref.color:
+                item_next_officer.setBackground(QtGui.QColor(status.status_ref.color))
 
             item_officer = QTableWidgetItem(officer)
             item_officer.setData(Qt.UserRole, status.officer_in_charge)
+            if status.status_ref.color:
+                item_officer.setBackground(QtGui.QColor(status.status_ref.color))
 
             row = self.application_status_twidget.rowCount()
             self.application_status_twidget.insertRow(row)

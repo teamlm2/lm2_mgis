@@ -1,5 +1,6 @@
-__author__ = 'Ankhaa'
 # -*- encoding: utf-8 -*-
+__author__ = 'Ankhaa'
+
 from qgis.core import *
 from geoalchemy2.elements import WKTElement
 
@@ -17,6 +18,7 @@ from ..model.CaParcelTbl import *
 from .qt_classes.ApplicationCmbBoxDelegate import *
 from ..controller.ApplicationsDialog import *
 from ..model.ApplicationSearch import *
+from ..model.AuMpa import *
 # from ..model.CaPlanParcel import *
 
 class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
@@ -457,7 +459,6 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
             if parcel_id in self.maintenance_parcels:
                 continue
 
-            print parcel_id
             self.maintenance_parcels.append(parcel_id)
 
             #Add main parcel to the tree
@@ -631,6 +632,37 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
             self.__import_new_parcels(file_path)
             self.open_parcel_file_button.setEnabled(False)
 
+    def __check_parcel_correct(self, geometry, error_message):
+
+        organization = DatabaseUtils.current_user_organization()
+        print organization
+        valid = True
+        if not organization:
+            return
+
+        if organization == 1:
+            # Тусгай хамгаалалтай болон чөлөөт бүсд нэгж талбар оруулж болохгүй
+            count = self.session.query(AuMpa.id) \
+                .filter(geometry.ST_Intersects(AuMpa.geometry)).count()
+            if count > 0:
+                valid = False
+                parcel_error = self.tr("Parcels mpa boundary overlap!!!")
+                error_message = error_message + "\n \n" + parcel_error
+        elif organization == 3:
+            # Тусгай хамгаалалтай газар нутгаас өөр газар нэгж талбар оруулж болохгүй
+            count = self.session.query(AuMpa.id) \
+                .filter(geometry.ST_Within(AuMpa.geometry)).count()
+            print count
+            if count == 0:
+                valid = False
+                parcel_error = self.tr("Parcels out mpa boundary overlap!!!")
+                error_message = error_message + "\n \n" + parcel_error
+        elif organization == 5:
+            # Чөлөөт бүсээс өөр газар нэгж талбар оруулж болохгүй
+            print ''
+
+        return valid, error_message
+
     @pyqtSlot()
     def on_open_building_file_button_clicked(self):
 
@@ -686,8 +718,19 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
         count = 0
         # try:
         is_out_parcel = False
+        error_message = ''
         for parcel in iterator:
+
             parcel_geometry = WKTElement(parcel.geometry().exportToWkt(), srid=4326)
+
+            validaty_result = self.__check_parcel_correct(parcel_geometry, error_message)
+
+            if not validaty_result[0]:
+                log_measage = validaty_result[1]
+
+                PluginUtils.show_error(self, self.tr("Invalid parcel info"), log_measage)
+                return
+
             au2_parcel_count = self.session.query(AuLevel2).\
                 filter(AuLevel2.code == working_soum_code). \
                 filter(parcel_geometry.ST_Within(AuLevel2.geometry)).count()

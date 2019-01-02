@@ -1,5 +1,6 @@
-__author__ = 'B.Ankhbold'
 # -*- encoding: utf-8 -*-
+__author__ = 'B.Ankhbold'
+
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from sqlalchemy import exc, or_
@@ -120,15 +121,19 @@ class MemberGroupDialog(QDialog, Ui_MemberGroupDialog, DatabaseHelper):
         self.member_twidget.setRowCount(0)
         count = 0
         for member in pug_member:
-            person = member.person_ref
-            if not person.person_id:
-                person_id = self.tr(" (Id: n.a. )")
+            # person = member.person_ref
+            person_count = self.session.query(BsPerson).filter(BsPerson.person_id == member.person).count()
+            if person_count == 0:
+                return
+            person = self.session.query(BsPerson).filter(BsPerson.person_id == member.person).one()
+            if not person.person_register:
+                person_register = self.tr(" (Id: n.a. )")
             else:
-                person_id = self.tr(" (Id: ") + person.person_id + ")"
+                person_register = self.tr(" (Id: ") + person.person_register + ")"
 
             first_name = self.tr(" n.a. ") if not person.first_name else person.first_name
 
-            item = QTableWidgetItem(person.name + ", " + first_name + person_id)
+            item = QTableWidgetItem(person.name + ", " + first_name + person_register)
             if member.role == 10:
                 item.setCheckState(Qt.Checked)
             else:
@@ -166,10 +171,11 @@ class MemberGroupDialog(QDialog, Ui_MemberGroupDialog, DatabaseHelper):
 
     def __new_id_generate(self):
 
-        pug_max_id = self.session.query(CtPersonGroup). \
-            order_by(CtPersonGroup.group_no.desc()).first()
-
         l2_code = DatabaseUtils.working_l2_code()
+
+        pug_max_id = self.session.query(CtPersonGroup). \
+            filter(CtPersonGroup.au2 == l2_code).\
+            order_by(CtPersonGroup.group_no.desc()).first()
 
         if not pug_max_id:
             member_group_new_id = 1
@@ -178,6 +184,7 @@ class MemberGroupDialog(QDialog, Ui_MemberGroupDialog, DatabaseHelper):
                 member_group_new_id = pug_max_id.group_no + 1
             else:
                 member_group_new_id = int(str(pug_max_id.group_no)[4:]) + 1
+
         member_group_new_id = int(str(int(l2_code)) + '' + str(member_group_new_id))
 
         self.group_id_edit.setText(str(member_group_new_id))
@@ -487,36 +494,45 @@ class MemberGroupDialog(QDialog, Ui_MemberGroupDialog, DatabaseHelper):
 
                 self.bag_cbox.removeItem(self.bag_cbox.findData(code))
 
-        pug_member = self.session.query(CtGroupMember).filter(CtGroupMember.group_no == group_id).all()
+            pug_member = pug.members
 
-        self.member_twidget.setRowCount(0)
-        count = 0
-        for member in pug_member:
-            person = member.person_ref
-            if not person.person_id:
-                person_id = self.tr(" (Id: n.a. )")
-            else:
-                person_id = self.tr(" (Id: ") + person.person_id + ")"
+            # pug_member = self.session.query(CtGroupMember).filter(CtGroupMember.group_no == group_id).all()
 
-            first_name = self.tr(" n.a. ") if not person.first_name else person.first_name
+            self.member_twidget.setRowCount(0)
+            count = 0
+            for member in pug_member:
+                person = member.person_ref
+                if not person:
+                    return
+                # person_count = self.session.query(BsPerson).filter(BsPerson.person_id == member.person).count()
+                # print person_count
+                # if person_count == 0:
+                #     return
+                # person = self.session.query(BsPerson).filter(BsPerson.person_id == member.person).one()
+                # print person.person_register
+                if not person.person_register:
+                    person_register = self.tr(" (Id: n.a. )")
+                else:
+                    person_register = self.tr(" (Id: ") + person.person_register + ")"
 
-            item = QTableWidgetItem(person.name + ", " + first_name + person_id)
-            if member.role == 10:
-                item.setCheckState(Qt.Checked)
-            else:
-                item.setCheckState(Qt.Unchecked)
-            item.setIcon(QIcon(QPixmap(":/plugins/lm2/person.png")))
-            item.setData(Qt.UserRole, person.person_id)
-            self.member_twidget.insertRow(count)
+                first_name = self.tr(" n.a. ") if not person.first_name else person.first_name
 
-            self.member_twidget.setItem(count, 0, item)
+                item = QTableWidgetItem(person.name + ", " + first_name + person_register)
+                if member.role == 10:
+                    item.setCheckState(Qt.Checked)
+                else:
+                    item.setCheckState(Qt.Unchecked)
+                item.setIcon(QIcon(QPixmap(":/plugins/lm2/person.png")))
+                item.setData(Qt.UserRole, person.person_id)
+                self.member_twidget.insertRow(count)
 
-            group_item = QTableWidgetItem(group_name)
-            group_item.setData(Qt.UserRole, group_id)
-            self.member_twidget.setItem(count, 1, group_item)
+                self.member_twidget.setItem(count, 0, item)
 
-            count += 1
+                group_item = QTableWidgetItem(group_name)
+                group_item.setData(Qt.UserRole, group_id)
+                self.member_twidget.setItem(count, 1, group_item)
 
+                count += 1
 
     def __fade_status_message(self):
 
@@ -559,6 +575,7 @@ class MemberGroupDialog(QDialog, Ui_MemberGroupDialog, DatabaseHelper):
     def __save_pug_group(self):
 
         try:
+            au2 = DatabaseUtils.working_l2_code()
             for row in range(self.group_twidget.rowCount()):
                 new_row = False
                 id = self.group_twidget.item(row, 0).data(Qt.UserRole)
@@ -573,6 +590,7 @@ class MemberGroupDialog(QDialog, Ui_MemberGroupDialog, DatabaseHelper):
                 pug_group.is_contract = self.group_twidget.item(row, 2).text()
                 created_date = PluginUtils.convert_qt_date_to_python(QDate().currentDate())
                 pug_group.created_date = created_date
+                pug_group.au2 = au2
 
                 if new_row:
                     self.session.add(pug_group)
@@ -591,12 +609,12 @@ class MemberGroupDialog(QDialog, Ui_MemberGroupDialog, DatabaseHelper):
 
         self.bag_twidget.clearContents()
         self.bag_twidget.setRowCount(0)
-
+        working_au2 = DatabaseUtils.working_l2_code()
         row = 0
-        group_count = self.session.query(CtPersonGroup).count()
+        group_count = self.session.query(CtPersonGroup).filter(CtPersonGroup.au2 == working_au2).count()
         if group_count > 0:
             self.group_twidget.setRowCount(group_count)
-            pug_groups = self.session.query(CtPersonGroup).all()
+            pug_groups = self.session.query(CtPersonGroup).filter(CtPersonGroup.au2 == working_au2).all()
             for group in pug_groups:
                 item  = QTableWidgetItem(str(group.group_no))
                 item.setIcon(QIcon(QPixmap(":/plugins/lm2_pasture/group.png")))
@@ -637,7 +655,7 @@ class MemberGroupDialog(QDialog, Ui_MemberGroupDialog, DatabaseHelper):
             if self.person_id_edit.text():
                 filter_is_set = True
                 value = "%" + self.person_id_edit.text() + "%"
-                persons = persons.filter(PersonSearch.person_id.ilike(value))
+                persons = persons.filter(PersonSearch.person_register.ilike(value))
 
             count = 0
 
@@ -650,16 +668,16 @@ class MemberGroupDialog(QDialog, Ui_MemberGroupDialog, DatabaseHelper):
                 self.error_label.setText(self.tr("Please specify a search filter."))
                 return
 
-            for person in persons.distinct(PersonSearch.name, PersonSearch.person_id).order_by(PersonSearch.name.asc(), PersonSearch.person_id.asc()).all():
+            for person in persons.distinct(PersonSearch.name, PersonSearch.person_register, PersonSearch.person_id).order_by(PersonSearch.name.asc(), PersonSearch.person_id.asc()).all():
 
-                if not person.person_id:
-                    person_id = self.tr(" (Id: n.a. )")
+                if not person.person_register:
+                    person_register = self.tr(" (Id: n.a. )")
                 else:
-                    person_id = self.tr(" (Id: ") + person.person_id + ")"
+                    person_register = self.tr(" (Id: ") + person.person_register + ")"
 
                 first_name = self.tr(" n.a. ") if not person.first_name else person.first_name
 
-                item = QTableWidgetItem(person.name + ", " + first_name + person_id)
+                item = QTableWidgetItem(person.name + ", " + first_name + person_register)
                 item.setIcon(QIcon(QPixmap(":/plugins/lm2/person.png")))
                 item.setData(Qt.UserRole, person.person_id)
                 self.person_twidget.insertRow(count)
@@ -705,14 +723,14 @@ class MemberGroupDialog(QDialog, Ui_MemberGroupDialog, DatabaseHelper):
                 return
 
             person = self.session.query(BsPerson).filter(BsPerson.person_id == person_id).one()
-            if not person.person_id:
-                person_id = self.tr(" (Id: n.a. )")
+            if not person.person_register:
+                person_register = self.tr(" (Id: n.a. )")
             else:
-                person_id = self.tr(" (Id: ") + person.person_id + ")"
+                person_register = self.tr(" (Id: ") + person.person_register + ")"
 
             first_name = self.tr(" n.a. ") if not person.first_name else person.first_name
 
-            item = QTableWidgetItem(person.name + ", " + first_name + person_id)
+            item = QTableWidgetItem(person.name + ", " + first_name + person_register)
             item.setCheckState(Qt.Unchecked)
             item.setIcon(QIcon(QPixmap(":/plugins/lm2/person.png")))
             item.setData(Qt.UserRole, person.person_id)

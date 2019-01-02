@@ -1,6 +1,6 @@
 __author__ = 'anna'
 
-from sqlalchemy import Column, Integer, String, ForeignKey, Date
+from sqlalchemy import Column, Integer, String, ForeignKey, Date, DateTime
 from sqlalchemy.orm import relationship
 from Base import *
 from ClApplicationStatus import *
@@ -25,7 +25,7 @@ class ApplicationSearch(Base):
     middle_name = Column(String)
     parcel_id = Column(String)
     tmp_parcel_id = Column(String)
-    status_date = Column(Date)
+    status_date = Column(DateTime)
 
     app_type = Column(Integer, ForeignKey('cl_application_type.code'))
     app_type_ref = relationship("ClApplicationType")

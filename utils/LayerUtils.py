@@ -72,7 +72,7 @@ class LayerUtils(object):
         uri.setDataSource("data_soums_union", layer_name, "geometry", "", id)
 
         vlayer = QgsVectorLayer(uri.uri(), "data_soums_union" + "_" + layer_name, "postgres")
-        QgsMapLayerRegistry.instance().addMapLayer(vlayer)
+        QgsMapLayerRegistry.instance().addMapLayer(vlayer, False)
         return vlayer
 
     @staticmethod
@@ -89,7 +89,7 @@ class LayerUtils(object):
         uri.setDataSource("data_ub", layer_name, "geometry", "", id)
 
         vlayer = QgsVectorLayer(uri.uri(), layer_name, "postgres")
-        QgsMapLayerRegistry.instance().addMapLayer(vlayer)
+        QgsMapLayerRegistry.instance().addMapLayer(vlayer, False)
         return vlayer
 
     @staticmethod
@@ -169,7 +169,7 @@ class LayerUtils(object):
     def load_layer_by_name_admin_units(layer_name, id, restrictions=[]):
 
         restrictions = restrictions.split(",")
-        print restrictions
+
         if len(restrictions) > 0:
             for restriction in restrictions:
                 restriction = restriction.strip()

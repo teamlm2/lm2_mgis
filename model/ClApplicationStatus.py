@@ -11,3 +11,4 @@ class ClApplicationStatus(Base):
     code = Column(Integer, primary_key=True)
     description = Column(String)
     description_en = Column(String)
+    color = Column(String)

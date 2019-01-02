@@ -27,6 +27,8 @@ class CtApplication(Base):
     created_by = Column(Integer)
     created_at = Column(DateTime)
     updated_at = Column(DateTime)
+    property_no = Column(String)
+    status_id = Column(Integer)
 
     # foreign keys:
     app_type = Column(Integer, ForeignKey('cl_application_type.code'))

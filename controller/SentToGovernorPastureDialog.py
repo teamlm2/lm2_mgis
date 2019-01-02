@@ -1,5 +1,6 @@
-__author__ = 'B.Ankhbold'
 # coding=utf8
+__author__ = 'B.Ankhbold'
+
 import os
 import xlsxwriter
 from PyQt4.QtCore import *
@@ -564,7 +565,7 @@ class SentToGovernorPastureDialog(QDialog, Ui_SentToGovernorPastureDialog, Datab
             new_status.next_officer_in_charge = officers.user_name_real
             new_status.officer_in_charge = officers.user_name_real
             new_status.status = ConstantsPasture.APP_STATUS_SEND
-            new_status.status_date = datetime.now().strftime(ConstantsPasture.PYTHON_DATE_FORMAT)
+            new_status.status_date = datetime.now().strftime(ConstantsPasture.PYTHON_DATETIME_FORMAT)
             self.session.add(new_status)
             row += 1
 

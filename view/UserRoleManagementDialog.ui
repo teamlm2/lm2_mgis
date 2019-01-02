@@ -784,9 +784,19 @@
      <widget class="QLineEdit" name="find_update_user_edit">
       <property name="geometry">
        <rect>
-        <x>10</x>
+        <x>6</x>
         <y>328</y>
-        <width>291</width>
+        <width>131</width>
+        <height>20</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="find_update_name_edit">
+      <property name="geometry">
+       <rect>
+        <x>150</x>
+        <y>328</y>
+        <width>151</width>
         <height>20</height>
        </rect>
       </property>
@@ -1131,7 +1141,7 @@
       <rect>
        <x>380</x>
        <y>67</y>
-       <width>210</width>
+       <width>160</width>
        <height>22</height>
       </rect>
      </property>
@@ -1139,9 +1149,9 @@
     <widget class="QComboBox" name="department_soum_cbox">
      <property name="geometry">
       <rect>
-       <x>621</x>
+       <x>580</x>
        <y>67</y>
-       <width>210</width>
+       <width>160</width>
        <height>22</height>
       </rect>
      </property>
@@ -1151,7 +1161,7 @@
       <rect>
        <x>380</x>
        <y>47</y>
-       <width>210</width>
+       <width>160</width>
        <height>16</height>
       </rect>
      </property>
@@ -1162,9 +1172,9 @@
     <widget class="QLabel" name="label_20">
      <property name="geometry">
       <rect>
-       <x>621</x>
+       <x>580</x>
        <y>47</y>
-       <width>210</width>
+       <width>160</width>
        <height>16</height>
       </rect>
      </property>
@@ -1420,7 +1430,7 @@
       <rect>
        <x>380</x>
        <y>25</y>
-       <width>451</width>
+       <width>361</width>
        <height>22</height>
       </rect>
      </property>
@@ -1436,6 +1446,19 @@
      </property>
      <property name="text">
       <string>Load and find</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="department_find_button">
+     <property name="geometry">
+      <rect>
+       <x>753</x>
+       <y>24</y>
+       <width>75</width>
+       <height>66</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>FIND</string>
      </property>
     </widget>
    </widget>

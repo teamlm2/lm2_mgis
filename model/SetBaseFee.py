@@ -19,3 +19,4 @@ class SetBaseFee(Base):
     landuse_ref = relationship("ClLanduseType")
 
     fee_zone = Column(String, ForeignKey('set_fee_zone.zone_id'))
+    fee_zone_ref = relationship("SetFeeZone")

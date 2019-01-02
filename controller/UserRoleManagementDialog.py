@@ -1,3 +1,4 @@
+# -*- encoding: utf-8 -*-
 __author__ = 'ankhaa'
 
 from PyQt4.QtGui import *
@@ -15,6 +16,7 @@ from ..model.AuLevel2 import *
 from ..model.LM2Exception import LM2Exception
 from ..model.DialogInspector import DialogInspector
 from ..model.ClPositionType import *
+from ..model.BsPerson import *
 from ..model.SdOrganization import *
 from ..model.SdDepartment import *
 from ..model.SdPosition import *
@@ -25,6 +27,7 @@ from ..model.ClGroupRole import *
 from ..model.SetPositionGroupRole import *
 from ..model.SetUserPosition import *
 from ..model.SetUserGroupRole import *
+from ..model.SdPosition import *
 from ..utils.PluginUtils import *
 from ..controller.UserRoleManagementDetialDialog import *
 from uuid import getnode as get_mac
@@ -281,13 +284,13 @@ class UserRoleManagementDialog(QDialog, Ui_UserRoleManagementDialog):
 
         self.user_role_lwidget.clear()
         if self.has_privilege:
-            users = self.db_session.query(SetRole.user_name).order_by(SetRole.user_name).group_by(SetRole.user_name)
+            users = self.db_session.query(SetRole.user_name,SetRole.first_name).order_by(SetRole.user_name).group_by(SetRole.user_name,SetRole.first_name)
         else:
-            users = self.db_session.query(SetRole.user_name).filter(SetRole.user_name == self.__username).group_by(SetRole.user_name).all()
+            users = self.db_session.query(SetRole.user_name,SetRole.first_name).filter(SetRole.user_name == self.__username).group_by(SetRole.user_name,SetRole.first_name).all()
 
         try:
             for user in users:
-                item = QListWidgetItem(QIcon(":/plugins/lm2/person.png"), user.user_name)
+                item = QListWidgetItem(QIcon(":/plugins/lm2/person.png"), user.user_name+'-'+unicode(user.first_name))
                 # if user.user_name == self.__logged_on_user():
                 item.setForeground(Qt.blue)
                 # if self.__is_db_role(user.user_name):
@@ -302,16 +305,40 @@ class UserRoleManagementDialog(QDialog, Ui_UserRoleManagementDialog):
         value = "%" + text + "%"
         self.user_role_lwidget.clear()
         if self.has_privilege:
-            users = self.db_session.query(SetRole.user_name).\
+            users = self.db_session.query(SetRole.first_name,SetRole.user_name).\
                 filter(SetRole.user_name.ilike(value)).\
-                order_by(SetRole.user_name).group_by(SetRole.user_name)
+                order_by(SetRole.user_name).group_by(SetRole.first_name,SetRole.user_name)
         else:
-            users = self.db_session.query(SetRole.user_name).filter(SetRole.user_name == self.__username).group_by(
-                SetRole.user_name).all()
+            users = self.db_session.query(SetRole.first_name,SetRole.user_name).filter(SetRole.user_name == self.__username).group_by(
+                SetRole.first_name, SetRole.user_name).all()
 
         try:
             for user in users:
-                item = QListWidgetItem(QIcon(":/plugins/lm2/person.png"), user.user_name)
+                item = QListWidgetItem(QIcon(":/plugins/lm2/person.png"), user.user_name+'-'+unicode(user.first_name))
+                # if user.user_name == self.__logged_on_user():
+                item.setForeground(Qt.blue)
+                # if self.__is_db_role(user.user_name):
+                self.user_role_lwidget.addItem(item)
+
+        except (DatabaseError, SQLAlchemyError), e:
+            PluginUtils.show_error(self, self.tr("Database Error"), e.message)
+
+    @pyqtSlot(str)
+    def on_find_update_name_edit_textChanged(self, text):
+
+        value = "%" + text + "%"
+        self.user_role_lwidget.clear()
+        if self.has_privilege:
+            users = self.db_session.query(SetRole.first_name,SetRole.user_name). \
+                filter(SetRole.first_name.ilike(value)). \
+                order_by(SetRole.first_name).group_by(SetRole.first_name,SetRole.user_name)
+        else:
+            users = self.db_session.query(SetRole.user_name,SetRole.first_name).filter(SetRole.user_name == self.__username).group_by(
+                SetRole.first_name, SetRole.user_name).all()
+
+        try:
+            for user in users:
+                item = QListWidgetItem(QIcon(":/plugins/lm2/person.png"), user.user_name+'-'+unicode(user.first_name))
                 # if user.user_name == self.__logged_on_user():
                 item.setForeground(Qt.blue)
                 # if self.__is_db_role(user.user_name):
@@ -328,8 +355,7 @@ class UserRoleManagementDialog(QDialog, Ui_UserRoleManagementDialog):
 
         user_start = "user" + "%"
         users = self.db_session.query(SetRole).\
-            filter(SetRole.user_name.ilike(value)).\
-            filter(SetRole.user_name.like(user_start)).all()
+            filter(SetRole.user_name.ilike(value)).all()
 
         for user in users:
             row = self.user_twidget.rowCount()
@@ -410,7 +436,9 @@ class UserRoleManagementDialog(QDialog, Ui_UserRoleManagementDialog):
 
         # self.soum_lwidget.clear()
 
-        self.selected_user = self.user_role_lwidget.currentItem().text()
+        user_name = self.user_role_lwidget.currentItem().text()
+        user_name = user_name.split("-", 1)[0]
+        self.selected_user = user_name
         user_name = self.user_role_lwidget.currentItem().text()
 
         try:
@@ -503,7 +531,8 @@ class UserRoleManagementDialog(QDialog, Ui_UserRoleManagementDialog):
 
         self.selected_user = self.user_role_lwidget.currentItem().text()
         user_name = self.user_role_lwidget.currentItem().text()
-
+        user_name = user_name.split("-", 1)[0]
+        self.selected_user = user_name
         try:
             user_c = self.db_session.query(SetRole). \
                 filter(SetRole.user_name == user_name).count()
@@ -846,7 +875,6 @@ class UserRoleManagementDialog(QDialog, Ui_UserRoleManagementDialog):
             # add employee and user
 
             sd_user_count = self.db_session.query(SdUser).filter(SdUser.gis_user_real == role.user_name_real).count()
-
             user_pass = hashlib.md5(role.user_name).hexdigest()
 
             date_time_string = QDateTime.currentDateTime().toString(Constants.DATABASE_DATETIME_FORMAT)
@@ -867,7 +895,12 @@ class UserRoleManagementDialog(QDialog, Ui_UserRoleManagementDialog):
 
                 sd_user.password = user_pass
 
-            sd_employee_count = self.db_session.query(SdEmployee).filter(SdEmployee.register_number == role.user_register).count()
+            # sd_employee_count = self.db_session.query(SdEmployee).\
+            #     join(BsPerson, BsPerson.person_id == SdEmployee.person_id).\
+            #     filter(BsPerson.person_register == role.user_register).count()
+            sd_employee_count = self.db_session.query(SdEmployee). \
+                filter(SdEmployee.user_id == sd_user.user_id).count()
+
             if sd_employee_count == 0:
                 sd_employee = SdEmployee()
                 sd_employee.firstname =  role.first_name
@@ -883,15 +916,25 @@ class UserRoleManagementDialog(QDialog, Ui_UserRoleManagementDialog):
                 sd_employee.user_id = sd_user.user_id
                 self.db_session.add(sd_employee)
             else:
-                sd_employee = self.db_session.query(SdEmployee).filter(
-                    SdEmployee.register_number == role.user_register).first()
+                # sd_employee = self.db_session.query(SdEmployee).filter(
+                #     SdEmployee.register_number == role.user_register).first()
+                sd_employees = self.db_session.query(SdEmployee). \
+                    filter(SdEmployee.user_id == sd_user.user_id).all()
+                for sd_employee in sd_employees:
+                    sd_employee = self.db_session.query(SdEmployee). \
+                        filter(SdEmployee.employee_id == sd_employee.employee_id).one()
 
-                sd_employee.user_id = sd_user.user_id
+                    sd_employee.user_id = sd_user.user_id
+                    sd_employee.department_id = role.department
+                    sd_employee.position_id = role.position
+                    break
+
 
             self.db_session.flush()
             self.db_session.commit()
             self.__populate_user_role_lwidget()
-            item = self.user_role_lwidget.findItems(user_name, Qt.MatchExactly)[0]
+
+            item = self.user_role_lwidget.findItems(user_name+'-'+first_name, Qt.MatchExactly)[0]
             row = self.user_role_lwidget.row(item)
             self.user_role_lwidget.setCurrentRow(row)
             return True
@@ -900,7 +943,7 @@ class UserRoleManagementDialog(QDialog, Ui_UserRoleManagementDialog):
                 self.db_session.execute(u"ALTER ROLE {0} PASSWORD '{1}'".format(user_name, password))
             self.db_session.commit()
             self.__populate_user_role_lwidget()
-            item = self.user_role_lwidget.findItems(user_name, Qt.MatchExactly)[0]
+            item = self.user_role_lwidget.findItems(user_name+'-'+first_name, Qt.MatchExactly)[0]
             row = self.user_role_lwidget.row(item)
             self.user_role_lwidget.setCurrentRow(row)
             return True
@@ -911,6 +954,8 @@ class UserRoleManagementDialog(QDialog, Ui_UserRoleManagementDialog):
             if self.username_edit.text().strip() != self.selected_user:
                 PluginUtils.show_message(None, self.tr("Username can't be modified"),
                                         self.tr("The username of an existing user cannot be modified!"))
+
+                self.selected_user = self.selected_user.split("-", 1)[0]
                 self.username_edit.setText(self.selected_user)
                 return False
 
@@ -1187,15 +1232,15 @@ class UserRoleManagementDialog(QDialog, Ui_UserRoleManagementDialog):
     def __load_default_ritht_grud(self):
 
         aa = self.db_session.query(ClGroupRole).all()
-        positions = self.db_session.query(ClPositionType).all()
+        positions = self.db_session.query(SdPosition).all()
 
         for position in positions:
 
             # right_grud = self.db_session.query(SetPositionGroupRole)
             row = self.settings_position_twidget.rowCount()
             self.settings_position_twidget.insertRow(row)
-            item = QTableWidgetItem(u'{0}'.format(position.description))
-            item.setData(Qt.UserRole, position.code)
+            item = QTableWidgetItem(u'{0}'.format(position.name))
+            item.setData(Qt.UserRole, position.position_id)
             self.settings_position_twidget.setItem(row, 0, item)
 
     @pyqtSlot()
@@ -1237,7 +1282,7 @@ class UserRoleManagementDialog(QDialog, Ui_UserRoleManagementDialog):
         item = self.user_twidget.item(cur_row, 0)
         user_name_real = item.data(Qt.UserRole)
 
-        positions = self.db_session.query(ClPositionType).all()
+        positions = self.db_session.query(SdPosition).all()
 
         for position in positions:
             row = self.position_twidget.rowCount()
@@ -1245,10 +1290,10 @@ class UserRoleManagementDialog(QDialog, Ui_UserRoleManagementDialog):
 
             user_positions_count = self.db_session.query(SetUserPosition).\
                 filter(SetUserPosition.user_name_real == user_name_real).\
-                filter(SetUserPosition.position == position.code).count()
+                filter(SetUserPosition.position == position.position_id).count()
 
-            item = QTableWidgetItem(u'{0}'.format(position.description))
-            item.setData(Qt.UserRole, position.code)
+            item = QTableWidgetItem(u'{0}'.format(position.name))
+            item.setData(Qt.UserRole, position.position_id)
             if user_positions_count == 0:
                 item.setCheckState(Qt.Unchecked)
             else:
@@ -1339,34 +1384,34 @@ class UserRoleManagementDialog(QDialog, Ui_UserRoleManagementDialog):
 
         set_role = self.db_session.query(SetRole).filter(SetRole.user_name_real == user_name_real).one()
 
-        position = self.db_session.query(ClPositionType). \
-            filter(ClPositionType.code == set_role.position).one()
+        position = self.db_session.query(SdPosition). \
+            filter(SdPosition.position_id == set_role.position).one()
 
         user_positions_count = self.db_session.query(SetUserPosition). \
             filter(SetUserPosition.user_name_real == user_name_real). \
-            filter(SetUserPosition.position == position.code).count()
+            filter(SetUserPosition.position == position.position_id).count()
         if user_positions_count == 0:
 
             row = self.position_twidget.rowCount()
             self.position_twidget.insertRow(row)
 
-            item = QTableWidgetItem(u'{0}'.format(position.description))
-            item.setData(Qt.UserRole, position.code)
+            item = QTableWidgetItem(u'{0}'.format(position.name))
+            item.setData(Qt.UserRole, position.position_id)
             item.setCheckState(Qt.Checked)
             self.position_twidget.setItem(row, 0, item)
 
         for user_position in user_positions:
-            position = self.db_session.query(ClPositionType). \
-                filter(ClPositionType.code == user_position.position).one()
+            position = self.db_session.query(SdPosition). \
+                filter(SdPosition.position_id == user_position.position).one()
             row = self.position_twidget.rowCount()
             self.position_twidget.insertRow(row)
 
             user_positions_count = self.db_session.query(SetUserPosition). \
                 filter(SetUserPosition.user_name_real == user_name_real). \
-                filter(SetUserPosition.position == position.code).count()
+                filter(SetUserPosition.position == position.position_id).count()
 
-            item = QTableWidgetItem(u'{0}'.format(position.description))
-            item.setData(Qt.UserRole, position.code)
+            item = QTableWidgetItem(u'{0}'.format(position.name))
+            item.setData(Qt.UserRole, position.position_id)
             if user_positions_count == 0:
                 item.setCheckState(Qt.Unchecked)
             else:
@@ -1848,6 +1893,7 @@ class UserRoleManagementDialog(QDialog, Ui_UserRoleManagementDialog):
     @pyqtSlot(QTableWidgetItem)
     def on_department_twidget_itemClicked(self, item):
 
+        self.__department_clear()
         current_row = self.department_twidget.currentRow()
 
         item = self.department_twidget.item(current_row, 0)
@@ -1902,3 +1948,159 @@ class UserRoleManagementDialog(QDialog, Ui_UserRoleManagementDialog):
                                        self.tr("Could not execute: {0}").format(e.message))
                 self.reject()
 
+    @pyqtSlot()
+    def on_department_find_button_clicked(self):
+
+        self.__search_department()
+
+    # @pyqtSlot(int)
+    # def on_department_organization_cbox_currentIndexChanged(self, index):
+    #
+    #     self.__search_department()
+    #
+    # @pyqtSlot(int)
+    # def on_department_aimag_cbox_currentIndexChanged(self, index):
+    #
+    #     self.__search_department()
+    #
+    # @pyqtSlot(int)
+    # def on_department_soum_cbox_currentIndexChanged(self, index):
+    #
+    #     self.__search_department()
+
+    def __search_department(self):
+
+        self.department_twidget.setRowCount(0)
+        departments = self.db_session.query(SdDepartment)
+        organization = self.department_organization_cbox.itemData(self.department_organization_cbox.currentIndex())
+        if organization != -1:
+            departments = departments.filter(SdDepartment.organization == organization)
+
+        au1 = self.department_aimag_cbox.itemData(self.department_aimag_cbox.currentIndex())
+        if au1 != -1:
+            departments = departments.filter(SdDepartment.au1 == au1)
+        au2 = self.department_soum_cbox.itemData(self.department_soum_cbox.currentIndex())
+        if au2 != -1:
+            departments = departments.filter(SdDepartment.au2 == au2)
+
+        row = 0
+        for department in departments.all():
+
+            self.department_twidget.insertRow(row)
+
+            item = QTableWidgetItem()
+            item.setText(str(department.department_id))
+            item.setData(Qt.UserRole, department.department_id)
+            self.department_twidget.setItem(row, 0, item)
+
+            item = QTableWidgetItem()
+            item.setText(unicode(department.name))
+            self.department_twidget.setItem(row, 1, item)
+
+            item = QTableWidgetItem()
+            item.setText(unicode(department.address))
+            self.department_twidget.setItem(row, 2, item)
+
+            item = QTableWidgetItem()
+            item.setText(department.phone)
+            self.department_twidget.setItem(row, 3, item)
+
+            item = QTableWidgetItem()
+            item.setText(department.fax)
+            self.department_twidget.setItem(row, 4, item)
+
+            item = QTableWidgetItem()
+            item.setText(department.bank_name)
+            self.department_twidget.setItem(row, 5, item)
+
+            item = QTableWidgetItem()
+            item.setText(department.account_no)
+            self.department_twidget.setItem(row, 6, item)
+
+            item = QTableWidgetItem()
+            item.setText(department.report_email)
+            self.department_twidget.setItem(row, 7, item)
+
+            item = QTableWidgetItem()
+            item.setText(department.website)
+            self.department_twidget.setItem(row, 8, item)
+
+            item = QTableWidgetItem()
+            item.setText(department.head_surname)
+            self.department_twidget.setItem(row, 9, item)
+
+            item = QTableWidgetItem()
+            item.setText(department.head_firstname)
+            self.department_twidget.setItem(row, 10, item)
+            if department.organization_ref:
+                item = QTableWidgetItem()
+                item.setText(department.organization_ref.land_office_name)
+                self.department_twidget.setItem(row, 11, item)
+            if department.au1_ref:
+                item = QTableWidgetItem()
+                item.setText(department.au1_ref.name)
+                self.department_twidget.setItem(row, 12, item)
+            if department.au2_ref:
+                item = QTableWidgetItem()
+                item.setText(department.au2_ref.name)
+                self.department_twidget.setItem(row, 13, item)
+
+            row = + 1
+
+        self.department_twidget.resizeColumnsToContents()
+
+    @pyqtSlot()
+    def on_department_update_button_clicked(self):
+
+        selected_row = self.department_twidget.currentRow()
+        if selected_row is None:
+            return
+        item = self.department_twidget.item(selected_row, 0)
+        department_id = item.data(Qt.UserRole)
+
+        date_time_string = QDateTime.currentDateTime().toString(Constants.DATABASE_DATETIME_FORMAT)
+        current_date = datetime.strptime(date_time_string, Constants.PYTHON_DATETIME_FORMAT)
+
+        organization = self.department_organization_cbox.itemData(self.department_organization_cbox.currentIndex())
+        au1 = self.department_aimag_cbox.itemData(self.department_aimag_cbox.currentIndex())
+        au2 = self.department_soum_cbox.itemData(self.department_soum_cbox.currentIndex())
+
+        department = self.db_session.query(SdDepartment).filter(SdDepartment.department_id == department_id).one()
+
+        department.name = self.department_name_edit.text()
+        department.address = self.department_address_edit.toPlainText()
+        department.updated_at = current_date
+        department.fax = self.department_fax_edit.text()
+        department.phone = self.department_phone_edit.text()
+        department.report_email = self.department_email_edit.text()
+        department.website = self.department_web_edit.text()
+        department.bank_name = self.department_bank_edit.text()
+        department.account_no = self.department_account_edit.text()
+        department.head_firstname = self.department_head_firstname_edit.text()
+        department.head_surname = self.department_headsurname_edit.text()
+        department.organization = organization
+        department.au1 = au1
+        department.au2 = au2
+
+        self.__search_department()
+        # item = self.department_twidget.item(selected_row, 1)
+        # item.setText(self.department_name_edit.text())
+        # item.setData(Qt.UserRole, self.department_name_edit.text())
+
+    def __department_clear(self):
+
+        self.department_name_edit.clear()
+        self.department_address_edit.clear()
+        self.department_fax_edit.clear()
+        self.department_phone_edit.clear()
+        self.department_email_edit.clear()
+        self.department_web_edit.clear()
+        self.department_bank_edit.clear()
+        self.department_account_edit.clear()
+        self.department_head_firstname_edit.clear()
+        self.department_headsurname_edit.clear()
+
+    @pyqtSlot()
+    def on_department_add_button_clicked(self):
+
+        print ''

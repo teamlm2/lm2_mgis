@@ -1,5 +1,5 @@
-__author__ = 'Ankhbold'
 # -*- encoding: utf-8 -*-
+__author__ = 'Ankhbold'
 
 import glob
 from qgis.core import *

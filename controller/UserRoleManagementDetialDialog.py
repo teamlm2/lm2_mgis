@@ -1,3 +1,4 @@
+# -*- encoding: utf-8 -*-
 __author__ = 'ankhaa'
 
 from PyQt4.QtGui import *
@@ -183,12 +184,11 @@ class UserRoleManagementDetialDialog(QDialog, Ui_UserRoleManagementDetialDialog)
                 return
 
             user_numbers = max_number_user.user_name_real[-2:]
-            print str(int(user_numbers[1]))
+
             new_user_number = (str(int(user_numbers) + 1).zfill(2))
-            print new_user_number
-            print self.user_name_real_lbl.text()[:10]
+
         last_user_name = self.user_name_real_lbl.text()[:10]+new_user_number
-        print last_user_name
+
         old_roles = self.session.query(SetRole).filter(SetRole.user_name == self.username).all()
         for user in old_roles:
             user.is_active = False
