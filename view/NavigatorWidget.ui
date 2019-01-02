@@ -108,7 +108,7 @@
           <x>5</x>
           <y>0</y>
           <width>371</width>
-          <height>390</height>
+          <height>451</height>
          </rect>
         </property>
         <property name="title">
@@ -130,9 +130,9 @@
         <widget class="QPushButton" name="apply_button">
          <property name="geometry">
           <rect>
-           <x>10</x>
-           <y>360</y>
-           <width>111</width>
+           <x>14</x>
+           <y>359</y>
+           <width>153</width>
            <height>23</height>
           </rect>
          </property>
@@ -143,9 +143,9 @@
         <widget class="QPushButton" name="clear_b_box_button">
          <property name="geometry">
           <rect>
-           <x>254</x>
-           <y>360</y>
-           <width>111</width>
+           <x>14</x>
+           <y>419</y>
+           <width>153</width>
            <height>23</height>
           </rect>
          </property>
@@ -208,9 +208,9 @@
         <widget class="QPushButton" name="remove_button">
          <property name="geometry">
           <rect>
-           <x>130</x>
-           <y>360</y>
-           <width>111</width>
+           <x>14</x>
+           <y>389</y>
+           <width>153</width>
            <height>23</height>
           </rect>
          </property>
@@ -469,7 +469,7 @@
            <x>174</x>
            <y>123</y>
            <width>192</width>
-           <height>234</height>
+           <height>321</height>
           </rect>
          </property>
          <property name="font">
@@ -494,7 +494,7 @@
           <property name="geometry">
            <rect>
             <x>16</x>
-            <y>80</y>
+            <y>65</y>
             <width>161</width>
             <height>23</height>
            </rect>
@@ -507,7 +507,7 @@
           <property name="geometry">
            <rect>
             <x>16</x>
-            <y>200</y>
+            <y>165</y>
             <width>161</width>
             <height>23</height>
            </rect>
@@ -523,7 +523,7 @@
           <property name="geometry">
            <rect>
             <x>16</x>
-            <y>110</y>
+            <y>190</y>
             <width>161</width>
             <height>23</height>
            </rect>
@@ -536,7 +536,7 @@
           <property name="geometry">
            <rect>
             <x>16</x>
-            <y>50</y>
+            <y>40</y>
             <width>161</width>
             <height>23</height>
            </rect>
@@ -549,7 +549,7 @@
           <property name="geometry">
            <rect>
             <x>16</x>
-            <y>170</y>
+            <y>115</y>
             <width>161</width>
             <height>23</height>
            </rect>
@@ -575,7 +575,7 @@
           <property name="geometry">
            <rect>
             <x>16</x>
-            <y>20</y>
+            <y>15</y>
             <width>161</width>
             <height>23</height>
            </rect>
@@ -584,15 +584,41 @@
            <string>Аймаг/Нийслэлийн хил</string>
           </property>
          </widget>
+         <widget class="QPushButton" name="free_zone_button">
+          <property name="geometry">
+           <rect>
+            <x>16</x>
+            <y>90</y>
+            <width>161</width>
+            <height>23</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Чөлөөт бүс</string>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="valuation_zone_button">
+          <property name="geometry">
+           <rect>
+            <x>16</x>
+            <y>215</y>
+            <width>161</width>
+            <height>23</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Үнэлгээний бүс</string>
+          </property>
+         </widget>
         </widget>
        </widget>
        <widget class="QGroupBox" name="groupBox_6">
         <property name="geometry">
          <rect>
           <x>5</x>
-          <y>390</y>
+          <y>450</y>
           <width>371</width>
-          <height>131</height>
+          <height>82</height>
          </rect>
         </property>
         <property name="title">
@@ -667,19 +693,6 @@
          </property>
          <property name="text">
           <string>From</string>
-         </property>
-        </widget>
-        <widget class="QPushButton" name="mpa_edit_dialog_button">
-         <property name="geometry">
-          <rect>
-           <x>20</x>
-           <y>73</y>
-           <width>311</width>
-           <height>23</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>MPA parcel edit</string>
          </property>
         </widget>
        </widget>

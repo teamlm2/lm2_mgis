@@ -2496,25 +2496,25 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
         # except SQLAlchemyError, e:
         #     PluginUtils.show_error(self, self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
         #     return
-        try:
-            maintenance_count = self.session.query(CtApplication)\
-                .join(CaMaintenanceCase, CtApplication.maintenance_case == CaMaintenanceCase.id)\
-                .filter(CaMaintenanceCase.completion_date == None)\
-                .filter(CtApplication.app_id == self.application.app_id)\
-                .filter(CtApplication.parcel != None).count()
-            if self.parcel_edit.text() != '':
-                maintenance_count = self.session.query(CaParcelTbl).\
-                    filter(CaParcelTbl.parcel_id == self.parcel_edit.text()). \
-                    filter(CaParcelTbl.valid_till == "infinity").\
-                    filter(CaParcelTbl.geometry.ST_Overlaps(CaTmpParcel.geometry)).count()
-            if maintenance_count > 0:
-                PluginUtils.show_error(self, self.tr("Status error"),
-                                    self.tr("This parcel cadastre changing!!!."))
-                return
-
-        except SQLAlchemyError, e:
-            PluginUtils.show_error(self, self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+        # try:
+        maintenance_count = self.session.query(CtApplication)\
+            .join(CaMaintenanceCase, CtApplication.maintenance_case == CaMaintenanceCase.id)\
+            .filter(CaMaintenanceCase.completion_date == None)\
+            .filter(CtApplication.app_id == self.application.app_id)\
+            .filter(CtApplication.parcel != None).count()
+        if self.parcel_edit.text() != '':
+            maintenance_count = self.session.query(CaParcelTbl).\
+                filter(CaParcelTbl.parcel_id == self.parcel_edit.text()). \
+                filter(CaParcelTbl.valid_till == "infinity").\
+                filter(CaParcelTbl.geometry.ST_Contains(CaTmpParcel.geometry)).count()
+        if maintenance_count > 0:
+            PluginUtils.show_error(self, self.tr("Status error"),
+                                self.tr("This parcel cadastre changing!!!."))
             return
+
+        # except SQLAlchemyError, e:
+        #     PluginUtils.show_error(self, self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+        #     return
 
         check_count = self.application.statuses.filter(CtApplicationStatus.status == (status_id-1)).count()
         status_7_count = self.application.statuses.filter(CtApplicationStatus.status == 7).count()

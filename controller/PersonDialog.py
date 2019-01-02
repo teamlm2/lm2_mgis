@@ -167,6 +167,17 @@ class PersonDialog(QDialog, Ui_PersonDialog, DatabaseHelper):
         user_name = QSettings().value(SettingsConstants.USER)
         user_rights = DatabaseUtils.userright_by_name(user_name)
 
+        if self.person.person_register:
+            self.personal_id_edit.setEnabled(False)
+            self.middle_name_edit.setEnabled(False)
+            self.surname_company_edit.setEnabled(False)
+            self.first_name_edit.setEnabled(False)
+            if UserRight.cadastre_update in user_rights:
+                self.personal_id_edit.setEnabled(True)
+                self.middle_name_edit.setEnabled(True)
+                self.surname_company_edit.setEnabled(True)
+                self.first_name_edit.setEnabled(True)
+
         if UserRight.application_update in user_rights:
             self.apply_button.setEnabled(True)
         else:
@@ -480,20 +491,6 @@ class PersonDialog(QDialog, Ui_PersonDialog, DatabaseHelper):
         return text
 
     def __setup_mapping(self):
-
-        self.personal_id_edit.setEnabled(False)
-        self.middle_name_edit.setEnabled(False)
-        self.surname_company_edit.setEnabled(False)
-        self.first_name_edit.setEnabled(False)
-
-        user_name = QSettings().value(SettingsConstants.USER)
-        user_rights = DatabaseUtils.userright_by_name(user_name)
-
-        if UserRight.cadastre_update in user_rights:
-            self.personal_id_edit.setEnabled(True)
-            self.middle_name_edit.setEnabled(True)
-            self.surname_company_edit.setEnabled(True)
-            self.first_name_edit.setEnabled(True)
 
         if self.person.address_entrance_no is None:
             self.entrance_edit.setText(Constants.ENTRANCE_DEFAULT_VALUE)

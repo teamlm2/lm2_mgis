@@ -298,9 +298,9 @@ class LayerUtils(object):
         mygroup = root.findGroup(u"Кадастр")
         if mygroup is None:
             cadastre_group = root.insertGroup(4, u"Кадастр")
-        mygroup = root.findGroup(u"Төлбөр, татварын бүс")
+        mygroup = root.findGroup(u"Үнэлгээ, төлбөрийн бүс")
         if mygroup is None:
-            land_fee_and_tax_zones_group = root.insertGroup(5, u"Төлбөр, татварын бүс")
+            land_fee_and_tax_zones_group = root.insertGroup(5, u"Үнэлгээ, төлбөрийн бүс")
         mygroup = root.findGroup(U"Хил")
         if mygroup is None:
             admin_units_group = root.insertGroup(4, u"Хил")

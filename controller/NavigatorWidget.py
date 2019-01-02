@@ -13441,7 +13441,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
     def on_fee_tax_zone_button_clicked(self):
 
         root = QgsProject.instance().layerTreeRoot()
-        mygroup = root.findGroup(u"Төлбөр, татварын бүс")
+        mygroup = root.findGroup(u"Үнэлгээ, төлбөрийн бүс")
         vlayer = LayerUtils.layer_by_data_source("settings", "set_view_fee_zone")
         if vlayer is None:
             vlayer = LayerUtils.load_layer_base_layer("set_view_fee_zone", "zone_id", "settings")
@@ -13547,44 +13547,6 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
             PluginUtils.show_message(self, self.tr("Sent Warning"), self.tr("Can not send to UBEG. The status is wrong for application!"))
             return
 
-    @pyqtSlot()
-    def on_mpa_edit_dialog_button_clicked(self):
-
-        # self.mpa_edit_dialog_button.setVisible(False)
-        # employee = DatabaseUtils.get_sd_employee(DatabaseUtils.current_sd_user().user_id)
-        #
-        # if employee.department_ref.organization != 3:
-        #     PluginUtils.show_message(self, self.tr("Sent Warning"),
-        #                              self.tr("Permited edit Mpa parcel data"))
-        #     return
-        # self.__create_mpa_edit()
-        # root = QgsProject.instance().layerTreeRoot()
-        #
-        # restrictions = DatabaseUtils.working_l2_code()
-        # if not restrictions:
-        #     PluginUtils.show_message(self, self.tr("Connection Error"), self.tr("Please connect to database!!!"))
-        #     return
-
-        # mygroup = root.findGroup("UbGIS")
-        # if mygroup is None:
-        #     mygroup = root.insertGroup(8, "UbGIS")
-        #
-        # is_pug_parcel = False
-
-        vlayer_parcel = LayerUtils.load_ub_data_layer_by_name("ca_mpa_parcel_edit_view", "gid")
-        QgsMapLayerRegistry.instance().addMapLayer(vlayer_parcel)
-        # layers = self.plugin.iface.legendInterface().layers()
-        #
-        # for layer in layers:
-        #     if layer.name() == "MpaEditParcel":
-        #         is_pug_parcel = True
-        # if not is_pug_parcel:
-        #     mygroup.addLayer(vlayer_parcel)
-
-        # vlayer_parcel.setLayerName(QApplication.translate("Plugin", "MpaEditParcel"))
-        # vlayer_parcel.loadNamedStyle(
-        #     str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "template\style/ub_parcel.qml")
-
     def __create_mpa_edit(self):
 
         # dialog = ParcelMpaDialog()
@@ -13599,3 +13561,25 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         self.plugin.iface.addDockWidget(Qt.RightDockWidgetArea, self.mpaWidget)
         # QObject.connect(self.mpaWidget, SIGNAL("visibilityChanged(bool)"), self.__pastureVisibilityChanged)
         self.mpaWidget.hide()
+
+    @pyqtSlot()
+    def on_valuation_zone_button_clicked(self):
+
+        root = QgsProject.instance().layerTreeRoot()
+        mygroup = root.findGroup(u"Үнэлгээ, төлбөрийн бүс")
+        vlayer = LayerUtils.layer_by_data_source("data_estimate", "pa_valuation_level_view")
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer("pa_valuation_level_view", "id", "data_estimate")
+        vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/pa_valuation_level.qml")
+        vlayer.setLayerName(self.tr("Valuation level"))
+        mygroup.addLayer(vlayer)
+
+        root = QgsProject.instance().layerTreeRoot()
+        mygroup = root.findGroup(u"Үнэлгээ, төлбөрийн бүс")
+        vlayer = LayerUtils.layer_by_data_source("data_estimate", "pa_valuation_level_agriculture_view")
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer("pa_valuation_level_agriculture_view", "id", "data_estimate")
+        vlayer.loadNamedStyle(
+            str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/pa_valuation_agriculture_level.qml")
+        vlayer.setLayerName(self.tr("Valuation Agrivulture level"))
+        mygroup.addLayer(vlayer)
