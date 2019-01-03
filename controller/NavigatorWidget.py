@@ -55,6 +55,7 @@ from ..model.SetUserGroupRole import *
 from ..model.ClDocumentRole import *
 from ..controller.ParcelMpaDialog import *
 from ..controller.CadastrePageReportDialog import *
+from ..controller.NavigatorMainWidget import *
 from ..utils.DatabaseUtils import *
 from PersonDialog import PersonDialog
 from ContractDialog import ContractDialog
@@ -66,6 +67,7 @@ from CreateCaseDialog import CreateCaseDialog
 from LandTaxPaymentsDialog import *
 from LandFeePaymentsDialog import *
 from ParcelInfoStatisticDialog import *
+# from ..LM2Plugin import *
 from datetime import timedelta
 from xlsxwriter.utility import xl_rowcol_to_cell, xl_col_to_name
 import xlsxwriter
@@ -91,6 +93,8 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         self.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
         self.plugin = plugin
         self.session = SessionHandler().session_instance()
+
+        self.navigatorTestWidget = None
 
         self.userSettings = None
         self.khashaa_model = None
@@ -13514,12 +13518,12 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
                                      self.tr("Already send to UBEG."))
             return
 
-        if max_status == '11':
-            PluginUtils.show_message(self, self.tr("Information"),
-                                     self.tr("Property id has arrived."))
-            return
+        # if max_status == '11':
+        #     PluginUtils.show_message(self, self.tr("Information"),
+        #                              self.tr("Property id has arrived."))
+        #     return
 
-        if max_status == '7' or max_status == '9' or max_status == '12':
+        if max_status == '7' or max_status == '9' or max_status == '11' or max_status == '12':
             ubeg_doc_list = []
             is_ubeg_docs = self.session.query(ClDocumentRole).filter(ClDocumentRole.is_ubeg_required == True).all()
             for is_ubeg_doc in is_ubeg_docs:
@@ -13583,3 +13587,17 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
             str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/pa_valuation_agriculture_level.qml")
         vlayer.setLayerName(self.tr("Valuation Agrivulture level"))
         mygroup.addLayer(vlayer)
+
+    @pyqtSlot()
+    def on_test_button_clicked(self):
+
+        if self.navigatorTestWidget:
+            self.plugin.iface.removeDockWidget(self.navigatorTestWidget)
+            del self.navigatorTestWidget
+
+        self.navigatorTestWidget = NavigatorMainWidget(self)
+        self.plugin.iface.addDockWidget(Qt.RightDockWidgetArea, self.navigatorTestWidget)
+        # QObject.connect(self.navigatorWidget, SIGNAL("visibilityChanged(bool)"), self.__navigatorVisibilityChanged)
+        self.navigatorTestWidget.show()
+
+        self.hide()

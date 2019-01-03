@@ -610,6 +610,19 @@
            <string>Үнэлгээний бүс</string>
           </property>
          </widget>
+         <widget class="QPushButton" name="test_button">
+          <property name="geometry">
+           <rect>
+            <x>16</x>
+            <y>290</y>
+            <width>161</width>
+            <height>23</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>TEST</string>
+          </property>
+         </widget>
         </widget>
        </widget>
        <widget class="QGroupBox" name="groupBox_6">

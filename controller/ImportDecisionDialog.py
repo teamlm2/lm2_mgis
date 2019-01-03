@@ -3,7 +3,6 @@ __author__ = 'anna'
 
 import shutil
 
-
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from sqlalchemy.exc import SQLAlchemyError

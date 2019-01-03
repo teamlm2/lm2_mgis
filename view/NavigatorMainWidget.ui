@@ -1,0 +1,330 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>NavigatorMainWidget</class>
+ <widget class="QDockWidget" name="NavigatorMainWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>415</width>
+    <height>712</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>415</width>
+    <height>620</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>415</width>
+    <height>524287</height>
+   </size>
+  </property>
+  <property name="baseSize">
+   <size>
+    <width>440</width>
+    <height>665</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>Selection / Filter</string>
+  </property>
+  <widget class="QWidget" name="dockWidgetContents">
+   <widget class="QScrollArea" name="scrollArea">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>0</y>
+      <width>418</width>
+      <height>650</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="minimumSize">
+     <size>
+      <width>0</width>
+      <height>600</height>
+     </size>
+    </property>
+    <property name="maximumSize">
+     <size>
+      <width>435</width>
+      <height>650</height>
+     </size>
+    </property>
+    <property name="widgetResizable">
+     <bool>false</bool>
+    </property>
+    <widget class="QWidget" name="scrollAreaWidgetContents">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>0</y>
+       <width>419</width>
+       <height>664</height>
+      </rect>
+     </property>
+     <widget class="QLabel" name="error_label">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>576</y>
+        <width>374</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <family>Helvetica</family>
+        <pointsize>14</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QLabel {color : red;}
+font: 75 14pt &quot;Helvetica&quot;;</string>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="wordWrap">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="cadastre_button">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>10</y>
+        <width>131</width>
+        <height>50</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Cadastre</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pasture_button">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>70</y>
+        <width>131</width>
+        <height>50</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Pasture</string>
+      </property>
+     </widget>
+     <widget class="QGroupBox" name="groupBox_2">
+      <property name="geometry">
+       <rect>
+        <x>70</x>
+        <y>290</y>
+        <width>192</width>
+        <height>321</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <weight>50</weight>
+        <bold>false</bold>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QGroupBox {
+     background-color: #f5f5ef; border: 1px solid black;
+     border-radius: 3px;
+}</string>
+      </property>
+      <property name="title">
+       <string>Давхарга</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+      <widget class="QPushButton" name="au_level3_button">
+       <property name="geometry">
+        <rect>
+         <x>16</x>
+         <y>65</y>
+         <width>161</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Баг/Хорооны хил</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="plan_button">
+       <property name="geometry">
+        <rect>
+         <x>16</x>
+         <y>165</y>
+         <width>161</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true"/>
+       </property>
+       <property name="text">
+        <string>ГЗБТөлөвгөгөө</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="fee_tax_zone_button">
+       <property name="geometry">
+        <rect>
+         <x>16</x>
+         <y>190</y>
+         <width>161</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Төлбөр, Татварын бүс</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="au_level2_button">
+       <property name="geometry">
+        <rect>
+         <x>16</x>
+         <y>40</y>
+         <width>161</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Сум/Дүүргийн хил</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="mpa_zone_button">
+       <property name="geometry">
+        <rect>
+         <x>16</x>
+         <y>115</y>
+         <width>161</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Тусгай хамгаалалтай газар</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="sec_zone_button">
+       <property name="geometry">
+        <rect>
+         <x>16</x>
+         <y>140</y>
+         <width>161</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Хамгаалалтын зурвас</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="au_level1_button">
+       <property name="geometry">
+        <rect>
+         <x>16</x>
+         <y>15</y>
+         <width>161</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Аймаг/Нийслэлийн хил</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="free_zone_button">
+       <property name="geometry">
+        <rect>
+         <x>16</x>
+         <y>90</y>
+         <width>161</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Чөлөөт бүс</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="valuation_zone_button">
+       <property name="geometry">
+        <rect>
+         <x>16</x>
+         <y>215</y>
+         <width>161</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Үнэлгээний бүс</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="test_button_2">
+       <property name="geometry">
+        <rect>
+         <x>16</x>
+         <y>290</y>
+         <width>161</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>TEST</string>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QPushButton" name="ub_button">
+      <property name="geometry">
+       <rect>
+        <x>150</x>
+        <y>10</y>
+        <width>131</width>
+        <height>50</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>UB Parcel Editor</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="mpa_button">
+      <property name="geometry">
+       <rect>
+        <x>150</x>
+        <y>70</y>
+        <width>131</width>
+        <height>50</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>MPA</string>
+      </property>
+     </widget>
+    </widget>
+   </widget>
+  </widget>
+ </widget>
+ <tabstops>
+  <tabstop>scrollArea</tabstop>
+ </tabstops>
+ <resources/>
+ <connections/>
+</ui>

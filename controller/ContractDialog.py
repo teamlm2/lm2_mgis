@@ -187,14 +187,16 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
         end = PluginUtils.convert_qt_date_to_python(new_date).date()
         begin_txt = self.contract_begin_edit.text()
-        begin = datetime.strptime(begin_txt, '%Y-%m-%d')
+        print begin_txt
+        if begin_txt != '':
+            begin = datetime.strptime(begin_txt, '%Y-%m-%d')
 
-        if end and begin:
-            age_in_years = end.year - begin.year - ((end.month, end.day) < (begin.month, begin.day))
-            months = (end.month - begin.month - (end.day < begin.day)) % 12
-            # age = end - begin
-            # age_in_days = age.days
-            self.contract_duration_edit.setText(str(age_in_years))
+            if end and begin:
+                age_in_years = end.year - begin.year - ((end.month, end.day) < (begin.month, begin.day))
+                months = (end.month - begin.month - (end.day < begin.day)) % 12
+                # age = end - begin
+                # age_in_days = age.days
+                self.contract_duration_edit.setText(str(age_in_years))
 
     def __setup_validators(self):
 
@@ -363,8 +365,11 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         if contract_end is not None:
             # self.contract_end_edit.setText(contract_end.toString(Constants.DATABASE_DATE_FORMAT))
             self.contract_end_date.setDate(contract_end)
-            duration = contract_end.year() - contract_begin.year()
-            self.contract_duration_edit.setText(str(duration))
+            print contract_begin
+            print contract_end
+            if contract_begin is not None:
+                duration = contract_end.year() - contract_begin.year()
+                self.contract_duration_edit.setText(str(duration))
         else:
             application_role = self.contract.application_roles.filter_by(role=Constants.APPLICATION_ROLE_CREATES).one()
             application = application_role.application_ref
