@@ -1360,16 +1360,16 @@ class ParcelRecordDialog(QDialog, Ui_ParcelRecordDialog):
             application = session.query(CtApplication).filter(CtApplication.parcel == parcel.parcel_id).all()
             for application in application:
                 self.duration_year_edit.setText(str(application.approved_duration))
-                if session.query(CtDecisionApplication).filter(CtDecisionApplication.application == application.app_no).count() == 0:
+                if session.query(CtDecisionApplication).filter(CtDecisionApplication.application == application.app_id).count() == 0:
                     PluginUtils.show_message(self, self.tr(""), self.tr("no decision"))
                     self.decision_date_edit.setText("")
                 else:
-                    decision_application = session.query(CtDecisionApplication).filter(CtDecisionApplication.application == application.app_no).one()
-                    if session.query(CtDecision).filter(CtDecision.decision_no == decision_application.decision).count() == 0:
+                    decision_application = session.query(CtDecisionApplication).filter(CtDecisionApplication.application == application.app_id).one()
+                    if session.query(CtDecision).filter(CtDecision.decision_id == decision_application.decision).count() == 0:
                         PluginUtils.show_message(self, self.tr("no"), self.tr("no decision"))
                         self.decision_date_edit.setText("")
                     else:
-                        decision = session.query(CtDecision).filter(CtDecision.decision_no == decision_application.decision).one()
+                        decision = session.query(CtDecision).filter(CtDecision.decision_id == decision_application.decision).one()
                         self.decision_date_edit.setText(str(decision.decision_date))
 
         self.cadastreId_edit.setText(self.parcel_id)
@@ -1498,16 +1498,16 @@ class ParcelRecordDialog(QDialog, Ui_ParcelRecordDialog):
             application = session.query(CtApplication).filter(CtApplication.parcel == parcel.parcel_id).all()
             for application in application:
                 self.c_duration_edit.setText(str(application.approved_duration))
-                if session.query(CtDecisionApplication).filter(CtDecisionApplication.application == application.app_no).count() == 0:
+                if session.query(CtDecisionApplication).filter(CtDecisionApplication.application == application.app_id).count() == 0:
                     PluginUtils.show_message(self, self.tr(""), self.tr("no decision"))
                     self.c_decision_date_edit.setText("")
                 else:
-                    decision_application = session.query(CtDecisionApplication).filter(CtDecisionApplication.application == application.app_no).one()
-                    if session.query(CtDecision).filter(CtDecision.decision_no == decision_application.decision).count() == 0:
+                    decision_application = session.query(CtDecisionApplication).filter(CtDecisionApplication.application == application.app_id).one()
+                    if session.query(CtDecision).filter(CtDecision.decision_id == decision_application.decision).count() == 0:
                         PluginUtils.show_message(self, self.tr("no"), self.tr("no decision"))
                         self.c_decision_date_edit.setText("")
                     else:
-                        decision = session.query(CtDecision).filter(CtDecision.decision_no == decision_application.decision).one()
+                        decision = session.query(CtDecision).filter(CtDecision.decision_id == decision_application.decision).one()
                         self.c_decision_date_edit.setText(str(decision.decision_date))
 
         self.c_cadastreId_edit.setText(self.parcel_id)
@@ -1599,16 +1599,16 @@ class ParcelRecordDialog(QDialog, Ui_ParcelRecordDialog):
             application = session.query(CtApplication).filter(CtApplication.parcel == parcel.parcel_id).all()
             for application in application:
                 self.i_duration_edit.setText(str(application.approved_duration))
-                if session.query(CtDecisionApplication).filter(CtDecisionApplication.application == application.app_no).count() == 0:
+                if session.query(CtDecisionApplication).filter(CtDecisionApplication.application == application.app_id).count() == 0:
                     PluginUtils.show_message(self, self.tr(""), self.tr("no decision"))
                     self.i_decision_date_edit.setText("")
                 else:
-                    decision_application = session.query(CtDecisionApplication).filter(CtDecisionApplication.application == application.app_no).one()
-                    if session.query(CtDecision).filter(CtDecision.decision_no == decision_application.decision).count() == 0:
+                    decision_application = session.query(CtDecisionApplication).filter(CtDecisionApplication.application == application.app_id).one()
+                    if session.query(CtDecision).filter(CtDecision.decision_id == decision_application.decision).count() == 0:
                         PluginUtils.show_message(self, self.tr("no"), self.tr("no decision"))
                         self.i_decision_date_edit.setText("")
                     else:
-                        decision = session.query(CtDecision).filter(CtDecision.decision_no == decision_application.decision).one()
+                        decision = session.query(CtDecision).filter(CtDecision.decision_id == decision_application.decision).one()
                         self.i_decision_date_edit.setText(str(decision.decision_date))
 
         self.i_cadastreid_edit.setText(self.parcel_id)
@@ -1701,16 +1701,16 @@ class ParcelRecordDialog(QDialog, Ui_ParcelRecordDialog):
             application = session.query(CtApplication).filter(CtApplication.parcel == parcel.parcel_id).all()
             for application in application:
                 self.a_duration_edit.setText(str(application.approved_duration))
-                if session.query(CtDecisionApplication).filter(CtDecisionApplication.application == application.app_no).count() == 0:
+                if session.query(CtDecisionApplication).filter(CtDecisionApplication.application == application.app_id).count() == 0:
                     PluginUtils.show_message(self, self.tr(""), self.tr("no decision"))
                     self.a_decision_date_edit.setText("")
                 else:
-                    decision_application = session.query(CtDecisionApplication).filter(CtDecisionApplication.application == application.app_no).one()
-                    if session.query(CtDecision).filter(CtDecision.decision_no == decision_application.decision).count() == 0:
+                    decision_application = session.query(CtDecisionApplication).filter(CtDecisionApplication.application == application.app_id).one()
+                    if session.query(CtDecision).filter(CtDecision.decision_id == decision_application.decision).count() == 0:
                         PluginUtils.show_message(self, self.tr("no"), self.tr("no decision"))
                         self.a_decision_date_edit.setText("")
                     else:
-                        decision = session.query(CtDecision).filter(CtDecision.decision_no == decision_application.decision).one()
+                        decision = session.query(CtDecision).filter(CtDecision.decision_id == decision_application.decision).one()
                         self.a_decision_date_edit.setText(str(decision.decision_date))
 
         self.a_cadastreId_edit.setText(self.parcel_id)

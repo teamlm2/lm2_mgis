@@ -177,10 +177,13 @@ class LM2Plugin:
 
         # Add toolbar button and menu item
         self.lm_toolbar = self.iface.addToolBar(QApplication.translate("Plugin", "LandManager 2"))
-        # self.lm_toolbar.addAction(self.manage_parcel_records_action)
+
         self.lm_toolbar.addSeparator()
         self.lm_toolbar.addAction(self.parcel_map_action)
         self.lm_toolbar.addAction(self.parcel_mpa_action)
+        self.lm_toolbar.addSeparator()
+        self.lm_toolbar.addSeparator()
+        self.lm_toolbar.addAction(self.manage_parcel_records_action)
         self.lm_toolbar.addSeparator()
         self.lm_toolbar.addSeparator()
         self.lm_toolbar.addAction(self.pasture_use_action)

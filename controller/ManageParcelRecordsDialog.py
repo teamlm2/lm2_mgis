@@ -35,7 +35,8 @@ class ManageParcelRecordsDialog(QDialog, Ui_ManageParcelRecordsDialog):
         parcelTypeList = []
 
         restrictions = DatabaseUtils.working_l2_code()
-        parcelLayer = LayerUtils.layer_by_data_source("s" + restrictions, "ca_parcel")
+        # parcelLayer = LayerUtils.layer_by_data_source("s" + restrictions, "ca_parcel")
+        parcelLayer = LayerUtils.layer_by_data_source("data_soums_union", "ca_parcel")
         select_feature = parcelLayer.selectedFeatures()
 
         for feature in select_feature:
@@ -72,7 +73,8 @@ class ManageParcelRecordsDialog(QDialog, Ui_ManageParcelRecordsDialog):
     def __select_feature(self):
 
         restrictions = DatabaseUtils.working_l2_code()
-        parcelLayer = LayerUtils.layer_by_data_source("s" + restrictions, "ca_parcel")
+        # parcelLayer = LayerUtils.layer_by_data_source("s" + restrictions, "ca_parcel")
+        parcelLayer = LayerUtils.layer_by_data_source("data_soums_union", "ca_parcel")
         select_feature = parcelLayer.selectedFeatures()
         count = parcelLayer.selectedFeatureCount()
         if count != 1:
@@ -131,7 +133,8 @@ class ManageParcelRecordsDialog(QDialog, Ui_ManageParcelRecordsDialog):
         record = VaInfoHomeParcel()
         parcel_type = self.parcel_type_cbox.itemData(self.parcel_type_cbox.currentIndex())
         restrictions = DatabaseUtils.working_l2_code()
-        parcelLayer = LayerUtils.layer_by_data_source("s" + restrictions, "ca_parcel")
+        # parcelLayer = LayerUtils.layer_by_data_source("s" + restrictions, "ca_parcel")
+        parcelLayer = LayerUtils.layer_by_data_source("data_soums_union", "ca_parcel")
         select_feature = parcelLayer.selectedFeatures()
         for feature in select_feature:
             attr = feature.attributes()
@@ -168,7 +171,8 @@ class ManageParcelRecordsDialog(QDialog, Ui_ManageParcelRecordsDialog):
 
         parcel_type = self.parcel_type_cbox.itemData(self.parcel_type_cbox.currentIndex())
         restrictions = DatabaseUtils.working_l2_code()
-        parcelLayer = LayerUtils.layer_by_data_source("s" + restrictions, "ca_parcel")
+        # parcelLayer = LayerUtils.layer_by_data_source("s" + restrictions, "ca_parcel")
+        parcelLayer = LayerUtils.layer_by_data_source("data_soums_union", "ca_parcel")
         select_feature = parcelLayer.selectedFeatures()
         for feature in select_feature:
             attr = feature.attributes()
