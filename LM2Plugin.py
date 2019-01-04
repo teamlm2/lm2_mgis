@@ -12,6 +12,7 @@ from controller.PastureWidget import *
 from controller.ParcelInfoDialog import *
 from controller.ParcelMpaDialog import *
 from controller.ParcelInfoFeeDialog import *
+from controller.PlanNavigatorWidget import *
 from controller.ApplicationsDialog import *
 from controller.ContractDialog import *
 from controller.OwnRecordDialog import *
@@ -138,6 +139,12 @@ class LM2Plugin:
                                          self.iface.mainWindow())
         self.parcel_mpa_action.setCheckable(True)
 
+        ### GZBT navigator
+        self.land_plan_navigator_action = QAction(QIcon(":/plugins/lm2/land_plan.png"),
+                                         QApplication.translate("Plugin", "Land plan info"),
+                                         self.iface.mainWindow())
+        self.land_plan_navigator_action.setCheckable(True)
+
         # connect the action to the run method
         self.set_db_connection.triggered.connect(self.__show_connection_to_main_database_dialog)
         self.admin_settings_action.triggered.connect(self.__show_land_office_admin_settings_dialog)
@@ -163,44 +170,43 @@ class LM2Plugin:
         self.database_dump_action.triggered.connect(self.__show_database_dump_dialog)
         self.webgis_utility_action.triggered.connect(self.__show_webgis_utility_action)
         self.pasture_use_action.triggered.connect(self.__show_pasture_navigator_widget)
-
+        self.parcel_map_action.triggered.connect(self.__show_parcel_navigator_widget)
+        self.parcel_mpa_action.triggered.connect(self.__show_parcel_mpa_navigator_widget)
         # self.reports_action.triggered.connect(self.__show_reports_dialog)
-
-
+        self.land_plan_navigator_action.triggered.connect(self.__show_plan_navigator_widget)
 
         # Add toolbar button and menu item
         self.lm_toolbar = self.iface.addToolBar(QApplication.translate("Plugin", "LandManager 2"))
-        self.lm_toolbar.addAction(self.manage_parcel_records_action)
-        self.lm_toolbar.addAction(self.create_case_action)
+        # self.lm_toolbar.addAction(self.manage_parcel_records_action)
         self.lm_toolbar.addSeparator()
-        self.lm_toolbar.addAction(self.mark_apps_action)
-        self.lm_toolbar.addAction(self.import_decision_action)
-        self.lm_toolbar.addAction(self.print_cadastre_map_action)
-        self.lm_toolbar.addAction(self.print_point_map_action)
-        database = QSettings().value(SettingsConstants.DATABASE_NAME)
-        # if database:
-        #     au1 = DatabaseUtils.working_l1_code()
-        #     if au1:
-        #         if au1 == '11' or au1 == '61':
-        self.parcel_map_action.triggered.connect(self.__show_parcel_navigator_widget)
-        self.parcel_mpa_action.triggered.connect(self.__show_parcel_mpa_navigator_widget)
-
         self.lm_toolbar.addAction(self.parcel_map_action)
         self.lm_toolbar.addAction(self.parcel_mpa_action)
-
         self.lm_toolbar.addSeparator()
-        self.lm_toolbar.addAction(self.navigator_action)
         self.lm_toolbar.addSeparator()
         self.lm_toolbar.addAction(self.pasture_use_action)
         self.lm_toolbar.addAction(self.print_point_map_action)
         self.lm_toolbar.addSeparator()
+        self.lm_toolbar.addSeparator()
+        self.lm_toolbar.addAction(self.land_plan_navigator_action)
+        self.lm_toolbar.addSeparator()
+        self.lm_toolbar.addSeparator()
+        self.lm_toolbar.addAction(self.navigator_action)
+        self.lm_toolbar.addAction(self.create_case_action)
+        self.lm_toolbar.addAction(self.print_cadastre_map_action)
+        # self.lm_toolbar.addSeparator()
+        self.lm_toolbar.addAction(self.mark_apps_action)
+        self.lm_toolbar.addAction(self.import_decision_action)
+
+        self.lm_toolbar.addSeparator()
+
         self.lm_toolbar.addAction(self.webgis_utility_action)
         self.lm_toolbar.addAction(self.document_action)
+        self.lm_toolbar.addSeparator()
         self.lm_toolbar.addSeparator()
         self.lm_toolbar.addAction(self.admin_settings_action)
         self.lm_toolbar.addAction(self.user_role_management_action)
         self.lm_toolbar.addAction(self.set_db_connection)
-
+        self.lm_toolbar.addSeparator()
 
         # Retrieve main menu bar
         menu_bar = self.iface.mainWindow().menuBar()
@@ -266,6 +272,7 @@ class LM2Plugin:
         self.parcelInfoWidget = None
         self.pastureWidget = None
         self.parcelMpaInfoWidget = None
+        self.planWidget = None
         self.removeLayers()
         self.__set_menu_visibility()
         self.__setup_slots()
@@ -291,6 +298,8 @@ class LM2Plugin:
         self.iface.removePluginMenu(QApplication.translate("Plugin", "&LM2"), self.webgis_utility_action)
         self.iface.removePluginMenu(QApplication.translate("Plugin", "&LM2"), self.pasture_use_action)
         self.iface.removePluginMenu(QApplication.translate("Plugin", "&LM2"), self.print_point_map_action)
+        self.iface.removePluginMenu(QApplication.translate("Plugin", "&LM2"), self.land_plan_navigator_action)
+
 
         del self.lm_toolbar
 
@@ -309,6 +318,10 @@ class LM2Plugin:
         if self.parcelMpaInfoWidget:
             self.iface.removeDockWidget(self.parcelMpaInfoWidget)
             del self.parcelMpaInfoWidget
+
+        if self.planWidget:
+            self.iface.removeDockWidget(self.planWidget)
+            del self.planWidget
 
         self.removeLayers()
 
@@ -341,6 +354,10 @@ class LM2Plugin:
             if self.parcelMpaInfoWidget != None:
                 if self.parcelMpaInfoWidget.isVisible():
                     self.parcelMpaInfoWidget.hide()
+
+            if self.planWidget != None:
+                if self.planWidget.isVisible():
+                    self.planWidget.hide()
 
             SessionHandler().destroy_session()
             self.is_expired = dlg.get_expired()
@@ -536,6 +553,8 @@ class LM2Plugin:
                 self.parcelInfoWidget.hide()
             if self.parcelMpaInfoWidget:
                 self.parcelMpaInfoWidget.hide()
+            if self.planWidget:
+                self.planWidget.hide()
 
     def __show_pasture_navigator_widget(self):
 
@@ -547,6 +566,8 @@ class LM2Plugin:
                     self.parcelMpaInfoWidget.hide()
                 if self.parcelInfoWidget:
                     self.parcelInfoWidget.hide()
+                if self.planWidget:
+                    self.planWidget.hide()
                 if self.navigatorWidget:
                     self.navigatorWidget.show()
             else:
@@ -558,6 +579,8 @@ class LM2Plugin:
                     self.parcelMpaInfoWidget.hide()
                 if self.parcelInfoWidget:
                     self.parcelInfoWidget.hide()
+                if self.planWidget:
+                    self.planWidget.hide()
         else:
             self.__create_pasture()
 
@@ -572,6 +595,8 @@ class LM2Plugin:
                     self.parcelMpaInfoWidget.hide()
                 if self.pastureWidget:
                     self.pastureWidget.hide()
+                if self.planWidget:
+                    self.planWidget.hide()
                 if self.navigatorWidget:
                     self.navigatorWidget.show()
             else:
@@ -583,6 +608,8 @@ class LM2Plugin:
                     self.parcelMpaInfoWidget.hide()
                 if self.pastureWidget:
                     self.pastureWidget.hide()
+                if self.planWidget:
+                    self.planWidget.hide()
         else:
             self.__create_parcel_info()
         self.__start_parcel_info_map()
@@ -600,6 +627,8 @@ class LM2Plugin:
                     self.pastureWidget.hide()
                 if self.parcelInfoWidget:
                     self.parcelInfoWidget.hide()
+                if self.planWidget:
+                    self.planWidget.hide()
                 if self.navigatorWidget:
                     self.navigatorWidget.show()
             else:
@@ -611,9 +640,39 @@ class LM2Plugin:
                     self.pastureWidget.hide()
                 if self.parcelInfoWidget:
                     self.parcelInfoWidget.hide()
+                if self.planWidget:
+                    self.planWidget.hide()
         else:
             self.__create_mpa()
         self.__start_parcel_mpa_map()
+
+    def __show_plan_navigator_widget(self):
+
+        if self.pastureWidget:
+            if self.pastureWidget.isVisible():
+                if self.planWidget:
+                    self.planWidget.hide()
+                if self.pastureWidget:
+                    self.pastureWidget.hide()
+                if self.parcelMpaInfoWidget:
+                    self.parcelMpaInfoWidget.hide()
+                if self.parcelInfoWidget:
+                    self.parcelInfoWidget.hide()
+                if self.navigatorWidget:
+                    self.navigatorWidget.show()
+            else:
+                if self.planWidget:
+                    self.planWidget.show()
+                if self.pastureWidget:
+                    self.pastureWidget.hide()
+                if self.navigatorWidget:
+                    self.navigatorWidget.hide()
+                if self.parcelMpaInfoWidget:
+                    self.parcelMpaInfoWidget.hide()
+                if self.parcelInfoWidget:
+                    self.parcelInfoWidget.hide()
+        else:
+            self.__create_plan_navigator()
 
     def __navigatorVisibilityChanged(self):
 
@@ -628,6 +687,13 @@ class LM2Plugin:
             self.pasture_use_action.setChecked(True)
         else:
             self.pasture_use_action.setChecked(False)
+
+    def __planVisibilityChanged(self):
+
+        if self.planWidget.isVisible():
+            self.land_plan_navigator_action.setChecked(True)
+        else:
+            self.land_plan_navigator_action.setChecked(False)
 
     def __mpaVisibilityChanged(self):
 
@@ -1002,6 +1068,8 @@ class LM2Plugin:
             self.parcelInfoWidget.hide()
         if self.parcelMpaInfoWidget:
             self.parcelMpaInfoWidget.hide()
+        if self.planWidget:
+            self.planWidget.hide()
 
     def __create_mpa(self):
 
@@ -1021,6 +1089,8 @@ class LM2Plugin:
             self.parcelInfoWidget.hide()
         if self.pastureWidget:
             self.pastureWidget.hide()
+        if self.planWidget:
+            self.planWidget.hide()
 
     def __create_parcel_info(self):
 
@@ -1041,12 +1111,37 @@ class LM2Plugin:
             self.parcelMpaInfoWidget.hide()
         if self.pastureWidget:
             self.pastureWidget.hide()
+        if self.planWidget:
+            self.planWidget.hide()
+
+    def __create_plan_navigator(self):
+
+        self.removeLayers()
+        # create widget
+        if self.planWidget:
+            self.iface.removeDockWidget(self.planWidget)
+            del self.planWidget
+
+        self.planWidget = PlanNavigatorWidget(self)
+        self.iface.addDockWidget(Qt.RightDockWidgetArea, self.planWidget)
+
+        QObject.connect(self.planWidget, SIGNAL("visibilityChanged(bool)"), self.__planVisibilityChanged)
+        self.planWidget.show()
+        if self.navigatorWidget:
+            self.navigatorWidget.hide()
+        if self.parcelInfoWidget:
+            self.parcelInfoWidget.hide()
+        if self.parcelMpaInfoWidget:
+            self.parcelMpaInfoWidget.hide()
+        if self.pastureWidget:
+            self.pastureWidget.hide()
 
     def __enable_menu(self, user_rights):
 
         self.navigator_action.setEnabled(True)
         self.pasture_use_action.setEnabled(True)
         self.parcel_map_action.setEnabled(True)
+        self.land_plan_navigator_action.setEnabled(True)
         self.about_action.setEnabled(True)
 
         self.__create_navigator()
@@ -1105,6 +1200,7 @@ class LM2Plugin:
         self.database_dump_action.setEnabled(True)
         self.webgis_utility_action.setEnabled(False)
         self.pasture_use_action.setEnabled(False)
+        self.land_plan_navigator_action.setEnabled(False)
 
     def transformPoint(self, point, layer_postgis_srid):
 
