@@ -1294,7 +1294,7 @@ class LM2Plugin:
         Session = sessionmaker(bind=self.engine)
         session = Session()
         session.autocommit = False
-        session.execute("SET search_path to base, codelists, ub_data, admin_units, settings, pasture, data_landuse, public, data_soums_union, data_ub,sdplatform")
+        session.execute(set_search_path)
 
         role_count = session.query(SetRole).\
             filter(SetRole.user_name == user_name).\

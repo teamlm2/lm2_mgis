@@ -10,7 +10,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from ..model.Singleton import Singleton
 from ..model.SetRole import SetRole
-
+from ..model.Constants import *
 
 class SessionHandler(QObject):
 
@@ -47,7 +47,7 @@ class SessionHandler(QObject):
             Session = sessionmaker(bind=self.engine)
             self.session = Session()
             self.session.autocommit = False
-            self.session.execute("SET search_path to base, codelists, ub_data, admin_units, settings, pasture, data_soums_union, data_ub, public ,sdplatform")
+            self.session.execute(set_search_path)
 
             set_role_count = self.session.query(SetRole).filter(SetRole.user_name == user).filter(SetRole.is_active == True).count()
             if set_role_count == 0:
@@ -68,7 +68,7 @@ class SessionHandler(QObject):
 
             schema_string = ",".join(schemaList)
 
-            self.session.execute("SET search_path to base, codelists, ub_data, admin_units, settings, pasture, public, data_soums_union, data_ub,sdplatform")
+            self.session.execute(set_search_path)
             self.session.commit()
 
             return True

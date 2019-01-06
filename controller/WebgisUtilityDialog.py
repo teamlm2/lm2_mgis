@@ -1,5 +1,5 @@
 # -*- encoding: utf-8 -*-
-__author__ = 'bayantumen'
+__author__ = 'B.Ankhbold'
 
 import glob
 from qgis.core import *
@@ -13,6 +13,7 @@ from ..view.Ui_WebgisUtilityDialog import *
 from ..utils.FileUtils import FileUtils
 import webbrowser
 from ..utils.SessionHandler import SessionHandler
+from ..model.Constants import *
 from docxtpl import DocxTemplate, RichText
 
 class WebgisUtilityDialog(QDialog, Ui_WebgisUtilityDialog):
@@ -416,7 +417,7 @@ class WebgisUtilityDialog(QDialog, Ui_WebgisUtilityDialog):
             Session = sessionmaker(bind=self.engine)
             self.session = Session()
             self.session.autocommit = False
-            self.session.execute("SET search_path to base, codelists, admin_units, settings, public, webgis, sdplatform")
+            self.session.execute(set_search_path)
 
             self.session.commit()
 

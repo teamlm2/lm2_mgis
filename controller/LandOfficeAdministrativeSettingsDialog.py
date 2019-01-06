@@ -1759,7 +1759,7 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
         soum_code = DatabaseUtils.working_l2_code()
         schema_string = 's' + soum_code
         session.execute(
-            "SET search_path to base, codelists, admin_units, settings, pasture, public, data_soums_union, sdplatform")
+            set_search_path)
 
         for i in range(self.doc_twidget.rowCount()):
 
@@ -1819,7 +1819,7 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
         soum_code = DatabaseUtils.working_l2_code()
         schema_string = 's' + soum_code
         session.execute(
-            "SET search_path to base, codelists, admin_units, settings, pasture, public, data_soums_union, sdplatform")
+            set_search_path)
 
         count = self.session.query(codelist_class).filter(codelist_class.code == code).count()
         if count > 0:
@@ -1857,7 +1857,7 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
         soum_code = DatabaseUtils.working_l2_code()
         schema_string = 's' + soum_code
         session.execute(
-            "SET search_path to base, codelists, admin_units, settings, pasture, public, data_soums_union, sdplatform")
+            set_search_path)
 
         try:
             sql = text("UPDATE settings.set_logging SET log_enabled = :logLevel;")
@@ -1872,7 +1872,7 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
         soum_code = DatabaseUtils.working_l2_code()
         schema_string = 's' + soum_code
         session.execute(
-            "SET search_path to base, codelists, admin_units, settings, pasture, public, data_soums_union, sdplatform")
+            set_search_path)
 
         try:
             sql = text(
@@ -1889,7 +1889,7 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
         soum_code = DatabaseUtils.working_l2_code()
         schema_string = 's' + soum_code
         session.execute(
-            "SET search_path to base, codelists, admin_units, settings, pasture, public, data_soums_union, sdplatform")
+            set_search_path)
 
         # try:
         certificate_set = self.session.query(SetCertificate).get(certificate_type)
@@ -1907,7 +1907,7 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
         soum_code = DatabaseUtils.working_l2_code()
         schema_string = 's' + soum_code
         session.execute(
-            "SET search_path to base, codelists, admin_units, settings, pasture, public, data_soums_union, sdplatform")
+            set_search_path)
 
         for key_name, value in report_settings.iteritems():
             try:
@@ -2107,7 +2107,7 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
         if soum_code:
             schema_string = 's' + soum_code
             self.session.execute(
-                "SET search_path to base, codelists, admin_units, settings, pasture, public, data_soums_union, sdplatform")
+                set_search_path)
 
     @pyqtSlot(int)
     def on_zone_location_cbox_currentIndexChanged(self, idx):
@@ -2122,7 +2122,7 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
             schema_string = 's'+ soum_code
 
         self.session.execute(
-            "SET search_path to base, codelists, admin_units, settings, pasture, public, data_soums_union, sdplatform")
+            set_search_path)
 
         location = self.zone_location_cbox.currentText()
 
@@ -2191,7 +2191,7 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
         schema_string = 's' + soum_code
 
         self.session.execute(
-            "SET search_path to base, codelists, admin_units, settings, pasture, public, data_soums_union, sdplatform")
+            set_search_path)
 
         location = self.zone_location_tax_cbox.currentText()
 
@@ -2495,7 +2495,7 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
             soum_code = DatabaseUtils.working_l2_code()
             schema_string = 's' + soum_code
             session.execute(
-                "SET search_path to base, codelists, admin_units, settings, pasture, public, data_soums_union, sdplatform")
+                set_search_path)
             fee = self.session.query(SetBaseFee).filter(SetBaseFee.id == fee_id).one()
             session.delete(fee)
 
@@ -2514,7 +2514,7 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
             soum_code = DatabaseUtils.working_l2_code()
             schema_string = 's' + soum_code
             session.execute(
-                "SET search_path to base, codelists, admin_units, settings, pasture, public, data_soums_union, sdplatform")
+                set_search_path)
             tax = self.session.query(SetBaseTaxAndPrice).filter(SetBaseTaxAndPrice.id == tax_id).one()
             session.delete(tax)
 
@@ -2648,7 +2648,7 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
         soum_code = DatabaseUtils.working_l2_code()
         schema_string = 's' + soum_code
         session.execute(
-            "SET search_path to base, codelists, admin_units, settings, pasture, public, data_soums_union, sdplatform")
+            set_search_path)
         from_zone = self.session.query(SetFeeZone).filter(SetFeeZone.zone_id == from_zone_fid).one()
         fee_count = len(from_zone.fees)
 
@@ -2708,7 +2708,7 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
         soum_code = DatabaseUtils.working_l2_code()
         schema_string = 's' + soum_code
         session.execute(
-            "SET search_path to base, codelists, admin_units, settings, pasture, public, data_soums_union, sdplatform")
+            set_search_path)
         from_zone = self.session.query(SetTaxAndPriceZone).filter(SetTaxAndPriceZone.zone_id == from_zone_fid).one()
         tax_count = len(from_zone.taxes)
 
@@ -2780,7 +2780,7 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
         soum_code = DatabaseUtils.working_l2_code()
         schema_string = 's' + soum_code
         session.execute(
-            "SET search_path to base, codelists, admin_units, settings, pasture, public, data_soums_union, sdplatform")
+            set_search_path)
 
         # try:
         QApplication.setOverrideCursor(QCursor(Qt.WaitCursor))
@@ -2793,7 +2793,7 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
         l2_units = DatabaseUtils.l2_restriction_array()
 
 
-        session.execute("SET search_path to data_soums_union, sdplatform, base, codelists, admin_units, settings, public".format(l2_unit))
+        session.execute(set_search_path)
         # Get active contracts only
         contracts = self.session.query(CtContract).\
             filter(update_date < func.coalesce(CtContract.cancellation_date, CtContract.contract_end)).all()
@@ -2915,7 +2915,7 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
         soum_code = DatabaseUtils.working_l2_code()
         schema_string = 's' + soum_code
         session.execute(
-            "SET search_path to base, codelists, admin_units, settings, pasture, public, data_soums_union, sdplatform")
+            set_search_path)
 
         # try:
         QApplication.setOverrideCursor(QCursor(Qt.WaitCursor))
@@ -2927,7 +2927,7 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
         # Loop over restriction array
         l2_units = DatabaseUtils.l2_restriction_array()
 
-        session.execute("SET search_path to data_soums_union, sdplatform, base, codelists, admin_units, settings, public".format(l2_unit))
+        session.execute(set_search_path)
         # Get active records only
         records = self.session.query(CtOwnershipRecord).\
             filter(or_(CtOwnershipRecord.cancellation_date.is_(None), update_date < CtOwnershipRecord.cancellation_date)).all()
@@ -3141,7 +3141,7 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
             soum_code = DatabaseUtils.working_l2_code()
             schema_string = 's' + soum_code
             session.execute(
-                "SET search_path to base, codelists, admin_units, settings, pasture, public, data_soums_union, sdplatform")
+                set_search_path)
             company = self.session.query(SetSurveyCompany).filter(SetSurveyCompany.id == company_id).one()
             session.delete(company)
 

@@ -118,7 +118,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         self.landfee_message_label2.setStyleSheet("QLabel {color : red;}")
         self.landfee_message_label1.setText(self.tr('Without parcel no land fee information is available.'))
         self.landfee_message_label2.clear()
-
+        self.__setup_permissions()
         if self.attribute_update:
             self.__setup_mapping()
         else:
@@ -130,7 +130,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                 self.reject()
         self.__cert_range_cbox_setup()
         self.__fee_zone_cbox_setup()
-        self.__setup_permissions()
+
         self.__user_right_permissions()
         self.__setup_validators()
 
@@ -347,6 +347,9 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
     def __setup_mapping(self):
 
+        self.search_button.setEnabled(False)
+        self.accept_button.setEnabled(False)
+
         self.calculated_num_edit.setEnabled(True)
         self.calculated_num_edit.setReadOnly(True)
         # try:
@@ -365,8 +368,6 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         if contract_end is not None:
             # self.contract_end_edit.setText(contract_end.toString(Constants.DATABASE_DATE_FORMAT))
             self.contract_end_date.setDate(contract_end)
-            print contract_begin
-            print contract_end
             if contract_begin is not None:
                 duration = contract_end.year() - contract_begin.year()
                 self.contract_duration_edit.setText(str(duration))

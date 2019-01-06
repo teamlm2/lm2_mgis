@@ -124,3 +124,5 @@ CASE_BUILDING_IDENTIFIER = "building"
 MULTIPLE_APPLICATIONS_NOT_ALLOWED = [2, 7, 8, 9, 10, 11, 12, 13, 14, 15]
 
 LOG_FILE_NAME = "lm2.log"
+
+set_search_path = "SET search_path to base, codelists, ub_data, admin_units, settings, pasture, public, data_soums_union, data_plan, data_estimate,data_ub, sdplatform, webgis"

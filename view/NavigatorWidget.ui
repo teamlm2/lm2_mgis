@@ -80,8 +80,8 @@
      <widget class="QTabWidget" name="tabWidget">
       <property name="geometry">
        <rect>
-        <x>10</x>
-        <y>60</y>
+        <x>6</x>
+        <y>30</y>
         <width>386</width>
         <height>561</height>
        </rect>
@@ -108,7 +108,7 @@
           <x>5</x>
           <y>0</y>
           <width>371</width>
-          <height>451</height>
+          <height>431</height>
          </rect>
         </property>
         <property name="title">
@@ -118,7 +118,7 @@
          <property name="geometry">
           <rect>
            <x>129</x>
-           <y>57</y>
+           <y>53</y>
            <width>111</width>
            <height>28</height>
           </rect>
@@ -131,7 +131,7 @@
          <property name="geometry">
           <rect>
            <x>14</x>
-           <y>359</y>
+           <y>345</y>
            <width>153</width>
            <height>23</height>
           </rect>
@@ -144,7 +144,7 @@
          <property name="geometry">
           <rect>
            <x>14</x>
-           <y>419</y>
+           <y>400</y>
            <width>153</width>
            <height>23</height>
           </rect>
@@ -157,7 +157,7 @@
          <property name="geometry">
           <rect>
            <x>20</x>
-           <y>135</y>
+           <y>123</y>
            <width>150</width>
            <height>17</height>
           </rect>
@@ -170,7 +170,7 @@
          <property name="geometry">
           <rect>
            <x>20</x>
-           <y>208</y>
+           <y>196</y>
            <width>150</width>
            <height>17</height>
           </rect>
@@ -183,7 +183,7 @@
          <property name="geometry">
           <rect>
            <x>20</x>
-           <y>172</y>
+           <y>160</y>
            <width>150</width>
            <height>17</height>
           </rect>
@@ -196,9 +196,9 @@
          <property name="geometry">
           <rect>
            <x>16</x>
-           <y>330</y>
+           <y>314</y>
            <width>71</width>
-           <height>17</height>
+           <height>22</height>
           </rect>
          </property>
          <property name="text">
@@ -209,7 +209,7 @@
          <property name="geometry">
           <rect>
            <x>14</x>
-           <y>389</y>
+           <y>373</y>
            <width>153</width>
            <height>23</height>
           </rect>
@@ -225,7 +225,7 @@
          <property name="geometry">
           <rect>
            <x>15</x>
-           <y>150</y>
+           <y>138</y>
            <width>150</width>
            <height>22</height>
           </rect>
@@ -238,7 +238,7 @@
          <property name="geometry">
           <rect>
            <x>15</x>
-           <y>187</y>
+           <y>175</y>
            <width>150</width>
            <height>22</height>
           </rect>
@@ -251,7 +251,7 @@
          <property name="geometry">
           <rect>
            <x>15</x>
-           <y>223</y>
+           <y>211</y>
            <width>150</width>
            <height>22</height>
           </rect>
@@ -263,7 +263,7 @@
            <x>13</x>
            <y>14</y>
            <width>321</width>
-           <height>21</height>
+           <height>16</height>
           </rect>
          </property>
          <property name="text">
@@ -272,15 +272,12 @@
          <property name="checked">
           <bool>true</bool>
          </property>
-         <attribute name="buttonGroup">
-          <string notr="true">buttonGroup</string>
-         </attribute>
         </widget>
         <widget class="QRadioButton" name="admin_unit_rbutton">
          <property name="geometry">
           <rect>
            <x>13</x>
-           <y>120</y>
+           <y>106</y>
            <width>271</width>
            <height>16</height>
           </rect>
@@ -291,15 +288,12 @@
          <property name="checked">
           <bool>false</bool>
          </property>
-         <attribute name="buttonGroup">
-          <string notr="true">buttonGroup</string>
-         </attribute>
         </widget>
         <widget class="QDoubleSpinBox" name="extent_east_spinbox">
          <property name="geometry">
           <rect>
            <x>250</x>
-           <y>61</y>
+           <y>57</y>
            <width>110</width>
            <height>20</height>
           </rect>
@@ -324,7 +318,7 @@
          <property name="geometry">
           <rect>
            <x>10</x>
-           <y>62</y>
+           <y>58</y>
            <width>110</width>
            <height>20</height>
           </rect>
@@ -349,7 +343,7 @@
          <property name="geometry">
           <rect>
            <x>132</x>
-           <y>97</y>
+           <y>85</y>
            <width>110</width>
            <height>20</height>
           </rect>
@@ -399,7 +393,7 @@
          <property name="geometry">
           <rect>
            <x>15</x>
-           <y>246</y>
+           <y>234</y>
            <width>150</width>
            <height>17</height>
           </rect>
@@ -412,7 +406,7 @@
          <property name="geometry">
           <rect>
            <x>15</x>
-           <y>285</y>
+           <y>270</y>
            <width>150</width>
            <height>17</height>
           </rect>
@@ -428,7 +422,7 @@
          <property name="geometry">
           <rect>
            <x>15</x>
-           <y>261</y>
+           <y>249</y>
            <width>150</width>
            <height>21</height>
           </rect>
@@ -441,7 +435,7 @@
          <property name="geometry">
           <rect>
            <x>15</x>
-           <y>300</y>
+           <y>285</y>
            <width>150</width>
            <height>21</height>
           </rect>
@@ -454,9 +448,9 @@
          <property name="geometry">
           <rect>
            <x>80</x>
-           <y>325</y>
+           <y>313</y>
            <width>86</width>
-           <height>24</height>
+           <height>22</height>
           </rect>
          </property>
          <property name="maximum">
@@ -467,9 +461,9 @@
          <property name="geometry">
           <rect>
            <x>174</x>
-           <y>123</y>
+           <y>120</y>
            <width>192</width>
-           <height>321</height>
+           <height>301</height>
           </rect>
          </property>
          <property name="font">
@@ -614,7 +608,7 @@
           <property name="geometry">
            <rect>
             <x>16</x>
-            <y>290</y>
+            <y>260</y>
             <width>161</width>
             <height>23</height>
            </rect>
@@ -629,7 +623,7 @@
         <property name="geometry">
          <rect>
           <x>5</x>
-          <y>450</y>
+          <y>430</y>
           <width>371</width>
           <height>82</height>
          </rect>
@@ -4006,10 +4000,10 @@ QPushButton:disabled {
      <widget class="QComboBox" name="working_l1_cbox">
       <property name="geometry">
        <rect>
-        <x>205</x>
-        <y>5</y>
+        <x>6</x>
+        <y>4</y>
         <width>191</width>
-        <height>26</height>
+        <height>22</height>
        </rect>
       </property>
      </widget>
@@ -4017,36 +4011,10 @@ QPushButton:disabled {
       <property name="geometry">
        <rect>
         <x>205</x>
-        <y>30</y>
+        <y>4</y>
         <width>191</width>
-        <height>26</height>
+        <height>22</height>
        </rect>
-      </property>
-     </widget>
-     <widget class="QLabel" name="label">
-      <property name="geometry">
-       <rect>
-        <x>20</x>
-        <y>10</y>
-        <width>186</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Working Aimag / Duureg</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="label_2">
-      <property name="geometry">
-       <rect>
-        <x>20</x>
-        <y>35</y>
-        <width>191</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Working Soum</string>
       </property>
      </widget>
      <widget class="QLabel" name="error_label">
@@ -4081,122 +4049,6 @@ font: 75 14pt &quot;Helvetica&quot;;</string>
    </widget>
   </widget>
  </widget>
- <tabstops>
-  <tabstop>working_l1_cbox</tabstop>
-  <tabstop>working_l2_cbox</tabstop>
-  <tabstop>tabWidget</tabstop>
-  <tabstop>extent_rbutton</tabstop>
-  <tabstop>get_extent_button</tabstop>
-  <tabstop>extent_west_spinbox</tabstop>
-  <tabstop>extent_east_spinbox</tabstop>
-  <tabstop>extent_north_spinbox</tabstop>
-  <tabstop>extent_south_spinbox</tabstop>
-  <tabstop>admin_unit_rbutton</tabstop>
-  <tabstop>aimag_cbox</tabstop>
-  <tabstop>soum_cbox</tabstop>
-  <tabstop>bag_cbox</tabstop>
-  <tabstop>buffer_spinbox</tabstop>
-  <tabstop>street_line_edit</tabstop>
-  <tabstop>khashaa_line_edit</tabstop>
-  <tabstop>apply_button</tabstop>
-  <tabstop>remove_button</tabstop>
-  <tabstop>clear_b_box_button</tabstop>
-  <tabstop>from_date_edit</tabstop>
-  <tabstop>till_date_edit</tabstop>
-  <tabstop>infinity_check_box</tabstop>
-  <tabstop>temp_filter_apply_button</tabstop>
-  <tabstop>name_edit</tabstop>
-  <tabstop>personal_edit</tabstop>
-  <tabstop>state_reg_num_edit</tabstop>
-  <tabstop>mobile_num_edit</tabstop>
-  <tabstop>person_parcel_num_edit</tabstop>
-  <tabstop>person_application_num_edit</tabstop>
-  <tabstop>person_decision_num_edit</tabstop>
-  <tabstop>person_contract_num_edit</tabstop>
-  <tabstop>person_clear_button</tabstop>
-  <tabstop>person_find_button</tabstop>
-  <tabstop>person_results_twidget</tabstop>
-  <tabstop>person_add_button</tabstop>
-  <tabstop>person_edit_button</tabstop>
-  <tabstop>person_delete_button</tabstop>
-  <tabstop>parcel_num_edit</tabstop>
-  <tabstop>geo_id_edit</tabstop>
-  <tabstop>land_use_type_cbox</tabstop>
-  <tabstop>parcel_right_holder_name_edit</tabstop>
-  <tabstop>parcel_app_num_edit</tabstop>
-  <tabstop>parcel_decision_num_edit</tabstop>
-  <tabstop>parcel_contract_num_edit</tabstop>
-  <tabstop>parcel_clear_button</tabstop>
-  <tabstop>parcel_find_button</tabstop>
-  <tabstop>parcel_results_twidget</tabstop>
-  <tabstop>application_application_num_edit</tabstop>
-  <tabstop>status_cbox</tabstop>
-  <tabstop>office_in_charge_cbox</tabstop>
-  <tabstop>application_right_holder_name_edit</tabstop>
-  <tabstop>application_parcel_num_edit</tabstop>
-  <tabstop>application_decision_num_edit</tabstop>
-  <tabstop>application_contract_num_edit</tabstop>
-  <tabstop>application_clear_button</tabstop>
-  <tabstop>application_find_button</tabstop>
-  <tabstop>application_results_twidget</tabstop>
-  <tabstop>application_add_button</tabstop>
-  <tabstop>application_edit_button</tabstop>
-  <tabstop>application_delete_button</tabstop>
-  <tabstop>decision_num_edit</tabstop>
-  <tabstop>decision_date_cbox</tabstop>
-  <tabstop>decision_date</tabstop>
-  <tabstop>decision_right_holder_name_edit</tabstop>
-  <tabstop>decision_parcel_num_edit</tabstop>
-  <tabstop>decision_application_num_edit</tabstop>
-  <tabstop>decision_contract_num_edit</tabstop>
-  <tabstop>decision_clear_button</tabstop>
-  <tabstop>decision_find_button</tabstop>
-  <tabstop>decision_results_twidget</tabstop>
-  <tabstop>decision_add_button</tabstop>
-  <tabstop>decision_edit_button</tabstop>
-  <tabstop>decision_delete_button</tabstop>
-  <tabstop>case_no_edit</tabstop>
-  <tabstop>case_completion_date_checkbox</tabstop>
-  <tabstop>case_completion_date_edit</tabstop>
-  <tabstop>surveyed_by_company_cbox</tabstop>
-  <tabstop>surveyed_by_land_officer_cbox</tabstop>
-  <tabstop>finalized_by_cbox</tabstop>
-  <tabstop>case_parcel_no_edit</tabstop>
-  <tabstop>case_status_cbox</tabstop>
-  <tabstop>case_clear_button</tabstop>
-  <tabstop>case_find_button</tabstop>
-  <tabstop>case_results_twidget</tabstop>
-  <tabstop>case_create_button</tabstop>
-  <tabstop>case_revert_button</tabstop>
-  <tabstop>case_finalize_button</tabstop>
-  <tabstop>contract_num_edit</tabstop>
-  <tabstop>contract_date_cbox</tabstop>
-  <tabstop>contract_date</tabstop>
-  <tabstop>contract_right_holder_num_edit</tabstop>
-  <tabstop>contract_parcel_num_edit</tabstop>
-  <tabstop>contract_decision_num_edit</tabstop>
-  <tabstop>contract_application_num_edit</tabstop>
-  <tabstop>contract_clear_button</tabstop>
-  <tabstop>contract_find_button</tabstop>
-  <tabstop>contract_results_twidget</tabstop>
-  <tabstop>contract_add_button</tabstop>
-  <tabstop>contract_edit_button</tabstop>
-  <tabstop>contract_delete_button</tabstop>
-  <tabstop>record_record_num_edit</tabstop>
-  <tabstop>record_date_cbox</tabstop>
-  <tabstop>record_date_edit</tabstop>
-  <tabstop>record_right_holder_edit</tabstop>
-  <tabstop>record_parcel_num_edit</tabstop>
-  <tabstop>record_decision_num_edit</tabstop>
-  <tabstop>record_app_num_edit</tabstop>
-  <tabstop>record_clear_button</tabstop>
-  <tabstop>record_find_button</tabstop>
-  <tabstop>record_results_twidget</tabstop>
-  <tabstop>record_add_button</tabstop>
-  <tabstop>record_edit_button</tabstop>
-  <tabstop>record_delete_button</tabstop>
-  <tabstop>scrollArea</tabstop>
- </tabstops>
  <resources/>
  <connections/>
  <buttongroups>

@@ -26,6 +26,7 @@ from ..model.BsPerson import *
 from ..model.SdFtpPermission import *
 from ..model.SdFtpConnection import *
 from ..model.SdAutoNumbers import *
+from ..model.Constants import *
 from ftplib import FTP, error_perm
 import urllib
 import hashlib
@@ -391,7 +392,7 @@ class DatabaseUtils():
             if found_code:
                 schema_list.insert(0, "s" + first_code.strip())
 
-            session.execute("SET search_path to base, codelists, ub_data, admin_units, settings, pasture, public, data_soums_union, data_ub, sdplatform")
+            session.execute(set_search_path)
             session.commit()
 
         except DatabaseError, e:

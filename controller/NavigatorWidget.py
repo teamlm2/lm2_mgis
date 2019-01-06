@@ -336,13 +336,6 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         set_roles = self.session.query(SetRole).order_by(SetRole.user_name)
         soum_code = DatabaseUtils.working_l2_code()
         if set_roles is not None:
-            # for role in set_roles:
-            #     l2_code_list = role.restriction_au_level2.split(',')
-            #     if soum_code in l2_code_list:
-            #         # if role.user_name_real.find(restriction[1:]) != -1:
-            #         self.office_in_charge_cbox.addItem(role.surname + ", " + role.first_name, role)
-            #         self.next_officer_in_charge_cbox.addItem(role.surname + ", " + role.first_name, role)
-
             for setRole in set_roles:
                 l2_code_list = setRole.restriction_au_level2.split(',')
                 if soum_code in l2_code_list:
@@ -1246,15 +1239,20 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
 
     def __selected_parcel_id(self):
 
+        parcels = []
         selected_items = self.parcel_results_twidget.selectedItems()
 
-        if len(selected_items) != 1:
-            self.error_label.setText(self.tr("Only single selection allowed."))
-            return None
+        for item in selected_items:
+            parcel_no = item.data(Qt.UserRole)
+            parcels.append(parcel_no)
 
-        selected_item = selected_items[0]
-        parcel_no = selected_item.data(Qt.UserRole)
-        return parcel_no
+        # if len(selected_items) != 1:
+        #     self.error_label.setText(self.tr("Only single selection allowed."))
+        #     return None
+
+        # selected_item = selected_items[0]
+        # parcel_no = selected_item.data(Qt.UserRole)
+        return parcels
 
     def __selected_decision(self):
 
@@ -3061,7 +3059,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         elif self.tabWidget.currentWidget() == self.parcel_tab:
 
             parcel_id = self.__selected_parcel_id()
-            self.__zoom_to_parcel_ids([parcel_id])
+            self.__zoom_to_parcel_ids(parcel_id)
 
         elif self.tabWidget.currentWidget() == self.decision_tab:
 
@@ -3116,15 +3114,19 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
 
     def __zoom_to_parcel_ids(self, parcel_ids, layer_name = None):
 
+        print parcel_ids
         LayerUtils.deselect_all()
         is_temp = False
         if layer_name is None:
             for parcel_id in parcel_ids:
-                if len(parcel_id) == 12:
-                    layer_name = "ca_parcel"
+                if parcel_id:
+                    if len(parcel_id) == 12:
+                        layer_name = "ca_parcel"
+                    else:
+                        layer_name = "ca_tmp_parcel_view"
+                        is_temp = True
                 else:
-                    layer_name = "ca_tmp_parcel_view"
-                    is_temp = True
+                    layer_name = "ca_parcel"
 
         root = QgsProject.instance().layerTreeRoot()
         vlayer = LayerUtils.layer_by_data_source("data_soums_union", layer_name)
@@ -3159,6 +3161,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         exp_string = ""
 
         for parcel_id in parcel_ids:
+            print parcel_id
             if exp_string == "":
                 exp_string = "parcel_id = \'" + parcel_id  + "\'"
             else:
