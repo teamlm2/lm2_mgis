@@ -3114,7 +3114,6 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
 
     def __zoom_to_parcel_ids(self, parcel_ids, layer_name = None):
 
-        print parcel_ids
         LayerUtils.deselect_all()
         is_temp = False
         if layer_name is None:
@@ -3161,7 +3160,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         exp_string = ""
 
         for parcel_id in parcel_ids:
-            print parcel_id
+
             if exp_string == "":
                 exp_string = "parcel_id = \'" + parcel_id  + "\'"
             else:
@@ -13213,7 +13212,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         in_active_parcel_layer = LayerUtils.layer_by_data_source("data_soums_union", "view_inactive_parcel")
         if in_active_parcel_layer is None:
              mygroup = root.findGroup(u"Мэдээний хяналт")
-             vlayer = LayerUtils.load_layer_by_name_report("view_inactive_parcel", "parcel_id", restrictions)
+             vlayer = LayerUtils.load_union_layer_by_name("view_inactive_parcel", "gid")
              # vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) +"template\style/gt1_report.qml")
              vlayer.setLayerName(self.tr("In active parcels"))
              mygroup.addLayer(vlayer)

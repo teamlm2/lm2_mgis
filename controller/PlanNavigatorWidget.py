@@ -20,6 +20,7 @@ from ..model.LdProjectPlan import *
 from ..model.ClPlanDecisionLevel import *
 from ..model.ClPlanStatusType import *
 from ..model.ClPlanType import *
+from ..model.LdProjectPlanStatus import *
 from ..utils.DatabaseUtils import *
 from ..utils.PluginUtils import *
 from ..model.DatabaseHelper import *
@@ -673,19 +674,23 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
                 filter_is_set = True
                 values = values.filter(LdProjectPlan.plan_decision_level == self.decision_level_cbox.itemData(self.decision_level_cbox.currentIndex()))
 
-        # if self.office_in_charge_cbox.currentIndex() != -1:
-        #     if not self.office_in_charge_cbox.itemData(self.office_in_charge_cbox.currentIndex()) == -1:
-        #         filter_is_set = True
-        #         officer = self.office_in_charge_cbox.itemData(self.office_in_charge_cbox.currentIndex())
-        #
-        #         applications = applications.filter(ApplicationSearch.officer_in_charge == officer)
+        if self.office_in_charge_cbox.currentIndex() != -1:
+            if not self.office_in_charge_cbox.itemData(self.office_in_charge_cbox.currentIndex()) == -1:
+                filter_is_set = True
+                officer = self.office_in_charge_cbox.itemData(self.office_in_charge_cbox.currentIndex())
 
-        # if self.next_officer_in_charge_cbox.currentIndex() != -1:
-        #     if not self.next_officer_in_charge_cbox.itemData(self.next_officer_in_charge_cbox.currentIndex()) == -1:
-        #         filter_is_set = True
-        #         officer = self.next_officer_in_charge_cbox.itemData(self.next_officer_in_charge_cbox.currentIndex())
-        #         applications = applications.filter(ApplicationSearch.next_officer_in_charge == officer)
-        #
+                values = values.join(LdProjectPlanStatus, LdProjectPlan.plan_draft_id == LdProjectPlanStatus.plan_draft_id). \
+                    filter(LdProjectPlanStatus.status == LdProjectPlan.last_status_type). \
+                    filter(LdProjectPlanStatus.officer_in_charge == officer)
+
+        if self.next_officer_in_charge_cbox.currentIndex() != -1:
+            if not self.next_officer_in_charge_cbox.itemData(self.next_officer_in_charge_cbox.currentIndex()) == -1:
+                filter_is_set = True
+                officer = self.next_officer_in_charge_cbox.itemData(self.next_officer_in_charge_cbox.currentIndex())
+
+                values = values.join(LdProjectPlanStatus, LdProjectPlan.plan_draft_id == LdProjectPlanStatus.plan_draft_id). \
+                    filter(LdProjectPlanStatus.status == LdProjectPlan.last_status_type). \
+                    filter(LdProjectPlanStatus.next_officer_in_charge == officer)
 
         if self.plan_date_checkbox.isChecked():
             filter_is_set = True
@@ -710,7 +715,7 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
             plan_type = "" if not value.plan_type_ref else value.plan_type_ref.description
 
             item = QTableWidgetItem(str(value.plan_draft_no) + " ( " + unicode(plan_type) + " )")
-            item.setIcon(QIcon(QPixmap(":/plugins/lm2/application.png")))
+            item.setIcon(QIcon(QPixmap(":/plugins/lm2/land_plan.png")))
             item.setData(Qt.UserRole, value.plan_draft_id)
             item.setData(Qt.UserRole+1, value.plan_draft_no)
             self.plan_results_twidget.insertRow(count)
@@ -1402,22 +1407,15 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
         id = item.data(Qt.UserRole)
 
         try:
-            app_result = self.session.query(ApplicationSearch).filter(ApplicationSearch.app_id == id).one()
+            result = self.session.query(LdProjectPlan).filter(LdProjectPlan.plan_draft_id == id).one()
 
-            self.application_application_num_edit.setText(app_result.app_no)
-            self.application_right_holder_name_edit.setText(app_result.first_name)
-            self.application_parcel_num_edit.setText(app_result.parcel_id)
-            self.application_decision_num_edit.setText(app_result.decision_no)
-            if app_result.contract_no != None:
-                self.application_contract_num_edit.setText(app_result.contract_no)
-            else:
-                self.application_contract_num_edit.setText(app_result.record_no)
-            self.personal_application_edit.setText(app_result.person_register)
+            self.plan_num_edit.setText(result.plan_draft_no)
 
-            self.app_type_cbox.setCurrentIndex(self.app_type_cbox.findData(app_result.app_type))
-            self.status_cbox.setCurrentIndex(self.status_cbox.findData(app_result.status))
-            self.office_in_charge_cbox.setCurrentIndex(self.office_in_charge_cbox.findData(app_result.officer_in_charge))
-            self.next_officer_in_charge_cbox.setCurrentIndex(self.next_officer_in_charge_cbox.findData(app_result.next_officer_in_charge))
+            self.plan_type_cbox.setCurrentIndex(self.plan_type_cbox.findData(result.plan_type))
+            self.status_cbox.setCurrentIndex(self.status_cbox.findData(result.last_status_type))
+            self.decision_level_cbox.setCurrentIndex(self.decision_level_cbox.findData(result.last_status_type))
+            # self.office_in_charge_cbox.setCurrentIndex(self.office_in_charge_cbox.findData(result.plan_decision_level))
+            # self.next_officer_in_charge_cbox.setCurrentIndex(self.next_officer_in_charge_cbox.findData(result.next_officer_in_charge))
 
         except SQLAlchemyError, e:
             PluginUtils.show_error(self, self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))

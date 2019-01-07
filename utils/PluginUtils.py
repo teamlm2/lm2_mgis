@@ -53,8 +53,8 @@ class PluginUtils(object):
         application_status.status_date = date.today()
         date_time_string = QDateTime.currentDateTime().toString(Constants.DATABASE_DATETIME_FORMAT)
         application.app_timestamp = datetime.strptime(date_time_string, Constants.PYTHON_DATETIME_FORMAT)
-        # application.created_at = datetime.strptime(date_time_string, Constants.PYTHON_DATETIME_FORMAT)
-        # application.updated_at = datetime.strptime(date_time_string, Constants.PYTHON_DATETIME_FORMAT)
+        application.created_at = datetime.strptime(date_time_string, Constants.PYTHON_DATETIME_FORMAT)
+        application.updated_at = datetime.strptime(date_time_string, Constants.PYTHON_DATETIME_FORMAT)
         application.app_type = 1
         application.au2 = DatabaseUtils.current_working_soum_schema()
         application.au1 = DatabaseUtils.working_l1_code()
