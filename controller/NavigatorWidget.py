@@ -13448,18 +13448,18 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
 
         root = QgsProject.instance().layerTreeRoot()
         mygroup = root.findGroup(u"Үнэлгээ, төлбөрийн бүс")
-        vlayer = LayerUtils.layer_by_data_source("settings", "set_view_fee_zone")
+        vlayer = LayerUtils.layer_by_data_source("data_estimate", "set_view_fee_zone")
         if vlayer is None:
-            vlayer = LayerUtils.load_layer_base_layer("set_view_fee_zone", "zone_id", "settings")
+            vlayer = LayerUtils.load_layer_base_layer("set_view_fee_zone", "zone_id", "data_estimate")
         vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) +"/template\style/set_fee_zone.qml")
         vlayer.setLayerName(self.tr("Fee Zone"))
         myalayer = root.findLayer(vlayer.id())
         if myalayer is None:
             mygroup.addLayer(vlayer)
 
-        vlayer = LayerUtils.layer_by_data_source("settings", "set_view_tax_zone")
+        vlayer = LayerUtils.layer_by_data_source("data_estimate", "set_view_tax_zone")
         if vlayer is None:
-            vlayer = LayerUtils.load_layer_base_layer("set_view_tax_zone", "zone_id", "settings")
+            vlayer = LayerUtils.load_layer_base_layer("set_view_tax_zone", "zone_id", "data_estimate")
         vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) +"/template\style/set_tax_and_price_zone.qml")
         vlayer.setLayerName(self.tr("Tax Zone"))
         myalayer = root.findLayer(vlayer.id())
@@ -13514,7 +13514,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
             order_by(CtApplicationStatus.app_status_id.desc()).first()
 
         max_status = str(max_status).split(",")[0][1:]
-
+        print max_status
         if max_status == '10':
             PluginUtils.show_message(self, self.tr("Information"),
                                      self.tr("Already send to UBEG."))
@@ -13578,7 +13578,9 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
             vlayer = LayerUtils.load_layer_base_layer("pa_valuation_level_view", "id", "data_estimate")
         vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/pa_valuation_level.qml")
         vlayer.setLayerName(self.tr("Valuation level"))
-        mygroup.addLayer(vlayer)
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            mygroup.addLayer(vlayer)
 
         root = QgsProject.instance().layerTreeRoot()
         mygroup = root.findGroup(u"Үнэлгээ, төлбөрийн бүс")
@@ -13588,18 +13590,6 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         vlayer.loadNamedStyle(
             str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/pa_valuation_agriculture_level.qml")
         vlayer.setLayerName(self.tr("Valuation Agrivulture level"))
-        mygroup.addLayer(vlayer)
-
-    @pyqtSlot()
-    def on_test_button_clicked(self):
-
-        if self.navigatorTestWidget:
-            self.plugin.iface.removeDockWidget(self.navigatorTestWidget)
-            del self.navigatorTestWidget
-
-        self.navigatorTestWidget = NavigatorMainWidget(self)
-        self.plugin.iface.addDockWidget(Qt.RightDockWidgetArea, self.navigatorTestWidget)
-        # QObject.connect(self.navigatorWidget, SIGNAL("visibilityChanged(bool)"), self.__navigatorVisibilityChanged)
-        self.navigatorTestWidget.show()
-
-        self.hide()
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            mygroup.addLayer(vlayer)

@@ -16,6 +16,7 @@ from ..utils.SessionHandler import SessionHandler
 from ..utils.FileUtils import FileUtils
 from ..model.CaBuilding import *
 from ..model.CtApplication import *
+from ..model.ApplicationSearch import *
 from ..model.AuLevel1 import *
 from ..model.AuLevel2 import *
 from ..model.AuLevel3 import *
@@ -84,20 +85,17 @@ class PrintDialog(QDialog, Ui_PrintDialog):
         self.setWindowTitle(self.tr('Print map for parcel: <{0}>. Select the right holder.'.format(self.__parcel_no)))
         self.right_holder_twidget.clearContents()
         # self.session = SessionHandler().session_instance()
-        ct_applications = self.session.query(CtApplication).filter(CtApplication.parcel == self.__parcel_no).all()
+
+        ct_applications = self.session.query(CtApplication).filter(CtApplication.parcel.ilike(self.__parcel_no.strip())).all()
 
         for application in ct_applications:
-
             if application.contracts.count() > 0:
                 for contract_role in application.contracts:
-
                     if contract_role.role == Constants.APPLICATION_ROLE_CREATES:
-
                         contract = contract_role.contract_ref
                         # if contract.cancellation_date is None:
                         for stakeholder in application.stakeholders:
                             person = stakeholder.person_ref
-
                             if stakeholder.role == Constants.APPLICANT_ROLE_CODE or stakeholder.role == Constants.REMAINING_OWNER_CODE or stakeholder.role == Constants.NEW_RIGHT_HOLDER_CODE:
                                 # self.__add_contract_person(1,contract.status, contract.contract_no, contract.contract_date, application, person)
                                     if application.app_type == 2:
@@ -115,10 +113,8 @@ class PrintDialog(QDialog, Ui_PrintDialog):
                                         self.__add_contract_person(1, contract.status, contract.contract_no,
                                                                    contract.contract_date, application, person)
             else:
-
                 for stakeholder in application.stakeholders:
                     person = stakeholder.person_ref
-
                     if stakeholder.role == Constants.APPLICANT_ROLE_CODE or stakeholder.role == Constants.REMAINING_OWNER_CODE or stakeholder.role == Constants.NEW_RIGHT_HOLDER_CODE:
                         if application.app_type == 2:
                             if stakeholder.role == Constants.REMAINING_OWNER_CODE:

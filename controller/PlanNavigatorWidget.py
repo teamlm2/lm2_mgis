@@ -146,12 +146,12 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
         self.zoom_to_parcel_action.triggered.connect(self.on_zoom_to_parcel_action_clicked)
         self.copy_number_action.triggered.connect(self.on_copy_number_action_clicked)
 
-        self.app_context_menu = QMenu()
+        self.plan_context_menu = QMenu()
 
-        self.app_context_menu.addAction(self.zoom_to_parcel_action)
-        self.app_context_menu.addSeparator()
-        self.app_context_menu.addAction(self.copy_number_action)
-        self.app_context_menu.addSeparator()
+        self.plan_context_menu.addAction(self.zoom_to_parcel_action)
+        self.plan_context_menu.addSeparator()
+        self.plan_context_menu.addAction(self.copy_number_action)
+        self.plan_context_menu.addSeparator()
 
         self.plan_results_twidget.setColumnCount(1)
         self.plan_results_twidget.horizontalHeader().setResizeMode(0, QHeaderView.Stretch)
@@ -886,20 +886,10 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
     @pyqtSlot(QPoint)
     def on_custom_context_menu_requested(self, point):
 
-        if self.tabWidget.currentWidget() == self.parcel_tab:
-            item = self.parcel_results_twidget.itemAt(point)
-            if item is None: return
-            self.context_menu.exec_(self.parcel_results_twidget.mapToGlobal(point))
-
-        elif self.tabWidget.currentWidget() == self.parcel_tab:
-            item = self.parcel_results_twidget.itemAt(point)
-            if item is None: return
-            self.context_menu.exec_(self.parcel_results_twidget.mapToGlobal(point))
-
-        elif self.tabWidget.currentWidget() == self.application_tab:
+        if self.tabWidget.currentWidget() == self.plan_tab:
             item = self.plan_results_twidget.itemAt(point)
             if item is None: return
-            self.app_context_menu.exec_(self.plan_results_twidget.mapToGlobal(point))
+            self.plan_context_menu.exec_(self.plan_results_twidget.mapToGlobal(point))
 
         elif self.tabWidget.currentWidget() == self.maintenance_tab:
             item = self.case_results_twidget.itemAt(point)
@@ -1589,6 +1579,16 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
         vlayer.setLayerName(self.tr("Valuation Agrivulture level"))
         mygroup.addLayer(vlayer)
 
-
+    @pyqtSlot()
+    def on_plan_edit_button_clicked(self):
         
+        if self.navigatorTestWidget:
+            self.plugin.iface.removeDockWidget(self.navigatorTestWidget)
+            del self.navigatorTestWidget
 
+        self.navigatorTestWidget = NavigatorMainWidget(self)
+        self.plugin.iface.addDockWidget(Qt.RightDockWidgetArea, self.navigatorTestWidget)
+        # QObject.connect(self.navigatorWidget, SIGNAL("visibilityChanged(bool)"), self.__navigatorVisibilityChanged)
+        self.navigatorTestWidget.show()
+
+        self.hide()

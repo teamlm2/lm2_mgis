@@ -48,7 +48,7 @@ class Ui_PlanNavigatorWidget(object):
         self.scrollArea.setWidgetResizable(False)
         self.scrollArea.setObjectName(_fromUtf8("scrollArea"))
         self.scrollAreaWidgetContents = QtGui.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, -33, 419, 664))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 419, 664))
         self.scrollAreaWidgetContents.setObjectName(_fromUtf8("scrollAreaWidgetContents"))
         self.tabWidget = QtGui.QTabWidget(self.scrollAreaWidgetContents)
         self.tabWidget.setGeometry(QtCore.QRect(6, 30, 386, 561))

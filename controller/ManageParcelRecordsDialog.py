@@ -31,6 +31,7 @@ class ManageParcelRecordsDialog(QDialog, Ui_ManageParcelRecordsDialog):
 
     def __setup_combo_boxes(self):
 
+        parcel_id = None
         session = SessionHandler().session_instance()
         parcelTypeList = []
 
@@ -44,25 +45,25 @@ class ManageParcelRecordsDialog(QDialog, Ui_ManageParcelRecordsDialog):
             parcel_id = attr[0]
 
         try:
-            session = SessionHandler().session_instance()
-            parcel = session.query(CaParcel).filter(CaParcel.parcel_id == parcel_id).one()
-            if parcel.landuse != None:
-                landuse = session.query(ClLanduseType).filter(ClLanduseType.code == parcel.landuse).one()
+            if parcel_id:
+                parcel = session.query(CaParcel).filter(CaParcel.parcel_id == parcel_id).one()
+                if parcel.landuse != None:
+                    landuse = session.query(ClLanduseType).filter(ClLanduseType.code == parcel.landuse).one()
 
-                if parcel.landuse == 2204 or parcel.landuse == 2205 or parcel.landuse == 2206:
-                    parcelTypeList = session.query(VaTypeParcel).filter(VaTypeParcel.code == 10).all()
-                elif landuse.code2 == 11 or landuse.code2 == 12 or landuse.code2 == 13 or landuse.code2 == 14 \
-                        or landuse.code2 == 15 or landuse.code2 == 16 or landuse.code2 == 17:
-                    parcelTypeList = session.query(VaTypeParcel).filter(VaTypeParcel.code == 40).all()
-                elif landuse.code2 == 21 or landuse.code2 == 24 or landuse.code2 == 25 or landuse.code == 2201 \
-                        or landuse.code == 2202 or landuse.code == 2203:
-                    parcelTypeList = session.query(VaTypeParcel).filter(VaTypeParcel.code == 20).all()
-                elif landuse.code2 == 23 or landuse.code2 == 26:
-                    parcelTypeList = session.query(VaTypeParcel).filter(VaTypeParcel.code == 30).all()
-                else:
-                    self.addButton.setEnabled(False)
-                    self.editButton.setEnabled(False)
-                    self.deleteButton.setEnabled(False)
+                    if parcel.landuse == 2204 or parcel.landuse == 2205 or parcel.landuse == 2206:
+                        parcelTypeList = session.query(VaTypeParcel).filter(VaTypeParcel.code == 10).all()
+                    elif landuse.code2 == 11 or landuse.code2 == 12 or landuse.code2 == 13 or landuse.code2 == 14 \
+                            or landuse.code2 == 15 or landuse.code2 == 16 or landuse.code2 == 17:
+                        parcelTypeList = session.query(VaTypeParcel).filter(VaTypeParcel.code == 40).all()
+                    elif landuse.code2 == 21 or landuse.code2 == 24 or landuse.code2 == 25 or landuse.code == 2201 \
+                            or landuse.code == 2202 or landuse.code == 2203:
+                        parcelTypeList = session.query(VaTypeParcel).filter(VaTypeParcel.code == 20).all()
+                    elif landuse.code2 == 23 or landuse.code2 == 26:
+                        parcelTypeList = session.query(VaTypeParcel).filter(VaTypeParcel.code == 30).all()
+                    else:
+                        self.addButton.setEnabled(False)
+                        self.editButton.setEnabled(False)
+                        self.deleteButton.setEnabled(False)
         except SQLAlchemyError, e:
             QMessageBox.information(self, QApplication.translate("LM2", "Sql Error"), e.message)
 
