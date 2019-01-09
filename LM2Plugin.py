@@ -276,6 +276,7 @@ class LM2Plugin:
         self.pastureWidget = None
         self.parcelMpaInfoWidget = None
         self.planWidget = None
+        self.planDetailWidget = None
         self.removeLayers()
         self.__set_menu_visibility()
         self.__setup_slots()

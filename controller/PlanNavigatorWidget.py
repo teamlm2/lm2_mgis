@@ -24,7 +24,7 @@ from ..model.LdProjectPlanStatus import *
 from ..utils.DatabaseUtils import *
 from ..utils.PluginUtils import *
 from ..model.DatabaseHelper import *
-
+from ..controller.PlanDetailWidget import *
 # from ..LM2Plugin import *
 from datetime import timedelta
 from xlsxwriter.utility import xl_rowcol_to_cell, xl_col_to_name
@@ -53,7 +53,8 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
         self.session = SessionHandler().session_instance()
 
         self.userSettings = None
-
+        self.planDetailWidget = None
+        self.current_dialog = None
         self.is_au_level2 = False
         self.__setup_combo_boxes()
         self.__setup_change_combo_boxes()
@@ -81,7 +82,6 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
     def __setup_combo_boxes(self):
 
         try:
-            PluginUtils.populate_au_level1_cbox(self.aimag_cbox)
             PluginUtils.populate_au_level1_cbox(self.working_l1_cbox, False)
 
             l1_code = self.working_l1_cbox.itemData(self.working_l1_cbox.currentIndex(), Qt.UserRole)
@@ -171,28 +171,6 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
         self.case_results_twidget.setContextMenuPolicy(Qt.CustomContextMenu)
         self.case_results_twidget.customContextMenuRequested.connect(self.on_custom_context_menu_requested)
 
-    @pyqtSlot(int)
-    def on_aimag_cbox_currentIndexChanged(self, index):
-
-        l1_code = self.aimag_cbox.itemData(index)
-
-        self.soum_cbox.clear()
-        self.bag_cbox.clear()
-
-        if l1_code == -1 or not l1_code:
-            return
-        elif l1_code == 01:
-            PluginUtils.populate_au_level2_cbox(self.soum_cbox, l1_code)
-        else:
-            try:
-                if l1_code.startswith('1') or l1_code.startswith('01'):
-                    PluginUtils.populate_au_level3_cbox(self.bag_cbox, l1_code)
-                else:
-                    PluginUtils.populate_au_level2_cbox(self.soum_cbox, l1_code)
-            except SQLAlchemyError, e:
-                PluginUtils.show_message(self, self.tr("Sql Error"), e.message)
-                return
-
     def __working_l1_changed(self, index):
 
         l1_code = self.working_l1_cbox.itemData(index)
@@ -208,70 +186,6 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
             self.rollback_to_savepoint()
             PluginUtils.show_message(self,  self.tr("Sql Error"), e.message)
             return
-
-    @pyqtSlot(int)
-    def on_soum_cbox_currentIndexChanged(self, index):
-
-        l2_code = self.soum_cbox.itemData(index)
-
-        if l2_code == -1 or not l2_code:
-            return
-        else:
-            try:
-                PluginUtils.populate_au_level3_cbox(self.bag_cbox, l2_code)
-            except SQLAlchemyError, e:
-                PluginUtils.show_message(self, self.tr("Sql Error"), e.message)
-
-    @pyqtSlot(int)
-    def on_bag_cbox_currentIndexChanged(self, index):
-
-        l3_code = self.bag_cbox.itemData(index)
-
-        if l3_code == -1 or not l3_code:
-            return
-        else:
-            try:
-                # Streets
-                street_names = []
-                for street_name in self.session.query(CaParcel.address_streetname).distinct().filter(CaParcel.geometry.ST_Within(AuLevel3.geometry)).filter(AuLevel3.code == l3_code).order_by(CaParcel.address_streetname):
-                    if street_name[0]:
-                        street_names.append(street_name[0])
-
-                self.street_model = QStringListModel(street_names)
-
-                self.street_proxy_model = QSortFilterProxyModel()
-                self.street_proxy_model.setSourceModel(self.street_model)
-
-                self.street_completer = QCompleter(self.street_proxy_model, self,
-                                                   activated=self.on_street_completer_activated)
-                self.street_completer.setCompletionMode(QCompleter.PopupCompletion)
-
-                self.street_line_edit.setCompleter(self.street_completer)
-                self.street_line_edit.textEdited.connect(self.street_proxy_model.setFilterFixedString)
-
-                # Khashaas
-                khashaas = []
-                for khashaa in self.session.query(CaParcel.address_khashaa).distinct()\
-                                .filter(CaParcel.geometry.ST_Within(AuLevel3.geometry))\
-                                .filter(AuLevel3.code == l3_code).order_by(CaParcel.address_khashaa):
-
-                    if khashaa[0]:
-                        khashaas.append(khashaa[0])
-
-                self.khashaa_model = QStringListModel(khashaas)
-                self.khashaa_proxy_model = QSortFilterProxyModel()
-                self.khashaa_proxy_model.setSourceModel(self.khashaa_model)
-
-                self.khashaa_completer = QCompleter(self.khashaa_proxy_model, self,
-                                                    activated=self.on_khashaa_completer_activated)
-                self.khashaa_completer.setCompletionMode(QCompleter.PopupCompletion)
-
-                self.khashaa_line_edit.setCompleter(self.khashaa_completer)
-                self.khashaa_line_edit.textEdited.connect(self.khashaa_proxy_model.setFilterFixedString)
-
-            except SQLAlchemyError, e:
-                PluginUtils.show_message(self, self.tr("Sql Error"), e.message)
-                return
 
     @pyqtSlot(str)
     def on_street_completer_activated(self, text):
@@ -349,34 +263,6 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
         self.extent_west_spinbox.setValue(rect.xMinimum())
         self.extent_north_spinbox.setValue(rect.yMaximum())
         self.extent_south_spinbox.setValue(rect.yMinimum())
-
-    @pyqtSlot(bool)
-    def on_admin_unit_rbutton_toggled(self, state):
-
-        if state:
-            self.aimag_cbox.setEnabled(True)
-            self.soum_cbox.setEnabled(True)
-            self.bag_cbox.setEnabled(True)
-            self.street_line_edit.setEnabled(True)
-            self.khashaa_line_edit.setEnabled(True)
-            self.buffer_spinbox.setEnabled(True)
-            self.extent_north_spinbox.setEnabled(False)
-            self.extent_south_spinbox.setEnabled(False)
-            self.extent_west_spinbox.setEnabled(False)
-            self.extent_east_spinbox.setEnabled(False)
-            self.get_extent_button.setEnabled(False)
-        else:
-            self.extent_north_spinbox.setEnabled(True)
-            self.extent_south_spinbox.setEnabled(True)
-            self.extent_west_spinbox.setEnabled(True)
-            self.extent_east_spinbox.setEnabled(True)
-            self.get_extent_button.setEnabled(True)
-            self.aimag_cbox.setEnabled(False)
-            self.soum_cbox.setEnabled(False)
-            self.bag_cbox.setEnabled(False)
-            self.street_line_edit.setEnabled(False)
-            self.khashaa_line_edit.setEnabled(False)
-            self.buffer_spinbox.setEnabled(False)
 
     @pyqtSlot()
     def on_clear_b_box_button_clicked(self):
@@ -458,12 +344,9 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
                 if len(subset_string) > 0:
                     subset_string = ' AND ' + subset_string
 
-            if self.admin_unit_rbutton.isChecked():
-                if core_subset_string is None:
-                    core_subset_string = self.__getAdminUnitSubsetString(geometry_column)
-            else:
-                if core_subset_string is None:
-                    core_subset_string = self.__getBBoxSubsetString(layer)
+
+            if core_subset_string is None:
+                core_subset_string = self.__getBBoxSubsetString(layer)
 
             subset_string = core_subset_string + subset_string
             layer.setSubsetString(subset_string)
@@ -493,74 +376,6 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
         geometry_column = uri.geometryColumn()
 
         return "ST_Within({0}, ST_SetSRID(ST_MakeBox2D(ST_Point({1}), ST_Point({2})), {3}))".format(geometry_column, point1.toString(), point2.toString(), srs_id)
-
-    def __getAdminUnitSubsetString(self, geometry_column):
-
-        au_table_name = 'au_level1'
-        au_code = self.aimag_cbox.itemData(self.aimag_cbox.currentIndex())
-        current_buffer = self.buffer_spinbox.value()
-        extent = []
-
-        if self.soum_cbox.currentIndex() > 0:  # '*'
-            au_table_name = 'au_level2'
-            au_code = self.soum_cbox.itemData(self.soum_cbox.currentIndex())
-
-        if self.bag_cbox.currentIndex() > 0:  # '*'
-            au_table_name = 'au_level3'
-            au_code = self.bag_cbox.itemData(self.bag_cbox.currentIndex())
-            khashaa = self.khashaa_line_edit.text().strip()
-            street = self.street_line_edit.text().strip()
-
-            if len(khashaa) > 0 or len(street) > 0:
-                try:
-
-                    if len(khashaa) > 0 and len(street) > 0:
-                        extent = self.session.query(CaParcel.geometry.ST_Extent()).\
-                            filter(CaParcel.address_khashaa == khashaa).\
-                            filter(CaParcel.address_streetname == street).\
-                            filter(CaParcel.geometry.ST_Within(AuLevel3.geometry)).\
-                            filter(AuLevel3.code == au_code).one()
-
-                    elif len(khashaa) > 0 and len(street) == 0:
-                        extent = self.session.query(CaParcel.geometry.ST_Extent()).\
-                            filter(CaParcel.address_khashaa == khashaa).\
-                            filter(CaParcel.geometry.ST_Within(AuLevel3.geometry)).\
-                            filter(AuLevel3.code == au_code).one()
-
-                    else:
-                        extent = self.session.query(CaParcel.geometry.ST_Extent()).\
-                            filter(CaParcel.address_streetname == street).\
-                            filter(CaParcel.geometry.ST_Within(AuLevel3.geometry)).\
-                            filter(AuLevel3.code == au_code).one()
-                except SQLAlchemyError, e:
-                    PluginUtils.show_message(self,  self.tr("Sql Error"), e.message)
-                    return None
-
-                if extent[0]:
-                    box_text = extent[0]
-                    point1 = box_text[box_text.find('(')+1:box_text.find(')')].split(',')[0]
-                    point2 = box_text[box_text.find('(')+1:box_text.find(')')].split(',')[1]
-
-                    if current_buffer == 0:
-                        return "ST_Within({0}, ST_Buffer(ST_SetSRID(ST_MakeBox2D(ST_PointFromText('POINT({1})'), " \
-                               "ST_PointFromText('POINT({2})')), {3}), 0.00005))".format(geometry_column, point1, point2, 4326)
-                    else:
-
-                        where_clause = "ST_Within(ST_Transform({0}, base.find_utm_srid(St_Centroid({0}))), ST_Buffer(ST_Transform(ST_SetSRID(ST_MakeBox2D(ST_PointFromText('POINT({1})'), " \
-                                "ST_PointFromText('POINT({2})')), {3}), base.find_utm_srid(St_Centroid({0}))), {4}))"\
-                                .format(geometry_column, point1, point2, 4326, current_buffer)
-
-                        return where_clause
-
-        if current_buffer != 0:
-            subset_string = "ST_Transform(GEOMETRY, base.find_utm_srid(ST_Centroid(GEOMETRY))) && (SELECT st_buffer(ST_Transform({0}, base.find_utm_srid(ST_Centroid({0}))), {3}) FROM admin_units.{1} WHERE code = '{2}')"\
-                .format(geometry_column, au_table_name, au_code, current_buffer)
-            #QMessageBox.information(None, "test", subset_string)
-        else:
-            subset_string = "{0} && (SELECT {0} FROM admin_units.{1} WHERE code = '{2}')"\
-                .format(geometry_column, au_table_name, au_code)
-
-        return subset_string
 
     @pyqtSlot()
     def on_temp_filter_apply_button_clicked(self):
@@ -1449,11 +1264,6 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
         self.before_date = (str(sbox_value) + '-01-01')
         self.before_date = datetime.strptime(self.before_date, "%Y-%m-%d").date()
 
-    def __setup_combo_box(self):
-
-        PluginUtils.populate_au_level1_cbox(self.aimag_cbox,True,True,False)
-
-
     @pyqtSlot()
     def on_au_level1_button_clicked(self):
 
@@ -1581,14 +1391,33 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
 
     @pyqtSlot()
     def on_plan_edit_button_clicked(self):
-        
-        if self.navigatorTestWidget:
-            self.plugin.iface.removeDockWidget(self.navigatorTestWidget)
-            del self.navigatorTestWidget
 
-        self.navigatorTestWidget = NavigatorMainWidget(self)
-        self.plugin.iface.addDockWidget(Qt.RightDockWidgetArea, self.navigatorTestWidget)
-        # QObject.connect(self.navigatorWidget, SIGNAL("visibilityChanged(bool)"), self.__navigatorVisibilityChanged)
-        self.navigatorTestWidget.show()
+        if DialogInspector().dialog_visible():
+            return
 
-        self.hide()
+        plan_instance = self.__selected_plan()
+        if plan_instance is not None:
+            self.current_dialog = PlanDetailWidget(plan_instance, self, True, self.plugin.iface.mainWindow())
+            self.plugin.iface.addDockWidget(Qt.RightDockWidgetArea, self.current_dialog)
+            self.current_dialog.show()
+            self.hide()
+        # DatabaseUtils.set_working_schema()
+
+    def __selected_plan(self):
+
+        selected_items = self.plan_results_twidget.selectedItems()
+
+        if len(selected_items) != 1:
+            self.error_label.setText(self.tr("Only single selection allowed."))
+            return None
+
+        selected_item = selected_items[0]
+        plan_id = selected_item.data(Qt.UserRole)
+
+        try:
+            plan_instance = self.session.query(LdProjectPlan).filter_by(plan_draft_id=plan_id).one()
+        except SQLAlchemyError, e:
+            PluginUtils.show_message(self, self.tr("LM2", "Sql Error"), e.message)
+            return None
+
+        return plan_instance
