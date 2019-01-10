@@ -47,10 +47,14 @@ class SetRole(Base):
     department = Column(Integer, ForeignKey('hr_department.department_id'))
     department_ref = relationship("SdDepartment")
 
+    working_plan_id = Column(Integer, ForeignKey('ld_project_plan.plan_draft_id'))
+    working_plan_ref = relationship("LdProjectPlan")
+
     def __init__(self, user_name=None, surname=None, first_name=None, position=None, employee_type=None,
                  cancel_reason=None, phone=None, mac_addresses=None, user_name_real=None,
                  restriction_au_level1=None, restriction_au_level2=None, restriction_au_level3=None, pa_from=None,
-                 pa_till=None, is_active=None, user_register=None, email=None, working_au_level2 = None, organization = None, department = None):
+                 pa_till=None, is_active=None, user_register=None, email=None, working_au_level2 = None, organization = None,
+                 department = None, working_plan_id = None):
 
         self.user_name = user_name
         self.user_name_real = user_name_real
@@ -72,3 +76,4 @@ class SetRole(Base):
         self.working_au_level2 = working_au_level2
         self.organization = organization
         self.department = department
+        self.working_plan_id = working_plan_id

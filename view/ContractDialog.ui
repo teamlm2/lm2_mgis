@@ -78,7 +78,7 @@
     </rect>
    </property>
    <property name="currentIndex">
-    <number>2</number>
+    <number>4</number>
    </property>
    <widget class="QWidget" name="tab">
     <attribute name="title">
@@ -1314,6 +1314,19 @@
       </property>
       <property name="text">
        <string>Select base fee</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="refresh_fee_button">
+      <property name="geometry">
+       <rect>
+        <x>630</x>
+        <y>20</y>
+        <width>111</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Calculate Fee</string>
       </property>
      </widget>
     </widget>

@@ -1221,9 +1221,22 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
             self.decision_level_cbox.setCurrentIndex(self.decision_level_cbox.findData(result.last_status_type))
             # self.office_in_charge_cbox.setCurrentIndex(self.office_in_charge_cbox.findData(result.plan_decision_level))
             # self.next_officer_in_charge_cbox.setCurrentIndex(self.next_officer_in_charge_cbox.findData(result.next_officer_in_charge))
-
+            self.__change_current_plan()
         except SQLAlchemyError, e:
             PluginUtils.show_error(self, self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+            return
+
+    def __change_current_plan(self):
+
+        try:
+            role = DatabaseUtils.current_user()
+            if role:
+                role.working_plan_id = self.__selected_plan().plan_draft_id
+                self.commit()
+
+        except SQLAlchemyError, e:
+            self.rollback_to_savepoint()
+            PluginUtils.show_message(self,  self.tr("Sql Error"), e.message)
             return
 
     @pyqtSlot(QTableWidgetItem)
@@ -1421,3 +1434,22 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
             return None
 
         return plan_instance
+
+    @pyqtSlot()
+    def on_current_view_button_clicked(self):
+
+        print 'ok'
+        root = QgsProject.instance().layerTreeRoot()
+        mygroup = root.findGroup(u"ГЗБТөлөвлгөө")
+        vlayer = LayerUtils.layer_by_data_source("data_plan", "ld_view_project_main_zone_parcel_polygon")
+        print vlayer
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer("ld_view_project_main_zone_parcel_polygon", "parcel_id", "data_plan")
+        # vlayer.loadNamedStyle(
+        #     str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/pa_valuation_level.qml")
+        vlayer.setLayerName(self.tr("Current Plan"))
+        myalayer = root.findLayer(vlayer.id())
+        print vlayer.name()
+        if myalayer is None:
+            print 'ffff'
+            mygroup.addLayer(vlayer)

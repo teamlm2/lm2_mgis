@@ -385,7 +385,7 @@ class OwnRecordDialog(QDialog, Ui_OwnRecordDialog, DatabaseHelper):
 
     def __setup_combo_boxes(self):
 
-        self.document_path_edit.setText(FilePath.ownership_file_path())
+        # self.document_path_edit.setText(FilePath.ownership_file_path())
         try:
             # apps = self.session.query(CtApplication.app_no)\
             #     .filter(or_(CtApplication.app_type == 2,CtApplication.app_type == 4,CtApplication.app_type == 5,CtApplication.app_type == 9,\

@@ -58,6 +58,9 @@ from .qt_classes.IntegerSpinBoxDelegate import *
 from .qt_classes.ObjectAppDocumentDelegate import ObjectAppDocumentDelegate
 from .qt_classes.ContractDocumentDelegate import ContractDocumentDelegate
 from docxtpl import DocxTemplate, RichText
+import urllib
+import urllib2
+import json
 
 CONTRACTOR_NAME = 0
 CONTRACTOR_ID = 1
@@ -187,7 +190,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
         end = PluginUtils.convert_qt_date_to_python(new_date).date()
         begin_txt = self.contract_begin_edit.text()
-        print begin_txt
+
         if begin_txt != '':
             begin = datetime.strptime(begin_txt, '%Y-%m-%d')
 
@@ -520,7 +523,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         user_code = database_name.split('_')[1]
         user_start = 'user' + user_code
 
-        self.document_path_edit.setText(FilePath.contrac_file_path())
+        # self.document_path_edit.setText(FilePath.contrac_file_path())
         # try:
         restrictions = DatabaseUtils.working_l2_code()
         user = DatabaseUtils.current_user()
@@ -4180,3 +4183,25 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         base_fee_id = self.fee_zone_cbox.itemData(self.fee_zone_cbox.currentIndex())
 
         self.__calculate_landfee_tab(base_fee_id)
+
+    @pyqtSlot()
+    def on_refresh_fee_button_clicked(self):
+
+        parcel_id = self.id_main_edit.text
+        parcel_id = '067012012141'
+        print parcel_id
+        f = urllib2.urlopen('http://192.168.15.212:8060/api/payment/fee?parcel='+parcel_id)
+        ff = f.read()
+        print ff
+        ##############
+        print '################'
+        url = 'http://192.168.15.212:8060/api/payment/fee?parcel='+parcel_id
+        respons = urllib.request.urlopen(url)
+        print respons
+        print '------'
+        data = json.loads(respons.read().decode(respons.info().get_param('charset') or 'utf-8'))
+
+        print data['status']
+        print data['msg']
+        print data['data']['base_fee_per_m2']
+

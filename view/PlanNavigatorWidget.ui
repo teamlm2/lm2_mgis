@@ -93,7 +93,7 @@
        </size>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <property name="usesScrollButtons">
        <bool>true</bool>
@@ -410,11 +410,11 @@
           <string>Баг/Хорооны хил</string>
          </property>
         </widget>
-        <widget class="QPushButton" name="plan_button">
+        <widget class="QPushButton" name="layer_view_button">
          <property name="geometry">
           <rect>
-           <x>16</x>
-           <y>165</y>
+           <x>190</x>
+           <y>170</y>
            <width>161</width>
            <height>23</height>
           </rect>
@@ -423,14 +423,14 @@
           <string notr="true"/>
          </property>
          <property name="text">
-          <string>ГЗБТөлөвгөгөө</string>
+          <string>layer view</string>
          </property>
         </widget>
         <widget class="QPushButton" name="fee_tax_zone_button">
          <property name="geometry">
           <rect>
            <x>16</x>
-           <y>190</y>
+           <y>90</y>
            <width>161</width>
            <height>23</height>
           </rect>
@@ -455,8 +455,8 @@
         <widget class="QPushButton" name="mpa_zone_button">
          <property name="geometry">
           <rect>
-           <x>16</x>
-           <y>115</y>
+           <x>190</x>
+           <y>40</y>
            <width>161</width>
            <height>23</height>
           </rect>
@@ -468,8 +468,8 @@
         <widget class="QPushButton" name="sec_zone_button">
          <property name="geometry">
           <rect>
-           <x>16</x>
-           <y>140</y>
+           <x>190</x>
+           <y>65</y>
            <width>161</width>
            <height>23</height>
           </rect>
@@ -494,8 +494,8 @@
         <widget class="QPushButton" name="free_zone_button">
          <property name="geometry">
           <rect>
-           <x>16</x>
-           <y>90</y>
+           <x>190</x>
+           <y>15</y>
            <width>161</width>
            <height>23</height>
           </rect>
@@ -507,14 +507,37 @@
         <widget class="QPushButton" name="valuation_zone_button">
          <property name="geometry">
           <rect>
-           <x>16</x>
-           <y>215</y>
+           <x>190</x>
+           <y>90</y>
            <width>161</width>
            <height>23</height>
           </rect>
          </property>
          <property name="text">
           <string>Үнэлгээний бүс</string>
+         </property>
+        </widget>
+        <widget class="QComboBox" name="type_cbox">
+         <property name="geometry">
+          <rect>
+           <x>17</x>
+           <y>135</y>
+           <width>333</width>
+           <height>22</height>
+          </rect>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label">
+         <property name="geometry">
+          <rect>
+           <x>19</x>
+           <y>120</y>
+           <width>331</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Type</string>
          </property>
         </widget>
        </widget>
@@ -781,7 +804,7 @@
           <enum>QAbstractItemView::ExtendedSelection</enum>
          </property>
         </widget>
-        <widget class="QPushButton" name="plan_delete_button">
+        <widget class="QPushButton" name="current_view_button">
          <property name="geometry">
           <rect>
            <x>275</x>
@@ -791,7 +814,7 @@
           </rect>
          </property>
          <property name="text">
-          <string>Delete</string>
+          <string>LayerView</string>
          </property>
         </widget>
         <widget class="QPushButton" name="plan_edit_button">
@@ -1374,7 +1397,7 @@ font: 75 14pt &quot;Helvetica&quot;;</string>
   <tabstop>plan_results_twidget</tabstop>
   <tabstop>plan_add_button</tabstop>
   <tabstop>plan_edit_button</tabstop>
-  <tabstop>plan_delete_button</tabstop>
+  <tabstop>current_view_button</tabstop>
   <tabstop>case_no_edit</tabstop>
   <tabstop>case_completion_date_checkbox</tabstop>
   <tabstop>case_completion_date_edit</tabstop>
