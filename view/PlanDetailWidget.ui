@@ -251,21 +251,54 @@ font: 75 14pt &quot;Helvetica&quot;;</string>
        <attribute name="title">
         <string>Main Zone</string>
        </attribute>
-       <widget class="QTableWidget" name="tableWidget">
+       <widget class="QPushButton" name="main_zone_load_button">
+        <property name="geometry">
+         <rect>
+          <x>9</x>
+          <y>4</y>
+          <width>75</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Load</string>
+        </property>
+       </widget>
+       <widget class="QTreeWidget" name="main_tree_widget">
         <property name="geometry">
          <rect>
           <x>10</x>
           <y>30</y>
           <width>361</width>
-          <height>351</height>
+          <height>361</height>
+         </rect>
+        </property>
+        <column>
+         <property name="text">
+          <string>Result</string>
+         </property>
+        </column>
+       </widget>
+      </widget>
+      <widget class="QWidget" name="tab_2">
+       <attribute name="title">
+        <string>Sub Zone</string>
+       </attribute>
+       <widget class="QTableWidget" name="sub_tree_widget">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>30</y>
+          <width>361</width>
+          <height>361</height>
          </rect>
         </property>
        </widget>
-       <widget class="QPushButton" name="main_zone_load_button">
+       <widget class="QPushButton" name="sub_zone_load_button">
         <property name="geometry">
          <rect>
           <x>9</x>
-          <y>3</y>
+          <y>4</y>
           <width>75</width>
           <height>23</height>
          </rect>
@@ -275,15 +308,33 @@ font: 75 14pt &quot;Helvetica&quot;;</string>
         </property>
        </widget>
       </widget>
-      <widget class="QWidget" name="tab_2">
-       <attribute name="title">
-        <string>Sub Zone</string>
-       </attribute>
-      </widget>
       <widget class="QWidget" name="tab_3">
        <attribute name="title">
         <string>Parcel</string>
        </attribute>
+       <widget class="QTableWidget" name="parcel_tree_widget">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>30</y>
+          <width>361</width>
+          <height>361</height>
+         </rect>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="parcel_zone_load_button">
+        <property name="geometry">
+         <rect>
+          <x>9</x>
+          <y>4</y>
+          <width>75</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Load</string>
+        </property>
+       </widget>
       </widget>
      </widget>
     </widget>
@@ -295,7 +346,4 @@ font: 75 14pt &quot;Helvetica&quot;;</string>
  </tabstops>
  <resources/>
  <connections/>
- <buttongroups>
-  <buttongroup name="buttonGroup"/>
- </buttongroups>
 </ui>

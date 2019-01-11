@@ -21,6 +21,9 @@ from ..model.ClPlanDecisionLevel import *
 from ..model.ClPlanStatusType import *
 from ..model.ClPlanType import *
 from ..model.LdProjectPlanStatus import *
+from ..model.LdProjectMainZone import *
+# from ..model.LdProjectSubZone import *
+from ..model.LdProjectParcel import *
 from ..utils.DatabaseUtils import *
 from ..utils.PluginUtils import *
 from ..model.DatabaseHelper import *
@@ -59,6 +62,25 @@ class PlanDetailWidget(QDockWidget, Ui_PlanDetailWidget, DatabaseHelper):
         self.planNavigatorWidget = None
 
         self.__setup_data()
+        self.__setup_tree_widget()
+
+    def __setup_tree_widget(self):
+
+        self.item_point_main = QTreeWidgetItem()
+        self.item_point_main.setText(0, self.tr("Point"))
+        self.item_point_main.setData(0, Qt.UserRole, Constants.GEOM_POINT)
+
+        self.item_line_main = QTreeWidgetItem()
+        self.item_line_main.setText(0, self.tr("Line"))
+        self.item_line_main.setData(0, Qt.UserRole, Constants.GEOM_LINE)
+
+        self.item_polygon_main = QTreeWidgetItem()
+        self.item_polygon_main.setText(0, self.tr("Polygon"))
+        self.item_polygon_main.setData(0, Qt.UserRole, GEOM_POlYGON)
+
+        self.main_tree_widget.addTopLevelItem(self.item_point_main)
+        self.main_tree_widget.addTopLevelItem(self.item_line_main)
+        self.main_tree_widget.addTopLevelItem(self.item_polygon_main)
 
     def __setup_data(self):
 
@@ -73,3 +95,18 @@ class PlanDetailWidget(QDockWidget, Ui_PlanDetailWidget, DatabaseHelper):
 
         self.navigator.show()
         self.hide()
+
+    @pyqtSlot()
+    def on_main_zone_load_button_clicked(self):
+
+        au2 = DatabaseUtils.working_l2_code()
+        main_zone_points = self.session.query(LdProjectMainZone).\
+            filter(LdProjectMainZone.plan_draft_id == self.plan.plan_draft_id).\
+            filter(LdProjectMainZone.polygon_geom == None).\
+            filter(LdProjectMainZone.line_geom == None).\
+            filter(LdProjectMainZone.au2 == au2).all()
+
+        for main_zone_point in main_zone_points:
+            item = QTreeWidgetItem()
+            item.setText(0, str(main_zone_point.parcel_id)+'('+main_zone_point.gazner+')')
+            self.item_point_main.addChild(item)

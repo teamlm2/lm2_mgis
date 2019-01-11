@@ -752,7 +752,7 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
                     zoriulalt = parcel_subject.zoriulalt
                 landuse_type = self.__landuse_type(parcel_subject).code
 
-            self.zoriulalt_edit.setText(zoriulalt)
+            self.zoriulalt_edit.setText(str(zoriulalt))
             self.streetname_edit.setText(street)
             self.khashaa_edit.setText(khashaa)
             self.neighbourhood_edit.setText(neighbourhood)

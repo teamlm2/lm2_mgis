@@ -166,6 +166,57 @@ class LayerUtils(object):
         return vlayer
 
     @staticmethod
+    def load_polygon_layer_base_layer(layer_name, id, schema_name):
+
+        uri = QgsDataSourceURI()
+        user = QSettings().value(SettingsConstants.USER)
+        db = QSettings().value(SettingsConstants.DATABASE_NAME)
+        host = QSettings().value(SettingsConstants.HOST)
+        port = QSettings().value(SettingsConstants.PORT, "5432")
+        pwd = SessionHandler().current_password()
+
+        uri.setConnection(host, port, db, user, pwd)
+        uri.setDataSource(schema_name, layer_name, "polygon_geom", "", id)
+
+        vlayer = QgsVectorLayer(uri.uri(), layer_name, "postgres")
+        QgsMapLayerRegistry.instance().addMapLayer(vlayer, False)
+        return vlayer
+
+    @staticmethod
+    def load_point_layer_base_layer(layer_name, id, schema_name):
+
+        uri = QgsDataSourceURI()
+        user = QSettings().value(SettingsConstants.USER)
+        db = QSettings().value(SettingsConstants.DATABASE_NAME)
+        host = QSettings().value(SettingsConstants.HOST)
+        port = QSettings().value(SettingsConstants.PORT, "5432")
+        pwd = SessionHandler().current_password()
+
+        uri.setConnection(host, port, db, user, pwd)
+        uri.setDataSource(schema_name, layer_name, "point_geom", "", id)
+
+        vlayer = QgsVectorLayer(uri.uri(), layer_name, "postgres")
+        QgsMapLayerRegistry.instance().addMapLayer(vlayer, False)
+        return vlayer
+
+    @staticmethod
+    def load_line_layer_base_layer(layer_name, id, schema_name):
+
+        uri = QgsDataSourceURI()
+        user = QSettings().value(SettingsConstants.USER)
+        db = QSettings().value(SettingsConstants.DATABASE_NAME)
+        host = QSettings().value(SettingsConstants.HOST)
+        port = QSettings().value(SettingsConstants.PORT, "5432")
+        pwd = SessionHandler().current_password()
+
+        uri.setConnection(host, port, db, user, pwd)
+        uri.setDataSource(schema_name, layer_name, "line_geom", "", id)
+
+        vlayer = QgsVectorLayer(uri.uri(), layer_name, "postgres")
+        QgsMapLayerRegistry.instance().addMapLayer(vlayer, False)
+        return vlayer
+
+    @staticmethod
     def load_layer_by_name_admin_units(layer_name, id, restrictions=[]):
 
         restrictions = restrictions.split(",")
@@ -291,7 +342,7 @@ class LayerUtils(object):
             cadastre_plan_group = root.insertGroup(3, u"Кадастрын төлөвлөгөө")
         mygroup = root.findGroup(u"Тусгай хамгаалалттай газар")
         if mygroup is None:
-            cadastre_plan_group = root.insertGroup(5, u"Тусгай хамгаалалттай газар")
+            cadastre_plan_group = root.insertGroup(6, u"Тусгай хамгаалалттай газар")
         mygroup = root.findGroup(u"Кадастрын өөрчлөлт")
         if mygroup is None:
             cadastre_maintenance_group = root.insertGroup(2, u"Кадастрын өөрчлөлт")
@@ -300,10 +351,14 @@ class LayerUtils(object):
             cadastre_group = root.insertGroup(4, u"Кадастр")
         mygroup = root.findGroup(u"Үнэлгээ, төлбөрийн бүс")
         if mygroup is None:
-            land_fee_and_tax_zones_group = root.insertGroup(5, u"Үнэлгээ, төлбөрийн бүс")
+            land_fee_and_tax_zones_group = root.insertGroup(7, u"Үнэлгээ, төлбөрийн бүс")
         mygroup = root.findGroup(U"Хил")
         if mygroup is None:
             admin_units_group = root.insertGroup(4, u"Хил")
         mygroup = root.findGroup(U"ГЗБТөлөвлгөө")
         if mygroup is None:
-            plan = root.insertGroup(4, u"ГЗБТөлөвлгөө")
+            plan = root.insertGroup(5, u"ГЗБТөлөвлгөө")
+            current_root = plan.insertGroup(4, u"Ажиллаж байгаа")
+            current_root.insertGroup(1, u"Parcel")
+            current_root.insertGroup(2, u"Sub")
+            current_root.insertGroup(3, u"Main")

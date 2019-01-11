@@ -1438,18 +1438,35 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
     @pyqtSlot()
     def on_current_view_button_clicked(self):
 
-        print 'ok'
         root = QgsProject.instance().layerTreeRoot()
-        mygroup = root.findGroup(u"ГЗБТөлөвлгөө")
-        vlayer = LayerUtils.layer_by_data_source("data_plan", "ld_view_project_main_zone_parcel_polygon")
-        print vlayer
-        if vlayer is None:
-            vlayer = LayerUtils.load_layer_base_layer("ld_view_project_main_zone_parcel_polygon", "parcel_id", "data_plan")
-        # vlayer.loadNamedStyle(
-        #     str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/pa_valuation_level.qml")
-        vlayer.setLayerName(self.tr("Current Plan"))
-        myalayer = root.findLayer(vlayer.id())
-        print vlayer.name()
+        mygroup = root.findGroup(u"Main")
+
+        vlayer_polygon = LayerUtils.layer_by_data_source("data_plan", "ld_view_project_main_zone_polygon")
+        if vlayer_polygon is None:
+            vlayer_polygon = LayerUtils.load_polygon_layer_base_layer("ld_view_project_main_zone_polygon", "parcel_id", "data_plan")
+        vlayer_polygon.loadNamedStyle(
+            str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/plan_polygon_style.qml")
+        vlayer_polygon.setLayerName(self.tr("Current Main Polygon"))
+        myalayer = root.findLayer(vlayer_polygon.id())
         if myalayer is None:
-            print 'ffff'
-            mygroup.addLayer(vlayer)
+            mygroup.addLayer(vlayer_polygon)
+
+        vlayer_line = LayerUtils.layer_by_data_source("data_plan", "ld_view_project_main_zone_line")
+        if vlayer_line is None:
+            vlayer_line = LayerUtils.load_line_layer_base_layer("ld_view_project_main_zone_line", "parcel_id", "data_plan")
+        vlayer_line.loadNamedStyle(
+            str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/plan_line_style.qml")
+        vlayer_line.setLayerName(self.tr("Current Main Line"))
+        myalayer = root.findLayer(vlayer_line.id())
+        if myalayer is None:
+            mygroup.addLayer(vlayer_line)
+
+        vlayer_point = LayerUtils.layer_by_data_source("data_plan", "ld_view_project_main_zone_point")
+        if vlayer_point is None:
+            vlayer_point = LayerUtils.load_point_layer_base_layer("ld_view_project_main_zone_point", "parcel_id", "data_plan")
+        vlayer_point.loadNamedStyle(
+            str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/plan_point_style.qml")
+        vlayer_point.setLayerName(self.tr("Current Main Point"))
+        myalayer = root.findLayer(vlayer_point.id())
+        if myalayer is None:
+            mygroup.addLayer(vlayer_point)
