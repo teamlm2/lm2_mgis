@@ -109,9 +109,9 @@ font: 75 14pt &quot;Helvetica&quot;;</string>
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>30</y>
+        <y>27</y>
         <width>381</width>
-        <height>151</height>
+        <height>126</height>
        </rect>
       </property>
       <property name="title">
@@ -134,7 +134,7 @@ font: 75 14pt &quot;Helvetica&quot;;</string>
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>35</y>
+         <y>30</y>
          <width>361</width>
          <height>20</height>
         </rect>
@@ -147,7 +147,7 @@ font: 75 14pt &quot;Helvetica&quot;;</string>
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>57</y>
+         <y>50</y>
          <width>81</width>
          <height>16</height>
         </rect>
@@ -160,7 +160,7 @@ font: 75 14pt &quot;Helvetica&quot;;</string>
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>77</y>
+         <y>64</y>
          <width>361</width>
          <height>20</height>
         </rect>
@@ -173,7 +173,7 @@ font: 75 14pt &quot;Helvetica&quot;;</string>
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>98</y>
+         <y>86</y>
          <width>81</width>
          <height>16</height>
         </rect>
@@ -186,7 +186,7 @@ font: 75 14pt &quot;Helvetica&quot;;</string>
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>118</y>
+         <y>100</y>
          <width>361</width>
          <height>20</height>
         </rect>
@@ -239,9 +239,9 @@ font: 75 14pt &quot;Helvetica&quot;;</string>
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>190</y>
+        <y>260</y>
         <width>381</width>
-        <height>431</height>
+        <height>362</height>
        </rect>
       </property>
       <property name="currentIndex">
@@ -251,26 +251,13 @@ font: 75 14pt &quot;Helvetica&quot;;</string>
        <attribute name="title">
         <string>Main Zone</string>
        </attribute>
-       <widget class="QPushButton" name="main_zone_load_button">
-        <property name="geometry">
-         <rect>
-          <x>9</x>
-          <y>4</y>
-          <width>75</width>
-          <height>23</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Load</string>
-        </property>
-       </widget>
        <widget class="QTreeWidget" name="main_tree_widget">
         <property name="geometry">
          <rect>
           <x>10</x>
-          <y>30</y>
+          <y>10</y>
           <width>361</width>
-          <height>361</height>
+          <height>320</height>
          </rect>
         </property>
         <column>
@@ -288,23 +275,10 @@ font: 75 14pt &quot;Helvetica&quot;;</string>
         <property name="geometry">
          <rect>
           <x>10</x>
-          <y>30</y>
+          <y>10</y>
           <width>361</width>
-          <height>361</height>
+          <height>320</height>
          </rect>
-        </property>
-       </widget>
-       <widget class="QPushButton" name="sub_zone_load_button">
-        <property name="geometry">
-         <rect>
-          <x>9</x>
-          <y>4</y>
-          <width>75</width>
-          <height>23</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Load</string>
         </property>
        </widget>
       </widget>
@@ -316,25 +290,74 @@ font: 75 14pt &quot;Helvetica&quot;;</string>
         <property name="geometry">
          <rect>
           <x>10</x>
-          <y>30</y>
+          <y>10</y>
           <width>361</width>
-          <height>361</height>
+          <height>320</height>
          </rect>
         </property>
        </widget>
-       <widget class="QPushButton" name="parcel_zone_load_button">
-        <property name="geometry">
-         <rect>
-          <x>9</x>
-          <y>4</y>
-          <width>75</width>
-          <height>23</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Load</string>
-        </property>
-       </widget>
+      </widget>
+     </widget>
+     <widget class="QGroupBox" name="groupBox_2">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>149</y>
+        <width>381</width>
+        <height>110</height>
+       </rect>
+      </property>
+      <property name="title">
+       <string>GroupBox</string>
+      </property>
+      <widget class="QProgressBar" name="load_pbar">
+       <property name="geometry">
+        <rect>
+         <x>100</x>
+         <y>80</y>
+         <width>269</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="value">
+        <number>0</number>
+       </property>
+       <property name="textDirection">
+        <enum>QProgressBar::TopToBottom</enum>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="main_zone_load_button">
+       <property name="geometry">
+        <rect>
+         <x>9</x>
+         <y>80</y>
+         <width>81</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Load</string>
+       </property>
+      </widget>
+      <widget class="QComboBox" name="process_type_cbox">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>20</y>
+         <width>361</width>
+         <height>22</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="process_edit">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>50</y>
+         <width>361</width>
+         <height>20</height>
+        </rect>
+       </property>
       </widget>
      </widget>
     </widget>

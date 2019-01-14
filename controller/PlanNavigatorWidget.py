@@ -1410,7 +1410,7 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
 
         plan_instance = self.__selected_plan()
         if plan_instance is not None:
-            self.current_dialog = PlanDetailWidget(plan_instance, self, True, self.plugin.iface.mainWindow())
+            self.current_dialog = PlanDetailWidget(self.plugin, plan_instance, self, True, self.plugin.iface.mainWindow())
             self.plugin.iface.addDockWidget(Qt.RightDockWidgetArea, self.current_dialog)
             self.current_dialog.show()
             self.hide()
