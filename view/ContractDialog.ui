@@ -1344,6 +1344,11 @@
      </attribute>
      <column>
       <property name="text">
+       <string>Is Active</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
        <string>Contractor</string>
       </property>
       <property name="textAlignment">
@@ -1386,7 +1391,7 @@
      </column>
      <column>
       <property name="text">
-       <string>Grace Period [days]</string>
+       <string>Grace Period</string>
       </property>
       <property name="textAlignment">
        <set>AlignLeft|AlignVCenter</set>
@@ -1398,6 +1403,16 @@
       </property>
       <property name="textAlignment">
        <set>AlignLeft|AlignVCenter</set>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Zone Type</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Zone No</string>
       </property>
      </column>
     </widget>

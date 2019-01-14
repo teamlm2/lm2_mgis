@@ -1,9 +1,9 @@
-__author__ = 'Anna'
+__author__ = 'B.Ankhbold'
 
 from sqlalchemy import String,Date
 from geoalchemy2 import Geometry
+from ClZoneType import *
 from SetBaseFee import *
-
 
 class SetFeeZone(Base):
 
@@ -20,3 +20,6 @@ class SetFeeZone(Base):
     geometry = Column(Geometry('MULTIPOLYGON', srid=4326))
     fees = relationship("SetBaseFee", backref='parent', cascade="all, delete, delete-orphan")
     documents = relationship("SetFeeDocument", lazy="dynamic", cascade="all, delete-orphan")
+
+    zone_type =  Column(Integer, ForeignKey('cl_zone_type.code'))
+    zone_ref = relationship("ClZoneType")

@@ -12,8 +12,9 @@ class CtFee(Base):
 
     __tablename__ = 'ct_fee'
 
-    contract = Column(Integer, ForeignKey('ct_contract.contract_id'), primary_key=True)
-    person = Column(Integer, ForeignKey('bs_person.person_id'), primary_key=True)
+    id = Column(Integer, primary_key=True)
+    contract = Column(Integer, ForeignKey('ct_contract.contract_id'))
+    person = Column(Integer, ForeignKey('bs_person.person_id'))
     share = Column(Numeric)
     area = Column(Integer)
     fee_calculated = Column(Integer)
@@ -25,6 +26,8 @@ class CtFee(Base):
     contract_no = Column(String)
     person_register = Column(String)
 
+    base_fee_id = Column(Integer, ForeignKey('set_base_fee.id'))
+    base_fee_ref = relationship("SetBaseFee")
     # foreign keys:
     payment_frequency = Column(Integer, ForeignKey('cl_payment_frequency.code'))
     payment_frequency_ref = relationship("ClPaymentFrequency")

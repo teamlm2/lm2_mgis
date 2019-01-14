@@ -1,6 +1,6 @@
 __author__ = 'mwagner'
 
-from sqlalchemy import Date
+from sqlalchemy import Date, DateTime
 from sqlalchemy.orm import relationship
 from CtFee import *
 from CtContractCondition import *
@@ -18,6 +18,12 @@ class CtContract(Base):
     certificate_no = Column(Integer)
     cancellation_date = Column(Date)
     property_no = Column(String)
+
+    created_by = Column(Integer)
+    created_by = Column(Integer)
+    created_at = Column(DateTime)
+    updated_at = Column(DateTime)
+
     # foreign keys:
     status = Column(Integer, ForeignKey('cl_contract_status.code'))
     status_ref = relationship("ClContractStatus")
