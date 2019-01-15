@@ -129,7 +129,7 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
         self.decision_level_cbox.addItem("*", -1)
 
         for value in statuses:
-            self.status_cbox.addItem(value.description, value.code)
+            self.status_cbox.addItem(str(value.code) + ':' + value.description, value.code)
         for value in types:
             self.plan_type_cbox.addItem(value.description, value.code)
         for value in decision_levels:

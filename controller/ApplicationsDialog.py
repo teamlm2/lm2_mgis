@@ -2603,52 +2603,52 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
 
     def __save_application(self):
 
-        try:
-            self.create_savepoint()
+        # try:
+        self.create_savepoint()
 
-            self.__save_application_details()
+        self.__save_application_details()
 
-            self.__save_applicants()
+        self.__save_applicants()
 
-            if self.application.app_type == ApplicationType.privatization \
-                    or self.application.app_type == ApplicationType.privatization_representation:
+        if self.application.app_type == ApplicationType.privatization \
+                or self.application.app_type == ApplicationType.privatization_representation:
 
-                self.__save_privatization()
+            self.__save_privatization()
 
-            elif self.application.app_type == ApplicationType.change_ownership:
+        elif self.application.app_type == ApplicationType.change_ownership:
 
-                self.__save_change_ownership()
+            self.__save_change_ownership()
 
-            elif self.application.app_type == ApplicationType.mortgage_possession:
+        elif self.application.app_type == ApplicationType.mortgage_possession:
 
-                self.__save_mortgage_application()
+            self.__save_mortgage_application()
 
-            elif self.application.app_type == ApplicationType.transfer_possession_right:
+        elif self.application.app_type == ApplicationType.transfer_possession_right:
 
-                self.__save_transfer_possession()
+            self.__save_transfer_possession()
 
-            elif self.application.app_type == ApplicationType.possess_split:
+        elif self.application.app_type == ApplicationType.possess_split:
 
-                self.__save_transfer_possession()
+            self.__save_transfer_possession()
 
-            elif self.application.app_type == ApplicationType.encroachment:
+        elif self.application.app_type == ApplicationType.encroachment:
 
-                self.__save_transfer_possession()
+            self.__save_transfer_possession()
 
-            elif self.application.app_type == ApplicationType.possession_right_use_right:
+        elif self.application.app_type == ApplicationType.possession_right_use_right:
 
-                self.__save_transfer_possession()
+            self.__save_transfer_possession()
 
-            elif self.application.app_type == ApplicationType.court_decision:
+        elif self.application.app_type == ApplicationType.court_decision:
 
-                self.__save_court_decision()
+            self.__save_court_decision()
 
-            self.commit()
+        self.commit()
 
-        except LM2Exception, e:
-            self.rollback_to_savepoint()
-            PluginUtils.show_error(self, e.title(), e.message())
-            return
+        # except LM2Exception, e:
+        #     self.rollback_to_savepoint()
+        #     PluginUtils.show_error(self, e.title(), e.message())
+        #     return
 
     def __save_application_details(self):
 
@@ -2976,9 +2976,11 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
         for row in range(self.mortgage_twidget.rowCount()):
 
             item = self.mortgage_twidget.item(row, MORTGAGE_SHARE)
+            person_id = item.data(Qt.UserRole)
 
-            mortgagee = self.application.stakeholders.filter_by(role=Constants.MORTGAGEE_ROLE_CODE) \
-                .filter_by(person=item.data(Qt.UserRole)).one()
+            mortgagee = self.application.stakeholders.\
+                filter(CtApplicationPersonRole.role == Constants.MORTGAGEE_ROLE_CODE). \
+                filter(CtApplicationPersonRole.person == item.data(Qt.UserRole)).one()
 
             mortgagee.share = Decimal(item.text())
 

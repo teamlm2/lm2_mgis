@@ -432,16 +432,18 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                     PluginUtils.show_error(self, self.tr("Error loading Contract"),
                                            self.tr("Could not load contract. Cancellation application not found"))
                     self.reject()
-                self.app_number_cbox.clear()
-                self.app_number_cbox.addItem(cancellation_application.application, cancellation_application.application)
-                self.app_number_cbox.setCurrentIndex(
-                    self.app_number_cbox.findText(cancellation_application.application))
-                self.type_edit.setText(cancellation_application.application_ref.app_type_ref.description)
+                    self.app_number_cbox.clear()
+                    app = self.session.query(CtApplication).filter(CtApplication.app_id == cancellation_application.application).one()
+                    self.app_number_cbox.addItem(app.app_no, cancellation_application.application)
+                    self.app_number_cbox.setCurrentIndex(self.app_number_cbox.findText(app.app_no))
+                    self.type_edit.setText(cancellation_application.application_ref.app_type_ref.description)
 
-                app_persons = self.session.query(CtApplicationPersonRole).\
-                    filter(CtApplicationPersonRole.application == cancellation_application.application).all()
-                for app_person in app_persons:
-                    self.person_id_edit.setText(app_person.person)
+                    app_persons = self.session.query(CtApplicationPersonRole).\
+                        filter(CtApplicationPersonRole.application == cancellation_application.application).all()
+                    for app_person in app_persons:
+                        if app_person.person_ref:
+                            person = app_person.person_ref
+                            self.person_id_edit.setText(person.person_register)
 
         application_role = self.contract.application_roles.filter_by(role=Constants.APPLICATION_ROLE_CREATES).one()
         application = application_role.application_ref
@@ -2204,15 +2206,22 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             return
         fee = self.session.query(CtFee).filter(CtFee.contract == self.contract.contract_id).all()
 
+        is_active = False
         for fee in fee:
             if fee.base_fee_ref:
                 base_fee = fee.base_fee_ref
                 if base_fee.in_active:
                     payment = payment + fee.fee_contract
                     base_fee = fee.base_fee_per_m2
-            else:
-                payment = payment + fee.fee_contract
-                base_fee = fee.base_fee_per_m2
+                    is_active = True
+            # else:
+            #     payment = payment + fee.fee_contract
+            #     base_fee = fee.base_fee_per_m2
+        if not is_active:
+            for fee in fee:
+                if not fee.base_fee_ref:
+                    payment = payment + fee.fee_contract
+                    base_fee = fee.base_fee_per_m2
 
         # except SQLAlchemyError, e:
         #     raise LM2Exception(self.tr("Database Query Error"),
@@ -2451,13 +2460,13 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
         tpl.render(context)
 
-        # try:
-        tpl.save(default_path + "/" + contract_no[:-6] + '-' + contract_no[-5:] + ".docx")
-        QDesktopServices.openUrl(
-            QUrl.fromLocalFile(default_path + "/" + contract_no[:-6] + '-' + contract_no[-5:] + ".docx"))
-        # except IOError, e:
-        #     PluginUtils.show_error(self, self.tr("Out error"),
-        #                            self.tr("This file is already opened. Please close re-run"))
+        try:
+            tpl.save(default_path + "/" + contract_no[:-6] + '-' + contract_no[-5:] + ".docx")
+            QDesktopServices.openUrl(
+                QUrl.fromLocalFile(default_path + "/" + contract_no[:-6] + '-' + contract_no[-5:] + ".docx"))
+        except IOError, e:
+            PluginUtils.show_error(self, self.tr("Out error"),
+                                   self.tr("This file is already opened. Please close re-run"))
 
     @pyqtSlot()
     def on_print_contract_button_clicked(self):
@@ -4321,13 +4330,14 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
         status = data['status']
         msg = data['msg']
-        base_fee_id = data['data']['base_fee_id']
-        payment = data['data']['payment']
-        zone_type = data['data']['zone_type']
 
         if not status:
             PluginUtils.show_message(self, self.tr("Warning"), msg)
             return
+
+        base_fee_id = data['data']['base_fee_id']
+        payment = data['data']['payment']
+        zone_type = data['data']['zone_type']
 
         self.__calculate_landfee_level(base_fee_id, payment, parcel_id)
 
