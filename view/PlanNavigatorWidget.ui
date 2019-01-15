@@ -807,9 +807,9 @@
         <widget class="QPushButton" name="current_view_button">
          <property name="geometry">
           <rect>
-           <x>275</x>
+           <x>260</x>
            <y>270</y>
-           <width>75</width>
+           <width>100</width>
            <height>23</height>
           </rect>
          </property>
@@ -820,9 +820,9 @@
         <widget class="QPushButton" name="plan_edit_button">
          <property name="geometry">
           <rect>
-           <x>130</x>
+           <x>140</x>
            <y>270</y>
-           <width>111</width>
+           <width>100</width>
            <height>23</height>
           </rect>
          </property>
@@ -830,17 +830,17 @@
           <string>Edit</string>
          </property>
         </widget>
-        <widget class="QPushButton" name="plan_add_button">
+        <widget class="QPushButton" name="case_button">
          <property name="geometry">
           <rect>
            <x>15</x>
            <y>270</y>
-           <width>75</width>
+           <width>100</width>
            <height>23</height>
           </rect>
          </property>
          <property name="text">
-          <string>Add</string>
+          <string>Create Case</string>
          </property>
         </widget>
        </widget>
@@ -1395,7 +1395,7 @@ font: 75 14pt &quot;Helvetica&quot;;</string>
   <tabstop>plan_clear_button</tabstop>
   <tabstop>plan_find_button</tabstop>
   <tabstop>plan_results_twidget</tabstop>
-  <tabstop>plan_add_button</tabstop>
+  <tabstop>case_button</tabstop>
   <tabstop>plan_edit_button</tabstop>
   <tabstop>current_view_button</tabstop>
   <tabstop>case_no_edit</tabstop>

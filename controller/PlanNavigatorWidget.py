@@ -7,6 +7,7 @@ from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 from PyQt4.QtXml import *
 from PyQt4.QtCore import QDate
+from geoalchemy2.elements import WKTElement
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy import func, or_, and_, desc
 from sqlalchemy.sql.expression import cast
@@ -21,6 +22,7 @@ from ..model.ClPlanDecisionLevel import *
 from ..model.ClPlanStatusType import *
 from ..model.ClPlanType import *
 from ..model.LdProjectPlanStatus import *
+from ..controller.PlanCaseDialog import *
 from ..utils.DatabaseUtils import *
 from ..utils.PluginUtils import *
 from ..model.DatabaseHelper import *
@@ -1470,3 +1472,25 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
         myalayer = root.findLayer(vlayer_point.id())
         if myalayer is None:
             mygroup.addLayer(vlayer_point)
+
+    @pyqtSlot()
+    def on_case_button_clicked(self):
+
+        if DialogInspector().dialog_visible():
+            return
+
+        plan_instance = self.__selected_plan()
+        if plan_instance is not None:
+
+            self.current_dialog = PlanCaseDialog(self.plugin, plan_instance, self, True, self.plugin.iface.mainWindow())
+            # self.current_dialog.rejected.connect(self.on_current_dialog_closed)
+            # DialogInspector().set_dialog_visible(True)
+            # self.current_dialog.setModal(False)
+            self.current_dialog.show()
+
+        DatabaseUtils.set_working_schema()
+
+    @pyqtSlot()
+    def on_current_dialog_closed(self):
+
+        DialogInspector().set_dialog_visible(False)

@@ -1,5 +1,5 @@
 # -*- encoding: utf-8 -*-
-__author__ = 'Ankhaa'
+__author__ = 'B.Ankhbold'
 
 from qgis.core import *
 from geoalchemy2.elements import WKTElement
