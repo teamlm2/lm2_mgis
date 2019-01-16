@@ -20,8 +20,8 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>30</y>
-     <width>351</width>
+     <y>75</y>
+     <width>381</width>
      <height>90</height>
     </rect>
    </property>
@@ -31,9 +31,9 @@
    <widget class="QLineEdit" name="parcel_shape_edit">
     <property name="geometry">
      <rect>
-      <x>96</x>
+      <x>109</x>
       <y>58</y>
-      <width>200</width>
+      <width>211</width>
       <height>21</height>
      </rect>
     </property>
@@ -44,9 +44,9 @@
    <widget class="QLabel" name="label">
     <property name="geometry">
      <rect>
-      <x>97</x>
+      <x>110</x>
       <y>39</y>
-      <width>101</width>
+      <width>112</width>
       <height>16</height>
      </rect>
     </property>
@@ -57,9 +57,9 @@
    <widget class="QPushButton" name="open_parcel_file_button">
     <property name="geometry">
      <rect>
-      <x>300</x>
+      <x>330</x>
       <y>56</y>
-      <width>40</width>
+      <width>42</width>
       <height>25</height>
      </rect>
     </property>
@@ -71,7 +71,7 @@
       <normaloff>:/plugins/lm2/open.png</normaloff>:/plugins/lm2/open.png</iconset>
     </property>
    </widget>
-   <widget class="QRadioButton" name="radioButton">
+   <widget class="QRadioButton" name="point_rbutton">
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -84,7 +84,7 @@
      <string>Point</string>
     </property>
    </widget>
-   <widget class="QRadioButton" name="radioButton_2">
+   <widget class="QRadioButton" name="line_rbutton">
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -97,7 +97,7 @@
      <string>Line</string>
     </property>
    </widget>
-   <widget class="QRadioButton" name="radioButton_3">
+   <widget class="QRadioButton" name="polygon_rbutton">
     <property name="enabled">
      <bool>true</bool>
     </property>
@@ -118,9 +118,9 @@
    <property name="geometry">
     <rect>
      <x>410</x>
-     <y>36</y>
-     <width>351</width>
-     <height>318</height>
+     <y>30</y>
+     <width>361</width>
+     <height>361</height>
     </rect>
    </property>
    <property name="verticalScrollBarPolicy">
@@ -139,13 +139,254 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>130</y>
-     <width>351</width>
-     <height>221</height>
+     <y>168</y>
+     <width>381</width>
+     <height>224</height>
     </rect>
    </property>
    <property name="title">
-    <string>GroupBox</string>
+    <string>General information</string>
+   </property>
+   <widget class="QLabel" name="label_2">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>20</y>
+      <width>167</width>
+      <height>13</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Date &amp; Number</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="type_edit">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>74</y>
+      <width>361</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="readOnly">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_3">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>57</y>
+      <width>81</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Type</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="date_edit">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>36</y>
+      <width>91</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="readOnly">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="plan_num_edit">
+    <property name="geometry">
+     <rect>
+      <x>110</x>
+      <y>36</y>
+      <width>170</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="readOnly">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="status_edit">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>112</y>
+      <width>361</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="readOnly">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_4">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>96</y>
+      <width>81</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Status</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="message_label">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>195</y>
+      <width>361</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Message Information</string>
+    </property>
+   </widget>
+  </widget>
+  <widget class="Line" name="line">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>18</y>
+     <width>785</width>
+     <height>7</height>
+    </rect>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
+   </property>
+  </widget>
+  <widget class="Line" name="line_2">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>460</y>
+     <width>785</width>
+     <height>7</height>
+    </rect>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="help_button">
+   <property name="geometry">
+    <rect>
+     <x>518</x>
+     <y>430</y>
+     <width>75</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">image: url(:/plugins/lm2/help_button.png);</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/plugins/lm2/help_button.png</normaloff>:/plugins/lm2/help_button.png</iconset>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="close_button">
+   <property name="geometry">
+    <rect>
+     <x>697</x>
+     <y>430</y>
+     <width>75</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Close</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="apply_button">
+   <property name="geometry">
+    <rect>
+     <x>607</x>
+     <y>430</y>
+     <width>75</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Apply</string>
+   </property>
+  </widget>
+  <widget class="QGroupBox" name="groupBox_2">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>24</y>
+     <width>381</width>
+     <height>48</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Type</string>
+   </property>
+   <widget class="QRadioButton" name="zone_parcel_rbutton">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>18</y>
+      <width>120</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Parcel</string>
+    </property>
+   </widget>
+   <widget class="QRadioButton" name="zone_sub_rbutton">
+    <property name="geometry">
+     <rect>
+      <x>130</x>
+      <y>18</y>
+      <width>120</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Sub</string>
+    </property>
+   </widget>
+   <widget class="QRadioButton" name="zone_main_rbutton">
+    <property name="geometry">
+     <rect>
+      <x>250</x>
+      <y>18</y>
+      <width>120</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Main</string>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QLabel" name="status_label">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>430</y>
+     <width>341</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
    </property>
   </widget>
  </widget>

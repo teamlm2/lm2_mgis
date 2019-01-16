@@ -4250,138 +4250,139 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         for app in application:
             app_person_count = self.session.query(CtApplicationPersonRole).filter(CtApplicationPersonRole.application == app.app_id).count()
             if app_person_count != 0:
-                app_person = self.session.query(CtApplicationPersonRole).filter(CtApplicationPersonRole.application == app.app_id).all()
+                app_persons = self.session.query(CtApplicationPersonRole).filter(CtApplicationPersonRole.application == app.app_id).all()
 
                 name = ''
                 type = ''
-                for app_person in app_person:
+                for app_person in app_persons:
                     if app_person.main_applicant == True:
-                        if app_person.person_ref.type == 10 or app_person.person_ref.type == 20 or app_person.person_ref.type == 50:
-                            name = app_person.person_ref.name[:1] +'.'+ app_person.person_ref.first_name
-                        elif app_person.person_ref.type == 30 or app_person.person_ref.type == 40 or app_person.person_ref.type == 60:
-                            name = app_person.person_ref.name
-                        app_doc_count = self.session.query(CtApplicationDocument)\
-                            .join(CtApplicationPersonRole, CtApplicationDocument.application_id == CtApplicationPersonRole.application)\
-                            .join(BsPerson, CtApplicationPersonRole.person == BsPerson.person_id)\
-                            .filter(CtApplicationDocument.application_id == app.app_id)\
-                            .filter(BsPerson.person_id == app_person.person).count()
+                        if app_person.person_ref:
+                            if app_person.person_ref.type == 10 or app_person.person_ref.type == 20 or app_person.person_ref.type == 50:
+                                name = app_person.person_ref.name[:1] +'.'+ app_person.person_ref.first_name
+                            elif app_person.person_ref.type == 30 or app_person.person_ref.type == 40 or app_person.person_ref.type == 60:
+                                name = app_person.person_ref.name
+                            app_doc_count = self.session.query(CtApplicationDocument)\
+                                .join(CtApplicationPersonRole, CtApplicationDocument.application_id == CtApplicationPersonRole.application)\
+                                .join(BsPerson, CtApplicationPersonRole.person == BsPerson.person_id)\
+                                .filter(CtApplicationDocument.application_id == app.app_id)\
+                                .filter(BsPerson.person_id == app_person.person).count()
 
-                if app.app_type == 01 or app.app_type == 02 or app.app_type == 03 or app.app_type == 04 or app.app_type == 15:
-                    type = u'Ө'
-                elif (app.app_type == 06 or app.app_type == 9 or app.app_type == 10 or app.app_type == 12 or app.app_type == 13 or app.app_type == 14)\
-                        and (app_person.person_ref.type == 50 or app_person.person_ref.type == 60):
-                    type = u'А'
-                elif app.app_type == 05 or app.app_type == 07 or app.app_type == 8 or app.app_type == 10 or app.app_type == 0 or app.app_type == 11 \
-                    and app.app_type == 12 or app.app_type == 13 or app.app_type == 14:
-                    type = u'Э'
+                            if app.app_type == 01 or app.app_type == 02 or app.app_type == 03 or app.app_type == 04 or app.app_type == 15:
+                                type = u'Ө'
+                            elif (app.app_type == 06 or app.app_type == 9 or app.app_type == 10 or app.app_type == 12 or app.app_type == 13 or app.app_type == 14)\
+                                    and (app_person.person_ref.type == 50 or app_person.person_ref.type == 60):
+                                type = u'А'
+                            elif app.app_type == 05 or app.app_type == 07 or app.app_type == 8 or app.app_type == 10 or app.app_type == 0 or app.app_type == 11 \
+                                and app.app_type == 12 or app.app_type == 13 or app.app_type == 14:
+                                type = u'Э'
 
-                worksheet.write(row, col,  app.app_no, format)
-                worksheet.write(row, col+1,name, format)
-                worksheet.write(row, col+2,type, format)
-                worksheet.write(row, col+3,app_person.person_ref.person_register, format)
-                worksheet.write(row, col+4, str(app.app_timestamp),format)
-                worksheet.write(row, col+5, str(app_doc_count),format)
-                worksheet.write(row, col+23, app.remarks,format)
-                worksheet.write(row, col+24, '____',format)
+                            worksheet.write(row, col,  app.app_no, format)
+                            worksheet.write(row, col+1,name, format)
+                            worksheet.write(row, col+2,type, format)
+                            worksheet.write(row, col+3,app_person.person_ref.person_register, format)
+                            worksheet.write(row, col+4, str(app.app_timestamp),format)
+                            worksheet.write(row, col+5, str(app_doc_count),format)
+                            worksheet.write(row, col+23, app.remarks,format)
+                            worksheet.write(row, col+24, '____',format)
 
-                if app_doc_count != 0:
-                    app_doc = self.session.query(CtApplicationDocument)\
-                        .join(CtApplicationPersonRole, CtApplicationDocument.application_id == CtApplicationPersonRole.application)\
-                        .join(BsPerson, CtApplicationPersonRole.person == BsPerson.person_id)\
-                        .filter(CtApplicationDocument.application_id == app.app_id)\
-                        .filter(BsPerson.person_id == app_person.person_ref.person_id).all()
-                    for doc in app_doc:
-                        if doc.role == 1:
-                            app_doc_1 = 1
-                        elif doc.role == 2:
-                            app_doc_2 = 1
-                        elif doc.role == 3:
-                            app_doc_3 = 1
-                        elif doc.role == 8:
-                            app_doc_4 = 1
-                        elif doc.role == 9:
-                            app_doc_5 = 1
-                        elif doc.role == 4:
-                            app_doc_6 = 1
-                        elif doc.role == 18:
-                            app_doc_7 = 1
-                        elif doc.role == 17:
-                            app_doc_8 = 1
-                        elif doc.role == 12:
-                            app_doc_9 = 1
-                        elif doc.role == 11:
-                            app_doc_10 = 1
-                        elif doc.role == 5:
-                            app_doc_11 = 1
-                        elif doc.role == 16:
-                            app_doc_12 = 1
-                        elif doc.role == 13:
-                            app_doc_13 = 1
-                        elif doc.role == 10:
-                            app_doc_14 = 1
-                        elif doc.role == 14:
-                            app_doc_15 = 1
-                        elif doc.role == 19:
-                            app_doc_16 = 1
-                        elif doc.role == 23:
-                            app_doc_17 = 1
-                        worksheet.write(row, col+6, str(app_doc_1),format)
-                        worksheet.write(row, col+7, str(app_doc_2),format)
-                        worksheet.write(row, col+8, str(app_doc_3),format)
-                        worksheet.write(row, col+9, str(app_doc_4),format)
-                        worksheet.write(row, col+10, str(app_doc_5),format)
-                        worksheet.write(row, col+11, str(app_doc_6),format)
-                        worksheet.write(row, col+12, str(app_doc_7),format)
-                        worksheet.write(row, col+13, str(app_doc_8),format)
-                        worksheet.write(row, col+14, str(app_doc_9),format)
-                        worksheet.write(row, col+15, str(app_doc_10),format)
-                        worksheet.write(row, col+16, str(app_doc_11),format)
-                        worksheet.write(row, col+17, str(app_doc_12),format)
-                        worksheet.write(row, col+18, str(app_doc_13),format)
-                        worksheet.write(row, col+19, str(app_doc_14),format)
-                        worksheet.write(row, col+20, str(app_doc_15),format)
-                        worksheet.write(row, col+21, str(app_doc_16),format)
-                        worksheet.write(row, col+22, str(app_doc_17),format)
-                    app_doc_1 = 0
-                    app_doc_2 = 0
-                    app_doc_3 = 0
-                    app_doc_4 = 0
-                    app_doc_5 = 0
-                    app_doc_6 = 0
-                    app_doc_7 = 0
-                    app_doc_8 = 0
-                    app_doc_9 = 0
-                    app_doc_10 = 0
-                    app_doc_11 = 0
-                    app_doc_12 = 0
-                    app_doc_13 = 0
-                    app_doc_14 = 0
-                    app_doc_15 = 0
-                    app_doc_16 = 0
-                    app_doc_17 = 0
-                else:
+                            if app_doc_count != 0:
+                                app_doc = self.session.query(CtApplicationDocument)\
+                                    .join(CtApplicationPersonRole, CtApplicationDocument.application_id == CtApplicationPersonRole.application)\
+                                    .join(BsPerson, CtApplicationPersonRole.person == BsPerson.person_id)\
+                                    .filter(CtApplicationDocument.application_id == app.app_id)\
+                                    .filter(BsPerson.person_id == app_person.person_ref.person_id).all()
+                                for doc in app_doc:
+                                    if doc.role == 1:
+                                        app_doc_1 = 1
+                                    elif doc.role == 2:
+                                        app_doc_2 = 1
+                                    elif doc.role == 3:
+                                        app_doc_3 = 1
+                                    elif doc.role == 8:
+                                        app_doc_4 = 1
+                                    elif doc.role == 9:
+                                        app_doc_5 = 1
+                                    elif doc.role == 4:
+                                        app_doc_6 = 1
+                                    elif doc.role == 18:
+                                        app_doc_7 = 1
+                                    elif doc.role == 17:
+                                        app_doc_8 = 1
+                                    elif doc.role == 12:
+                                        app_doc_9 = 1
+                                    elif doc.role == 11:
+                                        app_doc_10 = 1
+                                    elif doc.role == 5:
+                                        app_doc_11 = 1
+                                    elif doc.role == 16:
+                                        app_doc_12 = 1
+                                    elif doc.role == 13:
+                                        app_doc_13 = 1
+                                    elif doc.role == 10:
+                                        app_doc_14 = 1
+                                    elif doc.role == 14:
+                                        app_doc_15 = 1
+                                    elif doc.role == 19:
+                                        app_doc_16 = 1
+                                    elif doc.role == 23:
+                                        app_doc_17 = 1
+                                    worksheet.write(row, col+6, str(app_doc_1),format)
+                                    worksheet.write(row, col+7, str(app_doc_2),format)
+                                    worksheet.write(row, col+8, str(app_doc_3),format)
+                                    worksheet.write(row, col+9, str(app_doc_4),format)
+                                    worksheet.write(row, col+10, str(app_doc_5),format)
+                                    worksheet.write(row, col+11, str(app_doc_6),format)
+                                    worksheet.write(row, col+12, str(app_doc_7),format)
+                                    worksheet.write(row, col+13, str(app_doc_8),format)
+                                    worksheet.write(row, col+14, str(app_doc_9),format)
+                                    worksheet.write(row, col+15, str(app_doc_10),format)
+                                    worksheet.write(row, col+16, str(app_doc_11),format)
+                                    worksheet.write(row, col+17, str(app_doc_12),format)
+                                    worksheet.write(row, col+18, str(app_doc_13),format)
+                                    worksheet.write(row, col+19, str(app_doc_14),format)
+                                    worksheet.write(row, col+20, str(app_doc_15),format)
+                                    worksheet.write(row, col+21, str(app_doc_16),format)
+                                    worksheet.write(row, col+22, str(app_doc_17),format)
+                                app_doc_1 = 0
+                                app_doc_2 = 0
+                                app_doc_3 = 0
+                                app_doc_4 = 0
+                                app_doc_5 = 0
+                                app_doc_6 = 0
+                                app_doc_7 = 0
+                                app_doc_8 = 0
+                                app_doc_9 = 0
+                                app_doc_10 = 0
+                                app_doc_11 = 0
+                                app_doc_12 = 0
+                                app_doc_13 = 0
+                                app_doc_14 = 0
+                                app_doc_15 = 0
+                                app_doc_16 = 0
+                                app_doc_17 = 0
+                            else:
 
-                    worksheet.write(row, col+6, str(app_doc_1),format)
-                    worksheet.write(row, col+7, str(app_doc_2),format)
-                    worksheet.write(row, col+8, str(app_doc_3),format)
-                    worksheet.write(row, col+9, str(app_doc_4),format)
-                    worksheet.write(row, col+10, str(app_doc_5),format)
-                    worksheet.write(row, col+11, str(app_doc_6),format)
-                    worksheet.write(row, col+12, str(app_doc_7),format)
-                    worksheet.write(row, col+13, str(app_doc_8),format)
-                    worksheet.write(row, col+14, str(app_doc_9),format)
-                    worksheet.write(row, col+15, str(app_doc_10),format)
-                    worksheet.write(row, col+16, str(app_doc_11),format)
-                    worksheet.write(row, col+17, str(app_doc_12),format)
-                    worksheet.write(row, col+18, str(app_doc_13),format)
-                    worksheet.write(row, col+19, str(app_doc_14),format)
-                    worksheet.write(row, col+20, str(app_doc_15),format)
-                    worksheet.write(row, col+21, str(app_doc_16),format)
-                    worksheet.write(row, col+22, str(app_doc_17),format)
+                                worksheet.write(row, col+6, str(app_doc_1),format)
+                                worksheet.write(row, col+7, str(app_doc_2),format)
+                                worksheet.write(row, col+8, str(app_doc_3),format)
+                                worksheet.write(row, col+9, str(app_doc_4),format)
+                                worksheet.write(row, col+10, str(app_doc_5),format)
+                                worksheet.write(row, col+11, str(app_doc_6),format)
+                                worksheet.write(row, col+12, str(app_doc_7),format)
+                                worksheet.write(row, col+13, str(app_doc_8),format)
+                                worksheet.write(row, col+14, str(app_doc_9),format)
+                                worksheet.write(row, col+15, str(app_doc_10),format)
+                                worksheet.write(row, col+16, str(app_doc_11),format)
+                                worksheet.write(row, col+17, str(app_doc_12),format)
+                                worksheet.write(row, col+18, str(app_doc_13),format)
+                                worksheet.write(row, col+19, str(app_doc_14),format)
+                                worksheet.write(row, col+20, str(app_doc_15),format)
+                                worksheet.write(row, col+21, str(app_doc_16),format)
+                                worksheet.write(row, col+22, str(app_doc_17),format)
 
-                row += 1
-                value_p = self.progressBar.value() + 1
-                self.progressBar.setValue(value_p)
+                            row += 1
+                            value_p = self.progressBar.value() + 1
+                            self.progressBar.setValue(value_p)
 
         # except SQLAlchemyError, e:
         #     PluginUtils.show_error(self, self.tr("Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))

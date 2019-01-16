@@ -635,7 +635,7 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
     def __check_parcel_correct(self, geometry, error_message):
 
         organization = DatabaseUtils.current_user_organization()
-        print organization
+
         valid = True
         if not organization:
             return
@@ -652,7 +652,7 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
             # Тусгай хамгаалалтай газар нутгаас өөр газар нэгж талбар оруулж болохгүй
             count = self.session.query(AuMpa.id) \
                 .filter(geometry.ST_Within(AuMpa.geometry)).count()
-            print count
+
             if count == 0:
                 valid = False
                 parcel_error = self.tr("Parcels out mpa boundary overlap!!!")
