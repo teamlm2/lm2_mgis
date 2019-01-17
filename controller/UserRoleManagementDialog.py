@@ -709,6 +709,19 @@ class UserRoleManagementDialog(QDialog, Ui_UserRoleManagementDialog):
                 if password != self.PW_PLACEHOLDER:
                     self.db_session.execute(u"ALTER ROLE {0} PASSWORD '{1}'".format(user_name, password))
 
+                active_role_count = self.db_session.query(SetRole).filter(SetRole.user_name == user_name).filter(
+                    SetRole.is_active == True).count()
+                if active_role_count == 1:
+                    role = self.db_session.query(SetRole).filter(SetRole.user_name == user_name).filter(
+                        SetRole.is_active == True).one()
+                else:
+                    role = self.db_session.query(SetRole).filter(SetRole.user_name == user_name).filter(
+                        SetRole.user_name_real == self.username_real_lbl.text()).one()
+                sd_user = self.db_session.query(SdUser).filter(
+                    SdUser.gis_user_real == role.user_name_real).first()
+                user_pass = hashlib.md5(password).hexdigest()
+                sd_user.password = user_pass
+
             groups = self.__groupsByUser(user_name)
             for group in groups:
                 self.db_session.execute(u"REVOKE {0} FROM {1}".format(group[0], user_name))
@@ -754,12 +767,7 @@ class UserRoleManagementDialog(QDialog, Ui_UserRoleManagementDialog):
                 else:
                     au_level1_code = str(item.data(Qt.UserRole))
                     restriction_au_level1 += au_level1_code + ','
-                    # Special treatment for UB's districts:
-                    # if au_level1_code.startswith('1') or au_level1_code.startswith('01'):
-                    #     restriction_au_level2 += au_level1_code + '00' + ','
-                    #     self.db_session.execute("SET ROLE role_management")
-                    #     self.db_session.execute(u"GRANT s{0}00 TO {1}".format(au_level1_code, user_name))
-                    #     self.db_session.execute("RESET ROLE")
+
                     if is_first == 0:
                         is_first = 1
                         for index2 in range(self.soum_lwidget.count()):
@@ -875,7 +883,8 @@ class UserRoleManagementDialog(QDialog, Ui_UserRoleManagementDialog):
             # add employee and user
 
             sd_user_count = self.db_session.query(SdUser).filter(SdUser.gis_user_real == role.user_name_real).count()
-            user_pass = hashlib.md5(role.user_name).hexdigest()
+
+            user_pass = hashlib.md5(password).hexdigest()
 
             date_time_string = QDateTime.currentDateTime().toString(Constants.DATABASE_DATETIME_FORMAT)
             if sd_user_count == 0:
@@ -941,6 +950,20 @@ class UserRoleManagementDialog(QDialog, Ui_UserRoleManagementDialog):
         else:
             if password != self.PW_PLACEHOLDER:
                 self.db_session.execute(u"ALTER ROLE {0} PASSWORD '{1}'".format(user_name, password))
+
+                active_role_count = self.db_session.query(SetRole).filter(SetRole.user_name == user_name).filter(
+                    SetRole.is_active == True).count()
+                if active_role_count == 1:
+                    role = self.db_session.query(SetRole).filter(SetRole.user_name == user_name).filter(
+                        SetRole.is_active == True).one()
+                else:
+                    role = self.db_session.query(SetRole).filter(SetRole.user_name == user_name).filter(
+                        SetRole.user_name_real == self.username_real_lbl.text()).one()
+                sd_user = self.db_session.query(SdUser).filter(
+                    SdUser.gis_user_real == role.user_name_real).first()
+                user_pass = hashlib.md5(password).hexdigest()
+                sd_user.password = user_pass
+
             self.db_session.commit()
             self.__populate_user_role_lwidget()
             item = self.user_role_lwidget.findItems(user_name+'-'+first_name, Qt.MatchExactly)[0]

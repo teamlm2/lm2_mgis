@@ -409,8 +409,8 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
                     if sd_user:
                         lastname = sd_user.lastname
                         firstname = sd_user.firstname
-                    self.office_in_charge_cbox.addItem(lastname + ", " + firstname, sd_user.user_id)
-                    self.next_officer_in_charge_cbox.addItem(lastname + ", " + firstname, sd_user.user_id)
+                        self.office_in_charge_cbox.addItem(lastname + ", " + firstname, sd_user.user_id)
+                        self.next_officer_in_charge_cbox.addItem(lastname + ", " + firstname, sd_user.user_id)
 
         if cl_app_type is not None:
             for app_type in cl_app_type:

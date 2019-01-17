@@ -680,7 +680,7 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
                 if sd_user:
                     lastname = sd_user.lastname
                     firstname = sd_user.firstname
-                self.next_officer_in_charge_cbox.addItem(lastname + ", " + firstname, sd_user.user_id)
+                    self.next_officer_in_charge_cbox.addItem(lastname + ", " + firstname, sd_user.user_id)
 
         officer = self.session.query(SetRole) \
             .filter(SetRole.user_name == QSettings().value(SettingsConstants.USER)) \

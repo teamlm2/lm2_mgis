@@ -50,6 +50,9 @@ from ..utils.DatabaseUtils import DatabaseUtils
 from ..utils.FilePath import *
 from ftplib import FTP, error_perm
 
+APPROVED = 'approved'
+REFUSED = 'refused'
+
 class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
 
     def __init__(self, plugin, plan, navigator, attribute_update=False, parent=None):
@@ -67,9 +70,10 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         self.is_file_import = False
         self.approved_item = None
         self.refused_item = None
-
+        self.error_dic = {}
         self.polygon_rbutton.setChecked(True)
         self.zone_parcel_rbutton.setChecked(True)
+        self.message_label.setWordWrap(True)
         # self.message_label.setStyleSheet("QLabel { background-color : red; color : blue; }");
         self.message_label.setStyleSheet("QLabel {color: rgb(255,0,0);}")
         self.__setup_data()
@@ -137,6 +141,8 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         working_soum_code = DatabaseUtils.working_l2_code()
         iterator = parcel_shape_layer.getFeatures()
         count = 0
+        approved_count = 0
+        refused_count = 0
         # try:
         is_out_parcel = False
         error_message = ''
@@ -152,56 +158,66 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
                 PluginUtils.show_error(self, self.tr("Invalid parcel info"), log_measage)
                 return
             count += 1
-
+            id = QDateTime().currentDateTime().toString("MMddhhmmss") + str(count)
             is_approved = False
-            if self.__approved_parcel_check(parcel, parcel_shape_layer):
+            if self.__approved_parcel_check(parcel, parcel_shape_layer, id):
                 is_approved = True
+
+            header = str(count)
+            if self.__get_attribute(parcel, parcel_shape_layer)[0]:
+                process_type = self.__get_attribute(parcel, parcel_shape_layer)[0]
+                header = header + ':' + '(' + str(process_type.code) + ')' + unicode(process_type.description)
+            if self.__get_attribute(parcel, parcel_shape_layer)[1]:
+                landuse = self.__get_attribute(parcel, parcel_shape_layer)[1]
+            if self.__get_attribute(parcel, parcel_shape_layer)[2]:
+                landname = self.__get_attribute(parcel, parcel_shape_layer)[2]
+                header = header + '/' + unicode(landname) + '/'
 
             if is_approved:
                 new_parcel = LdProjectParcel()
                 new_parcel.plan_draft_id = self.plan.plan_draft_id
                 new_parcel.plan_draft_ref = self.plan
-                new_parcel.parcel_id = QDateTime().currentDateTime().toString("MMddhhmmss") + str(count)
+                new_parcel.parcel_id = id
                 new_parcel.valid_from = PluginUtils.convert_qt_date_to_python(QDateTime().currentDateTime())
                 new_parcel.polygon_geom = WKTElement(parcel.geometry().exportToWkt(), srid=4326)
                 new_parcel = self.__copy_parcel_attributes(parcel, new_parcel, parcel_shape_layer)
 
                 self.session.add(new_parcel)
 
-                # self.__copy_parcel_attributes(parcel, new_parcel, parcel_shape_layer)
-
                 main_parcel_item = QTreeWidgetItem()
-                # main_parcel_item.setText(0, new_parcel.parcel_id)
-                main_parcel_item.setText(0, str(count))
+                main_parcel_item.setText(0, header)
                 main_parcel_item.setIcon(0, QIcon(QPixmap(":/plugins/lm2/parcel_red.png")))
-                # main_parcel_item.setData(0, Qt.UserRole, new_parcel.parcel_id)
-                # main_parcel_item.setData(0, Qt.UserRole + 1, Constants.CASE_PARCEL_IDENTIFIER)
+                main_parcel_item.setData(0, Qt.UserRole, id)
+                main_parcel_item.setData(0, Qt.UserRole + 1, APPROVED)
                 self.approved_item.addChild(main_parcel_item)
-
+                approved_count += 1
             else:
                 main_parcel_item = QTreeWidgetItem()
-                # main_parcel_item.setText(0, new_parcel.parcel_id)
-                main_parcel_item.setText(0, str(count))
+                main_parcel_item.setText(0, header)
                 main_parcel_item.setIcon(0, QIcon(QPixmap(":/plugins/lm2/parcel_red.png")))
-                # main_parcel_item.setData(0, Qt.UserRole, new_parcel.parcel_id)
-                # main_parcel_item.setData(0, Qt.UserRole + 1, Constants.CASE_PARCEL_IDENTIFIER)
+                main_parcel_item.setData(0, Qt.UserRole, id)
+                main_parcel_item.setData(0, Qt.UserRole + 1, REFUSED)
                 self.refused_item.addChild(main_parcel_item)
+                refused_count += 1
 
-    def __approved_parcel_check(self, parcel_feature, layer):
+        self.approved_item.setText(0, self.tr("Approved") + ' (' + str(approved_count) + ')')
+        self.refused_item.setText(0, self.tr("Refused") + ' (' + str(refused_count) + ')')
 
-        valid = True
+    def __get_attribute(self, parcel_feature, layer):
 
         column_name_parcel_id = "id"
         column_name_plan_code = "plan_code"
         column_name_landuse = "landuse"
-        column_landname = "landname"
+        column_name_landname = "landname"
         column_name_khashaa = "address_kh"
         column_name_street = "address_st"
         column_name_comment = "comment"
 
         column_names = {column_name_parcel_id: "", column_name_plan_code: "", column_name_landuse: "",
-                        column_landname: "", column_name_khashaa: "", column_name_street: "",
+                        column_name_landname: "", column_name_khashaa: "", column_name_street: "",
                         column_name_comment: ""}
+
+        parcel_geometry = WKTElement(parcel_feature.geometry().exportToWkt(), srid=4326)
 
         provider = layer.dataProvider()
         for key, item in column_names.iteritems():
@@ -210,14 +226,101 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
                 value = parcel_feature.attributes()[index]
                 column_names[key] = value
 
+        plan_code = column_names[column_name_plan_code]
+        landuse_code = column_names[column_name_landuse]
+
+        process_type = None
+        if plan_code:
+            count = self.session.query(LdProcessPlan).filter(LdProcessPlan.code == plan_code).count()
+            if count == 1:
+                process_type = self.session.query(LdProcessPlan).filter(LdProcessPlan.code == plan_code).one()
+        landuse = None
+        if landuse_code:
+            count = self.session.query(ClLanduseType).filter(ClLanduseType.code == landuse_code).count()
+            if count == 1:
+                landuse = self.session.query(ClLanduseType).filter(ClLanduseType.code == landuse_code).one()
+        landname = None
+        if column_names[column_name_landname] != None:
+            landname = column_names[column_name_landname]
+
+        return process_type, landuse, landname
+
+    def __approved_parcel_check(self, parcel_feature, layer, id):
+
+        working_soum_code = DatabaseUtils.working_l2_code()
+        valid = True
+
+        column_name_parcel_id = "id"
+        column_name_plan_code = "plan_code"
+        column_name_landuse = "landuse"
+        column_name_landname = "landname"
+        column_name_khashaa = "address_kh"
+        column_name_street = "address_st"
+        column_name_comment = "comment"
+
+        column_names = {column_name_parcel_id: "", column_name_plan_code: "", column_name_landuse: "",
+                        column_name_landname: "", column_name_khashaa: "", column_name_street: "",
+                        column_name_comment: ""}
+
+        parcel_geometry = WKTElement(parcel_feature.geometry().exportToWkt(), srid=4326)
+
+        provider = layer.dataProvider()
+        for key, item in column_names.iteritems():
+            index = provider.fieldNameIndex(key)
+            if index != -1:
+                value = parcel_feature.attributes()[index]
+                column_names[key] = value
+        error_message = u''
+
+        try:
+            if column_names[column_name_landuse] != None:
+                landuse = column_names[column_name_landuse]
+                if len(str(landuse).strip()) == 4:
+                    count = self.session.query(ClLanduseType).filter(ClLanduseType.code == landuse).count()
+                    if count == 0:
+                        valid = False
+                        message = unicode(u'Газрын нэгдмэл сангийн ангиллын дугаар буруу байна.')
+                        error_message = error_message + "\n" + message
+                        self.message_label.setText(error_message)
+                else:
+                    valid = False
+                    message = unicode(u'Газрын нэгдмэл сангийн ангиллын дугаар буруу байна.')
+                    error_message = error_message + "\n" + message
+                    self.message_label.setText(error_message)
+        except SQLAlchemyError, e:
+            valid = False
+            message = unicode(u'Газрын нэгдмэл сангийн дугаар ангиллын буруу байна.')
+            error_message = error_message + "\n" + message
+            self.message_label.setText(error_message)
+
         try:
             count = self.session.query(LdProcessPlan).filter(LdProcessPlan.code == column_names[column_name_plan_code]).count()
             if count == 0:
                 valid = False
-                self.message_label.setText(self.tr('The process code is not available in the database.'))
+                message = unicode(u'Үйл ажиллагааны ангиллын дугаар буруу байна.')
+                error_message = error_message + "\n" + message
+                self.message_label.setText(error_message)
         except SQLAlchemyError, e:
             valid = False
-            self.message_label.setText(self.tr('The process code is not available in the database.'))
+            message = unicode(u'Үйл ажиллагааны ангиллын дугаар буруу байна.')
+            error_message = error_message + "\n" + message
+            self.message_label.setText(error_message)
+
+        is_out_parcel = False
+        au2_parcel_count = self.session.query(AuLevel2). \
+            filter(AuLevel2.code == working_soum_code). \
+            filter(parcel_geometry.ST_Within(AuLevel2.geometry)).count()
+        if au2_parcel_count == 0:
+            is_out_parcel = True
+
+        if is_out_parcel:
+            valid = False
+            message = unicode(u'Сумын хилийн гадна байна.')
+            error_message = error_message + "\n" + message
+            self.message_label.setText(error_message)
+
+        if not valid:
+            self.error_dic[id] = error_message
 
         return valid
 
@@ -226,13 +329,13 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         column_name_parcel_id = "id"
         column_name_plan_code = "plan_code"
         column_name_landuse = "landuse"
-        column_landname = "landname"
+        column_name_landname = "landname"
         column_name_khashaa = "address_kh"
         column_name_street = "address_st"
         column_name_comment = "comment"
 
         column_names = {column_name_parcel_id: "", column_name_plan_code: "", column_name_landuse: "",
-                        column_landname: "", column_name_khashaa: "", column_name_street: "",
+                        column_name_landname: "", column_name_khashaa: "", column_name_street: "",
                         column_name_comment: ""}
 
         provider = layer.dataProvider()
@@ -256,8 +359,8 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
             plan_code = column_names[column_name_plan_code]
         if column_names[column_name_landuse] != None:
             landuse = column_names[column_name_landuse]
-        if column_names[column_landname] != None:
-            landname = column_names[column_landname]
+        if column_names[column_name_landname] != None:
+            landname = column_names[column_name_landname]
         if column_names[column_name_khashaa] != None:
             address_khashaa = column_names[column_name_khashaa]
         if column_names[column_name_street] != None:
@@ -329,3 +432,18 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         self.timer.timeout.connect(self.__fade_status_message)
         self.time_counter = 500
         self.timer.start(10)
+
+    @pyqtSlot()
+    def on_result_twidget_itemSelectionChanged(self):
+
+        current_item = self.result_twidget.selectedItems()[0]
+        object_type = current_item.data(0, Qt.UserRole + 1)
+        object_id = current_item.data(0, Qt.UserRole)
+
+        if object_type == REFUSED:
+            self.message_label.setStyleSheet("QLabel {color: rgb(255,0,0);}")
+            self.message_label.setText(self.error_dic[object_id])
+        else:
+            self.message_label.setStyleSheet("QLabel {color: rgb(0,71,31);}")
+            self.message_label.setText(current_item.text(0))
+

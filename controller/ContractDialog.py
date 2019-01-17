@@ -874,7 +874,6 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         self.land_fee_twidget.setRowCount(len(contractors))
         row = 0
         for contractor in contractors:
-            print 'rr'
             if contractor:
                 person = contractor.person_ref
                 if person:
@@ -975,8 +974,8 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             app = self.session.query(CtApplication).filter(CtApplication.app_no == app_no).one()
             contractors = app.stakeholders.filter(CtApplicationPersonRole.role == Constants.APPLICANT_ROLE_CODE).all()
 
-            if app_no[6:-9] == '07' or app_no[6:-9] == '14' or app_no[6:-9] == '23':
-                contractors = app.stakeholders.filter(CtApplicationPersonRole.role == Constants.NEW_RIGHT_HOLDER_CODE).all()
+            # if app_no[6:-9] == '07' or app_no[6:-9] == '14' or app_no[6:-9] == '23':
+            #     contractors = app.stakeholders.filter(CtApplicationPersonRole.role == Constants.NEW_RIGHT_HOLDER_CODE).all()
             # self.land_fee_twidget.setRowCount(len(contractors))
             row = 0
 
@@ -1011,7 +1010,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                                                     fee = person.fees.filter(CtFee.contract == self.contract.contract_id). \
                                                         filter(CtFee.base_fee_id == None).first()
                                                     self.__add_fee_row2(row, contractor, fee)
-
+                        row += 1
 
         self.land_fee_twidget.resizeColumnToContents(0)
         self.land_fee_twidget.resizeColumnToContents(1)
@@ -1934,7 +1933,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             self.property_num_edit.setText(application.parcel_ref.property_no)
         # try:
         self.__load_application_information()
-        # self.__populate_landfee_tab()
+        self.__populate_landfee_tab()
         self.__fee_zone_cbox_setup()
         self.__populate_archive_period_cbox()
         self.__populate_conditions_tab()
@@ -2196,40 +2195,10 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         contract_no = self.contract_num_edit.text()
 
         # try:
-        fee_count = self.session.query(CtFee).\
-            join(SetBaseFee, CtFee.base_fee_id == SetBaseFee.id).\
-            filter(CtFee.contract == self.contract.contract_id).\
-            filter(SetBaseFee.in_active == True).count()
-        print fee_count
-        if fee_count > 1:
-            PluginUtils.show_message(self, self.tr(u"Анхааруулга"), self.tr(u"Идэвхтэй итгэлцүүр 1 ээс их байна."))
-            return
-        fee = self.session.query(CtFee).filter(CtFee.contract == self.contract.contract_id).all()
-
-        is_active = False
-        for fee in fee:
-            if fee.base_fee_ref:
-                base_fee = fee.base_fee_ref
-                if base_fee.in_active:
-                    payment = payment + fee.fee_contract
-                    base_fee = fee.base_fee_per_m2
-                    is_active = True
-            # else:
-            #     payment = payment + fee.fee_contract
-            #     base_fee = fee.base_fee_per_m2
-        if not is_active:
-            for fee in fee:
-                if not fee.base_fee_ref:
-                    payment = payment + fee.fee_contract
-                    base_fee = fee.base_fee_per_m2
-
-        # except SQLAlchemyError, e:
-        #     raise LM2Exception(self.tr("Database Query Error"),
-        #                        self.tr("aCould not execute: {0}").format(e.message))
-
-        # report_settings = self.__admin_settings("set_report_parameter")
-        # if len(report_settings) == 0:
-        #     return
+        data = self.__fee_geoware()
+        if data['status']:
+            payment = data['data']['payment']
+            base_fee = round(float(data['data']['base_fee_per_m2']))
 
         local_name = " "
         address_street_name = ""
@@ -4317,16 +4286,21 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
         self.__calculate_landfee_tab(base_fee_id)
 
+    def __fee_geoware(self):
+
+        parcel_id = self.id_main_edit.text()
+        f = urllib2.urlopen('http://192.168.15.212:8060/api/payment/fee?parcel=' + parcel_id)
+        ff = f.read()
+
+        url = 'http://192.168.15.212:8060/api/payment/fee?parcel=' + parcel_id
+        respons = urllib.request.urlopen(url)
+        data = json.loads(respons.read().decode(respons.info().get_param('charset') or 'utf-8'))
+        return data
+
     @pyqtSlot()
     def on_refresh_fee_button_clicked(self):
 
-        parcel_id = self.id_main_edit.text()
-        f = urllib2.urlopen('http://192.168.15.212:8060/api/payment/fee?parcel='+parcel_id)
-        ff = f.read()
-
-        url = 'http://192.168.15.212:8060/api/payment/fee?parcel='+parcel_id
-        respons = urllib.request.urlopen(url)
-        data = json.loads(respons.read().decode(respons.info().get_param('charset') or 'utf-8'))
+        data = self.__fee_geoware()
 
         status = data['status']
         msg = data['msg']
@@ -4368,10 +4342,12 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                 if person:
                     fee_count = person.fees.filter(CtFee.contract == self.contract.contract_id).\
                         filter(CtFee.base_fee_id == base_fee_id).count()
-
                     if fee_count == 0:
                         self.__add_fee_row3(row, contractor, base_fee, payment, parcel_id)
-
+                    if fee_count == 1:
+                        fee = person.fees.filter(CtFee.contract == self.contract.contract_id). \
+                            filter(CtFee.base_fee_id == base_fee_id).one()
+                        self.__add_fee_row2(row, contractor, fee)
                     row += 1
 
     def __add_fee_row3(self, row, contractor, base_fee, payment, parcel_id):
