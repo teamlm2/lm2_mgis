@@ -2157,10 +2157,11 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
         if self.to_zone_cbox.count() > 1:
             self.to_zone_cbox.setCurrentIndex(1)
 
-        zone_fid = self.zones_lwidget.item(self.zones_lwidget.currentRow()).data(Qt.UserRole)
-        zone = self.session.query(SetFeeZone).filter(SetFeeZone.zone_id == zone_fid).one()
+        if self.zones_lwidget.item(self.zones_lwidget.currentRow()):
+            zone_fid = self.zones_lwidget.item(self.zones_lwidget.currentRow()).data(Qt.UserRole)
+            zone = self.session.query(SetFeeZone).filter(SetFeeZone.zone_id == zone_fid).one()
 
-        zone_no = zone.zone_no
+            zone_no = zone.zone_no
         self.landuse_code_list = list()
         # del self.land_fee_twidget[:]
 

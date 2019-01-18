@@ -70,15 +70,75 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         self.is_file_import = False
         self.approved_item = None
         self.refused_item = None
+        self.au2 = DatabaseUtils.working_l2_code()
+        self.au1 = DatabaseUtils.working_l1_code()
         self.error_dic = {}
         self.polygon_rbutton.setChecked(True)
         self.zone_parcel_rbutton.setChecked(True)
         self.message_label.setWordWrap(True)
         # self.message_label.setStyleSheet("QLabel { background-color : red; color : blue; }");
         self.message_label.setStyleSheet("QLabel {color: rgb(255,0,0);}")
+        self.__zones_rbutton_setup()
         self.__setup_data()
         self.__setup_twidget()
         self.__setup_context_menu()
+
+    def __zones_rbutton_setup(self):
+
+        if self.zone_parcel_rbutton.isChecked():
+            self.point_rbutton.setChecked(False)
+            self.point_rbutton.setEnabled(False)
+            self.line_rbutton.setChecked(False)
+            self.line_rbutton.setEnabled(False)
+            self.polygon_rbutton.setChecked(True)
+            self.polygon_rbutton.setEnabled(True)
+        elif self.zone_sub_rbutton.isChecked():
+            self.point_rbutton.setChecked(False)
+            self.point_rbutton.setEnabled(False)
+            self.line_rbutton.setChecked(False)
+            self.line_rbutton.setEnabled(False)
+            self.polygon_rbutton.setChecked(True)
+            self.polygon_rbutton.setEnabled(True)
+        elif self.zone_main_rbutton.isChecked():
+            self.point_rbutton.setChecked(True)
+            self.point_rbutton.setEnabled(True)
+            self.line_rbutton.setChecked(True)
+            self.line_rbutton.setEnabled(True)
+            self.polygon_rbutton.setChecked(True)
+            self.polygon_rbutton.setEnabled(True)
+
+    @pyqtSlot(bool)
+    def on_zone_parcel_rbutton_toggled(self, state):
+
+        if state:
+            self.point_rbutton.setChecked(False)
+            self.point_rbutton.setEnabled(False)
+            self.line_rbutton.setChecked(False)
+            self.line_rbutton.setEnabled(False)
+            self.polygon_rbutton.setChecked(True)
+            self.polygon_rbutton.setEnabled(True)
+
+    @pyqtSlot(bool)
+    def on_zone_sub_rbutton_toggled(self, state):
+
+        if state:
+            self.point_rbutton.setChecked(False)
+            self.point_rbutton.setEnabled(False)
+            self.line_rbutton.setChecked(False)
+            self.line_rbutton.setEnabled(False)
+            self.polygon_rbutton.setChecked(True)
+            self.polygon_rbutton.setEnabled(True)
+
+    @pyqtSlot(bool)
+    def on_zone_main_rbutton_toggled(self, state):
+
+        if state:
+            self.point_rbutton.setChecked(True)
+            self.point_rbutton.setEnabled(True)
+            self.line_rbutton.setChecked(True)
+            self.line_rbutton.setEnabled(True)
+            self.polygon_rbutton.setChecked(True)
+            self.polygon_rbutton.setEnabled(True)
 
     def __setup_data(self):
 
@@ -174,12 +234,32 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
                 header = header + '/' + unicode(landname) + '/'
 
             if is_approved:
-                new_parcel = LdProjectParcel()
+                if self.zone_parcel_rbutton.isChecked():
+                    new_parcel = LdProjectParcel()
+                elif self.zone_sub_rbutton.isChecked():
+                    new_parcel = LdProjectSubZone()
+                elif self.zone_main_rbutton.isChecked():
+                    new_parcel = LdProjectMainZone()
                 new_parcel.plan_draft_id = self.plan.plan_draft_id
                 new_parcel.plan_draft_ref = self.plan
                 new_parcel.parcel_id = id
                 new_parcel.valid_from = PluginUtils.convert_qt_date_to_python(QDateTime().currentDateTime())
-                new_parcel.polygon_geom = WKTElement(parcel.geometry().exportToWkt(), srid=4326)
+                new_parcel.au1 = self.au1
+                new_parcel.au2 = self.au2
+                if self.zone_parcel_rbutton.isChecked():
+                    if self.polygon_rbutton.isChecked():
+                        new_parcel.polygon_geom = WKTElement(parcel.geometry().exportToWkt(), srid=4326)
+                elif self.zone_parcel_rbutton.isChecked():
+                    if self.polygon_rbutton.isChecked():
+                        new_parcel.polygon_geom = WKTElement(parcel.geometry().exportToWkt(), srid=4326)
+                elif self.zone_main_rbutton.isChecked():
+                    if self.point_rbutton.isChecked():
+                        new_parcel.point_geom = WKTElement(parcel.geometry().exportToWkt(), srid=4326)
+                    elif self.line_rbutton.isChecked():
+                        new_parcel.line_geom = WKTElement(parcel.geometry().exportToWkt(), srid=4326)
+                    elif self.polygon_rbutton.isChecked():
+                        new_parcel.polygon_geom = WKTElement(parcel.geometry().exportToWkt(), srid=4326)
+
                 new_parcel = self.__copy_parcel_attributes(parcel, new_parcel, parcel_shape_layer)
 
                 self.session.add(new_parcel)
@@ -318,6 +398,15 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
             message = unicode(u'Сумын хилийн гадна байна.')
             error_message = error_message + "\n" + message
             self.message_label.setText(error_message)
+
+        if self.zone_parcel_rbutton.isChecked():
+            parcel_overlaps_count = self.session.query(LdProjectParcel).\
+                filter(LdProjectParcel.plan_draft_id == self.plan.plan_draft_id).\
+                filter(parcel_geometry.ST_Intersects(LdProjectParcel.polygon_geom)).count()
+            if parcel_overlaps_count > 0:
+                valid = False
+                message = unicode(u'Нэгж талбар давхардаж байна.')
+                error_message = error_message + "\n" + message
 
         if not valid:
             self.error_dic[id] = error_message

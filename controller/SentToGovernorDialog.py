@@ -848,7 +848,7 @@ class SentToGovernorDialog(QDialog, Ui_SentToGovernorDialog, DatabaseHelper):
 
             landsue_type_desc = self.draft_detail_twidget.item(row, 7).text()
             landuse_type = self.session.query(ClLanduseType). \
-                filter(ClLanduseType.description == landsue_type_desc).one()
+                filter(ClLanduseType.description == landsue_type_desc).first()
 
             decision_level_desc = self.draft_detail_twidget.item(row, 10).text()
             decision_level = self.session.query(ClDecisionLevel). \

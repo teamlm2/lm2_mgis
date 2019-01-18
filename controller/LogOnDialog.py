@@ -141,12 +141,12 @@ class LogOnDialog(QDialog, Ui_LogOnDialog):
             #     return
 
             # record = self.__selected_record()
-            if not has_privilege:
-                if self.__protected_dialog == Constants.ROLE_MANAGEMENT_DLG:
-                    PluginUtils.show_error(self, self.tr("No Privilege"),
-                                           self.tr("The user has no privileges to perform "
-                                                   "role management!"))
-                    return
+            # if not has_privilege:
+            #     if self.__protected_dialog == Constants.ROLE_MANAGEMENT_DLG:
+            #         PluginUtils.show_error(self, self.tr("No Privilege"),
+            #                                self.tr("The user has no privileges to perform "
+            #                                        "role management!"))
+            #         return
 
             dialog = UserRoleManagementDialog(has_privilege, user)
             # dialog.rejected.connect(self.reject)

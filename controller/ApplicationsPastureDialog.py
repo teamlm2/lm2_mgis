@@ -456,7 +456,7 @@ class ApplicationsPastureDialog(QDialog, Ui_ApplicationsPastureDialog, DatabaseH
 
         try:
             application_types = self.session.query(ClApplicationType).\
-                filter(or_(ClApplicationType.code == ApplicationType.pasture_use, ClApplicationType.code == ApplicationType.legitimate_rights)).\
+                filter(or_(ClApplicationType.code == ApplicationType.pasture_use, ClApplicationType.code == 27)).\
                 order_by(ClApplicationType.code).all()
             statuses = self.session.query(ClApplicationStatus).order_by(ClApplicationStatus.code).all()
             # set_roles = self.session.query(SetRole). \

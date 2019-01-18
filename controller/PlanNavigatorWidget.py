@@ -119,8 +119,8 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
                     if sd_user:
                         lastname = sd_user.lastname
                         firstname = sd_user.firstname
-                    self.office_in_charge_cbox.addItem(lastname + ", " + firstname, sd_user.user_id)
-                    self.next_officer_in_charge_cbox.addItem(lastname + ", " + firstname, sd_user.user_id)
+                        self.office_in_charge_cbox.addItem(lastname + ", " + firstname, sd_user.user_id)
+                        self.next_officer_in_charge_cbox.addItem(lastname + ", " + firstname, sd_user.user_id)
 
         statuses = self.session.query(ClPlanStatusType).all()
         types = self.session.query(ClPlanType).all()
@@ -1441,6 +1441,33 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
     def on_current_view_button_clicked(self):
 
         root = QgsProject.instance().layerTreeRoot()
+
+        mygroup = root.findGroup(u"Parcel")
+
+        vlayer_parcel = LayerUtils.layer_by_data_source("data_plan", "ld_view_project_parcel")
+        if vlayer_parcel is None:
+            vlayer_parcel = LayerUtils.load_polygon_layer_base_layer("ld_view_project_parcel", "parcel_id",
+                                                                       "data_plan")
+            vlayer_parcel.loadNamedStyle(
+                str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/plan_polygon_style.qml")
+            vlayer_parcel.setLayerName(self.tr("Current Parcel"))
+        myalayer = root.findLayer(vlayer_parcel.id())
+        if myalayer is None:
+            mygroup.addLayer(vlayer_parcel)
+
+        mygroup = root.findGroup(u"Sub")
+
+        vlayer_sub_zone = LayerUtils.layer_by_data_source("data_plan", "ld_view_project_sub_zone")
+        if vlayer_sub_zone is None:
+            vlayer_sub_zone = LayerUtils.load_polygon_layer_base_layer("ld_view_project_sub_zone", "parcel_id",
+                                                                      "data_plan")
+            vlayer_sub_zone.loadNamedStyle(
+            str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/plan_polygon_style.qml")
+            vlayer_sub_zone.setLayerName(self.tr("Current Sub Zone"))
+        myalayer = root.findLayer(vlayer_sub_zone.id())
+        if myalayer is None:
+            mygroup.addLayer(vlayer_sub_zone)
+
         mygroup = root.findGroup(u"Main")
 
         vlayer_polygon = LayerUtils.layer_by_data_source("data_plan", "ld_view_project_main_zone_polygon")

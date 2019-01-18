@@ -1486,6 +1486,17 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             self.timer.stop()
         self.time_counter -= 1
 
+    def __is_fee_row(self, person_register):
+
+        is_has = False
+
+        for row in range(self.land_fee_twidget.rowCount()):
+            register = self.land_fee_twidget.item(row, CONTRACTOR_ID).text()
+            if register == person_register:
+                is_has = True
+
+        return is_has
+
     def __save_fees(self):
 
         # self.create_savepoint()
@@ -4288,11 +4299,16 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
     def __fee_geoware(self):
 
+        au2 = DatabaseUtils.working_l2_code()
+
         parcel_id = self.id_main_edit.text()
         f = urllib2.urlopen('http://192.168.15.212:8060/api/payment/fee?parcel=' + parcel_id)
         ff = f.read()
 
-        url = 'http://192.168.15.212:8060/api/payment/fee?parcel=' + parcel_id
+        if au2 == '01110':
+            url = 'http://192.168.15.212:8060/api/payment/fee/old?parcel=' + parcel_id
+        else:
+            url = 'http://192.168.15.212:8060/api/payment/fee?parcel=' + parcel_id
         respons = urllib.request.urlopen(url)
         data = json.loads(respons.read().decode(respons.info().get_param('charset') or 'utf-8'))
         return data
@@ -4300,6 +4316,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
     @pyqtSlot()
     def on_refresh_fee_button_clicked(self):
 
+        parcel_id = self.id_main_edit.text()
         data = self.__fee_geoware()
 
         status = data['status']
@@ -4343,11 +4360,13 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                     fee_count = person.fees.filter(CtFee.contract == self.contract.contract_id).\
                         filter(CtFee.base_fee_id == base_fee_id).count()
                     if fee_count == 0:
-                        self.__add_fee_row3(row, contractor, base_fee, payment, parcel_id)
+                        if not self.__is_fee_row(person.person_register):
+                            self.__add_fee_row3(row, contractor, base_fee, payment, parcel_id)
                     if fee_count == 1:
                         fee = person.fees.filter(CtFee.contract == self.contract.contract_id). \
                             filter(CtFee.base_fee_id == base_fee_id).one()
-                        self.__add_fee_row2(row, contractor, fee)
+                        if not self.__is_fee_row(person.person_register):
+                            self.__add_fee_row2(row, contractor, fee)
                     row += 1
 
     def __add_fee_row3(self, row, contractor, base_fee, payment, parcel_id):
