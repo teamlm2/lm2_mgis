@@ -147,7 +147,7 @@ class SentToGovernorDialog(QDialog, Ui_SentToGovernorDialog, DatabaseHelper):
                     if sd_user:
                         lastname = sd_user.lastname
                         firstname = sd_user.firstname
-                    self.officer_cbox.addItem(lastname + ", " + firstname, sd_user.user_id)
+                        self.officer_cbox.addItem(lastname + ", " + firstname, sd_user.user_id)
         except SQLAlchemyError, e:
             self.rollback_to_savepoint()
             raise LM2Exception(self.tr("Database Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))

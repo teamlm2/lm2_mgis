@@ -351,6 +351,7 @@ class PluginUtils(object):
                 filter(SdAutoNumbers.format.like(soum_filter)). \
                 filter(SdAutoNumbers.format.like(year_filter)). \
                 filter(SdAutoNumbers.classes == object_type).count()
+            print count
             if count == 1:
                 auto_number = session.query(SdAutoNumbers). \
                     filter(SdAutoNumbers.format.like("%-%")). \
@@ -398,5 +399,5 @@ class PluginUtils(object):
                 auto_number.length = 5
 
                 session.add(auto_number)
-        session.flush()
+        # session.flush()
         session.commit()

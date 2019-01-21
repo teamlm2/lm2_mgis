@@ -7,6 +7,7 @@ from inspect import currentframe
 from sqlalchemy import func
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import func, or_
+from sqlalchemy.sql.expression import cast
 from ..view.Ui_OwnRecordDialog import *
 from ..controller.qt_classes.DropLabel import DropLabel
 from ..model import Constants
@@ -1009,44 +1010,44 @@ class OwnRecordDialog(QDialog, Ui_OwnRecordDialog, DatabaseHelper):
     def __generate_record_number(self):
 
         soum = DatabaseUtils.current_working_soum_schema()
-        try:
-            record_number_filter = "%-{0}/%".format(str(QDate.currentDate().toString("yyyy")))
+        # try:
+        record_number_filter = "%-{0}/%".format(str(QDate.currentDate().toString("yyyy")))
 
-            count = self.session.query(CtOwnershipRecord).filter(CtOwnershipRecord.record_no != str(self.record.record_no)) \
-                        .filter(CtOwnershipRecord.record_no.like("%-%"))\
-                        .filter(CtOwnershipRecord.record_no.like(record_number_filter)) \
-                        .filter(CtOwnershipRecord.au2 == soum) \
-                .order_by(func.substr(CtOwnershipRecord.record_no, 10, 16).desc()).count()
-            if count == 0:
-                cu_max_number = "00001"
+        count = self.session.query(CtOwnershipRecord).filter(CtOwnershipRecord.record_no != str(self.record.record_no)) \
+                    .filter(CtOwnershipRecord.record_no.like("%-%"))\
+                    .filter(CtOwnershipRecord.record_no.like(record_number_filter)) \
+                    .filter(CtOwnershipRecord.au2 == soum) \
+            .order_by(func.substr(CtOwnershipRecord.record_no, 12, 16).desc()).count()
+        if count == 0:
+            cu_max_number = "00001"
 
-            else:
-                cu_max_number = self.session.query(CtOwnershipRecord.record_no)\
-                                    .filter(CtOwnershipRecord.record_no != str(self.record.record_no)) \
-                                    .filter(CtOwnershipRecord.record_no.like("%-%"))\
-                                    .filter(CtOwnershipRecord.record_no.like(record_number_filter)) \
-                                    .filter(CtOwnershipRecord.au2 == soum) \
-                    .order_by(func.substr(CtOwnershipRecord.record_no, 10, 16).desc()).first()
+        else:
+            cu_max_number = self.session.query(CtOwnershipRecord.record_no)\
+                                .filter(CtOwnershipRecord.record_no != str(self.record.record_no)) \
+                                .filter(CtOwnershipRecord.record_no.like("%-%"))\
+                                .filter(CtOwnershipRecord.record_no.like(record_number_filter)) \
+                                .filter(CtOwnershipRecord.au2 == soum) \
+                .order_by(cast(func.substr(CtOwnershipRecord.record_no, 12, 16), Integer).desc()).first()
 
-                cu_max_number = cu_max_number[0]
-                minus_split_number = cu_max_number.split("-")
-                slash_split_number = minus_split_number[1].split("/")
-                cu_max_number = int(slash_split_number[1]) + 1
+            cu_max_number = cu_max_number[0]
+            minus_split_number = cu_max_number.split("-")
+            slash_split_number = minus_split_number[1].split("/")
+            cu_max_number = int(slash_split_number[1]) + 1
 
 
-            year = QDate.currentDate().toString("yyyy")
-            number = soum + "-" + year + "/" + str(cu_max_number).zfill(5)
+        year = QDate.currentDate().toString("yyyy")
+        number = soum + "-" + year + "/" + str(cu_max_number).zfill(5)
 
-            self.record_number_edit.setText(number)
-            self.record.record_no = number
+        self.record_number_edit.setText(number)
+        self.record.record_no = number
 
-            # contract_number_filter = "%-{0}/%".format(str(year))
-            app_type = None
-            obj_type = 'contract\OwnershipRecord'
-            PluginUtils.generate_auto_app_no(str(year), app_type, soum, obj_type)
+        # contract_number_filter = "%-{0}/%".format(str(year))
+        app_type = None
+        obj_type = 'contract\OwnershipRecord'
+        PluginUtils.generate_auto_app_no(str(year), app_type, soum, obj_type)
 
-        except SQLAlchemyError, e:
-            PluginUtils.show_error(self, self.tr("Database Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+        # except SQLAlchemyError, e:
+        #     PluginUtils.show_error(self, self.tr("Database Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
 
     def __record_status(self):
 

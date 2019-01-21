@@ -395,8 +395,8 @@ class ParcelMpaDialog(QDockWidget, Ui_ParcelMpaDialog, DatabaseHelper):
             item.setData(Qt.UserRole, str(subject.oldpid))
             self.right_holder_twidget.setItem(count, self.OLD_PARCEL_ID, item)
 
-            item = QTableWidgetItem(str(subject.pid))
-            item.setData(Qt.UserRole, str(subject.pid))
+            item = QTableWidgetItem(str(subject.gid))
+            item.setData(Qt.UserRole, (subject.gid))
             self.right_holder_twidget.setItem(count, self.PARCEL_ID, item)
 
             item = QTableWidgetItem(subject.zovshshiid)
@@ -548,7 +548,7 @@ class ParcelMpaDialog(QDockWidget, Ui_ParcelMpaDialog, DatabaseHelper):
 
     def __select_feature(self, parcel_id, layer):
 
-        expression = " old_parcel_id = \'" + parcel_id + "\'"
+        expression = " gid = \'" + parcel_id + "\'"
         request = QgsFeatureRequest()
         request.setFilterExpression(expression)
         feature_ids = []
@@ -573,8 +573,9 @@ class ParcelMpaDialog(QDockWidget, Ui_ParcelMpaDialog, DatabaseHelper):
 
         selected_row = self.right_holder_twidget.currentRow()
         old_parcel_id = self.right_holder_twidget.item(selected_row, 4).text()
+        gid = self.right_holder_twidget.item(selected_row, 5).data(Qt.UserRole)
 
-        self.__select_feature(old_parcel_id, layer)
+        self.__select_feature(str(gid), layer)
 
     @pyqtSlot(QTableWidgetItem)
     def on_right_holder_twidget_itemClicked(self, item):
@@ -1793,13 +1794,20 @@ class ParcelMpaDialog(QDockWidget, Ui_ParcelMpaDialog, DatabaseHelper):
     def __validaty_of_ubparcel(self):
 
         valid = True
-        old_parcel_id = int(self.old_parcel_id_edit.text())
+        old_parcel_id = self.old_parcel_id_edit.text()
         error_message = self.tr("The parcel info can't be saved. The following errors have been found: ")
-        ub_parcel = self.session.query(MpaGisEditSubject).filter(MpaGisEditSubject.gid == old_parcel_id).one()
+        ub_parcel = self.session.query(CaUBParcel).filter(CaUBParcel.old_parcel_id == old_parcel_id).one()
         parcel_within_count = self.session.query(CaParcel).filter(
             ub_parcel.geometry.ST_Within(CaParcel.geometry)).count()
 
         # parcel
+        validaty_result = self.__check_parcel_correct(ub_parcel.geometry, '')
+
+        if not validaty_result[0]:
+            valid = False
+            log_measage = validaty_result[1]
+            error_message = error_message + "\n \n" + log_measage
+
         if parcel_within_count > 0:
             valid = False
             parcel_error = self.tr("Duplicate Parcel.")
@@ -1936,7 +1944,8 @@ class ParcelMpaDialog(QDockWidget, Ui_ParcelMpaDialog, DatabaseHelper):
         right_type = self.rigth_type_cbox.itemData(self.rigth_type_cbox.currentIndex())
         if right_type == 1 or right_type == 2:
             text = self.contract_cert_edit.text()
-
+        else:
+            text = self.record_cert_edit.text()
         if not self.__validate_certificate(text):
             valid = False
             street_error = self.tr("Certificate number error!.")
@@ -1976,15 +1985,47 @@ class ParcelMpaDialog(QDockWidget, Ui_ParcelMpaDialog, DatabaseHelper):
                 app_dec = self.session.query(CtDecisionApplication).filter(
                     CtDecisionApplication.decision == self.decision.decision_id).first()
                 application = app_dec.application_ref
-                application_type = application.app_type
-                app_type = self.application_type_cbox.itemData(self.application_type_cbox.currentIndex())
-                if app_type != application_type:
-                    # PluginUtils.show_message(self, self.tr("LM2", "Application Type"),
-                    #                          self.tr("Can't match application type!!!"))
-                    # self.isSave = False
-                    valid = False
-                    street_error = self.tr("Can't match application type!!!")
-                    error_message = error_message + "\n \n" + street_error
+
+                if application:
+                    application_type = application.app_type
+                    app_type = self.application_type_cbox.itemData(self.application_type_cbox.currentIndex())
+                    if app_type != application_type:
+                        # PluginUtils.show_message(self, self.tr("LM2", "Application Type"),
+                        #                          self.tr("Can't match application type!!!"))
+                        # self.isSave = False
+                        valid = False
+                        street_error = self.tr("Can't match application type!!!")
+                        error_message = error_message + "\n \n" + street_error
+
+        return valid, error_message
+
+    def __check_parcel_correct(self, geometry, error_message):
+
+        organization = DatabaseUtils.current_user_organization()
+
+        valid = True
+        if not organization:
+            return
+
+        if organization == 1:
+            # Тусгай хамгаалалтай болон чөлөөт бүсд нэгж талбар оруулж болохгүй
+            count = self.session.query(AuMpa.id) \
+                .filter(geometry.ST_Intersects(AuMpa.geometry)).count()
+            if count > 0:
+                valid = False
+                parcel_error = self.tr("Parcels mpa boundary overlap!!!")
+                error_message = error_message + "\n \n" + parcel_error
+        elif organization == 3:
+            # Тусгай хамгаалалтай газар нутгаас өөр газар нэгж талбар оруулж болохгүй
+            count = self.session.query(AuMpa.id) \
+                .filter(geometry.ST_Within(AuMpa.geometry)).count()
+            if count == 0:
+                valid = False
+                parcel_error = self.tr("Parcels out mpa boundary overlap!!!")
+                error_message = error_message + "\n \n" + parcel_error
+        elif organization == 5:
+            # Чөлөөт бүсээс өөр газар нэгж талбар оруулж болохгүй
+            test = 0
 
         return valid, error_message
 
@@ -2036,7 +2077,7 @@ class ParcelMpaDialog(QDockWidget, Ui_ParcelMpaDialog, DatabaseHelper):
 
             selected_row = self.right_holder_twidget.currentRow()
             objectid = self.right_holder_twidget.item(selected_row, 1).data(Qt.UserRole + 1)
-            subject = self.session.query(MpaGisEditSubject).filter(MpaGisEditSubject.gid == objectid).one()
+            subject = self.session.query(UbGisSubject).filter(UbGisSubject.objectid == objectid).one()
             subject.is_finish = True
             subject.finish_user = DatabaseUtils.current_user().user_name
             subject.finish_date = PluginUtils.convert_qt_date_to_python(QDate.currentDate())
@@ -2096,6 +2137,13 @@ class ParcelMpaDialog(QDockWidget, Ui_ParcelMpaDialog, DatabaseHelper):
             self.contract.au2 = DatabaseUtils.working_l2_code()
 
             self.session.add(self.contract)
+
+            app_type = None
+            obj_type = 'contract\Contract'
+            qt_date = self.contract_date.date()
+            # contract_number_filter = "%-{0}/%".format(str(qt_date.toString("yyyy")))
+            year = qt_date.toString("yyyy")
+            PluginUtils.generate_auto_app_no(str(year), app_type, DatabaseUtils.working_l2_code(), obj_type)
 
             contract_app = CtContractApplicationRole()
             contract_app.application_ref = self.application
@@ -2275,12 +2323,14 @@ class ParcelMpaDialog(QDockWidget, Ui_ParcelMpaDialog, DatabaseHelper):
             self.session.add(bs_person)
         # self.session.flush()
 
+        self.__multi_owner_save(person_id)
+
     def __save_parcel(self):
 
         parcel_id = self.parcel_id_edit.text()
 
-        old_parcel_id = int(self.old_parcel_id_edit.text())
-        ub_parcel = self.session.query(MpaGisEditSubject).filter(MpaGisEditSubject.gid == old_parcel_id).one()
+        old_parcel_id = self.old_parcel_id_edit.text()
+        ub_parcel = self.session.query(CaUBParcel).filter(CaUBParcel.old_parcel_id == old_parcel_id).one()
         landuse = self.parcel_landuse_cbox.itemData(self.parcel_landuse_cbox.currentIndex())
 
         parcel_count = self.session.query(CaParcel).filter(CaParcel.parcel_id == parcel_id).count()
@@ -2351,6 +2401,12 @@ class ParcelMpaDialog(QDockWidget, Ui_ParcelMpaDialog, DatabaseHelper):
 
         self.application.parcel = parcel.parcel_id
         self.session.add(self.application)
+
+
+        qt_date = self.decision_date.date()
+        year = str(qt_date.toString("yy"))
+        obj_type = 'application\Application'
+        PluginUtils.generate_auto_app_no(str(year), str(app_type).zfill(2), au_level2, obj_type)
         # self.session.commit()
 
     def __save_application_details(self):

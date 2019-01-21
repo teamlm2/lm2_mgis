@@ -2,6 +2,7 @@ __author__ = 'B.Ankhbold'
 
 from sqlalchemy.orm import relationship
 from sqlalchemy import Column, Numeric, Integer, Sequence, ForeignKey, Float, Boolean
+from geoalchemy2 import Geometry
 from CtArchivedFee import *
 from CtArchivedTaxAndPrice import *
 
@@ -50,3 +51,4 @@ class MpaGisEditSubject(Base):
     address_neighbourhood = Column(String)
     landuse_code = Column(String)
     edit_status = Column(Integer)
+    geometry = Column(Geometry('POLYGON', 4326))

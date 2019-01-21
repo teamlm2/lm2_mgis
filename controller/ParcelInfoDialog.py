@@ -2508,7 +2508,7 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
                 app_dec = self.session.query(CtDecisionApplication).filter(
                     CtDecisionApplication.decision == self.decision.decision_id).first()
                 application = app_dec.application_ref
-                print application
+
                 if application:
                     application_type = application.app_type
                     app_type = self.application_type_cbox.itemData(self.application_type_cbox.currentIndex())
@@ -2919,7 +2919,7 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
     def __check_parcel_correct(self, geometry, error_message):
 
         organization = DatabaseUtils.current_user_organization()
-        print organization
+
         valid = True
         if not organization:
             return
@@ -2936,14 +2936,14 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
             # Тусгай хамгаалалтай газар нутгаас өөр газар нэгж талбар оруулж болохгүй
             count = self.session.query(AuMpa.id) \
                 .filter(geometry.ST_Within(AuMpa.geometry)).count()
-            print count
+
             if count == 0:
                 valid = False
                 parcel_error = self.tr("Parcels out mpa boundary overlap!!!")
                 error_message = error_message + "\n \n" + parcel_error
         elif organization == 5:
             # Чөлөөт бүсээс өөр газар нэгж талбар оруулж болохгүй
-            print ''
+            test = 0
 
         return valid, error_message
 

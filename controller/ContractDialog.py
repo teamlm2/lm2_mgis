@@ -14,6 +14,7 @@ from PyQt4.QtXml import *
 from geoalchemy2.elements import WKTElement
 from qgis.core import *
 from sqlalchemy import func, or_, extract
+from sqlalchemy.sql.expression import cast
 from PyQt4.QtXml import *
 from qgis.core import *
 from qgis.gui import *
@@ -129,12 +130,12 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             self.fee_zone_cbox.setEnabled(False)
             self.__setup_mapping()
         else:
-            try:
-                self.__generate_contract_number()
+            # try:
+            self.__generate_contract_number()
 
-            except LM2Exception, e:
-                PluginUtils.show_error(self, e.title(), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
-                self.reject()
+            # except LM2Exception, e:
+            #     PluginUtils.show_error(self, e.title(), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+            #     self.reject()
         self.__cert_range_cbox_setup()
         self.__fee_zone_cbox_setup()
 
@@ -213,41 +214,43 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
     def __generate_contract_number(self):
 
         soum = DatabaseUtils.current_working_soum_schema()
-        try:
-            contract_number_filter = "%-{0}/%".format(str(QDate().currentDate().toString("yyyy")))
-
-            count = self.session.query(CtContract).filter(CtContract.contract_no != str(self.contract.contract_no)) \
+        year = QDate().currentDate().toString("yyyy")
+        # try:
+        contract_number_filter = "%-{0}/%".format(str(QDate().currentDate().toString("yyyy")))
+      
+        count = self.session.query(CtContract) \
+            .filter(CtContract.contract_no.like("%-%")) \
+            .filter(CtContract.contract_no.like(soum+"-%")) \
+            .filter(CtContract.contract_no.like(contract_number_filter)) \
+            .filter(CtContract.au2 == soum) \
+            .order_by(func.substr(CtContract.contract_no, 12, 16).desc()).count()
+        if count == 0:
+            cu_max_number = "00001"
+        else:
+            cu_max_number = self.session.query(CtContract.contract_no) \
                 .filter(CtContract.contract_no.like("%-%")) \
+                .filter(CtContract.contract_no.like(soum + "-%")) \
                 .filter(CtContract.contract_no.like(contract_number_filter)) \
                 .filter(CtContract.au2 == soum) \
-                .order_by(func.substr(CtContract.contract_no, 10, 16).desc()).count()
-            if count == 0:
-                cu_max_number = "00001"
-            else:
-                cu_max_number = self.session.query(CtContract.contract_no) \
-                    .filter(CtContract.contract_no != str(self.contract.contract_no)) \
-                    .filter(CtContract.contract_no.like("%-%")) \
-                    .filter(CtContract.contract_no.like(contract_number_filter)) \
-                    .filter(CtContract.au2 == soum) \
-                    .order_by(func.substr(CtContract.contract_no, 10, 16).desc()).first()
-                cu_max_number = cu_max_number[0]
+                .order_by(cast(func.substr(CtContract.contract_no, 12, 16), Integer).desc()).first()
+            cu_max_number = cu_max_number[0]
 
-                minus_split_number = cu_max_number.split("-")
-                slash_split_number = minus_split_number[1].split("/")
-                cu_max_number = int(slash_split_number[1]) + 1
+            minus_split_number = cu_max_number.split("-")
+            slash_split_number = minus_split_number[1].split("/")
+            cu_max_number = int(slash_split_number[1]) + 1
+        
+        number = soum + "-" + year + "/" + str(cu_max_number).zfill(5)
+        self.contract_num_edit.setText(number)
+   
+        self.contract.contract_no = number
 
-            year = QDate().currentDate().toString("yyyy")
-            number = soum + "-" + year + "/" + str(cu_max_number).zfill(5)
-            self.contract_num_edit.setText(number)
-            self.contract.contract_no = number
+        # contract_number_filter = "%-{0}/%".format(str(year))
+        app_type = None
+        obj_type = 'contract\Contract'
+        PluginUtils.generate_auto_app_no(str(year), app_type, soum, obj_type)
 
-            # contract_number_filter = "%-{0}/%".format(str(year))
-            app_type = None
-            obj_type = 'contract\Contract'
-            PluginUtils.generate_auto_app_no(str(year), app_type, soum, obj_type)
-
-        except SQLAlchemyError, e:
-            raise LM2Exception(self.tr("Database Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+        # except SQLAlchemyError, e:
+        #     raise LM2Exception(self.tr("Database Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
 
     def __certificate_type(self):
 
@@ -2894,26 +2897,26 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         contact_first_name = ''
         app_no = self.application_this_contract_based_edit.text()
         person_signature = map_composition.getComposerItemById("person_signature")
-        try:
-            app_person = self.session.query(CtApplicationPersonRole).filter(CtApplicationPersonRole.application == self.app_id).all()
-            if app_no[6:-9] == '07' or app_no[6:-9] == '14':
-                app_person = self.session.query(CtApplicationPersonRole).filter(CtApplicationPersonRole.application == self.app_id)\
-                                    .filter(CtApplicationPersonRole.role == 70).all()
-            for p in app_person:
-                person = self.session.query(BsPerson).filter(BsPerson.person_id == p.person).one()
-                if person.contact_surname != None:
-                    contact_surname = person.contact_surname
-                if person.contact_first_name != None:
-                    contact_first_name = person.contact_first_name
-                if person.type == 10 or person.type == 20 or person.type == 50:
-                    name = "___________________"+person.name[:1]+"."+person.first_name + " /"+ person.person_register +"/"
-                    person_signature = self.__copy_label(person_signature,name,map_composition)
-                elif person.type == 30 or person.type == 40 or person.type == 60:
-                    name = "___________________"+ contact_surname[:1]+"."+ contact_first_name + " /"+ person.person_register +"/"
-                    person_signature = self.__copy_label(person_signature,name,map_composition)
+        # try:
+        app_person = self.session.query(CtApplicationPersonRole).filter(CtApplicationPersonRole.application == self.app_id).all()
+        if app_no[6:-9] == '07' or app_no[6:-9] == '14':
+            app_person = self.session.query(CtApplicationPersonRole).filter(CtApplicationPersonRole.application == self.app_id)\
+                                .filter(CtApplicationPersonRole.role == 70).all()
+        for p in app_person:
+            person = self.session.query(BsPerson).filter(BsPerson.person_id == p.person).one()
+            if person.contact_surname != None:
+                contact_surname = person.contact_surname
+            if person.contact_first_name != None:
+                contact_first_name = person.contact_first_name
+            if person.type == 10 or person.type == 20 or person.type == 50:
+                name = "___________________"+person.name[:1]+"."+person.first_name + " /"+ person.person_register +"/"
+                person_signature = self.__copy_label(person_signature,name,map_composition)
+            elif person.type == 30 or person.type == 40 or person.type == 60:
+                name = "___________________"+ contact_surname[:1]+"."+ contact_first_name + " /"+ person.person_register +"/"
+                person_signature = self.__copy_label(person_signature,name,map_composition)
 
-        except SQLAlchemyError, e:
-            raise LM2Exception(self.tr("Database Query Error"), self.tr("aCould not execute: {0}").format(e.message))
+        # except SQLAlchemyError, e:
+        #     raise LM2Exception(self.tr("Database Query Error"), self.tr("aCould not execute: {0}").format(e.message))
 
     def __add_person_name_cert(self,map_composition):
 
