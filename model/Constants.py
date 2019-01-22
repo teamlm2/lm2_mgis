@@ -2,6 +2,8 @@
 
 VERSION = '0.9.6'
 
+SETUP_VERSION = 1
+
 #Admin Settings Dialog
 #Tab Report
 REPORT_LAND_OFFICE_NAME = "land_office_name"

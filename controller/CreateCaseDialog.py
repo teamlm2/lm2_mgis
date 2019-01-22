@@ -742,6 +742,7 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
             new_parcel.parcel_id = QDateTime().currentDateTime().toString("MMddhhmmss") + str(count)
             new_parcel.initial_insert = None
             new_parcel.maintenance_case = self.ca_maintenance_case.id
+            new_parcel.au2 = self.working_soum
             new_parcel.valid_from = PluginUtils.convert_qt_date_to_python(QDateTime().currentDateTime())
             new_parcel.geometry = WKTElement(parcel.geometry().exportToWkt(), srid=4326)
             new_parcel = self.__copy_parcel_attributes(parcel, new_parcel, parcel_shape_layer)
@@ -951,6 +952,7 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
                     new_building.initial_insert = None
                     new_building.valid_from = PluginUtils.convert_qt_date_to_python(QDateTime().currentDateTime())
                     new_building.maintenance_case = case_id
+                    new_building.au2 = self.working_soum
                     new_building.geometry = WKTElement(building.geometry().exportToWkt(), srid=4326)
                     self.__copy_building_attributes(building, new_building, building_shape_layer)
                     self.session.add(new_building)

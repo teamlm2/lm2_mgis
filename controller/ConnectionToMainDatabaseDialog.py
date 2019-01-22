@@ -15,6 +15,7 @@ from ..utils.SessionHandler import SessionHandler
 from sqlalchemy.exc import DatabaseError, SQLAlchemyError
 from ..utils.PluginUtils import PluginUtils
 from ..model import Constants
+from ..model.SdConfiguration import *
 from datetime import timedelta, datetime
 import win32netcon,win32wnet
 import os
@@ -95,6 +96,14 @@ class ConnectionToMainDatabaseDialog(QDialog, Ui_ConnectionToMainDatabaseDialog)
             PluginUtils.show_error(self, self.tr("Query Error"), self.tr("User name or password is not correct!!!"))
             return
 
+        session = SessionHandler().session_instance()
+
+        conf = session.query(SdConfiguration).filter(SdConfiguration.code == 'setup_version').one()
+
+        if str(Constants.SETUP_VERSION) != conf.value:
+            PluginUtils.show_message(self, u'Анхааруулга',
+                                     u'Програмын шинэ хувилбарыг суулгана уу! ' + conf.description )
+            return
         # self.__layers_permission(user, password, host, port, database)
         self.reject()
 

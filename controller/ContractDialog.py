@@ -48,6 +48,7 @@ from ..model.CtApplicationStatus import *
 from ..model.SetCertificate import *
 from ..model.SetUserGroupRole import *
 from ..model.SdUser import *
+from ..model.SdConfiguration import *
 from ..utils.FileUtils import FileUtils
 from ..utils.PluginUtils import PluginUtils
 from ..utils.SessionHandler import SessionHandler
@@ -4305,13 +4306,12 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         au2 = DatabaseUtils.working_l2_code()
 
         parcel_id = self.id_main_edit.text()
-        f = urllib2.urlopen('http://192.168.15.212:8060/api/payment/fee?parcel=' + parcel_id)
-        ff = f.read()
+        conf = self.session.query(SdConfiguration).filter(SdConfiguration.code == 'ip_fee_lm').one()
 
         if au2 == '01110':
-            url = 'http://192.168.15.212:8060/api/payment/fee/old?parcel=' + parcel_id
+            url = 'http://' + conf.value + '/api/payment/fee/old?parcel=' + parcel_id
         else:
-            url = 'http://192.168.15.212:8060/api/payment/fee?parcel=' + parcel_id
+            url = 'http://' + conf.value + '/api/payment/fee?parcel=' + parcel_id
         respons = urllib.request.urlopen(url)
         data = json.loads(respons.read().decode(respons.info().get_param('charset') or 'utf-8'))
         return data

@@ -334,7 +334,7 @@ class PluginUtils(object):
             else:
                 format_text = soum_code + '-' + app_type + '-' + '?' +'-'+ year
 
-                generate_name = 'a:3:{s:5:"class";s:23:"application\Application";s:6:"format";s:13:"' + format_text + '";s:6:"length";i:5;}'
+                generate_name = 'a:3:{s:7:"classes";s:23:"application\Application";s:6:"format";s:13:"' + format_text + '";s:6:"length";i:5;}'
                 generate_name_md5 = hashlib.md5(generate_name).hexdigest()
                 auto_number = SdAutoNumbers()
                 auto_number.name = generate_name_md5
@@ -362,7 +362,7 @@ class PluginUtils(object):
             else:
                 format_text = soum_code + '-' + year + '/' + '?'
 
-                generate_name = 'a:3:{s:5:"class";s:17:"contract\Contract";s:6:"format";s:12:"' + format_text + '";s:6:"length";i:5;}'
+                generate_name = 'a:3:{s:7:"classes";s:17:"contract\Contract";s:6:"format";s:12:"' + format_text + '";s:6:"length";i:5;}'
                 generate_name_md5 = hashlib.md5(generate_name).hexdigest()
                 auto_number = SdAutoNumbers()
                 auto_number.name = generate_name_md5
@@ -389,7 +389,7 @@ class PluginUtils(object):
             else:
                 format_text = soum_code + '-' + year + '/' + '?'
 
-                generate_name = 'a:3:{s:5:"class";s:24:"contract\OwnershipRecord";s:6:"format";s:12:"' + format_text + '";s:6:"length";i:5;}'
+                generate_name = 'a:3:{s:7:"classes";s:24:"contract\OwnershipRecord";s:6:"format";s:12:"' + format_text + '";s:6:"length";i:5;}'
                 generate_name_md5 = hashlib.md5(generate_name).hexdigest()
                 auto_number = SdAutoNumbers()
                 auto_number.name = generate_name_md5

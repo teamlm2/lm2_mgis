@@ -3266,7 +3266,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
 
         if self.tabWidget.currentWidget() == self.person_tab:
             person = self.__selected_person()
-            QApplication.clipboard().setText(person.person_id)
+            QApplication.clipboard().setText(person.person_register)
         elif self.tabWidget.currentWidget() == self.parcel_tab:
             parcel_id = self.__selected_parcel_id()
             QApplication.clipboard().setText(parcel_id)

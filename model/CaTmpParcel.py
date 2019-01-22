@@ -9,7 +9,7 @@ from ClLanduseType import *
 
 class CaTmpParcel(Base):
 
-    __tablename__ = 'ca_tmp_parcel_view'
+    __tablename__ = 'ca_tmp_parcel'
 
     parcel_id = Column(String, primary_key=True)
     old_parcel_id = Column(String)
