@@ -332,18 +332,19 @@ class PluginUtils(object):
                     filter(SdAutoNumbers.classes == object_type).one()
                 auto_number.number = auto_number.number + 1
             else:
-                format_text = soum_code + '-' + app_type + '-' + '?' +'-'+ year
+                if count == 0:
+                    format_text = soum_code + '-' + app_type + '-' + '?' +'-'+ year
 
-                generate_name = 'a:3:{s:7:"classes";s:23:"application\Application";s:6:"format";s:13:"' + format_text + '";s:6:"length";i:5;}'
-                generate_name_md5 = hashlib.md5(generate_name).hexdigest()
-                auto_number = SdAutoNumbers()
-                auto_number.name = generate_name_md5
-                auto_number.number = 1
-                auto_number.classes = object_type
-                auto_number.format = format_text
-                auto_number.length = 5
+                    generate_name = 'a:3:{s:7:"classes";s:23:"application\Application";s:6:"format";s:13:"' + format_text + '";s:6:"length";i:5;}'
+                    generate_name_md5 = hashlib.md5(generate_name).hexdigest()
+                    auto_number = SdAutoNumbers()
+                    auto_number.name = generate_name_md5
+                    auto_number.number = 1
+                    auto_number.classes = object_type
+                    auto_number.format = format_text
+                    auto_number.length = 5
 
-                session.add(auto_number)
+                    session.add(auto_number)
         elif object_type == 'contract\Contract':
             year_filter = "%-" + str(year) + '/%'
             count = session.query(SdAutoNumbers). \
@@ -351,7 +352,6 @@ class PluginUtils(object):
                 filter(SdAutoNumbers.format.like(soum_filter)). \
                 filter(SdAutoNumbers.format.like(year_filter)). \
                 filter(SdAutoNumbers.classes == object_type).count()
-            print count
             if count == 1:
                 auto_number = session.query(SdAutoNumbers). \
                     filter(SdAutoNumbers.format.like("%-%")). \
@@ -360,18 +360,19 @@ class PluginUtils(object):
                     filter(SdAutoNumbers.classes == object_type).one()
                 auto_number.number = auto_number.number + 1
             else:
-                format_text = soum_code + '-' + year + '/' + '?'
+                if count == 0:
+                    format_text = soum_code + '-' + year + '/' + '?'
 
-                generate_name = 'a:3:{s:7:"classes";s:17:"contract\Contract";s:6:"format";s:12:"' + format_text + '";s:6:"length";i:5;}'
-                generate_name_md5 = hashlib.md5(generate_name).hexdigest()
-                auto_number = SdAutoNumbers()
-                auto_number.name = generate_name_md5
-                auto_number.number = 1
-                auto_number.classes = object_type
-                auto_number.format = format_text
-                auto_number.length = 5
+                    generate_name = 'a:3:{s:7:"classes";s:17:"contract\Contract";s:6:"format";s:12:"' + format_text + '";s:6:"length";i:5;}'
+                    generate_name_md5 = hashlib.md5(generate_name).hexdigest()
+                    auto_number = SdAutoNumbers()
+                    auto_number.name = generate_name_md5
+                    auto_number.number = 1
+                    auto_number.classes = object_type
+                    auto_number.format = format_text
+                    auto_number.length = 5
 
-                session.add(auto_number)
+                    session.add(auto_number)
         elif object_type == 'contract\OwnershipRecord':
             year_filter = "%-" + str(year) + '/%'
             count = session.query(SdAutoNumbers). \
@@ -387,17 +388,18 @@ class PluginUtils(object):
                     filter(SdAutoNumbers.classes == object_type).one()
                 auto_number.number = auto_number.number + 1
             else:
-                format_text = soum_code + '-' + year + '/' + '?'
+                if count == 0:
+                    format_text = soum_code + '-' + year + '/' + '?'
 
-                generate_name = 'a:3:{s:7:"classes";s:24:"contract\OwnershipRecord";s:6:"format";s:12:"' + format_text + '";s:6:"length";i:5;}'
-                generate_name_md5 = hashlib.md5(generate_name).hexdigest()
-                auto_number = SdAutoNumbers()
-                auto_number.name = generate_name_md5
-                auto_number.number = 1
-                auto_number.classes = object_type
-                auto_number.format = format_text
-                auto_number.length = 5
+                    generate_name = 'a:3:{s:7:"classes";s:24:"contract\OwnershipRecord";s:6:"format";s:12:"' + format_text + '";s:6:"length";i:5;}'
+                    generate_name_md5 = hashlib.md5(generate_name).hexdigest()
+                    auto_number = SdAutoNumbers()
+                    auto_number.name = generate_name_md5
+                    auto_number.number = 1
+                    auto_number.classes = object_type
+                    auto_number.format = format_text
+                    auto_number.length = 5
 
-                session.add(auto_number)
+                    session.add(auto_number)
         # session.flush()
         session.commit()
