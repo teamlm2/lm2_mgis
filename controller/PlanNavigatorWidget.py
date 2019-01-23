@@ -1440,6 +1440,8 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
     @pyqtSlot()
     def on_current_view_button_clicked(self):
 
+        column_name_process_type = "badedturl"
+
         root = QgsProject.instance().layerTreeRoot()
 
         mygroup = root.findGroup(u"Parcel")
@@ -1470,19 +1472,21 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
 
         mygroup = root.findGroup(u"Main")
 
-        vlayer_polygon = LayerUtils.layer_by_data_source("data_plan", "ld_view_project_main_zone_polygon")
-        if vlayer_polygon is None:
-            vlayer_polygon = LayerUtils.load_polygon_layer_base_layer("ld_view_project_main_zone_polygon", "parcel_id", "data_plan")
-        vlayer_polygon.loadNamedStyle(
-            str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/plan_polygon_style.qml")
-        vlayer_polygon.setLayerName(self.tr("Current Main Polygon"))
-        myalayer = root.findLayer(vlayer_polygon.id())
+        vlayer_point = LayerUtils.layer_by_data_source("data_plan", "ld_view_project_main_zone_point")
+        if vlayer_point is None:
+            vlayer_point = LayerUtils.load_point_layer_base_layer("ld_view_project_main_zone_point", "parcel_id",
+                                                                  "data_plan")
+        vlayer_point.loadNamedStyle(
+            str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/plan_point_style.qml")
+        vlayer_point.setLayerName(self.tr("Current Main Point"))
+        myalayer = root.findLayer(vlayer_point.id())
         if myalayer is None:
-            mygroup.addLayer(vlayer_polygon)
+            mygroup.addLayer(vlayer_point)
 
         vlayer_line = LayerUtils.layer_by_data_source("data_plan", "ld_view_project_main_zone_line")
         if vlayer_line is None:
-            vlayer_line = LayerUtils.load_line_layer_base_layer("ld_view_project_main_zone_line", "parcel_id", "data_plan")
+            vlayer_line = LayerUtils.load_line_layer_base_layer("ld_view_project_main_zone_line", "parcel_id",
+                                                                "data_plan")
         vlayer_line.loadNamedStyle(
             str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/plan_line_style.qml")
         vlayer_line.setLayerName(self.tr("Current Main Line"))
@@ -1490,15 +1494,37 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
         if myalayer is None:
             mygroup.addLayer(vlayer_line)
 
-        vlayer_point = LayerUtils.layer_by_data_source("data_plan", "ld_view_project_main_zone_point")
-        if vlayer_point is None:
-            vlayer_point = LayerUtils.load_point_layer_base_layer("ld_view_project_main_zone_point", "parcel_id", "data_plan")
-        vlayer_point.loadNamedStyle(
-            str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/plan_point_style.qml")
-        vlayer_point.setLayerName(self.tr("Current Main Point"))
-        myalayer = root.findLayer(vlayer_point.id())
+        vlayer_polygon = LayerUtils.layer_by_data_source("data_plan", "ld_view_project_main_zone_polygon")
+        if vlayer_polygon is None:
+            vlayer_polygon = LayerUtils.load_polygon_layer_base_layer("ld_view_project_main_zone_polygon", "parcel_id", "data_plan")
+        # vlayer_polygon.loadNamedStyle(
+        #     str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/plan_polygon_style.qml")
+        vlayer_polygon.setLayerName(self.tr("Current Main Polygon"))
+        myalayer = root.findLayer(vlayer_polygon.id())
         if myalayer is None:
-            mygroup.addLayer(vlayer_point)
+            mygroup.addLayer(vlayer_polygon)
+
+            # count = 0
+            # for feature in vlayer_polygon.getFeatures():
+            #     idx = vlayer_polygon.fieldNameIndex('badedturl')
+            #     print(feature.attributes()[idx])
+            #     renderer = vlayer_polygon.rendererV2()
+            #     myRenderer = renderer.clone()
+            #     myRenderer.updateCategoryLabel(count, str(feature.attributes()[count]))
+            #     count += 1
+
+            renderer = vlayer_polygon.rendererV2()
+            renderer.setClassAttribute()
+            print renderer.type()
+            # if renderer.type() == "categorizedSymbol":
+            myRenderer = renderer.clone()
+            idx = 0
+            for cat in myRenderer.categories():
+                print cat.value()
+                myRenderer.updateCategoryLabel(idx, "foo")
+                idx += 1
+            vlayer_polygon.setRendererV2(myRenderer)
+            vlayer_polygon.triggerRepaint()
 
     @pyqtSlot()
     def on_case_button_clicked(self):

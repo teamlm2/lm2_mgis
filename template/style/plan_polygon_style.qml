@@ -314,7 +314,8 @@
   </renderer-v2>
   <labeling type="simple"/>
   <customproperties>
-    <property key="embeddedWidgets/count" value="0"/>
+    <property key="embeddedWidgets/0/id" value="transparency"/>
+    <property key="embeddedWidgets/count" value="1"/>
     <property key="labeling" value="pal"/>
     <property key="labeling/addDirectionSymbol" value="false"/>
     <property key="labeling/angleOffset" value="0"/>
