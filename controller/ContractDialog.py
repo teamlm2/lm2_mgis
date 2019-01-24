@@ -4312,6 +4312,8 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             url = 'http://' + conf.value + '/api/payment/fee/old?parcel=' + parcel_id
         else:
             url = 'http://' + conf.value + '/api/payment/fee?parcel=' + parcel_id
+
+        print url
         respons = urllib.request.urlopen(url)
         data = json.loads(respons.read().decode(respons.info().get_param('charset') or 'utf-8'))
         return data
