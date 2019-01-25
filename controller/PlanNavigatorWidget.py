@@ -1647,15 +1647,16 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
     def __categorized_style(self, categories, layer, fill_color, boundary_color, opacity, code, description):
 
         symbol = QgsSymbolV2.defaultSymbol(layer.geometryType())
-        if fill_color:
-            fill_color = self.__hex_to_rgb(fill_color)
-            symbol.setColor(QColor(fill_color[0], fill_color[1], fill_color[2]))
-        if boundary_color:
-            boundary_color = self.__hex_to_rgb(boundary_color)
-            symbol.symbolLayer(0).setOutlineColor(QColor(boundary_color[0], boundary_color[1], boundary_color[2]))
-        symbol.setAlpha(opacity)
-        category = QgsRendererCategoryV2(code, symbol, description)
-        categories.append(category)
+        if symbol:
+            if fill_color:
+                fill_color = self.__hex_to_rgb(fill_color)
+                symbol.setColor(QColor(fill_color[0], fill_color[1], fill_color[2]))
+            if boundary_color:
+                boundary_color = self.__hex_to_rgb(boundary_color)
+                symbol.symbolLayer(0).setOutlineColor(QColor(boundary_color[0], boundary_color[1], boundary_color[2]))
+            symbol.setAlpha(opacity)
+            category = QgsRendererCategoryV2(code, symbol, description)
+            categories.append(category)
 
     def __hex_to_rgb(self, value):
         """Return (red, green, blue) for the color given as #rrggbb."""
