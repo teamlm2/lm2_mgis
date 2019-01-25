@@ -25,6 +25,7 @@ from ..model.LdProjectPlanStatus import *
 from ..controller.PlanCaseDialog import *
 from ..utils.DatabaseUtils import *
 from ..utils.PluginUtils import *
+from ..utils.LayerUtils import *
 from ..model.DatabaseHelper import *
 from ..model.SetProcessTypeColor import *
 from ..controller.PlanDetailWidget import *
@@ -67,6 +68,9 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
         self.__load_role_settings()
         # self.__report_setup()
         self.tabWidget.setCurrentIndex(0)
+
+        self.au2 = DatabaseUtils.working_l2_code()
+        self.plan = None
 
     def __load_role_settings(self):
 
@@ -1216,7 +1220,7 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
 
         try:
             result = self.session.query(LdProjectPlan).filter(LdProjectPlan.plan_draft_id == id).one()
-
+            self.plan = result
             self.plan_num_edit.setText(result.plan_draft_no)
 
             self.plan_type_cbox.setCurrentIndex(self.plan_type_cbox.findData(result.plan_type))
@@ -1441,22 +1445,49 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
     @pyqtSlot()
     def on_current_view_button_clicked(self):
 
-        column_name_process_type = "badedturl"
+        LayerUtils.refresh_layer()
 
         root = QgsProject.instance().layerTreeRoot()
-
         mygroup = root.findGroup(u"Parcel")
 
         vlayer_parcel = LayerUtils.layer_by_data_source("data_plan", "ld_view_project_parcel")
+
         if vlayer_parcel is None:
             vlayer_parcel = LayerUtils.load_polygon_layer_base_layer("ld_view_project_parcel", "parcel_id",
                                                                        "data_plan")
-            vlayer_parcel.loadNamedStyle(
-                str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/plan_polygon_style.qml")
+            vlayer_parcel.setLayerName(self.tr("Current Parcel"))
+        else:
+            QgsMapLayerRegistry.instance().removeMapLayers([vlayer_parcel.id()])
+            vlayer_parcel = LayerUtils.load_polygon_layer_base_layer("ld_view_project_parcel", "parcel_id",
+                                                                     "data_plan")
             vlayer_parcel.setLayerName(self.tr("Current Parcel"))
         myalayer = root.findLayer(vlayer_parcel.id())
         if myalayer is None:
             mygroup.addLayer(vlayer_parcel)
+            parcels = self.session.query(LdProjectParcel.badedturl). \
+                filter(LdProjectParcel.plan_draft_id == self.plan.plan_draft_id). \
+                filter(LdProjectParcel.au2 == self.au2). \
+                filter(LdProjectParcel.polygon_geom != None).group_by(LdProjectParcel.badedturl).order_by(
+                LdProjectParcel.badedturl.asc()).all()
+            categories = []
+            for parcel in parcels:
+                count = self.session.query(SetProcessTypeColor).filter(
+                    SetProcessTypeColor.code == parcel.badedturl).count()
+                if count == 1:
+                    style = self.session.query(SetProcessTypeColor).filter(
+                        SetProcessTypeColor.code == parcel.badedturl).one()
+                    fill_color = style.fill_color
+                    boundary_color = style.boundary_color
+                    opacity = 0.5
+                    code = str(int(style.code))
+                    description = str(int(style.code)) + ': ' + style.description
+
+                    self.__categorized_style(categories, vlayer_parcel, fill_color, boundary_color, opacity, code,
+                                             description)
+
+            expression = 'badedturl'  # field name
+            renderer = QgsCategorizedSymbolRendererV2(expression, categories)
+            vlayer_parcel.setRendererV2(renderer)
 
         mygroup = root.findGroup(u"Sub")
 
@@ -1464,12 +1495,39 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
         if vlayer_sub_zone is None:
             vlayer_sub_zone = LayerUtils.load_polygon_layer_base_layer("ld_view_project_sub_zone", "parcel_id",
                                                                       "data_plan")
-            vlayer_sub_zone.loadNamedStyle(
-            str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/plan_polygon_style.qml")
+            vlayer_sub_zone.setLayerName(self.tr("Current Sub Zone"))
+        else:
+            QgsMapLayerRegistry.instance().removeMapLayers([vlayer_sub_zone.id()])
+            vlayer_sub_zone = LayerUtils.load_polygon_layer_base_layer("ld_view_project_sub_zone", "parcel_id",
+                                                                       "data_plan")
             vlayer_sub_zone.setLayerName(self.tr("Current Sub Zone"))
         myalayer = root.findLayer(vlayer_sub_zone.id())
         if myalayer is None:
             mygroup.addLayer(vlayer_sub_zone)
+            parcels = self.session.query(LdProjectSubZone.badedturl). \
+                filter(LdProjectSubZone.plan_draft_id == self.plan.plan_draft_id). \
+                filter(LdProjectSubZone.au2 == self.au2). \
+                filter(LdProjectSubZone.polygon_geom != None).group_by(LdProjectSubZone.badedturl).order_by(
+                LdProjectSubZone.badedturl.asc()).all()
+            categories = []
+            for parcel in parcels:
+                count = self.session.query(SetProcessTypeColor).filter(
+                    SetProcessTypeColor.code == parcel.badedturl).count()
+                if count == 1:
+                    style = self.session.query(SetProcessTypeColor).filter(
+                        SetProcessTypeColor.code == parcel.badedturl).one()
+                    fill_color = style.fill_color
+                    boundary_color = style.boundary_color
+                    opacity = 0.5
+                    code = str(int(style.code))
+                    description = str(int(style.code)) + ': ' + style.description
+
+                    self.__categorized_style(categories, vlayer_sub_zone, fill_color, boundary_color, opacity, code,
+                                             description)
+
+            expression = 'badedturl'  # field name
+            renderer = QgsCategorizedSymbolRendererV2(expression, categories)
+            vlayer_sub_zone.setRendererV2(renderer)
 
         mygroup = root.findGroup(u"Main")
 
@@ -1477,53 +1535,127 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
         if vlayer_point is None:
             vlayer_point = LayerUtils.load_point_layer_base_layer("ld_view_project_main_zone_point", "parcel_id",
                                                                   "data_plan")
-        vlayer_point.loadNamedStyle(
-            str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/plan_point_style.qml")
-        vlayer_point.setLayerName(self.tr("Current Main Point"))
+            vlayer_point.setLayerName(self.tr("Current Main Point"))
+        else:
+            QgsMapLayerRegistry.instance().removeMapLayers([vlayer_point.id()])
+            vlayer_point = LayerUtils.load_point_layer_base_layer("ld_view_project_main_zone_point", "parcel_id",
+                                                                  "data_plan")
+            vlayer_point.setLayerName(self.tr("Current Main Point"))
+
         myalayer = root.findLayer(vlayer_point.id())
         if myalayer is None:
             mygroup.addLayer(vlayer_point)
+            parcels = self.session.query(LdProjectMainZone.badedturl). \
+                filter(LdProjectMainZone.plan_draft_id == self.plan.plan_draft_id). \
+                filter(LdProjectMainZone.au2 == self.au2). \
+                filter(LdProjectMainZone.point_geom != None).group_by(LdProjectMainZone.badedturl).order_by(
+                LdProjectMainZone.badedturl.asc()).all()
+            categories = []
+            for parcel in parcels:
+                count = self.session.query(SetProcessTypeColor).filter(
+                    SetProcessTypeColor.code == parcel.badedturl).count()
+                if count == 1:
+                    style = self.session.query(SetProcessTypeColor).filter(
+                        SetProcessTypeColor.code == parcel.badedturl).one()
+                    fill_color = style.fill_color
+                    boundary_color = style.boundary_color
+                    opacity = 0.5
+                    code = str(int(style.code))
+                    description = str(int(style.code)) + ': ' + style.description
+
+                    self.__categorized_style(categories, vlayer_point, fill_color, boundary_color, opacity, code,
+                                             description)
+
+            expression = 'badedturl'  # field name
+            renderer = QgsCategorizedSymbolRendererV2(expression, categories)
+            vlayer_point.setRendererV2(renderer)
 
         vlayer_line = LayerUtils.layer_by_data_source("data_plan", "ld_view_project_main_zone_line")
         if vlayer_line is None:
             vlayer_line = LayerUtils.load_line_layer_base_layer("ld_view_project_main_zone_line", "parcel_id",
                                                                 "data_plan")
-        vlayer_line.loadNamedStyle(
-            str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/plan_line_style.qml")
-        vlayer_line.setLayerName(self.tr("Current Main Line"))
+            vlayer_line.setLayerName(self.tr("Current Main Line"))
+        else:
+            QgsMapLayerRegistry.instance().removeMapLayers([vlayer_line.id()])
+            vlayer_line = LayerUtils.load_line_layer_base_layer("ld_view_project_main_zone_line", "parcel_id",
+                                                                "data_plan")
+            vlayer_line.setLayerName(self.tr("Current Main Line"))
         myalayer = root.findLayer(vlayer_line.id())
         if myalayer is None:
             mygroup.addLayer(vlayer_line)
+            parcels = self.session.query(LdProjectMainZone.badedturl). \
+                filter(LdProjectMainZone.plan_draft_id == self.plan.plan_draft_id). \
+                filter(LdProjectMainZone.au2 == self.au2). \
+                filter(LdProjectMainZone.line_geom != None).group_by(LdProjectMainZone.badedturl).order_by(
+                LdProjectMainZone.badedturl.asc()).all()
+            categories = []
+            for parcel in parcels:
+                count = self.session.query(SetProcessTypeColor).filter(
+                    SetProcessTypeColor.code == parcel.badedturl).count()
+                if count == 1:
+                    style = self.session.query(SetProcessTypeColor).filter(
+                        SetProcessTypeColor.code == parcel.badedturl).one()
+                    fill_color = style.fill_color
+                    boundary_color = style.boundary_color
+                    opacity = 0.5
+                    code = str(int(style.code))
+                    description = str(int(style.code)) + ': ' + style.description
+
+                    self.__categorized_style(categories, vlayer_line, fill_color, boundary_color, opacity, code,
+                                             description)
+
+            expression = 'badedturl'  # field name
+            renderer = QgsCategorizedSymbolRendererV2(expression, categories)
+            vlayer_line.setRendererV2(renderer)
 
         vlayer_polygon = LayerUtils.layer_by_data_source("data_plan", "ld_view_project_main_zone_polygon")
+
         if vlayer_polygon is None:
             vlayer_polygon = LayerUtils.load_polygon_layer_base_layer("ld_view_project_main_zone_polygon", "parcel_id", "data_plan")
-        # vlayer_polygon.loadNamedStyle(
-        #     str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/plan_polygon_style.qml")
-        vlayer_polygon.setLayerName(self.tr("Current Main Polygon"))
+            vlayer_polygon.setLayerName(self.tr("Current Main Polygon"))
+        else:
+            QgsMapLayerRegistry.instance().removeMapLayers([vlayer_polygon.id()])
+            vlayer_polygon = LayerUtils.load_polygon_layer_base_layer("ld_view_project_main_zone_polygon", "parcel_id",
+                                                                     "data_plan")
+            vlayer_polygon.setLayerName(self.tr("Current Main Polygon"))
         myalayer = root.findLayer(vlayer_polygon.id())
         if myalayer is None:
             mygroup.addLayer(vlayer_polygon)
 
-            set_styles = self.session.query(LdProjectMainZone)
-            set_styles = self.session.query(SetProcessTypeColor).all()
-
+            parcels = self.session.query(LdProjectMainZone.badedturl).\
+                filter(LdProjectMainZone.plan_draft_id == self.plan.plan_draft_id).\
+                filter(LdProjectMainZone.au2 == self.au2).\
+                filter(LdProjectMainZone.polygon_geom != None).group_by(LdProjectMainZone.badedturl).order_by(LdProjectMainZone.badedturl.asc()).all()
             categories = []
-            for style in set_styles:
-                symbol = QgsSymbolV2.defaultSymbol(vlayer_polygon.geometryType())
-                if style.fill_color:
-                    fill_color = self.__hex_to_rgb(style.fill_color)
-                    symbol.setColor(QColor(fill_color[0], fill_color[1], fill_color[2]))
-                if style.boundary_color:
-                    boundary_color = self.__hex_to_rgb(style.boundary_color)
-                    symbol.symbolLayer(0).setOutlineColor(QColor(boundary_color[0], boundary_color[1], boundary_color[2]))
-                symbol.setAlpha(0.5)
-                category = QgsRendererCategoryV2(str(int(style.code)), symbol, str(int(style.code))+': '+style.description)
-                categories.append(category)
+            for parcel in parcels:
+                count = self.session.query(SetProcessTypeColor).filter(
+                    SetProcessTypeColor.code == parcel.badedturl).count()
+                if count == 1:
+                    style = self.session.query(SetProcessTypeColor).filter(SetProcessTypeColor.code == parcel.badedturl).one()
+                    fill_color = style.fill_color
+                    boundary_color = style.boundary_color
+                    opacity = 0.5
+                    code = str(int(style.code))
+                    description = str(int(style.code)) + ': ' + style.description
+
+                    self.__categorized_style(categories, vlayer_polygon, fill_color, boundary_color, opacity, code, description)
 
             expression = 'badedturl'  # field name
             renderer = QgsCategorizedSymbolRendererV2(expression, categories)
             vlayer_polygon.setRendererV2(renderer)
+
+    def __categorized_style(self, categories, layer, fill_color, boundary_color, opacity, code, description):
+
+        symbol = QgsSymbolV2.defaultSymbol(layer.geometryType())
+        if fill_color:
+            fill_color = self.__hex_to_rgb(fill_color)
+            symbol.setColor(QColor(fill_color[0], fill_color[1], fill_color[2]))
+        if boundary_color:
+            boundary_color = self.__hex_to_rgb(boundary_color)
+            symbol.symbolLayer(0).setOutlineColor(QColor(boundary_color[0], boundary_color[1], boundary_color[2]))
+        symbol.setAlpha(opacity)
+        category = QgsRendererCategoryV2(code, symbol, description)
+        categories.append(category)
 
     def __hex_to_rgb(self, value):
         """Return (red, green, blue) for the color given as #rrggbb."""
@@ -1543,7 +1675,6 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
 
         plan_instance = self.__selected_plan()
         if plan_instance is not None:
-
             self.current_dialog = PlanCaseDialog(self.plugin, plan_instance, self, True, self.plugin.iface.mainWindow())
             # self.current_dialog.rejected.connect(self.on_current_dialog_closed)
             # DialogInspector().set_dialog_visible(True)
