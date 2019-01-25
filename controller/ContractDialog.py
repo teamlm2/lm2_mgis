@@ -465,9 +465,9 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         parcel = application.parcel_ref
         bag_name = ''
         bag_areas = {}
-        bag_count = self.session.query(AuLevel3).filter(parcel.geometry.ST_Within(AuLevel3.geometry)).count()
+        bag_count = self.session.query(AuLevel3).filter(AuLevel3.geometry.ST_Within(func.ST_Centroid(parcel.geometry))).count()
         if bag_count != 0:
-            bag = self.session.query(AuLevel3).filter(parcel.geometry.ST_Within(AuLevel3.geometry)).one()
+            bag = self.session.query(AuLevel3).filter(AuLevel3.geometry.ST_Within(func.ST_Centroid(parcel.geometry))).one()
             bag_name = bag.name
         else:
             bags = self.session.query(AuLevel3).filter(parcel.geometry.ST_Intersects(AuLevel3.geometry)).all()

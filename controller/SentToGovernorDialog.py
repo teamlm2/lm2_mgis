@@ -221,9 +221,9 @@ class SentToGovernorDialog(QDialog, Ui_SentToGovernorDialog, DatabaseHelper):
                 else:
                     parcel = self.session.query(CaTmpParcel).filter(CaTmpParcel.parcel_id == application_instance.tmp_parcel).one()
                 if parcel_count != 0:
-                    bag_count = self.session.query(AuLevel3).filter(AuLevel3.geometry.ST_Contains(parcel.geometry)).count()
+                    bag_count = self.session.query(AuLevel3).filter(AuLevel3.geometry.ST_Contains(func.ST_Centroid(parcel.geometry))).count()
                     if bag_count == 1:
-                        bag = self.session.query(AuLevel3).filter(AuLevel3.geometry.ST_Contains(parcel.geometry)).one()
+                        bag = self.session.query(AuLevel3).filter(AuLevel3.geometry.ST_Contains(func.ST_Centroid(parcel.geometry))).one()
                         if bag.name != None:
                             bag_name = bag.name
 

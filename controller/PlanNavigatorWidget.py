@@ -29,6 +29,7 @@ from ..utils.LayerUtils import *
 from ..model.DatabaseHelper import *
 from ..model.SetProcessTypeColor import *
 from ..controller.PlanDetailWidget import *
+from ..controller.PlanLayerFilterDialog import *
 # from ..LM2Plugin import *
 from datetime import timedelta
 from xlsxwriter.utility import xl_rowcol_to_cell, xl_col_to_name
@@ -65,12 +66,26 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
         self.working_l1_cbox.currentIndexChanged.connect(self.__working_l1_changed)
         self.working_l2_cbox.currentIndexChanged.connect(self.__working_l2_changed)
         self.__setup_twidgets()
+        self.__setup_mapping()
         self.__load_role_settings()
         # self.__report_setup()
         self.tabWidget.setCurrentIndex(0)
 
         self.au2 = DatabaseUtils.working_l2_code()
         self.plan = None
+
+    def __setup_mapping(self):
+
+        plan_types = self.session.query(ClPlanType).all()
+
+        for plan_type in plan_types:
+            main_item = QTableWidgetItem(str(plan_type.code) + ': ' + plan_type.description)
+            main_item.setCheckState(Qt.Unchecked)
+            main_item.setData(Qt.UserRole, plan_type.code)
+
+            inserted_row = self.layers_twidget.rowCount()
+            self.layers_twidget.insertRow(inserted_row)
+            self.layers_twidget.setItem(inserted_row, 0, main_item)
 
     def __load_role_settings(self):
 
@@ -100,6 +115,19 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
         except SQLAlchemyError, e:
             PluginUtils.show_message(self, self.tr("Sql Error"), e.message)
             return
+
+    @pyqtSlot()
+    def on_filter_view_button_clicked(self):
+
+        if self.filter_chbox.isChecked():
+            if DialogInspector().dialog_visible():
+                return
+
+            self.current_dialog = PlanLayerFilterDialog(self.plugin, self, True,
+                                                 self.plugin.iface.mainWindow())
+            self.current_dialog.show()
+
+            DatabaseUtils.set_working_schema()
 
     def __setup_change_combo_boxes(self):
 
@@ -143,6 +171,15 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
             self.decision_level_cbox.addItem(value.description, value.code)
 
     def __setup_twidgets(self):
+
+        self.layers_twidget.setColumnCount(1)
+        self.layers_twidget.horizontalHeader().setResizeMode(0, QHeaderView.Stretch)
+        self.layers_twidget.horizontalHeader().setVisible(False)
+        self.layers_twidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.layers_twidget.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.layers_twidget.setDragEnabled(True)
+        self.layers_twidget.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.layers_twidget.customContextMenuRequested.connect(self.on_custom_context_menu_requested)
 
         self.context_menu = QMenu()
         self.zoom_to_parcel_action = QAction(QIcon(":/plugins/lm2/parcel.png"), self.tr("Zoom to parcel"), self)

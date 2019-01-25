@@ -932,59 +932,60 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
         for building in iterator:
             count += 1
 
-            try:
-                tmp_parcel_count = self.session.query(CaTmpParcel).filter(WKTElement(building.geometry().exportToWkt(), srid=4326).ST_Within(CaTmpParcel.geometry)).count()
+            # try:
+            tmp_parcel_count = self.session.query(CaTmpParcel).filter(WKTElement(building.geometry().exportToWkt(), srid=4326).ST_Contains(CaTmpParcel.geometry)).count()
+            print tmp_parcel_count
+            print self.session.query(CaTmpParcel).filter(CaTmpParcel.geometry.ST_Covers(WKTElement(building.geometry().exportToWkt(), srid=4326))).count()
+            parcel_count = self.session.query(CaParcel).filter(
+                WKTElement(building.geometry().exportToWkt(), srid=4326).ST_Within(CaParcel.geometry)).count()
 
-                parcel_count = self.session.query(CaParcel).filter(
-                    WKTElement(building.geometry().exportToWkt(), srid=4326).ST_Within(CaParcel.geometry)).count()
-
-                if tmp_parcel_count == 0 and parcel_count == 0:
-                    PluginUtils.show_message(self, self.tr('No parcel'), self.tr('This building no parcel.'))
-                    return
-                if self.is_shape_parcel:
-                    case_id  = self.ca_maintenance_case.id
-
-                if tmp_parcel_count > 0:
-                    parcel = self.session.query(CaTmpParcel).filter(WKTElement(building.geometry().exportToWkt(), srid=4326).ST_Within(CaTmpParcel.geometry)).one()
-                    case_id = parcel.maintenance_case
-                    new_building = CaTmpBuilding()
-                    new_building.building_id = QDateTime().currentDateTime().toString("MMddhhmmss") + str(count)
-                    new_building.initial_insert = None
-                    new_building.valid_from = PluginUtils.convert_qt_date_to_python(QDateTime().currentDateTime())
-                    new_building.maintenance_case = case_id
-                    new_building.au2 = self.working_soum
-                    new_building.geometry = WKTElement(building.geometry().exportToWkt(), srid=4326)
-                    self.__copy_building_attributes(building, new_building, building_shape_layer)
-                    self.session.add(new_building)
-
-                    # Add main parcel to the tree
-                    main_building_item = QTreeWidgetItem()
-                    main_building_item.setText(0, new_building.building_id)
-                    main_building_item.setIcon(0, QIcon(QPixmap(":/plugins/lm2/building.gif")))
-                    main_building_item.setData(0, Qt.UserRole, new_building.building_id)
-                    main_building_item.setData(0, Qt.UserRole + 1, Constants.CASE_BUILDING_IDENTIFIER)
-
-                    self.buildings_item.addChild(main_building_item)
-
-                elif parcel_count > 0:
-                    parcel = self.session.query(CaParcel).filter(
-                        WKTElement(building.geometry().exportToWkt(), srid=4326).ST_Within(CaParcel.geometry)).one()
-                    new_building = CaBuilding()
-                    new_building.geometry = WKTElement(building.geometry().exportToWkt(), srid=4326)
-                    self.session.add(new_building)
-
-                    # Add main parcel to the tree
-                    main_building_item = QTreeWidgetItem()
-                    main_building_item.setText(0, new_building.building_id)
-                    main_building_item.setIcon(0, QIcon(QPixmap(":/plugins/lm2/building.gif")))
-                    main_building_item.setData(0, Qt.UserRole, new_building.building_id)
-                    main_building_item.setData(0, Qt.UserRole + 1, Constants.CASE_BUILDING_IDENTIFIER)
-
-                    self.buildings_item.addChild(main_building_item)
-
-            except SQLAlchemyError, e:
-                PluginUtils.show_error(self, self.tr("Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+            if tmp_parcel_count == 0 and parcel_count == 0:
+                PluginUtils.show_message(self, self.tr('No parcel'), self.tr('This building no parcel.'))
                 return
+            if self.is_shape_parcel:
+                case_id  = self.ca_maintenance_case.id
+
+            if tmp_parcel_count > 0:
+                parcel = self.session.query(CaTmpParcel).filter(WKTElement(building.geometry().exportToWkt(), srid=4326).ST_Within(CaTmpParcel.geometry)).one()
+                case_id = parcel.maintenance_case
+                new_building = CaTmpBuilding()
+                new_building.building_id = QDateTime().currentDateTime().toString("MMddhhmmss") + str(count)
+                new_building.initial_insert = None
+                new_building.valid_from = PluginUtils.convert_qt_date_to_python(QDateTime().currentDateTime())
+                new_building.maintenance_case = case_id
+                new_building.au2 = self.working_soum
+                new_building.geometry = WKTElement(building.geometry().exportToWkt(), srid=4326)
+                self.__copy_building_attributes(building, new_building, building_shape_layer)
+                self.session.add(new_building)
+
+                # Add main parcel to the tree
+                main_building_item = QTreeWidgetItem()
+                main_building_item.setText(0, new_building.building_id)
+                main_building_item.setIcon(0, QIcon(QPixmap(":/plugins/lm2/building.gif")))
+                main_building_item.setData(0, Qt.UserRole, new_building.building_id)
+                main_building_item.setData(0, Qt.UserRole + 1, Constants.CASE_BUILDING_IDENTIFIER)
+
+                self.buildings_item.addChild(main_building_item)
+
+            elif parcel_count > 0:
+                parcel = self.session.query(CaParcel).filter(
+                    WKTElement(building.geometry().exportToWkt(), srid=4326).ST_Within(CaParcel.geometry)).one()
+                new_building = CaBuilding()
+                new_building.geometry = WKTElement(building.geometry().exportToWkt(), srid=4326)
+                self.session.add(new_building)
+
+                # Add main parcel to the tree
+                main_building_item = QTreeWidgetItem()
+                main_building_item.setText(0, new_building.building_id)
+                main_building_item.setIcon(0, QIcon(QPixmap(":/plugins/lm2/building.gif")))
+                main_building_item.setData(0, Qt.UserRole, new_building.building_id)
+                main_building_item.setData(0, Qt.UserRole + 1, Constants.CASE_BUILDING_IDENTIFIER)
+
+                self.buildings_item.addChild(main_building_item)
+
+            # except SQLAlchemyError, e:
+            #     PluginUtils.show_error(self, self.tr("Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+            #     return
 
         return True
 
