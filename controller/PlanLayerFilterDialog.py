@@ -68,7 +68,6 @@ class PlanLayerFilterDialog(QDialog, Ui_PlanLayerFilterDialog, DatabaseHelper):
         self.au2 = DatabaseUtils.working_l2_code()
         self.au1 = DatabaseUtils.working_l1_code()
 
-        print self.type_list
         self.__admin_unit_mapping()
         self.__process_type_mapping()
 
@@ -81,7 +80,6 @@ class PlanLayerFilterDialog(QDialog, Ui_PlanLayerFilterDialog, DatabaseHelper):
             parent.setText(0, aimag.code + ': ' + aimag.name)
             parent.setData(0, Qt.UserRole, aimag.code)
             parent.setFlags(parent.flags() | Qt.ItemIsTristate | Qt.ItemIsUserCheckable)
-
             soums = self.session.query(AuLevel2.code, AuLevel2.name).filter(AuLevel2.au1_code == aimag.code).order_by(AuLevel2.code.asc()).all()
             for soum in soums:
                 child = QTreeWidgetItem(parent)
@@ -100,5 +98,13 @@ class PlanLayerFilterDialog(QDialog, Ui_PlanLayerFilterDialog, DatabaseHelper):
             parent.setText(0, str(parent_type) + ': ' + parent_types[parent_type])
             parent.setData(0, Qt.UserRole, parent_type)
             parent.setFlags(parent.flags() | Qt.ItemIsTristate | Qt.ItemIsUserCheckable)
+
+            soums = self.session.query(AuLevel1.code, AuLevel1.name).order_by(AuLevel1.code.asc()).all()
+            for soum in soums:
+                child = QTreeWidgetItem(parent)
+                child.setFlags(child.flags() | Qt.ItemIsUserCheckable)
+                child.setText(0, soum.code + ': ' + soum.name)
+                child.setData(0, Qt.UserRole, soum.code)
+                child.setCheckState(0, Qt.Unchecked)
 
         tree.show()
