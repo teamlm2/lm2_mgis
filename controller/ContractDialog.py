@@ -688,39 +688,40 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
     def __calculate_age(self):
 
-        duration = int(self.contract_duration_edit.text())
-        if not duration > 0:
-            PluginUtils.show_error(self, self.tr("End Date Error"),
-                                       self.tr("Its not allowed to contract date."))
-            return False
-        return True
-        # begin = self.contract.contract_begin
-        # end = PluginUtils.convert_qt_date_to_python(self.contract_end_date.date()).date()
+        if self.contract_duration_edit.text():
+            duration = int(self.contract_duration_edit.text())
+            if not duration > 0:
+                PluginUtils.show_error(self, self.tr("End Date Error"),
+                                           self.tr("Its not allowed to contract date."))
+                return False
+            return True
+            # begin = self.contract.contract_begin
+            # end = PluginUtils.convert_qt_date_to_python(self.contract_end_date.date()).date()
 
-        # # if end and begin:
-        # age_in_years = end.year - begin.year - ((end.month, end.day) < (begin.month, begin.day))
-        # months = (end.month - begin.month - (end.day < begin.day)) % 12
-        # age = end - begin
-        # age_in_days = age.days
-        #
-        # if not age_in_years > 0:
-        #     PluginUtils.show_error(self, self.tr("End Date Error"),
-        #                            self.tr("Its not allowed to contract date."))
-        #     return False
-        # return True
-        # if age_in_years >= 80:
-        #     return 80, 'years or older'
-        # if age_in_years >= 12:
-        #     return age_in_years, 'years'
-        # elif age_in_years >= 2:
-        #     half = 'and a half ' if months > 6 else ''
-        #     return age_in_years, '%syears' % half
-        # elif months >= 6:
-        #     return months, 'months'
-        # elif age_in_days >= 14:
-        #     return age_in_days / 7, 'weeks'
-        # else:
-        #     return age_in_days, 'days'
+            # # if end and begin:
+            # age_in_years = end.year - begin.year - ((end.month, end.day) < (begin.month, begin.day))
+            # months = (end.month - begin.month - (end.day < begin.day)) % 12
+            # age = end - begin
+            # age_in_days = age.days
+            #
+            # if not age_in_years > 0:
+            #     PluginUtils.show_error(self, self.tr("End Date Error"),
+            #                            self.tr("Its not allowed to contract date."))
+            #     return False
+            # return True
+            # if age_in_years >= 80:
+            #     return 80, 'years or older'
+            # if age_in_years >= 12:
+            #     return age_in_years, 'years'
+            # elif age_in_years >= 2:
+            #     half = 'and a half ' if months > 6 else ''
+            #     return age_in_years, '%syears' % half
+            # elif months >= 6:
+            #     return months, 'months'
+            # elif age_in_days >= 14:
+            #     return age_in_days / 7, 'weeks'
+            # else:
+            #     return age_in_days, 'days'
 
     def __validate_settings(self):
 
@@ -1490,13 +1491,14 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             self.timer.stop()
         self.time_counter -= 1
 
-    def __is_fee_row(self, person_register):
+    def __is_fee_row(self, person_register, base_fee):
 
         is_has = False
 
         for row in range(self.land_fee_twidget.rowCount()):
             register = self.land_fee_twidget.item(row, CONTRACTOR_ID).text()
-            if register == person_register:
+            base_fee_id = self.land_fee_twidget.item(row, CONTRACTOR_NAME).data(Qt.UserRole+2)
+            if register == person_register and base_fee == base_fee_id:
                 is_has = True
 
         return is_has
@@ -4313,7 +4315,6 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         else:
             url = 'http://' + conf.value + '/api/payment/fee?parcel=' + parcel_id
 
-        print url
         respons = urllib.request.urlopen(url)
         data = json.loads(respons.read().decode(respons.info().get_param('charset') or 'utf-8'))
         return data
@@ -4365,12 +4366,12 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                     fee_count = person.fees.filter(CtFee.contract == self.contract.contract_id).\
                         filter(CtFee.base_fee_id == base_fee_id).count()
                     if fee_count == 0:
-                        if not self.__is_fee_row(person.person_register):
+                        if not self.__is_fee_row(person.person_register, base_fee.id):
                             self.__add_fee_row3(row, contractor, base_fee, payment, parcel_id)
                     if fee_count == 1:
                         fee = person.fees.filter(CtFee.contract == self.contract.contract_id). \
                             filter(CtFee.base_fee_id == base_fee_id).one()
-                        if not self.__is_fee_row(person.person_register):
+                        if not self.__is_fee_row(person.person_register, base_fee.id):
                             self.__add_fee_row2(row, contractor, fee)
                     row += 1
 

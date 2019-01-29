@@ -76,7 +76,7 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
 
     def __setup_mapping(self):
 
-        plan_types = self.session.query(ClPlanType).all()
+        plan_types = self.session.query(ClPlanType).order_by(ClPlanType.code.desc()).all()
 
         for plan_type in plan_types:
             main_item = QTableWidgetItem(str(plan_type.code) + ': ' + plan_type.description)
@@ -123,11 +123,25 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
             if DialogInspector().dialog_visible():
                 return
 
-            self.current_dialog = PlanLayerFilterDialog(self.plugin, self, True,
+            type_list = self.__filter_plan_types()
+            if not type_list:
+                PluginUtils.show_message(self, u'Анхааруулга',
+                                         u'Жагсаалтаас сонгоно уу!')
+                return
+            self.current_dialog = PlanLayerFilterDialog(self.plugin, self, type_list,True,
                                                  self.plugin.iface.mainWindow())
             self.current_dialog.show()
 
             DatabaseUtils.set_working_schema()
+
+    def __filter_plan_types(self):
+
+        types = []
+        for row in range(self.layers_twidget.rowCount()):
+            main_item = self.layers_twidget.item(row, 0)
+            if main_item.checkState() == Qt.Checked:
+                types.append(main_item.data(Qt.UserRole))
+        return types
 
     def __setup_change_combo_boxes(self):
 
@@ -1482,7 +1496,7 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
     @pyqtSlot()
     def on_current_view_button_clicked(self):
 
-        LayerUtils.refresh_layer()
+        LayerUtils.refresh_layer_plan()
 
         root = QgsProject.instance().layerTreeRoot()
         mygroup = root.findGroup(u"Parcel")

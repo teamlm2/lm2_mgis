@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>402</width>
-    <height>559</height>
+    <height>666</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,19 +19,19 @@
      <x>10</x>
      <y>12</y>
      <width>381</width>
-     <height>201</height>
+     <height>261</height>
     </rect>
    </property>
    <property name="title">
     <string>Admin Units</string>
    </property>
-   <widget class="QTreeView" name="treeView">
+   <widget class="QTreeWidget" name="admin_unit_treewidget">
     <property name="geometry">
      <rect>
       <x>10</x>
       <y>20</y>
       <width>361</width>
-      <height>171</height>
+      <height>231</height>
      </rect>
     </property>
    </widget>
@@ -40,21 +40,21 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>213</y>
+     <y>270</y>
      <width>381</width>
-     <height>301</height>
+     <height>351</height>
     </rect>
    </property>
    <property name="title">
     <string>Process Type</string>
    </property>
-   <widget class="QTreeView" name="treeView_2">
+   <widget class="QTreeWidget" name="process_type_treewidget">
     <property name="geometry">
      <rect>
       <x>10</x>
       <y>20</y>
       <width>361</width>
-      <height>271</height>
+      <height>321</height>
      </rect>
     </property>
    </widget>
@@ -63,7 +63,7 @@
    <property name="geometry">
     <rect>
      <x>236</x>
-     <y>520</y>
+     <y>630</y>
      <width>75</width>
      <height>23</height>
     </rect>
@@ -76,7 +76,7 @@
    <property name="geometry">
     <rect>
      <x>320</x>
-     <y>520</y>
+     <y>630</y>
      <width>75</width>
      <height>23</height>
     </rect>
@@ -89,7 +89,7 @@
    <property name="geometry">
     <rect>
      <x>150</x>
-     <y>520</y>
+     <y>630</y>
      <width>75</width>
      <height>23</height>
     </rect>
