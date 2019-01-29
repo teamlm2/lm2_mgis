@@ -99,12 +99,30 @@ class PlanLayerFilterDialog(QDialog, Ui_PlanLayerFilterDialog, DatabaseHelper):
             parent.setData(0, Qt.UserRole, parent_type)
             parent.setFlags(parent.flags() | Qt.ItemIsTristate | Qt.ItemIsUserCheckable)
 
-            soums = self.session.query(AuLevel1.code, AuLevel1.name).order_by(AuLevel1.code.asc()).all()
-            for soum in soums:
+            sub_types = self.session.query(LdProcessPlan).filter(LdProcessPlan.parent_code == str(parent_type)).order_by(LdProcessPlan.code.asc()).all()
+            for sub_type in sub_types:
                 child = QTreeWidgetItem(parent)
                 child.setFlags(child.flags() | Qt.ItemIsUserCheckable)
-                child.setText(0, soum.code + ': ' + soum.name)
-                child.setData(0, Qt.UserRole, soum.code)
-                child.setCheckState(0, Qt.Unchecked)
+                child.setText(0, str(sub_type.code) + ': ' + sub_type.description)
+                child.setData(0, Qt.UserRole, sub_type.code)
+                child.setFlags(child.flags() | Qt.ItemIsTristate | Qt.ItemIsUserCheckable)
+
+                child_types = self.session.query(LdProcessPlan).filter(
+                    LdProcessPlan.parent_code == str(sub_type.code)).order_by(LdProcessPlan.code.asc()).all()
+                for child_type in child_types:
+                    sub_child = QTreeWidgetItem(child)
+                    sub_child.setFlags(child.flags() | Qt.ItemIsUserCheckable)
+                    sub_child.setText(0, str(child_type.code) + ': ' + child_type.description)
+                    sub_child.setData(0, Qt.UserRole, child_type.code)
+                    sub_child.setFlags(sub_child.flags() | Qt.ItemIsTristate | Qt.ItemIsUserCheckable)
+
+                    process_types = self.session.query(LdProcessPlan).filter(
+                        LdProcessPlan.parent_code == str(child_type.code)).order_by(LdProcessPlan.code.asc()).all()
+                    for process_type in process_types:
+                        process_child = QTreeWidgetItem(sub_child)
+                        process_child.setFlags(child.flags() | Qt.ItemIsUserCheckable)
+                        process_child.setText(0, str(process_type.code) + ': ' + process_type.description)
+                        process_child.setData(0, Qt.UserRole, process_type.code)
+                        process_child.setCheckState(0, Qt.Unchecked)
 
         tree.show()

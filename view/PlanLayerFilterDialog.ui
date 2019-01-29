@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>402</width>
+    <width>533</width>
     <height>666</height>
    </rect>
   </property>
@@ -18,7 +18,7 @@
     <rect>
      <x>10</x>
      <y>12</y>
-     <width>381</width>
+     <width>511</width>
      <height>261</height>
     </rect>
    </property>
@@ -30,10 +30,15 @@
      <rect>
       <x>10</x>
       <y>20</y>
-      <width>361</width>
+      <width>491</width>
       <height>231</height>
      </rect>
     </property>
+    <column>
+     <property name="text">
+      <string notr="true">1</string>
+     </property>
+    </column>
    </widget>
   </widget>
   <widget class="QGroupBox" name="groupBox_2">
@@ -41,7 +46,7 @@
     <rect>
      <x>10</x>
      <y>270</y>
-     <width>381</width>
+     <width>511</width>
      <height>351</height>
     </rect>
    </property>
@@ -53,16 +58,21 @@
      <rect>
       <x>10</x>
       <y>20</y>
-      <width>361</width>
+      <width>491</width>
       <height>321</height>
      </rect>
     </property>
+    <column>
+     <property name="text">
+      <string notr="true">1</string>
+     </property>
+    </column>
    </widget>
   </widget>
   <widget class="QPushButton" name="pushButton">
    <property name="geometry">
     <rect>
-     <x>236</x>
+     <x>366</x>
      <y>630</y>
      <width>75</width>
      <height>23</height>
@@ -75,7 +85,7 @@
   <widget class="QPushButton" name="close_button">
    <property name="geometry">
     <rect>
-     <x>320</x>
+     <x>450</x>
      <y>630</y>
      <width>75</width>
      <height>23</height>
@@ -88,7 +98,7 @@
   <widget class="QPushButton" name="help_button">
    <property name="geometry">
     <rect>
-     <x>150</x>
+     <x>280</x>
      <y>630</y>
      <width>75</width>
      <height>23</height>

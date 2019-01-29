@@ -75,6 +75,7 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
         # self.setAttribute(Qt.WA_DeleteOnClose)
         self.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
         self.plugin = plugin
+        self.setupUi(self)
         self.session = SessionHandler().session_instance()
         self.keyPressEvent = self.newOnkeyPressEvent
         self.is_find_ubgis = True
@@ -83,6 +84,8 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
         self.application = None
         self.contract = None
         self.record = None
+        # self.contract_gbox.setVisible(False)
+        # self.record_gbox.setVisible(False)
         self.__old_parcel_no = None
         self.__building_id_list = None
         self.__geometry = None
@@ -92,7 +95,7 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
         self.__coord_transform = None
         self.__second_page_enabled = False
         self.isSave = True
-        self.setupUi(self)
+
         self.__setup_validators()
         self.__setup_table_widget()
 
@@ -825,7 +828,7 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
 
             # contract info qt
             self.contract_full_edit.setText(self.__generate_contract_number())
-            self.contract_no_edit.setText(contract_no)
+            # self.contract_no_edit.setText(contract_no)
             self.contract_cert_edit.setText(certificate_no)
             if create_date:
                 qt_date = PluginUtils.convert_python_date_to_qt(create_date)
@@ -842,6 +845,7 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
 
             # record info qt
             self.record_cert_edit.setText(record_cert_no)
+            self.record_full_edit.setText(self.__generate_record_number())
             if record_date:
                 qt_date = PluginUtils.convert_python_date_to_qt(record_date)
                 self.own_date.setDate(qt_date)
@@ -1844,10 +1848,10 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
         self.contract_status_chbox.setChecked(False)
 
         # Ownership
-        self.record_no_edit.clear()
+        # self.record_no_edit.clear()
         self.record_cert_edit.clear()
         self.record_full_edit.clear()
-        self.record_no_chbox.setChecked(False)
+        # self.record_no_chbox.setChecked(False)
         self.record_certificate_chbox.setChecked(False)
         self.own_date_chbox.setChecked(False)
 
@@ -2527,6 +2531,13 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
 
         self.application_type_cbox.clear()
         rigth_code = self.rigth_type_cbox.itemData(self.rigth_type_cbox.currentIndex())
+
+        if rigth_code == 1 or rigth_code == 2:
+            self.contract_gbox.setVisible(True)
+            self.record_gbox.setVisible(False)
+        elif rigth_code == 3:
+            self.record_gbox.setVisible(True)
+            self.contract_gbox.setVisible(False)
 
         rigth_apps = self.session.query(SetRightTypeApplicationType).filter(
             SetRightTypeApplicationType.right_type == rigth_code). \

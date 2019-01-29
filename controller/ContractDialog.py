@@ -464,22 +464,27 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
         parcel = application.parcel_ref
         bag_name = ''
-        bag_areas = {}
-        bag_count = self.session.query(AuLevel3).filter(AuLevel3.geometry.ST_Within(func.ST_Centroid(parcel.geometry))).count()
-        if bag_count != 0:
-            bag = self.session.query(AuLevel3).filter(AuLevel3.geometry.ST_Within(func.ST_Centroid(parcel.geometry))).one()
+        bag_count = self.session.query(AuLevel3).filter(AuLevel3.geometry.ST_Overlaps((parcel.geometry))).count()
+        print bag_count
+        if bag_count == 1:
+            bag = self.session.query(AuLevel3).filter(AuLevel3.geometry.ST_Overlaps((parcel.geometry))).first()
             bag_name = bag.name
-        else:
-            bags = self.session.query(AuLevel3).filter(parcel.geometry.ST_Intersects(AuLevel3.geometry)).all()
-            for bag in bags:
-                area = self.session.query(func.ST_Area(parcel.geometry.ST_Intersection(AuLevel3.geometry))).\
-             filter(AuLevel3.code == bag.code).\
-                    filter(parcel.geometry.ST_Intersects(AuLevel3.geometry)).one()
-
-                bag_areas.update({bag.code:area[0]})
-            bag_code = max(bag_areas, key=bag_areas.get)
-            bag = self.session.query(AuLevel3).filter(AuLevel3.code == bag_code).one()
-            bag_name = bag.name
+        # bag_areas = {}
+        # bag_count = self.session.query(AuLevel3).filter(AuLevel3.geometry.ST_Within(func.ST_Centroid(parcel.geometry))).count()
+        # if bag_count != 0:
+        #     bag = self.session.query(AuLevel3).filter(AuLevel3.geometry.ST_Within(func.ST_Centroid(parcel.geometry))).one()
+        #     bag_name = bag.name
+        # else:
+        #     bags = self.session.query(AuLevel3).filter(AuLevel3.geometry.ST_Within(func.ST_Centroid(parcel.geometry))).all()
+        #     for bag in bags:
+        #         area = self.session.query(func.ST_Area(parcel.geometry.ST_Intersection(AuLevel3.geometry))).\
+        #              filter(AuLevel3.code == bag.code).\
+        #                     filter(AuLevel3.geometry.ST_Within(func.ST_Centroid(parcel.geometry))).one()
+        #
+        #         bag_areas.update({bag.code:area[0]})
+        #     bag_code = max(bag_areas, key=bag_areas.get)
+        #     bag = self.session.query(AuLevel3).filter(AuLevel3.code == bag_code).one()
+        #     bag_name = bag.name
 
         self.id_main_edit.setText(parcel.parcel_id)
         self.old_id_edit.setText(parcel.old_parcel_id)
