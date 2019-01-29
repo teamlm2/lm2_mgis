@@ -100,3 +100,5 @@ class PlanLayerFilterDialog(QDialog, Ui_PlanLayerFilterDialog, DatabaseHelper):
             parent.setText(0, str(parent_type) + ': ' + parent_types[parent_type])
             parent.setData(0, Qt.UserRole, parent_type)
             parent.setFlags(parent.flags() | Qt.ItemIsTristate | Qt.ItemIsUserCheckable)
+
+        tree.show()
