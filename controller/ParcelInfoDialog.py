@@ -1942,7 +1942,7 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
 
         # Contract
         if gaid == 2 or gaid == 3:
-            subject.gerid = self.contract_no_edit.text()
+            # subject.gerid = self.contract_no_edit.text()
             subject.gerchid = self.contract_cert_edit.text()
             contract_date = PluginUtils.convert_qt_date_to_python(self.contract_date.date())
             subject.gerdate = contract_date

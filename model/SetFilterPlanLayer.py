@@ -1,6 +1,7 @@
 __author__ = 'B.Ankhbold'
 
-from sqlalchemy import Column, Numeric, Integer, Sequence, Boolean, String
+from sqlalchemy import Column, Numeric, Integer, Sequence, Boolean, String, ForeignKey
+from sqlalchemy.orm import relationship
 from Base import *
 
 

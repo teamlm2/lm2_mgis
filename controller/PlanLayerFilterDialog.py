@@ -38,6 +38,7 @@ from ..model.LdProjectMainZone import *
 from ..model.LdProjectSubZone import *
 from ..model.LdProcessPlan import *
 from ..model.Constants import *
+from ..model.SetFilterPlanLayer import *
 from ..view.Ui_PlanLayerFilterDialog import *
 from .qt_classes.ApplicantDocumentDelegate import ApplicationDocumentDelegate
 from .qt_classes.DocumentsTableWidget import DocumentsTableWidget
@@ -70,6 +71,29 @@ class PlanLayerFilterDialog(QDialog, Ui_PlanLayerFilterDialog, DatabaseHelper):
 
         self.__admin_unit_mapping()
         self.__process_type_mapping()
+
+        self.admin_unit_treewidget.itemChanged.connect(self.__itemAuCheckChanged)
+        self.process_type_treewidget.itemChanged.connect(self.__itemProcessCheckChanged)
+        self.au2_list = []
+        self.process_list = []
+
+    def __itemAuCheckChanged(self, item, column):
+
+        if item.checkState(column) == QtCore.Qt.Checked:
+            au2 = item.data(0, Qt.UserRole)
+            self.au2_list.append(au2)
+        elif item.checkState(column) == QtCore.Qt.Unchecked:
+            au2 = item.data(0, Qt.UserRole)
+            self.au2_list.remove(au2)
+
+    def __itemProcessCheckChanged(self, item, column):
+
+        if item.checkState(column) == QtCore.Qt.Checked:
+            code = item.data(0, Qt.UserRole)
+            self.process_list.append(code)
+        elif item.checkState(column) == QtCore.Qt.Unchecked:
+            code = item.data(0, Qt.UserRole)
+            self.process_list.remove(code)
 
     def __admin_unit_mapping(self):
 
@@ -126,3 +150,14 @@ class PlanLayerFilterDialog(QDialog, Ui_PlanLayerFilterDialog, DatabaseHelper):
                         process_child.setCheckState(0, Qt.Unchecked)
 
         tree.show()
+
+    @pyqtSlot()
+    def on_ok_button_clicked(self):
+
+        print self.au2_list
+        print '----'
+        print self.process_list
+
+        aa = SetFilterPlanLayer()
+
+        self.plugin.iface.mapCanvas().refresh()
