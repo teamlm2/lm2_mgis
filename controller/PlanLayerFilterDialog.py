@@ -76,24 +76,37 @@ class PlanLayerFilterDialog(QDialog, Ui_PlanLayerFilterDialog, DatabaseHelper):
         self.process_type_treewidget.itemChanged.connect(self.__itemProcessCheckChanged)
         self.au2_list = []
         self.process_list = []
+        self.user = DatabaseUtils.current_sd_user()
+        self.user_id = self.user.user_id
 
     def __itemAuCheckChanged(self, item, column):
 
         if item.checkState(column) == QtCore.Qt.Checked:
             au2 = item.data(0, Qt.UserRole)
-            self.au2_list.append(au2)
+            if au2 not in self.au2_list:
+                if len(au2) == 5:
+                    self.au2_list.append(au2)
+
         elif item.checkState(column) == QtCore.Qt.Unchecked:
             au2 = item.data(0, Qt.UserRole)
-            self.au2_list.remove(au2)
+            if au2 in self.au2_list:
+                self.au2_list.remove(au2)
 
     def __itemProcessCheckChanged(self, item, column):
 
+        if not self.au2_list:
+            PluginUtils.show_message(self, u'Анхааруулга', u'Сум сонгоно уу!')
+            return
+
         if item.checkState(column) == QtCore.Qt.Checked:
             code = item.data(0, Qt.UserRole)
-            self.process_list.append(code)
+            if code not in self.process_list:
+                if len(str(code)) == 8:
+                    self.process_list.append(code)
         elif item.checkState(column) == QtCore.Qt.Unchecked:
             code = item.data(0, Qt.UserRole)
-            self.process_list.remove(code)
+            if code in self.process_list:
+                self.process_list.remove(code)
 
     def __admin_unit_mapping(self):
 
@@ -154,10 +167,43 @@ class PlanLayerFilterDialog(QDialog, Ui_PlanLayerFilterDialog, DatabaseHelper):
     @pyqtSlot()
     def on_ok_button_clicked(self):
 
-        print self.au2_list
-        print '----'
-        print self.process_list
+        if not self.au2_list:
+            PluginUtils.show_message(self, u'Анхааруулга', u'Сум сонгоно уу!')
+            return
+        if not self.process_list:
+            PluginUtils.show_message(self, u'Анхааруулга', u'Үйл ажиллагааны төрөл сонгоно уу!')
+            return
 
-        aa = SetFilterPlanLayer()
+        for type in self.type_list:
+            self.session.query(SetFilterPlanLayer). \
+                filter(SetFilterPlanLayer.plan_type == type). \
+                filter(SetFilterPlanLayer.user_id == self.user_id).delete()
+            for au2 in self.au2_list:
+                for code in self.process_list:
+                    count = self.session.query(SetFilterPlanLayer). \
+                        filter(SetFilterPlanLayer.plan_type == type). \
+                        filter(SetFilterPlanLayer.user_id == self.user_id). \
+                        filter(SetFilterPlanLayer.au2 == au2). \
+                        filter(SetFilterPlanLayer.process_type == code).count()
+                    if count == 0:
+                        filter_value = SetFilterPlanLayer()
+                        filter_value.user_id = self.user_id
+                        filter_value.plan_type = type
+                        filter_value.au2 = au2
+                        filter_value.process_type = code
+                        self.session.add(filter_value)
 
-        self.plugin.iface.mapCanvas().refresh()
+        self.session.commit()
+
+        #
+        # user = DatabaseUtils.current_sd_user()
+        # user_id = user.user_id
+        # for type in self.type_list:
+        #     filter_value = self.session.query(SetFilterPlanLayer).filter(SetFilterPlanLayer.plan_type == type).\
+        #         filter(SetFilterPlanLayer.user_id == user_id).all()
+        #
+        #
+        # aa = SetFilterPlanLayer()
+        #
+        # self.plugin.iface.mapCanvas().refresh()
+

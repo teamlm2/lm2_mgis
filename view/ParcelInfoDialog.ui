@@ -391,7 +391,7 @@
          <widget class="QCheckBox" name="firstname_chbox">
           <property name="geometry">
            <rect>
-            <x>10</x>
+            <x>203</x>
             <y>40</y>
             <width>180</width>
             <height>17</height>
@@ -412,19 +412,6 @@
           </property>
           <property name="text">
            <string>Last name/Company Name</string>
-          </property>
-         </widget>
-         <widget class="QCheckBox" name="middlename_chbox">
-          <property name="geometry">
-           <rect>
-            <x>193</x>
-            <y>40</y>
-            <width>191</width>
-            <height>17</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Middle name/Contact Person name</string>
           </property>
          </widget>
          <widget class="QLineEdit" name="name_edit">
@@ -459,7 +446,7 @@
           </property>
           <property name="geometry">
            <rect>
-            <x>10</x>
+            <x>203</x>
             <y>57</y>
             <width>180</width>
             <height>20</height>
@@ -501,19 +488,6 @@
            <bool>true</bool>
           </property>
          </widget>
-         <widget class="QLineEdit" name="middle_name_edit">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="geometry">
-           <rect>
-            <x>193</x>
-            <y>57</y>
-            <width>191</width>
-            <height>20</height>
-           </rect>
-          </property>
-         </widget>
          <widget class="QCheckBox" name="person_id_chbox">
           <property name="geometry">
            <rect>
@@ -525,6 +499,32 @@
           </property>
           <property name="text">
            <string>Person ID</string>
+          </property>
+         </widget>
+         <widget class="QLineEdit" name="middle_name_edit">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>57</y>
+            <width>191</width>
+            <height>20</height>
+           </rect>
+          </property>
+         </widget>
+         <widget class="QCheckBox" name="middlename_chbox">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>40</y>
+            <width>191</width>
+            <height>17</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Middle name/Contact Person name</string>
           </property>
          </widget>
         </widget>
@@ -2801,13 +2801,11 @@ QPushButton:disabled {
   <tabstop>find_lastname_edit</tabstop>
   <tabstop>clear_button</tabstop>
   <tabstop>find_button</tabstop>
-  <tabstop>middlename_chbox</tabstop>
   <tabstop>name_edit</tabstop>
   <tabstop>person_type_chbox</tabstop>
   <tabstop>first_name_edit</tabstop>
   <tabstop>personal_id_edit</tabstop>
   <tabstop>date_of_birth_date</tabstop>
-  <tabstop>middle_name_edit</tabstop>
   <tabstop>person_id_chbox</tabstop>
   <tabstop>aimag_cbox</tabstop>
   <tabstop>bag_cbox</tabstop>

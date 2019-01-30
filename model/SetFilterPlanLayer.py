@@ -12,7 +12,7 @@ class SetFilterPlanLayer(Base):
     user_id = Column(Integer, ForeignKey('sd_user.user_id'), primary_key=True)
     user_ref = relationship("SdUser")
 
-    badedturl = Column(Integer, ForeignKey('ld_process_plan.code'))
+    process_type = Column(Integer, ForeignKey('ld_process_plan.code'))
     process_ref = relationship("LdProcessPlan")
 
     plan_type = Column(Integer, ForeignKey('cl_plan_type.code'))

@@ -119,11 +119,77 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
     @pyqtSlot()
     def on_filter_view_button_clicked(self):
 
+        root = QgsProject.instance().layerTreeRoot()
+
         if self.filter_chbox.isChecked():
             if DialogInspector().dialog_visible():
                 return
 
             type_list = self.__filter_plan_types()
+
+            for type in  type_list:
+                if type == 1:
+                    mygroup = root.findGroup(u"Улсын ГЗБТ")
+                    for child in mygroup.children():
+                        if isinstance(child, QgsLayerTreeGroup):
+                            print "- group: " + child.name()
+                            if child.name() == "Parcel":
+                                vlayer_parcel = LayerUtils.layer_by_data_source("data_plan",
+                                                                                  "view_plan_type1_parcel")
+                                if vlayer_parcel is None:
+                                    vlayer_parcel = LayerUtils.load_polygon_layer_base_layer(
+                                        "view_plan_type1_parcel", "parcel_id",
+                                        "data_plan")
+                                    vlayer_parcel.setLayerName(self.tr("Sub Zone"))
+                                myalayer = root.findLayer(vlayer_parcel.id())
+                                if myalayer is None:
+                                    child.addLayer(vlayer_parcel)
+                            if child.name() == "Sub":
+                                vlayer_sub_zone = LayerUtils.layer_by_data_source("data_plan",
+                                                                                  "view_plan_type1_sub_zone")
+                                if vlayer_sub_zone is None:
+                                    vlayer_sub_zone = LayerUtils.load_polygon_layer_base_layer(
+                                        "view_plan_type1_sub_zone", "parcel_id",
+                                        "data_plan")
+                                    vlayer_sub_zone.setLayerName(self.tr("Sub Zone"))
+                                myalayer = root.findLayer(vlayer_sub_zone.id())
+                                if myalayer is None:
+                                    child.addLayer(vlayer_sub_zone)
+                            if child.name() == "Main":  # to check subgroups within test group
+                                ## point
+                                vlayer_point = LayerUtils.layer_by_data_source("data_plan", "view_plan_type1_main_zone_point")
+                                if vlayer_point is None:
+                                    vlayer_point = LayerUtils.load_polygon_layer_base_layer("view_plan_type1_main_zone_point", "parcel_id",
+                                                                                             "data_plan")
+                                    vlayer_point.setLayerName(self.tr("Main Point"))
+                                myalayer = root.findLayer(vlayer_point.id())
+                                if myalayer is None:
+                                    child.addLayer(vlayer_point)
+                                ## line
+                                vlayer_line = LayerUtils.layer_by_data_source("data_plan",
+                                                                              "view_plan_type1_main_zone_line")
+                                if vlayer_line is None:
+                                    vlayer_line = LayerUtils.load_line_layer_base_layer(
+                                        "view_plan_type1_main_zone_line", "parcel_id",
+                                        "data_plan")
+                                    vlayer_line.setLayerName(self.tr("Main Line"))
+                                myalayer = root.findLayer(vlayer_line.id())
+                                if myalayer is None:
+                                    child.addLayer(vlayer_line)
+
+                                ## Polygon
+                                vlayer_polygon = LayerUtils.layer_by_data_source("data_plan",
+                                                                              "view_plan_type1_main_zone_polygon")
+                                if vlayer_polygon is None:
+                                    vlayer_polygon = LayerUtils.load_polygon_layer_base_layer(
+                                        "view_plan_type1_main_zone_polygon", "parcel_id",
+                                        "data_plan")
+                                    vlayer_polygon.setLayerName(self.tr("Main Polygon"))
+                                myalayer = root.findLayer(vlayer_polygon.id())
+                                if myalayer is None:
+                                    child.addLayer(vlayer_polygon)
+
+
             if not type_list:
                 PluginUtils.show_message(self, u'Анхааруулга',
                                          u'Жагсаалтаас сонгоно уу!')
