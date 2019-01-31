@@ -140,7 +140,7 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
                                     vlayer_parcel = LayerUtils.load_polygon_layer_base_layer(
                                         "view_plan_type1_parcel", "parcel_id",
                                         "data_plan")
-                                    vlayer_parcel.setLayerName(self.tr("Sub Zone"))
+                                    vlayer_parcel.setLayerName(self.tr("Parcel"))
                                 myalayer = root.findLayer(vlayer_parcel.id())
                                 if myalayer is None:
                                     child.addLayer(vlayer_parcel)

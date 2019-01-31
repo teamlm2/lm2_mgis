@@ -1715,13 +1715,13 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
         else:
             self.decision_date.setEnabled(False)
 
-    @pyqtSlot(int)
-    def on_contract_no_chbox_stateChanged(self, state):
-
-        if state == Qt.Checked:
-            self.contract_no_edit.setEnabled(True)
-        else:
-            self.contract_no_edit.setEnabled(False)
+    # @pyqtSlot(int)
+    # def on_contract_no_chbox_stateChanged(self, state):
+    #
+    #     if state == Qt.Checked:
+    #         self.contract_no_edit.setEnabled(True)
+    #     else:
+    #         self.contract_no_edit.setEnabled(False)
 
     @pyqtSlot(int)
     def on_contract_certificate_chbox_stateChanged(self, state):
@@ -1837,7 +1837,7 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
         self.decision_date_chbox.setChecked(False)
 
         # Contract
-        self.contract_no_edit.clear()
+        # self.contract_no_edit.clear()
         self.contract_cert_edit.clear()
         self.contract_full_edit.clear()
         self.contract_no_chbox.setChecked(False)
