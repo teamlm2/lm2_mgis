@@ -438,6 +438,12 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
 
     def __setup_transfer_twidgets(self):
 
+        new_role = Constants.NEW_RIGHT_HOLDER_CODE
+        old_role = Constants.OLD_RIGHT_HOLDER_CODE
+        if self.application.app_type == 15 or self.application.app_type == 2:
+            new_role = Constants.REMAINING_OWNER_CODE
+            old_role = Constants.GIVING_UP_OWNER_CODE
+
         self.old_right_holders_twidget.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.old_right_holders_twidget.setSelectionMode(QAbstractItemView.SingleSelection)
 
@@ -463,11 +469,11 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
 
         try:
             applicants_new = self.application.stakeholders.filter(
-                CtApplicationPersonRole.role == Constants.NEW_RIGHT_HOLDER_CODE).all()
+                CtApplicationPersonRole.role == new_role).all()
             applicants_old_count = self.application.stakeholders.filter(
-                CtApplicationPersonRole.role == Constants.OLD_RIGHT_HOLDER_CODE).count()
+                CtApplicationPersonRole.role == old_role).count()
             applicants_old = self.application.stakeholders.filter(
-                CtApplicationPersonRole.role == Constants.OLD_RIGHT_HOLDER_CODE).all()
+                CtApplicationPersonRole.role == old_role).all()
 
             applicants = self.application.stakeholders.filter(
                 CtApplicationPersonRole.role == Constants.APPLICANT_ROLE_CODE).all()
@@ -1321,6 +1327,12 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
     @pyqtSlot()
     def on_accept_parcel_number_button_clicked(self):
 
+        new_role = Constants.NEW_RIGHT_HOLDER_CODE
+        old_role = Constants.OLD_RIGHT_HOLDER_CODE
+        if self.application.app_type == 15 or self.application.app_type == 2:
+            new_role = Constants.REMAINING_OWNER_CODE
+            old_role = Constants.GIVING_UP_OWNER_CODE
+
         parcel_id = self.found_parcel_number_edit.text()
 
         person_id = ""
@@ -1373,7 +1385,7 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
                 .join(CtOwnershipRecord, CtRecordApplicationRole.record == CtOwnershipRecord.record_id)\
                 .filter(CtOwnershipRecord.status == 30)\
                 .filter(CtApplication.parcel == parcel_id)\
-                .filter(CtRecordApplicationRole.role == Constants.REMAINING_OWNER_CODE)\
+                .filter(CtRecordApplicationRole.role == new_role)\
                 .filter(CtApplicationPersonRole.role == Constants.APPLICANT_ROLE_CODE).all()
 
             app_type = self.application_type_cbox.itemData(self.application_type_cbox.currentIndex())
@@ -1395,16 +1407,16 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
 
                 if app_type == ApplicationType.giving_up_ownership:
                     additional_role = self.session.query(ClPersonRole)\
-                        .filter_by(code=Constants.REMAINING_OWNER_CODE).one()
-                    person_role_code = Constants.REMAINING_OWNER_CODE
+                        .filter_by(code=new_role).one()
+                    person_role_code = new_role
                 elif app_type == ApplicationType.transfer_possession_right\
                         or app_type == ApplicationType.change_ownership \
                         or app_type == ApplicationType.possess_split \
                         or app_type == ApplicationType.encroachment \
                         or app_type == ApplicationType.possession_right_use_right:
                     additional_role = self.session.query(ClPersonRole)\
-                        .filter_by(code=Constants.OLD_RIGHT_HOLDER_CODE).one()
-                    person_role_code = Constants.OLD_RIGHT_HOLDER_CODE
+                        .filter_by(code=old_role).one()
+                    person_role_code = old_role
 
                 app_person_role = CtApplicationPersonRole()
                 app_person_role.app_id = self.application.app_id
@@ -1448,7 +1460,7 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
                             self.application.stakeholders.append(app_person_role_remain)
 
                 self.__add_applicant_item(applicant)
-                self.__add_co_ownership_item(applicant, Constants.REMAINING_OWNER_CODE)
+                self.__add_co_ownership_item(applicant, new_role)
 
         if current_app_type != ApplicationType.extension_possession and current_app_type != ApplicationType.mortgage_possession and current_app_type != ApplicationType.possession_right_use_right:
 
@@ -2009,11 +2021,11 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
 
             item = self.applicant_twidget.item(row, APPLICANT_MAIN)
             item_share = self.applicant_twidget.item(row, APPLICANT_SHARE)
-
-            person_id = item.data(Qt.UserRole)
             for applicant in self.application.stakeholders:
-                if person_id == applicant.person_ref.person_register:
-                    applicant.share = Decimal(item_share.text())
+                if item:
+                    person_id = item.data(Qt.UserRole)
+                    if person_id == applicant.person_ref.person_register:
+                        applicant.share = Decimal(item_share.text())
 
     @pyqtSlot()
     def on_drop_label_itemDropped(self):
@@ -2054,6 +2066,12 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
     @pyqtSlot()
     def on_appliciants_remove_button_clicked(self):
 
+        new_role = Constants.NEW_RIGHT_HOLDER_CODE
+        old_role = Constants.OLD_RIGHT_HOLDER_CODE
+        if self.application.app_type == 15 or self.application.app_type == 2:
+            new_role = Constants.REMAINING_OWNER_CODE
+            old_role = Constants.GIVING_UP_OWNER_CODE
+
         current_row = self.applicant_twidget.currentRow()
         person_item = self.applicant_twidget.item(current_row, 0)
         person_id = person_item.data(Qt.UserRole)
@@ -2075,7 +2093,7 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
                 giving_count = self.application.stakeholders.filter(CtApplicationPersonRole.person == person_id)\
                     .filter(CtApplicationPersonRole.role == Constants.GIVING_UP_OWNER_CODE).count()
                 remaining_count = self.application.stakeholders.filter(CtApplicationPersonRole.person == person_id)\
-                    .filter(CtApplicationPersonRole.role == Constants.REMAINING_OWNER_CODE).count()
+                    .filter(CtApplicationPersonRole.role == new_role).count()
 
                 if giving_count > 0:
                     ownership_giving_roles = self.application.stakeholders\
@@ -2089,23 +2107,23 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
                 if remaining_count > 0:
                     ownership_remain_roles = self.application.stakeholders\
                                                 .filter(CtApplicationPersonRole.person == person_id)\
-                                                .filter(CtApplicationPersonRole.role == Constants.REMAINING_OWNER_CODE)\
+                                                .filter(CtApplicationPersonRole.role == new_role)\
                                                 .one()
 
                     self.application.stakeholders.remove(ownership_remain_roles)
-                    self.__remove_person_from_co_ownership_twidgets(person_id, Constants.REMAINING_OWNER_CODE)
+                    self.__remove_person_from_co_ownership_twidgets(person_id, new_role)
 
             elif app_type == ApplicationType.transfer_possession_right or app_type == ApplicationType.change_ownership \
                     or  app_type == ApplicationType.possess_split or app_type == ApplicationType.encroachment \
                     or app_type == ApplicationType.possession_right_use_right:
 
                 old_count = self.application.stakeholders.filter(CtApplicationPersonRole.person == person_id)\
-                                .filter(CtApplicationPersonRole.role == Constants.OLD_RIGHT_HOLDER_CODE).count()
+                                .filter(CtApplicationPersonRole.role == old_role).count()
 
                 if old_count > 0:
                     old_right_holders = self.application.stakeholders\
                                             .filter(CtApplicationPersonRole.person == person_id)\
-                                            .filter(CtApplicationPersonRole.role == Constants.OLD_RIGHT_HOLDER_CODE)\
+                                            .filter(CtApplicationPersonRole.role == old_role)\
                                             .all()
 
                     for applicant in old_right_holders:
@@ -2243,6 +2261,12 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
     @pyqtSlot(int)
     def on_application_tab_widget_currentChanged(self, current_index):
 
+        new_role = Constants.NEW_RIGHT_HOLDER_CODE
+        old_role = Constants.OLD_RIGHT_HOLDER_CODE
+        if self.application.app_type == 15 or self.application.app_type == 2:
+            new_role = Constants.REMAINING_OWNER_CODE
+            old_role = Constants.GIVING_UP_OWNER_CODE
+
         self.last_tab = current_index
 
         # if self.application_tab_widget.widget(current_index) == self.document_tab:
@@ -2257,10 +2281,10 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
                 or app_type == ApplicationType.possession_right_use_right:
 
 
-            count = self.application.stakeholders.filter(CtApplicationPersonRole.role == Constants.OLD_RIGHT_HOLDER_CODE).count()
+            count = self.application.stakeholders.filter(CtApplicationPersonRole.role == old_role).count()
             if count > 0:
                 self.old_right_holders_twidget.setRowCount(0)
-                for applicant in self.application.stakeholders.filter(CtApplicationPersonRole.role == Constants.OLD_RIGHT_HOLDER_CODE):
+                for applicant in self.application.stakeholders.filter(CtApplicationPersonRole.role == old_role):
                     self.__add_old_right_holder_item(applicant)
 
     @pyqtSlot(int)
@@ -2745,6 +2769,12 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
 
     def __save_change_ownership(self):
 
+        new_role = Constants.NEW_RIGHT_HOLDER_CODE
+        old_role = Constants.OLD_RIGHT_HOLDER_CODE
+        if self.application.app_type == 15 or self.application.app_type == 2:
+            new_role = Constants.REMAINING_OWNER_CODE
+            old_role = Constants.GIVING_UP_OWNER_CODE
+
         self.create_savepoint()
 
         # try:
@@ -2760,18 +2790,18 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
             share_item = self.old_right_holders_twidget.item(row, OLD_RIGHT_HOLDER_SHARE)
             person_id = share_item.data(Qt.UserRole)
             applicant_count = self.application.stakeholders.filter(
-                CtApplicationPersonRole.role == Constants.OLD_RIGHT_HOLDER_CODE) \
+                CtApplicationPersonRole.role == old_role) \
                 .filter(CtApplicationPersonRole.person == person_id).count()
             if applicant_count == 0:
                 app_person_role = CtApplicationPersonRole()
                 app_person_role.application = self.application.app_id
                 app_person_role.share = Decimal(0.0)
-                app_person_role.role = Constants.OLD_RIGHT_HOLDER_CODE
+                app_person_role.role = old_role
                 app_person_role.person = person_id
                 app_person_role.main_applicant = False
             else:
                 applicant = self.application.stakeholders.filter(
-                    CtApplicationPersonRole.role == Constants.OLD_RIGHT_HOLDER_CODE) \
+                    CtApplicationPersonRole.role == old_role) \
                     .filter(CtApplicationPersonRole.person == person_id).one()
                 applicant.share = Decimal(share_item.text())
 
@@ -2782,18 +2812,18 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
             main = True if main_item.checkState() == Qt.Checked else False
             person_id = share_item.data(Qt.UserRole)
             applicant_count = self.application.stakeholders.filter(
-                CtApplicationPersonRole.role == Constants.NEW_RIGHT_HOLDER_CODE) \
+                CtApplicationPersonRole.role == new_role) \
                 .filter(CtApplicationPersonRole.person == person_id).count()
             if applicant_count == 0:
                 app_person_role = CtApplicationPersonRole()
                 app_person_role.application = self.application.app_id
                 app_person_role.share = Decimal(0.0)
-                app_person_role.role = Constants.OLD_RIGHT_HOLDER_CODE
+                app_person_role.role = old_role
                 app_person_role.person = person_id
                 app_person_role.main_applicant = False
             else:
                 applicant = self.application.stakeholders.filter(
-                    CtApplicationPersonRole.role == Constants.NEW_RIGHT_HOLDER_CODE) \
+                    CtApplicationPersonRole.role == new_role) \
                     .filter(CtApplicationPersonRole.person == person_id).one()
 
                 applicant.main_applicant = main
@@ -2805,6 +2835,12 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
 
     def __save_transfer_possession(self):
 
+        new_role = Constants.NEW_RIGHT_HOLDER_CODE
+        old_role = Constants.OLD_RIGHT_HOLDER_CODE
+        if self.application.app_type == 15 or self.application.app_type == 2:
+            new_role = Constants.REMAINING_OWNER_CODE
+            old_role = Constants.GIVING_UP_OWNER_CODE
+
         self.create_savepoint()
 
         # try:
@@ -2815,18 +2851,18 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
             person_id = share_item.data(Qt.UserRole)
 
             applicant_count = self.application.stakeholders.filter(
-                CtApplicationPersonRole.role == Constants.OLD_RIGHT_HOLDER_CODE) \
+                CtApplicationPersonRole.role == old_role) \
                 .filter(CtApplicationPersonRole.person == person_id).count()
             if applicant_count == 0:
                 app_person_role = CtApplicationPersonRole()
                 app_person_role.application = self.application.app_id
                 app_person_role.share = Decimal(0.0)
-                app_person_role.role = Constants.OLD_RIGHT_HOLDER_CODE
+                app_person_role.role = old_role
                 app_person_role.person = person_id
                 app_person_role.main_applicant = False
             else:
                 applicant = self.application.stakeholders.filter(
-                    CtApplicationPersonRole.role == Constants.OLD_RIGHT_HOLDER_CODE) \
+                    CtApplicationPersonRole.role == old_role) \
                     .filter(CtApplicationPersonRole.person == person_id).one()
                 applicant.share = Decimal(share_item.text())
 
@@ -2840,18 +2876,18 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
             person_id = share_item.data(Qt.UserRole)
 
             applicant_count = self.application.stakeholders.filter(
-                CtApplicationPersonRole.role == Constants.NEW_RIGHT_HOLDER_CODE) \
+                CtApplicationPersonRole.role == new_role) \
                 .filter(CtApplicationPersonRole.person == person_id).count()
             if applicant_count == 0:
                 app_person_role = CtApplicationPersonRole()
                 app_person_role.application = self.application.app_id
                 app_person_role.share = Decimal(0.0)
-                app_person_role.role = Constants.NEW_RIGHT_HOLDER_CODE
+                app_person_role.role = new_role
                 app_person_role.person = person_id
                 app_person_role.main_applicant = False
             else:
                 applicant = self.application.stakeholders.filter(
-                    CtApplicationPersonRole.role == Constants.NEW_RIGHT_HOLDER_CODE) \
+                    CtApplicationPersonRole.role == new_role) \
                     .filter(CtApplicationPersonRole.person == person_id).one()
                 applicant.main_applicant = main
                 applicant.share = Decimal(share_item.text())
@@ -2892,6 +2928,12 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
 
     def __save_remaining_ownership(self):
 
+        new_role = Constants.NEW_RIGHT_HOLDER_CODE
+        old_role = Constants.OLD_RIGHT_HOLDER_CODE
+        if self.application.app_type == 15 or self.application.app_type == 2:
+            new_role = Constants.REMAINING_OWNER_CODE
+            old_role = Constants.GIVING_UP_OWNER_CODE
+
         self.create_savepoint()
 
         for row in range(self.owners_remaining_twidget.rowCount()):
@@ -2900,31 +2942,41 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
             if item.checkState() == Qt.Checked:
                 main = True
                 try:
-                    applicant = self.application.stakeholders.filter(
-                        CtApplicationPersonRole.role == Constants.REMAINING_OWNER_CODE) \
-                        .filter(CtApplicationPersonRole.person == person_id).one()
+                    count = self.application.stakeholders.filter(
+                        CtApplicationPersonRole.role == new_role) \
+                        .filter(CtApplicationPersonRole.person == person_id).count()
+                    if count == 1:
+                        applicant = self.application.stakeholders.filter(
+                            CtApplicationPersonRole.role == new_role) \
+                            .filter(CtApplicationPersonRole.person == person_id).one()
 
-                    applicant.main_applicant = main
-                    share_item = self.applicant_twidget.item(row, APPLICANT_SHARE)
-                    applicant.share = Decimal(share_item.text())
+                        applicant.main_applicant = main
+                        share_item = self.applicant_twidget.item(row, APPLICANT_SHARE)
+                        if share_item:
+                            applicant.share = Decimal(share_item.text())
 
                 except SQLAlchemyError, e:
                     self.rollback_to_savepoint()
                     raise LM2Exception(self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
             else:
                 main = False
-                try:
+                # try:
+                count = self.application.stakeholders.filter(
+                    CtApplicationPersonRole.role == new_role) \
+                    .filter(CtApplicationPersonRole.person == person_id).count()
+                if count == 1:
                     applicant = self.application.stakeholders.filter(
-                        CtApplicationPersonRole.role == Constants.REMAINING_OWNER_CODE) \
+                        CtApplicationPersonRole.role == new_role) \
                         .filter(CtApplicationPersonRole.person == person_id).one()
 
                     applicant.main_applicant = main
                     share_item = self.applicant_twidget.item(row, APPLICANT_SHARE)
-                    applicant.share = Decimal(share_item.text())
+                    if share_item:
+                        applicant.share = Decimal(share_item.text())
 
-                except SQLAlchemyError, e:
-                    self.rollback_to_savepoint()
-                    raise LM2Exception(self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+                # except SQLAlchemyError, e:
+                #     self.rollback_to_savepoint()
+                #     raise LM2Exception(self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
 
     def __save_court_decision(self):
 
@@ -3052,12 +3104,15 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
     @pyqtSlot()
     def on_remove_new_right_holder_button_clicked(self):
 
+        role = Constants.NEW_RIGHT_HOLDER_CODE
+        if self.application.app_type == 15 or self.application.app_type == 2:
+            role = Constants.REMAINING_OWNER_CODE
         for row in range(self.new_right_holders_twidget.rowCount()):
             item = self.new_right_holders_twidget.item(row, 0)
             if item is not None and item.isSelected():
                 person_id = item.data(Qt.UserRole)
                 applicant_roles = self.application.stakeholders.filter(CtApplicationPersonRole.person == person_id) \
-                    .filter(CtApplicationPersonRole.role == Constants.NEW_RIGHT_HOLDER_CODE).one()
+                    .filter(CtApplicationPersonRole.role == role).one()
                 self.application.stakeholders.remove(applicant_roles)
                 self.new_right_holders_twidget.removeRow(row)
 
@@ -3377,18 +3432,24 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
 
     def __add_person_address(self,map_composition):
 
+        new_role = Constants.NEW_RIGHT_HOLDER_CODE
+        old_role = Constants.OLD_RIGHT_HOLDER_CODE
+        if self.application.app_type == 15 or self.application.app_type == 2:
+            new_role = Constants.REMAINING_OWNER_CODE
+            old_role = Constants.GIVING_UP_OWNER_CODE
+
         # app_no = self.application_num_first_edit.text() + "-" + self.application_num_type_edit.text() + "-" \
         #          + self.application_num_middle_edit.text() + "-" + self.application_num_last_edit.text()
         app_id = self.application.app_id
         # try:
-        if self.application.app_type == 7 or self.application.app_type == 15:
+        if self.application.app_type == 7 or self.application.app_type == 23:
             app_person = self.session.query(CtApplicationPersonRole). \
                 filter(CtApplicationPersonRole.application == app_id). \
-                filter(CtApplicationPersonRole.role == Constants.NEW_RIGHT_HOLDER_CODE).all()
-        elif self.application.app_type == 2:
+                filter(CtApplicationPersonRole.role == new_role).all()
+        elif self.application.app_type == 2 or self.application.app_type == 15:
             app_person = self.session.query(CtApplicationPersonRole). \
                 filter(CtApplicationPersonRole.application == app_id). \
-                filter(CtApplicationPersonRole.role == Constants.REMAINING_OWNER_CODE).all()
+                filter(CtApplicationPersonRole.role == new_role).all()
         else:
             app_person = self.session.query(CtApplicationPersonRole). \
                 filter(CtApplicationPersonRole.application == app_id).all()
@@ -3423,18 +3484,24 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
 
     def __add_person_name(self,map_composition):
 
+        new_role = Constants.NEW_RIGHT_HOLDER_CODE
+        old_role = Constants.OLD_RIGHT_HOLDER_CODE
+        if self.application.app_type == 15 or self.application.app_type == 2:
+            new_role = Constants.REMAINING_OWNER_CODE
+            old_role = Constants.GIVING_UP_OWNER_CODE
+
         app_no = self.application_num_first_edit.text() + "-" + self.application_num_type_edit.text() + "-" \
                      + self.application_num_middle_edit.text() + "-" + self.application_num_last_edit.text()
         app_id = self.application.app_id
         # try:
-        if self.application.app_type == 7 or self.application.app_type == 15:
+        if self.application.app_type == 7 or self.application.app_type == 23:
             app_person = self.session.query(CtApplicationPersonRole).\
                 filter(CtApplicationPersonRole.application == app_id).\
                 filter(CtApplicationPersonRole.role == Constants.NEW_RIGHT_HOLDER_CODE).all()
-        elif self.application.app_type == 2:
+        elif self.application.app_type == 2 or self.application.app_type == 15:
             app_person = self.session.query(CtApplicationPersonRole). \
                 filter(CtApplicationPersonRole.application == app_id). \
-                filter(CtApplicationPersonRole.role == Constants.REMAINING_OWNER_CODE).all()
+                filter(CtApplicationPersonRole.role == new_role).all()
         else:
             app_person = self.session.query(CtApplicationPersonRole). \
                 filter(CtApplicationPersonRole.application == app_id).all()
@@ -3455,18 +3522,24 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
 
     def __add_card_person_name(self,map_composition):
 
+        new_role = Constants.NEW_RIGHT_HOLDER_CODE
+        old_role = Constants.OLD_RIGHT_HOLDER_CODE
+        if self.application.app_type == 15 or self.application.app_type == 2:
+            new_role = Constants.REMAINING_OWNER_CODE
+            old_role = Constants.GIVING_UP_OWNER_CODE
+
         app_no = self.application_num_first_edit.text() + "-" + self.application_num_type_edit.text() + "-" \
                      + self.application_num_middle_edit.text() + "-" + self.application_num_last_edit.text()
         app_id = self.application.app_id
         try:
-            if self.application.app_type == 7 or self.application.app_type == 15:
+            if self.application.app_type == 7 or self.application.app_type == 23:
                 app_person = self.session.query(CtApplicationPersonRole).\
                     filter(CtApplicationPersonRole.application == app_id).\
                     filter(CtApplicationPersonRole.role == Constants.NEW_RIGHT_HOLDER_CODE).all()
-            elif self.application.app_type == 2:
+            elif self.application.app_type == 2 or self.application.app_type == 15:
                 app_person = self.session.query(CtApplicationPersonRole). \
                     filter(CtApplicationPersonRole.application == app_id). \
-                    filter(CtApplicationPersonRole.role == Constants.REMAINING_OWNER_CODE).all()
+                    filter(CtApplicationPersonRole.role == new_role).all()
             else:
                 app_person = self.session.query(CtApplicationPersonRole). \
                     filter(CtApplicationPersonRole.application == app_id).all()
@@ -3589,6 +3662,12 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
 
     def __copy_new_right_holder_from_navigator(self):
 
+        new_role = Constants.NEW_RIGHT_HOLDER_CODE
+        old_role = Constants.OLD_RIGHT_HOLDER_CODE
+        if self.application.app_type == 15 or self.application.app_type == 2:
+            new_role = Constants.REMAINING_OWNER_CODE
+            old_role = Constants.GIVING_UP_OWNER_CODE
+
         selected_persons = []
         self.create_savepoint()
         application_type_code = self.application_type_cbox.itemData(self.application_type_cbox.currentIndex())
@@ -3603,7 +3682,7 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
             try:
                 person = self.session.query(BsPerson).filter_by(person_id=person_id).one()
                 role_ref = self.session.query(ClPersonRole).filter_by(
-                    code=Constants.NEW_RIGHT_HOLDER_CODE).one()
+                    code=new_role).one()
                 if person.type == Constants.FOREIGN_ENTITY_PERSON_TYPE \
                         or person.type == Constants.STATE_PERSON_TYPE:
                         PluginUtils.show_error(self, self.tr("Error"),
@@ -3635,7 +3714,7 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
             app_person_role = CtApplicationPersonRole()
             app_person_role.application = self.application.app_id
             app_person_role.share = Decimal(1.0)
-            app_person_role.role = Constants.NEW_RIGHT_HOLDER_CODE
+            app_person_role.role = new_role
             app_person_role.role_ref = role_ref
             app_person_role.person = person.person_id
             app_person_role.person_ref = person
@@ -4040,6 +4119,12 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
 
     def __copy_applicant_from_navigator(self):
 
+        new_role = Constants.NEW_RIGHT_HOLDER_CODE
+        old_role = Constants.OLD_RIGHT_HOLDER_CODE
+        if self.application.app_type == 15 or self.application.app_type == 2:
+            new_role = Constants.REMAINING_OWNER_CODE
+            old_role = Constants.GIVING_UP_OWNER_CODE
+
         selected_persons = []
         selected_remain_persons = []
         additional_role = None
@@ -4059,16 +4144,16 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
 
                 if app_type == ApplicationType.giving_up_ownership:
                     additional_role = self.session.query(ClPersonRole)\
-                        .filter_by(code=Constants.REMAINING_OWNER_CODE).one()
-                    person_role_code = Constants.REMAINING_OWNER_CODE
+                        .filter_by(code=new_role).one()
+                    person_role_code = new_role
                 elif app_type == ApplicationType.transfer_possession_right\
                         or app_type == ApplicationType.change_ownership \
                         or app_type == ApplicationType.possess_split \
                         or app_type == ApplicationType.encroachment \
                         or app_type == ApplicationType.possession_right_use_right:
                     additional_role = self.session.query(ClPersonRole)\
-                        .filter_by(code=Constants.OLD_RIGHT_HOLDER_CODE).one()
-                    person_role_code = Constants.OLD_RIGHT_HOLDER_CODE
+                        .filter_by(code=old_role).one()
+                    person_role_code = old_role
 
             except SQLAlchemyError, e:
                 PluginUtils.show_error(self, self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
@@ -4133,7 +4218,7 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
 
         if app_type == ApplicationType.giving_up_ownership:
             for owner in selected_remain_persons:
-                self.__add_co_ownership_item(owner, Constants.REMAINING_OWNER_CODE)
+                self.__add_co_ownership_item(owner, new_role)
 
     def __copy_mortgagee_from_navigator(self):
 

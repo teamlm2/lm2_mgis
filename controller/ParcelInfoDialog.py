@@ -2967,13 +2967,20 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
         landuse = self.parcel_landuse_cbox.itemData(self.parcel_landuse_cbox.currentIndex())
 
         parcel_count = self.session.query(CaParcel).filter(CaParcel.parcel_id == parcel_id).count()
-        if parcel_count == 1:
-            parcel = self.session.query(CaParcel).filter(CaParcel.parcel_id == parcel_id).one()
-            parcel.parcel_id = None
-        else:
+        if parcel_count > 0:
+            # parcel = self.session.query(CaParcel).filter(CaParcel.parcel_id == parcel_id).one()
+            # parcel.parcel_id = None
+            PluginUtils.show_message(self, u'Анхааруулга',
+                                     u'Нэгж талбарын дугаар давхардаж байна.')
+            return
+        elif parcel_count == 0:
             parcel = CaParcel()
             if len(parcel_id) == 12:
                 parcel.parcel_id = parcel_id
+            else:
+                PluginUtils.show_message(self, u'Анхааруулга',
+                                         u'Нэгж талбарын дугаар буруу байна байна./Жишээ нь: Дугаарын оронгийн урт таарахгүй/')
+                return
 
         # parcel_id = self.parcel_id_edit.text()
         # old_parcel_id = self.old_parcel_id_edit.text()

@@ -28,7 +28,9 @@ from ..model.LdProcessPlan import *
 from ..utils.DatabaseUtils import *
 from ..utils.PluginUtils import *
 from ..model.DatabaseHelper import *
+from ..model.Constants import *
 from ..controller.PlanNavigatorWidget import *
+from ..controller.PlanAttributeEditDialog import *
 # from ..LM2Plugin import *
 from datetime import timedelta
 from xlsxwriter.utility import xl_rowcol_to_cell, xl_col_to_name
@@ -66,6 +68,11 @@ class PlanDetailWidget(QDockWidget, Ui_PlanDetailWidget, DatabaseHelper):
         self.__setup_cbox()
         self.__setup_main_tree_widget()
         self.__setup_context_menu()
+        self.parcels = []
+        self.process_types = []
+        self.main_tree_widget.itemChanged.connect(self.__itemMainParcelsCheckChanged)
+        self.sub_tree_widget.itemChanged.connect(self.__itemSubParcelsCheckChanged)
+        self.parcel_tree_widget.itemChanged.connect(self.__itemPlanParcelsCheckChanged)
 
     def __setup_cbox(self):
 
@@ -180,7 +187,7 @@ class PlanDetailWidget(QDockWidget, Ui_PlanDetailWidget, DatabaseHelper):
                 join(LdProcessPlan, LdProjectMainZone.badedturl == LdProcessPlan.code). \
                 filter(LdProcessPlan.description.ilike(process_text))
 
-
+        tree = self.main_tree_widget
         for main_zone in main_zone_points:
             name = ''
             if main_zone.gazner:
@@ -189,11 +196,13 @@ class PlanDetailWidget(QDockWidget, Ui_PlanDetailWidget, DatabaseHelper):
             if main_zone.process_ref:
                 if main_zone.process_ref.description:
                     desc = main_zone.process_ref.description
-                    item = QTreeWidgetItem()
+                    item = QTreeWidgetItem(tree)
                     item.setText(0, str(main_zone.process_ref.code) + name + desc)
                     item.setIcon(0, QIcon(QPixmap(":/plugins/lm2/parcel_red.png")))
                     item.setData(0, Qt.UserRole, main_zone.parcel_id)
                     item.setData(0, Qt.UserRole + 1, "point")
+                    item.setData(0, Qt.UserRole + 2, main_zone.process_ref.code)
+                    item.setCheckState(0, Qt.Unchecked)
                     self.item_point_main.addChild(item)
 
                     value_p = self.load_pbar.value() + 1
@@ -212,6 +221,8 @@ class PlanDetailWidget(QDockWidget, Ui_PlanDetailWidget, DatabaseHelper):
                     item.setIcon(0, QIcon(QPixmap(":/plugins/lm2/parcel_red.png")))
                     item.setData(0, Qt.UserRole, main_zone.parcel_id)
                     item.setData(0, Qt.UserRole + 1, "line")
+                    item.setData(0, Qt.UserRole + 2, main_zone.process_ref.code)
+                    item.setCheckState(0, Qt.Unchecked)
                     self.item_line_main.addChild(item)
                     value_p = self.load_pbar.value() + 1
                     self.load_pbar.setValue(value_p)
@@ -229,6 +240,8 @@ class PlanDetailWidget(QDockWidget, Ui_PlanDetailWidget, DatabaseHelper):
                     item.setIcon(0, QIcon(QPixmap(":/plugins/lm2/parcel_red.png")))
                     item.setData(0, Qt.UserRole, main_zone.parcel_id)
                     item.setData(0, Qt.UserRole + 1, "polygon")
+                    item.setData(0, Qt.UserRole + 2, main_zone.process_ref.code)
+                    item.setCheckState(0, Qt.Unchecked)
                     self.item_polygon_main.addChild(item)
                     value_p = self.load_pbar.value() + 1
                     self.load_pbar.setValue(value_p)
@@ -311,3 +324,92 @@ class PlanDetailWidget(QDockWidget, Ui_PlanDetailWidget, DatabaseHelper):
 
                 layer.setSelectedFeatures(feature_ids)
                 self.plugin.iface.mapCanvas().zoomToSelected(layer)
+
+    @pyqtSlot()
+    def on_main_edit_attribute_button_clicked(self):
+
+        parcel_list = self.parcels
+
+        if DialogInspector().dialog_visible():
+            return
+
+        if not parcel_list:
+            PluginUtils.show_message(self, u'Анхааруулга',
+                                     u'Жагсаалтаас сонгоно уу!')
+            return
+
+        if not self.__parcels_process_type_check():
+            PluginUtils.show_message(self, u'Анхааруулга',
+                                     u'Сонгосон нэгж талбаруудын үйл ажиллагааны төрөл зөвшөөрөгдөхгүй байна.')
+            return
+        b = set(self.process_types)
+        process_type = [item[0] for item in (list(b))]
+        print process_type
+        self.current_dialog = PlanAttributeEditDialog(self.plugin, self, parcel_list, process_type, True,
+                                                    self.plugin.iface.mainWindow())
+        self.current_dialog.show()
+
+        DatabaseUtils.set_working_schema()
+
+    def __parcels_process_type_check(self):
+
+        is_approved = False
+        if self.process_types:
+            b = set(self.process_types)
+            if len(list(b)) == 1:
+                is_approved = True
+            else:
+                is_approved = False
+
+        return is_approved
+
+    def __itemMainParcelsCheckChanged(self, item, column):
+
+        if item.checkState(column) == QtCore.Qt.Checked:
+            code = item.data(0, Qt.UserRole)
+            process_type = item.data(0, Qt.UserRole+2)
+            if code not in self.parcels:
+                self.parcels.append(code)
+            if process_type not in self.process_types:
+                self.process_types.append(process_type)
+        elif item.checkState(column) == QtCore.Qt.Unchecked:
+            code = item.data(0, Qt.UserRole)
+            process_type = item.data(0, Qt.UserRole + 2)
+            if code in self.parcels:
+                self.parcels.remove(code)
+            if process_type in self.process_types:
+                self.process_types.remove(process_type)
+
+    def __itemSubParcelsCheckChanged(self, item, column):
+
+        if item.checkState(column) == QtCore.Qt.Checked:
+            code = item.data(0, Qt.UserRole)
+            process_type = item.data(0, Qt.UserRole+2)
+            if code not in self.parcels:
+                self.parcels.append(code)
+            if process_type not in self.process_types:
+                self.process_types.append(process_type)
+        elif item.checkState(column) == QtCore.Qt.Unchecked:
+            code = item.data(0, Qt.UserRole)
+            process_type = item.data(0, Qt.UserRole + 2)
+            if code in self.parcels:
+                self.parcels.remove(code)
+            if process_type in self.process_types:
+                self.process_types.remove(process_type)
+
+    def __itemPlanParcelsCheckChanged(self, item, column):
+
+        if item.checkState(column) == QtCore.Qt.Checked:
+            code = item.data(0, Qt.UserRole)
+            process_type = item.data(0, Qt.UserRole+2)
+            if code not in self.parcels:
+                self.parcels.append(code)
+            if process_type not in self.process_types:
+                self.process_types.append(process_type)
+        elif item.checkState(column) == QtCore.Qt.Unchecked:
+            code = item.data(0, Qt.UserRole)
+            process_type = item.data(0, Qt.UserRole + 2)
+            if code in self.parcels:
+                self.parcels.remove(code)
+            if process_type in self.process_types:
+                self.process_types.remove(process_type)
