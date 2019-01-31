@@ -1840,7 +1840,7 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
         # self.contract_no_edit.clear()
         self.contract_cert_edit.clear()
         self.contract_full_edit.clear()
-        self.contract_no_chbox.setChecked(False)
+        # self.contract_no_chbox.setChecked(False)
         self.contract_certificate_chbox.setChecked(False)
         self.contract_date_chbox.setChecked(False)
         self.end_date_chbox.setChecked(False)
