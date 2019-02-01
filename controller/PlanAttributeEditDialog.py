@@ -58,6 +58,9 @@ from ..utils.DatabaseUtils import DatabaseUtils
 from ..utils.FilePath import *
 from ftplib import FTP, error_perm
 
+ATTRIBUTE_NAME = 0
+ATTRIBUTE_VALUE = 1
+
 class PlanAttributeEditDialog(QDialog, Ui_PlanAttributeEditDialog, DatabaseHelper):
 
     def __init__(self, plugin, navigator, parcel_list, process_type, attribute_update=False, parent=None):
@@ -81,3 +84,21 @@ class PlanAttributeEditDialog(QDialog, Ui_PlanAttributeEditDialog, DatabaseHelpe
 
         print self.parcel_list
         print self.process_type
+        print type(self.process_type)
+
+        self.attribute_twidget = None
+        self.__setup_attribute_twidget()
+
+    def __setup_attribute_twidget(self):
+
+        self.attribute_twidget = DragTableWidget("Attribute", 10, 30, 381, 501, self.applicants_group_box)
+
+        header = [self.tr("Attribute Name"),
+                  self.tr("Attribute Value")]
+
+        self.attribute_twidget.setup_header(header)
+        delegate = DoubleSpinBoxDelegate(ATTRIBUTE_VALUE, 0, 1, 1, 0.1, self.attribute_twidget)
+        self.attribute_twidget.setItemDelegateForColumn(ATTRIBUTE_VALUE, delegate)
+        # self.attribute_twidget.itemDropped.connect(self.on_application_twidget_itemDropped)
+        # self.attribute_twidget.cellChanged.connect(self.on_application_twidget_cellChanged)
+

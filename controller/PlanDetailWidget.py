@@ -343,8 +343,8 @@ class PlanDetailWidget(QDockWidget, Ui_PlanDetailWidget, DatabaseHelper):
                                      u'Сонгосон нэгж талбаруудын үйл ажиллагааны төрөл зөвшөөрөгдөхгүй байна.')
             return
         b = set(self.process_types)
-        process_type = [item[0] for item in (list(b))]
-        print process_type
+
+        process_type = list(b)[0]
         self.current_dialog = PlanAttributeEditDialog(self.plugin, self, parcel_list, process_type, True,
                                                     self.plugin.iface.mainWindow())
         self.current_dialog.show()
