@@ -21,3 +21,6 @@ class LdAttributeMainZoneValue(Base):
     parcel_id = Column(Integer, ForeignKey('ld_project_main_zone_parcel.parcel_id'))
     parcel_ref = relationship("LdProjectMainZone")
 
+    plan_draft_id = Column(Integer, ForeignKey('ld_project_plan.plan_draft_id'))
+    plan_draft_ref = relationship("LdProjectPlan")
+

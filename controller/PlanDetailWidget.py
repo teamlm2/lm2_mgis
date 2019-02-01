@@ -345,7 +345,7 @@ class PlanDetailWidget(QDockWidget, Ui_PlanDetailWidget, DatabaseHelper):
         b = set(self.process_types)
 
         process_type = list(b)[0]
-        self.current_dialog = PlanAttributeEditDialog(self.plugin, self, parcel_list, process_type, True,
+        self.current_dialog = PlanAttributeEditDialog(self.plugin, self, parcel_list, process_type, self.plan.plan_draft_id,True,
                                                     self.plugin.iface.mainWindow())
         self.current_dialog.show()
 

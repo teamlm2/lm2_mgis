@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>402</width>
-    <height>578</height>
+    <width>461</width>
+    <height>601</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,8 +16,8 @@
   <widget class="QPushButton" name="ok_button">
    <property name="geometry">
     <rect>
-     <x>232</x>
-     <y>549</y>
+     <x>296</x>
+     <y>572</y>
      <width>75</width>
      <height>23</height>
     </rect>
@@ -29,8 +29,8 @@
   <widget class="QPushButton" name="help_button">
    <property name="geometry">
     <rect>
-     <x>146</x>
-     <y>549</y>
+     <x>210</x>
+     <y>572</y>
      <width>75</width>
      <height>23</height>
     </rect>
@@ -49,8 +49,8 @@
   <widget class="QPushButton" name="close_button">
    <property name="geometry">
     <rect>
-     <x>316</x>
-     <y>549</y>
+     <x>380</x>
+     <y>572</y>
      <width>75</width>
      <height>23</height>
     </rect>
@@ -59,32 +59,12 @@
     <string>Close</string>
    </property>
   </widget>
-  <widget class="QTableWidget" name="tableWidget">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>30</y>
-     <width>381</width>
-     <height>501</height>
-    </rect>
-   </property>
-   <column>
-    <property name="text">
-     <string>Attribute Name</string>
-    </property>
-   </column>
-   <column>
-    <property name="text">
-     <string>Attribute Value</string>
-    </property>
-   </column>
-  </widget>
   <widget class="Line" name="line">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>17</y>
-     <width>401</width>
+     <width>461</width>
      <height>16</height>
     </rect>
    </property>
@@ -109,13 +89,51 @@
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>533</y>
-     <width>401</width>
+     <y>556</y>
+     <width>461</width>
      <height>16</height>
     </rect>
    </property>
    <property name="orientation">
     <enum>Qt::Horizontal</enum>
+   </property>
+  </widget>
+  <widget class="QGroupBox" name="attribute_group_box">
+   <property name="geometry">
+    <rect>
+     <x>3</x>
+     <y>27</y>
+     <width>451</width>
+     <height>531</height>
+    </rect>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>451</width>
+     <height>531</height>
+    </size>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>451</width>
+     <height>531</height>
+    </size>
+   </property>
+   <property name="title">
+    <string>Attribute Information</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="status_label">
+   <property name="geometry">
+    <rect>
+     <x>6</x>
+     <y>575</y>
+     <width>201</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
    </property>
   </widget>
  </widget>

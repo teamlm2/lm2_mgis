@@ -12,6 +12,7 @@ class LdAttribute(Base):
 
     id = Column(Integer, primary_key=True)
     attribute_name = Column(String)
+    attribute_name_mn = Column(String)
     attribute_type = Column(String)
     description = Column(String)
 
