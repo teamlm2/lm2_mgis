@@ -132,7 +132,6 @@ class PlanAttributeEditDialog(QDialog, Ui_PlanAttributeEditDialog, DatabaseHelpe
                     for value in values:
                         if value.attribute_value:
                             attribute_value = value.attribute_value
-                            print attribute_value
 
             value_item = QTableWidgetItem(attribute_value)
             value_item.setData(Qt.UserRole, attribute_value)
@@ -144,12 +143,22 @@ class PlanAttributeEditDialog(QDialog, Ui_PlanAttributeEditDialog, DatabaseHelpe
 
             if attribute_type == 'number':
                 delegate = QDoubleSpinBox()
+                if attribute_value != '':
+                    delegate.setValue(float(Decimal(attribute_value)))
+                else:
+                    delegate.setValue(0)
                 self.attribute_twidget.setCellWidget(attribute_row, ATTRIBUTE_VALUE, delegate)
             elif attribute_type == 'text':
                 delegate = QLineEdit()
+                delegate.setText(attribute_value)
                 self.attribute_twidget.setCellWidget(attribute_row, ATTRIBUTE_VALUE, delegate)
             elif attribute_type == 'date':
                 delegate = QDateEdit()
+                if attribute_value != '':
+                    delegate.setDate(QDate.fromString(attribute_value, Constants.DATE_FORMAT))
+                else:
+                    q_date = QDate.currentDate()
+                    delegate.setDate(q_date)
                 self.attribute_twidget.setCellWidget(attribute_row, ATTRIBUTE_VALUE, delegate)
 
         # self.attribute_twidget.resizeColumnsToContents()
@@ -168,7 +177,9 @@ class PlanAttributeEditDialog(QDialog, Ui_PlanAttributeEditDialog, DatabaseHelpe
                 if attribute_type == 'number':
                     attribute_value = str(self.attribute_twidget.cellWidget(row, ATTRIBUTE_VALUE).value())
                 elif attribute_type == 'date':
-                    attribute_value = str(self.attribute_twidget.cellWidget(row, ATTRIBUTE_VALUE).date())
+                    qt_date = self.attribute_twidget.cellWidget(row, ATTRIBUTE_VALUE).date()
+                    date_string = qt_date.toString(Constants.DATE_FORMAT)
+                    attribute_value = date_string
                 elif attribute_type == 'text':
                     attribute_value = str(self.attribute_twidget.cellWidget(row, ATTRIBUTE_VALUE).text())
                 print attribute_value
