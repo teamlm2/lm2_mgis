@@ -25,6 +25,7 @@ from controller.PrintCadastreExtractMapTool import *
 from controller.ParcelInfoExtractMapTool import *
 from controller.ParcelMpaEditMapTool import *
 from controller.PrintPointExtractMapTool import *
+from controller.CamaInfoExtractMapTool import *
 from controller.AboutDialog import *
 from controller.ReportDialog import *
 from utils.DatabaseUtils import *
@@ -691,7 +692,7 @@ class LM2Plugin:
                     self.navigatorWidget.show()
             else:
                 if self.camaWidget:
-                    self.camaWidget.hide()
+                    self.camaWidget.show()
                 if self.planWidget:
                     self.planWidget.hide()
                 if self.pastureWidget:
@@ -704,6 +705,7 @@ class LM2Plugin:
                     self.parcelInfoWidget.hide()
         else:
             self.__create_cama_navigator()
+        self.__start_cama_info_map()
 
     def __show_plan_navigator_widget(self):
 
@@ -903,6 +905,37 @@ class LM2Plugin:
         self.iface.mapCanvas().unsetMapTool(self.iface.mapCanvas().mapTool())
 
         mapTool = ParcelInfoExtractMapTool(self)
+
+        self.iface.mapCanvas().setMapTool(mapTool)
+        self.iface.mapCanvas().setCursor(QCursor(Qt.ArrowCursor))
+
+        self.iface.mapCanvas().setFocus(Qt.OtherFocusReason)
+
+    def __start_cama_info_map(self):
+
+        layer = LayerUtils.layer_by_data_source("data_soums_union", 'ca_parcel')
+        print'------'
+        print self.camaWidget.cadastre_rbutton.isCheckable()
+        print'------'
+        if layer is None:
+            QMessageBox.warning(self.iface.mainWindow(), QApplication.translate( "Plugin", "No <parcel> layer"),
+                                QApplication.translate( "Plugin", "Layer <parcel> must be added "
+                                                                  "to the table of contents first!"))
+            self.parcel_map_action.setChecked(False)
+            return
+
+        map_units = self.iface.mapCanvas().mapUnits()
+        if map_units != 0: # 0 = Meters
+            self.parcel_map_action.setChecked(False)
+            QMessageBox.warning(self.iface.mainWindow(),
+                                QApplication.translate( "Plugin", "Layer / map units not set to 'Meters'"),
+                                QApplication.translate( "Plugin", "Printing requires the layer units set to 'Meters'."
+                                                          " \n(Settings->Project Properties->General->Layer units)"))
+            return
+
+        self.iface.mapCanvas().unsetMapTool(self.iface.mapCanvas().mapTool())
+
+        mapTool = CamaInfoExtractMapTool(self)
 
         self.iface.mapCanvas().setMapTool(mapTool)
         self.iface.mapCanvas().setCursor(QCursor(Qt.ArrowCursor))
