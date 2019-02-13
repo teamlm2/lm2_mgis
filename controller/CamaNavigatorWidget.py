@@ -259,38 +259,40 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
     @pyqtSlot(str)
     def on_elevation_edit_textChanged(self, text):
 
-        ch_value = 0
+        factor_id = 1
+
         if text == "":
             self.elevation_edit.setStyleSheet(Constants.ERROR_LINEEDIT_STYLESHEET)
             return
         else:
             self.elevation_edit.setStyleSheet(self.styleSheet())
-            ch_value = float(self.elevation_edit.text())
 
-        count = self.session.query(CmFactorsAuValue).\
-            filter(CmFactorsAuValue.au2 == self.au2).\
-            filter(CmFactorsAuValue.factor_id == 1).\
-            filter(CmFactorsAuValue.is_interval == True).count()
-        print ch_value
-        print count
+        if self.__get_factor_change_value(text, factor_id):
+            value = self.__get_factor_change_value(text, factor_id)
+            self.elevation_value_edit.setText(str(value))
+
+    def __get_factor_change_value(self, text, factor_id):
+
+        ch_value = float(text)
 
         values = self.session.query(CmFactorsAuValue). \
             filter(CmFactorsAuValue.au2 == self.au2). \
-            filter(CmFactorsAuValue.factor_id == 1). \
+            filter(CmFactorsAuValue.factor_id == factor_id). \
             filter(CmFactorsAuValue.is_interval == True).all()
 
         is_ok = False
         conf_value = 1
         for value in values:
-            print value.first_value
-            print value.last_value
             if not is_ok:
                 if value.first_value <= ch_value and value.last_value >= ch_value:
                     is_ok = True
-                    factor_value = self.session.query(CmFactorsValue).filter(CmFactorsValue.code == value.factor_value_id).one()
+                    factor_value = self.session.query(CmFactorsValue).filter(
+                        CmFactorsValue.code == value.factor_value_id).one()
                     conf_value = factor_value.value
         if is_ok:
-            print conf_value
+            return conf_value
+        else:
+            return None
 
     def __all_clear(self):
 
