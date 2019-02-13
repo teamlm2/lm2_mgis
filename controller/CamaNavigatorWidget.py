@@ -29,6 +29,13 @@ from ..utils.PluginUtils import *
 from ..utils.LayerUtils import *
 from ..model.DatabaseHelper import *
 from ..model.SetProcessTypeColor import *
+from ..model.CmCamaLanduseType import *
+from ..model.CmFactorsAuValue import *
+from ..model.CmFactorsValue import *
+from ..model.CmFactorGroup import *
+from ..model.CmParcelTbl import *
+from ..model.CmFactors import *
+
 from ..controller.PlanDetailWidget import *
 from ..controller.PlanLayerFilterDialog import *
 # from ..LM2Plugin import *
@@ -66,6 +73,7 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
         self.__feature = None
         self.layer_type = None
 
+        self.__setup_validators()
         self.au2 = DatabaseUtils.working_l2_code()
         self.__setup_combo_boxes()
         self.working_l1_cbox.currentIndexChanged.connect(self.__working_l1_changed)
@@ -76,6 +84,18 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
 
         self.__setup_cbox()
         self.cadastre_rbutton.isCheckable()
+
+    def __setup_validators(self):
+
+        self.numbers_validator = QRegExpValidator(QRegExp("[1-9][0-9]+\\.[0-9]{3}"), None)
+        self.int_validator = QRegExpValidator(QRegExp("[0-9][0-9]"), None)
+
+        self.elevation_edit.setValidator(self.numbers_validator)
+        self.slopy_edit.setValidator(self.numbers_validator)
+        self.rain_replicate_edit.setValidator(self.numbers_validator)
+        self.earthquake_edit.setValidator(self.numbers_validator)
+        self.soil_quality_edit.setValidator(self.numbers_validator)
+        self.air_quality_edit.setValidator(self.numbers_validator)
 
     def set_parcel_data(self, parcel_no, feature, layer_type):
 
@@ -96,10 +116,11 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
 
             self.parcel_id_edit.setText(self.parcel_id)
             self.parcel_area_edit.setText(str(parcel.area_m2))
+            self.parcel_area_ha_edit.setText(str(parcel.area_m2/10000))
 
-            self.__get_base_price(parcel.parcel_id)
+            self.__get_base_price(parcel)
 
-    def __get_base_price(self, parcel_id):
+    def __get_base_price(self, parcel):
 
         sql = "select vl.id, vl.name, lt.description, vl.level_no, vlp.base_price, vlp.base_price_m2 " \
                 "from data_soums_union.ca_parcel_tbl pl " \
@@ -109,7 +130,7 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
                 "left join data_estimate.pa_valuation_level_price vlp on vlp.level_id = vl.id " \
                 "where parcel_id = :parcel_id "
 
-        result = self.session.execute(sql, {'parcel_id': parcel_id})
+        result = self.session.execute(sql, {'parcel_id': parcel.parcel_id})
 
         base_price_m2 = 0
         base_price_ha = 0
@@ -118,6 +139,8 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
             base_price_m2 = item_row[5]
 
         self.parcel_base_price.setText(str(base_price_m2))
+
+        self.parcel_all_base_price.setText(str(float(base_price_m2)*parcel.area_m2/1000000))
 
     def __setup_cbox(self):
 
@@ -184,7 +207,25 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
             return
         self.__zoom_to_soum(l2_code)
 
-        self.__setup_change_combo_boxes()
+    def __zoom_to_soum(self, soum_code):
+
+        layer = LayerUtils.layer_by_data_source("admin_units", "au_level2")
+        if layer is None:
+            layer = LayerUtils.load_layer_by_name_admin_units("au_level2", "code", "admin_units")
+        if soum_code:
+            expression = " code = \'" + soum_code + "\'"
+            request = QgsFeatureRequest()
+            request.setFilterExpression(expression)
+            feature_ids = []
+            iterator = layer.getFeatures(request)
+
+            for feature in iterator:
+                feature_ids.append(feature.id())
+            if len(feature_ids) == 0:
+                self.error_label.setText(self.tr("No soum assigned"))
+
+            layer.setSelectedFeatures(feature_ids)
+            self.plugin.iface.mapCanvas().zoomToSelected(layer)
 
     @pyqtSlot()
     def on_distinct_calc_button_clicked(self):
@@ -215,13 +256,54 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
             self.parcel_base_price.setEnabled(True)
             self.parcel_market_price.setEnabled(False)
 
+    @pyqtSlot(str)
+    def on_elevation_edit_textChanged(self, text):
+
+        ch_value = 0
+        if text == "":
+            self.elevation_edit.setStyleSheet(Constants.ERROR_LINEEDIT_STYLESHEET)
+            return
+        else:
+            self.elevation_edit.setStyleSheet(self.styleSheet())
+            ch_value = float(self.elevation_edit.text())
+
+        count = self.session.query(CmFactorsAuValue).\
+            filter(CmFactorsAuValue.au2 == self.au2).\
+            filter(CmFactorsAuValue.factor_id == 1).\
+            filter(CmFactorsAuValue.is_interval == True).count()
+        print ch_value
+        print count
+
+        values = self.session.query(CmFactorsAuValue). \
+            filter(CmFactorsAuValue.au2 == self.au2). \
+            filter(CmFactorsAuValue.factor_id == 1). \
+            filter(CmFactorsAuValue.is_interval == True).all()
+
+        is_ok = False
+        conf_value = 1
+        for value in values:
+            print value.first_value
+            print value.last_value
+            if not is_ok:
+                if value.first_value <= ch_value and value.last_value >= ch_value:
+                    is_ok = True
+                    factor_value = self.session.query(CmFactorsValue).filter(CmFactorsValue.code == value.factor_value_id).one()
+                    conf_value = factor_value.value
+        if is_ok:
+            print conf_value
+
     def __all_clear(self):
 
         # parcel info
         self.parcel_id_edit.clear()
         self.parcel_area_edit.clear()
+        self.parcel_area_ha_edit.clear()
         self.parcel_base_price.clear()
+        self.parcel_all_base_price.clear()
+        self.parcel_calc_base_price.clear()
         self.parcel_market_price.clear()
+        self.parcel_all_market_price.clear()
+        self.parcel_calc_market_price.clear()
         self.parcel_address_edit.clear()
 
         # factor

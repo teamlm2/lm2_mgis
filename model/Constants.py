@@ -131,6 +131,6 @@ MULTIPLE_APPLICATIONS_NOT_ALLOWED = [2, 7, 8, 9, 10, 11, 12, 13, 14, 15]
 
 LOG_FILE_NAME = "lm2.log"
 
-set_search_path = "SET search_path to base, codelists, ub_data, admin_units, settings, pasture, public, data_soums_union, data_plan, data_estimate, data_ub, sdplatform, webgis"
+set_search_path = "SET search_path to base, codelists, ub_data, admin_units, settings, pasture, public, data_soums_union, data_cama, data_plan, data_estimate, data_ub, sdplatform, webgis"
 
 plan_process_type_parent = {1:u"ХАА-н газар", 2:u"Хот, суурины газар", 3:u"Зам шугам сүлжээ", 4:u"Ойн сан газар", 5:u"Усан сан газар", 6:u"Тусгай хэрэгцээний газар", 7:u"Бусад газар"}

@@ -103,7 +103,7 @@
         <x>2</x>
         <y>30</y>
         <width>475</width>
-        <height>99</height>
+        <height>155</height>
        </rect>
       </property>
       <property name="styleSheet">
@@ -121,9 +121,9 @@
        </property>
        <property name="geometry">
         <rect>
-         <x>110</x>
-         <y>33</y>
-         <width>135</width>
+         <x>11</x>
+         <y>53</y>
+         <width>121</width>
          <height>20</height>
         </rect>
        </property>
@@ -134,9 +134,9 @@
       <widget class="QLabel" name="label">
        <property name="geometry">
         <rect>
-         <x>110</x>
-         <y>17</y>
-         <width>141</width>
+         <x>11</x>
+         <y>37</y>
+         <width>121</width>
          <height>16</height>
         </rect>
        </property>
@@ -147,14 +147,14 @@
       <widget class="QLabel" name="label_2">
        <property name="geometry">
         <rect>
-         <x>260</x>
-         <y>17</y>
+         <x>10</x>
+         <y>78</y>
          <width>95</width>
          <height>16</height>
         </rect>
        </property>
        <property name="text">
-        <string>Талбай</string>
+        <string>Талбай /м2/</string>
        </property>
       </widget>
       <widget class="QLineEdit" name="parcel_area_edit">
@@ -163,45 +163,9 @@
        </property>
        <property name="geometry">
         <rect>
-         <x>260</x>
-         <y>33</y>
+         <x>10</x>
+         <y>94</y>
          <width>95</width>
-         <height>20</height>
-        </rect>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="parcel_base_price">
-       <property name="geometry">
-        <rect>
-         <x>370</x>
-         <y>33</y>
-         <width>95</width>
-         <height>20</height>
-        </rect>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_4">
-       <property name="geometry">
-        <rect>
-         <x>110</x>
-         <y>55</y>
-         <width>141</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Address</string>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="parcel_address_edit">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="geometry">
-        <rect>
-         <x>110</x>
-         <y>71</y>
-         <width>245</width>
          <height>20</height>
         </rect>
        </property>
@@ -212,34 +176,21 @@
        </property>
        <property name="geometry">
         <rect>
-         <x>370</x>
-         <y>71</y>
+         <x>120</x>
+         <y>132</y>
          <width>95</width>
          <height>20</height>
         </rect>
        </property>
-      </widget>
-      <widget class="QCheckBox" name="base_price_chbox">
-       <property name="geometry">
-        <rect>
-         <x>370</x>
-         <y>16</y>
-         <width>101</width>
-         <height>17</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Суурь үнэ</string>
-       </property>
-       <property name="checked">
-        <bool>true</bool>
+       <property name="styleSheet">
+        <string notr="true">background-color: rgb(219, 242, 255);</string>
        </property>
       </widget>
       <widget class="QCheckBox" name="market_price_chbox">
        <property name="geometry">
         <rect>
-         <x>370</x>
-         <y>54</y>
+         <x>120</x>
+         <y>115</y>
          <width>101</width>
          <height>17</height>
         </rect>
@@ -252,8 +203,8 @@
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>30</y>
-         <width>101</width>
+         <y>17</y>
+         <width>61</width>
          <height>17</height>
         </rect>
        </property>
@@ -264,12 +215,38 @@
         <bool>true</bool>
        </property>
       </widget>
+      <widget class="QLineEdit" name="parcel_address_edit">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="geometry">
+        <rect>
+         <x>140</x>
+         <y>53</y>
+         <width>331</width>
+         <height>20</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_4">
+       <property name="geometry">
+        <rect>
+         <x>140</x>
+         <y>37</y>
+         <width>137</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Нэгж талбарын хаяг</string>
+       </property>
+      </widget>
       <widget class="QRadioButton" name="plan_rbutton">
        <property name="geometry">
         <rect>
-         <x>10</x>
-         <y>50</y>
-         <width>101</width>
+         <x>90</x>
+         <y>17</y>
+         <width>81</width>
          <height>17</height>
         </rect>
        </property>
@@ -277,14 +254,173 @@
         <string>Төлөвлөгөө</string>
        </property>
       </widget>
+      <widget class="QLineEdit" name="parcel_area_ha_edit">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>132</y>
+         <width>95</width>
+         <height>20</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_3">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>116</y>
+         <width>95</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Талбай /га/</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="parcel_base_price">
+       <property name="geometry">
+        <rect>
+         <x>120</x>
+         <y>94</y>
+         <width>95</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">background-color: rgb(255, 224, 206);</string>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="base_price_chbox">
+       <property name="geometry">
+        <rect>
+         <x>120</x>
+         <y>77</y>
+         <width>101</width>
+         <height>17</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Суурь үнэ /м2/</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="parcel_all_base_price">
+       <property name="geometry">
+        <rect>
+         <x>220</x>
+         <y>94</y>
+         <width>115</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">background-color: rgb(255, 224, 206);</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="parcel_calc_base_price">
+       <property name="geometry">
+        <rect>
+         <x>340</x>
+         <y>94</y>
+         <width>115</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">background-color: rgb(255, 224, 206);</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="parcel_all_market_price">
+       <property name="geometry">
+        <rect>
+         <x>220</x>
+         <y>132</y>
+         <width>115</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">background-color: rgb(219, 242, 255);</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="parcel_calc_market_price">
+       <property name="geometry">
+        <rect>
+         <x>340</x>
+         <y>132</y>
+         <width>115</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">background-color: rgb(219, 242, 255);</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_26">
+       <property name="geometry">
+        <rect>
+         <x>220</x>
+         <y>78</y>
+         <width>111</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Н/Т-н суурь үнэ/сая.т/</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_27">
+       <property name="geometry">
+        <rect>
+         <x>340</x>
+         <y>78</y>
+         <width>111</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Бодогдсон үнэ/сая.т/</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_28">
+       <property name="geometry">
+        <rect>
+         <x>220</x>
+         <y>116</y>
+         <width>111</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Н/Т-н суурь үнэ/сая.т/</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_29">
+       <property name="geometry">
+        <rect>
+         <x>340</x>
+         <y>116</y>
+         <width>111</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Бодогдсон үнэ/сая.т/</string>
+       </property>
+      </widget>
      </widget>
      <widget class="QTabWidget" name="tabWidget">
       <property name="geometry">
        <rect>
         <x>2</x>
-        <y>131</y>
+        <y>190</y>
         <width>478</width>
-        <height>491</height>
+        <height>438</height>
        </rect>
       </property>
       <property name="font">
@@ -670,32 +806,6 @@
           <string>Тооцоолох</string>
          </property>
         </widget>
-        <zorder>elevation_edit</zorder>
-        <zorder>slopy_edit</zorder>
-        <zorder>earthquake_edit</zorder>
-        <zorder>rain_replicate_edit</zorder>
-        <zorder>air_quality_edit</zorder>
-        <zorder>soil_quality_edit</zorder>
-        <zorder>permafrost_cbox</zorder>
-        <zorder>water_quality_cbox</zorder>
-        <zorder>label_5</zorder>
-        <zorder>label_6</zorder>
-        <zorder>label_7</zorder>
-        <zorder>label_8</zorder>
-        <zorder>label_9</zorder>
-        <zorder>label_10</zorder>
-        <zorder>label_11</zorder>
-        <zorder>label_12</zorder>
-        <zorder>elevation_value_edit</zorder>
-        <zorder>permafrost_value_edit</zorder>
-        <zorder>water_quality_value_edit</zorder>
-        <zorder>groupBox_3</zorder>
-        <zorder>slopy_value_edit</zorder>
-        <zorder>earthquake_value_edit</zorder>
-        <zorder>air_quality_value_edit</zorder>
-        <zorder>soil_quality_value_edit</zorder>
-        <zorder>rain_replicate_value_edit</zorder>
-        <zorder>environment_calc_button</zorder>
        </widget>
        <widget class="QGroupBox" name="groupBox_3">
         <property name="geometry">
@@ -977,36 +1087,6 @@
           </rect>
          </property>
         </widget>
-        <zorder>label_18</zorder>
-        <zorder>lineEdit_14</zorder>
-        <zorder>lineEdit_15</zorder>
-        <zorder>label_14</zorder>
-        <zorder>label_15</zorder>
-        <zorder>label_17</zorder>
-        <zorder>lineEdit_16</zorder>
-        <zorder>lineEdit_11</zorder>
-        <zorder>lineEdit_12</zorder>
-        <zorder>label_13</zorder>
-        <zorder>label_16</zorder>
-        <zorder>lineEdit_13</zorder>
-        <zorder>label_15</zorder>
-        <zorder>heat_line_edit</zorder>
-        <zorder>label_13</zorder>
-        <zorder>power_line_edit</zorder>
-        <zorder>label_14</zorder>
-        <zorder>water_line_edit</zorder>
-        <zorder>label_16</zorder>
-        <zorder>disinfect_line_edit</zorder>
-        <zorder>route_edit</zorder>
-        <zorder>label_17</zorder>
-        <zorder>label_23</zorder>
-        <zorder>parking_edit</zorder>
-        <zorder>power_line_value_edit</zorder>
-        <zorder>heat_line_value_edit</zorder>
-        <zorder>route_value_edit</zorder>
-        <zorder>water_line_value_edit</zorder>
-        <zorder>disinfect_line_value_edit</zorder>
-        <zorder>parking_value_edit</zorder>
        </widget>
        <widget class="QGroupBox" name="groupBox_4">
         <property name="geometry">
@@ -1246,31 +1326,6 @@
           </rect>
          </property>
         </widget>
-        <zorder>label_20</zorder>
-        <zorder>label_19</zorder>
-        <zorder>label_21</zorder>
-        <zorder>lineEdit_25</zorder>
-        <zorder>label_22</zorder>
-        <zorder>label_18</zorder>
-        <zorder>lineEdit_27</zorder>
-        <zorder>lineEdit_28</zorder>
-        <zorder>lineEdit_24</zorder>
-        <zorder>lineEdit_26</zorder>
-        <zorder>label_19</zorder>
-        <zorder>label_21</zorder>
-        <zorder>medical_edit</zorder>
-        <zorder>label_22</zorder>
-        <zorder>label_18</zorder>
-        <zorder>house_service_edit</zorder>
-        <zorder>shcool_edit</zorder>
-        <zorder>kindergarten_edit</zorder>
-        <zorder>label_20</zorder>
-        <zorder>admin_edit</zorder>
-        <zorder>shcool_value_edit</zorder>
-        <zorder>admin_value_edit</zorder>
-        <zorder>house_service_value_edit</zorder>
-        <zorder>kindergarten_value_edit</zorder>
-        <zorder>medical_value_edit</zorder>
        </widget>
        <widget class="QGroupBox" name="groupBox_5">
         <property name="geometry">
@@ -1440,7 +1495,4 @@
  </tabstops>
  <resources/>
  <connections/>
- <buttongroups>
-  <buttongroup name="buttonGroup"/>
- </buttongroups>
 </ui>
