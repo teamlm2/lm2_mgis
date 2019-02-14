@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>500</width>
-    <height>713</height>
+    <height>758</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -44,7 +44,7 @@
       <x>1</x>
       <y>0</y>
       <width>498</width>
-      <height>650</height>
+      <height>700</height>
      </rect>
     </property>
     <property name="sizePolicy">
@@ -56,13 +56,13 @@
     <property name="minimumSize">
      <size>
       <width>0</width>
-      <height>600</height>
+      <height>650</height>
      </size>
     </property>
     <property name="maximumSize">
      <size>
       <width>500</width>
-      <height>650</height>
+      <height>700</height>
      </size>
     </property>
     <property name="widgetResizable">
@@ -71,11 +71,23 @@
     <widget class="QWidget" name="scrollAreaWidgetContents">
      <property name="geometry">
       <rect>
-       <x>0</x>
+       <x>-4</x>
        <y>0</y>
        <width>500</width>
-       <height>664</height>
+       <height>750</height>
       </rect>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>650</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>800</height>
+      </size>
      </property>
      <widget class="QComboBox" name="working_l1_cbox">
       <property name="geometry">
@@ -420,7 +432,7 @@
         <x>2</x>
         <y>190</y>
         <width>478</width>
-        <height>438</height>
+        <height>461</height>
        </rect>
       </property>
       <property name="font">
@@ -791,19 +803,6 @@
            <width>25</width>
            <height>20</height>
           </rect>
-         </property>
-        </widget>
-        <widget class="QPushButton" name="environment_calc_button">
-         <property name="geometry">
-          <rect>
-           <x>320</x>
-           <y>101</y>
-           <width>141</width>
-           <height>23</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Тооцоолох</string>
          </property>
         </widget>
        </widget>
@@ -1439,25 +1438,57 @@
           </rect>
          </property>
         </widget>
-        <widget class="QPushButton" name="distinct_calc_button">
-         <property name="geometry">
-          <rect>
-           <x>320</x>
-           <y>28</y>
-           <width>141</width>
-           <height>23</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>Зай тооцох</string>
-         </property>
-        </widget>
+       </widget>
+       <widget class="QPushButton" name="distinct_calc_button">
+        <property name="geometry">
+         <rect>
+          <x>168</x>
+          <y>398</y>
+          <width>141</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <weight>50</weight>
+          <bold>false</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Зай тооцох</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="price_calc_button">
+        <property name="geometry">
+         <rect>
+          <x>328</x>
+          <y>398</y>
+          <width>141</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Тооцоолох</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="layer_button">
+        <property name="geometry">
+         <rect>
+          <x>4</x>
+          <y>398</y>
+          <width>141</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <weight>50</weight>
+          <bold>false</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Давхарга</string>
+        </property>
        </widget>
       </widget>
       <widget class="QWidget" name="tab_4">

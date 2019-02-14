@@ -357,7 +357,10 @@ class LayerUtils(object):
             land_fee_and_tax_zones_group = root.insertGroup(7, u"Үнэлгээ, төлбөрийн бүс")
         mygroup = root.findGroup(U"Хил")
         if mygroup is None:
-            admin_units_group = root.insertGroup(4, u"Хил")
+            admin_units_group = root.insertGroup(8, u"Хил")
+        mygroup = root.findGroup(U"CAMA")
+        if mygroup is None:
+            admin_units_group = root.insertGroup(8, u"CAMA")
 
     @staticmethod
     def refresh_layer_plan():
