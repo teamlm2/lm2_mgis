@@ -382,7 +382,8 @@ class PluginUtils(object):
         elif object_type == 'contract\OwnershipRecord':
             year_filter = "%-" + str(year) + '/%'
             format_text = soum_code + '-' + year + '/' + '?'
-            generate_name = 'a:3:{s:7:"classes";s:24:"contract\OwnershipRecord";s:6:"format";s:12:"' + format_text + '";s:6:"length";i:5;}'
+            # 'a:3:{s:7:"classes";s:22:"record\OwnershipRecord";s:6:"format";s:12:"08110-2019/?";s:6:"length";i:5;}'
+            generate_name = 'a:3:{s:7:"classes";s:22:"record\OwnershipRecord";s:6:"format";s:12:"' + format_text + '";s:6:"length";i:5;}'
             generate_name_md5 = hashlib.md5(generate_name).hexdigest()
             count = session.query(SdAutoNumbers). \
                 filter(SdAutoNumbers.format.like("%-%")). \

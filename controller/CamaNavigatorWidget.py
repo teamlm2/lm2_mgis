@@ -293,6 +293,11 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
             value = float(self.water_quality_value_edit.text())
             self.parcel_calc_price_value = self.parcel_calc_price_value * value
 
+        #
+        if self.shcool_value_edit.text() and self.parcel_calc_price_value:
+            value = float(self.shcool_value_edit.text())
+            self.parcel_calc_price_value = self.parcel_calc_price_value * value
+
         self.parcel_calc_base_price.setText(str(self.parcel_calc_price_value))
 
     @pyqtSlot(str)
@@ -453,10 +458,50 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
             vlayer = LayerUtils.load_layer_base_layer("cm_parcel_tbl", "parcel_id", "data_cama")
         # vlayer.loadNamedStyle(
         #     str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/pa_valuation_level.qml")
+
         vlayer.setLayerName(self.tr("Cama Base Parcel"))
         myalayer = root.findLayer(vlayer.id())
         if myalayer is None:
             mygroup.addLayer(vlayer)
+
+    @pyqtSlot()
+    def on_distinct_calc_button_clicked(self):
+
+        parcel_id = self.parcel_id_edit.text()
+        cama_landuse = 210401
+        if self.__calculate_parcel_distance(parcel_id, cama_landuse):
+            distance_value = self.__calculate_parcel_distance(parcel_id, cama_landuse)
+            self.shcool_edit.setText(str(distance_value))
+
+    def __calculate_parcel_distance(self, parcel_id, cama_landuse):
+
+        sql = "select parcel.parcel_id, " \
+              "min(ST_Distance(ST_Transform(parcel.geometry, base.find_utm_srid(St_Centroid(parcel.geometry))), ST_Transform(cm_parcel.geometry, base.find_utm_srid(St_Centroid(cm_parcel.geometry))))) " \
+              "from data_soums_union.ca_parcel_tbl parcel, data_cama.cm_parcel_tbl cm_parcel " \
+              "where parcel.parcel_id = :parcel_id and cm_parcel.cama_landuse = :cama_landuse group by parcel.parcel_id"
+
+        result = self.session.execute(sql, {'parcel_id': parcel_id, 'cama_landuse': cama_landuse})
+
+        distance_value = None
+        for item_row in result:
+            print type(item_row[1])
+            distance_value = item_row[1]/1000
+
+        return distance_value
+
+    @pyqtSlot(str)
+    def on_shcool_edit_textChanged(self, text):
+
+        factor_id = 15
+        is_interval = True
+        if text == "":
+            self.shcool_edit.setStyleSheet(Constants.ERROR_LINEEDIT_STYLESHEET)
+            return
+        else:
+            self.shcool_edit.setStyleSheet(self.styleSheet())
+        if self.__get_factor_change_value(text, factor_id, is_interval):
+            value = self.__get_factor_change_value(text, factor_id, is_interval)
+            self.shcool_value_edit.setText(str(value))
 
     def __all_clear(self):
 

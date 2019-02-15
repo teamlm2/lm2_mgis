@@ -127,6 +127,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         self.landfee_message_label1.setText(self.tr('Without parcel no land fee information is available.'))
         self.landfee_message_label2.clear()
         self.__setup_permissions()
+        self.__user_right_permissions()
         if self.attribute_update:
             self.fee_zone_cbox.setEnabled(False)
             self.__setup_mapping()
@@ -140,7 +141,6 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         self.__cert_range_cbox_setup()
         self.__fee_zone_cbox_setup()
 
-        self.__user_right_permissions()
         self.__setup_validators()
 
         self.officer = None
@@ -459,13 +459,14 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             return
         self.app_id = application.app_id
         self.application_this_contract_based_edit.setText(application.app_no)
+        self.unassign_button.setDisabled(True)
         self.application_type_edit.setText(application.app_type_ref.description)
         self.property_num_edit.setText(application.property_no)
 
         parcel = application.parcel_ref
         bag_name = ''
         bag_count = self.session.query(AuLevel3).filter(AuLevel3.geometry.ST_Overlaps((parcel.geometry))).count()
-        print bag_count
+
         if bag_count == 1:
             bag = self.session.query(AuLevel3).filter(AuLevel3.geometry.ST_Overlaps((parcel.geometry))).first()
             bag_name = bag.name

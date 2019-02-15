@@ -155,12 +155,11 @@ class OwnRecordDialog(QDialog, Ui_OwnRecordDialog, DatabaseHelper):
         self.landtax_message_label1.setText(self.tr('Without parcel no land tax information is available.'))
         self.landtax_message_label2.clear()
 
+        self.__setup_permissions()
         if self.attribute_update:
             self.__setup_mapping()
         else:
             self.__generate_record_number()
-
-        self.__setup_permissions()
 
     def __setup_mapping(self):
 
@@ -217,6 +216,7 @@ class OwnRecordDialog(QDialog, Ui_OwnRecordDialog, DatabaseHelper):
             return
         self.app_id = application.app_id
         self.application_based_edit.setText(application.app_no)
+        self.unassign_button.setDisabled(True)
         self.application_type_edit.setText(application.app_type_ref.description)
 
         parcel = application.parcel_ref
@@ -434,7 +434,7 @@ class OwnRecordDialog(QDialog, Ui_OwnRecordDialog, DatabaseHelper):
                     self.applicant_documents_cbox.addItem(person_label, person.person_id)
 
         self.updating = False
-        self.__update_app_documents_twidget()
+        # self.__update_app_documents_twidget()
 
     def __remove_document_items(self, twidget):
 
@@ -1621,7 +1621,7 @@ class OwnRecordDialog(QDialog, Ui_OwnRecordDialog, DatabaseHelper):
         if self.updating:
             return
 
-        self.__update_app_documents_twidget()
+        # self.__update_app_documents_twidget()
 
     def current_document_applicant(self):
 
