@@ -51,8 +51,8 @@
     <categories>
       <category render="true" symbol="0" value="2" label="Гэр бүлийн хэрэгцээний"/>
       <category render="true" symbol="1" value="3" label="Худалдаа, бүх төрлийн үйлчилгээ"/>
-      <category render="true" symbol="2" value="4" label="ХАА-гаас бусад үйлдвэрлэл"/>
-      <category render="true" symbol="3" value="5" label="ХАА-н үйлдвэрлэл"/>
+      <category render="true" symbol="2" value="4" label="ХАА-н үйлдвэрлэл"/>
+      <category render="true" symbol="3" value="5" label="ХАА-гаас бусад үйлдвэрлэл"/>
     </categories>
     <symbols>
       <symbol alpha="1" clip_to_extent="1" type="fill" name="0">
