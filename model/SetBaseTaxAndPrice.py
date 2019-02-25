@@ -19,4 +19,4 @@ class SetBaseTaxAndPrice(Base):
     landuse = Column(Integer, ForeignKey('cl_landuse_type.code'))
     landuse_ref = relationship("ClLanduseType")
 
-    tax_zone = Column(String, ForeignKey('set_tax_and_price_zone.zone_id'))
+    tax_zone = Column(Integer, ForeignKey('set_tax_and_price_zone.zone_id'))

@@ -210,13 +210,13 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         for parcel in iterator:
             parcel_geometry = WKTElement(parcel.geometry().exportToWkt(), srid=4326)
 
-            validaty_result = self.__check_parcel_correct(parcel_geometry, error_message)
-
-            if not validaty_result[0]:
-                log_measage = validaty_result[1]
-
-                PluginUtils.show_error(self, self.tr("Invalid parcel info"), log_measage)
-                return
+            # validaty_result = self.__check_parcel_correct(parcel_geometry, error_message)
+            #
+            # if not validaty_result[0]:
+            #     log_measage = validaty_result[1]
+            #
+            #     PluginUtils.show_error(self, self.tr("Invalid parcel info"), log_measage)
+            #     return
             count += 1
             id = QDateTime().currentDateTime().toString("MMddhhmmss") + str(count)
             is_approved = False
@@ -263,6 +263,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
                 new_parcel = self.__copy_parcel_attributes(parcel, new_parcel, parcel_shape_layer)
 
                 self.session.add(new_parcel)
+                self.session.flush()
 
                 main_parcel_item = QTreeWidgetItem()
                 main_parcel_item.setText(0, header)
@@ -352,39 +353,42 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
                 column_names[key] = value
         error_message = u''
 
-        try:
-            if column_names[column_name_landuse] != None:
-                landuse = column_names[column_name_landuse]
-                if len(str(landuse).strip()) == 4:
-                    count = self.session.query(ClLanduseType).filter(ClLanduseType.code == landuse).count()
-                    if count == 0:
-                        valid = False
-                        message = unicode(u'Газрын нэгдмэл сангийн ангиллын дугаар буруу байна.')
-                        error_message = error_message + "\n" + message
-                        self.message_label.setText(error_message)
-                else:
+        # try:
+        if column_names[column_name_landuse] != None:
+            landuse = column_names[column_name_landuse]
+            if len(str(landuse).strip()) == 4:
+                count = self.session.query(ClLanduseType).filter(ClLanduseType.code == landuse).count()
+                if count == 0:
                     valid = False
                     message = unicode(u'Газрын нэгдмэл сангийн ангиллын дугаар буруу байна.')
                     error_message = error_message + "\n" + message
                     self.message_label.setText(error_message)
-        except SQLAlchemyError, e:
-            valid = False
-            message = unicode(u'Газрын нэгдмэл сангийн дугаар ангиллын буруу байна.')
-            error_message = error_message + "\n" + message
-            self.message_label.setText(error_message)
+            else:
+                valid = False
+                message = unicode(u'Газрын нэгдмэл сангийн ангиллын дугаар буруу байна.')
+                error_message = error_message + "\n" + message
+                self.message_label.setText(error_message)
+        # except SQLAlchemyError, e:
+        #     valid = False
+        #     message = unicode(u'Газрын нэгдмэл сангийн дугаар ангиллын буруу байна.')
+        #     error_message = error_message + "\n" + message
+        #     self.message_label.setText(error_message)
 
-        try:
+        # try:
+        print column_names[column_name_plan_code]
+        print type(column_names[column_name_plan_code])
+        if column_names[column_name_plan_code]:
             count = self.session.query(LdProcessPlan).filter(LdProcessPlan.code == column_names[column_name_plan_code]).count()
             if count == 0:
                 valid = False
                 message = unicode(u'Үйл ажиллагааны ангиллын дугаар буруу байна.')
                 error_message = error_message + "\n" + message
                 self.message_label.setText(error_message)
-        except SQLAlchemyError, e:
-            valid = False
-            message = unicode(u'Үйл ажиллагааны ангиллын дугаар буруу байна.')
-            error_message = error_message + "\n" + message
-            self.message_label.setText(error_message)
+        # except SQLAlchemyError, e:
+        #     valid = False
+        #     message = unicode(u'Үйл ажиллагааны ангиллын дугаар буруу байна.')
+        #     error_message = error_message + "\n" + message
+        #     self.message_label.setText(error_message)
 
         is_out_parcel = False
         au2_parcel_count = self.session.query(AuLevel2). \

@@ -604,157 +604,157 @@ class ParcelMpaDialog(QDockWidget, Ui_ParcelMpaDialog, DatabaseHelper):
         mobile_phone = ''
         person_type = 10
         person_register = ''
-        try:
-            subject_persons = self.session.query(MpaGisEditSubject).filter(MpaGisEditSubject.gid == object_id).all()
-            for subject_person in subject_persons:
-                # if subject_person.is_finish:
-                #     self.edit_status_cbox.setEnabled(False)
-                heid = str(subject_person.heid)
-                if self.__is_number(heid):
-                    if int(subject_person.heid) == 1:
-                        person_type = 10
-                    elif int(subject_person.heid) == 2:
-                        person_type = 30
-                    elif int(subject_person.heid) == 3:
-                        person_type = 40
-                    elif int(subject_person.heid) == 4:
-                        person_type = 50
-                    elif int(subject_person.heid) == 5 or str(subject_person.heid) == 5:
-                        person_type = 60
+        # try:
+        subject_persons = self.session.query(MpaGisEditSubject).filter(MpaGisEditSubject.gid == object_id).all()
+        for subject_person in subject_persons:
+            # if subject_person.is_finish:
+            #     self.edit_status_cbox.setEnabled(False)
+            heid = str(subject_person.heid)
+            if self.__is_number(heid):
+                if int(subject_person.heid) == 1:
+                    person_type = 10
+                elif int(subject_person.heid) == 2:
+                    person_type = 30
+                elif int(subject_person.heid) == 3:
+                    person_type = 40
+                elif int(subject_person.heid) == 4:
+                    person_type = 50
+                elif int(subject_person.heid) == 5 or str(subject_person.heid) == 5:
+                    person_type = 60
 
-                person_register = subject_person.register
-                if subject_person.ner:
-                    name = subject_person.ner
-                if subject_person.utas1:
-                    if subject_person.utas1 and len(subject_person.utas1) > 1:
-                        mobile_phone = subject_person.utas1
-                if subject_person.utas1:
-                    if subject_person.utas2 and len(subject_person.utas2) > 1:
-                        phone = subject_person.utas2
-                if subject_person.ovog:
-                    firstname = subject_person.ovog
-                if subject_person.ovogner:
-                    middlename = subject_person.ovogner
+            person_register = subject_person.register
+            if subject_person.ner:
+                name = subject_person.ner
+            if subject_person.utas1:
+                if subject_person.utas1 and len(subject_person.utas1) > 1:
+                    mobile_phone = subject_person.utas1
+            if subject_person.utas1:
+                if subject_person.utas2 and len(subject_person.utas2) > 1:
+                    phone = subject_person.utas2
+            if subject_person.ovog:
+                firstname = subject_person.ovog
+            if subject_person.ovogner:
+                middlename = subject_person.ovogner
 
-            self.person_type_cbox.setCurrentIndex(self.person_type_cbox.findData(person_type))
-            self.personal_id_edit.setText(person_register)
-            self.middle_name_edit.setText(middlename)
-            self.first_name_edit.setText(firstname)
-            self.name_edit.setText(name)
-            self.__update_date_of_birth(person_register)
-            if len(phone) != 0:
-                phone = ', '+phone
-            self.phone_edit.setText(mobile_phone + phone)
+        self.person_type_cbox.setCurrentIndex(self.person_type_cbox.findData(person_type))
+        self.personal_id_edit.setText(person_register)
+        self.middle_name_edit.setText(middlename)
+        self.first_name_edit.setText(firstname)
+        self.name_edit.setText(name)
+        self.__update_date_of_birth(person_register)
+        if len(phone) != 0:
+            phone = ', '+phone
+        self.phone_edit.setText(mobile_phone + phone)
 
-            # parcel info
-            old_parcel_id = self.right_holder_twidget.item(selected_row, 4).text()
+        # parcel info
+        old_parcel_id = self.right_holder_twidget.item(selected_row, 4).text()
 
-            parcel_id = ''
-            street = ''
-            khashaa = ''
-            neighbourhood = ''
-            landuse_type = 2205
-            zoriulalt = 1
-            parcel_subjects = self.session.query(MpaGisEditSubject).filter(MpaGisEditSubject.gid == object_id).all()
-            for parcel_subject in parcel_subjects:
-                self.edit_status_cbox.setCurrentIndex(self.edit_status_cbox.findData(parcel_subject.edit_status))
-                self.old_parcel_id_edit.setText(str(parcel_subject.gid))
-                if parcel_subject.gudamj:
-                    street = parcel_subject.gudamj
-                    neighbourhood = parcel_subject.gudamj
-                if parcel_subject.hashaa:
-                    khashaa = parcel_subject.hashaa
-                if parcel_subject.zoriulalt:
-                    zoriulalt = parcel_subject.zoriulalt
-                landuse_type = parcel_subject.landuse_code
+        parcel_id = ''
+        street = ''
+        khashaa = ''
+        neighbourhood = ''
+        landuse_type = 2205
+        zoriulalt = 1
+        parcel_subjects = self.session.query(MpaGisEditSubject).filter(MpaGisEditSubject.gid == object_id).all()
+        for parcel_subject in parcel_subjects:
+            self.edit_status_cbox.setCurrentIndex(self.edit_status_cbox.findData(parcel_subject.edit_status))
+            self.old_parcel_id_edit.setText(str(parcel_subject.gid))
+            if parcel_subject.gudamj:
+                street = parcel_subject.gudamj
+                neighbourhood = parcel_subject.gudamj
+            if parcel_subject.hashaa:
+                khashaa = parcel_subject.hashaa
+            if parcel_subject.zoriulalt:
+                zoriulalt = parcel_subject.zoriulalt
+            landuse_type = parcel_subject.landuse_code
 
-            self.zoriulalt_edit.setText(unicode(zoriulalt))
-            self.streetname_edit.setText(street)
-            self.khashaa_edit.setText(khashaa)
-            self.neighbourhood_edit.setText(neighbourhood)
-            self.parcel_landuse_cbox.setCurrentIndex(self.parcel_landuse_cbox.findData(landuse_type))
+        self.zoriulalt_edit.setText(unicode(zoriulalt))
+        self.streetname_edit.setText(street)
+        self.khashaa_edit.setText(khashaa)
+        self.neighbourhood_edit.setText(neighbourhood)
+        self.parcel_landuse_cbox.setCurrentIndex(self.parcel_landuse_cbox.findData(landuse_type))
 
-            # decision info
-            decision_no = ''
-            decision_date = None
-            decision_level = 10
-            right_type = 1
+        # decision info
+        decision_no = ''
+        decision_date = None
+        decision_level = 10
+        right_type = 1
 
-            app_type = None
+        app_type = None
 
-            contract_no = ''
-            certificate_no = ''
-            create_date = None
-            end_date = None
-            duration = 0
-            contract_status = 20
+        contract_no = ''
+        certificate_no = ''
+        create_date = None
+        end_date = None
+        duration = 0
+        contract_status = 20
 
-            for subject in parcel_subjects:
-                if subject.zovshshiid:
-                    decision_no = subject.zovshshiid
-                if subject.zovshdate:
-                    decision_date = subject.zovshdate
-                if subject.gaid:
-                    right_type_object = self.session.query(ClRightType).filter(ClRightType.code == 1).one()
-                    right_type = right_type_object.code
-                decision_level = subject.zovshbaig
-                app_type = subject.app_type
-                if right_type == 1 or right_type == 2:
-                    if subject.gerid:
-                        contract_no = subject.gerid
-                    if subject.gerchid:
-                        certificate_no = subject.gerchid
-                    if subject.gerdate:
-                        create_date = subject.gerdate
-                    if subject.duusdate:
-                        end_date = subject.duusdate
-                        now_year = int(QDate().currentDate().toString("yyyy"))
-                        end_year = int(PluginUtils.convert_python_date_to_qt(end_date).toString("yyyy"))
-                        if now_year > end_year:
-                            contract_status = 30
-                    if subject.gerdate and subject.duusdate:
-                        create_date = subject.gerdate
-                        begin_year = int(PluginUtils.convert_python_date_to_qt(create_date).toString("yyyy"))
-                        end_year = int(PluginUtils.convert_python_date_to_qt(end_date).toString("yyyy"))
-                        if end_year > begin_year:
-                            duration = end_year - begin_year
+        for subject in parcel_subjects:
+            if subject.zovshshiid:
+                decision_no = subject.zovshshiid
+            if subject.zovshdate:
+                decision_date = subject.zovshdate
+            if subject.gaid:
+                right_type_object = self.session.query(ClRightType).filter(ClRightType.code == 1).one()
+                right_type = right_type_object.code
+            decision_level = subject.zovshbaig
+            app_type = subject.app_type
+            if right_type == 1 or right_type == 2:
+                if subject.gerid:
+                    contract_no = subject.gerid
+                if subject.gerchid:
+                    certificate_no = subject.gerchid
+                if subject.gerdate:
+                    create_date = subject.gerdate
+                if subject.duusdate:
+                    end_date = subject.duusdate
+                    now_year = int(QDate().currentDate().toString("yyyy"))
+                    end_year = int(PluginUtils.convert_python_date_to_qt(end_date).toString("yyyy"))
+                    if now_year > end_year:
+                        contract_status = 30
+                if subject.gerdate and subject.duusdate:
+                    create_date = subject.gerdate
+                    begin_year = int(PluginUtils.convert_python_date_to_qt(create_date).toString("yyyy"))
+                    end_year = int(PluginUtils.convert_python_date_to_qt(end_date).toString("yyyy"))
+                    if end_year > begin_year:
+                        duration = end_year - begin_year
 
-            self.decision_no_edit.setText(decision_no)
-            if decision_date:
-                qt_date = PluginUtils.convert_python_date_to_qt(decision_date)
-                self.decision_date.setDate(qt_date)
-            else:
-                self.decision_date.setDate(QDate(1900, 01, 01))
-            self.decision_level_cbox.setCurrentIndex(self.decision_level_cbox.findData(decision_level))
-            self.rigth_type_cbox.setCurrentIndex(self.rigth_type_cbox.findData(right_type))
+        self.decision_no_edit.setText(decision_no)
+        if decision_date:
+            qt_date = PluginUtils.convert_python_date_to_qt(decision_date)
+            self.decision_date.setDate(qt_date)
+        else:
+            self.decision_date.setDate(QDate(1900, 01, 01))
+        self.decision_level_cbox.setCurrentIndex(self.decision_level_cbox.findData(decision_level))
+        self.rigth_type_cbox.setCurrentIndex(self.rigth_type_cbox.findData(right_type))
 
-            if app_type:
-                self.application_type_cbox.setCurrentIndex(self.application_type_cbox.findData(app_type))
-            else:
-                self.application_type_cbox.setCurrentIndex(0)
+        if app_type:
+            self.application_type_cbox.setCurrentIndex(self.application_type_cbox.findData(app_type))
+        else:
+            self.application_type_cbox.setCurrentIndex(0)
 
-            # contract info qt
-            self.contract_full_edit.setText(self.__generate_contract_number())
-            self.contract_no_edit.setText(contract_no)
-            self.contract_cert_edit.setText(certificate_no)
-            if create_date:
-                qt_date = PluginUtils.convert_python_date_to_qt(create_date)
-                self.contract_date.setDate(qt_date)
-            else:
-                self.contract_date.setDate(QDate(1900, 01, 01))
-            if end_date:
-                qt_date = PluginUtils.convert_python_date_to_qt(end_date)
-                self.end_date.setDate(qt_date)
-            else:
-                self.end_date.setDate(QDate(1900, 01, 01))
-            self.duration_sbox.setValue(duration)
-            self.contract_status_cbox.setCurrentIndex(self.contract_status_cbox.findData(contract_status))
+        # contract info qt
+        self.contract_full_edit.setText(self.__generate_contract_number())
+        self.contract_no_edit.setText(contract_no)
+        self.contract_cert_edit.setText(certificate_no)
+        if create_date:
+            qt_date = PluginUtils.convert_python_date_to_qt(create_date)
+            self.contract_date.setDate(qt_date)
+        else:
+            self.contract_date.setDate(QDate(1900, 01, 01))
+        if end_date:
+            qt_date = PluginUtils.convert_python_date_to_qt(end_date)
+            self.end_date.setDate(qt_date)
+        else:
+            self.end_date.setDate(QDate(1900, 01, 01))
+        self.duration_sbox.setValue(duration)
+        self.contract_status_cbox.setCurrentIndex(self.contract_status_cbox.findData(contract_status))
 
-            # person address
-            self.__load_pesron_address(person_id)
+        # person address
+        self.__load_pesron_address(person_id)
 
-        except SQLAlchemyError, e:
-            self.rollback()
+        # except SQLAlchemyError, e:
+        #     self.rollback()
 
     def __load_pesron_address(self, person_id):
 

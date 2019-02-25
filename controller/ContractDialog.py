@@ -4316,10 +4316,10 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         parcel_id = self.id_main_edit.text()
         conf = self.session.query(SdConfiguration).filter(SdConfiguration.code == 'ip_fee_lm').one()
 
-        if au2 == '01110':
-            url = 'http://' + conf.value + '/api/payment/fee/old?parcel=' + parcel_id
-        else:
-            url = 'http://' + conf.value + '/api/payment/fee?parcel=' + parcel_id
+        # if au2 == '01110':
+        #     url = 'http://' + conf.value + '/api/payment/fee/old?parcel=' + parcel_id
+        # else:
+        url = 'http://' + conf.value + '/api/payment/fee?parcel=' + parcel_id
 
         respons = urllib.request.urlopen(url)
         data = json.loads(respons.read().decode(respons.info().get_param('charset') or 'utf-8'))

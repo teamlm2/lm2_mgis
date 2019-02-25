@@ -189,6 +189,261 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
                                 if myalayer is None:
                                     child.addLayer(vlayer_polygon)
 
+                                    sql = "select badedturl from view_plan_type1_main_zone_polygon"
+                                    result = self.session.execute(sql)
+
+                                    categories = []
+                                    for item_row in result:
+                                        badedturl = item_row[0]
+                                        count = self.session.query(SetProcessTypeColor).filter(
+                                            SetProcessTypeColor.code == badedturl).count()
+                                        if count == 1:
+                                            style = self.session.query(SetProcessTypeColor).filter(
+                                                SetProcessTypeColor.code == badedturl).one()
+                                            fill_color = style.fill_color
+                                            boundary_color = style.boundary_color
+                                            opacity = 0.5
+                                            code = str(int(style.code))
+                                            description = str(int(style.code)) + ': ' + style.description
+
+                                            self.__categorized_style(categories, vlayer_polygon, fill_color,
+                                                                     boundary_color, opacity, code, description)
+                                    expression = 'badedturl'  # field name
+                                    renderer = QgsCategorizedSymbolRendererV2(expression, categories)
+                                    vlayer_polygon.setRendererV2(renderer)
+
+                elif type == 2:
+                    mygroup = root.findGroup(u"Аймгийн ГЗБЕТ")
+                    for child in mygroup.children():
+                        if isinstance(child, QgsLayerTreeGroup):
+                            print "- group: " + child.name()
+                            if child.name() == "Parcel":
+                                vlayer_parcel = LayerUtils.layer_by_data_source("data_plan",
+                                                                                "view_plan_type2_parcel")
+                                if vlayer_parcel is None:
+                                    vlayer_parcel = LayerUtils.load_polygon_layer_base_layer(
+                                        "view_plan_type2_parcel", "parcel_id",
+                                        "data_plan")
+                                    vlayer_parcel.setLayerName(self.tr("Parcel"))
+                                myalayer = root.findLayer(vlayer_parcel.id())
+                                if myalayer is None:
+                                    child.addLayer(vlayer_parcel)
+                            if child.name() == "Sub":
+                                vlayer_sub_zone = LayerUtils.layer_by_data_source("data_plan",
+                                                                                  "view_plan_type2_sub_zone")
+                                if vlayer_sub_zone is None:
+                                    vlayer_sub_zone = LayerUtils.load_polygon_layer_base_layer(
+                                        "view_plan_type2_sub_zone", "parcel_id",
+                                        "data_plan")
+                                    vlayer_sub_zone.setLayerName(self.tr("Sub Zone"))
+                                myalayer = root.findLayer(vlayer_sub_zone.id())
+                                if myalayer is None:
+                                    child.addLayer(vlayer_sub_zone)
+                            if child.name() == "Main":  # to check subgroups within test group
+                                ## point
+                                vlayer_point = LayerUtils.layer_by_data_source("data_plan",
+                                                                               "view_plan_type2_main_zone_point")
+                                if vlayer_point is None:
+                                    vlayer_point = LayerUtils.load_polygon_layer_base_layer(
+                                        "view_plan_type2_main_zone_point", "parcel_id",
+                                        "data_plan")
+                                    vlayer_point.setLayerName(self.tr("Main Point"))
+                                myalayer = root.findLayer(vlayer_point.id())
+                                if myalayer is None:
+                                    child.addLayer(vlayer_point)
+                                ## line
+                                vlayer_line = LayerUtils.layer_by_data_source("data_plan",
+                                                                              "view_plan_type2_main_zone_line")
+                                if vlayer_line is None:
+                                    vlayer_line = LayerUtils.load_line_layer_base_layer(
+                                        "view_plan_type2_main_zone_line", "parcel_id",
+                                        "data_plan")
+                                    vlayer_line.setLayerName(self.tr("Main Line"))
+                                myalayer = root.findLayer(vlayer_line.id())
+                                if myalayer is None:
+                                    child.addLayer(vlayer_line)
+
+                                ## Polygon
+                                vlayer_polygon = LayerUtils.layer_by_data_source("data_plan",
+                                                                                 "view_plan_type2_main_zone_polygon")
+                                if vlayer_polygon is None:
+                                    vlayer_polygon = LayerUtils.load_polygon_layer_base_layer(
+                                        "view_plan_type2_main_zone_polygon", "parcel_id",
+                                        "data_plan")
+                                    vlayer_polygon.setLayerName(self.tr("Main Polygon"))
+                                myalayer = root.findLayer(vlayer_polygon.id())
+                                if myalayer is None:
+                                    child.addLayer(vlayer_polygon)
+                elif type == 6:
+                    mygroup = root.findGroup(u"Сумын НДХТ")
+                    for child in mygroup.children():
+                        if isinstance(child, QgsLayerTreeGroup):
+                            print "- group: " + child.name()
+                            if child.name() == "Parcel":
+                                vlayer_parcel = LayerUtils.layer_by_data_source("data_plan",
+                                                                                "view_plan_type6_parcel")
+                                if vlayer_parcel is None:
+                                    vlayer_parcel = LayerUtils.load_polygon_layer_base_layer(
+                                        "view_plan_type6_parcel", "parcel_id",
+                                        "data_plan")
+                                    vlayer_parcel.setLayerName(self.tr("Parcel"))
+                                myalayer = root.findLayer(vlayer_parcel.id())
+                                if myalayer is None:
+                                    child.addLayer(vlayer_parcel)
+                            if child.name() == "Sub":
+                                vlayer_sub_zone = LayerUtils.layer_by_data_source("data_plan",
+                                                                                  "view_plan_type6_sub_zone")
+                                if vlayer_sub_zone is None:
+                                    vlayer_sub_zone = LayerUtils.load_polygon_layer_base_layer(
+                                        "view_plan_type6_sub_zone", "parcel_id",
+                                        "data_plan")
+                                    vlayer_sub_zone.setLayerName(self.tr("Sub Zone"))
+                                myalayer = root.findLayer(vlayer_sub_zone.id())
+                                if myalayer is None:
+                                    child.addLayer(vlayer_sub_zone)
+                            if child.name() == "Main":  # to check subgroups within test group
+                                ## point
+                                vlayer_point = LayerUtils.layer_by_data_source("data_plan",
+                                                                               "view_plan_type6_main_zone_point")
+                                if vlayer_point is None:
+                                    vlayer_point = LayerUtils.load_polygon_layer_base_layer(
+                                        "view_plan_type6_main_zone_point", "parcel_id",
+                                        "data_plan")
+                                    vlayer_point.setLayerName(self.tr("Main Point"))
+                                myalayer = root.findLayer(vlayer_point.id())
+                                if myalayer is None:
+                                    child.addLayer(vlayer_point)
+                                ## line
+                                vlayer_line = LayerUtils.layer_by_data_source("data_plan",
+                                                                              "view_plan_type6_main_zone_line")
+                                if vlayer_line is None:
+                                    vlayer_line = LayerUtils.load_line_layer_base_layer(
+                                        "view_plan_type6_main_zone_line", "parcel_id",
+                                        "data_plan")
+                                    vlayer_line.setLayerName(self.tr("Main Line"))
+                                myalayer = root.findLayer(vlayer_line.id())
+                                if myalayer is None:
+                                    child.addLayer(vlayer_line)
+
+                                ## Polygon
+                                vlayer_polygon = LayerUtils.layer_by_data_source("data_plan",
+                                                                                 "view_plan_type6_main_zone_polygon")
+                                if vlayer_polygon is None:
+                                    vlayer_polygon = LayerUtils.load_polygon_layer_base_layer(
+                                        "view_plan_type6_main_zone_polygon", "parcel_id",
+                                        "data_plan")
+                                    vlayer_polygon.setLayerName(self.tr("Main Polygon"))
+                                myalayer = root.findLayer(vlayer_polygon.id())
+                                if myalayer is None:
+                                    child.addLayer(vlayer_polygon)
+                                    sql = "select badedturl from view_plan_type6_main_zone_polygon"
+                                    result = self.session.execute(sql)
+
+                                    categories = []
+                                    for item_row in result:
+                                        badedturl = item_row[0]
+                                        count = self.session.query(SetProcessTypeColor).filter(
+                                            SetProcessTypeColor.code == badedturl).count()
+                                        if count == 1:
+                                            style = self.session.query(SetProcessTypeColor).filter(
+                                                SetProcessTypeColor.code == badedturl).one()
+                                            fill_color = style.fill_color
+                                            boundary_color = style.boundary_color
+                                            opacity = 0.5
+                                            code = str(int(style.code))
+                                            description = str(int(style.code)) + ': ' + style.description
+
+                                            self.__categorized_style(categories, vlayer_polygon, fill_color,
+                                                                     boundary_color, opacity, code, description)
+                                    expression = 'badedturl'  # field name
+                                    renderer = QgsCategorizedSymbolRendererV2(expression, categories)
+                                    vlayer_polygon.setRendererV2(renderer)
+                elif type == 12:
+                    mygroup = root.findGroup(u"Хотын ХЕТ")
+                    for child in mygroup.children():
+                        if isinstance(child, QgsLayerTreeGroup):
+                            print "- group: " + child.name()
+                            if child.name() == "Parcel":
+                                vlayer_parcel = LayerUtils.layer_by_data_source("data_plan",
+                                                                                "view_plan_type12_parcel")
+                                if vlayer_parcel is None:
+                                    vlayer_parcel = LayerUtils.load_polygon_layer_base_layer(
+                                        "view_plan_type12_parcel", "parcel_id",
+                                        "data_plan")
+                                    vlayer_parcel.setLayerName(self.tr("Parcel"))
+                                myalayer = root.findLayer(vlayer_parcel.id())
+                                if myalayer is None:
+                                    child.addLayer(vlayer_parcel)
+                            if child.name() == "Sub":
+                                vlayer_sub_zone = LayerUtils.layer_by_data_source("data_plan",
+                                                                                  "view_plan_type12_sub_zone")
+                                if vlayer_sub_zone is None:
+                                    vlayer_sub_zone = LayerUtils.load_polygon_layer_base_layer(
+                                        "view_plan_type12_sub_zone", "parcel_id",
+                                        "data_plan")
+                                    vlayer_sub_zone.setLayerName(self.tr("Sub Zone"))
+                                myalayer = root.findLayer(vlayer_sub_zone.id())
+                                if myalayer is None:
+                                    child.addLayer(vlayer_sub_zone)
+                            if child.name() == "Main":  # to check subgroups within test group
+                                ## point
+                                vlayer_point = LayerUtils.layer_by_data_source("data_plan",
+                                                                               "view_plan_type12_main_zone_point")
+                                if vlayer_point is None:
+                                    vlayer_point = LayerUtils.load_polygon_layer_base_layer(
+                                        "view_plan_type12_main_zone_point", "parcel_id",
+                                        "data_plan")
+                                    vlayer_point.setLayerName(self.tr("Main Point"))
+                                myalayer = root.findLayer(vlayer_point.id())
+                                if myalayer is None:
+                                    child.addLayer(vlayer_point)
+                                ## line
+                                vlayer_line = LayerUtils.layer_by_data_source("data_plan",
+                                                                              "view_plan_type12_main_zone_line")
+                                if vlayer_line is None:
+                                    vlayer_line = LayerUtils.load_line_layer_base_layer(
+                                        "view_plan_type12_main_zone_line", "parcel_id",
+                                        "data_plan")
+                                    vlayer_line.setLayerName(self.tr("Main Line"))
+                                myalayer = root.findLayer(vlayer_line.id())
+                                if myalayer is None:
+                                    child.addLayer(vlayer_line)
+
+                                ## Polygon
+                                vlayer_polygon = LayerUtils.layer_by_data_source("data_plan",
+                                                                                 "view_plan_type12_main_zone_polygon")
+                                if vlayer_polygon is None:
+                                    vlayer_polygon = LayerUtils.load_polygon_layer_base_layer(
+                                        "view_plan_type12_main_zone_polygon", "parcel_id",
+                                        "data_plan")
+                                    vlayer_polygon.setLayerName(self.tr("Main Polygon"))
+                                myalayer = root.findLayer(vlayer_polygon.id())
+                                if myalayer is None:
+                                    child.addLayer(vlayer_polygon)
+
+                                    sql = "select badedturl from view_plan_type12_main_zone_polygon"
+                                    result = self.session.execute(sql)
+
+                                    categories = []
+                                    for item_row in result:
+                                        badedturl = item_row[0]
+                                        count = self.session.query(SetProcessTypeColor).filter(
+                                            SetProcessTypeColor.code == badedturl).count()
+                                        if count == 1:
+                                            style = self.session.query(SetProcessTypeColor).filter(
+                                                SetProcessTypeColor.code == badedturl).one()
+                                            fill_color = style.fill_color
+                                            boundary_color = style.boundary_color
+                                            opacity = 0.5
+                                            code = str(int(style.code))
+                                            description = str(int(style.code)) + ': ' + style.description
+
+                                            self.__categorized_style(categories, vlayer_polygon, fill_color,
+                                                                     boundary_color, opacity, code, description)
+                                    expression = 'badedturl'  # field name
+                                    renderer = QgsCategorizedSymbolRendererV2(expression, categories)
+                                    vlayer_polygon.setRendererV2(renderer)
+
 
             if not type_list:
                 PluginUtils.show_message(self, u'Анхааруулга',
@@ -1772,6 +2027,7 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
                 boundary_color = self.__hex_to_rgb(boundary_color)
                 symbol.symbolLayer(0).setOutlineColor(QColor(boundary_color[0], boundary_color[1], boundary_color[2]))
             symbol.setAlpha(opacity)
+
             category = QgsRendererCategoryV2(code, symbol, description)
             categories.append(category)
 

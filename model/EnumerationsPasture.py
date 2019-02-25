@@ -19,7 +19,10 @@ class ApplicationType:
     def __init__(self):
         pass
 
-    pasture_use = 26  # r
+    pasture_use = 26
+    right_land = 27
+
+    # pasture_use = 26  # r
     legitimate_rights = 27  # r
 
 class PersonType:

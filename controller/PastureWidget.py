@@ -35,6 +35,7 @@ from ..model.PsAvgReserveDaats import *
 from ..utils.LayerUtils import LayerUtils
 from ..utils.SessionHandler import SessionHandler
 from ..model.Enumerations import ApplicationType
+from ..model.EnumerationsPasture import ApplicationType
 from ..model.PsRecoveryClass import *
 from ..model.PsParcelDuration import *
 from ..model.CtAppGroupBoundary import *
