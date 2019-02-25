@@ -444,7 +444,6 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
                                     renderer = QgsCategorizedSymbolRendererV2(expression, categories)
                                     vlayer_polygon.setRendererV2(renderer)
 
-
             if not type_list:
                 PluginUtils.show_message(self, u'Анхааруулга',
                                          u'Жагсаалтаас сонгоно уу!')
