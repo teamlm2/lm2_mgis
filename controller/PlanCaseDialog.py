@@ -37,6 +37,7 @@ from ..model.LdProjectParcel import *
 from ..model.LdProjectMainZone import *
 from ..model.LdProjectSubZone import *
 from ..model.LdProcessPlan import *
+from ..model.LdProjectPlan import *
 from ..view.Ui_PlanCaseDialog import *
 from .qt_classes.ApplicantDocumentDelegate import ApplicationDocumentDelegate
 from .qt_classes.DocumentsTableWidget import DocumentsTableWidget
@@ -405,6 +406,8 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
 
         if self.zone_parcel_rbutton.isChecked():
             parcel_overlaps_count = self.session.query(LdProjectParcel).\
+                join(LdProjectPlan, LdProjectParcel.plan_draft_id == LdProjectPlan.plan_draft_id). \
+                filter(LdProjectPlan.plan_type == self.plan.plan_type). \
                 filter(LdProjectParcel.plan_draft_id == self.plan.plan_draft_id).\
                 filter(parcel_geometry.ST_Intersects(LdProjectParcel.polygon_geom)).count()
             if parcel_overlaps_count > 0:
