@@ -425,6 +425,19 @@
         <string>Бодогдсон үнэ/сая.т/</string>
        </property>
       </widget>
+      <widget class="QPushButton" name="valuation_button">
+       <property name="geometry">
+        <rect>
+         <x>350</x>
+         <y>10</y>
+         <width>111</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>З/З-н үнийн мэдээ</string>
+       </property>
+      </widget>
      </widget>
      <widget class="QTabWidget" name="tabWidget">
       <property name="geometry">

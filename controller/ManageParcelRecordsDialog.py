@@ -14,11 +14,14 @@ import sys
 
 class ManageParcelRecordsDialog(QDialog, Ui_ManageParcelRecordsDialog):
 
-    def __init__(self, parent=None):
+    def __init__(self, plugin, parcel_id, parent=None):
 
         super(ManageParcelRecordsDialog,  self).__init__(parent)
         self.setupUi(self)
         self.closeButton.clicked.connect(self.reject)
+
+        self.parcel_id = parcel_id
+        self.plugin = plugin
         self.__select_feature()
         self.__setup_combo_boxes()
         self.__setup_record_widget()
@@ -73,22 +76,24 @@ class ManageParcelRecordsDialog(QDialog, Ui_ManageParcelRecordsDialog):
     parcel_id = None
     def __select_feature(self):
 
-        restrictions = DatabaseUtils.working_l2_code()
-        # parcelLayer = LayerUtils.layer_by_data_source("s" + restrictions, "ca_parcel")
-        parcelLayer = LayerUtils.layer_by_data_source("data_soums_union", "ca_parcel")
-        select_feature = parcelLayer.selectedFeatures()
-        count = parcelLayer.selectedFeatureCount()
-        if count != 1:
-            PluginUtils.show_message(self,self.tr("No select parcel"),self.tr("No select parcel"))
-            self.addButton.setEnabled(False)
-            self.editButton.setEnabled(False)
-            self.deleteButton.setEnabled(False)
-            self.parcel_type_cbox.clear()
-            self.parcel_type_cbox.setEnabled(False)
-            return
-        for feature in select_feature:
-            attr = feature.attributes()
-            parcel_id = attr[0]
+        # restrictions = DatabaseUtils.working_l2_code()
+        # # parcelLayer = LayerUtils.layer_by_data_source("s" + restrictions, "ca_parcel")
+        # parcelLayer = LayerUtils.layer_by_data_source("data_soums_union", "ca_parcel")
+        # select_feature = parcelLayer.selectedFeatures()
+        # count = parcelLayer.selectedFeatureCount()
+        # if count != 1:
+        #     PluginUtils.show_message(self,self.tr("No select parcel"),self.tr("No select parcel"))
+        #     self.addButton.setEnabled(False)
+        #     self.editButton.setEnabled(False)
+        #     self.deleteButton.setEnabled(False)
+        #     self.parcel_type_cbox.clear()
+        #     self.parcel_type_cbox.setEnabled(False)
+        #     return
+        # for feature in select_feature:
+        #     attr = feature.attributes()
+        #     parcel_id = attr[0]
+
+        parcel_id = self.parcel_id
 
         session = SessionHandler().session_instance()
 
