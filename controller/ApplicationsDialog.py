@@ -2637,52 +2637,52 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
 
     def __save_application(self):
 
-        # try:
-        self.create_savepoint()
+        try:
+            self.create_savepoint()
 
-        self.__save_application_details()
+            self.__save_application_details()
 
-        self.__save_applicants()
+            self.__save_applicants()
 
-        if self.application.app_type == ApplicationType.privatization \
-                or self.application.app_type == ApplicationType.privatization_representation:
+            if self.application.app_type == ApplicationType.privatization \
+                    or self.application.app_type == ApplicationType.privatization_representation:
 
-            self.__save_privatization()
+                self.__save_privatization()
 
-        elif self.application.app_type == ApplicationType.change_ownership:
+            elif self.application.app_type == ApplicationType.change_ownership:
 
-            self.__save_change_ownership()
+                self.__save_change_ownership()
 
-        elif self.application.app_type == ApplicationType.mortgage_possession:
+            elif self.application.app_type == ApplicationType.mortgage_possession:
 
-            self.__save_mortgage_application()
+                self.__save_mortgage_application()
 
-        elif self.application.app_type == ApplicationType.transfer_possession_right:
+            elif self.application.app_type == ApplicationType.transfer_possession_right:
 
-            self.__save_transfer_possession()
+                self.__save_transfer_possession()
 
-        elif self.application.app_type == ApplicationType.possess_split:
+            elif self.application.app_type == ApplicationType.possess_split:
 
-            self.__save_transfer_possession()
+                self.__save_transfer_possession()
 
-        elif self.application.app_type == ApplicationType.encroachment:
+            elif self.application.app_type == ApplicationType.encroachment:
 
-            self.__save_transfer_possession()
+                self.__save_transfer_possession()
 
-        elif self.application.app_type == ApplicationType.possession_right_use_right:
+            elif self.application.app_type == ApplicationType.possession_right_use_right:
 
-            self.__save_transfer_possession()
+                self.__save_transfer_possession()
 
-        elif self.application.app_type == ApplicationType.court_decision:
+            elif self.application.app_type == ApplicationType.court_decision:
 
-            self.__save_court_decision()
+                self.__save_court_decision()
 
-        self.commit()
+            self.commit()
 
-        # except LM2Exception, e:
-        #     self.rollback_to_savepoint()
-        #     PluginUtils.show_error(self, e.title(), e.message())
-        #     return
+        except LM2Exception, e:
+            self.rollback_to_savepoint()
+            PluginUtils.show_error(self, e.title(), e.message())
+            return
 
     def __save_application_details(self):
 
@@ -2723,6 +2723,8 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
 
         rigth_type = self.rigth_type_cbox.itemData(self.rigth_type_cbox.currentIndex())
         self.application.right_type = rigth_type
+        app_type = self.application_type_cbox.itemData(self.application_type_cbox.currentIndex())
+        self.application.app_type = app_type
 
         parcel_id = self.parcel_edit.text()
         parcel_count = self.session.query(CaTmpParcel).filter(CaTmpParcel.parcel_id == parcel_id).count()
@@ -3779,21 +3781,24 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
 
         contract_apps = contract.application_roles.all()
         for contract_app in contract_apps:
-            app = self.session.query(CtApplication). \
-                filter(CtApplication.app_id == contract_app.application).one()
-            if app.app8ext:
-                app8ext = app.app8ext
-                if app8ext.mortgage_status == 10:
-                    PluginUtils.show_error(self, self.tr("Error"),
-                                           self.tr("The contract {0} is mortgagee!").format(contract_no))
-                    return
+            app_count = self.session.query(CtApplication). \
+                filter(CtApplication.app_id == contract_app.application).count()
+            if app_count == 1:
+                app = self.session.query(CtApplication). \
+                    filter(CtApplication.app_id == contract_app.application).one()
+                if app.app8ext:
+                    app8ext = app.app8ext
+                    if app8ext.mortgage_status == 10:
+                        PluginUtils.show_error(self, self.tr("Error"),
+                                               self.tr("The contract {0} is mortgagee!").format(contract_no))
+                        return
 
-            if app.app29ext:
-                app29ext = app.app29ext
-                if app29ext.court_status == 10 or app29ext.court_status == 20:
-                    PluginUtils.show_error(self, self.tr("Error"),
-                                           self.tr("The contract {0} is court decision!").format(contract_no))
-                    return
+                if app.app29ext:
+                    app29ext = app.app29ext
+                    if app29ext.court_status == 10 or app29ext.court_status == 20:
+                        PluginUtils.show_error(self, self.tr("Error"),
+                                               self.tr("The contract {0} is court decision!").format(contract_no))
+                        return
 
         contract_app_c = self.session.query(CtContractApplicationRole).\
             join(CtApplication, CtContractApplicationRole.application == CtApplication.app_id).\

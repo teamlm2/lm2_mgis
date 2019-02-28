@@ -2571,55 +2571,65 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
         message_box.exec_()
 
         if message_box.clickedButton() == yes_button:
-            self.__save_person()
-            self.__save_parcel()
-            # self.__save_application_details()
-            self.__save_applicant()
-            self.__save_status()
-            self.__save_decision()
-            self.__save_contract_owner()
+            self.create_savepoint()
+            try:
+                self.__save_person()
+                self.__save_parcel()
+                # self.__save_application_details()
+                self.__save_applicant()
+                self.__save_status()
+                self.__save_decision()
+                self.__save_contract_owner()
 
-            selected_row = self.right_holder_twidget.currentRow()
-            objectid = self.right_holder_twidget.item(selected_row, 1).data(Qt.UserRole + 1)
-            subject = self.session.query(UbGisSubject).filter(UbGisSubject.objectid == objectid).one()
-            subject.is_finish = True
-            subject.finish_user = DatabaseUtils.current_user().user_name
-            subject.finish_date = PluginUtils.convert_qt_date_to_python(QDate.currentDate())
+                selected_row = self.right_holder_twidget.currentRow()
+                objectid = self.right_holder_twidget.item(selected_row, 1).data(Qt.UserRole + 1)
+                subject = self.session.query(UbGisSubject).filter(UbGisSubject.objectid == objectid).one()
+                subject.is_finish = True
+                subject.finish_user = DatabaseUtils.current_user().user_name
+                subject.finish_date = PluginUtils.convert_qt_date_to_python(QDate.currentDate())
+            except LM2Exception, e:
+                self.rollback_to_savepoint()
+                PluginUtils.show_error(self, e.title(), e.message())
+                return
 
-            # return
-
-            # self.commit()
+            self.commit()
 
     def __multi_owner_save(self, person_id):
 
-        register = person_id
+        self.create_savepoint()
+        try:
+            register = person_id
 
-        sql = "select register, ovog,ner ,hen,zahid " \
-              "from ub_lpis_co info " \
-              "where oregister = :register "
+            sql = "select register, ovog,ner ,hen,zahid " \
+                  "from ub_lpis_co info " \
+                  "where oregister = :register "
 
-        result = self.session.execute(sql, {'register': register})
-        row = 0
-        for item_row in result:
-            person_id = item_row[0]
+            result = self.session.execute(sql, {'register': register})
+            row = 0
+            for item_row in result:
+                person_id = item_row[0]
 
-            name = item_row[1]
-            first_name = item_row[2]
+                name = item_row[1]
+                first_name = item_row[2]
 
-            person_count = self.session.query(BsPerson).filter(BsPerson.person_register == person_id).count()
-            if person_count > 0:
-                bs_person = self.session.query(BsPerson).filter(BsPerson.person_register == person_id).one()
-            else:
-                bs_person = BsPerson()
+                person_count = self.session.query(BsPerson).filter(BsPerson.person_register == person_id).count()
+                if person_count > 0:
+                    bs_person = self.session.query(BsPerson).filter(BsPerson.person_register == person_id).one()
+                else:
+                    bs_person = BsPerson()
 
-            bs_person.person_register = person_id
-            bs_person.type = 10
-            bs_person.name = name
-            bs_person.first_name = first_name
+                bs_person.person_register = person_id
+                bs_person.type = 10
+                bs_person.name = name
+                bs_person.first_name = first_name
 
-            self.session.add(bs_person)
+                self.session.add(bs_person)
 
-            # self.session.flush()
+                # self.session.flush()
+        except SQLAlchemyError, e:
+            self.rollback_to_savepoint()
+            raise LM2Exception(self.tr("File Error"),
+                               self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
 
     def __generate_record_number(self):
 
@@ -2702,102 +2712,102 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
 
         if right_type == 1 or right_type == 2:
             contract_no = self.__generate_contract_number()
-            self.contract = CtContract()
-            self.contract.contract_no = contract_no
-            self.contract.contract_begin = self.contract_date.date().toString(Constants.DATABASE_DATE_FORMAT)
-            self.contract.contract_date = self.contract_date.date().toString(Constants.DATABASE_DATE_FORMAT)
-            self.contract.contract_end = self.end_date.date().toString(Constants.DATABASE_DATE_FORMAT)
-            self.contract.certificate_no = int(self.contract_cert_edit.text())
-            self.contract.status = Constants.CONTRACT_STATUS_ACTIVE
-            self.contract.au2 = DatabaseUtils.working_l2_code()
+            self.create_savepoint()
+            try:
+                self.contract = CtContract()
+                self.contract.contract_no = contract_no
+                self.contract.contract_begin = self.contract_date.date().toString(Constants.DATABASE_DATE_FORMAT)
+                self.contract.contract_date = self.contract_date.date().toString(Constants.DATABASE_DATE_FORMAT)
+                self.contract.contract_end = self.end_date.date().toString(Constants.DATABASE_DATE_FORMAT)
+                self.contract.certificate_no = int(self.contract_cert_edit.text())
+                self.contract.status = Constants.CONTRACT_STATUS_ACTIVE
+                self.contract.au2 = DatabaseUtils.working_l2_code()
 
-            self.session.add(self.contract)
+                self.session.add(self.contract)
 
-            app_type = None
-            obj_type = 'contract\Contract'
-            qt_date = self.contract_date.date()
-            # contract_number_filter = "%-{0}/%".format(str(qt_date.toString("yyyy")))
-            year = qt_date.toString("yyyy")
-            PluginUtils.generate_auto_app_no(str(year), app_type, DatabaseUtils.working_l2_code(), obj_type)
 
-            contract_app = CtContractApplicationRole()
-            contract_app.application_ref = self.application
-            contract_app.application = self.application.app_id
-            contract_app.contract = self.contract.contract_id
-            contract_app.contract_ref = self.contract
+                app_type = None
+                obj_type = 'contract\Contract'
+                qt_date = self.contract_date.date()
+                # contract_number_filter = "%-{0}/%".format(str(qt_date.toString("yyyy")))
+                year = qt_date.toString("yyyy")
+                PluginUtils.generate_auto_app_no(str(year), app_type, DatabaseUtils.working_l2_code(), obj_type)
 
-            contract_app.role = Constants.APPLICATION_ROLE_CREATES
-            self.contract.application_roles.append(contract_app)
+                contract_app = CtContractApplicationRole()
+                contract_app.application_ref = self.application
+                contract_app.application = self.application.app_id
+                contract_app.contract = self.contract.contract_id
+                contract_app.contract_ref = self.contract
+
+                contract_app.role = Constants.APPLICATION_ROLE_CREATES
+                self.contract.application_roles.append(contract_app)
+            except SQLAlchemyError, e:
+                self.rollback_to_savepoint()
+                raise LM2Exception(self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
         else:
             record_no = self.__generate_record_number()
-            self.record = CtOwnershipRecord()
-            self.record.record_no = record_no
-            self.record.record_date = self.own_date.date().toString(Constants.DATABASE_DATE_FORMAT)
-            self.record.record_begin = self.decision_date.date().toString(Constants.DATABASE_DATE_FORMAT)
-            self.record.certificate_no = int(self.record_cert_edit.text())
-            self.record.status = Constants.RECORD_STATUS_ACTIVE
-            self.record.au2 = DatabaseUtils.working_l2_code()
+            self.create_savepoint()
+            try:
+                self.record = CtOwnershipRecord()
+                self.record.record_no = record_no
+                self.record.record_date = self.own_date.date().toString(Constants.DATABASE_DATE_FORMAT)
+                self.record.record_begin = self.decision_date.date().toString(Constants.DATABASE_DATE_FORMAT)
+                self.record.certificate_no = int(self.record_cert_edit.text())
+                self.record.status = Constants.RECORD_STATUS_ACTIVE
+                self.record.au2 = DatabaseUtils.working_l2_code()
 
-            self.session.add(self.record)
+                self.session.add(self.record)
 
-            app_type = None
-            obj_type = 'contract\OwnershipRecord'
-            qt_date = self.own_date.date()
-            # contract_number_filter = "%-{0}/%".format(str(qt_date.toString("yyyy")))
-            year = qt_date.toString("yyyy")
-            PluginUtils.generate_auto_app_no(str(year), app_type, DatabaseUtils.working_l2_code(),
-                                             obj_type)
+                app_type = None
+                obj_type = 'contract\OwnershipRecord'
+                qt_date = self.own_date.date()
+                # contract_number_filter = "%-{0}/%".format(str(qt_date.toString("yyyy")))
+                year = qt_date.toString("yyyy")
+                PluginUtils.generate_auto_app_no(str(year), app_type, DatabaseUtils.working_l2_code(),
+                                                 obj_type)
 
-            record_app = CtRecordApplicationRole()
-            record_app.application_ref = self.application
-            record_app.application = self.application.app_id
-            record_app.record = self.record.record_id
+                record_app = CtRecordApplicationRole()
+                record_app.application_ref = self.application
+                record_app.application = self.application.app_id
+                record_app.record = self.record.record_id
 
-            record_app.role = Constants.APPLICATION_ROLE_CREATES
-            self.record.application_roles.append(record_app)
+                record_app.role = Constants.APPLICATION_ROLE_CREATES
+                self.record.application_roles.append(record_app)
+            except SQLAlchemyError, e:
+                self.rollback_to_savepoint()
+                raise LM2Exception(self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
 
     def __save_decision(self):
 
-        # user = DatabaseUtils.current_user()
-        # current_employee = self.session.query(SetRole) \
-        #     .filter(SetRole.user_name == user.user_name) \
-        #     .filter(SetRole.is_active == True).one()
         decision_level = self.decision_level_cbox.itemData(self.decision_level_cbox.currentIndex())
         decision_no = self.decision_full_edit.text()
 
         decision_count = self.session.query(CtDecision).filter(CtDecision.decision_no == decision_no).\
             filter(CtDecision.decision_level == decision_level).count()
-        if decision_count == 1:
-            self.decision = self.session.query(CtDecision).filter(CtDecision.decision_no == decision_no).\
-                filter(CtDecision.decision_level == decision_level).one()
-            # app_dec_count = self.session.query(CtDecisionApplication).filter(
-            #     CtDecisionApplication.decision == self.decision.decision_no).count()
-            # if app_dec_count > 0:
-            #     app_dec = self.session.query(CtDecisionApplication).filter(CtDecisionApplication.decision == self.decision.decision_no).first()
-            #     application = app_dec.application_ref
-            #     application_type = application.app_type
-            #     app_type = self.application_type_cbox.itemData(self.application_type_cbox.currentIndex())
-            #     if app_type != application_type:
-            #         PluginUtils.show_message(self, self.tr("LM2", "Application Type"),
-            #                                  self.tr("Can't match application type!!!"))
-            #         self.isSave = False
-            #         return
-        else:
-            self.decision = CtDecision()
+        self.create_savepoint()
+        try:
+            if decision_count == 1:
+                self.decision = self.session.query(CtDecision).filter(CtDecision.decision_no == decision_no).\
+                    filter(CtDecision.decision_level == decision_level).one()
 
-            self.decision.decision_date = self.decision_date.date().toString(Constants.DATABASE_DATE_FORMAT)
-            self.decision.decision_no = decision_no
-            self.decision.decision_level = decision_level
-            self.decision.imported_by = DatabaseUtils.current_sd_user().user_id
-            self.decision.au2 = DatabaseUtils.working_l2_code()
-            self.session.add(self.decision)
+            else:
+                self.decision = CtDecision()
 
-        decision_app = CtDecisionApplication()
-        decision_app.decision = self.decision.decision_id
-        decision_app.decision_result = 10
-        decision_app.application = self.application.app_id
-        self.decision.results.append(decision_app)
+                self.decision.decision_date = self.decision_date.date().toString(Constants.DATABASE_DATE_FORMAT)
+                self.decision.decision_no = decision_no
+                self.decision.decision_level = decision_level
+                self.decision.imported_by = DatabaseUtils.current_sd_user().user_id
+                self.decision.au2 = DatabaseUtils.working_l2_code()
+                self.session.add(self.decision)
 
+            decision_app = CtDecisionApplication()
+            decision_app.decision = self.decision.decision_id
+            decision_app.decision_result = 10
+            decision_app.application = self.application.app_id
+            self.decision.results.append(decision_app)
+        except SQLAlchemyError, e:
+            self.rollback_to_savepoint()
+            raise LM2Exception(self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
         # self.session.flush()
 
     def __save_status(self):
@@ -2806,21 +2816,27 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
 
         statuses = self.session.query(ClApplicationStatus).all()
 
-        for status in statuses:
-            if status.code != 8 and status.code != 1 and status.code < 10:
-                application_status = CtApplicationStatus()
-                application_status.ct_application = self.application
-                application_status.status = status.code
-                application_status.status_ref = status
-                application_status.status_date = status_date
+        self.create_savepoint()
+        try:
+            for status in statuses:
+                if status.code != 8 and status.code != 1 and status.code < 10:
+                    application_status = CtApplicationStatus()
+                    application_status.ct_application = self.application
+                    application_status.status = status.code
+                    application_status.status_ref = status
+                    application_status.status_date = status_date
 
-                # current_user = QSettings().value(SettingsConstants.USER)
-                # officer = self.session.query(SetRole).filter_by(user_name=current_user).filter(SetRole.is_active == True).one()
-                application_status.next_officer_in_charge = DatabaseUtils.current_sd_user().user_id
-                application_status.next_officer_in_charge_ref = DatabaseUtils.current_sd_user()
-                application_status.officer_in_charge_ref = DatabaseUtils.current_sd_user()
-                application_status.officer_in_charge = DatabaseUtils.current_sd_user().user_id
-                self.application.statuses.append(application_status)
+                    # current_user = QSettings().value(SettingsConstants.USER)
+                    # officer = self.session.query(SetRole).filter_by(user_name=current_user).filter(SetRole.is_active == True).one()
+                    application_status.next_officer_in_charge = DatabaseUtils.current_sd_user().user_id
+                    application_status.next_officer_in_charge_ref = DatabaseUtils.current_sd_user()
+                    application_status.officer_in_charge_ref = DatabaseUtils.current_sd_user()
+                    application_status.officer_in_charge = DatabaseUtils.current_sd_user().user_id
+                    self.application.statuses.append(application_status)
+        except SQLAlchemyError, e:
+            self.rollback_to_savepoint()
+            raise LM2Exception(self.tr("File Error"),
+                               self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
 
     def __save_applicant(self):
 
@@ -2829,16 +2845,22 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
         role_ref = self.session.query(ClPersonRole).filter_by(
             code=Constants.APPLICANT_ROLE_CODE).one()
 
-        app_person_role = CtApplicationPersonRole()
-        app_person_role.application = self.application.app_id
-        app_person_role.share = Decimal(1.0)
-        app_person_role.role = Constants.APPLICANT_ROLE_CODE
-        app_person_role.role_ref = role_ref
-        app_person_role.person = person.person_id
-        app_person_role.person_ref = person
-        app_person_role.main_applicant = True
+        self.create_savepoint()
+        try:
+            app_person_role = CtApplicationPersonRole()
+            app_person_role.application = self.application.app_id
+            app_person_role.share = Decimal(1.0)
+            app_person_role.role = Constants.APPLICANT_ROLE_CODE
+            app_person_role.role_ref = role_ref
+            app_person_role.person = person.person_id
+            app_person_role.person_ref = person
+            app_person_role.main_applicant = True
 
-        self.application.stakeholders.append(app_person_role)
+            self.application.stakeholders.append(app_person_role)
+        except SQLAlchemyError, e:
+            self.rollback_to_savepoint()
+            raise LM2Exception(self.tr("File Error"),
+                               self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
 
         self.__multi_applicant_save(person_id, self.application)
 
@@ -2851,78 +2873,88 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
               "where oregister = :register "
 
         result = self.session.execute(sql, {'register': register})
-        row = 0
-        for item_row in result:
-            person_id = item_row[0]
+        self.create_savepoint()
+        try:
+            row = 0
+            for item_row in result:
+                person_id = item_row[0]
 
-            person = self.session.query(BsPerson).filter(BsPerson.person_register == person_id).one()
+                person = self.session.query(BsPerson).filter(BsPerson.person_register == person_id).one()
 
-            role_ref = self.session.query(ClPersonRole).filter_by(
-                code=Constants.APPLICANT_ROLE_CODE).one()
-            app_person_count = self.session.query(CtApplicationPersonRole).\
-                filter(CtApplicationPersonRole.application == application.app_id).\
-                filter(CtApplicationPersonRole.role == Constants.APPLICANT_ROLE_CODE).\
-                filter(CtApplicationPersonRole.person == person.person_id).count()
-            if app_person_count == 0:
-                app_person_role = CtApplicationPersonRole()
-                app_person_role.application = application.app_id
-                app_person_role.share = Decimal(0)
-                app_person_role.role = Constants.APPLICANT_ROLE_CODE
-                app_person_role.role_ref = role_ref
-                app_person_role.person = person.person_id
-                app_person_role.person_ref = person
-                app_person_role.main_applicant = True
+                role_ref = self.session.query(ClPersonRole).filter_by(
+                    code=Constants.APPLICANT_ROLE_CODE).one()
+                app_person_count = self.session.query(CtApplicationPersonRole).\
+                    filter(CtApplicationPersonRole.application == application.app_id).\
+                    filter(CtApplicationPersonRole.role == Constants.APPLICANT_ROLE_CODE).\
+                    filter(CtApplicationPersonRole.person == person.person_id).count()
+                if app_person_count == 0:
+                    app_person_role = CtApplicationPersonRole()
+                    app_person_role.application = application.app_id
+                    app_person_role.share = Decimal(0)
+                    app_person_role.role = Constants.APPLICANT_ROLE_CODE
+                    app_person_role.role_ref = role_ref
+                    app_person_role.person = person.person_id
+                    app_person_role.person_ref = person
+                    app_person_role.main_applicant = True
 
-                application.stakeholders.append(app_person_role)
+                    application.stakeholders.append(app_person_role)
+        except SQLAlchemyError, e:
+            self.rollback_to_savepoint()
+            raise LM2Exception(self.tr("File Error"),
+                               self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
 
     def __save_person(self):
 
         person_id = self.personal_id_edit.text()
+        self.create_savepoint()
+        try:
+            person_count = self.session.query(BsPerson).filter(BsPerson.person_register == person_id).count()
+            if person_count > 0:
+                bs_person = self.session.query(BsPerson).filter(BsPerson.person_register == person_id).one()
+            else:
+                bs_person = BsPerson()
 
-        person_count = self.session.query(BsPerson).filter(BsPerson.person_register == person_id).count()
-        if person_count > 0:
-            bs_person = self.session.query(BsPerson).filter(BsPerson.person_register == person_id).one()
-        else:
-            bs_person = BsPerson()
+            person_type = self.person_type_cbox.itemData(self.person_type_cbox.currentIndex())
+            bs_person.person_register = person_id
+            bs_person.type = person_type
+            if person_type == 10 or person_type == 20 or person_type == 50:
+                bs_person.name = self.first_name_edit.text()
+                bs_person.first_name = self.name_edit.text()
+                bs_person.middle_name = self.middle_name_edit.text()
+            else:
+                bs_person.name = self.name_edit.text()
+                bs_person.contact_surname = self.middle_name_edit.text()
+                bs_person.contact_first_name = self.first_name_edit.text()
 
-        person_type = self.person_type_cbox.itemData(self.person_type_cbox.currentIndex())
-        bs_person.person_register = person_id
-        bs_person.type = person_type
-        if person_type == 10 or person_type == 20 or person_type == 50:
-            bs_person.name = self.first_name_edit.text()
-            bs_person.first_name = self.name_edit.text()
-            bs_person.middle_name = self.middle_name_edit.text()
-        else:
-            bs_person.name = self.name_edit.text()
-            bs_person.contact_surname = self.middle_name_edit.text()
-            bs_person.contact_first_name = self.first_name_edit.text()
+            bs_person.date_of_birth = DatabaseUtils.convert_date(self.date_of_birth_date.date())
+            bs_person.mobile_phone = self.phone_edit.text()
+            bs_person.address_building_no = self.building_edit.text()
+            bs_person.address_apartment_no = self.apartment_edit.text()
+            bs_person.address_street_name = self.person_street_name_edit.text()
+            bs_person.address_khaskhaa = self.person_khashaa_edit.text()
 
-        bs_person.date_of_birth = DatabaseUtils.convert_date(self.date_of_birth_date.date())
-        bs_person.mobile_phone = self.phone_edit.text()
-        bs_person.address_building_no = self.building_edit.text()
-        bs_person.address_apartment_no = self.apartment_edit.text()
-        bs_person.address_street_name = self.person_street_name_edit.text()
-        bs_person.address_khaskhaa = self.person_khashaa_edit.text()
+            aimag = self.aimag_cbox.itemData(self.aimag_cbox.currentIndex())
+            if aimag == -1:
+                bs_person.au_level1_ref = None
+            else:
+                bs_person.address_au_level1 = aimag
 
-        aimag = self.aimag_cbox.itemData(self.aimag_cbox.currentIndex())
-        if aimag == -1:
-            bs_person.au_level1_ref = None
-        else:
-            bs_person.address_au_level1 = aimag
+            soum = self.soum_cbox.itemData(self.soum_cbox.currentIndex())
+            if soum == -1:
+                bs_person.address_au_level2 = None
+            else:
+                bs_person.address_au_level2 = soum
 
-        soum = self.soum_cbox.itemData(self.soum_cbox.currentIndex())
-        if soum == -1:
-            bs_person.address_au_level2 = None
-        else:
-            bs_person.address_au_level2 = soum
-
-        bag = self.bag_cbox.itemData(self.bag_cbox.currentIndex())
-        if bag == -1:
-            bs_person.address_au_level3 = None
-        else:
-            bs_person.address_au_level3 = bag
-        if person_count == 0:
-            self.session.add(bs_person)
+            bag = self.bag_cbox.itemData(self.bag_cbox.currentIndex())
+            if bag == -1:
+                bs_person.address_au_level3 = None
+            else:
+                bs_person.address_au_level3 = bag
+            if person_count == 0:
+                self.session.add(bs_person)
+        except SQLAlchemyError, e:
+            self.rollback_to_savepoint()
+            raise LM2Exception(self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
         # self.session.flush()
 
         self.__multi_owner_save(person_id)
@@ -2966,103 +2998,92 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
         ub_parcel = self.session.query(CaUBParcel).filter(CaUBParcel.old_parcel_id == old_parcel_id).one()
         landuse = self.parcel_landuse_cbox.itemData(self.parcel_landuse_cbox.currentIndex())
 
-        parcel_count = self.session.query(CaParcel).filter(CaParcel.parcel_id == parcel_id).count()
-        if parcel_count > 0:
-            # parcel = self.session.query(CaParcel).filter(CaParcel.parcel_id == parcel_id).one()
-            # parcel.parcel_id = None
-            PluginUtils.show_message(self, u'Анхааруулга',
-                                     u'Нэгж талбарын дугаар давхардаж байна.')
-            return
-        elif parcel_count == 0:
-            parcel = CaParcel()
-            if len(parcel_id) == 12:
-                parcel.parcel_id = parcel_id
-            else:
+        self.create_savepoint()
+        try:
+            parcel_count = self.session.query(CaParcel).filter(CaParcel.parcel_id == parcel_id).count()
+            if parcel_count > 0:
+                # parcel = self.session.query(CaParcel).filter(CaParcel.parcel_id == parcel_id).one()
+                # parcel.parcel_id = None
                 PluginUtils.show_message(self, u'Анхааруулга',
-                                         u'Нэгж талбарын дугаар буруу байна байна./Жишээ нь: Дугаарын оронгийн урт таарахгүй/')
+                                         u'Нэгж талбарын дугаар давхардаж байна.')
                 return
+            elif parcel_count == 0:
+                parcel = CaParcel()
+                if len(parcel_id) == 12:
+                    parcel.parcel_id = parcel_id
+                else:
+                    PluginUtils.show_message(self, u'Анхааруулга',
+                                             u'Нэгж талбарын дугаар буруу байна байна./Жишээ нь: Дугаарын оронгийн урт таарахгүй/')
+                    return
 
-        # parcel_id = self.parcel_id_edit.text()
-        # old_parcel_id = self.old_parcel_id_edit.text()
-        # ub_parcel = self.session.query(CaUBParcel).filter(CaUBParcel.old_parcel_id == old_parcel_id).one()
-        # landuse = self.parcel_landuse_cbox.itemData(self.parcel_landuse_cbox.currentIndex())
-        #
-        # parcel_count = self.session.query(CaParcel).filter(CaParcel.parcel_id == parcel_id).count()
-        # if parcel_count == 1:
-        #     parcel = self.session.query(CaParcel).filter(CaParcel.parcel_id == parcel_id).one()
-        # else:
-        #     parcel = CaParcel()
-        #
-        # if parcel_count == 0:
-        #     parcel.parcel_id = parcel_id
+                parcel.old_parcel_id = old_parcel_id
+                parcel.geo_id = old_parcel_id
+                parcel.landuse = landuse
+                parcel.address_khashaa = self.khashaa_edit.text()
+                parcel.address_streetname = self.streetname_edit.text()
+                parcel.address_neighbourhood = self.neighbourhood_edit.text()
+                valid_from = self.decision_date.date().toString(Constants.DATABASE_DATE_FORMAT)
+                parcel.valid_from = valid_from
+                parcel.geometry = ub_parcel.geometry
+                self.session.add(parcel)
+                self.session.flush()
 
-        # parcel = CaParcel()
-        parcel.old_parcel_id = old_parcel_id
-        parcel.geo_id = old_parcel_id
-        parcel.landuse = landuse
-        parcel.address_khashaa = self.khashaa_edit.text()
-        parcel.address_streetname = self.streetname_edit.text()
-        parcel.address_neighbourhood = self.neighbourhood_edit.text()
-        valid_from = self.decision_date.date().toString(Constants.DATABASE_DATE_FORMAT)
-        parcel.valid_from = valid_from
-        parcel.geometry = ub_parcel.geometry
-        self.session.add(parcel)
-        self.session.flush()
+                app_time = self.decision_date.date().toString(Constants.DATABASE_DATE_FORMAT)
+                status_date = self.decision_date.date().toString(Constants.DATABASE_DATE_FORMAT)
+                app_no = self.__generate_application_number()
+                right_type = self.rigth_type_cbox.itemData(self.rigth_type_cbox.currentIndex())
 
-        app_time = self.decision_date.date().toString(Constants.DATABASE_DATE_FORMAT)
-        status_date = self.decision_date.date().toString(Constants.DATABASE_DATE_FORMAT)
-        app_no = self.__generate_application_number()
-        right_type = self.rigth_type_cbox.itemData(self.rigth_type_cbox.currentIndex())
+                app_type = self.application_type_cbox.itemData(self.application_type_cbox.currentIndex())
 
-        app_type = self.application_type_cbox.itemData(self.application_type_cbox.currentIndex())
+                duration = self.duration_sbox.value()
+                landuse = self.parcel_landuse_cbox.itemData(self.parcel_landuse_cbox.currentIndex())
 
-        duration = self.duration_sbox.value()
-        landuse = self.parcel_landuse_cbox.itemData(self.parcel_landuse_cbox.currentIndex())
+                au_level1 = DatabaseUtils.working_l1_code()
+                au_level2 = DatabaseUtils.working_l2_code()
+                # try:
+                # check if the app_no is still valid, otherwise generate new one
+                self.application = CtApplication()
 
-        au_level1 = DatabaseUtils.working_l1_code()
-        au_level2 = DatabaseUtils.working_l2_code()
-        # try:
-        # check if the app_no is still valid, otherwise generate new one
-        self.application = CtApplication()
+                application_status = CtApplicationStatus()
+                application_status.ct_application = self.application
+                status = self.session.query(ClApplicationStatus).filter_by(code='1').one()
+                application_status.status = 1
+                application_status.status_ref = status
+                application_status.status_date = status_date
+                self.application.app_no = app_no
+                self.application.app_type = app_type
+                self.application.requested_landuse = landuse
+                self.application.approved_landuse = landuse
+                self.application.app_timestamp = app_time
+                self.application.requested_duration = duration
+                self.application.approved_duration = duration
+                self.application.right_type = right_type
+                self.application.created_by = DatabaseUtils.current_sd_user().user_id
+                self.application.created_at = app_time
+                self.application.updated_at = app_time
+                self.application.au1 = au_level1
+                self.application.au2 = au_level2
+                self.application.remarks = ''
 
-        application_status = CtApplicationStatus()
-        application_status.ct_application = self.application
-        status = self.session.query(ClApplicationStatus).filter_by(code='1').one()
-        application_status.status = 1
-        application_status.status_ref = status
-        application_status.status_date = status_date
-        self.application.app_no = app_no
-        self.application.app_type = app_type
-        self.application.requested_landuse = landuse
-        self.application.approved_landuse = landuse
-        self.application.app_timestamp = app_time
-        self.application.requested_duration = duration
-        self.application.approved_duration = duration
-        self.application.right_type = right_type
-        self.application.created_by = DatabaseUtils.current_sd_user().user_id
-        self.application.created_at = app_time
-        self.application.updated_at = app_time
-        self.application.au1 = au_level1
-        self.application.au2 = au_level2
-        self.application.remarks = ''
+                # current_user = QSettings().value(SettingsConstants.USER)
+                # officer = self.session.query(SetRole).filter_by(user_name=current_user).filter(SetRole.is_active == True).one()
+                application_status.next_officer_in_charge = DatabaseUtils.current_sd_user().user_id
+                application_status.next_officer_in_charge_ref = DatabaseUtils.current_sd_user()
+                application_status.officer_in_charge_ref = DatabaseUtils.current_sd_user()
+                application_status.officer_in_charge = DatabaseUtils.current_sd_user().user_id
+                self.application.statuses.append(application_status)
 
-        # current_user = QSettings().value(SettingsConstants.USER)
-        # officer = self.session.query(SetRole).filter_by(user_name=current_user).filter(SetRole.is_active == True).one()
-        application_status.next_officer_in_charge = DatabaseUtils.current_sd_user().user_id
-        application_status.next_officer_in_charge_ref = DatabaseUtils.current_sd_user()
-        application_status.officer_in_charge_ref = DatabaseUtils.current_sd_user()
-        application_status.officer_in_charge = DatabaseUtils.current_sd_user().user_id
-        self.application.statuses.append(application_status)
-
-        self.application.parcel = parcel.parcel_id
-        self.session.add(self.application)
-
+                self.application.parcel = parcel.parcel_id
+                self.session.add(self.application)
+        except SQLAlchemyError, e:
+            self.rollback_to_savepoint()
+            raise LM2Exception(self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
 
         qt_date = self.decision_date.date()
         year = str(qt_date.toString("yy"))
         obj_type = 'application\Application'
         PluginUtils.generate_auto_app_no(str(year), str(app_type).zfill(2), au_level2, obj_type)
-        # self.session.commit()
+            # self.session.commit()
 
     def __save_application_details(self):
 

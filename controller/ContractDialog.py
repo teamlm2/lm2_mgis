@@ -4341,6 +4341,9 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         base_fee_id = data['data']['base_fee_id']
         payment = data['data']['payment']
         zone_type = data['data']['zone_type']
+        self.base_fee_edit.setText(str(data['data']['base_fee_per_m2']))
+        self.subsidized_fee_rate_edit.setText(str(data['data']['subsidized_fee_rate']))
+        self.subsidized_area_edit.setText(str(data['data']['subsidized_area']))
 
         self.__calculate_landfee_level(base_fee_id, payment, parcel_id)
 
