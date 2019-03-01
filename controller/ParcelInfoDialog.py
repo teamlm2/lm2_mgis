@@ -2759,7 +2759,7 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
                 self.session.add(self.record)
 
                 app_type = None
-                obj_type = 'contract\OwnershipRecord'
+                obj_type = 'record\OwnershipRecord'
                 qt_date = self.own_date.date()
                 # contract_number_filter = "%-{0}/%".format(str(qt_date.toString("yyyy")))
                 year = qt_date.toString("yyyy")

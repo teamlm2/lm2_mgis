@@ -379,7 +379,7 @@ class PluginUtils(object):
                 auto_number.length = 5
 
                 session.add(auto_number)
-        elif object_type == 'contract\OwnershipRecord':
+        elif object_type == 'record\OwnershipRecord':
             year_filter = "%-" + str(year) + '/%'
             format_text = soum_code + '-' + year + '/' + '?'
             # 'a:3:{s:7:"classes";s:22:"record\OwnershipRecord";s:6:"format";s:12:"08110-2019/?";s:6:"length";i:5;}'

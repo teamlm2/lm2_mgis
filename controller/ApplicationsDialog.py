@@ -746,12 +746,12 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
                 error_message = error_message + "\n \n" + applicants_error
                 valid = False
 
-        if not self.is_representative:
-            if not self.__check_share_applicants():
-                self.applicant_twidget.setStyleSheet(Constants.ERROR_TWIDGET_STYLESHEET)
-                applicants_error = self.tr("The sum of share in the applicants is not 1.0 ")
-                error_message = error_message + "\n \n" + applicants_error
-                valid = False
+        # if not self.is_representative:
+        #     if not self.__check_share_applicants():
+        #         self.applicant_twidget.setStyleSheet(Constants.ERROR_TWIDGET_STYLESHEET)
+        #         applicants_error = self.tr("The sum of share in the applicants is not 1.0 ")
+        #         error_message = error_message + "\n \n" + applicants_error
+        #         valid = False
 
         if not self.__check_main_capable_applicant() and self.application.app_type == 3:
             self.applicant_twidget.setStyleSheet(Constants.ERROR_TWIDGET_STYLESHEET)
@@ -759,12 +759,12 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
             error_message = error_message + "\n \n" + applicants_error
             valid = False
 
-        if not self.is_representative:
-            if not self.__check_main_age_applicant() and self.application.app_type != 3:
-                self.applicant_twidget.setStyleSheet(Constants.ERROR_TWIDGET_STYLESHEET)
-                applicants_error = self.tr("In capable person should not be main.")
-                error_message = error_message + "\n \n" + applicants_error
-                valid = False
+        # if not self.is_representative:
+        #     if not self.__check_main_age_applicant() and self.application.app_type != 3:
+        #         self.applicant_twidget.setStyleSheet(Constants.ERROR_TWIDGET_STYLESHEET)
+        #         applicants_error = self.tr("In capable person should not be main.")
+        #         error_message = error_message + "\n \n" + applicants_error
+        #         valid = False
         if self.is_representative:
             if self.legal_rep_twidget.rowCount() == 0:
                 self.applicant_twidget.setStyleSheet(Constants.ERROR_TWIDGET_STYLESHEET)
@@ -1990,7 +1990,7 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
                 num_rows = self.application_status_twidget.rowCount()
                 if num_rows > 1:
                     PluginUtils.show_error(self, self.tr("add applicant error"), self.tr("it will acceptable only applicatin status one."))
-                    return
+                    # return
             self.__copy_applicant_from_navigator()
 
         if self.application.stakeholders.count() > 0:

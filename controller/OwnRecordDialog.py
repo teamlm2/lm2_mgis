@@ -1043,7 +1043,7 @@ class OwnRecordDialog(QDialog, Ui_OwnRecordDialog, DatabaseHelper):
 
         # contract_number_filter = "%-{0}/%".format(str(year))
         app_type = None
-        obj_type = 'contract\OwnershipRecord'
+        obj_type = 'record\OwnershipRecord'
         PluginUtils.generate_auto_app_no(str(year), app_type, soum, obj_type)
 
         # except SQLAlchemyError, e:
