@@ -1031,6 +1031,7 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
             temp_parcel.parcel_id = parcel.parcel_id
             temp_parcel.old_parcel_id = parcel.old_parcel_id
             temp_parcel.geo_id = parcel.geo_id
+            temp_parcel.landuse = parcel.landuse
             temp_parcel.address_khashaa = parcel.address_khashaa
             temp_parcel.address_streetname = parcel.address_streetname
             temp_parcel.address_neighbourhood = parcel.address_neighbourhood
