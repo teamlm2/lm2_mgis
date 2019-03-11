@@ -413,6 +413,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
             if parcel_overlaps_count > 0:
                 valid = False
                 message = unicode(u'Нэгж талбар давхардаж байна.')
+
                 error_message = error_message + "\n" + message
 
         if not valid:

@@ -24,6 +24,7 @@ from ..model.ClPlanType import *
 from ..model.LdProjectPlanStatus import *
 from ..model.CaParcel import *
 from ..controller.PlanCaseDialog import *
+from ..controller.ManageParcelRecordsDialog import *
 from ..utils.DatabaseUtils import *
 from ..utils.PluginUtils import *
 from ..utils.LayerUtils import *
@@ -564,3 +565,11 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
         self.shop_center_value_edit.clear()
         self.service_center_edit.clear()
         self.service_center_value_edit.clear()
+
+    @pyqtSlot()
+    def on_valuation_button_clicked(self):
+
+        parcel_id = self.parcel_id_edit.text()
+        self.current_dialog = ManageParcelRecordsDialog(self.plugin, parcel_id, self.plugin.iface.mainWindow())
+
+        self.current_dialog.show()
