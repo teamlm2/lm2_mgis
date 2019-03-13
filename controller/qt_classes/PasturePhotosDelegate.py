@@ -66,8 +66,6 @@ class PasturePhotosDelegate(QStyledItemDelegate):
                 if event.button() == Qt.RightButton:
                     return False
 
-                default_path = PasturePath.pasture_photo_file_path()
-
                 if not self.parent.current_parent_object_no():
                     return
                 if not self.parent.current_parent_year():
