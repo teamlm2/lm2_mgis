@@ -1,6 +1,6 @@
 __author__ = 'mwagner'
 
-from sqlalchemy import Column, Integer, String, ForeignKey, Date, DateTime
+from sqlalchemy import Column, Integer, String, ForeignKey, Date, DateTime, Sequence
 from sqlalchemy.orm import relationship
 from CtArchivedFee import *
 from CtArchivedTaxAndPrice import *

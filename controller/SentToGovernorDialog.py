@@ -201,97 +201,104 @@ class SentToGovernorDialog(QDialog, Ui_SentToGovernorDialog, DatabaseHelper):
 
             if int(application[6:-9]) == (self.app_type_cbox.itemData(self.app_type_cbox.currentIndex())) and application_instance.app_timestamp >= p_begin_date and application_instance.app_timestamp <= p_end_date:
 
-                app_person = self.session.query(CtApplicationPersonRole).filter(CtApplicationPersonRole.application == app_id).\
+                app_person_count = self.session.query(CtApplicationPersonRole).filter(CtApplicationPersonRole.application == app_id).\
                     filter(CtApplicationPersonRole.role == 70).count()
-                if app_person > 0:
+                if app_person_count > 0:
                     app_person = self.session.query(CtApplicationPersonRole).filter(
                         CtApplicationPersonRole.application == app_id).filter(CtApplicationPersonRole.role == 70).all()
                 else:
                     app_person = self.session.query(CtApplicationPersonRole).filter(
                         CtApplicationPersonRole.application == app_id).all()
                 landuse_type = self.session.query(ClLanduseType).filter(ClLanduseType.code == application_instance.requested_landuse).one()
+                is_parcel = True
                 parcel_count = self.session.query(CaTmpParcel).filter(CaTmpParcel.parcel_id == application_instance.tmp_parcel).count()
+
                 if parcel_count == 0:
                     parcel_count = self.session.query(CaParcel).filter(CaParcel.parcel_id == application_instance.parcel).count()
                     if parcel_count != 0:
                         parcel = self.session.query(CaParcel).filter(CaParcel.parcel_id == application_instance.parcel).one()
                     else:
-                        PluginUtils.show_message(self, self.tr("parcel none"), self.tr("None Parcel!!!"))
-                        return
+                        PluginUtils.show_message(self, self.tr("Warning"),
+                                              self.tr("The application {0} is not connect parcel. "                                          
+                                                      "the parcel.").format(application))
+                        is_parcel = False
+                        # return
                 else:
                     parcel = self.session.query(CaTmpParcel).filter(CaTmpParcel.parcel_id == application_instance.tmp_parcel).one()
-                if parcel_count != 0:
-                    bag_count = self.session.query(AuLevel3).filter(AuLevel3.geometry.ST_Contains(func.ST_Centroid(parcel.geometry))).count()
-                    if bag_count == 1:
-                        bag = self.session.query(AuLevel3).filter(AuLevel3.geometry.ST_Contains(func.ST_Centroid(parcel.geometry))).one()
-                        if bag.name != None:
-                            bag_name = bag.name
 
+                if is_parcel:
+                    if parcel_count != 0:
+                        bag_count = self.session.query(AuLevel3).filter(AuLevel3.geometry.ST_Contains(func.ST_Centroid(parcel.geometry))).count()
+                        if bag_count == 1:
+                            bag = self.session.query(AuLevel3).filter(AuLevel3.geometry.ST_Contains(func.ST_Centroid(parcel.geometry))).one()
+                            if bag.name != None:
+                                bag_name = bag.name
 
-                    if parcel.address_streetname != None:
-                        streetname = parcel.address_streetname
-                    if parcel.address_khashaa != None:
-                        khashaa = parcel.address_khashaa
-                    parcel_address = bag_name +', '+ streetname +', '+ khashaa
-                for p in app_person:
-                    if p.main_applicant == True:
-                        person = self.session.query(BsPerson).filter(BsPerson.person_id == p.person).one()
+                        if parcel.address_streetname != None:
+                            streetname = parcel.address_streetname
+                        if parcel.address_khashaa != None:
+                            khashaa = parcel.address_khashaa
+                        parcel_address = bag_name +', '+ streetname +', '+ khashaa
+                    for p in app_person:
+                        if p.main_applicant == True:
+                            print p.person
+                            person = self.session.query(BsPerson).filter(BsPerson.person_id == p.person).one()
 
-                self.draft_detail_twidget.insertRow(count)
+                    self.draft_detail_twidget.insertRow(count)
 
-                item = QTableWidgetItem(person.name)
-                item.setData(Qt.UserRole, person.name)
-                self.draft_detail_twidget.setItem(count, 0, item)
+                    item = QTableWidgetItem(person.name)
+                    item.setData(Qt.UserRole, person.name)
+                    self.draft_detail_twidget.setItem(count, 0, item)
 
-                item = QTableWidgetItem(person.first_name)
-                item.setData(Qt.UserRole, person.first_name)
-                self.draft_detail_twidget.setItem(count, 1, item)
+                    item = QTableWidgetItem(person.first_name)
+                    item.setData(Qt.UserRole, person.first_name)
+                    self.draft_detail_twidget.setItem(count, 1, item)
 
-                item = QTableWidgetItem(person.person_register)
-                item.setData(Qt.UserRole, person.person_id)
-                self.draft_detail_twidget.setItem(count, 2, item)
+                    item = QTableWidgetItem(person.person_register)
+                    item.setData(Qt.UserRole, person.person_id)
+                    self.draft_detail_twidget.setItem(count, 2, item)
 
-                item = QTableWidgetItem(application_instance.app_no)
-                item.setData(Qt.UserRole, application_instance.app_no)
-                self.draft_detail_twidget.setItem(count, 3, item)
+                    item = QTableWidgetItem(application_instance.app_no)
+                    item.setData(Qt.UserRole, application_instance.app_no)
+                    self.draft_detail_twidget.setItem(count, 3, item)
 
-                item = QTableWidgetItem(parcel.parcel_id)
-                item.setData(Qt.UserRole, parcel.parcel_id)
-                self.draft_detail_twidget.setItem(count, 4, item)
+                    item = QTableWidgetItem(parcel.parcel_id)
+                    item.setData(Qt.UserRole, parcel.parcel_id)
+                    self.draft_detail_twidget.setItem(count, 4, item)
 
-                item = QTableWidgetItem(parcel_address)
-                item.setData(Qt.UserRole, parcel_address)
-                self.draft_detail_twidget.setItem(count, 5, item)
+                    item = QTableWidgetItem(parcel_address)
+                    item.setData(Qt.UserRole, parcel_address)
+                    self.draft_detail_twidget.setItem(count, 5, item)
 
-                item = QTableWidgetItem(str(parcel.area_m2))
-                item.setData(Qt.UserRole, parcel.area_m2)
-                self.draft_detail_twidget.setItem(count, 6, item)
+                    item = QTableWidgetItem(str(parcel.area_m2))
+                    item.setData(Qt.UserRole, parcel.area_m2)
+                    self.draft_detail_twidget.setItem(count, 6, item)
 
-                item = QTableWidgetItem(landuse_type.description)
-                item.setData(Qt.UserRole, landuse_type.code)
-                self.draft_detail_twidget.setItem(count, 7, item)
+                    item = QTableWidgetItem(landuse_type.description)
+                    item.setData(Qt.UserRole, landuse_type.code)
+                    self.draft_detail_twidget.setItem(count, 7, item)
 
-                item = QTableWidgetItem(self.draft_no_edit.text())
-                item.setData(Qt.UserRole, self.draft_no_edit.text())
-                self.draft_detail_twidget.setItem(count, 8, item)
+                    item = QTableWidgetItem(self.draft_no_edit.text())
+                    item.setData(Qt.UserRole, self.draft_no_edit.text())
+                    self.draft_detail_twidget.setItem(count, 8, item)
 
-                item = QTableWidgetItem(self.draft_date.text())
-                item.setData(Qt.UserRole, self.draft_date.text())
-                self.draft_detail_twidget.setItem(count, 9, item)
+                    item = QTableWidgetItem(self.draft_date.text())
+                    item.setData(Qt.UserRole, self.draft_date.text())
+                    self.draft_detail_twidget.setItem(count, 9, item)
 
-                item = QTableWidgetItem(self.decision_level_cbox.itemText(self.decision_level_cbox.currentIndex()))
-                item.setData(Qt.UserRole, self.decision_level_cbox.itemData(self.decision_level_cbox.currentIndex()))
-                self.draft_detail_twidget.setItem(count, 10, item)
+                    item = QTableWidgetItem(self.decision_level_cbox.itemText(self.decision_level_cbox.currentIndex()))
+                    item.setData(Qt.UserRole, self.decision_level_cbox.itemData(self.decision_level_cbox.currentIndex()))
+                    self.draft_detail_twidget.setItem(count, 10, item)
 
-                item = QTableWidgetItem(decision_result.description)
-                item.setData(Qt.UserRole, decision_result.code)
-                self.draft_detail_twidget.setItem(count, 11, item)
+                    item = QTableWidgetItem(decision_result.description)
+                    item.setData(Qt.UserRole, decision_result.code)
+                    self.draft_detail_twidget.setItem(count, 11, item)
 
-                item = QTableWidgetItem(str(application_instance.requested_duration))
-                item.setData(Qt.UserRole, application_instance.requested_duration)
-                self.draft_detail_twidget.setItem(count, 12, item)
+                    item = QTableWidgetItem(str(application_instance.requested_duration))
+                    item.setData(Qt.UserRole, application_instance.requested_duration)
+                    self.draft_detail_twidget.setItem(count, 12, item)
 
-                count += 1
+                    count += 1
         self.select_app_count.setText(str(count) + '/')
         if count != 0:
             self.sent_to_governor_button.setEnabled(True)
