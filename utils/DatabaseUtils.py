@@ -230,13 +230,13 @@ class DatabaseUtils():
 
         user_setting_result = None
         session = SessionHandler().session_instance()
-        try:
-            user_setting_result = session.query(SetRole).filter_by(user_name=name).filter(SetRole.is_active == True).one()
-            session.commit()
-        except exc.SQLAlchemyError, e:
-            session.rollback()
-            raise LM2Exception(QApplication.translate("LM2", "Database Query Error"),
-                               QApplication.translate("LM2", "Could not execute: {0}").format(e.message))
+        # try:
+        user_setting_result = session.query(SetRole).filter_by(user_name=name).filter(SetRole.is_active == True).one()
+        session.commit()
+        # except exc.SQLAlchemyError, e:
+        #     session.rollback()
+        #     raise LM2Exception(QApplication.translate("LM2", "Database Query Error"),
+        #                        QApplication.translate("LM2", "Could not execute: {0}").format(e.message))
 
         return user_setting_result
 

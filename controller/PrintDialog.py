@@ -794,7 +794,7 @@ class PrintDialog(QDialog, Ui_PrintDialog):
 
         # try:
         parcel_geometry = self.session.query(CaParcel.geometry).filter(CaParcel.parcel_id == self.__parcel_no).one()
-        admin_unit_l2_name = self.session.query(AuLevel2.name).filter(AuLevel2.geometry.ST_Intersects(parcel_geometry[0])).first()
+        admin_unit_l2_name = self.session.query(AuLevel2.name).filter(AuLevel2.geometry.ST_Intersects(func.ST_Centroid(parcel_geometry[0]))).first()
         #
         # except SQLAlchemyError, e:
         #     raise LM2Exception(self.tr("Database Query Error"), self.tr("bCould not execute: {0}").format(e.message))
@@ -807,7 +807,7 @@ class PrintDialog(QDialog, Ui_PrintDialog):
 
         # try:
         parcel_geometry = self.session.query(CaParcel.geometry).filter(CaParcel.parcel_id == self.__parcel_no).one()
-        admin_unit_l2_name = self.session.query(AuLevel2.name).filter(AuLevel2.geometry.ST_Intersects(parcel_geometry[0])).first()
+        admin_unit_l2_name = self.session.query(AuLevel2.name).filter(AuLevel2.geometry.ST_Intersects(func.ST_Centroid(parcel_geometry[0]))).first()
 
         # except SQLAlchemyError, e:
         #     raise LM2Exception(self.tr("Database Query Error"), self.tr("bCould not execute: {0}").format(e.message))
@@ -820,7 +820,7 @@ class PrintDialog(QDialog, Ui_PrintDialog):
 
         # try:
         parcel_geometry = self.session.query(CaParcel.geometry).filter(CaParcel.parcel_id == self.__parcel_no).one()
-        admin_unit_l3_name = self.session.query(AuLevel3.name).filter(AuLevel3.geometry.ST_Intersects(parcel_geometry[0])).first()
+        admin_unit_l3_name = self.session.query(AuLevel3.name).filter(AuLevel3.geometry.ST_Intersects(func.ST_Centroid(parcel_geometry[0]))).first()
 
         # except SQLAlchemyError, e:
         #     PluginUtils.show_error(self, self.tr("Database Query Error"), self.tr("cCould not execute: {0}").format(e.message))
@@ -834,7 +834,7 @@ class PrintDialog(QDialog, Ui_PrintDialog):
 
         # try:
         parcel_geometry = self.session.query(CaParcel.geometry).filter(CaParcel.parcel_id == self.__parcel_no).one()
-        admin_unit_l3_name = self.session.query(AuLevel3.name).filter(AuLevel3.geometry.ST_Intersects(parcel_geometry[0])).first()
+        admin_unit_l3_name = self.session.query(AuLevel3.name).filter(AuLevel3.geometry.ST_Intersects(func.ST_Centroid(parcel_geometry[0]))).first()
 
         # except SQLAlchemyError, e:
         #     PluginUtils.show_error(self, self.tr("Database Query Error"), self.tr("cCould not execute: {0}").format(e.message))
@@ -1547,9 +1547,9 @@ class PrintDialog(QDialog, Ui_PrintDialog):
 
         parcel_geometry = self.session.query(CaParcel.geometry).filter(CaParcel.parcel_id == self.__parcel_no).one()
         admin_unit_l1_name = self.session.query(AuLevel1.name).filter(
-            AuLevel1.geometry.ST_Intersects(parcel_geometry[0])).first()
+            AuLevel1.geometry.ST_Intersects(func.ST_Centroid(parcel_geometry[0]))).first()
         admin_unit_l2_name = self.session.query(AuLevel2.name).filter(
-            AuLevel2.geometry.ST_Intersects(parcel_geometry[0])).first()
+            AuLevel2.geometry.ST_Intersects(func.ST_Centroid(parcel_geometry[0]))).first()
 
         land_officer_name = DatabaseUtils.current_user()
         officer_position = land_officer_name.position

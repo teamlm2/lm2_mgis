@@ -465,10 +465,10 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
         parcel = application.parcel_ref
         bag_name = ''
-        bag_count = self.session.query(AuLevel3).filter(AuLevel3.geometry.ST_Overlaps((parcel.geometry))).count()
+        bag_count = self.session.query(AuLevel3).filter(AuLevel3.geometry.ST_Within(func.ST_Centroid(parcel.geometry))).count()
 
         if bag_count == 1:
-            bag = self.session.query(AuLevel3).filter(AuLevel3.geometry.ST_Overlaps((parcel.geometry))).first()
+            bag = self.session.query(AuLevel3).filter(AuLevel3.geometry.ST_Within(func.ST_Centroid(parcel.geometry))).first()
             bag_name = bag.name
         # bag_areas = {}
         # bag_count = self.session.query(AuLevel3).filter(AuLevel3.geometry.ST_Within(func.ST_Centroid(parcel.geometry))).count()
@@ -866,7 +866,10 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             filter(SetBaseFee.id == base_fee_id). \
             one()
 
-        self.base_fee_edit.setText('{0}'.format(base_fee.base_fee_per_m2))
+        base_fee_per_m2 = 0
+        if  base_fee.base_fee_per_m2:
+            base_fee_per_m2 = base_fee.base_fee_per_m2
+        self.base_fee_edit.setText('{0}'.format(base_fee_per_m2))
         self.subsidized_area_edit.setText('{0}'.format(base_fee.subsidized_area))
         self.subsidized_fee_rate_edit.setText('{0}'.format(base_fee.subsidized_fee_rate))
 
@@ -927,19 +930,21 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             filter(CaParcelTbl.parcel_id == parcel_id). \
             filter(SetBaseFee.fee_zone == SetFeeZone.zone_id). \
             filter(SetBaseFee.landuse == CaParcelTbl.landuse). \
+            filter(SetBaseFee.in_active == True). \
             count()
-
+        print count
         fee_zones = self.session.query(SetBaseFee).filter(
             SetFeeZone.geometry.ST_Contains(func.ST_Centroid(CaParcelTbl.geometry))). \
             filter(CaParcelTbl.parcel_id == parcel_id). \
             filter(SetBaseFee.fee_zone == SetFeeZone.zone_id). \
             filter(SetBaseFee.landuse == CaParcelTbl.landuse). \
+            filter(SetBaseFee.in_active == True) .\
             all()
 
         self.fee_zone_cbox.clear()
 
         for fee_zone in fee_zones:
-
+            print fee_zone.in_active
             self.fee_zone_cbox.addItem(fee_zone.fee_zone_ref.location, fee_zone.id)
 
     def __populate_landfee_tab(self):
@@ -1254,7 +1259,9 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
     def __add_fee_row(self, row, contractor, parcel_id, base_fee):
 
-        base_fee_per_m2 = base_fee.base_fee_per_m2
+        base_fee_per_m2 = 0
+        if base_fee.base_fee_per_m2:
+            base_fee_per_m2 = base_fee.base_fee_per_m2
         subsidized_area = base_fee.subsidized_area
         subsidized_fee_rate = base_fee.subsidized_fee_rate
 
@@ -2220,8 +2227,9 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         # try:
         data = self.__fee_geoware()
         if data['status']:
-            payment = data['data']['payment']
-            base_fee = round(float(data['data']['base_fee_per_m2']))
+            for value in data['data']:
+                payment = value['payment']
+                base_fee = round(float(value['base_fee_per_m2']))
 
         local_name = " "
         address_street_name = ""
@@ -4338,14 +4346,15 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             PluginUtils.show_message(self, self.tr("Warning"), msg)
             return
 
-        base_fee_id = data['data']['base_fee_id']
-        payment = data['data']['payment']
-        zone_type = data['data']['zone_type']
-        self.base_fee_edit.setText(str(data['data']['base_fee_per_m2']))
-        self.subsidized_fee_rate_edit.setText(str(data['data']['subsidized_fee_rate']))
-        self.subsidized_area_edit.setText(str(data['data']['subsidized_area']))
+        for value in data['data']:
+            base_fee_id = value['base_fee_id']
+            payment = value['payment']
+            zone_type = value['zone_type']
+            self.base_fee_edit.setText(str(value['base_fee_per_m2']))
+            self.subsidized_fee_rate_edit.setText(str(value['subsidized_fee_rate']))
+            self.subsidized_area_edit.setText(str(value['subsidized_area']))
 
-        self.__calculate_landfee_level(base_fee_id, payment, parcel_id)
+            self.__calculate_landfee_level(base_fee_id, payment, parcel_id)
 
     def __calculate_landfee_level(self, base_fee_id, payment, parcel_id):
 
