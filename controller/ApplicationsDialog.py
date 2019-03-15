@@ -1889,7 +1889,7 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
                     giving_onwer_count = self.session.query(CtApplicationPersonRole.application)\
                         .join(CtApplicationStatus, CtApplicationPersonRole.application == CtApplicationStatus.application)\
                         .join(CtApplication, CtApplicationPersonRole.application == CtApplication.app_id)\
-                        .filter(or_(CtApplication.app_type == 1,CtApplication.app_type == 2, CtApplication.app_type == 15))\
+                        .filter(or_(CtApplication.app_type == 1,CtApplication.app_type == 2))\
                         .filter(CtApplicationPersonRole.person == person.person_id) \
                         .filter(CtApplicationStatus.status >= 7) \
                         .filter(CtApplicationStatus.status != 8) \
@@ -1899,7 +1899,7 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
                         .join(CtApplicationStatus,
                               CtApplicationPersonRole.application == CtApplicationStatus.application) \
                         .join(CtApplication, CtApplicationPersonRole.application == CtApplication.app_id) \
-                        .filter(or_(CtApplication.app_type == 1,CtApplication.app_type == 2, CtApplication.app_type == 15)) \
+                        .filter(or_(CtApplication.app_type == 1,CtApplication.app_type == 2)) \
                         .filter(CtApplicationPersonRole.person == person.person_id) \
                         .filter(CtApplicationStatus.status >= 7) \
                         .filter(CtApplicationStatus.status != 8) \
@@ -1910,7 +1910,7 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
                         .join(CtApplicationStatus,
                               CtApplicationPersonRole.application == CtApplicationStatus.application) \
                         .join(CtApplication, CtApplicationPersonRole.application == CtApplication.app_id) \
-                        .filter(or_(CtApplication.app_type == 1,CtApplication.app_type == 2, CtApplication.app_type == 15)) \
+                        .filter(or_(CtApplication.app_type == 1,CtApplication.app_type == 2)) \
                         .filter(CtApplicationPersonRole.person == person.person_id) \
                         .filter(CtApplicationStatus.status >= 7) \
                         .filter(CtApplicationStatus.status != 8) \

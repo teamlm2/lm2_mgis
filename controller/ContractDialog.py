@@ -2460,13 +2460,13 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
         tpl.render(context)
 
-        try:
-            tpl.save(default_path + "/" + contract_no[:-6] + '-' + contract_no[-5:] + ".docx")
-            QDesktopServices.openUrl(
-                QUrl.fromLocalFile(default_path + "/" + contract_no[:-6] + '-' + contract_no[-5:] + ".docx"))
-        except IOError, e:
-            PluginUtils.show_error(self, self.tr("Out error"),
-                                   self.tr("This file is already opened. Please close re-run"))
+        # try:
+        tpl.save(default_path + "/" + contract_no[:-6] + '-' + contract_no[-5:] + ".docx")
+        QDesktopServices.openUrl(
+            QUrl.fromLocalFile(default_path + "/" + contract_no[:-6] + '-' + contract_no[-5:] + ".docx"))
+        # except IOError, e:
+        #     PluginUtils.show_error(self, self.tr("Out error"),
+        #                            self.tr("This file is already opened. Please close re-run"))
 
     @pyqtSlot()
     def on_print_contract_button_clicked(self):

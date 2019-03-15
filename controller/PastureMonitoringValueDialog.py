@@ -766,63 +766,65 @@ class PastureMonitoringValueDialog(QDialog, Ui_PastureMonitoringValueDialog, Dat
 
         soum_code = DatabaseUtils.working_l2_code()
         value = soum_code + '%'
-        try:
-            point_details = self.session.query(PsPointDetail). \
-                filter(PsPointDetail.point_detail_id.ilike(value))
-            if self.pug_boundary_cbox.currentIndex() != -1:
-                if not self.pug_boundary_cbox.itemData(self.pug_boundary_cbox.currentIndex()) == -1:
-                    pug_id = self.pug_boundary_cbox.itemData(self.pug_boundary_cbox.currentIndex(), Qt.UserRole)
-                    pug = self.session.query(CaPUGBoundary).filter(CaPUGBoundary.code == pug_id).one()
+        # try:
+        point_details = self.session.query(PsPointDetail). \
+            filter(PsPointDetail.point_detail_id.ilike(value))
+        if self.pug_boundary_cbox.currentIndex() != -1:
+            if not self.pug_boundary_cbox.itemData(self.pug_boundary_cbox.currentIndex()) == -1:
+                pug_id = self.pug_boundary_cbox.itemData(self.pug_boundary_cbox.currentIndex(), Qt.UserRole)
+                pug = self.session.query(CaPUGBoundary).filter(CaPUGBoundary.code == pug_id).one()
 
-                    point_details = self.session.query(PsPointDetail) \
-                        .join(PsPointDetailPoints, PsPointDetail.point_detail_id == PsPointDetailPoints.point_detail_id) \
-                        .join(CaPastureMonitoring, PsPointDetailPoints.point_id == CaPastureMonitoring.point_id) \
-                        .filter(CaPastureMonitoring.geometry.ST_Intersects(pug.geometry))
-            if self.parcel_cbox.currentIndex() != -1:
-                if not self.parcel_cbox.itemData(self.parcel_cbox.currentIndex()) == -1:
-                    parcel_id = self.parcel_cbox.itemData(self.parcel_cbox.currentIndex(), Qt.UserRole)
-                    parcel = self.session.query(CaPastureParcel).filter(
-                        CaPastureParcel.parcel_id == parcel_id).one()
+                point_details = self.session.query(PsPointDetail) \
+                    .join(PsPointDetailPoints, PsPointDetail.point_detail_id == PsPointDetailPoints.point_detail_id) \
+                    .join(CaPastureMonitoring, PsPointDetailPoints.point_id == CaPastureMonitoring.point_id) \
+                    .filter(CaPastureMonitoring.geometry.ST_Intersects(pug.geometry))
+        if self.parcel_cbox.currentIndex() != -1:
+            if not self.parcel_cbox.itemData(self.parcel_cbox.currentIndex()) == -1:
+                parcel_id = self.parcel_cbox.itemData(self.parcel_cbox.currentIndex(), Qt.UserRole)
+                parcel = self.session.query(CaPastureParcel).filter(
+                    CaPastureParcel.parcel_id == parcel_id).one()
 
-                    point_details = self.session.query(PsPointDetail) \
-                        .join(PsPointDetailPoints, PsPointDetail.point_detail_id == PsPointDetailPoints.point_detail_id) \
-                        .join(CaPastureMonitoring, PsPointDetailPoints.point_id == CaPastureMonitoring.point_id) \
-                        .filter(CaPastureMonitoring.geometry.ST_Intersects(parcel.geometry))
+                point_details = self.session.query(PsPointDetail) \
+                    .join(PsPointDetailPoints, PsPointDetail.point_detail_id == PsPointDetailPoints.point_detail_id) \
+                    .join(CaPastureMonitoring, PsPointDetailPoints.point_id == CaPastureMonitoring.point_id) \
+                    .filter(CaPastureMonitoring.geometry.ST_Intersects(parcel.geometry))
 
-            count = 0
-            for point_detail in point_details:
-                self.point_detail_twidget.insertRow(count)
+        count = 0
+        for point_detail in point_details:
+            self.point_detail_twidget.insertRow(count)
 
-                item = QTableWidgetItem(point_detail.point_detail_id)
-                item.setData(Qt.UserRole, point_detail.point_detail_id)
+            item = QTableWidgetItem(point_detail.point_detail_id)
+            item.setData(Qt.UserRole, point_detail.point_detail_id)
 
-                self.point_detail_twidget.setItem(count, 0, item)
+            self.point_detail_twidget.setItem(count, 0, item)
 
-                item = QTableWidgetItem(str(point_detail.register_date))
-                item.setData(Qt.UserRole, point_detail.register_date)
+            item = QTableWidgetItem(str(point_detail.register_date))
+            item.setData(Qt.UserRole, point_detail.register_date)
 
-                self.point_detail_twidget.setItem(count, 1, item)
+            self.point_detail_twidget.setItem(count, 1, item)
 
-                item = QTableWidgetItem(unicode(point_detail.land_name))
-                item.setData(Qt.UserRole, point_detail.land_name)
+            item = QTableWidgetItem(unicode(point_detail.land_name))
+            item.setData(Qt.UserRole, point_detail.land_name)
 
-                self.point_detail_twidget.setItem(count, 2, item)
+            self.point_detail_twidget.setItem(count, 2, item)
 
+            land_form_count = self.session.query(ClLandForm).filter(ClLandForm.code == point_detail.land_form).count()
+            if land_form_count == 1:
                 land_form = self.session.query(ClLandForm).filter(ClLandForm.code == point_detail.land_form).one()
 
                 item = QTableWidgetItem(unicode(land_form.description))
                 item.setData(Qt.UserRole, land_form.code)
 
-                self.point_detail_twidget.setItem(count, 3, item)
+            self.point_detail_twidget.setItem(count, 3, item)
 
-                item = QTableWidgetItem(str(point_detail.elevation))
-                item.setData(Qt.UserRole, point_detail.elevation)
+            item = QTableWidgetItem(str(point_detail.elevation))
+            item.setData(Qt.UserRole, point_detail.elevation)
 
-                self.point_detail_twidget.setItem(count, 4, item)
+            self.point_detail_twidget.setItem(count, 4, item)
 
-        except SQLAlchemyError, e:
-            PluginUtils.show_message(self, self.tr("LM2", "Sql Error"), e.message)
-            return
+        # except SQLAlchemyError, e:
+        #     PluginUtils.show_message(self, self.tr("LM2", "Sql Error"), e.message)
+        #     return
 
     def __load_reserve_all_points(self):
 
@@ -1118,7 +1120,9 @@ class PastureMonitoringValueDialog(QDialog, Ui_PastureMonitoringValueDialog, Dat
         self.land_name_text_edit.setText(point_land_name)
 
         item = self.point_detail_twidget.item(current_row, 3)
-        land_form_code = item.data(Qt.UserRole)
+        print item
+        if item:
+            land_form_code = item.data(Qt.UserRole)
         point_detail = self.session.query(PsPointDetail).filter(PsPointDetail.point_detail_id == point_detail_id).one()
 
         self.land_form_cbox.setCurrentIndex(self.land_form_cbox.findData(point_detail.land_form))
@@ -2487,6 +2491,10 @@ class PastureMonitoringValueDialog(QDialog, Ui_PastureMonitoringValueDialog, Dat
                 filter(PsPastureSoilEvaluation.point_detail_id == point_detail_id).delete()
 
         if point_detail_count == 1:
+
+            self.session.query(PsPointDocument).\
+                filter(PsPointDocument.point_detail_id == point_detail_id).delete()
+
             self.session.query(PsPointDetail). \
                 filter(PsPointDetail.point_detail_id == point_detail_id).delete()
 
