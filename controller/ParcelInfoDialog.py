@@ -2731,7 +2731,7 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
                 qt_date = self.contract_date.date()
                 # contract_number_filter = "%-{0}/%".format(str(qt_date.toString("yyyy")))
                 year = qt_date.toString("yyyy")
-                PluginUtils.generate_auto_app_no(str(year), app_type, DatabaseUtils.working_l2_code(), obj_type)
+                PluginUtils.generate_auto_app_no(str(year), app_type, DatabaseUtils.working_l2_code(), obj_type, self.session)
 
                 contract_app = CtContractApplicationRole()
                 contract_app.application_ref = self.application
@@ -2763,8 +2763,7 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
                 qt_date = self.own_date.date()
                 # contract_number_filter = "%-{0}/%".format(str(qt_date.toString("yyyy")))
                 year = qt_date.toString("yyyy")
-                PluginUtils.generate_auto_app_no(str(year), app_type, DatabaseUtils.working_l2_code(),
-                                                 obj_type)
+                PluginUtils.generate_auto_app_no(str(year), app_type, DatabaseUtils.working_l2_code(), obj_type, self.session)
 
                 record_app = CtRecordApplicationRole()
                 record_app.application_ref = self.application
@@ -3082,7 +3081,7 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
         qt_date = self.decision_date.date()
         year = str(qt_date.toString("yy"))
         obj_type = 'application\Application'
-        PluginUtils.generate_auto_app_no(str(year), str(app_type).zfill(2), au_level2, obj_type)
+        PluginUtils.generate_auto_app_no(str(year), str(app_type).zfill(2), au_level2, obj_type, self.session)
             # self.session.commit()
 
     def __save_application_details(self):

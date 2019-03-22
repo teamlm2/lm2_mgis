@@ -248,7 +248,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         # contract_number_filter = "%-{0}/%".format(str(year))
         app_type = None
         obj_type = 'contract\Contract'
-        PluginUtils.generate_auto_app_no(str(year), app_type, soum, obj_type)
+        PluginUtils.generate_auto_app_no(str(year), app_type, soum, obj_type, self.session)
 
         # except SQLAlchemyError, e:
         #     raise LM2Exception(self.tr("Database Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))

@@ -1,12 +1,12 @@
 __author__ = 'B.Ankhbold'
 
-from sqlalchemy import Date, ForeignKey, Float, String, Integer
+from sqlalchemy import Date, ForeignKey, Float, String, Integer, Column
 from sqlalchemy.orm import relationship
-from LdProcessPlan import *
+from ClZoneActivity import *
 
-class SetProcessTypeColor(Base):
+class SetZoneColor(Base):
 
-    __tablename__ = 'set_process_type_color'
+    __tablename__ = 'set_zone_color'
 
     code = Column(Integer, primary_key=True)
     description = Column(String)

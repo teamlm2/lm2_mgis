@@ -33,10 +33,10 @@ from ..model.SdUser import *
 from ..model.Enumerations import ApplicationType, UserRight
 from ..model.SdFtpConnection import *
 from ..model.SdFtpPermission import *
-from ..model.LdProjectParcel import *
-from ..model.LdProjectMainZone import *
-from ..model.LdProjectSubZone import *
-from ..model.LdProcessPlan import *
+from ..model.PlProjectParcelZoneActivity import *
+from ..model.PlProjectParcelZoneMain import *
+from ..model.PlProjectParcelZoneSub import *
+from ..model.ClZoneActivity import *
 from ..model.Constants import *
 from ..model.SetFilterPlanLayer import *
 from ..view.Ui_PlanLayerFilterDialog import *
@@ -136,7 +136,7 @@ class PlanLayerFilterDialog(QDialog, Ui_PlanLayerFilterDialog, DatabaseHelper):
             parent.setData(0, Qt.UserRole, parent_type)
             parent.setFlags(parent.flags() | Qt.ItemIsTristate | Qt.ItemIsUserCheckable)
 
-            sub_types = self.session.query(LdProcessPlan).filter(LdProcessPlan.parent_code == str(parent_type)).order_by(LdProcessPlan.code.asc()).all()
+            sub_types = self.session.query(ClZoneActivity).filter(ClZoneActivity.parent_code == str(parent_type)).order_by(ClZoneActivity.code.asc()).all()
             for sub_type in sub_types:
                 child = QTreeWidgetItem(parent)
                 child.setFlags(child.flags() | Qt.ItemIsUserCheckable)
@@ -144,8 +144,8 @@ class PlanLayerFilterDialog(QDialog, Ui_PlanLayerFilterDialog, DatabaseHelper):
                 child.setData(0, Qt.UserRole, sub_type.code)
                 child.setFlags(child.flags() | Qt.ItemIsTristate | Qt.ItemIsUserCheckable)
 
-                child_types = self.session.query(LdProcessPlan).filter(
-                    LdProcessPlan.parent_code == str(sub_type.code)).order_by(LdProcessPlan.code.asc()).all()
+                child_types = self.session.query(ClZoneActivity).filter(
+                    ClZoneActivity.parent_code == str(sub_type.code)).order_by(ClZoneActivity.code.asc()).all()
                 for child_type in child_types:
                     sub_child = QTreeWidgetItem(child)
                     sub_child.setFlags(child.flags() | Qt.ItemIsUserCheckable)
@@ -153,8 +153,8 @@ class PlanLayerFilterDialog(QDialog, Ui_PlanLayerFilterDialog, DatabaseHelper):
                     sub_child.setData(0, Qt.UserRole, child_type.code)
                     sub_child.setFlags(sub_child.flags() | Qt.ItemIsTristate | Qt.ItemIsUserCheckable)
 
-                    process_types = self.session.query(LdProcessPlan).filter(
-                        LdProcessPlan.parent_code == str(child_type.code)).order_by(LdProcessPlan.code.asc()).all()
+                    process_types = self.session.query(ClZoneActivity).filter(
+                        ClZoneActivity.parent_code == str(child_type.code)).order_by(ClZoneActivity.code.asc()).all()
                     for process_type in process_types:
                         process_child = QTreeWidgetItem(sub_child)
                         process_child.setFlags(child.flags() | Qt.ItemIsUserCheckable)

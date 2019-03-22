@@ -47,8 +47,8 @@ class SetRole(Base):
     department = Column(Integer, ForeignKey('hr_department.department_id'))
     department_ref = relationship("SdDepartment")
 
-    working_plan_id = Column(Integer, ForeignKey('ld_project_plan.plan_draft_id'))
-    working_plan_ref = relationship("LdProjectPlan")
+    working_plan_id = Column(Integer, ForeignKey('pl_project.project_id'))
+    working_plan_ref = relationship("PlProject")
 
     def __init__(self, user_name=None, surname=None, first_name=None, position=None, employee_type=None,
                  cancel_reason=None, phone=None, mac_addresses=None, user_name_real=None,

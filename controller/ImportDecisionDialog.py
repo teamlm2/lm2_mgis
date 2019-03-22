@@ -1,5 +1,5 @@
 # coding=utf8
-__author__ = 'anna'
+__author__ = 'B.Ankhbold'
 
 import shutil
 
@@ -12,6 +12,7 @@ from datetime import date
 from inspect import currentframe
 from ..view.Ui_ImportDecisionDialog import *
 from ..model.CtApplicationStatus import *
+from ..model.CtApplication import *
 from ..model.DatabaseHelper import *
 from ..model.AuLevel2 import *
 from ..model.CtDecision import *
@@ -1285,16 +1286,22 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
 
             decision_level = self.session.query(ClDecisionLevel).\
                 filter(ClDecisionLevel.code == decision.decision_level).one()
-
             application_type = self.session.query(ClApplicationType).\
                 join(CtApplication, ClApplicationType.code == CtApplication.app_type).\
                 join(CtDecisionApplication, CtApplication.app_id == CtDecisionApplication.application).\
                 filter(CtDecisionApplication.decision == decision.decision_id).all()
 
+            # apps = self.session.query(CtApplication).\
+            #     join(CtDecisionApplication, CtApplication.app_id == CtDecisionApplication.application).\
+            #     filter(CtDecisionApplication.decision == decision.decision_id).all()
+
             self.decision_no_result_edit.setText(decision.decision_no)
             self.decision_date_result_edit.setText(str(decision.decision_date))
             self.level_result_edit.setText(decision_level.description)
             self.app_type_code = 1
+            # for app in apps:
+            #     print app.app_no
+            #     print app.app_type_ref.description
             for application_type in application_type:
                 self.app_type_code = application_type.code
                 self.application_type_edit.setText(application_type.description)

@@ -33,11 +33,11 @@ from ..model.SdUser import *
 from ..model.Enumerations import ApplicationType, UserRight
 from ..model.SdFtpConnection import *
 from ..model.SdFtpPermission import *
-from ..model.LdProjectParcel import *
-from ..model.LdProjectMainZone import *
-from ..model.LdProjectSubZone import *
-from ..model.LdProcessPlan import *
-from ..model.LdProjectPlan import *
+from ..model.PlProjectParcelZoneActivity import *
+from ..model.PlProjectParcelZoneMain import *
+from ..model.PlProjectParcelZoneSub import *
+from ..model.ClZoneActivity import *
+from ..model.PlProject import *
 from ..view.Ui_PlanCaseDialog import *
 from .qt_classes.ApplicantDocumentDelegate import ApplicationDocumentDelegate
 from .qt_classes.DocumentsTableWidget import DocumentsTableWidget
@@ -143,10 +143,10 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
 
     def __setup_data(self):
 
-        self.plan_num_edit.setText(self.plan.plan_draft_no)
-        self.date_edit.setText(str(self.plan.begin_date))
+        self.plan_num_edit.setText(self.plan.code)
+        self.date_edit.setText(str(self.plan.start_date))
         self.type_edit.setText(self.plan.plan_type_ref.description)
-        self.status_edit.setText(self.plan.last_status_type_ref.description)
+        self.status_edit.setText(self.plan.workrule_status_ref.description)
 
     def __setup_twidget(self):
 
@@ -227,7 +227,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
             header = str(count)
             if self.__get_attribute(parcel, parcel_shape_layer)[0]:
                 process_type = self.__get_attribute(parcel, parcel_shape_layer)[0]
-                header = header + ':' + '(' + str(process_type.code) + ')' + unicode(process_type.description)
+                header = header + ':' + '(' + str(process_type.code) + ')' + unicode(process_type.name)
             if self.__get_attribute(parcel, parcel_shape_layer)[1]:
                 landuse = self.__get_attribute(parcel, parcel_shape_layer)[1]
             if self.__get_attribute(parcel, parcel_shape_layer)[2]:
@@ -236,12 +236,12 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
 
             if is_approved:
                 if self.zone_parcel_rbutton.isChecked():
-                    new_parcel = LdProjectParcel()
+                    new_parcel = PlProjectParcelZoneActivity()
                 elif self.zone_sub_rbutton.isChecked():
-                    new_parcel = LdProjectSubZone()
+                    new_parcel = PlProjectParcelZoneSub()
                 elif self.zone_main_rbutton.isChecked():
-                    new_parcel = LdProjectMainZone()
-                new_parcel.plan_draft_id = self.plan.plan_draft_id
+                    new_parcel = PlProjectParcelZoneMain()
+                new_parcel.project_id = self.plan.project_id
                 new_parcel.plan_draft_ref = self.plan
                 new_parcel.parcel_id = id
                 new_parcel.valid_from = PluginUtils.convert_qt_date_to_python(QDateTime().currentDateTime())
@@ -313,9 +313,9 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
 
         process_type = None
         if plan_code:
-            count = self.session.query(LdProcessPlan).filter(LdProcessPlan.code == plan_code).count()
+            count = self.session.query(ClZoneActivity).filter(ClZoneActivity.zone_activity_id == plan_code).count()
             if count == 1:
-                process_type = self.session.query(LdProcessPlan).filter(LdProcessPlan.code == plan_code).one()
+                process_type = self.session.query(ClZoneActivity).filter(ClZoneActivity.zone_activity_id == plan_code).one()
         landuse = None
         if landuse_code:
             count = self.session.query(ClLanduseType).filter(ClLanduseType.code == landuse_code).count()
@@ -379,7 +379,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         print column_names[column_name_plan_code]
         print type(column_names[column_name_plan_code])
         if column_names[column_name_plan_code]:
-            count = self.session.query(LdProcessPlan).filter(LdProcessPlan.code == column_names[column_name_plan_code]).count()
+            count = self.session.query(ClZoneActivity).filter(ClZoneActivity.code == column_names[column_name_plan_code]).count()
             if count == 0:
                 valid = False
                 message = unicode(u'Үйл ажиллагааны ангиллын дугаар буруу байна.')
@@ -405,11 +405,11 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
             self.message_label.setText(error_message)
 
         if self.zone_parcel_rbutton.isChecked():
-            parcel_overlaps_count = self.session.query(LdProjectParcel).\
-                join(LdProjectPlan, LdProjectParcel.plan_draft_id == LdProjectPlan.plan_draft_id). \
-                filter(LdProjectPlan.plan_type == self.plan.plan_type). \
-                filter(LdProjectParcel.plan_draft_id == self.plan.plan_draft_id).\
-                filter(parcel_geometry.ST_Intersects(LdProjectParcel.polygon_geom)).count()
+            parcel_overlaps_count = self.session.query(PlProjectParcelZoneActivity).\
+                join(PlProject, PlProjectParcelZoneActivity.project_id == PlProject.project_id). \
+                filter(PlProject.plan_type_id == self.plan.plan_type_id). \
+                filter(PlProjectParcelZoneActivity.project_id == self.plan.project_id).\
+                filter(parcel_geometry.ST_Intersects(PlProjectParcelZoneActivity.polygon_geom)).count()
             if parcel_overlaps_count > 0:
                 valid = False
                 message = unicode(u'Нэгж талбар давхардаж байна.')

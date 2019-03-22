@@ -307,9 +307,9 @@ class PluginUtils(object):
             return row[0]
 
     @staticmethod
-    def generate_auto_app_no(year, app_type, soum_code, object_type):
+    def generate_auto_app_no(year, app_type, soum_code, object_type, ses):
 
-        session = SessionHandler().session_instance()
+        session = ses
 
         soum_filter = str(soum_code) + "-%"
 
@@ -340,14 +340,18 @@ class PluginUtils(object):
                     filter(SdAutoNumbers.classes == object_type).one()
                 auto_number.number = auto_number.number + 1
             elif count == 0:
-                auto_number = SdAutoNumbers()
-                auto_number.name = generate_name_md5
-                auto_number.number = 1
-                auto_number.classes = object_type
-                auto_number.format = format_text
-                auto_number.length = 5
+                if count == 1:
+                    auto_number = session.query(SdAutoNumbers).filter(SdAutoNumbers.name == generate_name_md5).one()
+                    auto_number.number = auto_number.number + 1
+                elif count == 0:
+                    auto_number = SdAutoNumbers()
+                    auto_number.name = generate_name_md5
+                    auto_number.number = 1
+                    auto_number.classes = object_type
+                    auto_number.format = format_text
+                    auto_number.length = 5
 
-                session.add(auto_number)
+                    session.add(auto_number)
         elif object_type == 'contract\Contract':
             format_text = soum_code + '-' + year + '/' + '?'
             generate_name = 'a:3:{s:7:"classes";s:17:"contract\Contract";s:6:"format";s:12:"' + format_text + '";s:6:"length";i:5;}'
@@ -371,14 +375,18 @@ class PluginUtils(object):
                     filter(SdAutoNumbers.classes == object_type).one()
                 auto_number.number = auto_number.number + 1
             elif count == 0:
-                auto_number = SdAutoNumbers()
-                auto_number.name = generate_name_md5
-                auto_number.number = 1
-                auto_number.classes = object_type
-                auto_number.format = format_text
-                auto_number.length = 5
+                if count == 1:
+                    auto_number = session.query(SdAutoNumbers).filter(SdAutoNumbers.name == generate_name_md5).one()
+                    auto_number.number = auto_number.number + 1
+                elif count == 0:
+                    auto_number = SdAutoNumbers()
+                    auto_number.name = generate_name_md5
+                    auto_number.number = 1
+                    auto_number.classes = object_type
+                    auto_number.format = format_text
+                    auto_number.length = 5
 
-                session.add(auto_number)
+                    session.add(auto_number)
         elif object_type == 'record\OwnershipRecord':
             year_filter = "%-" + str(year) + '/%'
             format_text = soum_code + '-' + year + '/' + '?'
@@ -404,13 +412,18 @@ class PluginUtils(object):
                     filter(SdAutoNumbers.classes == object_type).one()
                 auto_number.number = auto_number.number + 1
             elif count == 0:
-                auto_number = SdAutoNumbers()
-                auto_number.name = generate_name_md5
-                auto_number.number = 1
-                auto_number.classes = object_type
-                auto_number.format = format_text
-                auto_number.length = 5
+                count = session.query(SdAutoNumbers).filter(SdAutoNumbers.name == generate_name_md5).count()
+                if count == 1:
+                    auto_number = session.query(SdAutoNumbers).filter(SdAutoNumbers.name == generate_name_md5).one()
+                    auto_number.number = auto_number.number + 1
+                elif count == 0:
+                    auto_number = SdAutoNumbers()
+                    auto_number.name = generate_name_md5
+                    auto_number.number = 1
+                    auto_number.classes = object_type
+                    auto_number.format = format_text
+                    auto_number.length = 5
 
-                session.add(auto_number)
+                    session.add(auto_number)
         # session.flush()
-        session.commit()
+        # session.commit()

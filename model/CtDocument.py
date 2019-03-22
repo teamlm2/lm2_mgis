@@ -1,4 +1,4 @@
-__author__ = 'mwagner'
+__author__ = 'B.Ankhbold'
 
 from sqlalchemy import Column, String, Integer, Sequence, Binary, DateTime
 from Base import *

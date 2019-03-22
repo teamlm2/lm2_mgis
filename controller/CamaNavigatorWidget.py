@@ -17,11 +17,11 @@ from ..utils.LayerUtils import LayerUtils
 from ..model.AuCadastreBlock import *
 from ..model.AuLevel1 import *
 from ..model.AuLevel2 import *
-from ..model.LdProjectPlan import *
+from ..model.PlProject import *
 from ..model.ClPlanDecisionLevel import *
-from ..model.ClPlanStatusType import *
+from ..model.SetWorkruleStatus import *
 from ..model.ClPlanType import *
-from ..model.LdProjectPlanStatus import *
+from ..model.PlProjectStatusHistory import *
 from ..model.CaParcel import *
 from ..controller.PlanCaseDialog import *
 from ..controller.ManageParcelRecordsDialog import *
@@ -29,7 +29,7 @@ from ..utils.DatabaseUtils import *
 from ..utils.PluginUtils import *
 from ..utils.LayerUtils import *
 from ..model.DatabaseHelper import *
-from ..model.SetProcessTypeColor import *
+from ..model.SetZoneColor import *
 from ..model.CmCamaLanduseType import *
 from ..model.CmFactorsAuValue import *
 from ..model.CmFactorsValue import *

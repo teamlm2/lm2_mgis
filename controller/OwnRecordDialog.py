@@ -1044,7 +1044,7 @@ class OwnRecordDialog(QDialog, Ui_OwnRecordDialog, DatabaseHelper):
         # contract_number_filter = "%-{0}/%".format(str(year))
         app_type = None
         obj_type = 'record\OwnershipRecord'
-        PluginUtils.generate_auto_app_no(str(year), app_type, soum, obj_type)
+        PluginUtils.generate_auto_app_no(str(year), app_type, soum, obj_type, self.session)
 
         # except SQLAlchemyError, e:
         #     PluginUtils.show_error(self, self.tr("Database Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))

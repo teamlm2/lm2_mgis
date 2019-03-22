@@ -2709,7 +2709,7 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
                 year = self.application_num_last_edit.text()
                 # year_filter = "%-" + str(year)
                 obj_type = 'application\Application'
-                PluginUtils.generate_auto_app_no(year, app_type, soum_code, obj_type)
+                PluginUtils.generate_auto_app_no(year, app_type, soum_code, obj_type, self.session)
 
         self.application.app_no = app_no
         self.application.requested_landuse = self.requested_land_use_type_cbox.itemData(self.requested_land_use_type_cbox.currentIndex())
@@ -4659,7 +4659,7 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
                 .filter(CtDecisionApplication.application == self.application.app_id).count()
             if decision_count > 0:
                 decision = self.session.query(CtDecision).join(CtDecisionApplication.decision_ref)\
-                    .filter(CtDecisionApplication.application == self.application.app_id).one()
+                    .filter(CtDecisionApplication.application == self.application.app_id).first()
 
                 self.decision_number_edit.setText(decision.decision_no)
                 self.decision_date_edit.setText(PluginUtils.convert_python_date_to_qt(decision.decision_date)

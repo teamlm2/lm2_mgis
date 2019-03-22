@@ -1120,7 +1120,7 @@ class PastureMonitoringValueDialog(QDialog, Ui_PastureMonitoringValueDialog, Dat
         self.land_name_text_edit.setText(point_land_name)
 
         item = self.point_detail_twidget.item(current_row, 3)
-        print item
+
         if item:
             land_form_code = item.data(Qt.UserRole)
         point_detail = self.session.query(PsPointDetail).filter(PsPointDetail.point_detail_id == point_detail_id).one()
@@ -2500,6 +2500,8 @@ class PastureMonitoringValueDialog(QDialog, Ui_PastureMonitoringValueDialog, Dat
 
             selected_row = self.point_detail_twidget.currentRow()
             self.point_detail_twidget.removeRow(selected_row)
+
+        self.session.commit()
 
     @pyqtSlot()
     def on_delet_point_button_clicked(self):
