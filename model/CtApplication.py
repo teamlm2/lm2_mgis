@@ -1,4 +1,4 @@
-__author__ = 'mwagner'
+__author__ = 'B.Ankhbold'
 
 from sqlalchemy import Column, Integer, String, Date, Sequence, ForeignKey, DateTime, Table
 from sqlalchemy.orm import relationship, backref

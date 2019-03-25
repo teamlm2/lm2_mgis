@@ -1,4 +1,4 @@
-__author__ = 'mwagner'
+__author__ = 'B.Ankhbold'
 
 from sqlalchemy import ForeignKey, Column, String, Integer, Numeric
 from CtFineForTaxPayment import *

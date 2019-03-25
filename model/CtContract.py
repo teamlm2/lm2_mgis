@@ -1,4 +1,4 @@
-__author__ = 'mwagner'
+__author__ = 'B.Ankhbold'
 
 from sqlalchemy import Date, DateTime
 from sqlalchemy.orm import relationship

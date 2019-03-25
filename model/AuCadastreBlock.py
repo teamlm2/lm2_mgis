@@ -1,4 +1,4 @@
-__author__ = 'anna'
+__author__ = 'B.Ankhbold'
 
 from sqlalchemy import Column, String, Float, Integer, Sequence
 from geoalchemy2 import Geometry

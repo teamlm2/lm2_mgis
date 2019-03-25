@@ -1,4 +1,4 @@
-__author__ = 'anna'
+__author__ = 'B.Ankhbold'
 
 import unittest
 from trunk.utils.SessionHandler import SessionHandler

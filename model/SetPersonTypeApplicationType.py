@@ -1,4 +1,4 @@
-__author__ = 'Anna'
+__author__ = 'B.Ankhbold'
 
 from sqlalchemy import Column, ForeignKey, Integer
 from sqlalchemy.orm import relationship

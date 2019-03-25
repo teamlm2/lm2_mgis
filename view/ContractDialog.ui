@@ -74,7 +74,7 @@
      <x>10</x>
      <y>30</y>
      <width>781</width>
-     <height>391</height>
+     <height>395</height>
     </rect>
    </property>
    <property name="currentIndex">
@@ -1187,10 +1187,10 @@
     <widget class="QGroupBox" name="groupBox_6">
      <property name="geometry">
       <rect>
-       <x>10</x>
-       <y>10</y>
-       <width>756</width>
-       <height>131</height>
+       <x>2</x>
+       <y>0</y>
+       <width>771</width>
+       <height>177</height>
       </rect>
      </property>
      <property name="title">
@@ -1202,9 +1202,9 @@
       </property>
       <property name="geometry">
        <rect>
-        <x>40</x>
-        <y>65</y>
-        <width>200</width>
+        <x>10</x>
+        <y>68</y>
+        <width>150</width>
         <height>20</height>
        </rect>
       </property>
@@ -1215,9 +1215,9 @@
       </property>
       <property name="geometry">
        <rect>
-        <x>278</x>
-        <y>65</y>
-        <width>200</width>
+        <x>10</x>
+        <y>107</y>
+        <width>150</width>
         <height>20</height>
        </rect>
       </property>
@@ -1228,9 +1228,9 @@
       </property>
       <property name="geometry">
        <rect>
-        <x>510</x>
-        <y>65</y>
-        <width>200</width>
+        <x>10</x>
+        <y>146</y>
+        <width>150</width>
         <height>20</height>
        </rect>
       </property>
@@ -1238,9 +1238,9 @@
      <widget class="QLabel" name="label_27">
       <property name="geometry">
        <rect>
-        <x>40</x>
-        <y>50</y>
-        <width>200</width>
+        <x>10</x>
+        <y>53</y>
+        <width>121</width>
         <height>16</height>
        </rect>
       </property>
@@ -1251,8 +1251,8 @@
      <widget class="QLabel" name="label_28">
       <property name="geometry">
        <rect>
-        <x>278</x>
-        <y>50</y>
+        <x>10</x>
+        <y>92</y>
         <width>200</width>
         <height>16</height>
        </rect>
@@ -1264,8 +1264,8 @@
      <widget class="QLabel" name="label_29">
       <property name="geometry">
        <rect>
-        <x>510</x>
-        <y>50</y>
+        <x>10</x>
+        <y>131</y>
         <width>220</width>
         <height>16</height>
        </rect>
@@ -1277,10 +1277,10 @@
      <widget class="QLabel" name="landfee_message_label1">
       <property name="geometry">
        <rect>
-        <x>15</x>
-        <y>100</y>
-        <width>726</width>
-        <height>16</height>
+        <x>166</x>
+        <y>150</y>
+        <width>431</width>
+        <height>20</height>
        </rect>
       </property>
       <property name="font">
@@ -1296,9 +1296,9 @@
      <widget class="QComboBox" name="fee_zone_cbox">
       <property name="geometry">
        <rect>
-        <x>280</x>
-        <y>20</y>
-        <width>321</width>
+        <x>10</x>
+        <y>30</y>
+        <width>251</width>
         <height>22</height>
        </rect>
       </property>
@@ -1306,9 +1306,9 @@
      <widget class="QLabel" name="label_34">
       <property name="geometry">
        <rect>
-        <x>40</x>
-        <y>24</y>
-        <width>200</width>
+        <x>10</x>
+        <y>13</y>
+        <width>131</width>
         <height>16</height>
        </rect>
       </property>
@@ -1316,12 +1316,42 @@
        <string>Select base fee</string>
       </property>
      </widget>
+     <widget class="QTableWidget" name="share_fee_twidget">
+      <property name="geometry">
+       <rect>
+        <x>270</x>
+        <y>13</y>
+        <width>498</width>
+        <height>136</height>
+       </rect>
+      </property>
+      <column>
+       <property name="text">
+        <string>Fee Share</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Register</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Surname/Company</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>First Name</string>
+       </property>
+      </column>
+     </widget>
      <widget class="QPushButton" name="refresh_fee_button">
       <property name="geometry">
        <rect>
-        <x>630</x>
-        <y>20</y>
-        <width>111</width>
+        <x>690</x>
+        <y>150</y>
+        <width>75</width>
         <height>23</height>
        </rect>
       </property>
@@ -1329,14 +1359,27 @@
        <string>Calculate Fee</string>
       </property>
      </widget>
+     <widget class="QPushButton" name="show_fee_button">
+      <property name="geometry">
+       <rect>
+        <x>604</x>
+        <y>150</y>
+        <width>75</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Show Fee</string>
+      </property>
+     </widget>
     </widget>
     <widget class="QTableWidget" name="land_fee_twidget">
      <property name="geometry">
       <rect>
-       <x>10</x>
-       <y>150</y>
-       <width>756</width>
-       <height>181</height>
+       <x>2</x>
+       <y>180</y>
+       <width>770</width>
+       <height>184</height>
       </rect>
      </property>
      <attribute name="horizontalHeaderDefaultSectionSize">
@@ -1415,25 +1458,6 @@
        <string>Zone No</string>
       </property>
      </column>
-    </widget>
-    <widget class="QLabel" name="landfee_message_label2">
-     <property name="geometry">
-      <rect>
-       <x>15</x>
-       <y>340</y>
-       <width>746</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <weight>75</weight>
-       <bold>true</bold>
-      </font>
-     </property>
-     <property name="text">
-      <string>XXX</string>
-     </property>
     </widget>
    </widget>
    <widget class="QWidget" name="tab_6">

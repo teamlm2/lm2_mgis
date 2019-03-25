@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
 
-__author__ = 'anna'
+__author__ = 'B.Ankhbold'
 
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *

@@ -1,5 +1,5 @@
 
-__author__ = 'anna'
+__author__ = 'B.Ankhbold'
 
 from qgis.core import *
 from geoalchemy2.elements import WKTElement

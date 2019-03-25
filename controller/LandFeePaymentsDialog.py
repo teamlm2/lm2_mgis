@@ -1,5 +1,5 @@
 # coding=utf8
-__author__ = 'mwagner'
+__author__ = 'B.Ankhbold'
 
 from ..view.Ui_LandFeePaymentsDialog import *
 from ..utils.PluginUtils import *

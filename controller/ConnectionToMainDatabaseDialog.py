@@ -1,5 +1,5 @@
 # coding=utf8
-__author__ = 'anna'
+__author__ = 'B.Ankhbold'
 
 import os
 from PyQt4.QtCore import *

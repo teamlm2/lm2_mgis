@@ -1,4 +1,4 @@
-__author__ = 'anna'
+__author__ = 'B.Ankhbold'
 #!/usr/bin/python
 # -*- coding: utf-8
 from PyQt4.QtCore import *

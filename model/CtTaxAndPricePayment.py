@@ -1,4 +1,4 @@
-__author__ = 'mwagner'
+__author__ = 'B.Ankhbold'
 
 from sqlalchemy import Date, Sequence, ForeignKeyConstraint
 from sqlalchemy.orm import relationship
