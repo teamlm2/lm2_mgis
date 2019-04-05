@@ -2813,25 +2813,27 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
 
         status_date = self.decision_date.date().toString(Constants.DATABASE_DATE_FORMAT)
 
-        statuses = self.session.query(ClApplicationStatus).all()
+        statuses = self.session.query(ClApplicationStatus).\
+            filter(ClApplicationStatus.code != 1). \
+            filter(ClApplicationStatus.code != 8). \
+            filter(ClApplicationStatus.code < 10).order_by(ClApplicationStatus.code.asc()).all()
 
         self.create_savepoint()
         try:
             for status in statuses:
-                if status.code != 8 and status.code != 1 and status.code < 10:
-                    application_status = CtApplicationStatus()
-                    application_status.ct_application = self.application
-                    application_status.status = status.code
-                    application_status.status_ref = status
-                    application_status.status_date = status_date
+                application_status = CtApplicationStatus()
+                application_status.ct_application = self.application
+                application_status.status = status.code
+                application_status.status_ref = status
+                application_status.status_date = status_date
 
-                    # current_user = QSettings().value(SettingsConstants.USER)
-                    # officer = self.session.query(SetRole).filter_by(user_name=current_user).filter(SetRole.is_active == True).one()
-                    application_status.next_officer_in_charge = DatabaseUtils.current_sd_user().user_id
-                    application_status.next_officer_in_charge_ref = DatabaseUtils.current_sd_user()
-                    application_status.officer_in_charge_ref = DatabaseUtils.current_sd_user()
-                    application_status.officer_in_charge = DatabaseUtils.current_sd_user().user_id
-                    self.application.statuses.append(application_status)
+                # current_user = QSettings().value(SettingsConstants.USER)
+                # officer = self.session.query(SetRole).filter_by(user_name=current_user).filter(SetRole.is_active == True).one()
+                application_status.next_officer_in_charge = DatabaseUtils.current_sd_user().user_id
+                application_status.next_officer_in_charge_ref = DatabaseUtils.current_sd_user()
+                application_status.officer_in_charge_ref = DatabaseUtils.current_sd_user()
+                application_status.officer_in_charge = DatabaseUtils.current_sd_user().user_id
+                self.application.statuses.append(application_status)
         except SQLAlchemyError, e:
             self.rollback_to_savepoint()
             raise LM2Exception(self.tr("File Error"),

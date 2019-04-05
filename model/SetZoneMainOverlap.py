@@ -17,9 +17,9 @@ class SetZoneMainOverlap(Base):
     updated_by = Column(Integer)
 
     # foreign keys:
-    zone_main_id_src = Column(Integer, ForeignKey('cl_zone_main.zone_main_id'), primary_key=True)
-    zone_main_id_src_ref = relationship("ClZoneMain")
+    plan_zone_id_src = Column(Integer, ForeignKey('cl_plan_zone.plan_zone_id'), primary_key=True)
+    plan_zone_id_src_ref = relationship("ClPlanZone")
 
-    zone_main_id_trg = Column(Integer, ForeignKey('cl_zone_main.zone_main_id'), primary_key=True)
-    zone_main_id_trg_ref = relationship("ClZoneMain")
+    plan_zone_id_trg = Column(Integer, ForeignKey('cl_plan_zone.plan_zone_id'), primary_key=True)
+    plan_zone_id_trg_ref = relationship("ClPlanZone")
 

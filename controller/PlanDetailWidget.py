@@ -21,12 +21,11 @@ from ..model.ClPlanDecisionLevel import *
 from ..model.SetWorkruleStatus import *
 from ..model.ClPlanType import *
 from ..model.PlProjectStatusHistory import *
-from ..model.PlProjectParcelZoneMain import *
-# from ..model.PlProjectParcelZoneSub import *
-from ..model.PlProjectParcelZoneActivity import *
+from ..model.PlProjectParcel import *
 from ..model.ClZoneActivity import *
 from ..model.ClZoneSub import *
-from ..model.ClZoneMain import *
+from ..model.ClPlanZone import *
+from ..model.ClPlanZoneType import *
 from ..utils.DatabaseUtils import *
 from ..utils.PluginUtils import *
 from ..model.DatabaseHelper import *
@@ -73,43 +72,40 @@ class PlanDetailWidget(QDockWidget, Ui_PlanDetailWidget, DatabaseHelper):
         self.parcels = []
         self.process_types = []
         self.main_tree_widget.itemChanged.connect(self.__itemMainParcelsCheckChanged)
-        self.sub_tree_widget.itemChanged.connect(self.__itemSubParcelsCheckChanged)
-        self.activity_tree_widget.itemChanged.connect(self.__itemPlanParcelsCheckChanged)
 
     def __setup_cbox(self):
 
+        self.zone_type_cbox.clear()
+        values = self.session.query(ClPlanZoneType).order_by(ClPlanZoneType.sort_order.asc()).all()
+
+        self.zone_type_cbox.addItem("*", -1)
+        for value in values:
+            self.zone_type_cbox.addItem(str(value.code) + ':' + value.name, value.plan_zone_type_id)
+
+    @pyqtSlot(int)
+    def on_zone_type_cbox_currentIndexChanged(self, index):
+
+        zone_type_id = self.zone_type_cbox.itemData(index)
+
         self.main_process_type_cbox.clear()
-        values = self.session.query(ClZoneMain.zone_main_id, ClZoneMain.code, ClZoneMain.name).\
-            join(PlProjectParcelZoneMain, ClZoneMain.zone_main_id == PlProjectParcelZoneMain.zone_main_id).\
-            filter(PlProjectParcelZoneMain.project_id == self.plan.project_id).\
-            group_by(ClZoneMain.zone_main_id, ClZoneMain.code, ClZoneMain.name). \
-            order_by(ClZoneMain.code)
-
         self.main_process_type_cbox.addItem("*", -1)
-        for value in values:
-            self.main_process_type_cbox.addItem(str(value.code)+':'+value.name, value.zone_main_id)
-
-        self.sub_process_type_cbox.clear()
-        values = self.session.query(ClZoneSub.zone_sub_id, ClZoneSub.code, ClZoneSub.name). \
-            join(PlProjectParcelZoneSub, ClZoneSub.zone_sub_id == PlProjectParcelZoneSub.zone_sub_id). \
-            filter(PlProjectParcelZoneSub.project_id == self.plan.project_id). \
-            group_by(ClZoneSub.zone_sub_id, ClZoneSub.code, ClZoneSub.name). \
-            order_by(ClZoneSub.code)
-
-        self.sub_process_type_cbox.addItem("*", -1)
-        for value in values:
-            self.sub_process_type_cbox.addItem(str(value.code) + ':' + value.name, value.zone_sub_id)
-
-        self.activity_process_type_cbox.clear()
-        values = self.session.query(ClZoneActivity.zone_activity_id, ClZoneActivity.code, ClZoneActivity.name). \
-            join(PlProjectParcelZoneActivity, ClZoneActivity.zone_activity_id == PlProjectParcelZoneActivity.zone_activity_id). \
-            filter(PlProjectParcelZoneActivity.project_id == self.plan.project_id). \
-            group_by(ClZoneActivity.zone_activity_id, ClZoneActivity.code, ClZoneActivity.name). \
-            order_by(ClZoneActivity.code)
-
-        self.activity_process_type_cbox.addItem("*", -1)
-        for value in values:
-            self.activity_process_type_cbox.addItem(str(value.code) + ':' + value.name, value.zone_activity_id)
+        if zone_type_id != -1:
+            values = self.session.query(ClPlanZone.plan_zone_id, ClPlanZone.code, ClPlanZone.name). \
+                join(PlProjectParcel, ClPlanZone.plan_zone_id == PlProjectParcel.plan_zone_id). \
+                filter(PlProjectParcel.project_id == self.plan.project_id). \
+                filter(ClPlanZone.plan_zone_type_id == zone_type_id). \
+                group_by(ClPlanZone.plan_zone_id, ClPlanZone.code, ClPlanZone.name). \
+                order_by(ClPlanZone.code)
+            for value in values:
+                self.main_process_type_cbox.addItem(str(value.code) + ':' + value.name, value.plan_zone_id)
+        elif zone_type_id == -1:
+            values = self.session.query(ClPlanZone.plan_zone_id, ClPlanZone.code, ClPlanZone.name). \
+                join(PlProjectParcel, ClPlanZone.plan_zone_id == PlProjectParcel.plan_zone_id). \
+                filter(PlProjectParcel.project_id == self.plan.project_id). \
+                group_by(ClPlanZone.plan_zone_id, ClPlanZone.code, ClPlanZone.name). \
+                order_by(ClPlanZone.code)
+            for value in values:
+                self.main_process_type_cbox.addItem(str(value.code) + ':' + value.name, value.plan_zone_id)
 
     def __setup_main_tree_widget(self):
 
@@ -134,54 +130,6 @@ class PlanDetailWidget(QDockWidget, Ui_PlanDetailWidget, DatabaseHelper):
         self.main_tree_widget.addTopLevelItem(self.item_line_main)
         self.main_tree_widget.addTopLevelItem(self.item_polygon_main)
         self.main_tree_widget.setContextMenuPolicy(Qt.CustomContextMenu)
-
-    def __setup_sub_tree_widget(self):
-
-        self.sub_tree_widget.clear()
-        self.item_point_sub = QTreeWidgetItem()
-        self.item_point_sub.setText(0, self.tr("Point"))
-        self.item_point_sub.setData(0, Qt.UserRole, Constants.GEOM_POINT)
-
-        self.item_line_sub = QTreeWidgetItem()
-        self.item_line_sub.setText(0, self.tr("Line"))
-        self.item_line_sub.setData(0, Qt.UserRole, Constants.GEOM_LINE)
-
-        self.item_polygon_sub = QTreeWidgetItem()
-        self.item_polygon_sub.setText(0, self.tr("Polygon"))
-        self.item_polygon_sub.setData(0, Qt.UserRole, GEOM_POlYGON)
-
-        self.sub_tree_widget.setSelectionMode(QAbstractItemView.SingleSelection)
-        self.sub_tree_widget.setSelectionBehavior(QAbstractItemView.SelectRows)
-        self.sub_tree_widget.setEditTriggers(QAbstractItemView.NoEditTriggers)
-
-        self.sub_tree_widget.addTopLevelItem(self.item_point_sub)
-        self.sub_tree_widget.addTopLevelItem(self.item_line_sub)
-        self.sub_tree_widget.addTopLevelItem(self.item_polygon_sub)
-        self.sub_tree_widget.setContextMenuPolicy(Qt.CustomContextMenu)
-
-    def __setup_activity_tree_widget(self):
-
-        self.activity_tree_widget.clear()
-        self.item_point_activity = QTreeWidgetItem()
-        self.item_point_activity.setText(0, self.tr("Point"))
-        self.item_point_activity.setData(0, Qt.UserRole, Constants.GEOM_POINT)
-
-        self.item_line_activity = QTreeWidgetItem()
-        self.item_line_activity.setText(0, self.tr("Line"))
-        self.item_line_activity.setData(0, Qt.UserRole, Constants.GEOM_LINE)
-
-        self.item_polygon_activity = QTreeWidgetItem()
-        self.item_polygon_activity.setText(0, self.tr("Polygon"))
-        self.item_polygon_activity.setData(0, Qt.UserRole, GEOM_POlYGON)
-
-        self.activity_tree_widget.setSelectionMode(QAbstractItemView.SingleSelection)
-        self.activity_tree_widget.setSelectionBehavior(QAbstractItemView.SelectRows)
-        self.activity_tree_widget.setEditTriggers(QAbstractItemView.NoEditTriggers)
-
-        self.activity_tree_widget.addTopLevelItem(self.item_point_activity)
-        self.activity_tree_widget.addTopLevelItem(self.item_line_activity)
-        self.activity_tree_widget.addTopLevelItem(self.item_polygon_activity)
-        self.activity_tree_widget.setContextMenuPolicy(Qt.CustomContextMenu)
 
     def __setup_context_menu(self):
 
@@ -210,276 +158,50 @@ class PlanDetailWidget(QDockWidget, Ui_PlanDetailWidget, DatabaseHelper):
         point = self.main_tree_widget.viewport().mapToGlobal(point)
         self.menu.exec_(point)
 
-    def __load_activity_zone(self, au2):
-
-        self.activity_load_pbar.setValue(1)
-
-        values = self.session.query(PlProjectParcelZoneActivity). \
-            filter(PlProjectParcelZoneActivity.project_id == self.plan.project_id). \
-            filter(PlProjectParcelZoneActivity.au2 == au2)
-
-        self.activity_load_pbar.setMaximum(values.count())
-
-        points = self.session.query(PlProjectParcelZoneActivity). \
-            filter(PlProjectParcelZoneActivity.project_id == self.plan.project_id). \
-            filter(PlProjectParcelZoneActivity.polygon_geom == None). \
-            filter(PlProjectParcelZoneActivity.line_geom == None). \
-            filter(PlProjectParcelZoneActivity.au2 == au2).order_by(PlProjectParcelZoneActivity.badedturl)
-
-        lines = self.session.query(PlProjectParcelZoneActivity). \
-            filter(PlProjectParcelZoneActivity.project_id == self.plan.project_id). \
-            filter(PlProjectParcelZoneActivity.polygon_geom == None). \
-            filter(PlProjectParcelZoneActivity.point_geom == None). \
-            filter(PlProjectParcelZoneActivity.au2 == au2).order_by(PlProjectParcelZoneActivity.badedturl)
-
-        polygons = self.session.query(PlProjectParcelZoneActivity). \
-            filter(PlProjectParcelZoneActivity.project_id == self.plan.project_id). \
-            filter(PlProjectParcelZoneActivity.line_geom == None). \
-            filter(PlProjectParcelZoneActivity.point_geom == None). \
-            filter(PlProjectParcelZoneActivity.au2 == au2).order_by(PlProjectParcelZoneActivity.badedturl)
-
-        if self.activity_process_type_cbox.currentIndex() != -1:
-            if not self.activity_process_type_cbox.itemData(self.activity_process_type_cbox.currentIndex()) == -1:
-                process_type = self.activity_process_type_cbox.itemData(self.activity_process_type_cbox.currentIndex())
-
-                points = points.filter(PlProjectParcelZoneActivity.zone_activity_id == process_type)
-                lines = lines.filter(PlProjectParcelZoneActivity.zone_activity_id == process_type)
-                polygons = polygons.filter(PlProjectParcelZoneActivity.zone_activity_id == process_type)
-
-        if self.activity_process_edit.text():
-            process_text = "%" + self.activity_process_edit.text() + "%"
-            points = points.\
-                join(ClZoneActivity, PlProjectParcelZoneActivity.zone_activity_id == ClZoneActivity.zone_activity_id).\
-                filter(ClZoneActivity.description.ilike(process_text))
-
-            lines = lines. \
-                join(ClZoneActivity, PlProjectParcelZoneActivity.zone_activity_id == ClZoneActivity.zone_activity_id). \
-                filter(ClZoneActivity.description.ilike(process_text))
-
-            polygons = polygons. \
-                join(ClZoneActivity, PlProjectParcelZoneActivity.zone_activity_id == ClZoneActivity.zone_activity_id). \
-                filter(ClZoneActivity.description.ilike(process_text))
-
-        tree = self.activity_tree_widget
-        for value in polygons:
-            name = ''
-            if value.gazner:
-                name = '(' + value.gazner + ')'
-            desc = ''
-            if value.zone_activity_ref:
-                if value.zone_activity_ref.name:
-                    desc = value.zone_activity_ref.name
-                    item = QTreeWidgetItem()
-                    item.setText(0, str(value.zone_activity_ref.code)+ ': ' + name + desc)
-                    item.setIcon(0, QIcon(QPixmap(":/plugins/lm2/parcel_red.png")))
-                    item.setData(0, Qt.UserRole, value.parcel_id)
-                    item.setData(0, Qt.UserRole + 1, "polygon")
-                    item.setData(0, Qt.UserRole + 2, value.zone_activity_id)
-                    item.setCheckState(0, Qt.Unchecked)
-                    self.item_polygon_activity.addChild(item)
-                    value_p = self.activity_load_pbar.value() + 1
-                    self.activity_load_pbar.setValue(value_p)
-
-        for value in points:
-            name = ''
-            if value.gazner:
-                name = '(' + value.gazner + ')'
-            desc = ''
-            if value.zone_activity_ref:
-                if value.zone_activity_ref.name:
-                    desc = value.zone_activity_ref.name
-                    item = QTreeWidgetItem()
-                    item.setText(0, str(value.zone_activity_ref.code)+ ': ' + name + desc)
-                    item.setIcon(0, QIcon(QPixmap(":/plugins/lm2/parcel_red.png")))
-                    item.setData(0, Qt.UserRole, value.parcel_id)
-                    item.setData(0, Qt.UserRole + 1, "point")
-                    item.setData(0, Qt.UserRole + 2, value.zone_activity_id)
-                    item.setCheckState(0, Qt.Unchecked)
-                    self.item_point_activity.addChild(item)
-                    value_p = self.activity_load_pbar.value() + 1
-                    self.activity_load_pbar.setValue(value_p)
-
-        for value in lines:
-            name = ''
-            if value.gazner:
-                name = '(' + value.gazner + ')'
-            desc = ''
-            if value.zone_activity_ref:
-                if value.zone_activity_ref.name:
-                    desc = value.zone_activity_ref.name
-                    item = QTreeWidgetItem()
-                    item.setText(0, str(value.zone_activity_ref.code)+ ': ' + name + desc)
-                    item.setIcon(0, QIcon(QPixmap(":/plugins/lm2/parcel_red.png")))
-                    item.setData(0, Qt.UserRole, value.parcel_id)
-                    item.setData(0, Qt.UserRole + 1, "line")
-                    item.setData(0, Qt.UserRole + 2, value.zone_activity_id)
-                    item.setCheckState(0, Qt.Unchecked)
-                    self.item_line_activity.addChild(item)
-                    value_p = self.activity_load_pbar.value() + 1
-                    self.activity_load_pbar.setValue(value_p)
-
-        self.activity_tree_widget.expandAll()
-        self.activity_load_pbar.setVisible(False)
-
-    def __load_sub_zone(self, au2):
-
-        self.sub_load_pbar.setValue(1)
-
-        values = self.session.query(PlProjectParcelZoneSub). \
-            filter(PlProjectParcelZoneSub.project_id == self.plan.project_id). \
-            filter(PlProjectParcelZoneSub.au2 == au2)
-
-        self.sub_load_pbar.setMaximum(values.count())
-
-        points = self.session.query(PlProjectParcelZoneSub). \
-            filter(PlProjectParcelZoneSub.project_id == self.plan.project_id). \
-            filter(PlProjectParcelZoneSub.polygon_geom == None). \
-            filter(PlProjectParcelZoneSub.line_geom == None). \
-            filter(PlProjectParcelZoneSub.au2 == au2).order_by(PlProjectParcelZoneSub.badedturl)
-
-        lines = self.session.query(PlProjectParcelZoneSub). \
-            filter(PlProjectParcelZoneSub.project_id == self.plan.project_id). \
-            filter(PlProjectParcelZoneSub.polygon_geom == None). \
-            filter(PlProjectParcelZoneSub.point_geom == None). \
-            filter(PlProjectParcelZoneSub.au2 == au2).order_by(PlProjectParcelZoneSub.badedturl)
-
-        polygons = self.session.query(PlProjectParcelZoneSub). \
-            filter(PlProjectParcelZoneSub.project_id == self.plan.project_id). \
-            filter(PlProjectParcelZoneSub.line_geom == None). \
-            filter(PlProjectParcelZoneSub.point_geom == None). \
-            filter(PlProjectParcelZoneSub.au2 == au2).order_by(PlProjectParcelZoneSub.badedturl)
-
-        if self.sub_process_type_cbox.currentIndex() != -1:
-            if not self.sub_process_type_cbox.itemData(self.sub_process_type_cbox.currentIndex()) == -1:
-                process_type = self.sub_process_type_cbox.itemData(self.sub_process_type_cbox.currentIndex())
-
-                points = points.filter(PlProjectParcelZoneSub.zone_sub_id == process_type)
-                lines = lines.filter(PlProjectParcelZoneSub.zone_sub_id == process_type)
-                polygons = polygons.filter(PlProjectParcelZoneSub.zone_sub_id == process_type)
-
-        if self.sub_process_edit.text():
-            process_text = "%" + self.sub_process_edit.text() + "%"
-            points = points.\
-                join(ClZoneSub, PlProjectParcelZoneSub.zone_sub_id == ClZoneSub.zone_sub_id).\
-                filter(ClZoneSub.description.ilike(process_text))
-
-            lines = lines. \
-                join(ClZoneSub, PlProjectParcelZoneSub.zone_sub_id == ClZoneSub.zone_sub_id). \
-                filter(ClZoneSub.description.ilike(process_text))
-
-            polygons = polygons. \
-                join(ClZoneSub, PlProjectParcelZoneSub.zone_sub_id == ClZoneSub.zone_sub_id). \
-                filter(ClZoneSub.description.ilike(process_text))
-
-        tree = self.sub_tree_widget
-        for value in polygons:
-            name = ''
-            if value.gazner:
-                name = '(' + value.gazner + ')'
-            desc = ''
-            if value.zone_sub_ref:
-                if value.zone_sub_ref.name:
-                    desc = value.zone_sub_ref.name
-                    item = QTreeWidgetItem()
-                    item.setText(0, str(value.zone_sub_ref.code)+ ': ' + name + desc)
-                    item.setIcon(0, QIcon(QPixmap(":/plugins/lm2/parcel_red.png")))
-                    item.setData(0, Qt.UserRole, value.parcel_id)
-                    item.setData(0, Qt.UserRole + 1, "polygon")
-                    item.setData(0, Qt.UserRole + 2, value.zone_sub_id)
-                    item.setCheckState(0, Qt.Unchecked)
-                    self.item_polygon_sub.addChild(item)
-                    value_p = self.sub_load_pbar.value() + 1
-                    self.sub_load_pbar.setValue(value_p)
-
-        for value in points:
-            name = ''
-            if value.gazner:
-                name = '(' + value.gazner + ')'
-            desc = ''
-            if value.zone_sub_ref:
-                if value.zone_sub_ref.name:
-                    desc = value.zone_sub_ref.name
-                    item = QTreeWidgetItem()
-                    item.setText(0, str(value.zone_sub_ref.code)+ ': ' + name + desc)
-                    item.setIcon(0, QIcon(QPixmap(":/plugins/lm2/parcel_red.png")))
-                    item.setData(0, Qt.UserRole, value.parcel_id)
-                    item.setData(0, Qt.UserRole + 1, "point")
-                    item.setData(0, Qt.UserRole + 2, value.zone_sub_id)
-                    item.setCheckState(0, Qt.Unchecked)
-                    self.item_point_sub.addChild(item)
-                    value_p = self.sub_load_pbar.value() + 1
-                    self.sub_load_pbar.setValue(value_p)
-
-        for value in lines:
-            name = ''
-            if value.gazner:
-                name = '(' + value.gazner + ')'
-            desc = ''
-            if value.zone_sub_ref:
-                if value.zone_sub_ref.name:
-                    desc = value.zone_sub_ref.name
-                    item = QTreeWidgetItem()
-                    item.setText(0, str(value.zone_sub_ref.code)+ ': ' + name + desc)
-                    item.setIcon(0, QIcon(QPixmap(":/plugins/lm2/parcel_red.png")))
-                    item.setData(0, Qt.UserRole, value.parcel_id)
-                    item.setData(0, Qt.UserRole + 1, "line")
-                    item.setData(0, Qt.UserRole + 2, value.zone_sub_id)
-                    item.setCheckState(0, Qt.Unchecked)
-                    self.item_line_sub.addChild(item)
-                    value_p = self.sub_load_pbar.value() + 1
-                    self.sub_load_pbar.setValue(value_p)
-
-        self.sub_tree_widget.expandAll()
-        self.sub_load_pbar.setVisible(False)
-
     def __load_main_zone(self, au2):
 
         self.main_load_pbar.setValue(1)
 
-        values = self.session.query(PlProjectParcelZoneMain). \
-            filter(PlProjectParcelZoneMain.project_id == self.plan.project_id). \
-            filter(PlProjectParcelZoneMain.au2 == au2)
+        values = self.session.query(PlProjectParcel). \
+            filter(PlProjectParcel.project_id == self.plan.project_id)
 
         self.main_load_pbar.setMaximum(values.count())
 
-        points = self.session.query(PlProjectParcelZoneMain). \
-            filter(PlProjectParcelZoneMain.project_id == self.plan.project_id). \
-            filter(PlProjectParcelZoneMain.polygon_geom == None). \
-            filter(PlProjectParcelZoneMain.line_geom == None). \
-            filter(PlProjectParcelZoneMain.au2 == au2).order_by(PlProjectParcelZoneMain.badedturl)
+        points = self.session.query(PlProjectParcel). \
+            filter(PlProjectParcel.project_id == self.plan.project_id). \
+            filter(PlProjectParcel.polygon_geom == None). \
+            filter(PlProjectParcel.line_geom == None).order_by(PlProjectParcel.badedturl)
 
-        lines = self.session.query(PlProjectParcelZoneMain). \
-            filter(PlProjectParcelZoneMain.project_id == self.plan.project_id). \
-            filter(PlProjectParcelZoneMain.polygon_geom == None). \
-            filter(PlProjectParcelZoneMain.point_geom == None). \
-            filter(PlProjectParcelZoneMain.au2 == au2).order_by(PlProjectParcelZoneMain.badedturl)
+        lines = self.session.query(PlProjectParcel). \
+            filter(PlProjectParcel.project_id == self.plan.project_id). \
+            filter(PlProjectParcel.polygon_geom == None). \
+            filter(PlProjectParcel.point_geom == None).order_by(PlProjectParcel.badedturl)
 
-        polygons = self.session.query(PlProjectParcelZoneMain). \
-            filter(PlProjectParcelZoneMain.project_id == self.plan.project_id). \
-            filter(PlProjectParcelZoneMain.line_geom == None). \
-            filter(PlProjectParcelZoneMain.point_geom == None). \
-            filter(PlProjectParcelZoneMain.au2 == au2).order_by(PlProjectParcelZoneMain.badedturl)
+        polygons = self.session.query(PlProjectParcel). \
+            filter(PlProjectParcel.project_id == self.plan.project_id). \
+            filter(PlProjectParcel.line_geom == None). \
+            filter(PlProjectParcel.point_geom == None).order_by(PlProjectParcel.badedturl)
 
-        if self.sub_process_type_cbox.currentIndex() != -1:
-            if not self.sub_process_type_cbox.itemData(self.sub_process_type_cbox.currentIndex()) == -1:
-                process_type = self.sub_process_type_cbox.itemData(self.sub_process_type_cbox.currentIndex())
+        if self.main_process_type_cbox.currentIndex() != -1:
+            if not self.main_process_type_cbox.itemData(self.main_process_type_cbox.currentIndex()) == -1:
+                process_type = self.main_process_type_cbox.itemData(self.main_process_type_cbox.currentIndex())
 
-                points = points.filter(PlProjectParcelZoneMain.zone_main_id == process_type)
-                lines = lines.filter(PlProjectParcelZoneMain.zone_main_id == process_type)
-                polygons = polygons.filter(PlProjectParcelZoneMain.zone_main_id == process_type)
+                points = points.filter(PlProjectParcel.plan_zone_id == process_type)
+                lines = lines.filter(PlProjectParcel.plan_zone_id == process_type)
+                polygons = polygons.filter(PlProjectParcel.plan_zone_id == process_type)
 
-        if self.sub_process_edit.text():
-            process_text = "%" + self.sub_process_edit.text() + "%"
+        if self.main_process_edit.text():
+            process_text = "%" + self.main_process_edit.text() + "%"
             points = points.\
-                join(ClZoneSub, PlProjectParcelZoneMain.zone_main_id == ClZoneSub.zone_main_id).\
+                join(ClZoneSub, PlProjectParcel.plan_zone_id == ClZoneSub.plan_zone_id).\
                 filter(ClZoneSub.description.ilike(process_text))
 
             lines = lines. \
-                join(ClZoneSub, PlProjectParcelZoneMain.zone_main_id == ClZoneSub.zone_main_id). \
+                join(ClZoneSub, PlProjectParcel.plan_zone_id == ClZoneSub.plan_zone_id). \
                 filter(ClZoneSub.description.ilike(process_text))
 
             polygons = polygons. \
-                join(ClZoneSub, PlProjectParcelZoneMain.zone_main_id == ClZoneSub.zone_main_id). \
+                join(ClZoneSub, PlProjectParcel.plan_zone_id == ClZoneSub.plan_zone_id). \
                 filter(ClZoneSub.description.ilike(process_text))
 
         tree = self.main_tree_widget
@@ -496,7 +218,7 @@ class PlanDetailWidget(QDockWidget, Ui_PlanDetailWidget, DatabaseHelper):
                     item.setIcon(0, QIcon(QPixmap(":/plugins/lm2/parcel_red.png")))
                     item.setData(0, Qt.UserRole, value.parcel_id)
                     item.setData(0, Qt.UserRole + 1, "polygon")
-                    item.setData(0, Qt.UserRole + 2, value.zone_main_id)
+                    item.setData(0, Qt.UserRole + 2, value.plan_zone_id)
                     item.setCheckState(0, Qt.Unchecked)
                     self.item_polygon_main.addChild(item)
                     value_p = self.main_load_pbar.value() + 1
@@ -515,7 +237,7 @@ class PlanDetailWidget(QDockWidget, Ui_PlanDetailWidget, DatabaseHelper):
                     item.setIcon(0, QIcon(QPixmap(":/plugins/lm2/parcel_red.png")))
                     item.setData(0, Qt.UserRole, value.parcel_id)
                     item.setData(0, Qt.UserRole + 1, "point")
-                    item.setData(0, Qt.UserRole + 2, value.zone_main_id)
+                    item.setData(0, Qt.UserRole + 2, value.plan_zone_id)
                     item.setCheckState(0, Qt.Unchecked)
                     self.item_point_main.addChild(item)
                     value_p = self.main_load_pbar.value() + 1
@@ -534,7 +256,7 @@ class PlanDetailWidget(QDockWidget, Ui_PlanDetailWidget, DatabaseHelper):
                     item.setIcon(0, QIcon(QPixmap(":/plugins/lm2/parcel_red.png")))
                     item.setData(0, Qt.UserRole, value.parcel_id)
                     item.setData(0, Qt.UserRole + 1, "line")
-                    item.setData(0, Qt.UserRole + 2, value.zone_main_id)
+                    item.setData(0, Qt.UserRole + 2, value.plan_zone_id)
                     item.setCheckState(0, Qt.Unchecked)
                     self.item_line_main.addChild(item)
                     value_p = self.main_load_pbar.value() + 1
@@ -555,29 +277,21 @@ class PlanDetailWidget(QDockWidget, Ui_PlanDetailWidget, DatabaseHelper):
         self.__setup_main_tree_widget()
         self.__load_main_zone(au2)
 
-    @pyqtSlot()
-    def on_sub_zone_load_button_clicked(self):
+    def __selected_feature(self, parcel_id, layer):
 
-        self.sub_load_pbar.setVisible(True)
-        self.sub_load_pbar.setMinimum(1)
-        self.sub_load_pbar.setValue(0)
+        expression = " parcel_id = \'" + str(parcel_id) + "\'"
+        request = QgsFeatureRequest()
+        request.setFilterExpression(expression)
+        feature_ids = []
+        iterator = layer.getFeatures(request)
 
-        au2 = DatabaseUtils.working_l2_code()
-        # if self.tabWidget.currentIndex() == 0:
-        self.__setup_sub_tree_widget()
-        self.__load_sub_zone(au2)
+        for feature in iterator:
+            feature_ids.append(feature.id())
+        if len(feature_ids) == 0:
+            self.error_label.setText(self.tr("No parcel assigned"))
 
-    @pyqtSlot()
-    def on_activity_zone_load_button_clicked(self):
-
-        self.activity_load_pbar.setVisible(True)
-        self.activity_load_pbar.setMinimum(1)
-        self.activity_load_pbar.setValue(0)
-
-        au2 = DatabaseUtils.working_l2_code()
-        # if self.tabWidget.currentIndex() == 0:
-        self.__setup_activity_tree_widget()
-        self.__load_activity_zone(au2)
+        layer.setSelectedFeatures(feature_ids)
+        self.plugin.iface.mapCanvas().zoomToSelected(layer)
 
     @pyqtSlot()
     def zoom_to_selected_clicked(self):
@@ -591,57 +305,17 @@ class PlanDetailWidget(QDockWidget, Ui_PlanDetailWidget, DatabaseHelper):
 
         LayerUtils.deselect_all()
 
-        if type == 'line':
-            layer = LayerUtils.layer_by_data_source("data_plan", "ld_view_project_main_zone_line")
+        schema_name = "data_plan"
+        table_name = "pl_view_project_parcel"
+        layers = QgsMapLayerRegistry.instance().mapLayers()
 
-            if parcel_id:
-                expression = " parcel_id = \'" + str(parcel_id) + "\'"
-                request = QgsFeatureRequest()
-                request.setFilterExpression(expression)
-                feature_ids = []
-                iterator = layer.getFeatures(request)
-
-                for feature in iterator:
-                    feature_ids.append(feature.id())
-                if len(feature_ids) == 0:
-                    self.error_label.setText(self.tr("No parcel assigned"))
-
-                layer.setSelectedFeatures(feature_ids)
-                self.plugin.iface.mapCanvas().zoomToSelected(layer)
-        if type == 'point':
-            layer = LayerUtils.layer_by_data_source("data_plan", "ld_view_project_main_zone_point")
-
-            if parcel_id:
-                expression = " parcel_id = \'" + str(parcel_id) + "\'"
-                request = QgsFeatureRequest()
-                request.setFilterExpression(expression)
-                feature_ids = []
-                iterator = layer.getFeatures(request)
-
-                for feature in iterator:
-                    feature_ids.append(feature.id())
-                if len(feature_ids) == 0:
-                    self.error_label.setText(self.tr("No parcel assigned"))
-
-                layer.setSelectedFeatures(feature_ids)
-                self.plugin.iface.mapCanvas().zoomToSelected(layer)
-        if type == 'polygon':
-            layer = LayerUtils.layer_by_data_source("data_plan", "ld_view_project_main_zone_polygon")
-
-            if parcel_id:
-                expression = " parcel_id = \'" + str(parcel_id) + "\'"
-                request = QgsFeatureRequest()
-                request.setFilterExpression(expression)
-                feature_ids = []
-                iterator = layer.getFeatures(request)
-
-                for feature in iterator:
-                    feature_ids.append(feature.id())
-                if len(feature_ids) == 0:
-                    self.error_label.setText(self.tr("No parcel assigned"))
-
-                layer.setSelectedFeatures(feature_ids)
-                self.plugin.iface.mapCanvas().zoomToSelected(layer)
+        for id, layer in layers.iteritems():
+            if layer.type() == QgsMapLayer.VectorLayer:
+                uri_string = layer.dataProvider().dataSourceUri()
+                uri = QgsDataSourceURI(uri_string)
+                if uri.table() == table_name:
+                    if uri.schema() == schema_name:
+                        self.__selected_feature(parcel_id, layer)
 
     @pyqtSlot()
     def on_main_edit_attribute_button_clicked(self):

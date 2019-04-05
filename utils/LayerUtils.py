@@ -38,6 +38,23 @@ class LayerUtils(object):
                         return layer
 
     @staticmethod
+    def load_temp_table(sql, layer_name):
+
+        uri = QgsDataSourceURI()
+        user = QSettings().value(SettingsConstants.USER)
+        db = QSettings().value(SettingsConstants.DATABASE_NAME)
+        host = QSettings().value(SettingsConstants.HOST)
+        port = QSettings().value(SettingsConstants.PORT, "5432")
+        pwd = SessionHandler().current_password()
+
+        uri.setConnection(host, port, db, user, pwd)
+        uri.setDataSource("", sql, "geometry", "", "gid")
+
+        vlayer = QgsVectorLayer(uri.uri(), layer_name, "postgres")
+        QgsMapLayerRegistry.instance().addMapLayer(vlayer, False)
+        return vlayer
+
+    @staticmethod
     def load_layer_by_name(layer_name, id, restrictions=[]):
 
         restrictions = restrictions.split(",")
@@ -161,6 +178,44 @@ class LayerUtils(object):
 
         uri.setConnection(host, port, db, user, pwd)
         uri.setDataSource(schema_name, layer_name, "geometry", "", id)
+
+        vlayer = QgsVectorLayer(uri.uri(), layer_name, "postgres")
+        QgsMapLayerRegistry.instance().addMapLayer(vlayer, False)
+        return vlayer
+
+    @staticmethod
+    def check_layer_by_name(layer_name):
+
+        is_value = False
+        for lyr in QgsMapLayerRegistry.instance().mapLayers().values():
+            print lyr.name()
+            if lyr.name() == layer_name:
+                print lyr.name()
+                print '---'
+                print layer_name
+                is_value = True
+                break
+
+        # for key in QgsMapLayerRegistry.instance().mapLayers():
+        #     layer = QgsMapLayerRegistry.instance().mapLayers()[key]
+        #     if layer.name() == layer_name:
+        #         print 'hh'
+        #         is_value = True
+
+        return is_value
+
+    @staticmethod
+    def load_plan_layer_base_layer(layer_name, id, schema_name, geometry_column):
+
+        uri = QgsDataSourceURI()
+        user = QSettings().value(SettingsConstants.USER)
+        db = QSettings().value(SettingsConstants.DATABASE_NAME)
+        host = QSettings().value(SettingsConstants.HOST)
+        port = QSettings().value(SettingsConstants.PORT, "5432")
+        pwd = SessionHandler().current_password()
+
+        uri.setConnection(host, port, db, user, pwd)
+        uri.setDataSource(schema_name, layer_name, geometry_column, "", id)
 
         vlayer = QgsVectorLayer(uri.uri(), layer_name, "postgres")
         QgsMapLayerRegistry.instance().addMapLayer(vlayer, False)
@@ -373,23 +428,30 @@ class LayerUtils(object):
             plan = root.insertGroup(1, u"ГЗБТөлөвлгөө")
             current_root = plan.insertGroup(1, u"Ажиллаж байгаа")
             current_root.setExpanded(False)
-            current_root.insertGroup(1, u"Parcel")
-            current_root.insertGroup(2, u"Sub")
-            current_root.insertGroup(3, u"Main")
+            # current_root.insertGroup(1, u"Parcel")
+            # current_root.insertGroup(2, u"Sub")
+            # current_root.insertGroup(3, u"Main")
 
             other_root = plan.insertGroup(2, u"Бусад ГЗБТ")
-            other_root.setExpanded(False)
-            types = session.query(ClPlanType).order_by(ClPlanType.code.desc()).all()
-            count = 1
-            for type in types:
-                if type.is_point:
-                    child_root = other_root.insertGroup(count, type.short_name)
-                    child_root.insertGroup(1, u"Parcel")
-                    child_root.insertGroup(2, u"Sub")
-                    child_root.insertGroup(3, u"Main")
-                    child_root.setExpanded(False)
-                else:
-                    child_root = other_root.insertGroup(count, type.short_name)
-                    child_root.insertGroup(1, u"Parcel")
-                    child_root.setExpanded(False)
-                count += 1
+            # other_root.setExpanded(False)
+            # types = session.query(ClPlanType).order_by(ClPlanType.code.desc()).all()
+            # count = 1
+            # for type in types:
+            #     if type.is_point:
+            #         child_root = other_root.insertGroup(count, type.short_name)
+            #         child_root.insertGroup(1, u"Parcel")
+            #         child_root.insertGroup(2, u"Sub")
+            #         child_root.insertGroup(3, u"Main")
+            #         child_root.setExpanded(False)
+            #     else:
+            #         child_root = other_root.insertGroup(count, type.short_name)
+            #         child_root.insertGroup(1, u"Parcel")
+            #         child_root.setExpanded(False)
+            #     count += 1
+        else:
+            if not mygroup.findGroup(U"Ажиллаж байгаа"):
+                current_root = mygroup.insertGroup(1, u"Ажиллаж байгаа")
+                current_root.setExpanded(False)
+            if not mygroup.findGroup(U"Бусад ГЗБТ"):
+                other_root = mygroup.insertGroup(2, u"Бусад ГЗБТ")
+                other_root.setExpanded(False)

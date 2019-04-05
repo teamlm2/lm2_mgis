@@ -20,8 +20,8 @@ class SetAttributeMainZone(Base):
     updated_by = Column(Integer)
 
     # foreign keys:
-    zone_main_id = Column(Integer, ForeignKey('cl_zone_main.zone_main_id'), primary_key=True)
-    zone_main_ref = relationship("ClZoneMain")
+    plan_zone_id = Column(Integer, ForeignKey('cl_plan_zone.plan_zone_id'), primary_key=True)
+    zone_main_ref = relationship("ClPlanZone")
 
     attribute_id = Column(Integer, ForeignKey('cl_attribute_zone.attribute_id'), primary_key=True)
     attribute_ref = relationship("ClAttributeZone")

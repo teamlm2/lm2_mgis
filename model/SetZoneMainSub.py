@@ -18,6 +18,6 @@ class SetZoneMainSub(Base):
     zone_sub_id = Column(Integer, ForeignKey('cl_zone_sub.zone_sub_id'), primary_key=True)
     zone_sub_ref = relationship("ClZoneSub")
 
-    zone_main_id = Column(Integer, ForeignKey('cl_zone_main.zone_main_id'), primary_key=True)
-    zone_main_ref = relationship("ClZoneMain")
+    plan_zone_id = Column(Integer, ForeignKey('cl_plan_zone.plan_zone_id'), primary_key=True)
+    zone_main_ref = relationship("ClPlanZone")
 

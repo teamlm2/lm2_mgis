@@ -123,7 +123,7 @@ font: 75 14pt &quot;Helvetica&quot;;</string>
         <x>4</x>
         <y>27</y>
         <width>572</width>
-        <height>91</height>
+        <height>221</height>
        </rect>
       </property>
       <property name="title">
@@ -207,6 +207,130 @@ font: 75 14pt &quot;Helvetica&quot;;</string>
         <bool>true</bool>
        </property>
       </widget>
+      <widget class="QLabel" name="label_10">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>90</y>
+         <width>140</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Zone Type</string>
+       </property>
+      </widget>
+      <widget class="QComboBox" name="zone_type_cbox">
+       <property name="geometry">
+        <rect>
+         <x>164</x>
+         <y>87</y>
+         <width>400</width>
+         <height>22</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="main_process_edit">
+       <property name="geometry">
+        <rect>
+         <x>164</x>
+         <y>145</y>
+         <width>400</width>
+         <height>20</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="main_edit_attribute_button">
+       <property name="geometry">
+        <rect>
+         <x>204</x>
+         <y>179</y>
+         <width>81</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Edit Attribute</string>
+       </property>
+      </widget>
+      <widget class="QComboBox" name="main_process_type_cbox">
+       <property name="geometry">
+        <rect>
+         <x>164</x>
+         <y>115</y>
+         <width>400</width>
+         <height>22</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_4">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>119</y>
+         <width>140</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Process Type</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_5">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>147</y>
+         <width>140</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Process Desc</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="main_zone_load_button">
+       <property name="geometry">
+        <rect>
+         <x>23</x>
+         <y>179</y>
+         <width>81</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Load</string>
+       </property>
+      </widget>
+      <widget class="QProgressBar" name="main_load_pbar">
+       <property name="geometry">
+        <rect>
+         <x>304</x>
+         <y>179</y>
+         <width>261</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="value">
+        <number>0</number>
+       </property>
+       <property name="textDirection">
+        <enum>QProgressBar::TopToBottom</enum>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="main_to_layer_button">
+       <property name="geometry">
+        <rect>
+         <x>114</x>
+         <y>179</y>
+         <width>81</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>To Layer</string>
+       </property>
+      </widget>
      </widget>
      <widget class="QPushButton" name="home_button">
       <property name="geometry">
@@ -247,420 +371,20 @@ font: 75 14pt &quot;Helvetica&quot;;</string>
        <bool>true</bool>
       </property>
      </widget>
-     <widget class="QTabWidget" name="tabWidget">
+     <widget class="QTreeWidget" name="main_tree_widget">
       <property name="geometry">
        <rect>
-        <x>4</x>
-        <y>120</y>
-        <width>574</width>
-        <height>631</height>
+        <x>9</x>
+        <y>270</y>
+        <width>559</width>
+        <height>431</height>
        </rect>
       </property>
-      <property name="currentIndex">
-       <number>2</number>
-      </property>
-      <widget class="QWidget" name="tab">
-       <attribute name="title">
-        <string>Main Zone</string>
-       </attribute>
-       <widget class="QTreeWidget" name="main_tree_widget">
-        <property name="geometry">
-         <rect>
-          <x>6</x>
-          <y>115</y>
-          <width>559</width>
-          <height>481</height>
-         </rect>
-        </property>
-        <column>
-         <property name="text">
-          <string>Result</string>
-         </property>
-        </column>
-       </widget>
-       <widget class="QGroupBox" name="groupBox_2">
-        <property name="geometry">
-         <rect>
-          <x>6</x>
-          <y>0</y>
-          <width>572</width>
-          <height>110</height>
-         </rect>
-        </property>
-        <property name="title">
-         <string>Find</string>
-        </property>
-        <widget class="QProgressBar" name="main_load_pbar">
-         <property name="geometry">
-          <rect>
-           <x>290</x>
-           <y>80</y>
-           <width>261</width>
-           <height>23</height>
-          </rect>
-         </property>
-         <property name="value">
-          <number>0</number>
-         </property>
-         <property name="textDirection">
-          <enum>QProgressBar::TopToBottom</enum>
-         </property>
-        </widget>
-        <widget class="QPushButton" name="main_zone_load_button">
-         <property name="geometry">
-          <rect>
-           <x>9</x>
-           <y>80</y>
-           <width>81</width>
-           <height>23</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Load</string>
-         </property>
-        </widget>
-        <widget class="QComboBox" name="main_process_type_cbox">
-         <property name="geometry">
-          <rect>
-           <x>150</x>
-           <y>16</y>
-           <width>400</width>
-           <height>22</height>
-          </rect>
-         </property>
-        </widget>
-        <widget class="QLineEdit" name="main_process_edit">
-         <property name="geometry">
-          <rect>
-           <x>150</x>
-           <y>46</y>
-           <width>400</width>
-           <height>20</height>
-          </rect>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_4">
-         <property name="geometry">
-          <rect>
-           <x>10</x>
-           <y>20</y>
-           <width>140</width>
-           <height>16</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Process Type</string>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_5">
-         <property name="geometry">
-          <rect>
-           <x>10</x>
-           <y>48</y>
-           <width>140</width>
-           <height>16</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Process Desc</string>
-         </property>
-        </widget>
-        <widget class="QPushButton" name="main_to_layer_button">
-         <property name="geometry">
-          <rect>
-           <x>100</x>
-           <y>80</y>
-           <width>81</width>
-           <height>23</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>To Layer</string>
-         </property>
-        </widget>
-        <widget class="QPushButton" name="main_edit_attribute_button">
-         <property name="geometry">
-          <rect>
-           <x>190</x>
-           <y>80</y>
-           <width>81</width>
-           <height>23</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Edit Attribute</string>
-         </property>
-        </widget>
-       </widget>
-      </widget>
-      <widget class="QWidget" name="tab_2">
-       <attribute name="title">
-        <string>Sub Zone</string>
-       </attribute>
-       <widget class="QTreeWidget" name="sub_tree_widget">
-        <property name="geometry">
-         <rect>
-          <x>6</x>
-          <y>115</y>
-          <width>559</width>
-          <height>481</height>
-         </rect>
-        </property>
-        <column>
-         <property name="text">
-          <string>Result</string>
-         </property>
-        </column>
-       </widget>
-       <widget class="QGroupBox" name="groupBox_3">
-        <property name="geometry">
-         <rect>
-          <x>6</x>
-          <y>0</y>
-          <width>572</width>
-          <height>110</height>
-         </rect>
-        </property>
-        <property name="title">
-         <string>Find</string>
-        </property>
-        <widget class="QProgressBar" name="sub_load_pbar">
-         <property name="geometry">
-          <rect>
-           <x>290</x>
-           <y>80</y>
-           <width>261</width>
-           <height>23</height>
-          </rect>
-         </property>
-         <property name="value">
-          <number>0</number>
-         </property>
-         <property name="textDirection">
-          <enum>QProgressBar::TopToBottom</enum>
-         </property>
-        </widget>
-        <widget class="QPushButton" name="sub_zone_load_button">
-         <property name="geometry">
-          <rect>
-           <x>9</x>
-           <y>80</y>
-           <width>81</width>
-           <height>23</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Load</string>
-         </property>
-        </widget>
-        <widget class="QComboBox" name="sub_process_type_cbox">
-         <property name="geometry">
-          <rect>
-           <x>150</x>
-           <y>16</y>
-           <width>400</width>
-           <height>22</height>
-          </rect>
-         </property>
-        </widget>
-        <widget class="QLineEdit" name="sub_process_edit">
-         <property name="geometry">
-          <rect>
-           <x>150</x>
-           <y>46</y>
-           <width>400</width>
-           <height>20</height>
-          </rect>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_6">
-         <property name="geometry">
-          <rect>
-           <x>10</x>
-           <y>20</y>
-           <width>140</width>
-           <height>16</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Process Type</string>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_7">
-         <property name="geometry">
-          <rect>
-           <x>10</x>
-           <y>48</y>
-           <width>140</width>
-           <height>16</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Process Desc</string>
-         </property>
-        </widget>
-        <widget class="QPushButton" name="sub_to_layer_button">
-         <property name="geometry">
-          <rect>
-           <x>100</x>
-           <y>80</y>
-           <width>81</width>
-           <height>23</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>To Layer</string>
-         </property>
-        </widget>
-        <widget class="QPushButton" name="sub_edit_attribute_button">
-         <property name="geometry">
-          <rect>
-           <x>190</x>
-           <y>80</y>
-           <width>81</width>
-           <height>23</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Edit Attribute</string>
-         </property>
-        </widget>
-       </widget>
-      </widget>
-      <widget class="QWidget" name="tab_3">
-       <attribute name="title">
-        <string>Parcel</string>
-       </attribute>
-       <widget class="QGroupBox" name="groupBox_4">
-        <property name="geometry">
-         <rect>
-          <x>6</x>
-          <y>0</y>
-          <width>572</width>
-          <height>110</height>
-         </rect>
-        </property>
-        <property name="title">
-         <string>Find</string>
-        </property>
-        <widget class="QProgressBar" name="activity_load_pbar">
-         <property name="geometry">
-          <rect>
-           <x>290</x>
-           <y>80</y>
-           <width>261</width>
-           <height>23</height>
-          </rect>
-         </property>
-         <property name="value">
-          <number>0</number>
-         </property>
-         <property name="textDirection">
-          <enum>QProgressBar::TopToBottom</enum>
-         </property>
-        </widget>
-        <widget class="QPushButton" name="activity_zone_load_button">
-         <property name="geometry">
-          <rect>
-           <x>9</x>
-           <y>80</y>
-           <width>81</width>
-           <height>23</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Load</string>
-         </property>
-        </widget>
-        <widget class="QComboBox" name="activity_process_type_cbox">
-         <property name="geometry">
-          <rect>
-           <x>150</x>
-           <y>16</y>
-           <width>400</width>
-           <height>22</height>
-          </rect>
-         </property>
-        </widget>
-        <widget class="QLineEdit" name="activity_process_edit">
-         <property name="geometry">
-          <rect>
-           <x>150</x>
-           <y>46</y>
-           <width>400</width>
-           <height>20</height>
-          </rect>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_8">
-         <property name="geometry">
-          <rect>
-           <x>10</x>
-           <y>20</y>
-           <width>140</width>
-           <height>16</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Process Type</string>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_9">
-         <property name="geometry">
-          <rect>
-           <x>10</x>
-           <y>48</y>
-           <width>140</width>
-           <height>16</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Process Desc</string>
-         </property>
-        </widget>
-        <widget class="QPushButton" name="activity_to_layer_button">
-         <property name="geometry">
-          <rect>
-           <x>100</x>
-           <y>80</y>
-           <width>81</width>
-           <height>23</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>To Layer</string>
-         </property>
-        </widget>
-        <widget class="QPushButton" name="activity_edit_attribute_button">
-         <property name="geometry">
-          <rect>
-           <x>190</x>
-           <y>80</y>
-           <width>81</width>
-           <height>23</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Edit Attribute</string>
-         </property>
-        </widget>
-       </widget>
-       <widget class="QTreeWidget" name="activity_tree_widget">
-        <property name="geometry">
-         <rect>
-          <x>6</x>
-          <y>115</y>
-          <width>559</width>
-          <height>481</height>
-         </rect>
-        </property>
-        <column>
-         <property name="text">
-          <string>Result</string>
-         </property>
-        </column>
-       </widget>
-      </widget>
+      <column>
+       <property name="text">
+        <string>Result</string>
+       </property>
+      </column>
      </widget>
     </widget>
    </widget>

@@ -1328,9 +1328,8 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
     @pyqtSlot()
     def on_accept_parcel_number_button_clicked(self):
 
-        print self.application.app_type
         app_type = self.application_type_cbox.itemData(self.application_type_cbox.currentIndex())
-        print app_type
+
         if app_type == 15 or app_type == 2:
             new_role = Constants.REMAINING_OWNER_CODE
             old_role = Constants.GIVING_UP_OWNER_CODE
@@ -1557,11 +1556,13 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
                     filter(SetBaseTaxAndPrice.landuse == parcel.landuse). \
                     one()
                 subsidized_area = base_tax_and_price.subsidized_area
-                limit_area = subsidized_area - (parcel.area_m2 + other_area)
-                if limit_area < 0:
-                    PluginUtils.show_error(self, self.tr("Area Limit"),
-                                           self.tr("The application limit parcel area."))
-                    return
+
+                if subsidized_area and other_area:
+                    limit_area = subsidized_area - (parcel.area_m2 + other_area)
+                    if limit_area < 0:
+                        PluginUtils.show_error(self, self.tr("Area Limit"),
+                                               self.tr("The application limit parcel area."))
+                        return
 
         self.parcel_edit.setText(parcel.parcel_id)
         self.parcel_area_edit.setText(str(parcel.area_m2))
@@ -4437,7 +4438,7 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
     def __add_co_ownership_item(self, applicant, code):
 
         if applicant.person_ref:
-            print 'ddddd'
+
             main_item = QTableWidgetItem(QIcon(), "")
             main_item.setCheckState(Qt.Checked) if applicant.main_applicant \
                 else main_item.setCheckState(Qt.Unchecked)
@@ -4452,20 +4453,16 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
 
             first_name_item = QTableWidgetItem(applicant.person_ref.first_name)
             first_name_item.setData(Qt.UserRole, applicant.person)
-            print code
-            print Constants.REMAINING_OWNER_CODE
+
             if code == Constants.REMAINING_OWNER_CODE:
-                print code
                 inserted_row = self.owners_remaining_twidget.rowCount()
                 self.owners_remaining_twidget.insertRow(inserted_row)
                 self.owners_remaining_twidget.setItem(inserted_row, CO_OWNERSHIP_MAIN, main_item)
                 self.owners_remaining_twidget.setItem(inserted_row, CO_OWNERSHIP_PERSON_ID, person_id_item)
                 self.owners_remaining_twidget.setItem(inserted_row, CO_OWNERSHIP_SURNAME, surname_item)
                 self.owners_remaining_twidget.setItem(inserted_row, CO_OWNERSHIP_FIRST_NAME, first_name_item)
-
             elif code == Constants.GIVING_UP_OWNER_CODE:
-                print '---'
-                print code
+
                 inserted_row = self.owners_giving_twidget.rowCount()
                 self.owners_giving_twidget.insertRow(inserted_row)
                 self.owners_giving_twidget.setItem(inserted_row, 0, person_id_item)

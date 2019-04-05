@@ -1,5 +1,5 @@
 # coding=utf8
-__author__ = 'Topmap'
+__author__ = 'B.Ankhbold'
 
 import os
 import re
@@ -22,6 +22,7 @@ from inspect import currentframe
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import func
 from datetime import date, datetime, timedelta
+from decimal import Decimal
 from ..model import Constants
 from ..model.BsPerson import *
 from ..model.ClBank import *
@@ -49,6 +50,8 @@ from ..model.SetCertificate import *
 from ..model.SetUserGroupRole import *
 from ..model.SdUser import *
 from ..model.SdConfiguration import *
+from ..model.SetApplicationTypePersonRole import *
+from ..model.CtContractFee import *
 from ..utils.FileUtils import FileUtils
 from ..utils.PluginUtils import PluginUtils
 from ..utils.SessionHandler import SessionHandler
@@ -59,6 +62,7 @@ from .qt_classes.DropLabel import DropLabel
 from .qt_classes.IntegerSpinBoxDelegate import *
 from .qt_classes.ObjectAppDocumentDelegate import ObjectAppDocumentDelegate
 from .qt_classes.ContractDocumentDelegate import ContractDocumentDelegate
+from .qt_classes.DoubleSpinBoxDelegate import DoubleSpinBoxDelegate
 from docxtpl import DocxTemplate, RichText
 import urllib
 import urllib2
@@ -115,7 +119,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         self.drop_label.itemDropped.connect(self.on_drop_label_itemDropped)
         self.close_button.clicked.connect(self.reject)
         self.contract_end_date.dateChanged.connect(self.__end_date_change)
-
+        self.is_first_app_connect = False
         self.__setup_combo_boxes()
         self.__set_up_land_fee_twidget()
         self.__set_up_archive_land_fee_twidget()
@@ -123,9 +127,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         self.status_label.clear()
         self.is_certificate = False
         self.landfee_message_label1.setStyleSheet("QLabel {color : red;}")
-        self.landfee_message_label2.setStyleSheet("QLabel {color : red;}")
-        self.landfee_message_label1.setText(self.tr('Without parcel no land fee information is available.'))
-        self.landfee_message_label2.clear()
+
         self.__setup_permissions()
         self.__user_right_permissions()
         if self.attribute_update:
@@ -140,6 +142,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             #     self.reject()
         self.__cert_range_cbox_setup()
         self.__fee_zone_cbox_setup()
+        self.__setup_share_fee_contractors()
 
         self.__setup_validators()
 
@@ -151,6 +154,64 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                 self.officer = DatabaseUtils.get_sd_employee(p.officer_in_charge);
             else:
                 self.officer = DatabaseUtils.get_sd_employee(p.officer_in_charge);
+
+    def __setup_share_fee_contractors(self):
+
+        app_no = self.application_this_contract_based_edit.text()
+        if len(app_no) == 0:
+            return
+        app_no_count = self.session.query(CtApplication).filter(CtApplication.app_no == app_no).count()
+        if app_no_count == 0:
+            return
+
+        applicants = self.session.query(CtApplicationPersonRole).\
+            join(CtApplication, CtApplicationPersonRole.application == CtApplication.app_id).\
+            join(SetApplicationTypePersonRole, CtApplication.app_type == SetApplicationTypePersonRole.type).\
+            filter(CtApplication.app_no == app_no).\
+            filter(SetApplicationTypePersonRole.is_owner == True).all()
+
+        for applicant in applicants:
+            if applicant.person_ref:
+                inserted_row = self.share_fee_twidget.rowCount()
+                self.share_fee_twidget.insertRow(inserted_row)
+
+                share_item = QTableWidgetItem(str(applicant.share) if (applicant.share) else '0')
+                share_item.setData(Qt.UserRole, applicant.share)
+
+                register_item = QTableWidgetItem(unicode(applicant.person_ref.person_register))
+                register_item.setData(Qt.UserRole, applicant.person_ref.person_id)
+                register_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+
+                surname_item = QTableWidgetItem(applicant.person_ref.name)
+                surname_item.setData(Qt.UserRole, applicant.person)
+                surname_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+
+                first_name_item = QTableWidgetItem(applicant.person_ref.first_name)
+                first_name_item.setData(Qt.UserRole, applicant.person)
+                first_name_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+
+                self.share_fee_twidget.setItem(inserted_row, 0, share_item)
+                self.share_fee_twidget.setItem(inserted_row, 1, register_item)
+                self.share_fee_twidget.setItem(inserted_row, 2, surname_item)
+                self.share_fee_twidget.setItem(inserted_row, 3, first_name_item)
+
+    def __check_share_sum(self, twidget, column):
+
+        share_all = 0
+
+        for row in range(twidget.rowCount()):
+            item_share = twidget.item(row, column)
+            try:
+                share = Decimal(item_share.text())
+            except ValueError:
+                return False
+
+            share_all = share_all + share
+
+        if share_all != Decimal(1.0):
+            return False
+        else:
+            return True
 
     def  __cert_range_cbox_setup(self):
 
@@ -166,15 +227,22 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
         for cert in cert_au2:
             au_name = ''
+            description = ''
             if cert.au2_ref:
                 au_name = cert.au2_ref.name
-            self.cert_range_cbox.addItem(str(cert.id)+','+ au_name +','+str(cert.range_first_no)+'-'+str(cert.range_last_no)+','+cert.description, cert.id)
+            if cert.description:
+                description = cert.description
+
+            self.cert_range_cbox.addItem(str(cert.id)+','+ au_name +','+str(cert.range_first_no)+'-'+str(cert.range_last_no)+','+description, cert.id)
 
         for cert in cert_au1:
             au_name = ''
+            description = ''
             if cert.au1_ref:
                 au_name = cert.au1_ref.name
-            self.cert_range_cbox.addItem(str(cert.id)+','+ au_name +','+str(cert.range_first_no)+'-'+str(cert.range_last_no)+','+cert.description, cert.id)
+            if cert.description:
+                description = cert.description
+            self.cert_range_cbox.addItem(str(cert.id)+','+ au_name +','+str(cert.range_first_no)+'-'+str(cert.range_last_no)+','+description, cert.id)
 
     def __user_right_permissions(self):
 
@@ -248,7 +316,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         # contract_number_filter = "%-{0}/%".format(str(year))
         app_type = None
         obj_type = 'contract\Contract'
-        PluginUtils.generate_auto_app_no(str(year), app_type, soum, obj_type)
+        PluginUtils.generate_auto_app_no(str(year), app_type, soum, obj_type, self.session)
 
         # except SQLAlchemyError, e:
         #     raise LM2Exception(self.tr("Database Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
@@ -731,11 +799,19 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
     def __validate_settings(self):
 
+        if self.contract_begin_edit.text() is None or self.contract_begin_edit.text() == '':
+            PluginUtils.show_error(self, self.tr("Land Fees"), u'Гэрээний эхлэх хугацаа ороогүй байна. Энэ нь анх компанийн хийсэн мэдээлэлд дутуу байсан гэсэн үг юм.')
+            return False
+        if self.land_fee_twidget.rowCount() == 0:
+            PluginUtils.show_error(self, self.tr("Land Fees"), u'Газрын төлбөрийн бодолтийг хийнэ үү!!!')
+            return False
+
         if len(self.landfee_message_label1.text()) > 0:
             PluginUtils.show_error(self, self.tr("Land Fees"), self.landfee_message_label1.text())
             return False
-        if not self.__calculate_age():
-            return False
+
+        # if not self.__calculate_age():
+        #     return False
 
         return True
 
@@ -848,12 +924,12 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
     def __calculate_landfee_tab(self, base_fee_id):
 
         self.landfee_message_label1.clear()
-        self.landfee_message_label2.clear()
 
         self.land_fee_twidget.clearContents()
         self.land_fee_twidget.setRowCount(0)
 
         parcel_id = self.id_main_edit.text().strip()
+
         if len(parcel_id) == 0:
             self.landfee_message_label1.setText(self.tr('Without parcel no land fee information is available.'))
             return
@@ -892,12 +968,13 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                 person = contractor.person_ref
                 if person:
                     fee_count = person.fees.filter(CtFee.contract == self.contract.contract_id).count()
-                    if fee_count == 0:
-                        self.__add_fee_row(row, contractor, parcel_id, base_fee)
-                        row += 1
-                    else:
+                    # if fee_count == 0:
+                    #     self.__add_fee_row(row, contractor, parcel_id, base_fee_id)
+                    #     row += 1
+                    # else:
+                    if fee_count > 0:
                         fees = person.fees.filter(CtFee.contract == self.contract.contract_id).\
-                            filter(CtFee.base_fee_id == base_fee.id).all()
+                            filter(CtFee.base_fee_id == base_fee_id).all()
                         for fee in fees:
                             self.__add_fee_row2(row, contractor, fee)
                             row += 1
@@ -921,6 +998,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
     def __fee_zone_cbox_setup(self):
 
         parcel_id = self.id_main_edit.text().strip()
+
         if len(parcel_id) == 0:
             self.landfee_message_label1.setText(self.tr('Without parcel no land fee information is available.'))
             return
@@ -932,7 +1010,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             filter(SetBaseFee.landuse == CaParcelTbl.landuse). \
             filter(SetBaseFee.in_active == True). \
             count()
-        print count
+
         fee_zones = self.session.query(SetBaseFee).filter(
             SetFeeZone.geometry.ST_Contains(func.ST_Centroid(CaParcelTbl.geometry))). \
             filter(CaParcelTbl.parcel_id == parcel_id). \
@@ -944,18 +1022,18 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         self.fee_zone_cbox.clear()
 
         for fee_zone in fee_zones:
-            print fee_zone.in_active
+
             self.fee_zone_cbox.addItem(fee_zone.fee_zone_ref.location, fee_zone.id)
 
     def __populate_landfee_tab(self):
 
         self.landfee_message_label1.clear()
-        self.landfee_message_label2.clear()
 
         self.land_fee_twidget.clearContents()
         self.land_fee_twidget.setRowCount(0)
 
         parcel_id = self.id_main_edit.text().strip()
+
         if len(parcel_id) == 0:
             self.landfee_message_label1.setText(self.tr('Without parcel no land fee information is available.'))
             return
@@ -1040,6 +1118,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
     def __set_up_land_fee_twidget(self):
 
         self.__setup_twidget(self.land_fee_twidget)
+        self.__setup_twidget(self.share_fee_twidget)
 
         code_list = list()
         descriptions = self.session.query(ClPaymentFrequency.description).order_by(ClPaymentFrequency.description)
@@ -1052,6 +1131,9 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         self.land_fee_twidget.setItemDelegateForColumn(CONTRACTOR_GRACE_PERIOD, delegate)
         delegate = ComboBoxDelegate(CONTRACTOR_PAYMENT_FREQUENCY, code_list, self.land_fee_twidget)
         self.land_fee_twidget.setItemDelegateForColumn(CONTRACTOR_PAYMENT_FREQUENCY, delegate)
+
+        delegate = DoubleSpinBoxDelegate(0, 0, 1, 1, 0.1, self.share_fee_twidget)
+        self.share_fee_twidget.setItemDelegateForColumn(0, delegate)
 
     def __set_up_archive_land_fee_twidget(self):
 
@@ -1257,36 +1339,66 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                     self.doc_twidget.setItem(i, DOC_VIEW_COLUMN, item_view)
                     self.doc_twidget.setItem(i, DOC_NAME_COLUMN, item_name)
 
-    def __add_fee_row(self, row, contractor, parcel_id, base_fee):
-
-        base_fee_per_m2 = 0
-        if base_fee.base_fee_per_m2:
-            base_fee_per_m2 = base_fee.base_fee_per_m2
-        subsidized_area = base_fee.subsidized_area
-        subsidized_fee_rate = base_fee.subsidized_fee_rate
-
-        in_active = u''
-        if base_fee.in_active:
-            in_active = u'Идэвхтэй'
-        else:
-            in_active = u'Идэвхгүй'
-
-        zone_type = ''
-        if self.__get_zone_type_by_base_fee(base_fee):
-            zone_type = self.__get_zone_type_by_base_fee(base_fee).description
-
-        zone_no = ''
-        if self.__get_zone_no_by_base_fee(base_fee):
-            zone_no = str(self.__get_zone_no_by_base_fee(base_fee).zone_no)
+    def __add_fee_row(self, row, contractor, parcel_id, base_fee_id):
 
         # TODO: fix rounding issues
         if contractor:
+            if base_fee_id:
+                base_fee = self.session.query(SetBaseFee).filter(SetBaseFee.id == base_fee_id).one()
+
+                base_fee_per_m2 = 0
+                if base_fee.base_fee_per_m2:
+                    base_fee_per_m2 = base_fee.base_fee_per_m2
+                subsidized_area = base_fee.subsidized_area
+                subsidized_fee_rate = base_fee.subsidized_fee_rate
+
+                in_active = u''
+                if base_fee.in_active:
+                    in_active = u'Идэвхтэй'
+                else:
+                    in_active = u'Идэвхгүй'
+
+                zone_type = ''
+                if self.__get_zone_type_by_base_fee(base_fee):
+                    zone_type = self.__get_zone_type_by_base_fee(base_fee).description
+
+                zone_no = ''
+                if self.__get_zone_no_by_base_fee(base_fee):
+                    zone_no = str(self.__get_zone_no_by_base_fee(base_fee).zone_no)
+
+                item = QTableWidgetItem(in_active)
+                self.land_fee_twidget.setItem(row, ACTIVE_COLUMN, item)
+
+                item = QTableWidgetItem(unicode(zone_type))
+                self.land_fee_twidget.setItem(row, ZONE_TYPE_COLUMN, item)
+
+                item = QTableWidgetItem(zone_no)
+                self.land_fee_twidget.setItem(row, ZONE_NO_COLUMN, item)
+
+                contractor_area = int(round(float(contractor.share) * parcel_area))
+                item = QTableWidgetItem('{0}'.format(contractor_area))
+                self.__lock_item(item)
+                self.land_fee_twidget.setItem(row, CONTRACTOR_AREA, item)
+
+                contractor_subsidized_area = int(round(float(contractor.share) * subsidized_area))
+                fee_subsidized = (contractor_subsidized_area * float(base_fee_per_m2)) - (
+                contractor_subsidized_area * float(base_fee_per_m2) * (float(subsidized_fee_rate) / 100))
+                fee_standard = (contractor_area - contractor_subsidized_area) * float(base_fee_per_m2)
+                fee_base = contractor_area * float(base_fee_per_m2) * float((100 - subsidized_fee_rate) / 100)
+                fee_calculated = int(round(fee_base if fee_standard <= 0 else fee_subsidized + fee_standard))
+
+                # if parcel_area > subsidized_area:pg_cursors
+                # fee_calculated = float(contractor.share) * ((parcel_area - subsidized_area) * base_fee_per_m2 + float(subsidized_area * base_fee_per_m2 * subsidized_fee_rate / 100))
+                # elif parcel_area <= subsidized_area:
+                # fee_calculated = float(contractor.share) * (parcel_area * base_fee_per_m2 * subsidized_fee_rate / 100)
+
+                item = QTableWidgetItem('{0}'.format(fee_calculated))
+                self.__lock_item(item)
+                self.land_fee_twidget.setItem(row, CONTRACTOR_FEE_CALCULATED, item)
+                item = QTableWidgetItem('{0}'.format(fee_calculated))
 
             parcel_area = self.session.query(CaParcelTbl.area_m2).filter(CaParcelTbl.parcel_id == parcel_id).one()[0]
             parcel_area = round(parcel_area)
-
-            item = QTableWidgetItem(in_active)
-            self.land_fee_twidget.setItem(row, ACTIVE_COLUMN, item)
 
             item = QTableWidgetItem(u'{0}, {1}'.format(contractor.person_ref.name, contractor.person_ref.first_name))
             item.setData(Qt.UserRole, contractor.person_ref.person_register)
@@ -1300,37 +1412,14 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             item = QTableWidgetItem('{0}'.format(contractor.share))
             self.__lock_item(item)
             self.land_fee_twidget.setItem(row, CONTRACTOR_SHARE, item)
-            contractor_area = int(round(float(contractor.share) * parcel_area))
-            item = QTableWidgetItem('{0}'.format(contractor_area))
-            self.__lock_item(item)
-            self.land_fee_twidget.setItem(row, CONTRACTOR_AREA, item)
-            contractor_subsidized_area = int(round(float(contractor.share) * subsidized_area))
-            fee_subsidized = (contractor_subsidized_area * float(base_fee_per_m2))-(contractor_subsidized_area * float(base_fee_per_m2) * (float(subsidized_fee_rate) / 100))
-            fee_standard = (contractor_area - contractor_subsidized_area) * float(base_fee_per_m2)
-            fee_base = contractor_area * float(base_fee_per_m2)*float((100-subsidized_fee_rate)/100)
-            fee_calculated = int(round(fee_base if fee_standard <= 0 else fee_subsidized + fee_standard))
 
-            #if parcel_area > subsidized_area:pg_cursors
-            #fee_calculated = float(contractor.share) * ((parcel_area - subsidized_area) * base_fee_per_m2 + float(subsidized_area * base_fee_per_m2 * subsidized_fee_rate / 100))
-            #elif parcel_area <= subsidized_area:
-            #fee_calculated = float(contractor.share) * (parcel_area * base_fee_per_m2 * subsidized_fee_rate / 100)
 
-            item = QTableWidgetItem('{0}'.format(fee_calculated))
-            self.__lock_item(item)
-            self.land_fee_twidget.setItem(row, CONTRACTOR_FEE_CALCULATED, item)
-            item = QTableWidgetItem('{0}'.format(fee_calculated))
             self.land_fee_twidget.setItem(row, CONTRACTOR_FEE_CONTRACT, item)
             item = QTableWidgetItem('{0}'.format(10))
             self.land_fee_twidget.setItem(row, CONTRACTOR_GRACE_PERIOD, item)
             payment_frequency = self.session.query(ClPaymentFrequency).get(10)
             item = QTableWidgetItem(u'{0}'.format(payment_frequency.description))
             self.land_fee_twidget.setItem(row, CONTRACTOR_PAYMENT_FREQUENCY, item)
-
-            item = QTableWidgetItem(unicode(zone_type))
-            self.land_fee_twidget.setItem(row, ZONE_TYPE_COLUMN, item)
-
-            item = QTableWidgetItem(zone_no)
-            self.land_fee_twidget.setItem(row, ZONE_NO_COLUMN, item)
 
     def __lock_item(self, item):
 
@@ -1365,10 +1454,13 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
             item = QTableWidgetItem(u'{0}, {1}'.format(contractor.person_ref.name, contractor.person_ref.first_name))
             item.setData(Qt.UserRole, contractor.person_ref.person_register)
-            item.setData(Qt.UserRole+1, contractor.person_ref.person_id)
+            item.setData(Qt.UserRole + 1, contractor.person_ref.person_id)
+            item.setData(Qt.UserRole + 2, fee.base_fee_id)
             self.__lock_item(item)
             self.land_fee_twidget.setItem(row, CONTRACTOR_NAME, item)
             item = QTableWidgetItem(u'{0}'.format(contractor.person_ref.person_register))
+            item.setData(Qt.UserRole, contractor.person_ref.person_register)
+            item.setData(Qt.UserRole + 1, contractor.person_ref.person_id)
             self.__lock_item(item)
             self.land_fee_twidget.setItem(row, CONTRACTOR_ID, item)
             item = QTableWidgetItem('{0}'.format(fee.share))
@@ -1401,7 +1493,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
         # try:
         self.__save_contract()
-        self.__save_parcel()
+        # self.__save_parcel()
         self.__save_fees()
         self.__save_conditions()
         return True
@@ -1521,50 +1613,107 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         # self.create_savepoint()
         # try:
         for row in range(self.land_fee_twidget.rowCount()):
-            fee = None
-            new_row = False
-            contractor_id = self.land_fee_twidget.item(row, CONTRACTOR_ID).text()
-            person_id = self.land_fee_twidget.item(row, CONTRACTOR_ID).data(Qt.UserRole+1)
+            item = self.land_fee_twidget.item(row, CONTRACTOR_SHARE)
+            share = Decimal(item.text())
+
+            item = self.land_fee_twidget.item(row, CONTRACTOR_ID)
+            person_register = item.data(Qt.UserRole)
+            person_id = item.data(Qt.UserRole + 1)
+
             base_fee_id = self.land_fee_twidget.item(row, CONTRACTOR_NAME).data(Qt.UserRole + 2)
 
-            contractor = self.session.query(BsPerson).filter(BsPerson.person_register==contractor_id).one()
-            if base_fee_id:
-                fee_count = contractor.fees.filter(CtFee.contract == self.contract.contract_id).\
-                    filter(CtFee.base_fee_id == base_fee_id).count()
-                if fee_count == 0:
-                    new_row = True
+            count = self.session.query(CtFee).filter(CtFee.contract == self.contract.contract_id).\
+                filter(CtFee.person == person_id).\
+                filter(CtFee.base_fee_id == base_fee_id).count()
+            if count == 0:
+                if share > 0:
                     fee = CtFee()
-                else:
-                    fee = contractor.fees.filter(CtFee.contract == self.contract.contract_id). \
-                        filter(CtFee.base_fee_id == base_fee_id).one()
-            else:
-                fee_count = contractor.fees.filter(CtFee.contract == self.contract.contract_id).count()
-                if fee_count == 1:
-                    fee = contractor.fees.filter(CtFee.contract == self.contract.contract_id).one()
-
-            if fee:
-                if base_fee_id:
+                    fee.contract = self.contract.contract_id
+                    fee.contract_no = self.contract.contract_no
+                    fee.person = person_id
+                    fee.person_register = person_register
                     fee.base_fee_id = base_fee_id
-                fee.contract = self.contract.contract_id
-                fee.contract_no = self.contract.contract_no
-                fee.share = float(self.land_fee_twidget.item(row, CONTRACTOR_SHARE).text())
-                fee.area = int(self.land_fee_twidget.item(row, CONTRACTOR_AREA).text())
+                    fee.share = share
+                    fee.area = float(self.calculated_area_edit.text())
+                    fee.fee_calculated = int(self.land_fee_twidget.item(row, CONTRACTOR_FEE_CALCULATED).text())
+                    fee.fee_contract = int(self.land_fee_twidget.item(row, CONTRACTOR_FEE_CONTRACT).text())
+                    fee.grace_period = int(self.land_fee_twidget.item(row, CONTRACTOR_GRACE_PERIOD).text())
+                    fee.base_fee_per_m2 = float(self.base_fee_edit.text())
+
+                    if self.subsidized_area_edit.text() != '':
+                        fee.subsidized_area = int(self.subsidized_area_edit.text())
+                    if self.subsidized_fee_rate_edit.text() != '':
+                        fee.subsidized_fee_rate = float(self.subsidized_fee_rate_edit.text())
+                    payment_frequency_desc = self.land_fee_twidget.item(row, CONTRACTOR_PAYMENT_FREQUENCY).text()
+                    payment_frequency = self.session.query(ClPaymentFrequency). \
+                        filter(ClPaymentFrequency.description == payment_frequency_desc).one()
+                    fee.payment_frequency = payment_frequency.code
+                    fee.created_by = DatabaseUtils.current_sd_user().user_id
+                    date_time_string = QDateTime.currentDateTime().toString(Constants.DATABASE_DATETIME_FORMAT)
+                    fee.created_at = datetime.strptime(date_time_string, Constants.PYTHON_DATETIME_FORMAT)
+                    self.session.add(fee)
+            elif count == 1:
+                fee = self.session.query(CtFee).filter(CtFee.contract == self.contract.contract_id). \
+                    filter(CtFee.person == person_id). \
+                    filter(CtFee.base_fee_id == base_fee_id).one()
+                fee.share = share
+                fee.area = float(self.calculated_area_edit.text())
                 fee.fee_calculated = int(self.land_fee_twidget.item(row, CONTRACTOR_FEE_CALCULATED).text())
                 fee.fee_contract = int(self.land_fee_twidget.item(row, CONTRACTOR_FEE_CONTRACT).text())
                 fee.grace_period = int(self.land_fee_twidget.item(row, CONTRACTOR_GRACE_PERIOD).text())
                 fee.base_fee_per_m2 = float(self.base_fee_edit.text())
                 fee.subsidized_area = int(self.subsidized_area_edit.text())
                 fee.subsidized_fee_rate = float(self.subsidized_fee_rate_edit.text())
-                fee.contract_no = self.contract.contract_no
-                fee.person_register = contractor_id
-                fee.person = contractor.person_id
                 payment_frequency_desc = self.land_fee_twidget.item(row, CONTRACTOR_PAYMENT_FREQUENCY).text()
                 payment_frequency = self.session.query(ClPaymentFrequency). \
                     filter(ClPaymentFrequency.description == payment_frequency_desc).one()
                 fee.payment_frequency = payment_frequency.code
-
-                if new_row:
-                    contractor.fees.append(fee)
+        #
+        # for row in range(self.land_fee_twidget.rowCount()):
+        #     fee = None
+        #     new_row = False
+        #     contractor_id = self.land_fee_twidget.item(row, CONTRACTOR_ID).text()
+        #     person_id = self.land_fee_twidget.item(row, CONTRACTOR_ID).data(Qt.UserRole+1)
+        #     base_fee_id = self.land_fee_twidget.item(row, CONTRACTOR_NAME).data(Qt.UserRole + 2)
+        #
+        #     contractor = self.session.query(BsPerson).filter(BsPerson.person_register==contractor_id).one()
+        #     if base_fee_id:
+        #         fee_count = contractor.fees.filter(CtFee.contract == self.contract.contract_id).\
+        #             filter(CtFee.base_fee_id == base_fee_id).count()
+        #         if fee_count == 0:
+        #             new_row = True
+        #             fee = CtFee()
+        #         else:
+        #             fee = contractor.fees.filter(CtFee.contract == self.contract.contract_id). \
+        #                 filter(CtFee.base_fee_id == base_fee_id).one()
+        #     else:
+        #         fee_count = contractor.fees.filter(CtFee.contract == self.contract.contract_id).count()
+        #         if fee_count == 1:
+        #             fee = contractor.fees.filter(CtFee.contract == self.contract.contract_id).one()
+        #
+        #     if fee:
+        #         if base_fee_id:
+        #             fee.base_fee_id = base_fee_id
+        #         fee.contract = self.contract.contract_id
+        #         fee.contract_no = self.contract.contract_no
+        #         fee.share = float(self.land_fee_twidget.item(row, CONTRACTOR_SHARE).text())
+        #         fee.area = int(self.land_fee_twidget.item(row, CONTRACTOR_AREA).text())
+        #         fee.fee_calculated = int(self.land_fee_twidget.item(row, CONTRACTOR_FEE_CALCULATED).text())
+        #         fee.fee_contract = int(self.land_fee_twidget.item(row, CONTRACTOR_FEE_CONTRACT).text())
+        #         fee.grace_period = int(self.land_fee_twidget.item(row, CONTRACTOR_GRACE_PERIOD).text())
+        #         fee.base_fee_per_m2 = float(self.base_fee_edit.text())
+        #         fee.subsidized_area = int(self.subsidized_area_edit.text())
+        #         fee.subsidized_fee_rate = float(self.subsidized_fee_rate_edit.text())
+        #         fee.contract_no = self.contract.contract_no
+        #         fee.person_register = contractor_id
+        #         fee.person = contractor.person_id
+        #         payment_frequency_desc = self.land_fee_twidget.item(row, CONTRACTOR_PAYMENT_FREQUENCY).text()
+        #         payment_frequency = self.session.query(ClPaymentFrequency). \
+        #             filter(ClPaymentFrequency.description == payment_frequency_desc).one()
+        #         fee.payment_frequency = payment_frequency.code
+        #
+        #         if new_row:
+        #             contractor.fees.append(fee)
 
         self.__populate_landfee_tab()
 
@@ -1575,19 +1724,21 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
     def __save_cancellation_app(self):
 
         app_id = self.app_number_cbox.itemData(self.app_number_cbox.currentIndex())
-        cancel_count = self.contract.application_roles.filter_by(role=Constants.APPLICATION_ROLE_CANCELS).count()
-        self.contract.cancellation_reason = None
-        if cancel_count > 0:
-            # update
-            cancellation_app = self.contract.application_roles.filter_by(role=Constants.APPLICATION_ROLE_CANCELS).one()
-            cancellation_app.application = app_id
-        else:
-            # insert
-            contract_app = CtContractApplicationRole()
-            contract_app.application = app_id
-            contract_app.contract = self.contract.contract_id
-            contract_app.role = Constants.APP_ROLE_CANCEL
-            self.contract.application_roles.append(contract_app)
+
+        if app_id:
+            cancel_count = self.contract.application_roles.filter_by(role=Constants.APPLICATION_ROLE_CANCELS).count()
+            self.contract.cancellation_reason = None
+            if cancel_count > 0:
+                # update
+                cancellation_app = self.contract.application_roles.filter_by(role=Constants.APPLICATION_ROLE_CANCELS).one()
+                cancellation_app.application = app_id
+            else:
+                # insert
+                contract_app = CtContractApplicationRole()
+                contract_app.application = app_id
+                contract_app.contract = self.contract.contract_id
+                contract_app.role = Constants.APP_ROLE_CANCEL
+                self.contract.application_roles.append(contract_app)
 
     def __save_other_reason(self):
 
@@ -1963,7 +2114,9 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             self.property_num_edit.setText(application.parcel_ref.property_no)
         # try:
         self.__load_application_information()
-        self.__populate_landfee_tab()
+        self.__setup_share_fee_contractors()
+        self.is_first_app_connect = True
+        # self.__populate_landfee_tab()
         self.__fee_zone_cbox_setup()
         self.__populate_archive_period_cbox()
         self.__populate_conditions_tab()
@@ -2460,13 +2613,13 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
         tpl.render(context)
 
-        try:
-            tpl.save(default_path + "/" + contract_no[:-6] + '-' + contract_no[-5:] + ".docx")
-            QDesktopServices.openUrl(
-                QUrl.fromLocalFile(default_path + "/" + contract_no[:-6] + '-' + contract_no[-5:] + ".docx"))
-        except IOError, e:
-            PluginUtils.show_error(self, self.tr("Out error"),
-                                   self.tr("This file is already opened. Please close re-run"))
+        # try:
+        tpl.save(default_path + "/" + contract_no[:-6] + '-' + contract_no[-5:] + ".docx")
+        QDesktopServices.openUrl(
+            QUrl.fromLocalFile(default_path + "/" + contract_no[:-6] + '-' + contract_no[-5:] + ".docx"))
+        # except IOError, e:
+        #     PluginUtils.show_error(self, self.tr("Out error"),
+        #                            self.tr("This file is already opened. Please close re-run"))
 
     @pyqtSlot()
     def on_print_contract_button_clicked(self):
@@ -4314,27 +4467,46 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         if self.attribute_update:
             return
         base_fee_id = self.fee_zone_cbox.itemData(self.fee_zone_cbox.currentIndex())
+        if not self.is_first_app_connect:
+            self.__calculate_landfee_tab(base_fee_id)
 
-        self.__calculate_landfee_tab(base_fee_id)
+    # @pyqtSlot()
+    # def on_show_fee_button_clicked(self):
+    #
+    #
 
     def __fee_geoware(self):
 
-        au2 = DatabaseUtils.working_l2_code()
-
         parcel_id = self.id_main_edit.text()
         conf = self.session.query(SdConfiguration).filter(SdConfiguration.code == 'ip_fee_lm').one()
-
+        # au2 = DatabaseUtils.working_l2_code()
         # if au2 == '01110':
         #     url = 'http://' + conf.value + '/api/payment/fee/old?parcel=' + parcel_id
         # else:
-        url = 'http://' + conf.value + '/api/payment/fee?parcel=' + parcel_id
+        is_load_service = False
+        for row in range(self.share_fee_twidget.rowCount()):
+            if not is_load_service:
+                item = self.share_fee_twidget.item(row, 0)
+                share = Decimal(item.text())
 
-        respons = urllib.request.urlopen(url)
-        data = json.loads(respons.read().decode(respons.info().get_param('charset') or 'utf-8'))
-        return data
+                item = self.share_fee_twidget.item(row, 1)
+                person_id = item.data(Qt.UserRole)
+                if share > 0:
+                    url = 'http://' + conf.value + '/api/payment/fee?parcel=' + parcel_id + '&person=' + str(person_id)
+                    respons = urllib.request.urlopen(url)
+                    data = json.loads(respons.read().decode(respons.info().get_param('charset') or 'utf-8'))
+
+                    is_load_service = True
+                    return data
 
     @pyqtSlot()
     def on_refresh_fee_button_clicked(self):
+
+        self.land_fee_twidget.setRowCount(0)
+
+        if not self.__check_share_sum(self.share_fee_twidget, 0):
+            PluginUtils.show_message(self, u'Анхааруулга', u'Төлбөр тооцох хувийн нийлбэр 1-тэй тэнцүү байх ёстой')
+            return
 
         parcel_id = self.id_main_edit.text()
         data = self.__fee_geoware()
@@ -4346,19 +4518,118 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             PluginUtils.show_message(self, self.tr("Warning"), msg)
             return
 
+        base_fee_per_m2 = None
+        base_price_m2 = None
+        payment = 0
+        area = None
+
+        base_fee_id = None
+        subsidized_fee_rate = None
+        subsidized_area = None
+
+        zone_id = None
+        zone_no = None
+        level_id = None
+        level_name = None #description
+        zone_type = None #description
+        confidence_percent = None
+
         for value in data['data']:
-            base_fee_id = value['base_fee_id']
-            payment = value['payment']
-            zone_type = value['zone_type']
-            self.base_fee_edit.setText(str(value['base_fee_per_m2']))
-            self.subsidized_fee_rate_edit.setText(str(value['subsidized_fee_rate']))
-            self.subsidized_area_edit.setText(str(value['subsidized_area']))
+            amount = value['payment']
+            payment = payment + amount
+            base_fee_per_m2 = value['base_fee_per_m2']
+            base_price_m2 = value['base_price_m2']
+            area = value['area']
+
+            try:
+                base_fee_id = value['base_fee_id']
+            except KeyError:
+                base_fee_id = None
+
+            self.base_fee_edit.setText(str(base_fee_per_m2))
+            # zone_type = value['zone_type']
+            try:
+                subsidized_fee_rate = str(value['subsidized_fee_rate'])
+                self.subsidized_fee_rate_edit.setText(subsidized_fee_rate)
+            except KeyError:
+                subsidized_fee_rate = None
+
+            try:
+                subsidized_area = str(value['subsidized_area'])
+                self.subsidized_fee_rate_edit.setText(subsidized_area)
+            except KeyError:
+                subsidized_area = None
+
+            try:
+                zone_id = (value['zone_id'])
+            except KeyError:
+                zone_id = None
+
+            try:
+                zone_no = str(value['zone_no'])
+            except KeyError:
+                zone_no = None
+
+            try:
+                level_id = (value['level_id'])
+            except KeyError:
+                level_id = None
+
+            try:
+                level_name = unicode(value['level_name'])
+            except KeyError:
+                level_name = None
+
+            try:
+                zone_type = unicode(value['zone_type'])
+            except KeyError:
+                zone_type = None
+
+            try:
+                confidence_percent = str(value['confidence_percent'])
+            except KeyError:
+                confidence_percent = None
+
+            # if zone_id and level_id:
+            count = self.session.query(CtContractFee).\
+                filter(CtContractFee.contract_id == self.contract.contract_id).\
+                filter(CtContractFee.zone_id == zone_id).\
+                filter(CtContractFee.level_id == level_id).count()
+            if count == 0:
+                contract_fee = CtContractFee()
+                contract_fee.contract_id = self.contract.contract_id
+                contract_fee.level_id = level_id
+                contract_fee.zone_id = zone_id
+                contract_fee.base_price_m2 = base_price_m2
+                contract_fee.confidence_percent = confidence_percent
+                contract_fee.subsidized_area = subsidized_area
+                contract_fee.subsidized_fee_rate = subsidized_fee_rate
+                contract_fee.base_fee_per_m2 = base_fee_per_m2
+                contract_fee.area = area
+                contract_fee.amount = amount
+                contract_fee.created_by = DatabaseUtils.current_sd_user().user_id
+                date_time_string = QDateTime.currentDateTime().toString(Constants.DATABASE_DATETIME_FORMAT)
+                contract_fee.created_at = datetime.strptime(date_time_string, Constants.PYTHON_DATETIME_FORMAT)
+                self.session.add(contract_fee)
+            elif count == 1:
+                contract_fee = self.session.query(CtContractFee). \
+                    filter(CtContractFee.contract_id == self.contract.contract_id). \
+                    filter(CtContractFee.zone_id == zone_id). \
+                    filter(CtContractFee.level_id == level_id).one()
+                contract_fee.base_price_m2 = base_price_m2
+                contract_fee.confidence_percent = confidence_percent
+                contract_fee.subsidized_area = subsidized_area
+                contract_fee.subsidized_fee_rate = subsidized_fee_rate
+                contract_fee.base_fee_per_m2 = base_fee_per_m2
+                contract_fee.area = area
+                contract_fee.amount = amount
 
             self.__calculate_landfee_level(base_fee_id, payment, parcel_id)
 
     def __calculate_landfee_level(self, base_fee_id, payment, parcel_id):
 
-        base_fee = self.session.query(SetBaseFee).filter(SetBaseFee.id == base_fee_id).one()
+        if base_fee_id:
+            base_fee = self.session.query(SetBaseFee).filter(SetBaseFee.id == base_fee_id).one()
 
         app_no = self.application_this_contract_based_edit.text()
         if len(app_no) == 0:
@@ -4367,35 +4638,47 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         app_no_count = self.session.query(CtApplication).filter(CtApplication.app_no == app_no).count()
         if app_no_count == 0:
             return
+        for row in range(self.share_fee_twidget.rowCount()):
+            item = self.share_fee_twidget.item(row, 0)
+            share = Decimal(item.text())
 
-        app = self.session.query(CtApplication).filter(CtApplication.app_no == app_no).one()
-        contractors = app.stakeholders.filter(CtApplicationPersonRole.role == Constants.APPLICANT_ROLE_CODE).all()
+            item = self.share_fee_twidget.item(row, 1)
+            person_id = item.data(Qt.UserRole)
 
-        fee_count = self.session.query(CtFee).filter(CtFee.base_fee_id == base_fee_id).\
-            filter(CtFee.contract == self.contract.contract_id).count()
+            self.__add_fee_row3(row, person_id, base_fee_id, payment, parcel_id, share)
+            self.landfee_message_label1.clear()
 
-        # if fee_count == 0:
+        # contractors = self.session.query(CtApplicationPersonRole). \
+        #     join(CtApplication, CtApplicationPersonRole.application == CtApplication.app_id). \
+        #     join(SetApplicationTypePersonRole, CtApplication.app_type == SetApplicationTypePersonRole.type). \
+        #     filter(CtApplication.app_no == app_no). \
+        #     filter(SetApplicationTypePersonRole.is_owner == True).all()
+        #
+        # row = 0
+        # for contractor in contractors:
+        #     if contractor:
+        #         person = contractor.person_ref
+        #         if person:
+        #             fee_count = person.fees.filter(CtFee.contract == self.contract.contract_id).\
+        #                 filter(CtFee.base_fee_id == base_fee_id).count()
 
-        row = 0
-        for contractor in contractors:
-            if contractor:
-                person = contractor.person_ref
-                if person:
-                    fee_count = person.fees.filter(CtFee.contract == self.contract.contract_id).\
-                        filter(CtFee.base_fee_id == base_fee_id).count()
-                    if fee_count == 0:
-                        if not self.__is_fee_row(person.person_register, base_fee.id):
-                            self.__add_fee_row3(row, contractor, base_fee, payment, parcel_id)
-                    if fee_count == 1:
-                        fee = person.fees.filter(CtFee.contract == self.contract.contract_id). \
-                            filter(CtFee.base_fee_id == base_fee_id).one()
-                        if not self.__is_fee_row(person.person_register, base_fee.id):
-                            self.__add_fee_row2(row, contractor, fee)
-                    row += 1
+        #             if fee_count == 0:
+        #                 if not self.__is_fee_row(person.person_register, base_fee_id):
 
-    def __add_fee_row3(self, row, contractor, base_fee, payment, parcel_id):
+        #                     self.__add_fee_row3(row, contractor, base_fee_id, payment, parcel_id)
+        #             if fee_count == 1:
+        #                 fee = person.fees.filter(CtFee.contract == self.contract.contract_id). \
+        #                     filter(CtFee.base_fee_id == base_fee_id).one()
+        #                 if not self.__is_fee_row(person.person_register, base_fee_id):
+        #                     self.__add_fee_row2(row, contractor, fee)
+        #             row += 1
 
-        if contractor:
+    def __add_fee_row3(self, row, person_id, base_fee_id, payment, parcel_id, share):
+
+        person = self.session.query(BsPerson).filter(BsPerson.person_id == person_id).one()
+        self.land_fee_twidget.insertRow(row)
+        if base_fee_id:
+            base_fee = self.session.query(SetBaseFee).filter(SetBaseFee.id == base_fee_id).one()
             in_active = u''
             if base_fee.in_active:
                 in_active = u'Идэвхтэй'
@@ -4410,49 +4693,49 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             if self.__get_zone_no_by_base_fee(base_fee):
                 zone_no = str(self.__get_zone_no_by_base_fee(base_fee).zone_no)
 
-            self.land_fee_twidget.insertRow(row)
-            parcel_area = self.session.query(CaParcelTbl.area_m2).filter(CaParcelTbl.parcel_id == parcel_id).one()[0]
-            parcel_area = round(parcel_area)
-
-            item = QTableWidgetItem(in_active)
+            # item = QTableWidgetItem(unicode(in_active))
+            item = QTableWidgetItem(u'{0}'.format(in_active))
             self.land_fee_twidget.setItem(row, ACTIVE_COLUMN, item)
-
-            item = QTableWidgetItem(u'{0}, {1}'.format(contractor.person_ref.name, contractor.person_ref.first_name))
-            item.setData(Qt.UserRole, contractor.person_ref.person_register)
-            item.setData(Qt.UserRole + 1, contractor.person_ref.person_id)
-            item.setData(Qt.UserRole + 2, base_fee.id)
-            self.land_fee_twidget.setItem(row, CONTRACTOR_NAME, item)
-            item = QTableWidgetItem(u'{0}'.format(contractor.person_ref.person_register))
-            self.__lock_item(item)
-            item.setData(Qt.UserRole, contractor.person_ref.person_register)
-            item.setData(Qt.UserRole + 1, contractor.person_ref.person_id)
-            self.land_fee_twidget.setItem(row, CONTRACTOR_ID, item)
-            item = QTableWidgetItem('{0}'.format(contractor.share))
-            self.__lock_item(item)
-            self.land_fee_twidget.setItem(row, CONTRACTOR_SHARE, item)
-            contractor_area = int(round(float(contractor.share) * parcel_area))
-            item = QTableWidgetItem('{0}'.format(contractor_area))
-            self.__lock_item(item)
-            self.land_fee_twidget.setItem(row, CONTRACTOR_AREA, item)
-
-            fee_calculated = int(round(payment*float(contractor.share)))
-
-            item = QTableWidgetItem('{0}'.format(fee_calculated))
-            self.__lock_item(item)
-            self.land_fee_twidget.setItem(row, CONTRACTOR_FEE_CALCULATED, item)
-            item = QTableWidgetItem('{0}'.format(fee_calculated))
-            self.land_fee_twidget.setItem(row, CONTRACTOR_FEE_CONTRACT, item)
-            item = QTableWidgetItem('{0}'.format(10))
-            self.land_fee_twidget.setItem(row, CONTRACTOR_GRACE_PERIOD, item)
-            payment_frequency = self.session.query(ClPaymentFrequency).get(10)
-            item = QTableWidgetItem(u'{0}'.format(payment_frequency.description))
-            self.land_fee_twidget.setItem(row, CONTRACTOR_PAYMENT_FREQUENCY, item)
 
             item = QTableWidgetItem(unicode(zone_type))
             self.land_fee_twidget.setItem(row, ZONE_TYPE_COLUMN, item)
 
             item = QTableWidgetItem(zone_no)
             self.land_fee_twidget.setItem(row, ZONE_NO_COLUMN, item)
+
+        parcel_area = self.session.query(CaParcelTbl.area_m2).filter(CaParcelTbl.parcel_id == parcel_id).one()[0]
+        parcel_area = round(parcel_area)
+
+        item = QTableWidgetItem(u'{0}, {1}'.format(person.name, person.first_name))
+        item.setData(Qt.UserRole, person.person_register)
+        item.setData(Qt.UserRole + 1, person.person_id)
+        item.setData(Qt.UserRole + 2, base_fee_id)
+        self.land_fee_twidget.setItem(row, CONTRACTOR_NAME, item)
+        item = QTableWidgetItem(u'{0}'.format(person.person_register))
+        self.__lock_item(item)
+        item.setData(Qt.UserRole, person.person_register)
+        item.setData(Qt.UserRole + 1, person.person_id)
+        self.land_fee_twidget.setItem(row, CONTRACTOR_ID, item)
+        item = QTableWidgetItem('{0}'.format(share))
+        self.__lock_item(item)
+        self.land_fee_twidget.setItem(row, CONTRACTOR_SHARE, item)
+        contractor_area = int(round(float(share) * parcel_area))
+        item = QTableWidgetItem('{0}'.format(contractor_area))
+        self.__lock_item(item)
+        self.land_fee_twidget.setItem(row, CONTRACTOR_AREA, item)
+
+        fee_calculated = int(round(payment*float(share)))
+
+        item = QTableWidgetItem('{0}'.format(fee_calculated))
+        self.__lock_item(item)
+        self.land_fee_twidget.setItem(row, CONTRACTOR_FEE_CALCULATED, item)
+        item = QTableWidgetItem('{0}'.format(fee_calculated))
+        self.land_fee_twidget.setItem(row, CONTRACTOR_FEE_CONTRACT, item)
+        item = QTableWidgetItem('{0}'.format(10))
+        self.land_fee_twidget.setItem(row, CONTRACTOR_GRACE_PERIOD, item)
+        payment_frequency = self.session.query(ClPaymentFrequency).get(10)
+        item = QTableWidgetItem(u'{0}'.format(payment_frequency.description))
+        self.land_fee_twidget.setItem(row, CONTRACTOR_PAYMENT_FREQUENCY, item)
 
         self.__fee_twidget_resize()
 

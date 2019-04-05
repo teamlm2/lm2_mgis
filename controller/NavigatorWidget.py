@@ -74,6 +74,7 @@ import xlsxwriter
 import time
 import urllib
 import urllib2
+import json
 
 LANDUSE_1 = u'Хөдөө аж ахуйн газар'
 LANDUSE_2 = u'Хот, тосгон, бусад суурины газар'
@@ -13540,12 +13541,23 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
             if all(i in app_doc_list for i in ubeg_doc_list):
             # if ubeg_doc_list in app_doc_list:
                 conf = self.session.query(SdConfiguration).filter(SdConfiguration.code == 'ip_web_lm').one()
+            #     urllib2.urlopen('http://'+conf.value+'/api/geoxyp/send/application/gasr?app_id=' + str(application.app_id)+ '&user_id=' + str(DatabaseUtils.current_sd_user().user_id))
+            #     PluginUtils.show_message(self, self.tr("Sucsess"),
+            #                              self.tr("Sucsess send to UBEG."))
+            #     return
 
-                urllib2.urlopen('http://'+conf.value+'/api/geoxyp/send/application/gasr?app_id=' + str(application.app_id)+ '&user_id=' + str(DatabaseUtils.current_sd_user().user_id))
+                url = 'http://'+conf.value+'/api/geoxyp/send/application/gasr?app_id=' + str(application.app_id)+ '&user_id=' + str(DatabaseUtils.current_sd_user().user_id)
+                respons = urllib.request.urlopen(url)
+                data = json.loads(respons.read().decode(respons.info().get_param('charset') or 'utf-8'))
 
-                PluginUtils.show_message(self, self.tr("Sucsess"),
-                                         self.tr("Sucsess send to UBEG."))
-                return
+                status = data['status']
+                msg = data['message']
+
+                if not status:
+                    PluginUtils.show_message(self, self.tr("Warning"), msg)
+                    return
+                else:
+                    PluginUtils.show_message(self, self.tr("Success"), msg)
             else:
                 PluginUtils.show_message(self, self.tr("Sent Warning"),
                                          self.tr("Can not send to UBEG. Attachment is incomplete for application!"))

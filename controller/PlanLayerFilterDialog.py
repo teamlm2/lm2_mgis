@@ -33,9 +33,7 @@ from ..model.SdUser import *
 from ..model.Enumerations import ApplicationType, UserRight
 from ..model.SdFtpConnection import *
 from ..model.SdFtpPermission import *
-from ..model.PlProjectParcelZoneActivity import *
-from ..model.PlProjectParcelZoneMain import *
-from ..model.PlProjectParcelZoneSub import *
+from ..model.PlProjectParcel import *
 from ..model.ClZoneActivity import *
 from ..model.Constants import *
 from ..model.SetFilterPlanLayer import *

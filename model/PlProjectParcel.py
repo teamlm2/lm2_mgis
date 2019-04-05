@@ -4,11 +4,11 @@ from sqlalchemy import Column, Integer, String, Date, Sequence, ForeignKey, Date
 from sqlalchemy.orm import relationship, backref
 from geoalchemy2 import Geometry
 from CtApp1Ext import *
-from ClZoneActivity import *
+from ClPlanZone import *
 
-class PlProjectParcelZoneActivity(Base):
+class PlProjectParcel(Base):
 
-    __tablename__ = 'pl_project_parcel_zone_activity'
+    __tablename__ = 'pl_project_parcel'
 
     parcel_id = Column(Integer, primary_key=True)
     area_m2 = Column(Float)
@@ -35,8 +35,8 @@ class PlProjectParcelZoneActivity(Base):
     project_id = Column(Integer, ForeignKey('pl_project.project_id'))
     project_ref = relationship("PlProject")
 
-    zone_activity_id = Column(Integer, ForeignKey('cl_zone_activity.zone_activity_id'))
-    zone_activity_ref = relationship("ClZoneActivity")
+    plan_zone_id = Column(Integer, ForeignKey('cl_plan_zone.plan_zone_id'))
+    zone_main_ref = relationship("ClPlanZone")
 
     au1 = Column(String, ForeignKey('au_level1.code'))
     au1_ref = relationship("AuLevel1")

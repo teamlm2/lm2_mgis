@@ -33,10 +33,10 @@ from ..model.SdUser import *
 from ..model.Enumerations import ApplicationType, UserRight
 from ..model.SdFtpConnection import *
 from ..model.SdFtpPermission import *
-from ..model.PlProjectParcelZoneActivity import *
-from ..model.PlProjectParcelZoneMain import *
-from ..model.PlProjectParcelZoneSub import *
-from ..model.ClZoneActivity import *
+from ..model.PlProjectParcel import *
+from ..model.PlProjectParcel import *
+
+from ..model.ClPlanZone import *
 from ..model.PlProject import *
 from ..view.Ui_PlanCaseDialog import *
 from .qt_classes.ApplicantDocumentDelegate import ApplicationDocumentDelegate
@@ -209,20 +209,9 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         error_message = ''
 
         for parcel in iterator:
-            parcel_geometry = WKTElement(parcel.geometry().exportToWkt(), srid=4326)
 
-            # validaty_result = self.__check_parcel_correct(parcel_geometry, error_message)
-            #
-            # if not validaty_result[0]:
-            #     log_measage = validaty_result[1]
-            #
-            #     PluginUtils.show_error(self, self.tr("Invalid parcel info"), log_measage)
-            #     return
             count += 1
             id = QDateTime().currentDateTime().toString("MMddhhmmss") + str(count)
-            is_approved = False
-            if self.__approved_parcel_check(parcel, parcel_shape_layer, id):
-                is_approved = True
 
             header = str(count)
             if self.__get_attribute(parcel, parcel_shape_layer)[0]:
@@ -233,17 +222,13 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
             if self.__get_attribute(parcel, parcel_shape_layer)[2]:
                 landname = self.__get_attribute(parcel, parcel_shape_layer)[2]
                 header = header + '/' + unicode(landname) + '/'
-
-            if is_approved:
+            if self.__approved_parcel_check(parcel, parcel_shape_layer, id):
                 if self.zone_parcel_rbutton.isChecked():
-                    new_parcel = PlProjectParcelZoneActivity()
-                elif self.zone_sub_rbutton.isChecked():
-                    new_parcel = PlProjectParcelZoneSub()
-                elif self.zone_main_rbutton.isChecked():
-                    new_parcel = PlProjectParcelZoneMain()
+                    new_parcel = PlProjectParcel()
+
                 new_parcel.project_id = self.plan.project_id
                 new_parcel.plan_draft_ref = self.plan
-                new_parcel.parcel_id = id
+                # new_parcel.parcel_id = id
                 new_parcel.valid_from = PluginUtils.convert_qt_date_to_python(QDateTime().currentDateTime())
                 new_parcel.au1 = self.au1
                 new_parcel.au2 = self.au2
@@ -261,7 +246,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
                     elif self.polygon_rbutton.isChecked():
                         new_parcel.polygon_geom = WKTElement(parcel.geometry().exportToWkt(), srid=4326)
 
-                new_parcel = self.__copy_parcel_attributes(parcel, new_parcel, parcel_shape_layer)
+                self.__copy_parcel_attributes(parcel, new_parcel, parcel_shape_layer)
 
                 self.session.add(new_parcel)
                 self.session.flush()
@@ -299,8 +284,6 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
                         column_name_landname: "", column_name_khashaa: "", column_name_street: "",
                         column_name_comment: ""}
 
-        parcel_geometry = WKTElement(parcel_feature.geometry().exportToWkt(), srid=4326)
-
         provider = layer.dataProvider()
         for key, item in column_names.iteritems():
             index = provider.fieldNameIndex(key)
@@ -313,9 +296,9 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
 
         process_type = None
         if plan_code:
-            count = self.session.query(ClZoneActivity).filter(ClZoneActivity.zone_activity_id == plan_code).count()
+            count = self.session.query(ClPlanZone).filter(ClPlanZone.plan_zone_id == plan_code).count()
             if count == 1:
-                process_type = self.session.query(ClZoneActivity).filter(ClZoneActivity.zone_activity_id == plan_code).one()
+                process_type = self.session.query(ClPlanZone).filter(ClPlanZone.plan_zone_id == plan_code).one()
         landuse = None
         if landuse_code:
             count = self.session.query(ClLanduseType).filter(ClLanduseType.code == landuse_code).count()
@@ -355,20 +338,20 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         error_message = u''
 
         # try:
-        if column_names[column_name_landuse] != None:
-            landuse = column_names[column_name_landuse]
-            if len(str(landuse).strip()) == 4:
-                count = self.session.query(ClLanduseType).filter(ClLanduseType.code == landuse).count()
-                if count == 0:
-                    valid = False
-                    message = unicode(u'Газрын нэгдмэл сангийн ангиллын дугаар буруу байна.')
-                    error_message = error_message + "\n" + message
-                    self.message_label.setText(error_message)
-            else:
-                valid = False
-                message = unicode(u'Газрын нэгдмэл сангийн ангиллын дугаар буруу байна.')
-                error_message = error_message + "\n" + message
-                self.message_label.setText(error_message)
+        # if column_names[column_name_landuse] != None:
+        #     landuse = column_names[column_name_landuse]
+        #     if len(str(landuse).strip()) == 4:
+        #         count = self.session.query(ClLanduseType).filter(ClLanduseType.code == landuse).count()
+        #         if count == 0:
+        #             valid = False
+        #             message = unicode(u'Газрын нэгдмэл сангийн ангиллын дугаар буруу байна.')
+        #             error_message = error_message + "\n" + message
+        #             self.message_label.setText(error_message)
+        #     else:
+        #         valid = False
+        #         message = unicode(u'Газрын нэгдмэл сангийн ангиллын дугаар буруу байна.')
+        #         error_message = error_message + "\n" + message
+        #         self.message_label.setText(error_message)
         # except SQLAlchemyError, e:
         #     valid = False
         #     message = unicode(u'Газрын нэгдмэл сангийн дугаар ангиллын буруу байна.')
@@ -379,7 +362,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         print column_names[column_name_plan_code]
         print type(column_names[column_name_plan_code])
         if column_names[column_name_plan_code]:
-            count = self.session.query(ClZoneActivity).filter(ClZoneActivity.code == column_names[column_name_plan_code]).count()
+            count = self.session.query(ClPlanZone).filter(ClPlanZone.code == column_names[column_name_plan_code]).count()
             if count == 0:
                 valid = False
                 message = unicode(u'Үйл ажиллагааны ангиллын дугаар буруу байна.')
@@ -405,11 +388,11 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
             self.message_label.setText(error_message)
 
         if self.zone_parcel_rbutton.isChecked():
-            parcel_overlaps_count = self.session.query(PlProjectParcelZoneActivity).\
-                join(PlProject, PlProjectParcelZoneActivity.project_id == PlProject.project_id). \
+            parcel_overlaps_count = self.session.query(PlProjectParcel).\
+                join(PlProject, PlProjectParcel.project_id == PlProject.project_id). \
                 filter(PlProject.plan_type_id == self.plan.plan_type_id). \
-                filter(PlProjectParcelZoneActivity.project_id == self.plan.project_id).\
-                filter(parcel_geometry.ST_Intersects(PlProjectParcelZoneActivity.polygon_geom)).count()
+                filter(PlProjectParcel.project_id == self.plan.project_id).\
+                filter(parcel_geometry.ST_Intersects(PlProjectParcel.polygon_geom)).count()
             if parcel_overlaps_count > 0:
                 valid = False
                 message = unicode(u'Нэгж талбар давхардаж байна.')
@@ -443,7 +426,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
                 column_names[key] = value
 
         id = 0
-        plan_code = 0
+        plan_code = ''
         landuse = 0
         landname = ''
         address_khashaa = 0
@@ -465,20 +448,15 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         if column_names[column_name_comment] != None:
             comment = column_names[column_name_comment]
 
+        zone_type_count = self.session.query(ClPlanZone).filter(ClPlanZone.code == plan_code).count()
+        if zone_type_count == 1:
+            print 'gggggg'
+            zone_type = self.session.query(ClPlanZone).filter(ClPlanZone.code == plan_code).one()
+            parcel_object.plan_zone_id = zone_type.plan_zone_type_id
         parcel_object.landuse = landuse
         parcel_object.gazner = landname
 
         return parcel_object
-
-    def __check_parcel_correct(self, geometry, error_message):
-
-        organization = DatabaseUtils.current_user_organization()
-        if not organization:
-            return
-
-        valid = True
-
-        return valid, error_message
 
     @pyqtSlot(QPoint)
     def on_result_twidget_customContextMenuRequested(self, point):
