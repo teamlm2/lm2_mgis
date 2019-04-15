@@ -62,6 +62,7 @@ class ApplicationType:
 
     pasture_use = 26
     right_land = 27
+    legitimate_rights = 27
     your_request = 28
     court_decision = 29
 

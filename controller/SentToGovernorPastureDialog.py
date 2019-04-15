@@ -150,9 +150,16 @@ class SentToGovernorPastureDialog(QDialog, Ui_SentToGovernorPastureDialog, Datab
 
         app_count = ""
         try:
-            app_count = self.session.query(CtApplicationStatus.application, func.max(CtApplicationStatus.status_date))\
-                .group_by(CtApplicationStatus.application)\
-                .having(func.max(CtApplicationStatus.status) == ConstantsPasture.APP_STATUS_WAITING).distinct().count()
+            # app_count = self.session.query(CtApplicationStatus.application, func.max(CtApplicationStatus.status_date))\
+            #     .group_by(CtApplicationStatus.application)\
+            #     .having(func.max(CtApplicationStatus.status) == ConstantsPasture.APP_STATUS_WAITING).distinct().count()
+
+            app_count = self.session.query(CtApplicationStatus.application, func.max(CtApplicationStatus.status_date)) \
+                .join(CtApplication, CtApplicationStatus.application == CtApplication.app_id) \
+                .filter(CtApplication.au2 == DatabaseUtils.working_l2_code()) \
+                .filter(CtApplication.app_type == 26) \
+                .group_by(CtApplicationStatus.application) \
+                .having(func.max(CtApplicationStatus.status) == Constants.APP_STATUS_WAITING).distinct().count()
 
         except SQLAlchemyError, e:
             PluginUtils.show_error(self.iface.mainWindow(), QApplication.translate("Plugin", "Error executing"), e.message)
@@ -252,20 +259,21 @@ class SentToGovernorPastureDialog(QDialog, Ui_SentToGovernorPastureDialog, Datab
         for app in applications:
 
             application = app.app_no
+            app_id = app.app_id
 
             application_instance = self.session.query(CtApplication).filter(CtApplication.app_no == application).one()
 
             if int(application[6:-9]) == (self.app_type_cbox.itemData(self.app_type_cbox.currentIndex())) and application_instance.app_timestamp >= p_begin_date and application_instance.app_timestamp <= p_end_date:
 
-                app_person = self.session.query(CtApplicationPersonRole).filter(CtApplicationPersonRole.application == application).\
+                app_person = self.session.query(CtApplicationPersonRole).filter(CtApplicationPersonRole.application == app_id).\
                     filter(CtApplicationPersonRole.role == 70).count()
                 if app_person > 0:
                     app_person = self.session.query(CtApplicationPersonRole).filter(
-                        CtApplicationPersonRole.application == application).filter(CtApplicationPersonRole.role == 70).all()
+                        CtApplicationPersonRole.application == app_id).filter(CtApplicationPersonRole.role == 70).all()
                 else:
                     app_person = self.session.query(CtApplicationPersonRole).filter(
-                        CtApplicationPersonRole.application == application).all()
-                parcel_count = self.session.query(CtApplicationPUGParcel).filter(CtApplicationPUGParcel.application == application_instance.app_no).count()
+                        CtApplicationPersonRole.application == app_id).all()
+                parcel_count = self.session.query(CtApplicationPUGParcel).filter(CtApplicationPUGParcel.application == app_id).count()
                 if parcel_count == 0:
                     PluginUtils.show_message(self, self.tr("parcel none"), self.tr("None Parcel!!!"))
                     return
@@ -273,7 +281,7 @@ class SentToGovernorPastureDialog(QDialog, Ui_SentToGovernorPastureDialog, Datab
                 for p in app_person:
                     if p.main_applicant == True:
                         person = self.session.query(BsPerson).filter(BsPerson.person_id == p.person).one()
-                app_pug = self.session.query(CtApplicationPUG).filter(CtApplicationPUG.application == application_instance.app_no).all()
+                app_pug = self.session.query(CtApplicationPUG).filter(CtApplicationPUG.application == application_instance.app_id).all()
                 group_name = u'Бүлэгт хамаарахгүй'
                 group_no = None
                 for app_group in app_pug:
@@ -287,8 +295,10 @@ class SentToGovernorPastureDialog(QDialog, Ui_SentToGovernorPastureDialog, Datab
                 decision_level = self.decision_level_cbox.itemText(self.decision_level_cbox.currentIndex())
                 decision_res = decision_result.description
                 duration = str(application_instance.requested_duration)
-                app_info = [group_name,person.name, person.first_name,person.person_id,application_instance.app_no, \
+                app_info = [group_name,person.name, person.first_name,person.person_register,application_instance.app_no, \
                             self.draft_no_edit.text(),self.draft_date.text(),decision_level,decision_res,duration]
+                print app_info
+                print type(app_info)
                 app_item = QTreeWidgetItem(app_info)
                 # app_item.setText(0, group_name)
                 app_item.setIcon(0, QIcon(QPixmap(":/plugins/lm2_pasture/group.png")))
@@ -302,7 +312,7 @@ class SentToGovernorPastureDialog(QDialog, Ui_SentToGovernorPastureDialog, Datab
                 self.draft_detail_twidget.setItemWidget(app_item, 9, spin)
 
                 app_parcels = self.session.query(CtApplicationPUGParcel).\
-                    filter(CtApplicationPUGParcel.application == application_instance.app_no).all()
+                    filter(CtApplicationPUGParcel.application == app_id).all()
                 for app_parcel in app_parcels:
                     parcel = self.session.query(CaPastureParcel).filter(CaPastureParcel.parcel_id == app_parcel.parcel).one()
 
@@ -483,14 +493,14 @@ class SentToGovernorPastureDialog(QDialog, Ui_SentToGovernorPastureDialog, Datab
 
             application_instance = self.session.query(CtApplication).filter(CtApplication.app_no == application).one()
             app_person = self.session.query(CtApplicationPersonRole).filter(
-                CtApplicationPersonRole.application == application). \
+                CtApplicationPersonRole.application == application_instance.app_id). \
                 filter(CtApplicationPersonRole.role == 70).count()
             if app_person > 0:
                 app_person = self.session.query(CtApplicationPersonRole).filter(
                     CtApplicationPersonRole.application == application).filter(CtApplicationPersonRole.role == 70).all()
             else:
                 app_person = self.session.query(CtApplicationPersonRole).filter(
-                    CtApplicationPersonRole.application == application).all()
+                    CtApplicationPersonRole.application == application_instance.app_id).all()
             landuse_type = self.session.query(ClLanduseType).filter(ClLanduseType.code == application_instance.requested_landuse).one()
             for p in app_person:
                 if p.main_applicant == True:
@@ -501,7 +511,7 @@ class SentToGovernorPastureDialog(QDialog, Ui_SentToGovernorPastureDialog, Datab
                 first_name = u"ААН"
 
             app_pug = self.session.query(CtApplicationPUG).filter(
-                CtApplicationPUG.application == application).all()
+                CtApplicationPUG.application == application_instance.app_id).all()
             group_name = u'Бүлэгт хамаарахгүй'
             group_no = None
             for app_group in app_pug:
@@ -521,7 +531,7 @@ class SentToGovernorPastureDialog(QDialog, Ui_SentToGovernorPastureDialog, Datab
             worksheet.write(row, col, group_name,format0)
             worksheet.write(row, col+1,person.name,format0)
             worksheet.write(row, col+2,first_name,format0)
-            worksheet.write(row, col+3,person.person_id,format0)
+            worksheet.write(row, col+3,person.person_register,format0)
             worksheet.write(row, col+4,application,format0)
             worksheet.write(row, col+5,self.draft_no_edit.text(),format0)
             worksheet.write(row, col+6,self.draft_date.text(),format0)
@@ -530,7 +540,7 @@ class SentToGovernorPastureDialog(QDialog, Ui_SentToGovernorPastureDialog, Datab
             worksheet.write(row, col+9,str(application_instance.requested_duration),format0)
 
             app_parcels = self.session.query(CtApplicationPUGParcel). \
-                filter(CtApplicationPUGParcel.application == application_instance.app_no).all()
+                filter(CtApplicationPUGParcel.application == application_instance.app_id).all()
             for app_parcel in app_parcels:
                 parcel = self.session.query(CaPastureParcel).filter(
                     CaPastureParcel.parcel_id == app_parcel.parcel).one()
@@ -560,12 +570,14 @@ class SentToGovernorPastureDialog(QDialog, Ui_SentToGovernorPastureDialog, Datab
                 .filter(SetRole.user_name == user.user_name) \
                 .filter(SetRole.is_active == True).one()
 
+            sd_user = self.session.query(SdUser).filter(SdUser.gis_user_real == officers.user_name_real).one()
+
             new_status = CtApplicationStatus()
-            new_status.application = application
-            new_status.next_officer_in_charge = officers.user_name_real
-            new_status.officer_in_charge = officers.user_name_real
-            new_status.status = ConstantsPasture.APP_STATUS_SEND
-            new_status.status_date = datetime.now().strftime(ConstantsPasture.PYTHON_DATETIME_FORMAT)
+            new_status.application = application_instance.app_id
+            new_status.next_officer_in_charge = sd_user.user_id
+            new_status.officer_in_charge = sd_user.user_id
+            new_status.status = Constants.APP_STATUS_SEND
+            new_status.status_date = datetime.now().strftime(Constants.PYTHON_DATE_FORMAT)
             self.session.add(new_status)
             row += 1
 
@@ -621,7 +633,9 @@ class SentToGovernorPastureDialog(QDialog, Ui_SentToGovernorPastureDialog, Datab
             app_no = worksheet.cell_value(curr_row, 4)
             if len(app_no) == 17:
                 self.app_no = app_no
-
+                application_instance = self.session.query(CtApplication).filter(
+                    CtApplication.app_no == app_no).one()
+                app_id = application_instance.app_id
                 applications = self.session.query(ApplicationPastureSearch)
                 sub = self.session.query(ApplicationPastureSearch,
                                          func.row_number().over(partition_by=ApplicationPastureSearch.app_no, order_by=(
@@ -640,9 +654,9 @@ class SentToGovernorPastureDialog(QDialog, Ui_SentToGovernorPastureDialog, Datab
                         filter(CtApplication.app_no == self.app_no).one()
 
                     app_person = self.session.query(CtApplicationPersonRole).filter(
-                        CtApplicationPersonRole.application == self.app_no).all()
+                        CtApplicationPersonRole.application == app_id).all()
                     parcel_count = self.session.query(CtApplicationPUGParcel).filter(
-                        CtApplicationPUGParcel.application == self.app_no).count()
+                        CtApplicationPUGParcel.application == app_id).count()
                     if parcel_count == 0:
                         PluginUtils.show_message(self, self.tr("parcel none"), self.tr("None Parcel!!!"))
                         return
@@ -651,7 +665,7 @@ class SentToGovernorPastureDialog(QDialog, Ui_SentToGovernorPastureDialog, Datab
                         if p.main_applicant == True:
                             person = self.session.query(BsPerson).filter(BsPerson.person_id == p.person).one()
                     app_pug = self.session.query(CtApplicationPUG).filter(
-                        CtApplicationPUG.application == self.app_no).all()
+                        CtApplicationPUG.application == app_id).all()
                     group_name = u'Бүлэгт хамаарахгүй'
                     group_no = None
                     for app_group in app_pug:
@@ -666,7 +680,7 @@ class SentToGovernorPastureDialog(QDialog, Ui_SentToGovernorPastureDialog, Datab
                     decision_level = self.decision_level_cbox.itemText(self.decision_level_cbox.currentIndex())
                     decision_res = decision_result.description
                     duration = str(application.requested_duration)
-                    app_info = [group_name, person.name, person.first_name, person.person_id, application.app_no, \
+                    app_info = [group_name, person.name, person.first_name, person.person_register, application.app_no, \
                                 self.draft_no_edit.text(), self.draft_date.text(), decision_level, decision_res, duration]
                     app_item = QTreeWidgetItem(app_info)
                     # app_item.setText(0, group_name)
@@ -689,7 +703,7 @@ class SentToGovernorPastureDialog(QDialog, Ui_SentToGovernorPastureDialog, Datab
                         app_item.setText(9, str(spin.value()))
 
                     app_parcels = self.session.query(CtApplicationPUGParcel). \
-                        filter(CtApplicationPUGParcel.application == self.app_no).all()
+                        filter(CtApplicationPUGParcel.application == app_id).all()
                     for app_parcel in app_parcels:
                         parcel = self.session.query(CaPastureParcel).filter(
                             CaPastureParcel.parcel_id == app_parcel.parcel).one()
@@ -1128,116 +1142,120 @@ class SentToGovernorPastureDialog(QDialog, Ui_SentToGovernorPastureDialog, Datab
         self.create_savepoint()
         maintenance_cases = []
 
-        try:
-            first_date = str(s.cell(1, decision_date_column).value)
-            decision_no = s.cell(1, decision_no_column).value
-            decision_level = s.cell(1, decision_level_column).value
+        # try:
+        first_date = str(s.cell(1, decision_date_column).value)
+        decision_no = s.cell(1, decision_no_column).value
+        decision_level = s.cell(1, decision_level_column).value
 
-            if not self.__validate_decision_attributes(first_date, decision_no, decision_level):
-                self.import_button.setEnabled(False)
-                self.add_document_button.setEnabled(False)
-                self.load_document_button.setEnabled(False)
-                self.delete_document_button.setEnabled(False)
-                self.view_document_button.setEnabled(False)
+        if not self.__validate_decision_attributes(first_date, decision_no, decision_level):
+            self.import_button.setEnabled(False)
+            self.add_document_button.setEnabled(False)
+            self.load_document_button.setEnabled(False)
+            self.delete_document_button.setEnabled(False)
+            self.view_document_button.setEnabled(False)
 
-                return
-
-            user = DatabaseUtils.current_user()
-            current_employee = self.session.query(SetRole) \
-                .filter(SetRole.user_name == user.user_name) \
-                .filter(SetRole.is_active == True).one()
-
-            self.decision = CtDecision()
-            self.decision.decision_date = s.cell(1, decision_date_column).value
-            self.decision.decision_no = s.cell(1, decision_no_column).value
-            self.decision.decision_level = s.cell(1, decision_level_column).value
-            self.decision.imported_by = current_employee.user_name_real
-
-            self.decision_no_edit.setText(self.decision.decision_no)
-            self.decision_date_edit.setText(str(self.decision.decision_date))
-            self.level_cbox.setCurrentIndex(self.level_cbox.findData(self.decision.decision_level))
-
-            for row in range(1, s.nrows):
-
-                decision_result = s.cell(row, decision_column).value
-                app_no = s.cell(row, application_no_column).value
-                current_decision_no = s.cell(row, decision_no_column).value
-                duration = s.cell(1, application_duration_column).value
-                landuse = s.cell(row, landuse_column).value
-
-                if not self.__validate_row(decision_result, app_no, current_decision_no, self.decision.decision_no,
-                                           duration, landuse):
-                    item = QTreeWidgetItem()
-                    item.setText(0, app_no)
-                    self.item_skipped.addChild(item)
-                    self.import_button.setEnabled(False)
-                    self.error_details_button.setEnabled(True)
-                    continue
-
-                decision_app = CtDecisionApplication()
-                decision_app.decision_result = decision_result
-                decision_app.application = app_no
-                self.decision.results.append(decision_app)
-
-                application = self.session.query(CtApplication).filter_by(app_no=app_no).one()
-                application_result_exists = False
-                application.approved_landuse = landuse
-
-                if decision_app.decision_result == ConstantsPasture.DECISION_RESULT_APPROVED:
-                    count = application.statuses\
-                        .filter(CtApplicationStatus.status == ConstantsPasture.APP_STATUS_APPROVED).count()
-                    if count > 0:
-                        application_result_exists = True
-                else:
-                    count = application.statuses\
-                        .filter(CtApplicationStatus.status == ConstantsPasture.APP_STATUS_REFUSED).count()
-                    if count > 0:
-                        application_result_exists = True
-
-                if not application_result_exists:
-
-                    app_status = CtApplicationStatus()
-                    user = DatabaseUtils.current_user()
-                    app_status.next_officer_in_charge = current_employee.user_name_real
-                    app_status.officer_in_charge = current_employee.user_name_real
-                    app_status.application = app_no
-                    app_status.status_date = self.decision.decision_date
-
-                    if decision_app.decision_result == ConstantsPasture.DECISION_RESULT_APPROVED or decision_app.decision_result == '10':
-                        app_status.status = ConstantsPasture.APP_STATUS_APPROVED
-                    else:
-                        app_status.status = ConstantsPasture.APP_STATUS_REFUSED
-
-                        #rollback: set date of parcel that isn't approved to NULL
-                        #set valid_till of parcels back to infinity
-                        application = self.session.query(CtApplication).get(app_no)
-                        if application.maintenance_case not in maintenance_cases and application.maintenance_case is not None:
-                            maintenance_cases.append(application.maintenance_case)
-
-                    self.session.add(app_status)
-
-                if application.app_type in ConstantsPasture.APPLICATION_TYPE_WITH_DURATION:
-                    approved_duration = int(duration)
-                    application.approved_duration = approved_duration
-
-                item = QTreeWidgetItem()
-                item.setText(0, decision_app.application)
-                if int(decision_app.decision_result) == int(ConstantsPasture.DECISION_RESULT_APPROVED):
-                    self.item_approved.addChild(item)
-                else:
-                    self.item_refused.addChild(item)
-
-                self.session.add(self.decision)
-                self.add_document_button.setEnabled(True)
-                self.load_document_button.setEnabled(True)
-                self.delete_document_button.setEnabled(True)
-                self.view_document_button.setEnabled(True)
-                self.select_file_button.setEnabled(False)
-
-        except SQLAlchemyError, e:
-            self.rollback_to_savepoint()
-            PluginUtils.show_error(self, self.tr("Query Error"), self.tr("Could not import xls file {0}: {1}").format(currentframe().f_lineno, e.message))
             return
+
+        user = DatabaseUtils.current_user()
+        current_employee = self.session.query(SetRole) \
+            .filter(SetRole.user_name == user.user_name) \
+            .filter(SetRole.is_active == True).one()
+
+        sd_user = self.session.query(SdUser).filter(SdUser.gis_user_real == current_employee.user_name_real).one()
+
+        self.decision = CtDecision()
+        self.decision.decision_date = s.cell(1, decision_date_column).value
+        self.decision.decision_no = s.cell(1, decision_no_column).value
+        self.decision.decision_level = s.cell(1, decision_level_column).value
+        self.decision.imported_by = DatabaseUtils.current_sd_user().user_id
+
+        self.decision_no_edit.setText(self.decision.decision_no)
+        self.decision_date_edit.setText(str(self.decision.decision_date))
+        self.level_cbox.setCurrentIndex(self.level_cbox.findData(self.decision.decision_level))
+
+        for row in range(1, s.nrows):
+
+            decision_result = s.cell(row, decision_column).value
+            app_no = s.cell(row, application_no_column).value
+            current_decision_no = s.cell(row, decision_no_column).value
+            duration = s.cell(1, application_duration_column).value
+            landuse = s.cell(row, landuse_column).value
+            application_instance = self.session.query(CtApplication).filter(
+                CtApplication.app_no == app_no).one()
+            app_id = application_instance.app_id
+            if not self.__validate_row(decision_result, app_no, current_decision_no, self.decision.decision_no,
+                                       duration, landuse):
+                item = QTreeWidgetItem()
+                item.setText(0, app_no)
+                self.item_skipped.addChild(item)
+                self.import_button.setEnabled(False)
+                self.error_details_button.setEnabled(True)
+                continue
+
+            decision_app = CtDecisionApplication()
+            decision_app.decision_result = decision_result
+            decision_app.application = app_id
+            self.decision.results.append(decision_app)
+
+            application = self.session.query(CtApplication).filter_by(app_no=app_no).one()
+            application_result_exists = False
+            application.approved_landuse = landuse
+
+            if decision_app.decision_result == ConstantsPasture.DECISION_RESULT_APPROVED:
+                count = application.statuses\
+                    .filter(CtApplicationStatus.status == ConstantsPasture.APP_STATUS_APPROVED).count()
+                if count > 0:
+                    application_result_exists = True
+            else:
+                count = application.statuses\
+                    .filter(CtApplicationStatus.status == ConstantsPasture.APP_STATUS_REFUSED).count()
+                if count > 0:
+                    application_result_exists = True
+
+            if not application_result_exists:
+
+                app_status = CtApplicationStatus()
+                user = DatabaseUtils.current_user()
+                app_status.next_officer_in_charge = sd_user.user_id
+                app_status.officer_in_charge = sd_user.user_id
+                app_status.application = app_id
+                app_status.status_date = self.decision.decision_date
+
+                if decision_app.decision_result == ConstantsPasture.DECISION_RESULT_APPROVED or decision_app.decision_result == '10':
+                    app_status.status = ConstantsPasture.APP_STATUS_APPROVED
+                else:
+                    app_status.status = ConstantsPasture.APP_STATUS_REFUSED
+
+                    #rollback: set date of parcel that isn't approved to NULL
+                    #set valid_till of parcels back to infinity
+                    application = self.session.query(CtApplication).get(app_no)
+                    if application.maintenance_case not in maintenance_cases and application.maintenance_case is not None:
+                        maintenance_cases.append(application.maintenance_case)
+
+                self.session.add(app_status)
+
+            if application.app_type in ConstantsPasture.APPLICATION_TYPE_WITH_DURATION:
+                approved_duration = int(duration)
+                application.approved_duration = approved_duration
+
+            item = QTreeWidgetItem()
+            item.setText(0, application.app_no)
+            if int(decision_app.decision_result) == int(ConstantsPasture.DECISION_RESULT_APPROVED):
+                self.item_approved.addChild(item)
+            else:
+                self.item_refused.addChild(item)
+
+            self.session.add(self.decision)
+            self.add_document_button.setEnabled(True)
+            self.load_document_button.setEnabled(True)
+            self.delete_document_button.setEnabled(True)
+            self.view_document_button.setEnabled(True)
+            self.select_file_button.setEnabled(False)
+
+        # except SQLAlchemyError, e:
+        #     self.rollback_to_savepoint()
+        #     PluginUtils.show_error(self, self.tr("Query Error"), self.tr("Could not import xls file {0}: {1}").format(currentframe().f_lineno, e.message))
+        #     return
 
     def __validate_decision_attributes(self, current_date_string, decision_no, decision_level):
 
@@ -1419,14 +1437,14 @@ class SentToGovernorPastureDialog(QDialog, Ui_SentToGovernorPastureDialog, Datab
     @pyqtSlot()
     def on_import_button_clicked(self):
 
-        try:
-            self.commit()
+        # try:
+        self.commit()
 
-        except SQLAlchemyError, e:
-            self.rollback()
-            PluginUtils.show_error(self, self.tr("Query Error"),
-                                   self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
-            return
+        # except SQLAlchemyError, e:
+        #     self.rollback()
+        #     PluginUtils.show_error(self, self.tr("Query Error"),
+        #                            self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+        #     return
 
         self.__start_fade_out_timer()
         user = DatabaseUtils.current_user()

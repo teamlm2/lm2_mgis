@@ -63,7 +63,7 @@
     <string notr="true">QTabBar::tab { width: 150px; }</string>
    </property>
    <property name="currentIndex">
-    <number>2</number>
+    <number>0</number>
    </property>
    <property name="usesScrollButtons">
     <bool>true</bool>
@@ -86,7 +86,7 @@
      </property>
      <widget class="QDateTimeEdit" name="date_time_date">
       <property name="enabled">
-       <bool>false</bool>
+       <bool>true</bool>
       </property>
       <property name="geometry">
        <rect>
@@ -506,7 +506,7 @@
         <string>Status</string>
        </property>
        <property name="textAlignment">
-        <set>AlignLeft|AlignVCenter</set>
+        <set>AlignLeading|AlignVCenter</set>
        </property>
       </column>
       <column>
@@ -514,7 +514,7 @@
         <string>Date</string>
        </property>
        <property name="textAlignment">
-        <set>AlignLeft|AlignVCenter</set>
+        <set>AlignLeading|AlignVCenter</set>
        </property>
       </column>
       <column>
@@ -522,7 +522,7 @@
         <string>Officer in Charge</string>
        </property>
        <property name="textAlignment">
-        <set>AlignLeft|AlignVCenter</set>
+        <set>AlignLeading|AlignVCenter</set>
        </property>
       </column>
       <column>
@@ -530,7 +530,7 @@
         <string>Next Officer in Charge</string>
        </property>
        <property name="textAlignment">
-        <set>AlignLeft|AlignVCenter</set>
+        <set>AlignLeading|AlignVCenter</set>
        </property>
       </column>
      </widget>

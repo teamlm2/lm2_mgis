@@ -433,6 +433,7 @@ class LayerUtils(object):
             # current_root.insertGroup(3, u"Main")
 
             other_root = plan.insertGroup(2, u"Бусад ГЗБТ")
+
             # other_root.setExpanded(False)
             # types = session.query(ClPlanType).order_by(ClPlanType.code.desc()).all()
             # count = 1

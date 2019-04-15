@@ -451,7 +451,7 @@ class ContractPastureDialog(QDialog, Ui_ContractPastureDialog, DatabaseHelper):
         #checks that the decision was "approved"
 
         app_contarct_count = self.session.query(CtContractApplicationRole).\
-            filter(CtContractApplicationRole.application == application.app_no).count()
+            filter(CtContractApplicationRole.application == application.app_id).count()
         if app_contarct_count > 0:
             PluginUtils.show_error(self, self.tr("Application Error"),
                                    self.tr("This applicaton already created contract."))
@@ -476,7 +476,7 @@ class ContractPastureDialog(QDialog, Ui_ContractPastureDialog, DatabaseHelper):
             return False
 
         #check that there is a parcel for this application
-        ct_app_parcels_count = self.session.query(CtApplicationPUGParcel.application == application.app_no).count()
+        ct_app_parcels_count = self.session.query(CtApplicationPUGParcel.application == application.app_id).count()
         if ct_app_parcels_count == 0:
             PluginUtils.show_error(self, self.tr("Application Error"),
                                    self.tr("It is not allowed to add applications without assigned parcel."))
@@ -1240,23 +1240,23 @@ class ContractPastureDialog(QDialog, Ui_ContractPastureDialog, DatabaseHelper):
         if not self.enter_application_num_edit.text():
             return
 
-        try:
-            app_no = self.enter_application_num_edit.text()
-            count = self.session.query(CtApplication).filter(CtApplication.app_no == app_no).count()
-            if count == 1:
-                application = self.session.query(CtApplication).filter(CtApplication.app_no == app_no).one()
+        # try:
+        app_no = self.enter_application_num_edit.text()
+        count = self.session.query(CtApplication).filter(CtApplication.app_no == app_no).count()
+        if count == 1:
+            application = self.session.query(CtApplication).filter(CtApplication.app_no == app_no).one()
 
-                if not self.__validate_application(application):
-                    return
+            if not self.__validate_application(application):
+                return
 
-                self.found_edit.setText(application.app_no)
-                self.enter_application_num_edit.setText("")
-            else:
-                PluginUtils.show_error(self, self.tr("Database Error"),
-                                       self.tr("Found multiple applications for the number {0}.").format(app_no))
+            self.found_edit.setText(application.app_no)
+            self.enter_application_num_edit.setText("")
+        else:
+            PluginUtils.show_error(self, self.tr("Database Error"),
+                                   self.tr("Found multiple applications for the number {0}.").format(app_no))
 
-        except SQLAlchemyError, e:
-            PluginUtils.show_error(self, self.tr("Database Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+        # except SQLAlchemyError, e:
+        #     PluginUtils.show_error(self, self.tr("Database Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
 
     @pyqtSlot()
     def on_apply_button_clicked(self):
@@ -1309,7 +1309,8 @@ class ContractPastureDialog(QDialog, Ui_ContractPastureDialog, DatabaseHelper):
         decision_date = ''
         decision_level = ''
         decision_no = ''
-        application = self.session.query(CtApplication.app_no == app_no).one()
+
+        application = self.session.query(CtApplication).filter(CtApplication.app_no == app_no).one()
         app_dec = self.session.query(CtDecisionApplication).filter(
             CtDecisionApplication.application == application.app_id).all()
         for p in app_dec:
@@ -1381,9 +1382,9 @@ class ContractPastureDialog(QDialog, Ui_ContractPastureDialog, DatabaseHelper):
             raise LM2Exception(self.tr("Database Query Error"),
                                self.tr("aCould not execute: {0}").format(e.message))
 
-        report_settings = self.__admin_settings("set_report_parameter")
-        if len(report_settings) == 0:
-            return
+        # report_settings = self.__admin_settings("set_report_parameter")
+        # if len(report_settings) == 0:
+        #     return
 
         local_name = " "
         address_street_name = ""
@@ -1435,8 +1436,8 @@ class ContractPastureDialog(QDialog, Ui_ContractPastureDialog, DatabaseHelper):
         dec_year = decision_date[:4]
         dec_month = decision_date[5:-3]
         dec_day = decision_date[-2:]
-        o_firstname = officer.first_name
-        o_surname = officer.surname
+        o_firstname = officer.firstname
+        o_surname = officer.lastname
         company_name = ''
         person_surname = ''
         person_firstname = ''
@@ -1450,14 +1451,14 @@ class ContractPastureDialog(QDialog, Ui_ContractPastureDialog, DatabaseHelper):
             person_surname = person.contact_surname
             person_firstname = person.contact_first_name
 
-        bank_name = report_settings[ConstantsPasture.REPORT_BANK]
-        account_no = report_settings[ConstantsPasture.REPORT_BANK_ACCOUNT]
-        office_address = report_settings[ConstantsPasture.REPORT_ADDRESS]
-        person_bank_name = person_bank_name
+        bank_name = ''
+        account_no = ''
+        office_address = ''
+        person_bank_name = ''
         person_account = person.bank_account_no
         person_phone = person.phone
         person_email = person.email_address
-        office_phone = report_settings[ConstantsPasture.REPORT_PHONE]
+        office_phone = ''
         sum_name_dec = ''
         sum_officer = ''
 
@@ -1579,11 +1580,13 @@ class ContractPastureDialog(QDialog, Ui_ContractPastureDialog, DatabaseHelper):
     def __group_name(self):
 
         app_no = self.application_this_contract_based_edit.text()
+        application_instance = self.session.query(CtApplication).filter(CtApplication.app_no == app_no).one()
+        app_id = application_instance.app_id
         app_person = self.session.query(CtApplicationPersonRole).filter(
-            CtApplicationPersonRole.application == app_no).all()
+            CtApplicationPersonRole.application == app_id).all()
 
         parcel_count = self.session.query(CtApplicationPUGParcel).filter(
-            CtApplicationPUGParcel.application == app_no).count()
+            CtApplicationPUGParcel.application == app_id).count()
         if parcel_count == 0:
             PluginUtils.show_message(self, self.tr("parcel none"), self.tr("None Parcel!!!"))
             return
@@ -1592,7 +1595,7 @@ class ContractPastureDialog(QDialog, Ui_ContractPastureDialog, DatabaseHelper):
             if p.main_applicant == True:
                 person = self.session.query(BsPerson).filter(BsPerson.person_id == p.person).one()
         app_pug = self.session.query(CtApplicationPUG).filter(
-            CtApplicationPUG.application == app_no).all()
+            CtApplicationPUG.application == app_id).all()
         group_name = u'Бүлэгт хамаарахгүй'
         group_no = None
         for app_group in app_pug:
@@ -1607,9 +1610,11 @@ class ContractPastureDialog(QDialog, Ui_ContractPastureDialog, DatabaseHelper):
     def __parcel_pastures(self, parcel_id):
 
         app_no = self.application_this_contract_based_edit.text()
+        application_instance = self.session.query(CtApplication).filter(CtApplication.app_no == app_no).one()
+        app_id = application_instance.app_id
         pasture_type_list = ''
         parcel_pastures = self.session.query(CtApplicationParcelPasture). \
-            filter(CtApplicationParcelPasture.application == app_no). \
+            filter(CtApplicationParcelPasture.application == app_id). \
             filter(CtApplicationParcelPasture.parcel == parcel_id).all()
         for pastures in parcel_pastures:
             pasture = self.session.query(ClPastureType).filter(ClPastureType.code == pastures.pasture).one()
@@ -1627,22 +1632,22 @@ class ContractPastureDialog(QDialog, Ui_ContractPastureDialog, DatabaseHelper):
 
         if not self.pdf_checkbox.isChecked():
             self.__contract_possess()
-
-    def __admin_settings(self, table_name):
-
-        session = SessionHandler().session_instance()
-        lookup = {}
-        l2_code = DatabaseUtils.working_l2_code()
-        try:
-            sql = "SELECT * FROM " + "s" + l2_code + ".{0};".format(table_name)
-            result = session.execute(sql).fetchall()
-            for row in result:
-                lookup[row[0]] = row[1]
-
-        except exc.SQLAlchemyError, e:
-            PluginUtils.show_error(self, self.tr("SQL Error"), e.message)
-
-        return lookup
+    #
+    # def __admin_settings(self, table_name):
+    #
+    #     session = SessionHandler().session_instance()
+    #     lookup = {}
+    #     l2_code = DatabaseUtils.working_l2_code()
+    #     try:
+    #         sql = "SELECT * FROM " + "s" + l2_code + ".{0};".format(table_name)
+    #         result = session.execute(sql).fetchall()
+    #         for row in result:
+    #             lookup[row[0]] = row[1]
+    #
+    #     except exc.SQLAlchemyError, e:
+    #         PluginUtils.show_error(self, self.tr("SQL Error"), e.message)
+    #
+    #     return lookup
 
     @pyqtSlot()
     def on_print_soil_qual_pass_edit_clicked(self):
@@ -1707,7 +1712,7 @@ class ContractPastureDialog(QDialog, Ui_ContractPastureDialog, DatabaseHelper):
         value = "%" + text + "%"
 
         application = self.session.query(CtApplication)\
-            .join(CtApplicationPersonRole, CtApplication.app_no == CtApplicationPersonRole.application)\
+            .join(CtApplicationPersonRole, CtApplication.app_id == CtApplicationPersonRole.application)\
             .join(BsPerson, CtApplicationPersonRole.person == BsPerson.person_id)\
             .filter(BsPerson.person_id.ilike(value)).all()
 
@@ -1724,10 +1729,10 @@ class ContractPastureDialog(QDialog, Ui_ContractPastureDialog, DatabaseHelper):
                     filter(CtContractApplicationRole.contract == self.contract.contract_id).all()
                 for contract_app in contract_apps:
                     mortgage_count = self.session.query(CtApp8Ext).\
-                        filter(CtApp8Ext.app_no == contract_app.application).count()
+                        filter(CtApp8Ext.app_id == contract_app.application).count()
                     if mortgage_count > 0:
                         mortgage = self.session.query(CtApp8Ext).\
-                        filter(CtApp8Ext.app_no == contract_app.application).one()
+                        filter(CtApp8Ext.app_id == contract_app.application).one()
                         today = date.today()
                         mortgage_date = mortgage.end_mortgage_period
                         if today < mortgage_date:

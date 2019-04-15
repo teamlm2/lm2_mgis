@@ -403,9 +403,9 @@
        <widget class="QComboBox" name="working_l2_cbox">
         <property name="geometry">
          <rect>
-          <x>205</x>
+          <x>236</x>
           <y>5</y>
-          <width>170</width>
+          <width>140</width>
           <height>22</height>
          </rect>
         </property>
@@ -413,9 +413,9 @@
        <widget class="QComboBox" name="working_l1_cbox">
         <property name="geometry">
          <rect>
-          <x>6</x>
+          <x>88</x>
           <y>5</y>
-          <width>170</width>
+          <width>140</width>
           <height>22</height>
          </rect>
         </property>
@@ -446,6 +446,19 @@ font: 75 14pt &quot;Helvetica&quot;;</string>
         </property>
         <property name="wordWrap">
          <bool>true</bool>
+        </property>
+       </widget>
+       <widget class="QCheckBox" name="is_filter_chbox">
+        <property name="geometry">
+         <rect>
+          <x>8</x>
+          <y>8</y>
+          <width>78</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Is Filter</string>
         </property>
        </widget>
       </widget>

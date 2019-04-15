@@ -887,15 +887,15 @@ class ApplicationsPastureDialog(QDialog, Ui_ApplicationsPastureDialog, DatabaseH
         self.__remove_document_items()
         current_app_type = self.application_type_cbox.itemData(self.application_type_cbox.currentIndex())
         try:
-            required_doc_types = self.session.query(SetApplicationTypeDocumentRole). \
-                filter(SetApplicationTypeDocumentRole.application_type == current_app_type).all()
+            required_doc_types = self.session.query(SetApplicationTypeDocumentRole).filter_by(
+                application_type=current_app_type)
 
         except SQLAlchemyError, e:
-            PluginUtils.show_error(self, self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+            PluginUtils.show_error(self, self.tr("File Error"),
+                                   self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
             return
 
         for docType in required_doc_types:
-
             item_provided = QTableWidgetItem()
             item_provided.setCheckState(Qt.Unchecked)
 
@@ -923,7 +923,7 @@ class ApplicationsPastureDialog(QDialog, Ui_ApplicationsPastureDialog, DatabaseH
             self.documents_twidget.setItem(row, DOC_OPEN_FILE_COLUMN, item_open)
             self.documents_twidget.setItem(row, DOC_DELETE_COLUMN, item_remove)
             self.documents_twidget.setItem(row, DOC_VIEW_COLUMN, item_view)
-
+        #
         self.__update_documents_file_twidget()
 
     @pyqtSlot()
@@ -1288,7 +1288,7 @@ class ApplicationsPastureDialog(QDialog, Ui_ApplicationsPastureDialog, DatabaseH
                     index = self.next_officer_in_charge_cbox.currentIndex()
                     next_officer_user_name = self.next_officer_in_charge_cbox.itemData(index, Qt.UserRole)
                     appStatus.next_officer_in_charge = next_officer_user_name
-                    python_date = PluginUtils.convert_python_datetime_to_qt(self.status_date_date.dateTime())
+                    python_date = PluginUtils.convert_qt_date_to_python(self.status_date_date.date())
                     appStatus.status_date = python_date
                     #self.commit()
 

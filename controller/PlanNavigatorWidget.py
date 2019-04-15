@@ -844,37 +844,37 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
 
         filter_is_set = False
 
+        if self.is_filter_chbox.isChecked():
+            filter_is_set = True
+            l2_code = self.working_l2_cbox.itemData(self.working_l2_cbox.currentIndex())
+            l1_code = self.working_l1_cbox.itemData(self.working_l1_cbox.currentIndex())
+            values = values.filter(or_(PlProject.au2 == l2_code, PlProject.au2 == None)).\
+                filter(or_(PlProject.au1 == l1_code, PlProject.au1 == None))
+
         if self.plan_num_edit.text():
             filter_is_set = True
             plan_no = "%" + self.plan_num_edit.text() + "%"
             values = values.filter(PlProject.code.ilike(plan_no))
-
-
         if self.status_cbox.currentIndex() != -1:
             if not self.status_cbox.itemData(self.status_cbox.currentIndex()) == -1:
                 filter_is_set = True
                 status = self.status_cbox.itemData(self.status_cbox.currentIndex())
-
                 values = values.filter(PlProject.workrule_status_id == status)
         if self.plan_type_cbox.currentIndex() != -1:
             if not self.plan_type_cbox.itemData(self.plan_type_cbox.currentIndex()) == -1:
                 filter_is_set = True
                 values = values.filter(PlProject.plan_type_id == self.plan_type_cbox.itemData(self.plan_type_cbox.currentIndex()))
-
         if self.decision_level_cbox.currentIndex() != -1:
             if not self.decision_level_cbox.itemData(self.decision_level_cbox.currentIndex()) == -1:
                 filter_is_set = True
                 values = values.filter(PlProject.plan_decision_level_id == self.decision_level_cbox.itemData(self.decision_level_cbox.currentIndex()))
-
         if self.office_in_charge_cbox.currentIndex() != -1:
             if not self.office_in_charge_cbox.itemData(self.office_in_charge_cbox.currentIndex()) == -1:
                 filter_is_set = True
                 officer = self.office_in_charge_cbox.itemData(self.office_in_charge_cbox.currentIndex())
-
                 values = values.join(PlProjectStatusNextOfficer, PlProject.project_id == PlProjectStatusNextOfficer.project_id). \
                     filter(PlProjectStatusNextOfficer.workrule_status_id == PlProject.workrule_status_id). \
                     filter(PlProjectStatusNextOfficer.created_by == officer)
-
         if self.next_officer_in_charge_cbox.currentIndex() != -1:
             if not self.next_officer_in_charge_cbox.itemData(self.next_officer_in_charge_cbox.currentIndex()) == -1:
                 filter_is_set = True
@@ -883,7 +883,6 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
                 values = values.join(PlProjectStatusNextOfficer, PlProject.project_id == PlProjectStatusNextOfficer.project_id). \
                     filter(PlProjectStatusNextOfficer.workrule_status_id == PlProject.workrule_status_id). \
                     filter(PlProjectStatusNextOfficer.next_officer_id == officer)
-
         if self.plan_date_checkbox.isChecked():
             filter_is_set = True
             qt_date = self.plan_datetime_edit.date().toString(Constants.DATABASE_DATE_FORMAT)
@@ -904,9 +903,21 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
             return
 
         for value in values.order_by(PlProject.code).all():
-            plan_type = "" if not value.plan_type_ref else value.plan_type_ref.description
 
-            item = QTableWidgetItem(str(value.code) + " ( " + unicode(plan_type) + " )")
+            description = ''
+            plan_type = "" if not value.plan_type_ref else value.plan_type_ref.short_name
+            au_type = ''
+
+            if value.plan_type_ref.admin_unit_type == 2:
+                if value.au1_ref:
+                    au_type = ' /' + unicode(value.au1_ref.name) + '/'
+            elif value.plan_type_ref.admin_unit_type == 3:
+                if value.au2_ref:
+                    au_type = ' /' + unicode(value.au2_ref.name) + '/'
+            else:
+                au_type = ''
+            description = str(value.code) + au_type + " (" + unicode(plan_type) + ")"
+            item = QTableWidgetItem(description)
             item.setIcon(QIcon(QPixmap(":/plugins/lm2/land_plan.png")))
             item.setData(Qt.UserRole, value.project_id)
             item.setData(Qt.UserRole + 1, value.code)
@@ -1214,18 +1225,27 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
             self.current_dialog.setModal(False)
             self.current_dialog.show()
 
-    def __load_temp_layer(self, project_id, layer_name, mygroup, root):
+    def __load_temp_layer(self, project_id, layer_name, mygroup, root, base_code):
 
-        sql_polygon = "(select parcel_id as gid, badedturl, project_id, polygon_geom as geometry from data_plan.pl_project_parcel where project_id = " + str(
-            project_id) + " and polygon_geom is not null)"
+        sql_polygon = "(select parcel_id as gid, zone.code as zone_code, zone.name, proj.code as project_code, parcel.gazner, parcel.txt, polygon_geom as geometry from data_plan.pl_project_parcel parcel " \
+                      "join data_plan.pl_project proj on parcel.project_id = proj.project_id  " \
+                      "join data_plan.cl_plan_zone zone on parcel.plan_zone_id = zone.plan_zone_id  " \
+                      "where substring(zone.code, 1, 1) = " + base_code + " and proj.project_id = " + str(project_id) + " and polygon_geom is not null  " \
+                                                                     " order by zone.code)"
 
-        sql_point = "(select parcel_id as gid, badedturl, project_id, point_geom as geometry from data_plan.pl_project_parcel where project_id = " + str(
-            project_id) + " and point_geom is not null)"
+        sql_point = "(select parcel_id as gid, zone.code as zone_code, zone.name, proj.code as project_code, parcel.gazner, parcel.txt, point_geom as geometry from data_plan.pl_project_parcel parcel " \
+                    "join data_plan.pl_project proj on parcel.project_id = proj.project_id  " \
+                    "join data_plan.cl_plan_zone zone on parcel.plan_zone_id = zone.plan_zone_id  " \
+                    "where substring(zone.code, 1, 1) = " + base_code + " and proj.project_id = " + str(project_id) + " and point_geom is not null  " \
+                                                                     " order by zone.code)"
 
-        sql_line = "(select parcel_id as gid, badedturl, project_id, line_geom as geometry from data_plan.pl_project_parcel where project_id = " + str(
-            project_id) + " and line_geom is not null)"
+        sql_line = "(select parcel_id as gid, zone.code as zone_code, zone.name, proj.code as project_code, parcel.gazner, parcel.txt, line_geom as geometry from data_plan.pl_project_parcel parcel " \
+                      "join data_plan.pl_project proj on parcel.project_id = proj.project_id  " \
+                      "join data_plan.cl_plan_zone zone on parcel.plan_zone_id = zone.plan_zone_id  " \
+                      "where substring(zone.code, 1, 1) = " + base_code + " and proj.project_id = " + str(project_id) + " and line_geom is not null  " \
+                                                                     " order by zone.code)"
 
-        column_name = 'badedturl'
+        column_name = 'zone_code'
         layer_list = []
         layers = QgsMapLayerRegistry.instance().mapLayers()
 
@@ -1265,7 +1285,7 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
 
     def __load_layer_style(self, vlayer_parcel, project_id, column_name, sql):
 
-        sql = "select badedturl from (" + sql + " )xxx group by badedturl "
+        sql = "select zone_code from (" + sql + " )xxx group by zone_code order by zone_code"
 
         categories = []
         parcels = self.session.execute(sql).fetchall()
@@ -1309,12 +1329,27 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
         group_name = plan_instance.plan_type_ref.short_name + '/' + plan_instance.code + '/'
 
         root_group = root.findGroup(u"Бусад ГЗБТ")
-        mygroup = self.__create_layer_group(root_group, group_name)
-        mygroup.setExpanded(False)
+        parent_group = self.__create_layer_group(root_group, group_name)
+        parent_group.setExpanded(False)
 
-        self.__load_temp_layer(project_id, "Point", mygroup, root)
-        self.__load_temp_layer(project_id, "Line", mygroup, root)
-        self.__load_temp_layer(project_id, "Polygon", mygroup, root)
+        sql = "select base_code from ( " \
+                "select substring(zone.code, 1, 1) base_code from data_plan.pl_project_parcel parcel " \
+                "join data_plan.cl_plan_zone zone on parcel.plan_zone_id = zone.plan_zone_id " \
+                "where project_id = " + str(project_id) + " group by zone.code order by zone.code )xxx group by base_code order by base_code "
+
+        values = self.session.execute(sql).fetchall()
+        parent_types = Constants.plan_process_type_parent
+        for parent_type in parent_types:
+            for row in values:
+                base_code = str(row[0])
+                if base_code == str(parent_type):
+                    name = parent_types[parent_type]
+                    mygroup = self.__create_layer_group(parent_group, unicode(name))
+                    mygroup.setExpanded(False)
+                    code = "'" + base_code + "'"
+                    self.__load_temp_layer(project_id, "Point", mygroup, root, code)
+                    self.__load_temp_layer(project_id, "Line", mygroup, root, code)
+                    self.__load_temp_layer(project_id, "Polygon", mygroup, root, code)
 
     def __zoom_to_parcel_several_soums(self, soums):
 
@@ -1888,10 +1923,26 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
     def on_current_view_button_clicked(self):
 
         self.__change_current_plan()
-
         LayerUtils.refresh_layer_plan()
-
         root = QgsProject.instance().layerTreeRoot()
+
+        plan_instance = self.__selected_plan()
+        project_id = plan_instance.project_id
+        group_name = plan_instance.plan_type_ref.short_name + '/' + plan_instance.code + '/'
+
+        root_group = root.findGroup(u"Ажиллаж байгаа")
+
+        if not root_group is None:
+            # root.removeGroup('Ажиллаж байгаа')
+            root.removeChildNode(root_group)
+            # for child in root_group.children():
+            #     dump = child.dump()
+            #     id = dump.split("=")[-1].strip()
+            #     QgsMapLayerRegistry.instance().removeMapLayer(id)
+            # print 'dddddd'
+            # root.removeChildNode(root_group)
+        LayerUtils.refresh_layer_plan()
+        root_group = root.findGroup(u"Ажиллаж байгаа")
 
         schema_name = "data_plan"
         table_name = "pl_view_project_parcel"
@@ -1910,144 +1961,32 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
         if vlayer_parcel:
             QgsMapLayerRegistry.instance().removeMapLayers(layer_list)
 
-        mygroup = root.findGroup(u"Ажиллаж байгаа")
+        parent_group = self.__create_layer_group(root_group, unicode(group_name))
+        parent_group.setExpanded(False)
 
+        sql = "select base_code from ( " \
+              "select substring(zone.code, 1, 1) base_code from data_plan.pl_project_parcel parcel " \
+              "join data_plan.cl_plan_zone zone on parcel.plan_zone_id = zone.plan_zone_id " \
+              "where project_id = " + str(
+            project_id) + " group by zone.code order by zone.code )xxx group by base_code order by base_code "
+
+        # values = self.session.execute(sql).fetchall()
+        # parent_types = Constants.plan_process_type_parent
+        # for parent_type in parent_types:
+        #     for row in values:
+        #         base_code = str(row[0])
+        #         if base_code == str(parent_type):
+        #             name = parent_types[parent_type]
+        #             mygroup = self.__create_layer_group(parent_group, unicode(name))
+        #             mygroup.setExpanded(False)
+        #             self.__load_parcel_polygon_layer(root, mygroup)
+        #             self.__load_parcel_point_layer(root, mygroup)
+        #             self.__load_parcel_line_layer(root, mygroup)
+        mygroup = parent_group
         self.__load_parcel_polygon_layer(root, mygroup)
         self.__load_parcel_point_layer(root, mygroup)
         self.__load_parcel_line_layer(root, mygroup)
-        # mygroup = root.findGroup(u"Sub")
-        #
-        # vlayer_sub_zone = LayerUtils.layer_by_data_source("data_plan", "ld_view_project_sub_zone")
-        # if vlayer_sub_zone is None:
-        #     vlayer_sub_zone = LayerUtils.load_polygon_layer_base_layer("ld_view_project_sub_zone", "parcel_id",
-        #                                                               "data_plan")
-        #     vlayer_sub_zone.setLayerName(self.tr("Current Sub Zone"))
-        # else:
-        #     QgsMapLayerRegistry.instance().removeMapLayers([vlayer_sub_zone.id()])
-        #     vlayer_sub_zone = LayerUtils.load_polygon_layer_base_layer("ld_view_project_sub_zone", "parcel_id",
-        #                                                                "data_plan")
-        #     vlayer_sub_zone.setLayerName(self.tr("Current Sub Zone"))
-        # myalayer = root.findLayer(vlayer_sub_zone.id())
-        #
-        #
-        #     expression = 'badedturl'  # field name
-        #     renderer = QgsCategorizedSymbolRendererV2(expression, categories)
-        #     vlayer_sub_zone.setRendererV2(renderer)
-        #
-        # mygroup = root.findGroup(u"Main")
-        #
-        # vlayer_point = LayerUtils.layer_by_data_source("data_plan", "ld_view_project_main_zone_point")
-        # if vlayer_point is None:
-        #     vlayer_point = LayerUtils.load_point_layer_base_layer("ld_view_project_main_zone_point", "parcel_id",
-        #                                                           "data_plan")
-        #     vlayer_point.setLayerName(self.tr("Current Main Point"))
-        # else:
-        #     QgsMapLayerRegistry.instance().removeMapLayers([vlayer_point.id()])
-        #     vlayer_point = LayerUtils.load_point_layer_base_layer("ld_view_project_main_zone_point", "parcel_id",
-        #                                                           "data_plan")
-        #     vlayer_point.setLayerName(self.tr("Current Main Point"))
-        #
-        # myalayer = root.findLayer(vlayer_point.id())
-        # if myalayer is None:
-        #     mygroup.addLayer(vlayer_point)
-        #     parcels = self.session.query(PlProjectParcel.badedturl). \
-        #         filter(PlProjectParcel.project_id == self.plan.project_id). \
-        #         filter(PlProjectParcel.au2 == self.au2). \
-        #         filter(PlProjectParcel.point_geom != None).group_by(PlProjectParcel.badedturl).order_by(
-        #         PlProjectParcel.badedturl.asc()).all()
-        #     categories = []
-        #     for parcel in parcels:
-        #         count = self.session.query(SetZoneColor).filter(
-        #             SetZoneColor.code == parcel.badedturl).count()
-        #         if count == 1:
-        #             style = self.session.query(SetZoneColor).filter(
-        #                 SetZoneColor.code == parcel.badedturl).one()
-        #             fill_color = style.fill_color
-        #             boundary_color = style.boundary_color
-        #             opacity = 0.5
-        #             code = str(int(style.code))
-        #             description = str(int(style.code)) + ': ' + style.description
-        #
-        #             self.__categorized_style(categories, vlayer_point, fill_color, boundary_color, opacity, code,
-        #                                      description)
-        #
-        #     expression = 'badedturl'  # field name
-        #     renderer = QgsCategorizedSymbolRendererV2(expression, categories)
-        #     vlayer_point.setRendererV2(renderer)
-        #
-        # vlayer_line = LayerUtils.layer_by_data_source("data_plan", "ld_view_project_main_zone_line")
-        # if vlayer_line is None:
-        #     vlayer_line = LayerUtils.load_line_layer_base_layer("ld_view_project_main_zone_line", "parcel_id",
-        #                                                         "data_plan")
-        #     vlayer_line.setLayerName(self.tr("Current Main Line"))
-        # else:
-        #     QgsMapLayerRegistry.instance().removeMapLayers([vlayer_line.id()])
-        #     vlayer_line = LayerUtils.load_line_layer_base_layer("ld_view_project_main_zone_line", "parcel_id",
-        #                                                         "data_plan")
-        #     vlayer_line.setLayerName(self.tr("Current Main Line"))
-        # myalayer = root.findLayer(vlayer_line.id())
-        # if myalayer is None:
-        #     mygroup.addLayer(vlayer_line)
-        #     parcels = self.session.query(PlProjectParcel.badedturl). \
-        #         filter(PlProjectParcel.project_id == self.plan.project_id). \
-        #         filter(PlProjectParcel.au2 == self.au2). \
-        #         filter(PlProjectParcel.line_geom != None).group_by(PlProjectParcel.badedturl).order_by(
-        #         PlProjectParcel.badedturl.asc()).all()
-        #     categories = []
-        #     for parcel in parcels:
-        #         count = self.session.query(SetZoneColor).filter(
-        #             SetZoneColor.code == parcel.badedturl).count()
-        #         if count == 1:
-        #             style = self.session.query(SetZoneColor).filter(
-        #                 SetZoneColor.code == parcel.badedturl).one()
-        #             fill_color = style.fill_color
-        #             boundary_color = style.boundary_color
-        #             opacity = 0.5
-        #             code = str(int(style.code))
-        #             description = str(int(style.code)) + ': ' + style.description
-        #
-        #             self.__categorized_style(categories, vlayer_line, fill_color, boundary_color, opacity, code,
-        #                                      description)
-        #
-        #     expression = 'badedturl'  # field name
-        #     renderer = QgsCategorizedSymbolRendererV2(expression, categories)
-        #     vlayer_line.setRendererV2(renderer)
-        #
-        # vlayer_polygon = LayerUtils.layer_by_data_source("data_plan", "ld_view_project_main_zone_polygon")
-        #
-        # if vlayer_polygon is None:
-        #     vlayer_polygon = LayerUtils.load_polygon_layer_base_layer("ld_view_project_main_zone_polygon", "parcel_id", "data_plan")
-        #     vlayer_polygon.setLayerName(self.tr("Current Main Polygon"))
-        # else:
-        #     QgsMapLayerRegistry.instance().removeMapLayers([vlayer_polygon.id()])
-        #     vlayer_polygon = LayerUtils.load_polygon_layer_base_layer("ld_view_project_main_zone_polygon", "parcel_id",
-        #                                                              "data_plan")
-        #     vlayer_polygon.setLayerName(self.tr("Current Main Polygon"))
-        # myalayer = root.findLayer(vlayer_polygon.id())
-        # if myalayer is None:
-        #     mygroup.addLayer(vlayer_polygon)
-        #
-        #     parcels = self.session.query(PlProjectParcel.badedturl).\
-        #         filter(PlProjectParcel.project_id == self.plan.project_id).\
-        #         filter(PlProjectParcel.au2 == self.au2).\
-        #         filter(PlProjectParcel.polygon_geom != None).group_by(PlProjectParcel.badedturl).order_by(PlProjectParcel.badedturl.asc()).all()
-        #     categories = []
-        #     for parcel in parcels:
-        #         count = self.session.query(SetZoneColor).filter(
-        #             SetZoneColor.code == parcel.badedturl).count()
-        #         if count == 1:
-        #             style = self.session.query(SetZoneColor).filter(SetZoneColor.code == parcel.badedturl).one()
-        #             fill_color = style.fill_color
-        #             boundary_color = style.boundary_color
-        #             opacity = 0.5
-        #             code = str(int(style.code))
-        #             description = str(int(style.code)) + ': ' + style.description
-        #
-        #             self.__categorized_style(categories, vlayer_polygon, fill_color, boundary_color, opacity, code, description)
-        #
-        #     expression = 'badedturl'  # field name
-        #     renderer = QgsCategorizedSymbolRendererV2(expression, categories)
-        #     vlayer_polygon.setRendererV2(renderer)
+
 
     def __categorized_style(self, categories, layer, fill_color, boundary_color, opacity, code, description):
 

@@ -6,7 +6,7 @@ from Base import *
 
 class SetPayment(Base):
 
-    __tablename__ = 'set_payment'
+    __tablename__ = 'set_payment_tax_fine'
 
     id = Column(Integer, Sequence('set_payment_id_seq'), primary_key=True)
     landfee_fine_rate_per_day = Column(Numeric)

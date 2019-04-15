@@ -14,6 +14,7 @@ class ClPlanType(Base):
     description_en = Column(String)
     is_point = Column(Boolean)
     short_name = Column(String)
+    admin_unit_type = Column(Integer)
 
     is_active = Column(Boolean)
     created_at = Column(DateTime)

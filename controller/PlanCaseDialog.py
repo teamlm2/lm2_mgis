@@ -84,6 +84,11 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         self.__setup_twidget()
         self.__setup_context_menu()
 
+    def reject(self):
+
+        self.rollback()
+        QDialog.reject(self)
+
     def __zones_rbutton_setup(self):
 
         if self.zone_parcel_rbutton.isChecked():
@@ -223,28 +228,22 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
                 landname = self.__get_attribute(parcel, parcel_shape_layer)[2]
                 header = header + '/' + unicode(landname) + '/'
             if self.__approved_parcel_check(parcel, parcel_shape_layer, id):
-                if self.zone_parcel_rbutton.isChecked():
-                    new_parcel = PlProjectParcel()
+                # if self.zone_parcel_rbutton.isChecked():
+                new_parcel = PlProjectParcel()
 
                 new_parcel.project_id = self.plan.project_id
-                new_parcel.plan_draft_ref = self.plan
+                new_parcel.project_ref = self.plan
                 # new_parcel.parcel_id = id
                 new_parcel.valid_from = PluginUtils.convert_qt_date_to_python(QDateTime().currentDateTime())
                 new_parcel.au1 = self.au1
                 new_parcel.au2 = self.au2
-                if self.zone_parcel_rbutton.isChecked():
-                    if self.polygon_rbutton.isChecked():
-                        new_parcel.polygon_geom = WKTElement(parcel.geometry().exportToWkt(), srid=4326)
-                elif self.zone_parcel_rbutton.isChecked():
-                    if self.polygon_rbutton.isChecked():
-                        new_parcel.polygon_geom = WKTElement(parcel.geometry().exportToWkt(), srid=4326)
-                elif self.zone_main_rbutton.isChecked():
-                    if self.point_rbutton.isChecked():
-                        new_parcel.point_geom = WKTElement(parcel.geometry().exportToWkt(), srid=4326)
-                    elif self.line_rbutton.isChecked():
-                        new_parcel.line_geom = WKTElement(parcel.geometry().exportToWkt(), srid=4326)
-                    elif self.polygon_rbutton.isChecked():
-                        new_parcel.polygon_geom = WKTElement(parcel.geometry().exportToWkt(), srid=4326)
+
+                if self.point_rbutton.isChecked():
+                    new_parcel.point_geom = WKTElement(parcel.geometry().exportToWkt(), srid=4326)
+                elif self.line_rbutton.isChecked():
+                    new_parcel.line_geom = WKTElement(parcel.geometry().exportToWkt(), srid=4326)
+                elif self.polygon_rbutton.isChecked():
+                    new_parcel.polygon_geom = WKTElement(parcel.geometry().exportToWkt(), srid=4326)
 
                 self.__copy_parcel_attributes(parcel, new_parcel, parcel_shape_layer)
 
@@ -359,8 +358,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         #     self.message_label.setText(error_message)
 
         # try:
-        print column_names[column_name_plan_code]
-        print type(column_names[column_name_plan_code])
+
         if column_names[column_name_plan_code]:
             count = self.session.query(ClPlanZone).filter(ClPlanZone.code == column_names[column_name_plan_code]).count()
             if count == 0:
@@ -390,7 +388,6 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         if self.zone_parcel_rbutton.isChecked():
             parcel_overlaps_count = self.session.query(PlProjectParcel).\
                 join(PlProject, PlProjectParcel.project_id == PlProject.project_id). \
-                filter(PlProject.plan_type_id == self.plan.plan_type_id). \
                 filter(PlProjectParcel.project_id == self.plan.project_id).\
                 filter(parcel_geometry.ST_Intersects(PlProjectParcel.polygon_geom)).count()
             if parcel_overlaps_count > 0:
@@ -427,7 +424,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
 
         id = 0
         plan_code = ''
-        landuse = 0
+        landuse = None
         landname = ''
         address_khashaa = 0
         address_streetname = ''
@@ -450,11 +447,13 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
 
         zone_type_count = self.session.query(ClPlanZone).filter(ClPlanZone.code == plan_code).count()
         if zone_type_count == 1:
-            print 'gggggg'
+
             zone_type = self.session.query(ClPlanZone).filter(ClPlanZone.code == plan_code).one()
-            parcel_object.plan_zone_id = zone_type.plan_zone_type_id
+            parcel_object.plan_zone_id = zone_type.plan_zone_id
+            parcel_object.badedturl = plan_code
         parcel_object.landuse = landuse
         parcel_object.gazner = landname
+
 
         return parcel_object
 

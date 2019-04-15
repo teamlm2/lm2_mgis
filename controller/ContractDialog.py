@@ -434,6 +434,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         # try:
         self.contract_num_edit.setText(self.contract.contract_no)
         self.calculated_num_edit.setText(str(self.contract.certificate_no))
+
         qt_date = PluginUtils.convert_python_date_to_qt(self.contract.contract_date)
         if qt_date is not None:
             self.contract_date.setDate(qt_date)
@@ -976,6 +977,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                         fees = person.fees.filter(CtFee.contract == self.contract.contract_id).\
                             filter(CtFee.base_fee_id == base_fee_id).all()
                         for fee in fees:
+                            person = self.session.query(BsPerson).filter(BsPerson.person_id == contractor.person_ref.person_id).one()
                             self.__add_fee_row2(row, contractor, fee)
                             row += 1
 
@@ -1067,44 +1069,46 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
             app = self.session.query(CtApplication).filter(CtApplication.app_no == app_no).one()
             contractors = app.stakeholders.filter(CtApplicationPersonRole.role == Constants.APPLICANT_ROLE_CODE).all()
+        fees = self.session.query(CtFee).filter(CtFee.contract == self.contract.contract_id).all()
+        # if app_no[6:-9] == '07' or app_no[6:-9] == '14' or app_no[6:-9] == '23':
+        #     contractors = app.stakeholders.filter(CtApplicationPersonRole.role == Constants.NEW_RIGHT_HOLDER_CODE).all()
+        # self.land_fee_twidget.setRowCount(len(contractors))
+        row = 0
 
-            # if app_no[6:-9] == '07' or app_no[6:-9] == '14' or app_no[6:-9] == '23':
-            #     contractors = app.stakeholders.filter(CtApplicationPersonRole.role == Constants.NEW_RIGHT_HOLDER_CODE).all()
-            # self.land_fee_twidget.setRowCount(len(contractors))
-            row = 0
+        for fee in fees:
 
-            for contractor in contractors:
-                if contractor:
-                    person = contractor.person_ref
-                    if person:
-                        fee_count = person.fees.filter(CtFee.contract == self.contract.contract_id).\
-                            filter(CtFee.base_fee_id == base_fee.id).count()
-                        if fee_count == 1:
-                            fee = person.fees.filter(CtFee.contract == self.contract.contract_id). \
-                                filter(CtFee.base_fee_id == base_fee.id).one()
-                            self.__add_fee_row2(row, contractor, fee)
-                        else:
-                            if fee_count > 1:
-                                fee = person.fees.filter(CtFee.contract == self.contract.contract_id). \
-                                    filter(CtFee.base_fee_id == base_fee.id).first()
-                                self.__add_fee_row2(row, contractor, fee)
-                            else:
-                                for contractor in contractors:
-                                    if contractor:
-                                        person = contractor.person_ref
-                                        if person:
-                                            fee_count = person.fees.filter(CtFee.contract == self.contract.contract_id). \
-                                                filter(CtFee.base_fee_id == None).count()
-                                            if fee_count == 1:
-                                                fee = person.fees.filter(CtFee.contract == self.contract.contract_id). \
-                                                    filter(CtFee.base_fee_id == None).one()
-                                                self.__add_fee_row2(row, contractor, fee)
-                                            else:
-                                                if fee_count > 1:
-                                                    fee = person.fees.filter(CtFee.contract == self.contract.contract_id). \
-                                                        filter(CtFee.base_fee_id == None).first()
-                                                    self.__add_fee_row2(row, contractor, fee)
-                        row += 1
+            if fee.person:
+                person = self.session.query(BsPerson).filter(BsPerson.person_id == fee.person).one()
+                if person:
+                    self.__add_fee_row2(row, person, fee)
+                    # fee_count = person.fees.filter(CtFee.contract == self.contract.contract_id).\
+                    #     filter(CtFee.base_fee_id == base_fee.id).count()
+                    # if fee_count == 1:
+                    #     fee = person.fees.filter(CtFee.contract == self.contract.contract_id). \
+                    #         filter(CtFee.base_fee_id == base_fee.id).one()
+                    #     self.__add_fee_row2(row, person, fee)
+                    # else:
+                    #     if fee_count > 1:
+                    #         fee = person.fees.filter(CtFee.contract == self.contract.contract_id). \
+                    #             filter(CtFee.base_fee_id == base_fee.id).first()
+                    #         self.__add_fee_row2(row, person, fee)
+                    #     else:
+                    #         for contractor in contractors:
+                    #             if contractor:
+                    #                 person = contractor.person_ref
+                    #                 if person:
+                    #                     fee_count = person.fees.filter(CtFee.contract == self.contract.contract_id). \
+                    #                         filter(CtFee.base_fee_id == None).count()
+                    #                     if fee_count == 1:
+                    #                         fee = person.fees.filter(CtFee.contract == self.contract.contract_id). \
+                    #                             filter(CtFee.base_fee_id == None).one()
+                    #                         self.__add_fee_row2(row, contractor, fee)
+                    #                     else:
+                    #                         if fee_count > 1:
+                    #                             fee = person.fees.filter(CtFee.contract == self.contract.contract_id). \
+                    #                                 filter(CtFee.base_fee_id == None).first()
+                    #                             self.__add_fee_row2(row, contractor, fee)
+                    row += 1
 
         self.land_fee_twidget.resizeColumnToContents(0)
         self.land_fee_twidget.resizeColumnToContents(1)
@@ -1452,15 +1456,15 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             item = QTableWidgetItem(in_active)
             self.land_fee_twidget.setItem(row, ACTIVE_COLUMN, item)
 
-            item = QTableWidgetItem(u'{0}, {1}'.format(contractor.person_ref.name, contractor.person_ref.first_name))
-            item.setData(Qt.UserRole, contractor.person_ref.person_register)
-            item.setData(Qt.UserRole + 1, contractor.person_ref.person_id)
+            item = QTableWidgetItem(u'{0}, {1}'.format(contractor.name, contractor.first_name))
+            item.setData(Qt.UserRole, contractor.person_register)
+            item.setData(Qt.UserRole + 1, contractor.person_id)
             item.setData(Qt.UserRole + 2, fee.base_fee_id)
             self.__lock_item(item)
             self.land_fee_twidget.setItem(row, CONTRACTOR_NAME, item)
-            item = QTableWidgetItem(u'{0}'.format(contractor.person_ref.person_register))
-            item.setData(Qt.UserRole, contractor.person_ref.person_register)
-            item.setData(Qt.UserRole + 1, contractor.person_ref.person_id)
+            item = QTableWidgetItem(u'{0}'.format(contractor.person_register))
+            item.setData(Qt.UserRole, contractor.person_register)
+            item.setData(Qt.UserRole + 1, contractor.person_id)
             self.__lock_item(item)
             self.land_fee_twidget.setItem(row, CONTRACTOR_ID, item)
             item = QTableWidgetItem('{0}'.format(fee.share))
@@ -1493,7 +1497,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
         # try:
         self.__save_contract()
-        # self.__save_parcel()
+        self.__save_parcel()
         self.__save_fees()
         self.__save_conditions()
         return True
@@ -2420,7 +2424,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         else:
             if person.type == 10 or person.type == 20 or person.type == 30 or person.type == 40:
                 tpl = DocxTemplate(path+'geree_ezemshix_DX.docx')
-            elif person.type == 50 or person.type == 60:
+            elif person.type == 50 or person.type == 60 or person.type == 70:
                 tpl = DocxTemplate(path+'geree_ashigluulah_DX.docx')
 
         if not officer:
@@ -2450,7 +2454,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         if person.type == 10 or person.type == 20 or person.type == 50:
             person_surname = person.name
             person_firstname = person.first_name
-        elif person.type == 30 or person.type == 40 or person.type == 60:
+        elif person.type == 30 or person.type == 40 or person.type == 60 or person.type == 70:
             company_name = person.name
             contact_position = person.contact_position
             person_surname = person.contact_surname
@@ -2511,7 +2515,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
         if person.type == 10 or person.type == 20 or person.type == 50:
             company_name = person_surname + u' овогтой ' + person_firstname
-        elif person.type == 30 or person.type == 40 or person.type == 60:
+        elif person.type == 30 or person.type == 40 or person.type == 60 or person.type == 70:
             company_name = company_name + u'-н ' + contact_position + u' ' + person_surname + u' овогтой ' + person_firstname
 
         if self.is_sign_checkbox.isChecked():
@@ -3081,7 +3085,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             if person.type == 10 or person.type == 20 or person.type == 50:
                 name = "___________________"+person.name[:1]+"."+person.first_name + " /"+ person.person_register +"/"
                 person_signature = self.__copy_label(person_signature,name,map_composition)
-            elif person.type == 30 or person.type == 40 or person.type == 60:
+            elif person.type == 30 or person.type == 40 or person.type == 60 or person.type == 70:
                 name = "___________________"+ contact_surname[:1]+"."+ contact_first_name + " /"+ person.person_register +"/"
                 person_signature = self.__copy_label(person_signature,name,map_composition)
 
@@ -3173,6 +3177,19 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             item.setText(name)
             item.adjustSizeToText()
         elif person.type == 60:
+            state_reg = " "
+            if person.state_registration_no != None:
+                state_reg = person.state_registration_no
+            person_id = state_reg +", "+person.person_register
+            item = map_composition.getComposerItemById("company_id")
+            item.setText(person_id)
+            item.adjustSizeToText()
+
+            item = map_composition.getComposerItemById("company_name")
+            name = person.name
+            item.setText(name)
+            item.adjustSizeToText()
+        elif person.type == 70:
             state_reg = " "
             if person.state_registration_no != None:
                 state_reg = person.state_registration_no
@@ -3278,6 +3295,12 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             person_id = state_reg +", "+person.person_register
             company_name = person.name +", "+ person.first_name
         elif person.type == 60:
+            state_reg = " "
+            if person.state_registration_no != None:
+                state_reg = person.state_registration_no
+                company_id = state_reg +", "+person.person_register
+            company_name = person.name
+        elif person.type == 70:
             state_reg = " "
             if person.state_registration_no != None:
                 state_reg = person.state_registration_no
@@ -3622,7 +3645,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                             a = a + y
                             if text_len < 105:
                                 contract_condition_6_2 = self.__copy_label(contract_condition_6_2,'  - '+condition.description[-(text_len):],map_composition)
-        elif person.type == 50 or person.type == 60:
+        elif person.type == 50 or person.type == 60 or person.type == 70:
             use_contract_condition_3_6 = map_composition.getComposerItemById("contract_condition_3_6")
             use_contract_condition_4_2 = map_composition.getComposerItemById("contract_condition_4_2")
             use_contract_condition_5_1 = map_composition.getComposerItemById("contract_condition_5_1")
@@ -3814,7 +3837,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             person = self.session.query(BsPerson).filter(BsPerson.person_id == fee.person).one()
             if person.type == 10 or person.type == 20:
                 sub_name = person.name[:1]+"."+person.first_name
-            elif person.type == 30 or person.type == 40 or person.type == 60:
+            elif person.type == 30 or person.type == 40 or person.type == 60 or person.type == 70:
                 sub_name = person.name
             elif person.type == 50:
                 sub_name = person.name +" "+ person.first_name
@@ -4007,6 +4030,11 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             name = u"                                                                                         " \
                    + " ("+person.name+") " + contact_position + u"  ажилтай " + contact_surname + \
                    u" овогтой " + contact_first_name + u" нар энэхүү гэрээг байгуулав."
+        elif person.type == 70:
+            header = u"ГАДААДЫН ХУУЛИЙН ЭТГЭЭДЭД ГАЗАР АШИГЛУУЛАХ ГЭРЭЭ"
+            name = u"                                                                                         " \
+                   + " ("+person.name+") " + contact_position + u"  ажилтай " + contact_surname + \
+                   u" овогтой " + contact_first_name + u" нар энэхүү гэрээг байгуулав."
 
         item = map_composition.getComposerItemById("person_contract")
         item.setText(self.__wrap(name, 250))
@@ -4191,8 +4219,11 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             tpl = DocxTemplate(path + 'cert_state.docx')
         elif person.type == 50:
             tpl = DocxTemplate(path + 'cert_use_person.docx')
-        elif person.type == 60 and person.type == 70:
+        elif person.type == 60:
             tpl = DocxTemplate(path + 'cert_use_company.docx')
+        elif person.type == 70:
+            tpl = DocxTemplate(path + 'cert_use_company.docx')
+
         context = {
             'aimag_name': aimag_name,
             'soum_name': soum_name,
@@ -4470,10 +4501,10 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         if not self.is_first_app_connect:
             self.__calculate_landfee_tab(base_fee_id)
 
-    # @pyqtSlot()
-    # def on_show_fee_button_clicked(self):
-    #
-    #
+    @pyqtSlot()
+    def on_show_fee_button_clicked(self):
+
+        self.__populate_landfee_tab()
 
     def __fee_geoware(self):
 
