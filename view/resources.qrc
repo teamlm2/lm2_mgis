@@ -3,6 +3,8 @@
     <file alias="about.png">icons/about.png</file>
     <file alias="down_button.png">icons/down_button.png</file>
     <file alias="up_button.png">icons/up_button.png</file>
+    <file alias="double_right_button.png">icons/double_right_button.png</file>
+    <file alias="double_left_button.png">icons/double_left_button.png</file>
     <file alias="help_button.png">icons/help_button.png</file>
     <file alias="person.png">icons/person.png</file>
     <file alias="navigator.png">icons/navigator.png</file>

@@ -1067,12 +1067,8 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             if app_no_count == 0:
                 return
 
-            app = self.session.query(CtApplication).filter(CtApplication.app_no == app_no).one()
-            contractors = app.stakeholders.filter(CtApplicationPersonRole.role == Constants.APPLICANT_ROLE_CODE).all()
         fees = self.session.query(CtFee).filter(CtFee.contract == self.contract.contract_id).all()
-        # if app_no[6:-9] == '07' or app_no[6:-9] == '14' or app_no[6:-9] == '23':
-        #     contractors = app.stakeholders.filter(CtApplicationPersonRole.role == Constants.NEW_RIGHT_HOLDER_CODE).all()
-        # self.land_fee_twidget.setRowCount(len(contractors))
+
         row = 0
 
         for fee in fees:
@@ -1081,33 +1077,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                 person = self.session.query(BsPerson).filter(BsPerson.person_id == fee.person).one()
                 if person:
                     self.__add_fee_row2(row, person, fee)
-                    # fee_count = person.fees.filter(CtFee.contract == self.contract.contract_id).\
-                    #     filter(CtFee.base_fee_id == base_fee.id).count()
-                    # if fee_count == 1:
-                    #     fee = person.fees.filter(CtFee.contract == self.contract.contract_id). \
-                    #         filter(CtFee.base_fee_id == base_fee.id).one()
-                    #     self.__add_fee_row2(row, person, fee)
-                    # else:
-                    #     if fee_count > 1:
-                    #         fee = person.fees.filter(CtFee.contract == self.contract.contract_id). \
-                    #             filter(CtFee.base_fee_id == base_fee.id).first()
-                    #         self.__add_fee_row2(row, person, fee)
-                    #     else:
-                    #         for contractor in contractors:
-                    #             if contractor:
-                    #                 person = contractor.person_ref
-                    #                 if person:
-                    #                     fee_count = person.fees.filter(CtFee.contract == self.contract.contract_id). \
-                    #                         filter(CtFee.base_fee_id == None).count()
-                    #                     if fee_count == 1:
-                    #                         fee = person.fees.filter(CtFee.contract == self.contract.contract_id). \
-                    #                             filter(CtFee.base_fee_id == None).one()
-                    #                         self.__add_fee_row2(row, contractor, fee)
-                    #                     else:
-                    #                         if fee_count > 1:
-                    #                             fee = person.fees.filter(CtFee.contract == self.contract.contract_id). \
-                    #                                 filter(CtFee.base_fee_id == None).first()
-                    #                             self.__add_fee_row2(row, contractor, fee)
+
                     row += 1
 
         self.land_fee_twidget.resizeColumnToContents(0)
