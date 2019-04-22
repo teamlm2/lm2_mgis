@@ -3014,7 +3014,7 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
                     parcel.parcel_id = parcel_id
                 else:
                     PluginUtils.show_message(self, u'Анхааруулга',
-                                             u'Нэгж талбарын дугаар буруу байна байна./Жишээ нь: Дугаарын оронгийн урт таарахгүй/')
+                                             u'Нэгж талбарын дугаар буруу байна./Жишээ нь: Дугаарын оронгийн урт таарахгүй/')
                     return
 
                 parcel.old_parcel_id = old_parcel_id

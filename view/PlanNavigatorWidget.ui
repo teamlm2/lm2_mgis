@@ -93,7 +93,7 @@
        </size>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <property name="usesScrollButtons">
        <bool>true</bool>
@@ -744,7 +744,7 @@ font: 75 14pt &quot;Helvetica&quot;;</string>
          </rect>
         </property>
         <property name="currentIndex">
-         <number>0</number>
+         <number>1</number>
         </property>
         <widget class="QWidget" name="tab_6">
          <attribute name="title">
@@ -841,7 +841,7 @@ font: 75 14pt &quot;Helvetica&quot;;</string>
           <property name="geometry">
            <rect>
             <x>190</x>
-            <y>185</y>
+            <y>260</y>
             <width>161</width>
             <height>23</height>
            </rect>
@@ -870,7 +870,7 @@ font: 75 14pt &quot;Helvetica&quot;;</string>
           <property name="geometry">
            <rect>
             <x>17</x>
-            <y>150</y>
+            <y>225</y>
             <width>333</width>
             <height>22</height>
            </rect>
@@ -919,7 +919,7 @@ font: 75 14pt &quot;Helvetica&quot;;</string>
           <property name="geometry">
            <rect>
             <x>19</x>
-            <y>135</y>
+            <y>210</y>
             <width>331</width>
             <height>16</height>
            </rect>

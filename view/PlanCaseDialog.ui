@@ -214,6 +214,12 @@
        <height>291</height>
       </rect>
      </property>
+     <property name="sortingEnabled">
+      <bool>true</bool>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
      <column>
       <property name="text">
        <string>Result</string>
@@ -238,7 +244,7 @@
       <rect>
        <x>111</x>
        <y>31</y>
-       <width>271</width>
+       <width>350</width>
        <height>22</height>
       </rect>
      </property>
@@ -248,7 +254,7 @@
       <rect>
        <x>111</x>
        <y>58</y>
-       <width>271</width>
+       <width>350</width>
        <height>22</height>
       </rect>
      </property>
@@ -274,6 +280,12 @@
        <width>351</width>
        <height>291</height>
       </rect>
+     </property>
+     <property name="sortingEnabled">
+      <bool>true</bool>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
      </property>
      <column>
       <property name="text">
@@ -333,28 +345,15 @@
       <rect>
        <x>111</x>
        <y>5</y>
-       <width>271</width>
+       <width>350</width>
        <height>22</height>
       </rect>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="selected_layer_button">
-     <property name="geometry">
-      <rect>
-       <x>540</x>
-       <y>5</y>
-       <width>75</width>
-       <height>23</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Layer Load</string>
      </property>
     </widget>
     <widget class="QPushButton" name="find_button">
      <property name="geometry">
       <rect>
-       <x>540</x>
+       <x>680</x>
        <y>58</y>
        <width>75</width>
        <height>23</height>

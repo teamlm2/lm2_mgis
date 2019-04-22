@@ -21,7 +21,7 @@ class SetAttributeMainZone(Base):
 
     # foreign keys:
     plan_zone_id = Column(Integer, ForeignKey('cl_plan_zone.plan_zone_id'), primary_key=True)
-    zone_main_ref = relationship("ClPlanZone")
+    plan_zone_ref = relationship("ClPlanZone")
 
     attribute_id = Column(Integer, ForeignKey('cl_attribute_zone.attribute_id'), primary_key=True)
     attribute_ref = relationship("ClAttributeZone")

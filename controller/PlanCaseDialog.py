@@ -38,6 +38,7 @@ from ..model.PlProjectParcel import *
 from ..model.ClPlanZoneType import *
 from ..model.ClPlanZone import *
 from ..model.PlProject import *
+from ..model.SetZoneColor import *
 from ..view.Ui_PlanCaseDialog import *
 from .qt_classes.ApplicantDocumentDelegate import ApplicationDocumentDelegate
 from .qt_classes.DocumentsTableWidget import DocumentsTableWidget
@@ -49,6 +50,7 @@ from ..utils.SessionHandler import SessionHandler
 from ..utils.PluginUtils import PluginUtils
 from ..utils.DatabaseUtils import DatabaseUtils
 from ..utils.FilePath import *
+from ..utils.LayerUtils import LayerUtils
 from ftplib import FTP, error_perm
 
 APPROVED = 'approved'
@@ -80,25 +82,255 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         # self.message_label.setStyleSheet("QLabel { background-color : red; color : blue; }");
         self.message_label.setStyleSheet("QLabel {color: rgb(255,0,0);}")
         self.__setup_data()
+        self.__setup_current_tree_widget()
         self.__setup_twidget()
         self.__setup_context_menu()
         self.__setup_cbox()
+        self.main_parcels = []
+        self.main_tree_widget.itemChanged.connect(self.__itemMainParcelCheckChanged)
+
+    def __itemMainParcelCheckChanged(self, item, column):
+
+        parcel_id = item.data(0, Qt.UserRole)
+        if item.checkState(column) == QtCore.Qt.Checked:
+            if parcel_id not in self.main_parcels:
+                self.main_parcels.append(parcel_id)
+        elif item.checkState(column) == QtCore.Qt.Unchecked:
+            if parcel_id in self.main_parcels:
+                self.main_parcels.remove(parcel_id)
 
     def __setup_context_menu(self):
 
-        self.menu = QMenu()
-        self.zoom_to_selected = QAction(QIcon("zoom.png"), "Zoom to item", self)
-        self.menu.addAction(self.zoom_to_selected)
-        self.zoom_to_selected.triggered.connect(self.zoom_to_selected_clicked)
+        self.new_menu = QMenu()
+        self.new_zoom_to_selected = QAction(QIcon("zoom.png"), "New Parcel Zoom to item", self)
+        self.new_menu.addAction(self.new_zoom_to_selected)
+        self.new_zoom_to_selected.triggered.connect(self.new_zoom_to_selected_clicked)
+
+        self.main_menu = QMenu()
+        self.main_zoom_to_selected = QAction(QIcon("zoom.png"), "Main Parcel Zoom to item", self)
+        self.main_menu.addAction(self.main_zoom_to_selected)
+        self.main_zoom_to_selected.triggered.connect(self.main_zoom_to_selected_clicked)
+
+        self.current_menu = QMenu()
+        self.current_zoom_to_selected = QAction(QIcon("zoom.png"), "Current Parcel Zoom to item", self)
+        self.current_menu.addAction(self.current_zoom_to_selected)
+        self.current_zoom_to_selected.triggered.connect(self.current_menu_zoom_to_selected_clicked)
 
     @pyqtSlot(QPoint)
     def on_main_tree_widget_customContextMenuRequested(self, point):
 
         point = self.main_tree_widget.viewport().mapToGlobal(point)
-        self.menu.exec_(point)
+        self.main_menu.exec_(point)
+
+    @pyqtSlot(QPoint)
+    def on_current_tree_widget_customContextMenuRequested(self, point):
+
+        point = self.current_tree_widget.viewport().mapToGlobal(point)
+        self.current_menu.exec_(point)
+
+    @pyqtSlot(QPoint)
+    def on_result_twidget_customContextMenuRequested(self, point):
+
+        if self.is_file_import:
+            return
+
+        point = self.result_twidget.viewport().mapToGlobal(point)
+        self.new_menu.exec_(point)
+
+    def __search_parent_type(self, key):
+
+        parent_types = Constants.plan_process_type_parent
+        for parent_type in parent_types:
+            if key == str(parent_type):
+                name = parent_types[parent_type]
+                return name
+
+    def __create_layer_group(self, root_group, group_name):
+
+        if root_group.findGroup(group_name):
+            return group_name
+        else:
+            return root_group.insertGroup(1, group_name)
+
+    def __load_layer_style(self, vlayer_parcel, project_id, column_name, sql):
+
+        sql = "select zone_code from (" + sql + " )xxx group by zone_code order by zone_code"
+
+        categories = []
+        parcels = self.session.execute(sql).fetchall()
+        for row in parcels:
+            badedturl = row[0]
+
+            count = self.session.query(SetZoneColor).filter(
+                SetZoneColor.code == badedturl).count()
+
+            if count == 1:
+                style = self.session.query(SetZoneColor).filter(
+                    SetZoneColor.code == badedturl).one()
+                fill_color = style.fill_color
+                boundary_color = style.boundary_color
+                opacity = 0.5
+                code = str(int(style.code))
+                description = str(int(style.code)) + ': ' + style.description
+
+                self.__categorized_style(categories, vlayer_parcel, fill_color, boundary_color, opacity, code,
+                                         description)
+
+        expression = column_name  # field name
+        renderer = QgsCategorizedSymbolRendererV2(expression, categories)
+        vlayer_parcel.setRendererV2(renderer)
+
+    def __categorized_style(self, categories, layer, fill_color, boundary_color, opacity, code, description):
+
+        symbol = QgsSymbolV2.defaultSymbol(layer.geometryType())
+        if symbol:
+            if fill_color:
+                fill_color = self.__hex_to_rgb(fill_color)
+                symbol.setColor(QColor(fill_color[0], fill_color[1], fill_color[2]))
+            if boundary_color:
+                boundary_color = self.__hex_to_rgb(boundary_color)
+                symbol.symbolLayer(0).setOutlineColor(QColor(boundary_color[0], boundary_color[1], boundary_color[2]))
+            symbol.setAlpha(opacity)
+
+            category = QgsRendererCategoryV2(code, symbol, description)
+            categories.append(category)
+
+    def __hex_to_rgb(self, value):
+        """Return (red, green, blue) for the color given as #rrggbb."""
+        value = value.lstrip('#')
+        lv = len(value)
+        return list(int(value[i:i + lv // 3], 16) for i in range(0, lv, lv // 3))
+
+    def __load_temp_layer(self, project_id, layer_name, mygroup, root, base_code):
+
+        sql_polygon = "(select parcel_id as gid, zone.code as zone_code, zone.name, proj.code as project_code, parcel.gazner, parcel.txt, polygon_geom as geometry from data_plan.pl_project_parcel parcel " \
+                      "join data_plan.pl_project proj on parcel.project_id = proj.project_id  " \
+                      "join data_plan.cl_plan_zone zone on parcel.plan_zone_id = zone.plan_zone_id  " \
+                      "where substring(zone.code, 1, 1) = " + base_code + " and proj.project_id = " + str(project_id) + " and polygon_geom is not null  " \
+                                                                     " order by zone.code)"
+
+        sql_point = "(select parcel_id as gid, zone.code as zone_code, zone.name, proj.code as project_code, parcel.gazner, parcel.txt, point_geom as geometry from data_plan.pl_project_parcel parcel " \
+                    "join data_plan.pl_project proj on parcel.project_id = proj.project_id  " \
+                    "join data_plan.cl_plan_zone zone on parcel.plan_zone_id = zone.plan_zone_id  " \
+                    "where substring(zone.code, 1, 1) = " + base_code + " and proj.project_id = " + str(project_id) + " and point_geom is not null  " \
+                                                                     " order by zone.code)"
+
+        sql_line = "(select parcel_id as gid, zone.code as zone_code, zone.name, proj.code as project_code, parcel.gazner, parcel.txt, line_geom as geometry from data_plan.pl_project_parcel parcel " \
+                      "join data_plan.pl_project proj on parcel.project_id = proj.project_id  " \
+                      "join data_plan.cl_plan_zone zone on parcel.plan_zone_id = zone.plan_zone_id  " \
+                      "where substring(zone.code, 1, 1) = " + base_code + " and proj.project_id = " + str(project_id) + " and line_geom is not null  " \
+                                                                     " order by zone.code)"
+
+        column_name = 'zone_code'
+        layer_list = []
+        layers = QgsMapLayerRegistry.instance().mapLayers()
+
+        for id, layer in layers.iteritems():
+            if layer.type() == QgsMapLayer.VectorLayer:
+                if layer.name() == layer_name:
+                    layer_list.append(id)
+
+        if layer_name == "Polygon":
+            vlayer_parcel = LayerUtils.layer_by_data_source("", sql_polygon)
+            if vlayer_parcel:
+                QgsMapLayerRegistry.instance().removeMapLayers(layer_list)
+            vlayer_parcel = LayerUtils.load_temp_table(sql_polygon, layer_name)
+
+            myalayer = root.findLayer(vlayer_parcel.id())
+            if myalayer is None:
+                mygroup.addLayer(vlayer_parcel)
+                self.__load_layer_style(vlayer_parcel, project_id, column_name, sql_polygon)
+        elif layer_name == "Point":
+            vlayer_parcel = LayerUtils.layer_by_data_source("", sql_point)
+            if vlayer_parcel:
+                QgsMapLayerRegistry.instance().removeMapLayers(layer_list)
+            vlayer_parcel = LayerUtils.load_temp_table(sql_point, layer_name)
+            myalayer = root.findLayer(vlayer_parcel.id())
+            if myalayer is None:
+                mygroup.addLayer(vlayer_parcel)
+                self.__load_layer_style(vlayer_parcel, project_id, column_name, sql_point)
+        else:
+            vlayer_parcel = LayerUtils.layer_by_data_source("", sql_line)
+            if vlayer_parcel:
+                QgsMapLayerRegistry.instance().removeMapLayers(layer_list)
+            vlayer_parcel = LayerUtils.load_temp_table(sql_line, layer_name)
+            myalayer = root.findLayer(vlayer_parcel.id())
+            if myalayer is None:
+                mygroup.addLayer(vlayer_parcel)
+                self.__load_layer_style(vlayer_parcel, project_id, column_name, sql_line)
 
     @pyqtSlot()
-    def zoom_to_selected_clicked(self):
+    def main_zoom_to_selected_clicked(self):
+
+        selected_item = self.main_tree_widget.selectedItems()[0]
+
+        parcel_id = selected_item.data(0, Qt.UserRole)
+        type = selected_item.data(0, Qt.UserRole + 1)
+        plan_zone_id = selected_item.data(0, Qt.UserRole + 2)
+        zone_code = selected_item.data(0, Qt.UserRole + 3)
+
+        parent_id = str(zone_code)[:1]
+        parent_name = self.__search_parent_type(parent_id)
+
+        if selected_item is None:
+            return
+
+        project_id = self.plan_cbox.itemData(self.plan_cbox.currentIndex())
+        plan = self.session.query(PlProject).filter(PlProject.project_id == project_id).one()
+        group_name = plan.plan_type_ref.short_name + '/' + plan.code + '/'
+
+        root = QgsProject.instance().layerTreeRoot()
+        group = root.findGroup(group_name)
+
+        if not group:
+            LayerUtils.refresh_layer_plan()
+            root_group = root.findGroup(u"Бусад ГЗБТ")
+            parent_group = self.__create_layer_group(root_group, group_name)
+            parent_group.setExpanded(False)
+
+            sql = "select base_code from ( " \
+                  "select substring(zone.code, 1, 1) base_code from data_plan.pl_project_parcel parcel " \
+                  "join data_plan.cl_plan_zone zone on parcel.plan_zone_id = zone.plan_zone_id " \
+                  "where project_id = " + str(
+                project_id) + " group by zone.code order by zone.code )xxx group by base_code order by base_code "
+
+            values = self.session.execute(sql).fetchall()
+            parent_types = Constants.plan_process_type_parent
+            for parent_type in parent_types:
+                for row in values:
+                    base_code = str(row[0])
+                    if base_code == str(parent_type):
+                        name = parent_types[parent_type]
+                        mygroup = self.__create_layer_group(parent_group, unicode(name))
+                        mygroup.setExpanded(False)
+                        code = "'" + base_code + "'"
+                        self.__load_temp_layer(project_id, "Point", mygroup, root, code)
+                        self.__load_temp_layer(project_id, "Line", mygroup, root, code)
+                        self.__load_temp_layer(project_id, "Polygon", mygroup, root, code)
+
+        group = root.findGroup(group_name)
+        for child in group.children():
+            parent_group_name = child.name()
+            for child in child.children():
+                if isinstance(child, QgsLayerTreeLayer):
+                    layer = child.layer()
+
+                    if layer.name() == 'Polygon' and type == 'polygon':
+                        if parent_group_name == parent_name:
+                            column_name = 'gid'
+                            self.__selected_feature(column_name, parcel_id, layer)
+                    elif layer.name() == 'Point' and type == 'point':
+                        if parent_group_name == parent_name:
+                            column_name = 'gid'
+                            self.__selected_feature(column_name, parcel_id, layer)
+                    else:
+                        if parent_group_name == parent_name:
+                            column_name = 'gid'
+                            self.__selected_feature(column_name, parcel_id, layer)
+
+
+    @pyqtSlot()
+    def current_menu_zoom_to_selected_clicked(self):
 
         selected_item = self.main_tree_widget.selectedItems()[0]
 
@@ -120,6 +352,23 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
                 if uri.table() == table_name:
                     if uri.schema() == schema_name:
                         self.__selected_feature(parcel_id, layer)
+
+    def __selected_feature(self, column_name ,parcel_id, layer):
+
+        expression = column_name + " = \'" + str(parcel_id) + "\'"
+
+        request = QgsFeatureRequest()
+        request.setFilterExpression(expression)
+        feature_ids = []
+        iterator = layer.getFeatures(request)
+
+        for feature in iterator:
+            feature_ids.append(feature.id())
+        if len(feature_ids) == 0:
+            self.status_label.setText(self.tr("No parcel assigned"))
+
+        layer.setSelectedFeatures(feature_ids)
+        self.plugin.iface.mapCanvas().zoomToSelected(layer)
 
     def __setup_cbox(self):
 
@@ -157,16 +406,17 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
             self.zone_type_cbox.addItem(str(value.code) + ':' + value.name, value.plan_zone_type_id)
 
     @pyqtSlot(int)
-    def on_zone_type_cbox_currentIndexChanged(self, index):
+    def on_plan_cbox_currentIndexChanged(self, index):
 
-        zone_type_id = self.zone_type_cbox.itemData(index)
+        project_id = self.plan_cbox.itemData(self.plan_cbox.currentIndex())
+        zone_type_id = self.zone_type_cbox.itemData(self.zone_type_cbox.currentIndex())
 
         self.main_process_type_cbox.clear()
         self.main_process_type_cbox.addItem("*", -1)
         if zone_type_id != -1:
             values = self.session.query(ClPlanZone.plan_zone_id, ClPlanZone.code, ClPlanZone.name). \
                 join(PlProjectParcel, ClPlanZone.plan_zone_id == PlProjectParcel.plan_zone_id). \
-                filter(PlProjectParcel.project_id == self.plan.project_id). \
+                filter(PlProjectParcel.project_id == project_id). \
                 filter(ClPlanZone.plan_zone_type_id == zone_type_id). \
                 group_by(ClPlanZone.plan_zone_id, ClPlanZone.code, ClPlanZone.name). \
                 order_by(ClPlanZone.code)
@@ -175,7 +425,33 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         elif zone_type_id == -1:
             values = self.session.query(ClPlanZone.plan_zone_id, ClPlanZone.code, ClPlanZone.name). \
                 join(PlProjectParcel, ClPlanZone.plan_zone_id == PlProjectParcel.plan_zone_id). \
-                filter(PlProjectParcel.project_id == self.plan.project_id). \
+                filter(PlProjectParcel.project_id == project_id). \
+                group_by(ClPlanZone.plan_zone_id, ClPlanZone.code, ClPlanZone.name). \
+                order_by(ClPlanZone.code)
+            for value in values:
+                self.main_process_type_cbox.addItem(str(value.code) + ':' + value.name, value.plan_zone_id)
+
+    @pyqtSlot(int)
+    def on_zone_type_cbox_currentIndexChanged(self, index):
+
+        project_id = self.plan_cbox.itemData(self.plan_cbox.currentIndex())
+        zone_type_id = self.zone_type_cbox.itemData(index)
+
+        self.main_process_type_cbox.clear()
+        self.main_process_type_cbox.addItem("*", -1)
+        if zone_type_id != -1:
+            values = self.session.query(ClPlanZone.plan_zone_id, ClPlanZone.code, ClPlanZone.name). \
+                join(PlProjectParcel, ClPlanZone.plan_zone_id == PlProjectParcel.plan_zone_id). \
+                filter(PlProjectParcel.project_id == project_id). \
+                filter(ClPlanZone.plan_zone_type_id == zone_type_id). \
+                group_by(ClPlanZone.plan_zone_id, ClPlanZone.code, ClPlanZone.name). \
+                order_by(ClPlanZone.code)
+            for value in values:
+                self.main_process_type_cbox.addItem(str(value.code) + ':' + value.name, value.plan_zone_id)
+        elif zone_type_id == -1:
+            values = self.session.query(ClPlanZone.plan_zone_id, ClPlanZone.code, ClPlanZone.name). \
+                join(PlProjectParcel, ClPlanZone.plan_zone_id == PlProjectParcel.plan_zone_id). \
+                filter(PlProjectParcel.project_id == project_id). \
                 group_by(ClPlanZone.plan_zone_id, ClPlanZone.code, ClPlanZone.name). \
                 order_by(ClPlanZone.code)
             for value in values:
@@ -189,31 +465,31 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         self.main_load_pbar.setValue(0)
 
         au2 = DatabaseUtils.working_l2_code()
-        # if self.tabWidget.currentIndex() == 0:
         self.__setup_main_tree_widget()
         self.__load_main_zone(au2)
 
     def __load_main_zone(self, au2):
 
+        project_id = self.plan_cbox.itemData(self.plan_cbox.currentIndex())
         self.main_load_pbar.setValue(1)
 
         values = self.session.query(PlProjectParcel). \
-            filter(PlProjectParcel.project_id == self.plan.project_id)
+            filter(PlProjectParcel.project_id == project_id)
 
         self.main_load_pbar.setMaximum(values.count())
 
         points = self.session.query(PlProjectParcel). \
-            filter(PlProjectParcel.project_id == self.plan.project_id). \
+            filter(PlProjectParcel.project_id == project_id). \
             filter(PlProjectParcel.polygon_geom == None). \
             filter(PlProjectParcel.line_geom == None).order_by(PlProjectParcel.badedturl)
 
         lines = self.session.query(PlProjectParcel). \
-            filter(PlProjectParcel.project_id == self.plan.project_id). \
+            filter(PlProjectParcel.project_id == project_id). \
             filter(PlProjectParcel.polygon_geom == None). \
             filter(PlProjectParcel.point_geom == None).order_by(PlProjectParcel.badedturl)
 
         polygons = self.session.query(PlProjectParcel). \
-            filter(PlProjectParcel.project_id == self.plan.project_id). \
+            filter(PlProjectParcel.project_id == project_id). \
             filter(PlProjectParcel.line_geom == None). \
             filter(PlProjectParcel.point_geom == None).order_by(PlProjectParcel.badedturl)
 
@@ -231,15 +507,16 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
             if value.gazner:
                 name = '(' + value.gazner + ')'
             desc = ''
-            if value.zone_main_ref:
-                if value.zone_main_ref.name:
-                    desc = value.zone_main_ref.name
+            if value.plan_zone_ref:
+                if value.plan_zone_ref.name:
+                    desc = value.plan_zone_ref.name
                     item = QTreeWidgetItem()
-                    item.setText(0, str(value.zone_main_ref.code)+ ': ' + name + desc)
+                    item.setText(0, str(value.plan_zone_ref.code)+ ': ' + name + desc)
                     item.setIcon(0, QIcon(QPixmap(":/plugins/lm2/parcel_red.png")))
                     item.setData(0, Qt.UserRole, value.parcel_id)
                     item.setData(0, Qt.UserRole + 1, "polygon")
                     item.setData(0, Qt.UserRole + 2, value.plan_zone_id)
+                    item.setData(0, Qt.UserRole + 3, value.plan_zone_ref.code)
                     item.setCheckState(0, Qt.Unchecked)
                     self.item_polygon_main.addChild(item)
                     value_p = self.main_load_pbar.value() + 1
@@ -250,15 +527,16 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
             if value.gazner:
                 name = '(' + value.gazner + ')'
             desc = ''
-            if value.zone_main_ref:
-                if value.zone_main_ref.name:
-                    desc = value.zone_main_ref.name
+            if value.plan_zone_ref:
+                if value.plan_zone_ref.name:
+                    desc = value.plan_zone_ref.name
                     item = QTreeWidgetItem()
-                    item.setText(0, str(value.zone_main_ref.code)+ ': ' + name + desc)
+                    item.setText(0, str(value.plan_zone_ref.code)+ ': ' + name + desc)
                     item.setIcon(0, QIcon(QPixmap(":/plugins/lm2/parcel_red.png")))
                     item.setData(0, Qt.UserRole, value.parcel_id)
                     item.setData(0, Qt.UserRole + 1, "point")
                     item.setData(0, Qt.UserRole + 2, value.plan_zone_id)
+                    item.setData(0, Qt.UserRole + 3, value.plan_zone_ref.code)
                     item.setCheckState(0, Qt.Unchecked)
                     self.item_point_main.addChild(item)
                     value_p = self.main_load_pbar.value() + 1
@@ -269,15 +547,16 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
             if value.gazner:
                 name = '(' + value.gazner + ')'
             desc = ''
-            if value.zone_main_ref:
-                if value.zone_main_ref.name:
-                    desc = value.zone_main_ref.name
+            if value.plan_zone_ref:
+                if value.plan_zone_ref.name:
+                    desc = value.plan_zone_ref.name
                     item = QTreeWidgetItem()
-                    item.setText(0, str(value.zone_main_ref.code)+ ': ' + name + desc)
+                    item.setText(0, str(value.plan_zone_ref.code)+ ': ' + name + desc)
                     item.setIcon(0, QIcon(QPixmap(":/plugins/lm2/parcel_red.png")))
                     item.setData(0, Qt.UserRole, value.parcel_id)
                     item.setData(0, Qt.UserRole + 1, "line")
                     item.setData(0, Qt.UserRole + 2, value.plan_zone_id)
+                    item.setData(0, Qt.UserRole + 3, value.plan_zone_ref.code)
                     item.setCheckState(0, Qt.Unchecked)
                     self.item_line_main.addChild(item)
                     value_p = self.main_load_pbar.value() + 1
@@ -286,9 +565,35 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         self.main_tree_widget.expandAll()
         self.main_load_pbar.setVisible(False)
 
+    def __setup_current_tree_widget(self):
+
+        self.current_tree_widget.clear()
+
+        self.item_point_current = QTreeWidgetItem()
+        self.item_point_current.setText(0, self.tr("Point"))
+        self.item_point_current.setData(0, Qt.UserRole, Constants.GEOM_POINT)
+
+        self.item_line_current = QTreeWidgetItem()
+        self.item_line_current.setText(0, self.tr("Line"))
+        self.item_line_current.setData(0, Qt.UserRole, Constants.GEOM_LINE)
+
+        self.item_polygon_current = QTreeWidgetItem()
+        self.item_polygon_current.setText(0, self.tr("Polygon"))
+        self.item_polygon_current.setData(0, Qt.UserRole, Constants.GEOM_POlYGON)
+
+        self.current_tree_widget.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.current_tree_widget.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.current_tree_widget.setEditTriggers(QAbstractItemView.NoEditTriggers)
+
+        self.current_tree_widget.addTopLevelItem(self.item_point_current)
+        self.current_tree_widget.addTopLevelItem(self.item_line_current)
+        self.current_tree_widget.addTopLevelItem(self.item_polygon_current)
+        self.current_tree_widget.setContextMenuPolicy(Qt.CustomContextMenu)
+
     def __setup_main_tree_widget(self):
 
         self.main_tree_widget.clear()
+
         self.item_point_main = QTreeWidgetItem()
         self.item_point_main.setText(0, self.tr("Point"))
         self.item_point_main.setData(0, Qt.UserRole, Constants.GEOM_POINT)
@@ -299,7 +604,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
 
         self.item_polygon_main = QTreeWidgetItem()
         self.item_polygon_main.setText(0, self.tr("Polygon"))
-        self.item_polygon_main.setData(0, Qt.UserRole, GEOM_POlYGON)
+        self.item_polygon_main.setData(0, Qt.UserRole, Constants.GEOM_POlYGON)
 
         self.main_tree_widget.setSelectionMode(QAbstractItemView.SingleSelection)
         self.main_tree_widget.setSelectionBehavior(QAbstractItemView.SelectRows)
@@ -625,24 +930,8 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
 
         return parcel_object
 
-    @pyqtSlot(QPoint)
-    def on_result_twidget_customContextMenuRequested(self, point):
-
-        if self.is_file_import:
-            return
-
-        point = self.result_twidget.viewport().mapToGlobal(point)
-        self.menu.exec_(point)
-
-    def __setup_context_menu(self):
-
-        self.menu = QMenu()
-        self.zoom_to_selected = QAction(QIcon("zoom.png"), "Zoom to item", self)
-        self.menu.addAction(self.zoom_to_selected)
-        self.zoom_to_selected.triggered.connect(self.zoom_to_selected_clicked)
-
     @pyqtSlot()
-    def zoom_to_selected_clicked(self):
+    def new_zoom_to_selected_clicked(self):
 
         selected_item = self.result_twidget.selectedItems()[0]
 
@@ -689,3 +978,36 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
             self.message_label.setStyleSheet("QLabel {color: rgb(0,71,31);}")
             self.message_label.setText(current_item.text(0))
 
+    @pyqtSlot()
+    def on_add_button_clicked(self):
+
+        if not self.main_parcels:
+            PluginUtils.show_message(self, u'Анхааруулга', u'Нэгж талбар сонгоогүй байна.')
+            return
+
+        for parcel_id in self.main_parcels:
+
+            print parcel_id
+            value = self.session.query(PlProjectParcel).filter(PlProjectParcel.parcel_id == parcel_id).one()
+            name = ''
+            if value.gazner:
+                name = '(' + value.gazner + ')'
+            desc = ''
+            if value.plan_zone_ref:
+                if value.plan_zone_ref.name:
+                    desc = value.plan_zone_ref.name
+                    item = QTreeWidgetItem()
+                    item.setText(0, str(value.plan_zone_ref.code) + ': ' + name + desc)
+                    item.setIcon(0, QIcon(QPixmap(":/plugins/lm2/parcel_red.png")))
+                    item.setData(0, Qt.UserRole, value.parcel_id)
+                    item.setData(0, Qt.UserRole + 1, "polygon")
+                    item.setData(0, Qt.UserRole + 2, value.plan_zone_id)
+                    item.setData(0, Qt.UserRole + 3, value.plan_zone_ref.code)
+                    item.setCheckState(0, Qt.Unchecked)
+
+                    if value.polygon_geom is not None:
+                        self.item_polygon_current.addChild(item)
+                    elif value.line_geom is not None:
+                        self.item_line_current.addChild(item)
+                    else:
+                        self.item_point_current.addChild(item)

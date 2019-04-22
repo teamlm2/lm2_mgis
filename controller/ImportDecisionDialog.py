@@ -1247,13 +1247,14 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
     def on_decision_result_twidget_itemClicked(self, item):
 
         decision_no = item.data(Qt.UserRole)
+        decision_id = item.data(Qt.UserRole+1)
         item.setCheckState(Qt.Checked)
 
-        try:
-            decision = self.session.query(CtDecision).filter_by(decision_no = decision_no).one()
-        except SQLAlchemyError, e:
-            PluginUtils.show_error(self, self.tr("Database Query Error"), self.tr("Could not execute: {0}").format(e.message))
-            return
+        # try:
+        decision = self.session.query(CtDecision).filter_by(decision_id = decision_id).one()
+        # except SQLAlchemyError, e:
+        #     PluginUtils.show_error(self, self.tr("Database Query Error"), self.tr("Could not execute: {0}").format(e.message))
+        #     return
 
         self.__populate_decision(decision)
 
@@ -1281,48 +1282,49 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
         self.result_tree_widget.addTopLevelItem(self.item_skipped)
         self.document_twidget.clear()
 
-        try:
-            self.decision = decision
+        # try:
+        self.decision = decision
 
-            decision_level = self.session.query(ClDecisionLevel).\
-                filter(ClDecisionLevel.code == decision.decision_level).one()
-            application_type = self.session.query(ClApplicationType).\
-                join(CtApplication, ClApplicationType.code == CtApplication.app_type).\
-                join(CtDecisionApplication, CtApplication.app_id == CtDecisionApplication.application).\
-                filter(CtDecisionApplication.decision == decision.decision_id).all()
+        decision_level = self.session.query(ClDecisionLevel).\
+            filter(ClDecisionLevel.code == decision.decision_level).one()
+        application_type = self.session.query(ClApplicationType).\
+            join(CtApplication, ClApplicationType.code == CtApplication.app_type).\
+            join(CtDecisionApplication, CtApplication.app_id == CtDecisionApplication.application).\
+            filter(CtDecisionApplication.decision == decision.decision_id).all()
 
-            # apps = self.session.query(CtApplication).\
-            #     join(CtDecisionApplication, CtApplication.app_id == CtDecisionApplication.application).\
-            #     filter(CtDecisionApplication.decision == decision.decision_id).all()
+        # apps = self.session.query(CtApplication).\
+        #     join(CtDecisionApplication, CtApplication.app_id == CtDecisionApplication.application).\
+        #     filter(CtDecisionApplication.decision == decision.decision_id).all()
 
-            self.decision_no_result_edit.setText(decision.decision_no)
-            self.decision_date_result_edit.setText(str(decision.decision_date))
-            self.level_result_edit.setText(decision_level.description)
-            self.app_type_code = 1
-            # for app in apps:
-            #     print app.app_no
-            #     print app.app_type_ref.description
-            for application_type in application_type:
-                self.app_type_code = application_type.code
-                self.application_type_edit.setText(application_type.description)
+        self.decision_no_result_edit.setText(decision.decision_no)
+        self.decision_date_result_edit.setText(str(decision.decision_date))
+        self.level_result_edit.setText(decision_level.description)
+        self.app_type_code = 1
 
-            if self.decision.decision_level == 70:
-                self.seller_buyer_checkbox.setChecked(True)
-                for decision_doc in self.decision.documents:
+        for application_type in application_type:
+            self.app_type_code = application_type.code
+            self.application_type_edit.setText(application_type.description)
 
-                    item = QListWidgetItem(decision_doc.document_ref.name, self.document_twidget)
-                    item.setData(Qt.UserRole, decision_doc)
-                for result in self.decision.results:
-                    app = self.session.query(CtApplication).filter(CtApplication.app_id == result.application).one()
-                    self.application_cbox.addItem(app.app_no, app.app_no)
-                self.contract_date.setDate(self.decision.decision_date)
-                self.level_cbox.setCurrentIndex(self.level_cbox.findData(self.decision.decision_level))
-                self.notary_number_edit.setDisabled(True)
-                self.contract_id_edit.setDisabled(True)
-                self.notary_decision_edit.setText(self.decision.decision_no)
-                self.decision_save_button.setDisabled(True)
-            else:
-                for result in self.decision.results:
+        if self.decision.decision_level == 70:
+            self.seller_buyer_checkbox.setChecked(True)
+            for decision_doc in self.decision.documents:
+
+                item = QListWidgetItem(decision_doc.document_ref.name, self.document_twidget)
+                item.setData(Qt.UserRole, decision_doc)
+            for result in self.decision.results:
+                app = self.session.query(CtApplication).filter(CtApplication.app_id == result.application).one()
+                self.application_cbox.addItem(app.app_no, app.app_no)
+            self.contract_date.setDate(self.decision.decision_date)
+            self.level_cbox.setCurrentIndex(self.level_cbox.findData(self.decision.decision_level))
+            self.notary_number_edit.setDisabled(True)
+            self.contract_id_edit.setDisabled(True)
+            self.notary_decision_edit.setText(self.decision.decision_no)
+            self.decision_save_button.setDisabled(True)
+        else:
+            for result in self.decision.results:
+
+                app_count = self.session.query(CtApplication).filter(CtApplication.app_id == result.application).count()
+                if app_count == 1:
                     app = self.session.query(CtApplication).filter(CtApplication.app_id == result.application).one()
                     item = QTreeWidgetItem()
                     item.setText(0, app.app_no)
@@ -1331,22 +1333,22 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
                     else:
                         self.item_refused.addChild(item)
 
-                for decision_doc in self.decision.documents:
+            for decision_doc in self.decision.documents:
 
-                    item = QListWidgetItem(decision_doc.document_ref.name, self.document_twidget)
-                    item.setData(Qt.UserRole, decision_doc)
+                item = QListWidgetItem(decision_doc.document_ref.name, self.document_twidget)
+                item.setData(Qt.UserRole, decision_doc)
 
-                self.decision_date_edit.setText(self.decision.decision_date.strftime(Constants.PYTHON_DATE_FORMAT))
-                self.decision_no_edit.setText(self.decision.decision_no)
-                self.level_cbox.setCurrentIndex(self.level_cbox.findData(self.decision.decision_level))
-                self.import_by_edit.setText(self.decision.imported_by)
-            self.add_document_button.setEnabled(True)
-            self.load_document_button.setEnabled(True)
-            self.delete_document_button.setEnabled(True)
-            self.view_document_button.setEnabled(True)
-        except SQLAlchemyError, e:
-            PluginUtils.show_error(self, self.tr("Database Query Error"), self.tr("Could not execute: {0}").format(e.message))
-            return
+            self.decision_date_edit.setText(self.decision.decision_date.strftime(Constants.PYTHON_DATE_FORMAT))
+            self.decision_no_edit.setText(self.decision.decision_no)
+            self.level_cbox.setCurrentIndex(self.level_cbox.findData(self.decision.decision_level))
+            self.import_by_edit.setText(self.decision.imported_by)
+        self.add_document_button.setEnabled(True)
+        self.load_document_button.setEnabled(True)
+        self.delete_document_button.setEnabled(True)
+        self.view_document_button.setEnabled(True)
+        # except SQLAlchemyError, e:
+        #     PluginUtils.show_error(self, self.tr("Database Query Error"), self.tr("Could not execute: {0}").format(e.message))
+        #     return
 
     def __populate_application(self):
 

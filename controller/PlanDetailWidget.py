@@ -210,11 +210,11 @@ class PlanDetailWidget(QDockWidget, Ui_PlanDetailWidget, DatabaseHelper):
             if value.gazner:
                 name = '(' + value.gazner + ')'
             desc = ''
-            if value.zone_main_ref:
-                if value.zone_main_ref.name:
-                    desc = value.zone_main_ref.name
+            if value.plan_zone_ref:
+                if value.plan_zone_ref.name:
+                    desc = value.plan_zone_ref.name
                     item = QTreeWidgetItem()
-                    item.setText(0, str(value.zone_main_ref.code)+ ': ' + name + desc)
+                    item.setText(0, str(value.plan_zone_ref.code)+ ': ' + name + desc)
                     item.setIcon(0, QIcon(QPixmap(":/plugins/lm2/parcel_red.png")))
                     item.setData(0, Qt.UserRole, value.parcel_id)
                     item.setData(0, Qt.UserRole + 1, "polygon")
@@ -229,11 +229,11 @@ class PlanDetailWidget(QDockWidget, Ui_PlanDetailWidget, DatabaseHelper):
             if value.gazner:
                 name = '(' + value.gazner + ')'
             desc = ''
-            if value.zone_main_ref:
-                if value.zone_main_ref.name:
-                    desc = value.zone_main_ref.name
+            if value.plan_zone_ref:
+                if value.plan_zone_ref.name:
+                    desc = value.plan_zone_ref.name
                     item = QTreeWidgetItem()
-                    item.setText(0, str(value.zone_main_ref.code)+ ': ' + name + desc)
+                    item.setText(0, str(value.plan_zone_ref.code)+ ': ' + name + desc)
                     item.setIcon(0, QIcon(QPixmap(":/plugins/lm2/parcel_red.png")))
                     item.setData(0, Qt.UserRole, value.parcel_id)
                     item.setData(0, Qt.UserRole + 1, "point")
@@ -248,11 +248,11 @@ class PlanDetailWidget(QDockWidget, Ui_PlanDetailWidget, DatabaseHelper):
             if value.gazner:
                 name = '(' + value.gazner + ')'
             desc = ''
-            if value.zone_main_ref:
-                if value.zone_main_ref.name:
-                    desc = value.zone_main_ref.name
+            if value.plan_zone_ref:
+                if value.plan_zone_ref.name:
+                    desc = value.plan_zone_ref.name
                     item = QTreeWidgetItem()
-                    item.setText(0, str(value.zone_main_ref.code)+ ': ' + name + desc)
+                    item.setText(0, str(value.plan_zone_ref.code)+ ': ' + name + desc)
                     item.setIcon(0, QIcon(QPixmap(":/plugins/lm2/parcel_red.png")))
                     item.setData(0, Qt.UserRole, value.parcel_id)
                     item.setData(0, Qt.UserRole + 1, "line")

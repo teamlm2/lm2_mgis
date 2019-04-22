@@ -36,7 +36,7 @@ class PlProjectParcel(Base):
     project_ref = relationship("PlProject")
 
     plan_zone_id = Column(Integer, ForeignKey('cl_plan_zone.plan_zone_id'))
-    zone_main_ref = relationship("ClPlanZone")
+    plan_zone_ref = relationship("ClPlanZone")
 
     au1 = Column(String, ForeignKey('au_level1.code'))
     au1_ref = relationship("AuLevel1")

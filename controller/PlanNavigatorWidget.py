@@ -1816,7 +1816,7 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
         vlayer_parcel = LayerUtils.load_plan_layer_base_layer("pl_view_project_parcel",
                                                                      "parcel_id",
                                                                      "data_plan", "polygon_geom")
-        vlayer_parcel.setLayerName(self.tr("Current Polygon"))
+        vlayer_parcel.setLayerName(self.tr("Polygon"))
 
         myalayer = root.findLayer(vlayer_parcel.id())
         if myalayer is None:
@@ -1852,7 +1852,7 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
         vlayer_parcel = LayerUtils.load_plan_layer_base_layer("pl_view_project_parcel",
                                                               "parcel_id",
                                                               "data_plan", "line_geom")
-        vlayer_parcel.setLayerName(self.tr("Current Line"))
+        vlayer_parcel.setLayerName(self.tr("Line"))
 
         myalayer = root.findLayer(vlayer_parcel.id())
         if myalayer is None:
@@ -1888,7 +1888,7 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
         vlayer_parcel = LayerUtils.load_plan_layer_base_layer("pl_view_project_parcel",
                                                               "parcel_id",
                                                               "data_plan", "point_geom")
-        vlayer_parcel.setLayerName(self.tr("Current Point"))
+        vlayer_parcel.setLayerName(self.tr("Point"))
 
         myalayer = root.findLayer(vlayer_parcel.id())
         if myalayer is None:

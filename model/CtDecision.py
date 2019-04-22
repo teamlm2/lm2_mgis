@@ -1,6 +1,6 @@
 __author__ = 'B.Ankhbold'
 
-from sqlalchemy import Date, ForeignKey
+from sqlalchemy import Date, ForeignKey, Column, Integer, String
 from sqlalchemy.orm import relationship
 from ClDecision import *
 from ClDecisionLevel import *
