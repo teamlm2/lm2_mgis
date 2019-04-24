@@ -1,6 +1,6 @@
 __author__ = 'B.Ankhbold'
 
-from sqlalchemy import Date, DateTime
+from sqlalchemy import Date, DateTime, Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
 from CtFee import *
 from CtContractCondition import *
@@ -20,7 +20,7 @@ class CtContract(Base):
     property_no = Column(String)
 
     created_by = Column(Integer)
-    created_by = Column(Integer)
+    updated_by = Column(Integer)
     created_at = Column(DateTime)
     updated_at = Column(DateTime)
 

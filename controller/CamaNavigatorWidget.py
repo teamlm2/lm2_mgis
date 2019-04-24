@@ -11,7 +11,7 @@ from geoalchemy2.elements import WKTElement
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy import func, or_, and_, desc
 from sqlalchemy.sql.expression import cast
-from sqlalchemy import func
+from sqlalchemy import func, or_, extract
 from ..view.Ui_CamaNavigatorWidget import Ui_CamaNavigatorWidget
 from ..utils.LayerUtils import LayerUtils
 from ..model.AuCadastreBlock import *
@@ -23,6 +23,7 @@ from ..model.SetWorkruleStatus import *
 from ..model.ClPlanType import *
 from ..model.PlProjectStatusHistory import *
 from ..model.CaParcel import *
+from ..model.CmParcelBasePrice import *
 from ..controller.PlanCaseDialog import *
 from ..controller.ManageParcelRecordsDialog import *
 from ..utils.DatabaseUtils import *
@@ -457,8 +458,8 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
         vlayer = LayerUtils.layer_by_data_source("data_cama", "cm_parcel_tbl")
         if vlayer is None:
             vlayer = LayerUtils.load_layer_base_layer("cm_parcel_tbl", "parcel_id", "data_cama")
-        # vlayer.loadNamedStyle(
-        #     str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/pa_valuation_level.qml")
+        vlayer.loadNamedStyle(
+            str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/cm_parcel_tbl.qml")
 
         vlayer.setLayerName(self.tr("Cama Base Parcel"))
         myalayer = root.findLayer(vlayer.id())
@@ -565,6 +566,114 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
         self.shop_center_value_edit.clear()
         self.service_center_edit.clear()
         self.service_center_value_edit.clear()
+
+    @pyqtSlot()
+    def on_load_button_clicked(self):
+
+        au2 = DatabaseUtils.working_l2_code()
+
+        parcel_base_price = self.session.query(CmParcelBasePrice.au2 == au2)
+
+
+        count = parcel_base_price.count()
+        self.parcel_count_edit.setText(str(count))
+
+        min_price = self.session.query(func.min(CmParcelBasePrice.base_price_m2)).one()
+        max_price = self.session.query(func.max(CmParcelBasePrice.base_price_m2)).one()
+        self.min_price_edit.setText(str(min_price[0]))
+        self.max_price_edit.setText(str(max_price[0]))
+
+
+    @pyqtSlot()
+    def on_calculate_button_clicked(self):
+
+        min_price = 0
+        max_price = 0
+        next_interval = 0
+        begin_interval = 0
+        end_interval = 0
+        level_no = 1
+        if self.min_price_edit.text():
+            min_price = float(self.min_price_edit.text())
+        if self.max_price_edit.text():
+            max_price = float(self.max_price_edit.text())
+
+
+        self.price_interval_twidget.setRowCount(0)
+        level_count = self.level_count_sbox.value()
+        interval_sub = (max_price - min_price)/level_count
+        for row in range(level_count):
+            print row
+            if row == 0:
+                next_interval = next_interval + min_price
+            else:
+                next_interval = next_interval + interval_sub
+
+            begin_interval = next_interval
+            end_interval = next_interval + interval_sub
+            delegate_integer = QSpinBox()
+            delegate_integer.setValue(level_no)
+            delegate_double_min = QDoubleSpinBox()
+            delegate_double_min.setMaximum(999999999999999)
+            delegate_double_min.setValue(begin_interval)
+            delegate_double_max = QDoubleSpinBox()
+            delegate_double_max.setMaximum(999999999999999)
+            delegate_double_max.setValue(end_interval)
+            count = self.price_interval_twidget.rowCount()
+            self.price_interval_twidget.insertRow(count)
+
+            self.price_interval_twidget.setCellWidget(count, 0, delegate_integer)
+            self.price_interval_twidget.setCellWidget(count, 1, delegate_double_min)
+            self.price_interval_twidget.setCellWidget(count, 2, delegate_double_max)
+
+            level_no = level_no + 1
+
+
+    @pyqtSlot()
+    def on_view_layer_button_clicked(self):
+
+        sql = ""
+        rows = self.price_interval_twidget.rowCount()
+
+        for row in range(rows):
+            print row
+            zone_no = str(self.price_interval_twidget.cellWidget(row, 0).value())
+            begin_value = str(self.price_interval_twidget.cellWidget(row, 1).value())
+            end_value = str(self.price_interval_twidget.cellWidget(row, 2).value())
+            if (row + 1) == rows:
+                end_value = " <= " + end_value
+            else:
+                end_value = " < " + end_value
+            if sql:
+                sql = sql + "UNION" + "\n"
+            select = "select parcel.parcel_id as gid, " + zone_no + " as zone_no, parcel_price.base_price_m2, parcel.geometry from data_cama.cm_parcel_base_price parcel_price " \
+                     "join data_soums_union.ca_parcel_tbl parcel on parcel_price.parcel_id = parcel.parcel_id " \
+                     "where parcel.au2 = '01125' and (parcel_price.base_price_m2 >= " + begin_value + " and parcel_price.base_price_m2  "+ end_value +")"
+
+            sql = sql + select
+        sql = "(" + sql + ")"
+
+        root = QgsProject.instance().layerTreeRoot()
+        mygroup = root.findGroup(u"CAMA")
+        layer_name = 'TEST'
+        layer_list = []
+        layers = QgsMapLayerRegistry.instance().mapLayers()
+
+        for id, layer in layers.iteritems():
+            if layer.type() == QgsMapLayer.VectorLayer:
+                if layer.name() == layer_name:
+                    layer_list.append(id)
+
+
+        vlayer_parcel = LayerUtils.layer_by_data_source("", sql)
+        if vlayer_parcel:
+            QgsMapLayerRegistry.instance().removeMapLayers(layer_list)
+        vlayer_parcel = LayerUtils.load_temp_table(sql, layer_name)
+
+        myalayer = root.findLayer(vlayer_parcel.id())
+        if myalayer is None:
+            mygroup.addLayer(vlayer_parcel)
+
 
     @pyqtSlot()
     def on_valuation_button_clicked(self):
