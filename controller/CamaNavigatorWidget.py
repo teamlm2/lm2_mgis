@@ -601,6 +601,9 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
 
         self.price_interval_twidget.setRowCount(0)
         level_count = self.level_count_sbox.value()
+        if max_price == 0 or level_count == 0:
+            return
+
         interval_sub = (max_price - min_price)/level_count
         for row in range(level_count):
             print row
@@ -636,7 +639,6 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
         rows = self.price_interval_twidget.rowCount()
 
         for row in range(rows):
-            print row
             zone_no = str(self.price_interval_twidget.cellWidget(row, 0).value())
             begin_value = str(self.price_interval_twidget.cellWidget(row, 1).value())
             end_value = str(self.price_interval_twidget.cellWidget(row, 2).value())
@@ -655,7 +657,7 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
 
         root = QgsProject.instance().layerTreeRoot()
         mygroup = root.findGroup(u"CAMA")
-        layer_name = 'TEST'
+        layer_name = 'Parcel Zone Classify'
         layer_list = []
         layers = QgsMapLayerRegistry.instance().mapLayers()
 

@@ -1485,6 +1485,18 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                 parcel.address_streetname = self.street_name_edit.text()
                 parcel.address_khashaa = self.khashaa_edit.text()
 
+    def __is_number(self, s):
+
+        try:
+            float(s)  # for int, long and float
+        except ValueError:
+            try:
+                complex(s)  # for complex
+            except ValueError:
+                return False
+
+        return True
+
     def __save_contract(self):
 
         # self.create_savepoint()
@@ -1513,7 +1525,8 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         calculated_num_edit = ''
         if self.calculated_num_edit.text():
             calculated_num_edit = self.calculated_num_edit.text()
-        self.contract.certificate_no = int(calculated_num_edit)
+        if self.__is_number(calculated_num_edit):
+            self.contract.certificate_no = int(calculated_num_edit)
         if self.property_num_edit.text():
             self.contract.property_no = self.property_num_edit.text()
         if self.cancellation_date_check_box.isChecked():
