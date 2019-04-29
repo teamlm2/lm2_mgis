@@ -3005,17 +3005,36 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
             if parcel_count > 0:
                 # parcel = self.session.query(CaParcel).filter(CaParcel.parcel_id == parcel_id).one()
                 # parcel.parcel_id = None
-                PluginUtils.show_message(self, u'Анхааруулга',
-                                         u'Нэгж талбарын дугаар давхардаж байна.')
-                return
+                message_box = QMessageBox()
+                message_box.setText(u'Нэгж талбарын дугаар давхардаж байна.. Шинэ дугаар олгох бол үргэлжүүлнэ үү.')
+
+                no_button = message_box.addButton(self.tr("Yes"), QMessageBox.ActionRole)
+                message_box.addButton(self.tr("No"), QMessageBox.ActionRole)
+                message_box.exec_()
+
+                if not message_box.clickedButton() == no_button:
+                    return
+                # PluginUtils.show_message(self, u'Анхааруулга',
+                #                          u'Нэгж талбарын дугаар давхардаж байна.')
+                # return
             elif parcel_count == 0:
                 parcel = CaParcel()
                 if len(parcel_id) == 12:
                     parcel.parcel_id = parcel_id
                 else:
-                    PluginUtils.show_message(self, u'Анхааруулга',
-                                             u'Нэгж талбарын дугаар буруу байна./Жишээ нь: Дугаарын оронгийн урт таарахгүй/')
-                    return
+                    message_box = QMessageBox()
+                    message_box.setText(u'Нэгж талбарын дугаар буруу байна. Шинэ дугаар олгох бол үргэлжүүлнэ үү.')
+
+                    no_button = message_box.addButton(self.tr("Yes"), QMessageBox.ActionRole)
+                    message_box.addButton(self.tr("No"), QMessageBox.ActionRole)
+                    message_box.exec_()
+
+                    if not message_box.clickedButton() == no_button:
+                        return
+
+                    # PluginUtils.show_message(self, u'Анхааруулга',
+                    #                          u'Нэгж талбарын дугаар буруу байна./Жишээ нь: Дугаарын оронгийн урт таарахгүй/')
+                    # return
 
                 parcel.old_parcel_id = old_parcel_id
                 parcel.geo_id = old_parcel_id

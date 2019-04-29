@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>785</width>
-    <height>555</height>
+    <height>559</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,9 +17,9 @@
    <property name="geometry">
     <rect>
      <x>5</x>
-     <y>10</y>
+     <y>8</y>
      <width>774</width>
-     <height>61</height>
+     <height>58</height>
     </rect>
    </property>
    <property name="title">
@@ -193,9 +193,9 @@
    <property name="geometry">
     <rect>
      <x>5</x>
-     <y>73</y>
+     <y>67</y>
      <width>775</width>
-     <height>427</height>
+     <height>433</height>
     </rect>
    </property>
    <property name="currentIndex">
@@ -209,9 +209,9 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>100</y>
-       <width>351</width>
-       <height>291</height>
+       <y>90</y>
+       <width>751</width>
+       <height>135</height>
       </rect>
      </property>
      <property name="sortingEnabled">
@@ -231,7 +231,7 @@
       <rect>
        <x>7</x>
        <y>34</y>
-       <width>101</width>
+       <width>80</width>
        <height>16</height>
       </rect>
      </property>
@@ -242,9 +242,9 @@
     <widget class="QComboBox" name="zone_type_cbox">
      <property name="geometry">
       <rect>
-       <x>111</x>
+       <x>90</x>
        <y>31</y>
-       <width>350</width>
+       <width>281</width>
        <height>22</height>
       </rect>
      </property>
@@ -252,9 +252,9 @@
     <widget class="QComboBox" name="main_process_type_cbox">
      <property name="geometry">
       <rect>
-       <x>111</x>
+       <x>90</x>
        <y>58</y>
-       <width>350</width>
+       <width>581</width>
        <height>22</height>
       </rect>
      </property>
@@ -264,7 +264,7 @@
       <rect>
        <x>7</x>
        <y>61</y>
-       <width>102</width>
+       <width>80</width>
        <height>16</height>
       </rect>
      </property>
@@ -272,32 +272,11 @@
       <string>Process Type</string>
      </property>
     </widget>
-    <widget class="QTreeWidget" name="current_tree_widget">
-     <property name="geometry">
-      <rect>
-       <x>410</x>
-       <y>100</y>
-       <width>351</width>
-       <height>291</height>
-      </rect>
-     </property>
-     <property name="sortingEnabled">
-      <bool>true</bool>
-     </property>
-     <property name="wordWrap">
-      <bool>true</bool>
-     </property>
-     <column>
-      <property name="text">
-       <string>Result</string>
-      </property>
-     </column>
-    </widget>
     <widget class="QPushButton" name="add_button">
      <property name="geometry">
       <rect>
-       <x>370</x>
-       <y>170</y>
+       <x>360</x>
+       <y>230</y>
        <width>30</width>
        <height>25</height>
       </rect>
@@ -307,14 +286,14 @@
      </property>
      <property name="icon">
       <iconset resource="resources.qrc">
-       <normaloff>:/plugins/lm2/double_right_button.png</normaloff>:/plugins/lm2/double_right_button.png</iconset>
+       <normaloff>:/plugins/lm2/down_button.png</normaloff>:/plugins/lm2/down_button.png</iconset>
      </property>
     </widget>
     <widget class="QPushButton" name="remove_button">
      <property name="geometry">
       <rect>
-       <x>370</x>
-       <y>210</y>
+       <x>400</x>
+       <y>230</y>
        <width>30</width>
        <height>25</height>
       </rect>
@@ -324,7 +303,7 @@
      </property>
      <property name="icon">
       <iconset resource="resources.qrc">
-       <normaloff>:/plugins/lm2/double_left_button.png</normaloff>:/plugins/lm2/double_left_button.png</iconset>
+       <normaloff>:/plugins/lm2/up_button.png</normaloff>:/plugins/lm2/up_button.png</iconset>
      </property>
     </widget>
     <widget class="QLabel" name="label_11">
@@ -332,7 +311,7 @@
       <rect>
        <x>7</x>
        <y>8</y>
-       <width>101</width>
+       <width>80</width>
        <height>16</height>
       </rect>
      </property>
@@ -343,9 +322,9 @@
     <widget class="QComboBox" name="plan_cbox">
      <property name="geometry">
       <rect>
-       <x>111</x>
+       <x>90</x>
        <y>5</y>
-       <width>350</width>
+       <width>280</width>
        <height>22</height>
       </rect>
      </property>
@@ -353,7 +332,7 @@
     <widget class="QPushButton" name="find_button">
      <property name="geometry">
       <rect>
-       <x>680</x>
+       <x>686</x>
        <y>58</y>
        <width>75</width>
        <height>23</height>
@@ -361,6 +340,63 @@
      </property>
      <property name="text">
       <string>Find</string>
+     </property>
+    </widget>
+    <widget class="QTreeWidget" name="current_tree_widget">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>260</y>
+       <width>751</width>
+       <height>135</height>
+      </rect>
+     </property>
+     <property name="sortingEnabled">
+      <bool>true</bool>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+     <attribute name="headerDefaultSectionSize">
+      <number>200</number>
+     </attribute>
+     <column>
+      <property name="text">
+       <string>Parcel Info</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Form type</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>From</string>
+      </property>
+     </column>
+    </widget>
+    <widget class="QComboBox" name="form_type_cbox">
+     <property name="geometry">
+      <rect>
+       <x>460</x>
+       <y>5</y>
+       <width>300</width>
+       <height>22</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_12">
+     <property name="geometry">
+      <rect>
+       <x>378</x>
+       <y>8</y>
+       <width>80</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Form Type</string>
      </property>
     </widget>
    </widget>

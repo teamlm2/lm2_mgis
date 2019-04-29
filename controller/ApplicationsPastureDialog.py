@@ -399,6 +399,7 @@ class ApplicationsPastureDialog(QDialog, Ui_ApplicationsPastureDialog, DatabaseH
                   self.tr("Surname/Company"),
                   self.tr("First Name")]
 
+        self.applicant_twidget.head
         self.applicant_twidget.setup_header(header)
         self.applicant_twidget.itemClicked.connect(self.on_application_twidget_cellChanged)
 
