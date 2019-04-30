@@ -852,7 +852,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             .join(CtDecisionApplication.decision_ref) \
             .filter(CtApplication.app_no == application.app_no) \
             .filter(CtDecisionApplication.decision_result == Constants.DECISION_RESULT_APPROVED) \
-            .one()
+            .first()
 
         qt_date = PluginUtils.convert_python_date_to_qt(last_decision.decision_date)
         if qt_date is not None:
