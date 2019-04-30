@@ -410,6 +410,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         values = self.session.query(ClRightForm).all()
         for value in values:
             self.form_type_cbox.addItem(str(value.code) + ':' + value.description, value.right_form_id)
+            self.form_type_change_cbox.addItem(str(value.code) + ':' + value.description, value.right_form_id)
 
     @pyqtSlot(int)
     def on_plan_cbox_currentIndexChanged(self, index):
@@ -1049,3 +1050,13 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         item = self.current_tree_widget.currentItem()
         if item:
             (item.parent() or root).removeChild(item)
+
+    @pyqtSlot(int)
+    def on_change_form_check_box_stateChanged(self, state):
+
+        if state == Qt.Checked:
+            self.form_type_change_cbox.setEnabled(True)
+            self.form_change_button.setEnabled(True)
+        else:
+            self.form_type_change_cbox.setEnabled(False)
+            self.form_change_button.setEnabled(False)

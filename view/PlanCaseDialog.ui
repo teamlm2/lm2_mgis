@@ -275,7 +275,7 @@
     <widget class="QPushButton" name="add_button">
      <property name="geometry">
       <rect>
-       <x>360</x>
+       <x>570</x>
        <y>230</y>
        <width>30</width>
        <height>25</height>
@@ -292,7 +292,7 @@
     <widget class="QPushButton" name="remove_button">
      <property name="geometry">
       <rect>
-       <x>400</x>
+       <x>610</x>
        <y>230</y>
        <width>30</width>
        <height>25</height>
@@ -324,7 +324,7 @@
       <rect>
        <x>90</x>
        <y>5</y>
-       <width>280</width>
+       <width>281</width>
        <height>22</height>
       </rect>
      </property>
@@ -332,7 +332,7 @@
     <widget class="QPushButton" name="find_button">
      <property name="geometry">
       <rect>
-       <x>686</x>
+       <x>687</x>
        <y>58</y>
        <width>75</width>
        <height>23</height>
@@ -397,6 +397,48 @@
      </property>
      <property name="text">
       <string>Form Type</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="form_change_button">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>440</x>
+       <y>232</y>
+       <width>75</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Change</string>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="form_type_change_cbox">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>125</x>
+       <y>232</y>
+       <width>300</width>
+       <height>22</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="change_form_check_box">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>234</y>
+       <width>110</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Change right form</string>
      </property>
     </widget>
    </widget>
