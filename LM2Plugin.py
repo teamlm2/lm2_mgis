@@ -373,6 +373,7 @@ class LM2Plugin:
                 if self.planWidget.isVisible():
                     self.planWidget.hide()
 
+            self.__disable_menu()
             SessionHandler().destroy_session()
             self.is_expired = dlg.get_expired()
 

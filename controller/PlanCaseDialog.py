@@ -1060,3 +1060,31 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         else:
             self.form_type_change_cbox.setEnabled(False)
             self.form_change_button.setEnabled(False)
+
+    @pyqtSlot()
+    def on_form_change_button_clicked(self):
+
+
+
+        root = self.current_tree_widget.invisibleRootItem()
+
+        self.current_tree_widget.topLevelItemCount()
+        child_count = root.childCount()
+        for i in range(child_count):
+            parent_item = root.child(i)
+
+            for i in range(parent_item.childCount()):
+                child_item = parent_item.child(i)
+                if child_item.checkState(0) == QtCore.Qt.Checked:
+                    print child_item.text(0)
+
+                    child_item.setText(1, self.form_type_change_cbox.currentText())
+
+            # item.parent()
+            # if item.checkState(0) == QtCore.Qt.Checked:
+            #     print 'ffff'
+            # # if item.isChecked():
+            # #     print 'fff'
+            # url = item.text(0)  # text at first (0) column
+            # print url
+            # item.setText(1, 'result from %s' % url)  # update result column (1)
