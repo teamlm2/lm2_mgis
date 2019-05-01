@@ -112,6 +112,21 @@ class DatabaseUtils():
                                QApplication.translate("LM2", "Could not execute: {0}").format(e.message))
 
     @staticmethod
+    def current_employee():
+
+        try:
+            session = SessionHandler().session_instance()
+            user = DatabaseUtils.current_sd_user()
+            sd_employee = session.query(SdEmployee). \
+                filter(SdEmployee.user_id == user.user_id).first()
+
+            return sd_employee
+
+        except exc.SQLAlchemyError, e:
+            QMessageBox.information(None, QApplication.translate("LM2", "Database Query Error"),
+                                    QApplication.translate("LM2", "Could not execute: {0}").format(e.message))
+
+    @staticmethod
     def current_user_organization():
 
         try:

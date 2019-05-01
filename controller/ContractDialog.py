@@ -2299,7 +2299,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         app_no = self.application_this_contract_based_edit.text()
         # try:
         app_status = self.session.query(CtApplicationStatus).filter(
-            CtApplicationStatus.application == self.app_id).all()
+            CtApplicationStatus.application == self.app_id).order_by(CtApplicationStatus.status.desc()).all()
         for p in app_status:
             if p.status == 9:
                 officer = DatabaseUtils.get_sd_employee(p.officer_in_charge);
@@ -2312,6 +2312,16 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         #     raise LM2Exception(self.tr("Database Query Error"),
         #                        self.tr("aCould not execute: {0}").format(e.message))
 
+        if not officer:
+            officer = DatabaseUtils.current_employee()
+
+        if not officer:
+            for p in app_status:
+                officer = DatabaseUtils.get_sd_employee(p.officer_in_charge);
+                if officer:
+                    break
+
+        self.officer = officer
         app_no = self.application_this_contract_based_edit.text()
 
         # try:
