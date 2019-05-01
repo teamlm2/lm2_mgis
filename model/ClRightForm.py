@@ -3,7 +3,6 @@ __author__ = 'B.Ankhbold'
 from sqlalchemy import Column, String, Integer
 from Base import *
 
-
 class ClRightForm(Base):
 
     __tablename__ = 'cl_right_form'

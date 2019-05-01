@@ -518,7 +518,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                             person = app_person.person_ref
                             self.person_id_edit.setText(person.person_register)
 
-        application_role = self.contract.application_roles.filter_by(role=Constants.APPLICATION_ROLE_CREATES).one()
+        application_role = self.contract.application_roles.filter_by(role=Constants.APPLICATION_ROLE_CREATES).first()
         application = application_role.application_ref
 
         if application_role is None or application is None:
@@ -2482,6 +2482,30 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         fee_area = self.subsidized_area_edit.text()
         fee_rate = self.subsidized_fee_rate_edit.text()
 
+        bank_name = ''
+        account_no = ''
+        department_name = ''
+        department_phone = ''
+        department_address = ''
+        head_surname = ''
+        head_firstname = ''
+
+        if self.officer.department_ref:
+            if self.officer.department_ref.bank_name:
+                bank_name = self.officer.department_ref.bank_name
+            if self.officer.department_ref.account_no:
+                account_no = self.officer.department_ref.account_no
+            if self.officer.department_ref.name:
+                department_name = self.officer.department_ref.name
+            if self.officer.department_ref.phone:
+                department_phone = self.officer.department_ref.phone
+            if self.officer.department_ref.address:
+                department_address = self.officer.department_ref.address
+            if self.officer.department_ref.head_surname:
+                head_surname = self.officer.department_ref.head_surname
+            if self.officer.department_ref.head_firstname:
+                head_firstname = self.officer.department_ref.head_firstname
+
 
         person_bank_name = person_bank_name
         person_account = person.bank_account_no
@@ -2518,29 +2542,6 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             darga_signature = ''
             darga_position = ''
 
-        bank_name = ''
-        account_no = ''
-        department_name = ''
-        department_phone = ''
-        department_address = ''
-        head_surname = ''
-        head_firstname = ''
-
-        if self.officer.department_ref:
-            if self.officer.department_ref.bank_name:
-                bank_name = self.officer.department_ref.bank_name
-            if self.officer.department_ref.account_no:
-                account_no = self.officer.department_ref.account_no
-            if self.officer.department_ref.name:
-                department_name = self.officer.department_ref.name
-            if self.officer.department_ref.phone:
-                department_phone = self.officer.department_ref.phone
-            if self.officer.department_ref.address:
-                department_address = self.officer.department_ref.address
-            if self.officer.department_ref.head_surname:
-                head_surname = self.officer.department_ref.head_surname
-            if self.officer.department_ref.head_firstname:
-                head_firstname = self.officer.department_ref.head_firstname
         duration_year = self.contract_duration_edit.text()
 
         au1 = DatabaseUtils.working_l1_code()
