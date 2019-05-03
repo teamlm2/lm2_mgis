@@ -40,6 +40,7 @@ from ..model.ClPlanZone import *
 from ..model.PlProject import *
 from ..model.SetZoneColor import *
 from ..model.ClRightForm import *
+from ..model.PlProjectParcelRefParcel import *
 from ..view.Ui_PlanCaseDialog import *
 from .qt_classes.ApplicantDocumentDelegate import ApplicationDocumentDelegate
 from .qt_classes.DocumentsTableWidget import DocumentsTableWidget
@@ -1019,29 +1020,97 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
             desc = ''
             if value.plan_zone_ref:
                 if value.plan_zone_ref.name:
-                    desc = value.plan_zone_ref.name
-                    item = QTreeWidgetItem()
-                    item.setText(0, str(value.plan_zone_ref.code) + ': ' + name + desc)
-                    item.setIcon(0, QIcon(QPixmap(":/plugins/lm2/parcel_red.png")))
-                    item.setData(0, Qt.UserRole, value.parcel_id)
-                    item.setData(0, Qt.UserRole + 1, "polygon")
-                    item.setData(0, Qt.UserRole + 2, value.plan_zone_id)
-                    item.setData(0, Qt.UserRole + 3, value.plan_zone_ref.code)
 
-                    item.setText(1, form_type_desc)
-                    item.setData(1, Qt.UserRole, form_type_id)
 
-                    item.setText(2, description)
-                    item.setData(2, Qt.UserRole, plan.project_id)
+                        desc = value.plan_zone_ref.name
+                        item = QTreeWidgetItem()
+                        item.setText(0, str(value.plan_zone_ref.code) + ': ' + name + desc)
+                        item.setIcon(0, QIcon(QPixmap(":/plugins/lm2/parcel_red.png")))
+                        item.setData(0, Qt.UserRole, value.parcel_id)
+                        item.setData(0, Qt.UserRole + 1, "polygon")
+                        item.setData(0, Qt.UserRole + 2, value.plan_zone_id)
+                        item.setData(0, Qt.UserRole + 3, value.plan_zone_ref.code)
 
-                    item.setCheckState(0, Qt.Checked)
+                        item.setText(1, form_type_desc)
+                        item.setData(1, Qt.UserRole, form_type_id)
 
-                    if value.polygon_geom is not None:
-                        self.item_polygon_current.addChild(item)
-                    elif value.line_geom is not None:
-                        self.item_line_current.addChild(item)
-                    else:
-                        self.item_point_current.addChild(item)
+                        item.setText(2, description)
+                        item.setData(2, Qt.UserRole, plan.project_id)
+
+                        item.setCheckState(0, Qt.Checked)
+
+                        if value.polygon_geom is not None:
+                            if self.__parcel_duplicate_check('polygon', value.polygon_geom):
+                                new_parcel = self.__add_parcel_ref('polygon', value)
+                                item.setData(0, Qt.UserRole + 4, new_parcel.parcel_id)
+                                self.item_polygon_current.addChild(item)
+                        elif value.line_geom is not None:
+                            if self.__parcel_duplicate_check('line', value.line_geom):
+                                new_parcel = self.__add_parcel_ref('line', value)
+                                item.setData(0, Qt.UserRole + 4, new_parcel.parcel_id)
+                                self.item_line_current.addChild(item)
+                        else:
+                            if self.__parcel_duplicate_check('point', value.point_geom):
+                                new_parcel = self.__add_parcel_ref('point', value)
+                                item.setData(0, Qt.UserRole + 4, new_parcel.parcel_id)
+                                self.item_point_current.addChild(item)
+
+    def __add_parcel_ref(self, geom_type, value):
+
+        new_parcel = PlProjectParcel()
+
+        new_parcel.project_id = self.plan.project_id
+        new_parcel.project_ref = self.plan
+        new_parcel.landuse = value.landuse
+        new_parcel.gazner = value.gazner
+        new_parcel.plan_zone_id = value.plan_zone_id
+        new_parcel.badedturl = value.badedturl
+        new_parcel.right_form_id = value.right_form_id
+        new_parcel.right_form_ref = value.right_form_ref
+        new_parcel.valid_from = PluginUtils.convert_qt_date_to_python(QDateTime().currentDateTime())
+        new_parcel.au1 = self.au1
+        new_parcel.au2 = self.au2
+        if geom_type == 'polygon':
+            new_parcel.polygon_geom = value.polygon_geom
+        elif geom_type == 'line':
+            new_parcel.line_geom = value.line_geom
+        else:
+            new_parcel.point_geom = value.point_geom
+
+        self.session.add(new_parcel)
+        self.session.flush()
+
+        parcel_ref = PlProjectParcelRefParcel()
+        parcel_ref.parcel_id = new_parcel.parcel_id
+        parcel_ref.ref_parcel_id = value.parcel_id
+        parcel_ref.cad_parcel_id = None
+        parcel_ref.is_cadastre = False
+        self.session.add(parcel_ref)
+
+        return new_parcel
+
+    def __parcel_duplicate_check(self, geom_type, geometry):
+
+        is_true = True
+        if geom_type == 'polygon':
+            count = self.session.query(PlProjectParcel).\
+                filter(PlProjectParcel.project_id == self.plan.project_id).\
+                filter(PlProjectParcel.polygon_geom.ST_Equals(geometry)).count()
+            if count > 0:
+                is_true = False
+        elif geom_type == 'line':
+            count = self.session.query(PlProjectParcel). \
+                filter(PlProjectParcel.project_id == self.plan.project_id). \
+                filter(PlProjectParcel.line_geom.ST_Equals(geometry)).count()
+            if count > 0:
+                is_true = False
+        else:
+            count = self.session.query(PlProjectParcel). \
+                filter(PlProjectParcel.project_id == self.plan.project_id). \
+                filter(PlProjectParcel.point_geom.ST_Equals(geometry)).count()
+            if count > 0:
+                is_true = False
+        return is_true
 
     @pyqtSlot()
     def on_remove_button_clicked(self):
@@ -1075,6 +1144,8 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
             for i in range(parent_item.childCount()):
                 child_item = parent_item.child(i)
                 if child_item.checkState(0) == QtCore.Qt.Checked:
+                    parcel_id = child_item.data(Qt.UserRole + 4)
+                    print parcel_id
 
                     child_item.setText(1, form_type_txt)
                     child_item.setData(1, Qt.UserRole, form_type_code)
