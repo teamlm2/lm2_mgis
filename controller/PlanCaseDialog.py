@@ -1144,8 +1144,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
             for i in range(parent_item.childCount()):
                 child_item = parent_item.child(i)
                 if child_item.checkState(0) == QtCore.Qt.Checked:
-                    parcel_id = child_item.data(Qt.UserRole + 4)
-                    print parcel_id
+                    parcel_id = child_item.data(0, Qt.UserRole + 4)
 
                     child_item.setText(1, form_type_txt)
                     child_item.setData(1, Qt.UserRole, form_type_code)

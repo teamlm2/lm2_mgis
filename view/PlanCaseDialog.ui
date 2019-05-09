@@ -275,7 +275,7 @@
     <widget class="QPushButton" name="add_button">
      <property name="geometry">
       <rect>
-       <x>570</x>
+       <x>10</x>
        <y>230</y>
        <width>30</width>
        <height>25</height>
@@ -292,7 +292,7 @@
     <widget class="QPushButton" name="remove_button">
      <property name="geometry">
       <rect>
-       <x>610</x>
+       <x>50</x>
        <y>230</y>
        <width>30</width>
        <height>25</height>
@@ -405,7 +405,7 @@
      </property>
      <property name="geometry">
       <rect>
-       <x>440</x>
+       <x>687</x>
        <y>232</y>
        <width>75</width>
        <height>23</height>
@@ -421,9 +421,9 @@
      </property>
      <property name="geometry">
       <rect>
-       <x>125</x>
+       <x>206</x>
        <y>232</y>
-       <width>300</width>
+       <width>261</width>
        <height>22</height>
       </rect>
      </property>
@@ -431,7 +431,7 @@
     <widget class="QCheckBox" name="change_form_check_box">
      <property name="geometry">
       <rect>
-       <x>10</x>
+       <x>91</x>
        <y>234</y>
        <width>110</width>
        <height>17</height>
@@ -439,6 +439,342 @@
      </property>
      <property name="text">
       <string>Change right form</string>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="right_type_change_cbox">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>480</x>
+       <y>232</y>
+       <width>200</width>
+       <height>22</height>
+      </rect>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="tab_3">
+    <attribute name="title">
+     <string>Import Cadastre</string>
+    </attribute>
+    <widget class="QLabel" name="label_13">
+     <property name="geometry">
+      <rect>
+       <x>7</x>
+       <y>8</y>
+       <width>80</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Right Type</string>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="cadastre_right_type_cbox">
+     <property name="geometry">
+      <rect>
+       <x>90</x>
+       <y>5</y>
+       <width>251</width>
+       <height>22</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_14">
+     <property name="geometry">
+      <rect>
+       <x>350</x>
+       <y>8</y>
+       <width>80</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Land Use</string>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="landuse_type_cbox">
+     <property name="geometry">
+      <rect>
+       <x>429</x>
+       <y>5</y>
+       <width>331</width>
+       <height>22</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_84">
+     <property name="geometry">
+      <rect>
+       <x>430</x>
+       <y>34</y>
+       <width>81</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Khashaa</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_25">
+     <property name="geometry">
+      <rect>
+       <x>270</x>
+       <y>31</y>
+       <width>150</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Right Holder Name</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="parcel_khashaa_edit">
+     <property name="geometry">
+      <rect>
+       <x>430</x>
+       <y>50</y>
+       <width>75</width>
+       <height>20</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="parcel_streetname_edit">
+     <property name="geometry">
+      <rect>
+       <x>516</x>
+       <y>50</y>
+       <width>160</width>
+       <height>20</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_83">
+     <property name="geometry">
+      <rect>
+       <x>515</x>
+       <y>31</y>
+       <width>150</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Street Name</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="parcel_right_holder_name_edit">
+     <property name="geometry">
+      <rect>
+       <x>270</x>
+       <y>50</y>
+       <width>150</width>
+       <height>20</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="personal_parcel_edit">
+     <property name="geometry">
+      <rect>
+       <x>140</x>
+       <y>50</y>
+       <width>120</width>
+       <height>20</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_70">
+     <property name="geometry">
+      <rect>
+       <x>140</x>
+       <y>34</y>
+       <width>120</width>
+       <height>11</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Personal / Company ID</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="parcel_num_edit">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>50</y>
+       <width>120</width>
+       <height>20</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_22">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>31</y>
+       <width>120</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Parcel Number</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="cadastre_form_change_button">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>687</x>
+       <y>232</y>
+       <width>75</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Change</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="add_button_2">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>230</y>
+       <width>30</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="resources.qrc">
+       <normaloff>:/plugins/lm2/down_button.png</normaloff>:/plugins/lm2/down_button.png</iconset>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="cadastre_change_form_check_box">
+     <property name="geometry">
+      <rect>
+       <x>91</x>
+       <y>234</y>
+       <width>110</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Change right form</string>
+     </property>
+    </widget>
+    <widget class="QTreeWidget" name="cadastre_current_tree_widget">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>260</y>
+       <width>751</width>
+       <height>135</height>
+      </rect>
+     </property>
+     <property name="sortingEnabled">
+      <bool>true</bool>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+     <attribute name="headerDefaultSectionSize">
+      <number>200</number>
+     </attribute>
+     <column>
+      <property name="text">
+       <string>Parcel Info</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Form type</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>From</string>
+      </property>
+     </column>
+    </widget>
+    <widget class="QComboBox" name="cadastre_form_type_change_cbox">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>206</x>
+       <y>232</y>
+       <width>261</width>
+       <height>22</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="remove_button_2">
+     <property name="geometry">
+      <rect>
+       <x>50</x>
+       <y>230</y>
+       <width>30</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="resources.qrc">
+       <normaloff>:/plugins/lm2/up_button.png</normaloff>:/plugins/lm2/up_button.png</iconset>
+     </property>
+    </widget>
+    <widget class="QTreeWidget" name="cadastre_tree_widget">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>90</y>
+       <width>751</width>
+       <height>135</height>
+      </rect>
+     </property>
+     <property name="sortingEnabled">
+      <bool>true</bool>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+     <column>
+      <property name="text">
+       <string>Result</string>
+      </property>
+     </column>
+    </widget>
+    <widget class="QPushButton" name="find_button_2">
+     <property name="geometry">
+      <rect>
+       <x>687</x>
+       <y>58</y>
+       <width>75</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Find</string>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="cadastre_right_type_change_cbox">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>480</x>
+       <y>232</y>
+       <width>200</width>
+       <height>22</height>
+      </rect>
      </property>
     </widget>
    </widget>
