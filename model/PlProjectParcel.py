@@ -41,6 +41,9 @@ class PlProjectParcel(Base):
     right_form_id = Column(Integer, ForeignKey('cl_right_form.right_form_id'))
     right_form_ref = relationship("ClRightForm")
 
+    right_type_code = Column(Integer, ForeignKey('cl_right_type.code'))
+    right_type_ref = relationship("ClRightType")
+
     au1 = Column(String, ForeignKey('au_level1.code'))
     au1_ref = relationship("AuLevel1")
 

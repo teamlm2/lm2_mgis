@@ -40,6 +40,8 @@ from ..model.ClPlanZone import *
 from ..model.PlProject import *
 from ..model.SetZoneColor import *
 from ..model.ClRightForm import *
+from ..model.ClRightType import *
+from ..model.PlSetRightFormRightType import *
 from ..model.PlProjectParcelRefParcel import *
 from ..view.Ui_PlanCaseDialog import *
 from .qt_classes.ApplicantDocumentDelegate import ApplicationDocumentDelegate
@@ -334,9 +336,9 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
     @pyqtSlot()
     def current_menu_zoom_to_selected_clicked(self):
 
-        selected_item = self.main_tree_widget.selectedItems()[0]
+        selected_item = self.current_tree_widget.selectedItems()[0]
 
-        parcel_id = selected_item.data(0, Qt.UserRole)
+        parcel_id = selected_item.data(0, Qt.UserRole + 4)
         type = selected_item.data(0, Qt.UserRole + 1)
         if selected_item is None:
             return
@@ -345,6 +347,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
 
         schema_name = "data_plan"
         table_name = "pl_view_project_parcel"
+        column_name = 'parcel_id'
         layers = QgsMapLayerRegistry.instance().mapLayers()
 
         for id, layer in layers.iteritems():
@@ -353,7 +356,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
                 uri = QgsDataSourceURI(uri_string)
                 if uri.table() == table_name:
                     if uri.schema() == schema_name:
-                        self.__selected_feature(parcel_id, layer)
+                        self.__selected_feature(column_name, parcel_id, layer)
 
     def __selected_feature(self, column_name ,parcel_id, layer):
 
@@ -474,7 +477,161 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
 
         au2 = DatabaseUtils.working_l2_code()
         self.__setup_main_tree_widget()
+        self.__setup_current_tree_widget()
         self.__load_main_zone(au2)
+        self.__load_current_zone(au2)
+
+    def __load_current_zone(self, au2):
+
+        self.__load_current_polygon()
+        self.__load_current_point()
+        self.__load_current_line()
+
+    def __load_current_line(self):
+
+        lines = self.session.query(PlProjectParcel). \
+            filter(PlProjectParcel.project_id == self.plan.project_id). \
+            filter(PlProjectParcel.polygon_geom == None). \
+            filter(PlProjectParcel.point_geom == None).order_by(PlProjectParcel.badedturl)
+
+        for value in lines:
+            plan = value.project_ref
+            plan_type = "" if not plan.plan_type_ref else plan.plan_type_ref.short_name
+            au_type = ''
+
+            if plan.plan_type_ref.admin_unit_type == 2:
+                if plan.au1_ref:
+                    au_type = ' /' + unicode(plan.au1_ref.name) + '/'
+            elif plan.plan_type_ref.admin_unit_type == 3:
+                if plan.au2_ref:
+                    au_type = ' /' + unicode(plan.au2_ref.name) + '/'
+            else:
+                au_type = ''
+            description = str(plan.code) + au_type + " (" + unicode(plan_type) + ")"
+            form_type_desc = "" if not value.right_form_ref else value.right_form_ref.description
+            form_type_id = None if not value.right_form_ref else value.right_form_ref.right_form_id
+
+            name = ''
+            if value.gazner:
+                name = '(' + value.gazner + ')'
+            if value.plan_zone_ref:
+                if value.plan_zone_ref.name:
+                    desc = value.plan_zone_ref.name
+                    item = QTreeWidgetItem()
+                    item.setText(0, str(value.plan_zone_ref.code) + ': ' + name + desc)
+                    item.setIcon(0, QIcon(QPixmap(":/plugins/lm2/parcel_red.png")))
+                    item.setData(0, Qt.UserRole + 4, value.parcel_id)
+                    item.setData(0, Qt.UserRole + 1, "polygon")
+                    item.setData(0, Qt.UserRole + 2, value.plan_zone_id)
+                    item.setData(0, Qt.UserRole + 3, value.plan_zone_ref.code)
+
+                    item.setText(1, form_type_desc)
+                    item.setData(1, Qt.UserRole, form_type_id)
+
+                    item.setText(2, description)
+                    item.setData(2, Qt.UserRole, plan.project_id)
+
+                    item.setCheckState(0, Qt.Checked)
+                    item.setCheckState(0, Qt.Unchecked)
+                    self.item_line_current.addChild(item)
+
+    def __load_current_point(self):
+
+        points = self.session.query(PlProjectParcel). \
+            join(PlProjectParcelRefParcel, PlProjectParcel.parcel_id == PlProjectParcelRefParcel.parcel_id). \
+            filter(PlProjectParcel.project_id == self.plan.project_id). \
+            filter(PlProjectParcel.polygon_geom == None). \
+            filter(PlProjectParcel.line_geom == None).order_by(PlProjectParcel.badedturl)
+
+        for value in points:
+            plan = value.project_ref
+            plan_type = "" if not plan.plan_type_ref else plan.plan_type_ref.short_name
+            au_type = ''
+
+            if plan.plan_type_ref.admin_unit_type == 2:
+                if plan.au1_ref:
+                    au_type = ' /' + unicode(plan.au1_ref.name) + '/'
+            elif plan.plan_type_ref.admin_unit_type == 3:
+                if plan.au2_ref:
+                    au_type = ' /' + unicode(plan.au2_ref.name) + '/'
+            else:
+                au_type = ''
+            description = str(plan.code) + au_type + " (" + unicode(plan_type) + ")"
+            form_type_desc = "" if not value.right_form_ref else value.right_form_ref.description
+            form_type_id = None if not value.right_form_ref else value.right_form_ref.right_form_id
+
+            name = ''
+            if value.gazner:
+                name = '(' + value.gazner + ')'
+            if value.plan_zone_ref:
+                if value.plan_zone_ref.name:
+                    desc = value.plan_zone_ref.name
+                    item = QTreeWidgetItem()
+                    item.setText(0, str(value.plan_zone_ref.code) + ': ' + name + desc)
+                    item.setIcon(0, QIcon(QPixmap(":/plugins/lm2/parcel_red.png")))
+                    item.setData(0, Qt.UserRole + 4, value.parcel_id)
+                    item.setData(0, Qt.UserRole + 1, "polygon")
+                    item.setData(0, Qt.UserRole + 2, value.plan_zone_id)
+                    item.setData(0, Qt.UserRole + 3, value.plan_zone_ref.code)
+
+                    item.setText(1, form_type_desc)
+                    item.setData(1, Qt.UserRole, form_type_id)
+
+                    item.setText(2, description)
+                    item.setData(2, Qt.UserRole, plan.project_id)
+
+                    item.setCheckState(0, Qt.Checked)
+                    item.setCheckState(0, Qt.Unchecked)
+                    self.item_point_current.addChild(item)
+
+    def __load_current_polygon(self):
+
+        polygons = self.session.query(PlProjectParcel). \
+            join(PlProjectParcelRefParcel, PlProjectParcel.parcel_id == PlProjectParcelRefParcel.parcel_id). \
+            filter(PlProjectParcel.project_id == self.plan.project_id). \
+            filter(PlProjectParcel.line_geom == None). \
+            filter(PlProjectParcel.point_geom == None).order_by(PlProjectParcel.badedturl)
+
+        for value in polygons:
+            plan = value.project_ref
+            plan_type = "" if not plan.plan_type_ref else plan.plan_type_ref.short_name
+            au_type = ''
+
+            if plan.plan_type_ref.admin_unit_type == 2:
+                if plan.au1_ref:
+                    au_type = ' /' + unicode(plan.au1_ref.name) + '/'
+            elif plan.plan_type_ref.admin_unit_type == 3:
+                if plan.au2_ref:
+                    au_type = ' /' + unicode(plan.au2_ref.name) + '/'
+            else:
+                au_type = ''
+            description = str(plan.code) + au_type + " (" + unicode(plan_type) + ")"
+            form_type_desc = "" if not value.right_form_ref else value.right_form_ref.description
+            form_type_id = None if not value.right_form_ref else value.right_form_ref.right_form_id
+
+            name = ''
+            if value.gazner:
+                name = '(' + value.gazner + ')'
+            if value.plan_zone_ref:
+                if value.plan_zone_ref.name:
+                    desc = value.plan_zone_ref.name
+                    item = QTreeWidgetItem()
+                    item.setText(0, str(value.plan_zone_ref.code) + ': ' + name + desc)
+                    item.setIcon(0, QIcon(QPixmap(":/plugins/lm2/parcel_red.png")))
+                    item.setData(0, Qt.UserRole + 4, value.parcel_id)
+                    item.setData(0, Qt.UserRole + 1, "polygon")
+                    item.setData(0, Qt.UserRole + 2, value.plan_zone_id)
+                    item.setData(0, Qt.UserRole + 3, value.plan_zone_ref.code)
+
+                    item.setText(1, form_type_desc)
+                    item.setData(1, Qt.UserRole, form_type_id)
+
+                    item.setText(2, description)
+                    item.setData(2, Qt.UserRole, plan.project_id)
+
+                    item.setCheckState(0, Qt.Checked)
+                    item.setCheckState(0, Qt.Unchecked)
+                    self.item_polygon_current.addChild(item)
 
     def __load_main_zone(self, au2):
 
@@ -935,7 +1092,6 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         parcel_object.landuse = landuse
         parcel_object.gazner = landname
 
-
         return parcel_object
 
     @pyqtSlot()
@@ -1021,7 +1177,6 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
             if value.plan_zone_ref:
                 if value.plan_zone_ref.name:
 
-
                         desc = value.plan_zone_ref.name
                         item = QTreeWidgetItem()
                         item.setText(0, str(value.plan_zone_ref.code) + ': ' + name + desc)
@@ -1057,6 +1212,9 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
 
     def __add_parcel_ref(self, geom_type, value):
 
+        # if not value.polygon_geom and not value.line_geom and not value.point_geom:
+        #     return
+
         new_parcel = PlProjectParcel()
 
         new_parcel.project_id = self.plan.project_id
@@ -1070,6 +1228,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         new_parcel.valid_from = PluginUtils.convert_qt_date_to_python(QDateTime().currentDateTime())
         new_parcel.au1 = self.au1
         new_parcel.au2 = self.au2
+
         if geom_type == 'polygon':
             new_parcel.polygon_geom = value.polygon_geom
         elif geom_type == 'line':
@@ -1118,6 +1277,20 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         root = self.current_tree_widget.invisibleRootItem()
         item = self.current_tree_widget.currentItem()
         if item:
+            parcel_id = item.data(0, Qt.UserRole + 4)
+
+            ref_count = self.session.query(PlProjectParcelRefParcel). \
+                filter(PlProjectParcelRefParcel.parcel_id == parcel_id).count()
+
+            if ref_count > 0:
+                self.session.query(PlProjectParcelRefParcel). \
+                    filter(PlProjectParcelRefParcel.parcel_id == parcel_id).delete()
+
+            count = self.session.query(PlProjectParcel). \
+                filter(PlProjectParcel.parcel_id == parcel_id).count()
+            if count == 1:
+                self.session.query(PlProjectParcel). \
+                    filter(PlProjectParcel.parcel_id == parcel_id).delete()
             (item.parent() or root).removeChild(item)
 
     @pyqtSlot(int)
@@ -1129,6 +1302,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         else:
             self.form_type_change_cbox.setEnabled(False)
             self.form_change_button.setEnabled(False)
+            self.form_type_change_cbox.clear()
 
     @pyqtSlot()
     def on_form_change_button_clicked(self):
@@ -1148,3 +1322,33 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
 
                     child_item.setText(1, form_type_txt)
                     child_item.setData(1, Qt.UserRole, form_type_code)
+
+                    count = self.session.query(PlProjectParcel). \
+                        filter(PlProjectParcel.parcel_id == parcel_id).count()
+                    if count == 1:
+                        parcel = self.session.query(PlProjectParcel). \
+                            filter(PlProjectParcel.parcel_id == parcel_id).one()
+
+                        form_type_code = self.form_type_change_cbox.itemData(self.form_type_change_cbox.currentIndex())
+                        right_type_code = self.right_type_change_cbox.itemData(self.right_type_change_cbox.currentIndex())
+                        if form_type_code:
+                            parcel.right_form_id = form_type_code
+                        if right_type_code:
+                            parcel.right_type_code = right_type_code
+
+    @pyqtSlot(int)
+    def on_form_type_change_cbox_currentIndexChanged(self, index):
+
+        self.right_type_change_cbox.clear()
+        form_type = self.form_type_change_cbox.itemData(self.form_type_change_cbox.currentIndex())
+
+        form_right_types = self.session.query(PlSetRightFormRightType).filter(PlSetRightFormRightType.right_form_id == form_type)
+
+        if form_right_types.count() > 0:
+            self.right_type_change_cbox.setEnabled(True)
+        else:
+            self.right_type_change_cbox.setEnabled(False)
+
+        for value in form_right_types.all():
+            right_type = self.session.query(ClRightType).filter(ClRightType.code == value.right_type_code).one()
+            self.right_type_change_cbox.addItem(right_type.description, right_type.code)
