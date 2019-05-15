@@ -29,6 +29,8 @@ class ParcelSearch(Base):
     au2_code = Column(String)
     contract_status = Column(Integer)
     record_status = Column(Integer)
+    right_type_code = Column(Integer)
+    right_type_desc = Column(String)
 
     landuse = Column(Integer, ForeignKey('cl_landuse_type.code'))
     landuse_ref = relationship("ClLanduseType")

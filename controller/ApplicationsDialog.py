@@ -3073,7 +3073,8 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
         self.requested_land_use_type_cbox.clear()
 
         for item in landuse_types:
-            self.requested_land_use_type_cbox.addItem(str(item.code) + ": " + item.description, item.code)
+            if len(str(item.code)) == 4:
+                self.requested_land_use_type_cbox.addItem(str(item.code) + ": " + item.description, item.code)
 
     def reject(self):
 

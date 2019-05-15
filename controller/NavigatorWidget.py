@@ -177,7 +177,6 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
             if index == 2:
                 self.__setup_parcel_combo_boxes()
                 self.__setup_address_fill()
-                self.__create_parcel_view()
                 self.__create_tmp_parcel_view()
             if index == 3:
                 self.__setup_app_combo_boxes()
@@ -320,7 +319,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
 
         self.__create_person_view()
         self.__create_application_view()
-        # self.__create_parcel_view()
+        self.__create_parcel_view()
         # self.__create_tmp_parcel_view()
         self.__create_contract_view()
         # self.__create_decision_view()
@@ -430,7 +429,8 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         self.land_use_type_cbox.addItem("*", -1)
         if cl_landusetype is not None:
             for landuse in cl_landusetype:
-                self.land_use_type_cbox.addItem(str(landuse.code)+':'+landuse.description, landuse.code)
+                if len(str(landuse.code)) == 4:
+                    self.land_use_type_cbox.addItem(str(landuse.code)+':'+landuse.description, landuse.code)
 
     def __setup_person_combo_boxes(self):
 
@@ -1143,9 +1143,10 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
 
         select = "SELECT parcel.parcel_id, app_pers.main_applicant ,app_pers.role as person_role, parcel.old_parcel_id, parcel.geo_id, parcel.landuse, person.person_register,  person.person_id, " \
                  "person.name, person.middle_name, person.first_name,  application.app_no, decision.decision_no, contract.contract_no, contract.status contract_status, " \
-                 "record.record_no, record.status record_status, parcel.address_streetname, parcel.address_khashaa, parcel.au2 as au2_code " \
+                 "record.record_no, record.status record_status, parcel.address_streetname, parcel.address_khashaa, parcel.au2 as au2_code, rtype.code as right_type_code, rtype.description as right_type_desc " \
                  "FROM data_soums_union.ca_parcel_tbl parcel " \
                  "LEFT JOIN data_soums_union.ct_application application on application.parcel = parcel.parcel_id " \
+                 "LEFT JOIN codelists.cl_right_type rtype on application.right_type = rtype.code " \
                  "LEFT JOIN data_soums_union.ct_application_person_role app_pers on application.app_id = app_pers.application " \
                  "LEFT JOIN base.bs_person person ON app_pers.person = person.person_id " \
                  "LEFT JOIN data_soums_union.ct_contract_application_role con_app on con_app.application = application.app_id " \
@@ -2697,7 +2698,6 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
             item = self.decision_results_twidget.itemAt(point)
             if item is None: return
             self.context_menu.exec_(self.decision_results_twidget.mapToGlobal(point))
-
 
     @pyqtSlot()
     def on_application_add_button_clicked(self):
