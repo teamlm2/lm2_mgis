@@ -199,7 +199,7 @@
     </rect>
    </property>
    <property name="currentIndex">
-    <number>1</number>
+    <number>0</number>
    </property>
    <widget class="QWidget" name="tab_2">
     <attribute name="title">
@@ -675,6 +675,38 @@
        <height>140</height>
       </rect>
      </property>
+     <attribute name="horizontalHeaderDefaultSectionSize">
+      <number>200</number>
+     </attribute>
+     <attribute name="horizontalHeaderMinimumSectionSize">
+      <number>35</number>
+     </attribute>
+     <attribute name="verticalHeaderDefaultSectionSize">
+      <number>30</number>
+     </attribute>
+     <attribute name="verticalHeaderMinimumSectionSize">
+      <number>19</number>
+     </attribute>
+     <column>
+      <property name="text">
+       <string>Cadastre Parcel Information</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Zone Type</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Form Type</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Right Type</string>
+      </property>
+     </column>
     </widget>
     <widget class="QComboBox" name="cadastre_form_type_change_cbox">
      <property name="enabled">

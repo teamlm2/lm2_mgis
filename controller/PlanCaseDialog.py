@@ -118,10 +118,10 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         self.cadastre_twidget.setContextMenuPolicy(Qt.CustomContextMenu)
         self.cadastre_twidget.customContextMenuRequested.connect(self.on_custom_context_menu_requested)
 
-        self.cadastre_current_twidget.setColumnCount(1)
+        # self.cadastre_current_twidget.setColumnCount(1)
         self.cadastre_current_twidget.setDragEnabled(True)
         self.cadastre_current_twidget.horizontalHeader().setResizeMode(0, QHeaderView.Stretch)
-        self.cadastre_current_twidget.horizontalHeader().setVisible(False)
+        # self.cadastre_current_twidget.horizontalHeader().setVisible(False)
         self.cadastre_current_twidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.cadastre_current_twidget.setSelectionBehavior(QAbstractItemView.SelectRows)
         # self.cadastre_current_twidget.setContextMenuPolicy(Qt.CustomContextMenu)
@@ -684,6 +684,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
 
         lines = self.session.query(PlProjectParcel). \
             filter(PlProjectParcel.project_id == self.plan.project_id). \
+            filter(PlProjectParcelRefParcel.is_cadastre == False). \
             filter(PlProjectParcel.polygon_geom == None). \
             filter(PlProjectParcel.point_geom == None).order_by(PlProjectParcel.badedturl)
 
@@ -711,7 +712,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
                 if value.plan_zone_ref.name:
                     desc = value.plan_zone_ref.name
                     item = QTreeWidgetItem()
-                    item.setText(0, str(value.plan_zone_ref.code) + ': ' + name + desc)
+                    item.setText(0, '/' + str(value.parcel_id) + '/' + str(value.plan_zone_ref.code) + ': ' + name + desc)
                     item.setIcon(0, QIcon(QPixmap(":/plugins/lm2/parcel_red.png")))
                     item.setData(0, Qt.UserRole + 4, value.parcel_id)
                     item.setData(0, Qt.UserRole + 1, "polygon")
@@ -733,6 +734,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         points = self.session.query(PlProjectParcel). \
             join(PlProjectParcelRefParcel, PlProjectParcel.parcel_id == PlProjectParcelRefParcel.parcel_id). \
             filter(PlProjectParcel.project_id == self.plan.project_id). \
+            filter(PlProjectParcelRefParcel.is_cadastre == False). \
             filter(PlProjectParcel.polygon_geom == None). \
             filter(PlProjectParcel.line_geom == None).order_by(PlProjectParcel.badedturl)
 
@@ -760,7 +762,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
                 if value.plan_zone_ref.name:
                     desc = value.plan_zone_ref.name
                     item = QTreeWidgetItem()
-                    item.setText(0, str(value.plan_zone_ref.code) + ': ' + name + desc)
+                    item.setText(0, '/' + str(value.parcel_id) + '/' + str(value.plan_zone_ref.code) + ': ' + name + desc)
                     item.setIcon(0, QIcon(QPixmap(":/plugins/lm2/parcel_red.png")))
                     item.setData(0, Qt.UserRole + 4, value.parcel_id)
                     item.setData(0, Qt.UserRole + 1, "polygon")
@@ -782,6 +784,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         polygons = self.session.query(PlProjectParcel). \
             join(PlProjectParcelRefParcel, PlProjectParcel.parcel_id == PlProjectParcelRefParcel.parcel_id). \
             filter(PlProjectParcel.project_id == self.plan.project_id). \
+            filter(PlProjectParcelRefParcel.is_cadastre == False). \
             filter(PlProjectParcel.line_geom == None). \
             filter(PlProjectParcel.point_geom == None).order_by(PlProjectParcel.badedturl)
 
@@ -809,7 +812,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
                 if value.plan_zone_ref.name:
                     desc = value.plan_zone_ref.name
                     item = QTreeWidgetItem()
-                    item.setText(0, str(value.plan_zone_ref.code) + ': ' + name + desc)
+                    item.setText(0, '/' + str(value.parcel_id) + '/' + str(value.plan_zone_ref.code) + ': ' + name + desc)
                     item.setIcon(0, QIcon(QPixmap(":/plugins/lm2/parcel_red.png")))
                     item.setData(0, Qt.UserRole + 4, value.parcel_id)
                     item.setData(0, Qt.UserRole + 1, "polygon")
@@ -1466,22 +1469,26 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
 
         if state == Qt.Checked:
             self.form_type_change_cbox.setEnabled(True)
+            self.right_type_change_cbox.setEnabled(True)
             self.form_change_button.setEnabled(True)
         else:
             self.form_type_change_cbox.setEnabled(False)
+            self.right_type_change_cbox.setEnabled(False)
             self.form_change_button.setEnabled(False)
-            self.form_type_change_cbox.clear()
+            # self.form_type_change_cbox.clear()
 
     @pyqtSlot(int)
     def on_cadastre_change_form_check_box_stateChanged(self, state):
 
         if state == Qt.Checked:
             self.cadastre_form_type_change_cbox.setEnabled(True)
+            self.cadastre_right_type_change_cbox.setEnabled(True)
             self.cadastre_form_change_button.setEnabled(True)
         else:
             self.cadastre_form_type_change_cbox.setEnabled(False)
+            self.cadastre_right_type_change_cbox.setEnabled(False)
             self.cadastre_form_change_button.setEnabled(False)
-            self.cadastre_form_type_change_cbox.clear()
+            # self.cadastre_form_type_change_cbox.clear()
 
     @pyqtSlot()
     def on_form_change_button_clicked(self):
@@ -1558,10 +1565,46 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
 
     def __plan_cadastre_find(self):
 
-        values = self.session.query(PlProjectParcel). \
-            join(PlProjectParcelRefParcel, PlProjectParcel.parcel_id == PlProjectParcelRefParcel.parcel_id). \
+        parcels = self.session.query(ParcelSearch, PlProjectParcelRefParcel, PlProjectParcel). \
+            join(PlProjectParcelRefParcel, ParcelSearch.parcel_id == PlProjectParcelRefParcel.cad_parcel_id). \
+            join(PlProjectParcel, PlProjectParcel.parcel_id == PlProjectParcelRefParcel.parcel_id). \
             filter(PlProjectParcel.project_id == self.plan.project_id). \
-            filter(PlProjectParcelRefParcel.is_cadastre == True).order_by(PlProjectParcel.badedturl)
+            filter(PlProjectParcelRefParcel.is_cadastre == True)
+
+        count = 0
+        self.cadastre_current_twidget.setRowCount(0)
+        for parcel, parcel_ref, project_parcel in parcels.distinct(ParcelSearch.parcel_id).all():
+            plan_zone = project_parcel.plan_zone_ref
+            form_type = project_parcel.right_form_ref
+            right_type = project_parcel.right_type_ref
+            # geo_id = self.tr("n.a.") if not parcel.geo_id else parcel.geo_id
+            self.cadastre_current_twidget.insertRow(count)
+            address_khashaa = ''
+            address_streetname = ''
+            if parcel.address_khashaa:
+                address_khashaa = parcel.address_khashaa
+            if parcel.address_streetname:
+                address_streetname = parcel.address_streetname
+            item = QTableWidgetItem(parcel.parcel_id + " (" + address_khashaa + ", " + address_streetname + ")")
+            item.setCheckState(Qt.Unchecked)
+            item.setIcon(QIcon(QPixmap(":/plugins/lm2/parcel_red.png")))
+            item.setData(Qt.UserRole, parcel.parcel_id)
+            item.setData(Qt.UserRole + 1, parcel_ref.parcel_id)
+            self.cadastre_current_twidget.setItem(count, 0, item)
+            if plan_zone:
+                item = QTableWidgetItem(plan_zone.code + ':' + plan_zone.name)
+                item.setData(Qt.UserRole, plan_zone.plan_zone_id)
+                self.cadastre_current_twidget.setItem(count, 1, item)
+            if form_type:
+                item = QTableWidgetItem(form_type.code + ':' + form_type.description)
+                item.setData(Qt.UserRole, form_type.right_form_id)
+                self.cadastre_current_twidget.setItem(count, 2, item)
+            if right_type:
+                item = QTableWidgetItem(right_type.description)
+                item.setData(Qt.UserRole, right_type.code)
+                self.cadastre_current_twidget.setItem(count, 3, item)
+            count += 1
+        self.error_label.setText("")
 
     def __cadastre_find(self):
 
@@ -1662,14 +1705,21 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
 
             parcel = self.session.query(CaParcelTbl).filter(CaParcelTbl.parcel_id == parcel_id).one()
             if self.__cad_parcel_duplicate_check(parcel):
-                self.__add_cad_parcel_ref(parcel, plan_zone)
+                new_parcel = self.__add_cad_parcel_ref(parcel, plan_zone)
 
-                item = QTableWidgetItem(parcel_text)
-                item.setIcon(QIcon(QPixmap(":/plugins/lm2/parcel_red.png")))
-                item.setData(Qt.UserRole, parcel_id)
                 row_count = self.cadastre_current_twidget.rowCount()
                 self.cadastre_current_twidget.insertRow(row_count)
+
+                item = QTableWidgetItem(parcel_text)
+                item.setCheckState(Qt.Checked)
+                item.setIcon(QIcon(QPixmap(":/plugins/lm2/parcel_red.png")))
+                item.setData(Qt.UserRole, parcel_id)
+                item.setData(Qt.UserRole + 1, new_parcel.parcel_id)
                 self.cadastre_current_twidget.setItem(row_count, 0, item)
+
+                item = QTableWidgetItem(plan_zone.code + ':' + plan_zone.name)
+                item.setData(Qt.UserRole, plan_zone.plan_zone_id)
+                self.cadastre_current_twidget.setItem(row_count, 1, item)
 
     @pyqtSlot()
     def on_cad_remove_button_clicked(self):
@@ -1680,10 +1730,6 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         items = self.cadastre_current_twidget.selectedItems()
 
     def __add_cad_parcel_ref(self, parcel, plan_zone):
-
-        plan_zone_id = self.cad_process_type_cbox.itemData(self.cad_process_type_cbox.currentIndex())
-        form_type = self.cadastre_form_type_change_cbox.itemData(self.cadastre_form_type_change_cbox.currentIndex())
-        right_type = self.cadastre_right_type_change_cbox.itemData(self.cadastre_right_type_change_cbox.currentIndex())
 
         new_parcel = PlProjectParcel()
 
@@ -1708,6 +1754,8 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         parcel_ref.cad_parcel_id = parcel.parcel_id
         parcel_ref.is_cadastre = True
         self.session.add(parcel_ref)
+
+        return new_parcel
 
     def __cad_parcel_duplicate_check(self, parcel):
 
@@ -1743,3 +1791,46 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         plan_zone = self.session.query(ClPlanZone).filter(ClPlanZone.code == zone_code).one()
 
         return plan_zone
+
+    @pyqtSlot()
+    def on_cadastre_form_change_button_clicked(self):
+
+        plan_zone_id = self.cad_process_type_cbox.itemData(self.cad_process_type_cbox.currentIndex())
+        form_type_code = self.cadastre_form_type_change_cbox.itemData(self.cadastre_form_type_change_cbox.currentIndex())
+        form_type_text = self.cadastre_form_type_change_cbox.currentText()
+        right_type_code = self.cadastre_right_type_change_cbox.itemData(self.cadastre_right_type_change_cbox.currentIndex())
+        right_type_text = self.cadastre_right_type_change_cbox.currentText()
+
+        row_count = self.cadastre_current_twidget.rowCount()
+
+        for row in range(row_count):
+            item = self.cadastre_current_twidget.item(row, 0)
+            parcel_id = item.data(Qt.UserRole + 1)
+            if item.checkState() == Qt.Checked:
+                item = self.cadastre_current_twidget.item(row, 2)
+                if item:
+                    item.setText(form_type_text)
+                    item.setData(Qt.UserRole, form_type_code)
+                else:
+                    item = QTableWidgetItem(form_type_text)
+                    item.setData(Qt.UserRole, form_type_code)
+                    self.cadastre_current_twidget.setItem(row, 2, item)
+                item = self.cadastre_current_twidget.item(row, 3)
+                if item:
+                    item.setText(right_type_text)
+                    item.setData(Qt.UserRole, right_type_code)
+                else:
+                    item = QTableWidgetItem(right_type_text)
+                    item.setData(Qt.UserRole, right_type_code)
+                    self.cadastre_current_twidget.setItem(row, 3, item)
+
+                count = self.session.query(PlProjectParcel). \
+                    filter(PlProjectParcel.parcel_id == parcel_id).count()
+                if count == 1:
+                    parcel = self.session.query(PlProjectParcel). \
+                        filter(PlProjectParcel.parcel_id == parcel_id).one()
+
+                    if form_type_code:
+                        parcel.right_form_id = form_type_code
+                    if right_type_code:
+                        parcel.right_type_code = right_type_code

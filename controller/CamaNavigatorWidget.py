@@ -455,13 +455,25 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
 
         root = QgsProject.instance().layerTreeRoot()
         mygroup = root.findGroup(u"CAMA")
+
         vlayer = LayerUtils.layer_by_data_source("data_cama", "cm_parcel_tbl")
         if vlayer is None:
             vlayer = LayerUtils.load_layer_base_layer("cm_parcel_tbl", "parcel_id", "data_cama")
         vlayer.loadNamedStyle(
             str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/cm_parcel_tbl.qml")
 
-        vlayer.setLayerName(self.tr("Cama Base Parcel"))
+        vlayer.setLayerName(self.tr("CAMA Base Parcel"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            mygroup.addLayer(vlayer)
+
+        vlayer = LayerUtils.layer_by_data_source("data_cama", "cm_valuation_level")
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer("cm_valuation_level", "id", "data_cama")
+        vlayer.loadNamedStyle(
+            str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/cm_valuation_level.qml")
+
+        vlayer.setLayerName(self.tr("CAMA Valuation Level"))
         myalayer = root.findLayer(vlayer.id())
         if myalayer is None:
             mygroup.addLayer(vlayer)
