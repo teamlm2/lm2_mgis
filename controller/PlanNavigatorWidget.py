@@ -1,6 +1,7 @@
 # coding=utf8
 __author__ = 'B.Ankhbold'
 from qgis.core import *
+from qgis.gui import *
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 from PyQt4.QtXml import *
@@ -27,6 +28,7 @@ from ..utils.PluginUtils import *
 from ..utils.LayerUtils import *
 from ..model.DatabaseHelper import *
 from ..model.SetZoneColor import *
+from ..model.SetPlanZoneAttribute import *
 from ..controller.PlanDetailWidget import *
 from ..controller.PlanLayerFilterDialog import *
 # from ..LM2Plugin import *
@@ -502,6 +504,11 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
             self.plan_type_cbox.addItem(value.description, value.plan_type_id)
         for value in decision_levels:
             self.decision_level_cbox.addItem(value.description, value.plan_decision_level_id)
+
+        plan_zones = self.session.query(ClPlanZone).order_by(ClPlanZone.code).all()
+        self.plan_zone_cbox.addItem("*", -1)
+        for value in plan_zones:
+            self.plan_zone_cbox.addItem(value.code + ':' + value.name, value.plan_zone_id)
 
     def __setup_twidgets(self):
 
@@ -2033,3 +2040,50 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
     def on_current_dialog_closed(self):
 
         DialogInspector().set_dialog_visible(False)
+
+    @pyqtSlot(int)
+    def on_plan_zone_cbox_currentIndexChanged(self, index):
+
+        if self.plan_zone_cbox.currentIndex() == -1:
+            return
+
+        plan_zone_id = self.plan_zone_cbox.itemData(self.plan_zone_cbox.currentIndex())
+
+        attributes = self.session.query(SetPlanZoneAttribute).filter(SetPlanZoneAttribute.plan_zone_id == plan_zone_id).all()
+        self.attribute_twidget.setRowCount(0)
+        for value in attributes:
+            if value.attribute_ref:
+                attribute = value.attribute_ref
+                row_count = self.attribute_twidget.rowCount()
+                self.attribute_twidget.insertRow(row_count)
+
+                item = QTableWidgetItem(attribute.attribute_name)
+                item.setData(Qt.UserRole, attribute.attribute_id)
+                self.attribute_twidget.setItem(row_count, 0, item)
+
+                item = QTableWidgetItem(attribute.attribute_type)
+                item.setData(Qt.UserRole, attribute.attribute_type)
+                self.attribute_twidget.setItem(row_count, 1, item)
+
+                item = QTableWidgetItem(attribute.description)
+                self.attribute_twidget.setItem(row_count, 2, item)
+
+    @pyqtSlot()
+    def on_load_template_button_clicked(self):
+
+        root = QgsProject.instance().layerTreeRoot()
+        mygroup = root.findGroup(u"CAMA")
+
+        layer = QgsVectorLayer('LineString?crs=epsg:4326', 'line', 'memory')
+        print layer
+        pr = layer.dataProvider()
+
+        pr.addAttributes([QgsField("name", QVariant.String),
+                          QgsField("age", QVariant.Int),
+                          QgsField("size", QVariant.Double)])
+        layer.updateFields()
+
+        layer.updateExtents()
+
+        # Add the layer to the Layers panel
+        QgsMapLayerRegistry.instance().addMapLayers([layer])

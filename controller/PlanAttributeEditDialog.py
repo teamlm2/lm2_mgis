@@ -39,7 +39,7 @@ from ..model.Constants import *
 from ..model.SetFilterPlanLayer import *
 from ..model.ClAttributeZone import *
 from ..model.ClAttributeGroup import *
-from ..model.SetAttributeActivityZone import *
+from ..model.SetPlanZoneAttribute import *
 from ..model.PlProjectParcelAttributeValue import *
 from ..model.PlProjectParcelAttributeValue import *
 from ..model.PlProjectParcelAttributeValue import *

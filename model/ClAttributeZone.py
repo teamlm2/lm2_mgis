@@ -20,7 +20,7 @@ class ClAttributeZone(Base):
     created_at = Column(DateTime)
     created_by = Column(Integer)
     updated_at = Column(DateTime)
-    updatedd_by = Column(Integer)
+    updated_by = Column(Integer)
 
     # foreign keys:
     attribute_group_id = Column(Integer, ForeignKey('cl_attribute_group.attribute_group_id'))
