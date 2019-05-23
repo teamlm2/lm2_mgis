@@ -4,7 +4,7 @@ from sqlalchemy import Column, String, Integer, Numeric
 from Base import *
 
 
-class CmFactorsValue(Base):
+class CmFactorValue(Base):
 
     __tablename__ = 'cm_factors_value'
 

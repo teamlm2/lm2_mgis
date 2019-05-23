@@ -699,7 +699,7 @@ class PrintDialog(QDialog, Ui_PrintDialog):
         item = map_composition.getComposerItemById("parcel_id_h")
         parcel_id = self.__parcel_no
 
-        parcel_id = self.__cut_zeros_from_parcel_id(parcel_id)
+        # parcel_id = self.__cut_zeros_from_parcel_id(parcel_id)
 
         if self.geoid_chbox.isChecked():
 

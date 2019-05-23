@@ -2349,7 +2349,7 @@ class ParcelMpaDialog(QDockWidget, Ui_ParcelMpaDialog, DatabaseHelper):
             parcel.parcel_id = None
         else:
             parcel = CaParcel()
-            if len(parcel_id) == 12:
+            if len(parcel_id) == 10:
                 parcel.parcel_id = parcel_id
 
         parcel.old_parcel_id = old_parcel_id

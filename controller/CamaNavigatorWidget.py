@@ -32,12 +32,12 @@ from ..utils.LayerUtils import *
 from ..model.DatabaseHelper import *
 from ..model.SetZoneColor import *
 from ..model.CmCamaLanduseType import *
-from ..model.CmFactorsAuValue import *
-from ..model.CmFactorsValue import *
+from ..model.CmFactorAuValue import *
+from ..model.CmFactorValue import *
 from ..model.CmFactorGroup import *
 from ..model.CmParcelTbl import *
-from ..model.CmFactors import *
-
+from ..model.CmFactor import *
+from ..model.CmParcelFactorValue import *
 from ..controller.PlanDetailWidget import *
 from ..controller.PlanLayerFilterDialog import *
 # from ..LM2Plugin import *
@@ -54,6 +54,9 @@ LANDUSE_3 = u'Зам, шугам сүлжээний газар'
 LANDUSE_4 = u'Ойн сан бүхий газар'
 LANDUSE_5 = u'Усны сан бүхий газар'
 LANDUSE_6 = u'Улсын тусгай хэрэгцээний газар'
+
+SURFACE_ELEVATION = 'surface_elevation'
+SURFACE_SLOPE = 'surface_slope'
 
 class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
 
@@ -87,7 +90,152 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
         self.is_yes_list = {1: u'Тйим', 0: u'Үгүй'}
 
         self.__setup_cbox()
+        self.__setup_analyze_cbox()
         self.cadastre_rbutton.isCheckable()
+        self.__setup_twidget()
+        self.__setup_context_menu()
+
+    def __setup_context_menu(self):
+
+        self.context_menu = QMenu()
+        self.zoom_to_parcel_action = QAction(QIcon(":/plugins/lm2/parcel.png"), self.tr("Zoom to parcel"), self)
+        self.copy_number_action = QAction(QIcon(":/plugins/lm2/copy.png"), self.tr("Copy number"), self)
+        self.context_menu.addAction(self.zoom_to_parcel_action)
+        self.context_menu.addSeparator()
+        self.context_menu.addAction(self.copy_number_action)
+        self.zoom_to_parcel_action.triggered.connect(self.on_zoom_to_parcel_action_clicked)
+        self.copy_number_action.triggered.connect(self.on_copy_number_action_clicked)
+
+    @pyqtSlot()
+    def on_copy_number_action_clicked(self):
+
+        parcel_id = self.__selected_parcel_id()
+        QApplication.clipboard().setText(parcel_id)
+
+    @pyqtSlot(QTableWidgetItem)
+    def on_zoom_to_parcel_action_clicked(self):
+        parcel_ids = []
+        parcel_id = self.__selected_parcel_id()
+        parcel_ids.append(parcel_id)
+        self.__zoom_to_parcel_ids(parcel_ids)
+
+    @pyqtSlot(QPoint)
+    def on_cadastre_current_twidget_customContextMenuRequested(self, point):
+
+        point = self.cadastre_current_twidget.viewport().mapToGlobal(point)
+        self.context_menu.exec_(point)
+
+    def __selected_parcel_id(self):
+
+        # parcels = []
+        current_row = self.cadastre_current_twidget.currentRow()
+        item = self.cadastre_current_twidget.item(current_row, 0)
+        parcel_no = item.data(Qt.UserRole)
+        # parcels.append(parcel_no)
+        # selected_items = self.cadastre_current_twidget.currentItem()
+
+        # for item in selected_items:
+        #     parcel_no = item.data(Qt.UserRole)
+        #     parcels.append(parcel_no)
+
+        # if len(selected_items) != 1:
+        #     self.error_label.setText(self.tr("Only single selection allowed."))
+        #     return None
+
+        # selected_item = selected_items[0]
+        # parcel_no = selected_item.data(Qt.UserRole)
+        return parcel_no
+
+    def __zoom_to_parcel_ids(self, parcel_ids, layer_name = None):
+
+        LayerUtils.deselect_all()
+        is_temp = False
+        if layer_name is None:
+            for parcel_id in parcel_ids:
+                if parcel_id:
+                    if len(parcel_id) == 12:
+                        layer_name = "ca_parcel"
+                    else:
+                        layer_name = "ca_tmp_parcel_view"
+                        is_temp = True
+                else:
+                    layer_name = "ca_parcel"
+
+        root = QgsProject.instance().layerTreeRoot()
+        vlayer = LayerUtils.layer_by_data_source("data_soums_union", layer_name)
+
+        restrictions = DatabaseUtils.working_l2_code()
+        if not restrictions:
+            PluginUtils.show_message(self, self.tr("Connection Error"), self.tr("Please connect to database!!!"))
+            return
+
+        if is_temp:
+            if vlayer is None:
+                vlayer = LayerUtils.load_tmp_layer_by_name(layer_name, "parcel_id", "data_soums_union")
+            mygroup = root.findGroup(u"Кадастрын өөрчлөлт")
+            myalayer = root.findLayer(vlayer.id())
+            vlayer.loadNamedStyle(
+                str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "template\style/ca_tmp_parcel.qml")
+            vlayer.setLayerName(QApplication.translate("Plugin", "Tmp_Parcel"))
+            if myalayer is None:
+                mygroup.addLayer(vlayer)
+
+            b_vlayer = LayerUtils.layer_by_data_source("data_soums_union", "ca_tmp_building_view")
+            if b_vlayer is None:
+                b_vlayer = LayerUtils.load_tmp_layer_by_name("ca_tmp_building_view", "building_id", "data_soums_union")
+            mygroup = root.findGroup(u"Кадастрын өөрчлөлт")
+            myalayer = root.findLayer(b_vlayer.id())
+            b_vlayer.loadNamedStyle(
+                str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "template\style/ca_tmp_building.qml")
+            b_vlayer.setLayerName(QApplication.translate("Plugin", "Tmp_Building"))
+            if myalayer is None:
+                mygroup.addLayer(b_vlayer)
+
+        exp_string = ""
+
+        for parcel_id in parcel_ids:
+
+            if exp_string == "":
+                exp_string = "parcel_id = \'" + parcel_id  + "\'"
+            else:
+                exp_string += " or parcel_id = \'" + parcel_id  + "\'"
+
+        request = QgsFeatureRequest()
+        request.setFilterExpression(exp_string)
+
+        feature_ids = []
+        if vlayer:
+            iterator = vlayer.getFeatures(request)
+
+            for feature in iterator:
+                feature_ids.append(feature.id())
+
+            if len(feature_ids) == 0:
+                self.error_label.setText(self.tr("No parcel assigned"))
+
+            vlayer.setSelectedFeatures(feature_ids)
+            self.plugin.iface.mapCanvas().zoomToSelected(vlayer)
+
+    def __setup_twidget(self):
+
+        # self.cadastre_current_twidget.setColumnCount(1)
+        # self.cadastre_current_twidget.setDragEnabled(True)
+        # self.cadastre_current_twidget.horizontalHeader().setResizeMode(0, QHeaderView.Stretch)
+        # self.cadastre_current_twidget.horizontalHeader().setVisible(False)
+        # self.cadastre_current_twidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        # self.cadastre_current_twidget.setSelectionBehavior(QAbstractItemView.SelectRows)
+        # self.cadastre_current_twidget.setContextMenuPolicy(Qt.CustomContextMenu)
+        # self.cadastre_current_twidget.customContextMenuRequested.connect(self.on_custom_context_menu_requested)
+
+        self.cadastre_current_twidget.setAlternatingRowColors(True)
+        self.cadastre_current_twidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.cadastre_current_twidget.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.cadastre_current_twidget.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.cadastre_current_twidget.setContextMenuPolicy(Qt.CustomContextMenu)
+
+        self.cadastre_current_twidget.horizontalHeader().resizeSection(0, 250)
+        self.cadastre_current_twidget.horizontalHeader().resizeSection(1, 70)
+        self.cadastre_current_twidget.horizontalHeader().resizeSection(2, 70)
 
     def __setup_validators(self):
 
@@ -212,6 +360,7 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
             PluginUtils.show_message(self,  self.tr("Sql Error"), e.message)
             return
         self.__zoom_to_soum(l2_code)
+        self.__setup_analyze_cbox()
 
     def __zoom_to_soum(self, soum_code):
 
@@ -422,10 +571,10 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
 
         ch_value = float(text)
 
-        values = self.session.query(CmFactorsAuValue). \
-            filter(CmFactorsAuValue.au2 == self.au2). \
-            filter(CmFactorsAuValue.factor_id == factor_id). \
-            filter(CmFactorsAuValue.is_interval == is_interval).all()
+        values = self.session.query(CmFactorAuValue). \
+            filter(CmFactorAuValue.au2 == self.au2). \
+            filter(CmFactorAuValue.factor_id == factor_id). \
+            filter(CmFactorAuValue.is_interval == is_interval).all()
 
         is_ok = False
         conf_value = 1
@@ -435,14 +584,14 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
                 if is_interval:
                     if value.first_value <= ch_value and value.last_value >= ch_value:
                         is_ok = True
-                        factor_value = self.session.query(CmFactorsValue).filter(
-                            CmFactorsValue.code == value.factor_value_id).one()
+                        factor_value = self.session.query(CmFactorValue).filter(
+                            CmFactorValue.code == value.factor_value_id).one()
                         conf_value = factor_value.value
                 else:
                     if value.first_value == ch_value:
                         is_ok = True
-                        factor_value = self.session.query(CmFactorsValue).filter(
-                            CmFactorsValue.code == value.factor_value_id).one()
+                        factor_value = self.session.query(CmFactorValue).filter(
+                            CmFactorValue.code == value.factor_value_id).one()
                         conf_value = factor_value.value
 
         if is_ok:
@@ -498,7 +647,6 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
 
         distance_value = None
         for item_row in result:
-            print type(item_row[1])
             distance_value = item_row[1]/1000
 
         return distance_value
@@ -618,7 +766,6 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
 
         interval_sub = (max_price - min_price)/level_count
         for row in range(level_count):
-            print row
             if row == 0:
                 next_interval = next_interval + min_price
             else:
@@ -696,3 +843,283 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
         self.current_dialog = ManageParcelRecordsDialog(self.plugin, parcel_id, self.plugin.iface.mainWindow())
 
         self.current_dialog.show()
+
+    def __setup_analyze_cbox(self):
+
+        self.land_use_type_cbox.clear()
+
+        l2_code = DatabaseUtils.working_l2_code()
+
+        if not l2_code:
+            return
+        else:
+            try:
+                PluginUtils.populate_au_level3_cbox(self.bag_cbox, l2_code)
+            except SQLAlchemyError, e:
+                PluginUtils.show_message(self, self.tr("Sql Error"), e.message)
+
+        cl_landusetype = self.session.query(ClLanduseType).order_by(ClLanduseType.code.asc()).all()
+        self.land_use_type_cbox.addItem("*", -1)
+        if cl_landusetype is not None:
+            for landuse in cl_landusetype:
+                if len(str(landuse.code)) == 4:
+                    self.land_use_type_cbox.addItem(str(landuse.code) + ':' + landuse.description, landuse.code)
+
+    @pyqtSlot()
+    def on_parcel_find_button_clicked(self):
+
+        self.__search_parcels()
+
+    def __search_parcels(self):
+
+        factor_elevation = self.session.query(CmFactor).filter(CmFactor.code == SURFACE_ELEVATION).one()
+        factor_slope = self.session.query(CmFactor).filter(CmFactor.code == SURFACE_SLOPE).one()
+
+        parcels = self.session.query(CaParcel)
+        all_count = parcels.count()
+        # return
+        filter_is_set = False
+        if self.parcel_num_edit.text():
+            if len(self.parcel_num_edit.text()) < 5:
+                self.error_label.setText(self.tr("parcel find search character should be at least 4"))
+                return
+            filter_is_set = True
+            parcel_no = "%" + self.parcel_num_edit.text() + "%"
+            parcels = parcels.filter(CaParcel.parcel_id.ilike(parcel_no))
+
+        if not self.land_use_type_cbox.itemData(self.land_use_type_cbox.currentIndex()) == -1:
+            filter_is_set = True
+            value = self.land_use_type_cbox.itemData(self.land_use_type_cbox.currentIndex())
+            parcels = parcels.filter(CaParcel.landuse == value)
+
+        if not self.bag_cbox.itemData(self.bag_cbox.currentIndex()) == -1:
+            filter_is_set = True
+            value = self.bag_cbox.itemData(self.bag_cbox.currentIndex())
+            parcels = parcels.filter(func.ST_Centroid(CaParcel.geometry).ST_Within((AuLevel3.geometry))). \
+                filter(AuLevel3.code == value)
+
+        if self.parcel_streetname_edit.text():
+            filter_is_set = True
+            value = "%" + self.parcel_streetname_edit.text() + "%"
+            parcels = parcels.filter(CaParcel.address_streetname.ilike(value))
+
+        if self.parcel_khashaa_edit.text():
+            filter_is_set = True
+            value = "%" + self.parcel_khashaa_edit.text() + "%"
+            parcels = parcels.filter(CaParcel.address_khashaa.ilike(value))
+
+        if self.is_no_calculate_chbox.isChecked():
+            parcels = parcels.outerjoin(CmParcelFactorValue, CaParcel.parcel_id == CmParcelFactorValue.parcel_id). \
+                filter(CmParcelFactorValue.factor_id == None). \
+                filter(CmParcelFactorValue.factor_id == None)
+        count = 0
+        self.cadastre_current_twidget.setRowCount(0)
+
+        if parcels.distinct(CaParcel.parcel_id).count() == 0:
+            self.error_label.setText(self.tr("No parcels found for this search filter."))
+            return
+
+        elif filter_is_set is False:
+            self.error_label.setText(self.tr("Please specify a search filter."))
+            return
+
+        for parcel in parcels.all():
+            self.cadastre_current_twidget.insertRow(count)
+            address_khashaa = ''
+            address_streetname = ''
+            if parcel.address_khashaa:
+                address_khashaa = parcel.address_khashaa
+            if parcel.address_streetname:
+                address_streetname = parcel.address_streetname
+            item = QTableWidgetItem(parcel.parcel_id + " (" + address_khashaa + ", " + address_streetname + ")")
+            item.setCheckState(Qt.Unchecked)
+            item.setIcon(QIcon(QPixmap(":/plugins/lm2/parcel.png")))
+            item.setData(Qt.UserRole, parcel.parcel_id)
+            self.cadastre_current_twidget.setItem(count, 0, item)
+
+            factor_elevation_count = self.session.query(CmParcelFactorValue).\
+                filter(CmParcelFactorValue.parcel_id == parcel.parcel_id).\
+                filter(CmParcelFactorValue.factor_id == factor_elevation.id). \
+                filter(CmParcelFactorValue.in_active == True).count()
+
+            factor_slope_count = self.session.query(CmParcelFactorValue). \
+                filter(CmParcelFactorValue.parcel_id == parcel.parcel_id). \
+                filter(CmParcelFactorValue.factor_id == factor_slope.id). \
+                filter(CmParcelFactorValue.in_active == True).count()
+
+            if factor_elevation_count == 1:
+                factor_elevation_value = self.session.query(CmParcelFactorValue). \
+                    filter(CmParcelFactorValue.parcel_id == parcel.parcel_id). \
+                    filter(CmParcelFactorValue.factor_id == factor_elevation.id). \
+                    filter(CmParcelFactorValue.in_active == True).one()
+                item = QTableWidgetItem(str(factor_elevation_value.factor_value))
+                item.setData(Qt.UserRole, factor_elevation_value.id)
+                item.setData(Qt.UserRole + 1, factor_elevation.id)
+                item.setData(Qt.UserRole + 2, factor_elevation_value.factor_value)
+                self.cadastre_current_twidget.setItem(count, 1, item)
+
+            if factor_slope_count == 1:
+                factor_slope_value = self.session.query(CmParcelFactorValue). \
+                    filter(CmParcelFactorValue.parcel_id == parcel.parcel_id). \
+                    filter(CmParcelFactorValue.factor_id == factor_slope.id). \
+                    filter(CmParcelFactorValue.in_active == True).one()
+                item = QTableWidgetItem(str(factor_slope_value.factor_value))
+                item.setData(Qt.UserRole, factor_slope.id)
+                item.setData(Qt.UserRole + 1, factor_slope_value.id)
+                item.setData(Qt.UserRole + 2, factor_slope_value.factor_value)
+                self.cadastre_current_twidget.setItem(count, 2, item)
+
+            count += 1
+            self.parcel_results_label.setText(self.tr("Results: ") + str(all_count) + '/' + str(count))
+        self.error_label.setText("")
+
+    @pyqtSlot()
+    def on_slope_calculate_button_clicked(self):
+
+        row_count = self.cadastre_current_twidget.rowCount()
+
+        for row in range(row_count):
+            item = self.cadastre_current_twidget.item(row, 0)
+            parcel_id = item.data(Qt.UserRole)
+            if item.checkState() == Qt.Checked:
+                sql = "select val, row_number() over(partition by xxx.parcel_id, 2, True) as rank from ( " \
+                        "select parcel.au2, parcel.parcel_id, (ST_DumpAsPolygons(rast)).geom::geometry, (ST_DumpAsPolygons(rast)).val from ( " \
+                        "select au2, parcel_id, geometry FROM data_soums_union.ca_parcel_tbl parcel " \
+                        "where parcel.parcel_id = " + "'" + parcel_id + "'" + " " \
+                        ")parcel, data_raster.mongolia_dem rast " \
+                        "where st_intersects(parcel.geometry, rast) " \
+                        ")xxx, (select au2, parcel_id, (geometry) as geometry FROM data_soums_union.ca_parcel_tbl parcel " \
+                        "where parcel.parcel_id = " + "'" + parcel_id + "'" + ") parcel " \
+                        "where parcel.parcel_id = xxx.parcel_id and st_intersects(xxx.geom, st_makevalid(parcel.geometry)) "
+
+                result = self.session.execute(sql)
+                elevation_value = None
+                for item_row in result:
+                    value = item_row[0]
+                    elevation_value = int(value)
+
+                factor_elevation = self.session.query(CmFactor).filter(CmFactor.code == SURFACE_ELEVATION).one()
+                if elevation_value:
+                    item = self.cadastre_current_twidget.item(row, 1)
+                    if item:
+                        item.setText(str(elevation_value))
+                        item.setData(Qt.UserRole, factor_elevation.id)
+                        item.setData(Qt.UserRole + 2, elevation_value)
+                    else:
+                        item = QTableWidgetItem(str(elevation_value))
+                        item.setData(Qt.UserRole, factor_elevation.id)
+                        item.setData(Qt.UserRole + 2, elevation_value)
+                        self.cadastre_current_twidget.setItem(row, 1, item)
+                # slope
+                sql = "select val, row_number() over(partition by xxx.parcel_id, 2, True) as rank from ( " \
+                      "select parcel.au2, parcel.parcel_id, (ST_DumpAsPolygons(rast)).geom::geometry, (ST_DumpAsPolygons(rast)).val from ( " \
+                      "select au2, parcel_id, geometry FROM data_soums_union.ca_parcel_tbl parcel " \
+                      "where parcel.parcel_id = " + "'" + parcel_id + "'" + " " \
+                      ")parcel, data_raster.mongolia_slope rast " \
+                      "where st_intersects(parcel.geometry, rast) " \
+                      ")xxx, (select au2, parcel_id, (geometry) as geometry FROM data_soums_union.ca_parcel_tbl parcel " \
+                      "where parcel.parcel_id = " + "'" + parcel_id + "'" + ") parcel " \
+                      "where parcel.parcel_id = xxx.parcel_id and st_intersects(xxx.geom, st_makevalid(parcel.geometry)) "
+
+                result = self.session.execute(sql)
+                slope_value = None
+                for item_row in result:
+                    value = item_row[0]
+                    slope_value = round(value, 2)
+
+                factor_slope = self.session.query(CmFactor).filter(CmFactor.code == SURFACE_SLOPE).one()
+                if slope_value:
+                    item = self.cadastre_current_twidget.item(row, 2)
+                    if item:
+                        item.setText(str(slope_value))
+                        item.setData(Qt.UserRole, factor_slope.id)
+                        item.setData(Qt.UserRole + 2, slope_value)
+                    else:
+                        item = QTableWidgetItem(str(slope_value))
+                        item.setData(Qt.UserRole, factor_slope.id)
+                        item.setData(Qt.UserRole + 2, slope_value)
+                        self.cadastre_current_twidget.setItem(row, 2, item)
+
+    @pyqtSlot()
+    def on_slope_apply_button_clicked(self):
+
+        row_count = self.cadastre_current_twidget.rowCount()
+        date_time_string = QDateTime.currentDateTime().toString(Constants.DATABASE_DATETIME_FORMAT)
+        date_now = datetime.strptime(date_time_string, Constants.PYTHON_DATETIME_FORMAT)
+        for row in range(row_count):
+            item = self.cadastre_current_twidget.item(row, 0)
+            parcel_id = item.data(Qt.UserRole)
+            if item.checkState() == Qt.Checked:
+                factor_slope = self.session.query(CmFactor).filter(CmFactor.code == SURFACE_SLOPE).one()
+                factor_elevation = self.session.query(CmFactor).filter(CmFactor.code == SURFACE_ELEVATION).one()
+
+                elevation_value_count = self.session.query(CmParcelFactorValue). \
+                    filter(CmParcelFactorValue.parcel_id == parcel_id). \
+                    filter(CmParcelFactorValue.factor_id == factor_elevation.id). \
+                    filter(CmParcelFactorValue.in_active == True).count()
+                item = self.cadastre_current_twidget.item(row, 1)
+                if item:
+                    value = item.data(Qt.UserRole + 2)
+                    if elevation_value_count == 1:
+                        parcel_factor_value = self.session.query(CmParcelFactorValue). \
+                            filter(CmParcelFactorValue.parcel_id == parcel_id). \
+                            filter(CmParcelFactorValue.factor_id == factor_elevation.id). \
+                            filter(CmParcelFactorValue.in_active == True).one()
+
+                        parcel_factor_value.factor_value = value
+                    elif elevation_value_count == 0:
+                        parcel_factor_value = CmParcelFactorValue()
+
+                        parcel_factor_value.parcel_id = parcel_id
+                        parcel_factor_value.factor_id = factor_elevation.id
+                        parcel_factor_value.factor_value = value
+                        parcel_factor_value.in_active = True
+                        parcel_factor_value.created_at = date_now
+                        self.session.add(parcel_factor_value)
+
+                slope_value_count = self.session.query(CmParcelFactorValue). \
+                    filter(CmParcelFactorValue.parcel_id == parcel_id). \
+                    filter(CmParcelFactorValue.factor_id == factor_slope.id). \
+                    filter(CmParcelFactorValue.in_active == True).count()
+                item = self.cadastre_current_twidget.item(row, 2)
+                if item:
+                    value = item.data(Qt.UserRole + 2)
+                    if slope_value_count == 1:
+                        parcel_factor_value = self.session.query(CmParcelFactorValue). \
+                            filter(CmParcelFactorValue.parcel_id == parcel_id). \
+                            filter(CmParcelFactorValue.factor_id == factor_slope.id). \
+                            filter(CmParcelFactorValue.in_active == True).one()
+
+                        parcel_factor_value.factor_value = value
+                    elif slope_value_count == 0:
+                        parcel_factor_value = CmParcelFactorValue()
+
+                        parcel_factor_value.parcel_id = parcel_id
+                        parcel_factor_value.factor_id = factor_slope.id
+                        parcel_factor_value.factor_value = value
+                        parcel_factor_value.in_active = True
+                        parcel_factor_value.created_at = date_now
+                        self.session.add(parcel_factor_value)
+        self.session.commit()
+
+        PluginUtils.show_message(self, u'Мэдээлэл', u'Амжилттай хадгаллаа.')
+
+    @pyqtSlot()
+    def on_parcel_clear_button_clicked(self):
+
+        self.__remove_parcel_items()
+        self.__clear_parcel()
+
+    def __remove_parcel_items(self):
+
+        self.cadastre_current_twidget.setRowCount(0)
+        self.parcel_results_label.setText("")
+
+    def __clear_parcel(self):
+
+        self.parcel_num_edit.clear()
+        self.land_use_type_cbox.setCurrentIndex(self.land_use_type_cbox.findData(-1))
+        self.bag_cbox.setCurrentIndex(self.bag_cbox.findData(-1))
+        self.parcel_streetname_edit.clear()
+        self.parcel_khashaa_edit.clear()
+        self.is_no_calculate_chbox.setCheckState(Qt.Unchecked)

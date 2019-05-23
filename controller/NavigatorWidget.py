@@ -425,7 +425,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         self.land_use_type_cbox.clear()
         self.person_type_cbox.clear()
 
-        cl_landusetype = self.session.query(ClLanduseType).all()
+        cl_landusetype = self.session.query(ClLanduseType).order_by(ClLanduseType.code.asc()).all()
         self.land_use_type_cbox.addItem("*", -1)
         if cl_landusetype is not None:
             for landuse in cl_landusetype:

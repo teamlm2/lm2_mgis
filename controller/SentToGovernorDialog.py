@@ -1271,7 +1271,8 @@ class SentToGovernorDialog(QDialog, Ui_SentToGovernorDialog, DatabaseHelper):
         else:
             khashaa = parcel.address_khashaa
         parcel_address =  streetname + ', ' + khashaa
-        parcel_id = parcel.parcel_id[1:-9]+parcel.parcel_id[4:]
+        # parcel_id = parcel.parcel_id[1:-9]+parcel.parcel_id[4:]
+        parcel_id = parcel.parcel_id
         if person.type == 50:
 
             full_name =  u'          1. ..................улсын иргэн "'+sur_name.text() + u'" овогтой ' + first_name.text()+ u' -ын '+ register_id.text()+u'/регистрийн дугаар/-д ' + \
@@ -1343,7 +1344,8 @@ class SentToGovernorDialog(QDialog, Ui_SentToGovernorDialog, DatabaseHelper):
         else:
             khashaa = parcel.address_khashaa
         parcel_address =  streetname + ', ' + khashaa
-        parcel_id = parcel.parcel_id[1:-9]+parcel.parcel_id[4:]
+        # parcel_id = parcel.parcel_id[1:-9]+parcel.parcel_id[4:]
+        parcel_id = parcel.parcel_id
         if person.type == 10 or person.type == 20 or person.type == 50:
 
             full_name =  u'          1. Иргэн "'+sur_name.text() + u'" овогтой ' + first_name.text()+ u' -ын '+ register_id.text()+u'/регистрийн дугаар/-д ' + \
@@ -1415,7 +1417,8 @@ class SentToGovernorDialog(QDialog, Ui_SentToGovernorDialog, DatabaseHelper):
         else:
             khashaa = parcel.address_khashaa
         parcel_address =  streetname + ', ' + khashaa
-        parcel_id = parcel.parcel_id[1:-9]+parcel.parcel_id[4:]
+        # parcel_id = parcel.parcel_id[1:-9]+parcel.parcel_id[4:]
+        parcel_id = parcel.parcel_id
         if person.type == 10 or person.type == 20 or person.type == 50:
 
             full_name =  u'          1. Иргэн "'+sur_name.text() + u'" овогтой ' + first_name.text()+ u' -ын '+ register_id.text()+u'/регистрийн дугаар/-д гэр бүлийнх нь хамтын хэрэгцээнд давуу эрхээр' + \
@@ -1487,7 +1490,8 @@ class SentToGovernorDialog(QDialog, Ui_SentToGovernorDialog, DatabaseHelper):
         else:
             khashaa = parcel.address_khashaa
         parcel_address =  streetname + ', ' + khashaa
-        parcel_id = parcel.parcel_id[1:-9]+parcel.parcel_id[4:]
+        # parcel_id = parcel.parcel_id[1:-9]+parcel.parcel_id[4:]
+        parcel_id = parcel.parcel_id
         if person.type == 10 or person.type == 20 or person.type == 50:
 
             full_name =  u'          1. Иргэн "'+sur_name.text() + u'" овогтой ' + first_name.text()+ u' -ын '+ register_id.text()+u'/регистрийн дугаар/-д ' + \
@@ -1744,7 +1748,8 @@ class SentToGovernorDialog(QDialog, Ui_SentToGovernorDialog, DatabaseHelper):
         else:
             khashaa = parcel.address_khashaa
         parcel_address =  streetname + ', ' + khashaa
-        parcel_id = parcel.parcel_id[1:-9]+parcel.parcel_id[4:]
+        # parcel_id = parcel.parcel_id[1:-9]+parcel.parcel_id[4:]
+        parcel_id = parcel.parcel_id
         if person.type == 10 or person.type == 20:
             if applicant.person_ref.type == 10:
                 full_name =  u'          1. Иргэн '+sur_name.text() + u' овогтой ' + first_name.text()+ u' -ын '+ register_id.text()+u'/регистрийн дугаар/-д ' + \
@@ -1832,8 +1837,8 @@ class SentToGovernorDialog(QDialog, Ui_SentToGovernorDialog, DatabaseHelper):
         else:
             khashaa = parcel.address_khashaa
         parcel_address =  streetname + ', ' + khashaa
-        parcel_id = parcel.parcel_id[1:-9]+parcel.parcel_id[4:]
-
+        # parcel_id = parcel.parcel_id[1:-9]+parcel.parcel_id[4:]
+        parcel_id = parcel.parcel_id
         if person.type == 30:
 
             full_name =  u'          1. "' + sur_name.text() + u'" /'+ register_id.text()+u'/ сууц өмчлөгчдийн холбоонд' + \

@@ -3019,7 +3019,7 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
                 # return
             elif parcel_count == 0:
                 parcel = CaParcel()
-                if len(parcel_id) == 12:
+                if len(parcel_id) == 10:
                     parcel.parcel_id = parcel_id
                 else:
                     message_box = QMessageBox()

@@ -199,7 +199,7 @@
     </rect>
    </property>
    <property name="currentIndex">
-    <number>0</number>
+    <number>1</number>
    </property>
    <widget class="QWidget" name="tab_2">
     <attribute name="title">
@@ -674,6 +674,9 @@
        <width>751</width>
        <height>140</height>
       </rect>
+     </property>
+     <property name="sortingEnabled">
+      <bool>true</bool>
      </property>
      <attribute name="horizontalHeaderDefaultSectionSize">
       <number>200</number>

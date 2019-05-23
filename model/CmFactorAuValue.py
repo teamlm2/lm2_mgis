@@ -7,7 +7,7 @@ from geoalchemy2 import Geometry
 from ClLanduseType import *
 
 
-class CmFactorsAuValue(Base):
+class CmFactorAuValue(Base):
 
     __tablename__ = 'cm_factors_au_value'
 
@@ -23,11 +23,11 @@ class CmFactorsAuValue(Base):
     updated_at = Column(DateTime)
 
     # foreign keys:
-    factor_id = Column(Integer, ForeignKey('cm_factors.code'), primary_key=True)
-    factor_ref = relationship("CmFactors")
+    factor_id = Column(Integer, ForeignKey('cm_factor.id'), primary_key=True)
+    factor_ref = relationship("CmFactor")
 
     factor_value_id = Column(Integer, ForeignKey('cm_factors_value.code'), primary_key=True)
-    factor_value_ref = relationship("CmFactorsValue")
+    factor_value_ref = relationship("CmFactorValue")
 
     au2 = Column(String, ForeignKey('au_level2.code'), primary_key=True)
     au2_ref = relationship("AuLevel2")

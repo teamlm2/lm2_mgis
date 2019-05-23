@@ -2512,7 +2512,8 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         person_phone = person.phone
         person_email = person.email_address
         # office_phone = report_settings[Constants.REPORT_PHONE]
-        parcel_id = self.id_main_edit.text()[1:-9] + self.id_main_edit.text()[4:]
+        # parcel_id = self.id_main_edit.text()[1:-9] + self.id_main_edit.text()[4:]
+        parcel_id = self.id_main_edit.text()
         sum_name_dec = ''
         sum_officer = ''
 
@@ -3846,7 +3847,8 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
         app_no = self.application_this_contract_based_edit.text()
         contract_no = self.contract_num_edit.text()
-        parcel_id  = self.id_main_edit.text()[1:-9] + self.id_main_edit.text()[4:]
+        parcel_id = self.id_main_edit.text()
+        # parcel_id  = self.id_main_edit.text()[1:-9] + self.id_main_edit.text()[4:]
 
         landuse = self.land_use_type_edit.text()
         area_m2 = self.calculated_area_edit.text()
@@ -3889,8 +3891,8 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
         app_no = self.application_this_contract_based_edit.text()
         contract_no = self.contract_num_edit.text()
-        parcel_id  = self.id_main_edit.text()[1:-9] + self.id_main_edit.text()[4:]
-
+        # parcel_id  = self.id_main_edit.text()[1:-9] + self.id_main_edit.text()[4:]
+        parcel_id = self.id_main_edit.text()
         landuse = self.land_use_type_edit.text()
         area_m2 = self.calculated_area_edit.text()
         area_m2 = str((area_m2)) + " /"+str(float(area_m2)/10000)+"/"

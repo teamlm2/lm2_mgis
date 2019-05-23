@@ -37,6 +37,14 @@ SOURCES        += controller/ParcelInfoFeeDialog.py
 SOURCES        += controller/ParcelInfoExtractMapTool.py
 SOURCES        += controller/PastureMonitoringValueDialog.py
 
+SOURCES        += controller/CamaNavigatorWidget.py
+SOURCES        += controller/ParcelMpaDialog.py
+
+SOURCES        += controller/PlanAttributeEditDialog.py
+SOURCES        += controller/PlanCaseDialog.py
+SOURCES        += controller/PlanDetailWidget.py
+SOURCES        += controller/PlanNavigatorWidget.py
+
 SOURCES      += controller/qt_classes/ApplicantDocumentDelegate.py
 SOURCES      += controller/qt_classes/ApplicationComboBoxDelegate.py
 SOURCES      += controller/qt_classes/ComboBoxDelegate.py
@@ -97,5 +105,13 @@ FORMS        += view/SentToGovernorPastureDialog.ui
 FORMS        += view/ParcelInfoDialog.ui
 FORMS        += view/ParcelInfoFeeDialog.ui
 FORMS        += view/PastureMonitoringValueDialog.ui
+
+FORMS        += view/CamaNavigatorWidget.ui
+FORMS        += view/ParcelMpaDialog.ui
+
+FORMS        += view/PlanAttributeEditDialog.ui
+FORMS        += view/PlanCaseDialog.ui
+FORMS        += view/PlanDetailWidget.ui
+FORMS        += view/PlanNavigatorWidget.ui
 
 TRANSLATIONS += LM2Plugin_mn.ts
