@@ -50,6 +50,7 @@ from ..model.SetCertificate import *
 from ..model.SetUserGroupRole import *
 from ..model.SdUser import *
 from ..model.SdConfiguration import *
+from ..model.SdPosition import *
 from ..model.SetApplicationTypePersonRole import *
 from ..model.CtContractFee import *
 from ..utils.FileUtils import FileUtils
@@ -615,7 +616,8 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         currect_user = user.position
         # if restrictions[3:] == '01':
         self.print_officer_cbox.setDisabled(False)
-        print_officers = self.session.query(SetRole).filter(or_(SetRole.position == 5,SetRole.position == 6,SetRole.position == 7,SetRole.position == 8, SetRole.position == currect_user)).all()
+        # print_officers = self.session.query(SetRole).filter(or_(SetRole.position == 5,SetRole.position == 6,SetRole.position == 7,SetRole.position == 8, SetRole.position == currect_user)).all()
+        print_officers = self.session.query(SetRole).all()
             # filter(or_(SetRole.position == 9, SetRole.position == currect_user)). \
             # filter(SetRole.is_active == True). \
             # filter(SetRole.user_name.startswith(user_start)).all()
@@ -648,10 +650,17 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
     @pyqtSlot(int)
     def on_print_officer_cbox_currentIndexChanged(self, index):
 
+        self.position_lbl.setText('')
         user_name_real = self.print_officer_cbox.itemData(self.print_officer_cbox.currentIndex())
+
         user = self.session.query(SetRole).filter(SetRole.user_name_real == user_name_real).one()
 
-        self.position_lbl.setText(user.position_ref.name)
+        position_c = self.session.query(SdPosition).filter(SdPosition.position_id == user.position).count()
+
+        if position_c == 1:
+            position = self.session.query(SdPosition).filter(SdPosition.position_id == user.position).one()
+
+            self.position_lbl.setText(position.name)
 
     def __setup_applicant_cbox(self):
 

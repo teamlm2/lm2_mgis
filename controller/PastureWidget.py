@@ -150,7 +150,7 @@ class PastureWidget(QDockWidget, Ui_PastureWidget, DatabaseHelper):
         LayerUtils.deselect_all()
         if layer_name is None:
             for parcel_id in parcel_ids:
-                if len(parcel_id) == 12:
+                if len(parcel_id) == 10:
                     layer_name = "ca_pasture_parcel"
 
         layer = LayerUtils.layer_by_data_source("s" + DatabaseUtils.current_working_soum_schema(), layer_name)

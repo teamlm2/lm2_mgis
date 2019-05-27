@@ -153,7 +153,7 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
         if layer_name is None:
             for parcel_id in parcel_ids:
                 if parcel_id:
-                    if len(parcel_id) == 12:
+                    if len(parcel_id) == 10:
                         layer_name = "ca_parcel"
                     else:
                         layer_name = "ca_tmp_parcel_view"

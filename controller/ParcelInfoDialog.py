@@ -623,15 +623,16 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
         request = QgsFeatureRequest()
         request.setFilterExpression(expression)
         feature_ids = []
-        iterator = layer.getFeatures(request)
+        if layer:
+            iterator = layer.getFeatures(request)
 
-        for feature in iterator:
-            feature_ids.append(feature.id())
-        if len(feature_ids) == 0:
-            self.error_label.setText(self.tr("No parcel assigned"))
+            for feature in iterator:
+                feature_ids.append(feature.id())
+            if len(feature_ids) == 0:
+                self.error_label.setText(self.tr("No parcel assigned"))
 
-        layer.setSelectedFeatures(feature_ids)
-        self.plugin.iface.mapCanvas().zoomToSelected(layer)
+            layer.setSelectedFeatures(feature_ids)
+            self.plugin.iface.mapCanvas().zoomToSelected(layer)
 
     @pyqtSlot(QTableWidgetItem)
     def on_right_holder_twidget_itemDoubleClicked(self, item):
@@ -3001,12 +3002,12 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
 
         self.create_savepoint()
         try:
-            parcel_count = self.session.query(CaParcel).filter(CaParcel.parcel_id == parcel_id).count()
+            parcel_count = self.session.query(CaParcelTbl).filter(CaParcelTbl.parcel_id == parcel_id).count()
             if parcel_count > 0:
                 # parcel = self.session.query(CaParcel).filter(CaParcel.parcel_id == parcel_id).one()
                 # parcel.parcel_id = None
                 message_box = QMessageBox()
-                message_box.setText(u'Нэгж талбарын дугаар давхардаж байна.. Шинэ дугаар олгох бол үргэлжүүлнэ үү.')
+                message_box.setText(u'Нэгж талбарын дугаар давхардаж байна. Шинэ дугаар олгох бол үргэлжүүлнэ үү.')
 
                 no_button = message_box.addButton(self.tr("Yes"), QMessageBox.ActionRole)
                 message_box.addButton(self.tr("No"), QMessageBox.ActionRole)
@@ -3035,7 +3036,6 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
                     # PluginUtils.show_message(self, u'Анхааруулга',
                     #                          u'Нэгж талбарын дугаар буруу байна./Жишээ нь: Дугаарын оронгийн урт таарахгүй/')
                     # return
-
                 parcel.old_parcel_id = old_parcel_id
                 parcel.geo_id = old_parcel_id
                 parcel.landuse = landuse

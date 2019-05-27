@@ -378,6 +378,9 @@ class LM2Plugin:
             self.is_expired = dlg.get_expired()
 
             self.__update_database_connection(dlg.get_password(), self.is_expired)
+        else:
+            self.__disable_menu()
+            SessionHandler().destroy_session()
 
     def __show_reports_dialog(self):
 

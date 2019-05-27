@@ -1398,7 +1398,7 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
         is_temp = False
         if layer_name is None:
             for parcel_id in parcel_ids:
-                if len(parcel_id) == 12:
+                if len(parcel_id) == 10:
                     layer_name = "ca_parcel"
                 else:
                     layer_name = "ca_tmp_parcel_view"
