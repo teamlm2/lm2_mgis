@@ -996,7 +996,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         else:
             sql = sql + "UNION" + "\n"
 
-        select = "SELECT application.app_id, application.app_no, application.app_timestamp, application.app_type, status.status, status.status_date, status.officer_in_charge, status.next_officer_in_charge, decision.decision_no, " \
+        select = "SELECT application.app_id, application.app_no, application.app_timestamp, application.app_type, status.app_status_id, status.status, status.status_date, status.officer_in_charge, status.next_officer_in_charge, decision.decision_no, " \
                  "contract.contract_no, person.person_register,  person.person_id, person.name, person.first_name, person.middle_name, parcel.parcel_id, tmp_parcel.parcel_id tmp_parcel_id, record.record_no " \
                  "FROM data_soums_union.ct_application application " \
                  "left join data_soums_union.ct_application_status status on status.application = application.app_id " \

@@ -26,6 +26,7 @@ class ApplicationSearch(Base):
     parcel_id = Column(String)
     tmp_parcel_id = Column(String)
     status_date = Column(DateTime)
+    app_status_id = Column(Integer)
 
     app_type = Column(Integer, ForeignKey('cl_application_type.code'))
     app_type_ref = relationship("ClApplicationType")

@@ -172,7 +172,7 @@ class SentToGovernorDialog(QDialog, Ui_SentToGovernorDialog, DatabaseHelper):
         application_type = self.app_type_cbox.itemData(self.app_type_cbox.currentIndex())
         try:
             applications = self.session.query(ApplicationSearch)
-            sub = self.session.query(ApplicationSearch, func.row_number().over(partition_by = ApplicationSearch.app_no, order_by = (desc(ApplicationSearch.status_date), desc(ApplicationSearch.status))).label("row_number")).subquery()
+            sub = self.session.query(ApplicationSearch, func.row_number().over(partition_by = ApplicationSearch.app_no, order_by = (desc(ApplicationSearch.app_status_id))).label("row_number")).subquery()
             applications = applications.select_entity_from(sub).filter(sub.c.row_number == 1)
             status = 5
 
