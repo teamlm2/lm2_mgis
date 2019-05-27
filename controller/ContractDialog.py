@@ -2385,10 +2385,11 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
         # try:
         data = self.__fee_geoware()
-        if data['status']:
-            for value in data['data']:
-                payment = value['payment']
-                base_fee = round(float(value['base_fee_per_m2']))
+        if data:
+            if data['status']:
+                for value in data['data']:
+                    payment = value['payment']
+                    base_fee = round(float(value['base_fee_per_m2']))
 
         local_name = " "
         address_street_name = ""
