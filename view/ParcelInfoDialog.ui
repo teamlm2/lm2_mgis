@@ -2874,8 +2874,6 @@ QPushButton:disabled {
   <tabstop>find_y_coordinate_edit</tabstop>
   <tabstop>point_scale_sbox</tabstop>
  </tabstops>
- <resources>
-  <include location="C:/Users/B.Ankhbold/.qgis2/python/plugins/lm2/view/resources.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

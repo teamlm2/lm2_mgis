@@ -2,7 +2,7 @@ __author__ = 'B.Ankhbold'
 
 from sqlalchemy import Date, ForeignKey, Float, String, Integer, Column
 from sqlalchemy.orm import relationship
-from ClZoneActivity import *
+from ClPlanZone import *
 
 class SetZoneColor(Base):
 

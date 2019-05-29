@@ -6,17 +6,14 @@ from geoalchemy2 import Geometry
 from CtApp1Ext import *
 from ClPlanZone import *
 
-class SetPlanTypeWorkrule(Base):
+class SetPlanZonePlanType(Base):
 
-    __tablename__ = 'set_plan_type_workrile'
-
-    created_at = Column(DateTime)
-    created_by = Column(Integer)
+    __tablename__ = 'set_plan_zone_plan_type'
 
     # foreign keys:
     plan_type_id = Column(Integer, ForeignKey('cl_plan_type.plan_type_id'), primary_key=True)
     plan_type_ref = relationship("ClPlanType")
 
-    workrule_id = Column(Integer, ForeignKey('set_workrule.workrule_id'), primary_key=True)
-    workrule_ref = relationship("SetWorkrule")
+    plan_zone_id = Column(Integer, ForeignKey('cl_plan_zone.plan_zone_id'), primary_key=True)
+    plan_zone_ref = relationship("ClPlanZone")
 

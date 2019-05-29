@@ -29,6 +29,8 @@ from ..utils.LayerUtils import *
 from ..model.DatabaseHelper import *
 from ..model.SetZoneColor import *
 from ..model.SetPlanZoneAttribute import *
+from ..model.SetPlanZonePlanType import *
+from ..model.ClAttributeZone import *
 from ..controller.PlanDetailWidget import *
 from ..controller.PlanLayerFilterDialog import *
 # from ..LM2Plugin import *
@@ -69,11 +71,59 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
         self.__setup_twidgets()
         self.__setup_mapping()
         self.__load_role_settings()
+        # self.__process_type_mapping()
+        self.process_type_treewidget.itemChanged.connect(self.__itemProcessCheckChanged)
+        self.process_list = []
         # self.__report_setup()
         self.tabWidget.setCurrentIndex(0)
 
         self.au2 = DatabaseUtils.working_l2_code()
         self.plan = None
+        self.process_type_treewidget.connect(self.process_type_treewidget, SIGNAL("itemClicked(QTreeWidgetItem*, int)"), self.__on_click_plan_zone_treewidget)
+
+    def __process_type_mapping(self, plan_type):
+
+        tree = self.process_type_treewidget
+        parent_types = Constants.plan_process_type_parent
+        for parent_type in parent_types:
+            parent = QTreeWidgetItem(tree)
+            parent.setText(0, str(parent_type) + ': ' + parent_types[parent_type])
+            parent.setData(0, Qt.UserRole, parent_type)
+            parent.setFlags(parent.flags() | Qt.ItemIsTristate | Qt.ItemIsUserCheckable)
+            parent_type_value = str(parent_type) + '%'
+            if plan_type != -1:
+                sub_types = self.session.query(SetPlanZonePlanType).\
+                    join(ClPlanZone, ClPlanZone.plan_zone_id == SetPlanZonePlanType.plan_zone_id). \
+                    filter(SetPlanZonePlanType.plan_type_id == plan_type). \
+                    filter(ClPlanZone.code.ilike(parent_type_value))
+            else:
+                sub_types = self.session.query(SetPlanZonePlanType). \
+                    join(ClPlanZone, ClPlanZone.plan_zone_id == SetPlanZonePlanType.plan_zone_id). \
+                    filter(ClPlanZone.code.ilike(parent_type_value))
+
+            for value in sub_types.distinct(SetPlanZonePlanType.plan_zone_id).all():
+                sub_type = value.plan_zone_ref
+                # if sub_type.code[:1] == parent_type:
+                child = QTreeWidgetItem(parent)
+                child.setFlags(child.flags() | Qt.ItemIsUserCheckable)
+                child.setText(0, str(sub_type.code) + ': ' + sub_type.name)
+                child.setData(0, Qt.UserRole, sub_type.code)
+                child.setFlags(child.flags() | Qt.ItemIsTristate | Qt.ItemIsUserCheckable)
+                child.setCheckState(0, Qt.Unchecked)
+
+        tree.show()
+
+    def __itemProcessCheckChanged(self, item, column):
+
+        if item.checkState(column) == QtCore.Qt.Checked:
+            code = item.data(0, Qt.UserRole)
+            if code not in self.process_list:
+                if len(str(code)) == 8:
+                    self.process_list.append(code)
+        elif item.checkState(column) == QtCore.Qt.Unchecked:
+            code = item.data(0, Qt.UserRole)
+            if code in self.process_list:
+                self.process_list.remove(code)
 
     def __setup_mapping(self):
 
@@ -469,6 +519,7 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
         self.office_in_charge_cbox.clear()
         self.next_officer_in_charge_cbox.clear()
         self.plan_type_cbox.clear()
+        self.tmp_plan_type_cbox.clear()
         self.status_cbox.clear()
         self.decision_level_cbox.clear()
 
@@ -491,24 +542,21 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
                         self.next_officer_in_charge_cbox.addItem(lastname + ", " + firstname, sd_user.user_id)
 
         statuses = self.session.query(SetWorkruleStatus).all()
-        types = self.session.query(ClPlanType).all()
+        types = self.session.query(ClPlanType).order_by(ClPlanType.code.asc()).all()
         decision_levels = self.session.query(ClPlanDecisionLevel).all()
 
         self.plan_type_cbox.addItem("*", -1)
+        self.tmp_plan_type_cbox.addItem("*", -1)
         self.status_cbox.addItem("*", -1)
         self.decision_level_cbox.addItem("*", -1)
 
         for value in statuses:
             self.status_cbox.addItem(str(value.workrule_status_id) + ':' + value.description, value.workrule_status_id)
         for value in types:
-            self.plan_type_cbox.addItem(value.description, value.plan_type_id)
+            self.plan_type_cbox.addItem(value.code +':'+ value.description, value.plan_type_id)
+            self.tmp_plan_type_cbox.addItem(value.code +':'+ value.description, value.plan_type_id)
         for value in decision_levels:
             self.decision_level_cbox.addItem(value.description, value.plan_decision_level_id)
-
-        plan_zones = self.session.query(ClPlanZone).order_by(ClPlanZone.code).all()
-        self.plan_zone_cbox.addItem("*", -1)
-        for value in plan_zones:
-            self.plan_zone_cbox.addItem(value.code + ':' + value.name, value.plan_zone_id)
 
     def __setup_twidgets(self):
 
@@ -2041,49 +2089,127 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
 
         DialogInspector().set_dialog_visible(False)
 
-    @pyqtSlot(int)
-    def on_plan_zone_cbox_currentIndexChanged(self, index):
+    def __load_attribute(self, plan_zone_id):
 
-        if self.plan_zone_cbox.currentIndex() == -1:
-            return
-
-        plan_zone_id = self.plan_zone_cbox.itemData(self.plan_zone_cbox.currentIndex())
-
-        attributes = self.session.query(SetPlanZoneAttribute).filter(SetPlanZoneAttribute.plan_zone_id == plan_zone_id).all()
-        self.attribute_twidget.setRowCount(0)
+        plan_type = self.tmp_plan_type_cbox.itemData(self.tmp_plan_type_cbox.currentIndex())
+        attributes = self.session.query(SetPlanZoneAttribute).\
+            filter(SetPlanZoneAttribute.plan_zone_id == plan_zone_id). \
+            filter(SetPlanZoneAttribute.plan_type_id == plan_type).all()
         for value in attributes:
             if value.attribute_ref:
                 attribute = value.attribute_ref
-                row_count = self.attribute_twidget.rowCount()
-                self.attribute_twidget.insertRow(row_count)
+                if self.__is_duplicate_attribute(attribute.attribute_id):
+                    row_count = self.attribute_twidget.rowCount()
+                    self.attribute_twidget.insertRow(row_count)
 
-                item = QTableWidgetItem(attribute.attribute_name)
-                item.setData(Qt.UserRole, attribute.attribute_id)
-                self.attribute_twidget.setItem(row_count, 0, item)
+                    item = QTableWidgetItem(attribute.attribute_name)
+                    item.setBackground(Qt.gray)
+                    item.setData(Qt.UserRole, attribute.attribute_id)
+                    self.attribute_twidget.setItem(row_count, 0, item)
 
-                item = QTableWidgetItem(attribute.attribute_type)
-                item.setData(Qt.UserRole, attribute.attribute_type)
-                self.attribute_twidget.setItem(row_count, 1, item)
+                    item = QTableWidgetItem(attribute.attribute_type)
+                    item.setBackground(Qt.gray)
+                    item.setData(Qt.UserRole, attribute.attribute_type)
+                    self.attribute_twidget.setItem(row_count, 1, item)
 
-                item = QTableWidgetItem(attribute.description)
-                self.attribute_twidget.setItem(row_count, 2, item)
+                    item = QTableWidgetItem(attribute.description)
+                    item.setBackground(Qt.gray)
+                    self.attribute_twidget.setItem(row_count, 2, item)
+
+    def __is_duplicate_attribute(self, check_attribute_id):
+
+        is_true = True
+
+        row_count = self.attribute_twidget.rowCount()
+
+        for row in range(row_count):
+            item = self.attribute_twidget.item(row, 0)
+            attribute_id = item.data(Qt.UserRole)
+            if attribute_id == check_attribute_id:
+                is_true = False
+        return is_true
+
+    @pyqtSlot()
+    def on_load_attribute_button_clicked(self):
+
+        self.attribute_twidget.setRowCount(0)
+        for value in self.process_list:
+            plan_zone = self.session.query(ClPlanZone).filter(ClPlanZone.code == value).one()
+            plan_zone_id = plan_zone.plan_zone_id
+
+            self.__load_attribute(plan_zone_id)
 
     @pyqtSlot()
     def on_load_template_button_clicked(self):
 
         root = QgsProject.instance().layerTreeRoot()
         mygroup = root.findGroup(u"CAMA")
-
-        layer = QgsVectorLayer('LineString?crs=epsg:4326', 'line', 'memory')
-        print layer
+        layer = QgsVectorLayer('Polygon?crs=epsg:4326', 'PlanTemplate', 'memory')
         pr = layer.dataProvider()
+        fields = []
+        row_count = self.attribute_twidget.rowCount()
+        for row in range(row_count):
+            item = self.attribute_twidget.item(row, 0)
+            attribute_id = item.data(Qt.UserRole)
+            attribute = self.session.query(ClAttributeZone).filter(ClAttributeZone.attribute_id == attribute_id).one()
 
-        pr.addAttributes([QgsField("name", QVariant.String),
-                          QgsField("age", QVariant.Int),
-                          QgsField("size", QVariant.Double)])
+            fields.append(QgsField(attribute.attribute_name, QVariant.String))
+
+
+        pr.addAttributes(fields)
         layer.updateFields()
 
         layer.updateExtents()
 
         # Add the layer to the Layers panel
-        QgsMapLayerRegistry.instance().addMapLayers([layer])
+        mygroup.addLayer(QgsMapLayerRegistry.instance().addMapLayers([layer]))
+
+    @pyqtSlot(int)
+    def on_tmp_plan_type_cbox_currentIndexChanged(self, index):
+
+        self.process_type_treewidget.clear()
+        plan_type = self.tmp_plan_type_cbox.itemData(index)
+        self.__process_type_mapping(plan_type)
+
+    @pyqtSlot(QTreeWidgetItem)
+    def on_process_type_treewidget_itemClicked(self, item):
+
+        print item
+
+    def __plan_zone_treewidget_reset_color(self):
+
+        row_count = self.attribute_twidget.rowCount()
+        for row in range(row_count):
+            item = self.attribute_twidget.item(row, 0)
+            item.setBackground(Qt.gray)
+
+            item = self.attribute_twidget.item(row, 1)
+            item.setBackground(Qt.gray)
+
+            item = self.attribute_twidget.item(row, 2)
+            item.setBackground(Qt.gray)
+
+    def __on_click_plan_zone_treewidget(self, item, column):
+
+        self.__plan_zone_treewidget_reset_color()
+        plan_zone_code = item.data(0, Qt.UserRole)
+        plan_zone_count = self.session.query(ClPlanZone).filter(ClPlanZone.code == str(plan_zone_code)).count()
+        if plan_zone_count != 1:
+            return
+        plan_zone = self.session.query(ClPlanZone).filter(ClPlanZone.code == str(plan_zone_code)).one()
+        attributes = self.session.query(SetPlanZoneAttribute). \
+            filter(SetPlanZoneAttribute.plan_zone_id == plan_zone.plan_zone_id).all()
+
+        for attribute in attributes:
+            row_count = self.attribute_twidget.rowCount()
+            for row in range(row_count):
+                item = self.attribute_twidget.item(row, 0)
+                attribute_id = item.data(Qt.UserRole)
+                if attribute.attribute_id == attribute_id:
+                    item.setBackground(Qt.green)
+
+                    item = self.attribute_twidget.item(row, 1)
+                    item.setBackground(Qt.green)
+
+                    item = self.attribute_twidget.item(row, 2)
+                    item.setBackground(Qt.green)

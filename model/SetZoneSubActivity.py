@@ -4,7 +4,7 @@ from sqlalchemy import Column, Integer, String, Date, Sequence, ForeignKey, Date
 from sqlalchemy.orm import relationship, backref
 from geoalchemy2 import Geometry
 from CtApp1Ext import *
-from ClZoneActivity import *
+from ClPlanZone import *
 
 class SetZoneSubActivity(Base):
 
@@ -21,5 +21,5 @@ class SetZoneSubActivity(Base):
     zone_sub_ref = relationship("ClZoneSub")
 
     zone_activity_id = Column(Integer, ForeignKey('cl_zone_activity.zone_activity_id'), primary_key=True)
-    zone_activity_ref = relationship("ClZoneActivity")
+    zone_activity_ref = relationship("ClPlanZone")
 

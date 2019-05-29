@@ -1760,13 +1760,13 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             code = item.data(Qt.UserRole)
             if code is None:
                 return
-            if self.__condition_assigned(code):
-                item.setCheckState(Qt.Checked)
+            # if self.__condition_assigned(code):
+            #     item.setCheckState(Qt.Checked)
 
     def __condition_assigned(self, code):
 
         contract = self.session.query(CtContract).get(self.contract.contract_id)
-        count = contract.conditions.filter(CtContractCondition.contract == code).count()
+        count = contract.conditions.filter(CtContractCondition.contract_id == code).count()
         if count > 0:
             return True
         return False
@@ -3480,7 +3480,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             for p in app_person:
                 if p.main_applicant == True:
                     person = self.session.query(BsPerson).filter(BsPerson.person_id == p.person).one()
-            contract_condition = self.session.query(CtContractCondition).filter(CtContractCondition.contract == self.contract.contract_id).all()
+            contract_condition = self.session.query(CtContractCondition).filter(CtContractCondition.contract_id == self.contract.contract_id).all()
         except SQLAlchemyError, e:
             raise LM2Exception(self.tr("Database Query Error"), self.tr("aCould not execute: {0}").format(e.message))
         if person.type == 10 or person.type == 20 or person.type == 30 or person.type == 40:

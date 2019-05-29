@@ -22,7 +22,7 @@ from ..model.SetWorkruleStatus import *
 from ..model.ClPlanType import *
 from ..model.PlProjectStatusHistory import *
 from ..model.PlProjectParcel import *
-from ..model.ClZoneActivity import *
+from ..model.ClPlanZone import *
 from ..model.ClZoneSub import *
 from ..model.ClPlanZone import *
 from ..model.ClPlanZoneType import *

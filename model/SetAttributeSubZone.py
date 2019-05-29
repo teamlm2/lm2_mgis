@@ -4,7 +4,7 @@ from sqlalchemy import Column, Integer, String, Date, Sequence, ForeignKey, Date
 from sqlalchemy.orm import relationship, backref
 from geoalchemy2 import Geometry
 from CtApp1Ext import *
-from ClZoneActivity import *
+from ClPlanZone import *
 
 class SetAttributeSubZone(Base):
 

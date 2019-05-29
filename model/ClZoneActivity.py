@@ -6,7 +6,7 @@ from Base import *
 from SetRole import *
 
 
-class ClZoneActivity(Base):
+class ClPlanZone(Base):
 
     __tablename__ = 'cl_zone_activity'
 

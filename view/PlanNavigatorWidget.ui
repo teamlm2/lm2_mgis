@@ -93,7 +93,7 @@
        </size>
       </property>
       <property name="currentIndex">
-       <number>2</number>
+       <number>1</number>
       </property>
       <property name="usesScrollButtons">
        <bool>true</bool>
@@ -459,6 +459,100 @@ font: 75 14pt &quot;Helvetica&quot;;</string>
         </property>
         <property name="text">
          <string>Is Filter</string>
+        </property>
+       </widget>
+      </widget>
+      <widget class="QWidget" name="tab">
+       <attribute name="title">
+        <string>Template</string>
+       </attribute>
+       <widget class="QComboBox" name="tmp_plan_type_cbox">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>25</y>
+          <width>361</width>
+          <height>22</height>
+         </rect>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="load_template_button">
+        <property name="geometry">
+         <rect>
+          <x>240</x>
+          <y>310</y>
+          <width>131</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Load Template</string>
+        </property>
+       </widget>
+       <widget class="QTableWidget" name="attribute_twidget">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>340</y>
+          <width>361</width>
+          <height>251</height>
+         </rect>
+        </property>
+        <column>
+         <property name="text">
+          <string>Attribute Name</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Type</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Description</string>
+         </property>
+        </column>
+       </widget>
+       <widget class="QTreeWidget" name="process_type_treewidget">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>52</y>
+          <width>361</width>
+          <height>251</height>
+         </rect>
+        </property>
+        <column>
+         <property name="text">
+          <string notr="true">1</string>
+         </property>
+        </column>
+       </widget>
+       <widget class="QLabel" name="label">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>5</y>
+          <width>46</width>
+          <height>13</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>TextLabel</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="load_attribute_button">
+        <property name="geometry">
+         <rect>
+          <x>90</x>
+          <y>310</y>
+          <width>131</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Load Attribute</string>
         </property>
        </widget>
       </widget>
@@ -1040,54 +1134,6 @@ font: 75 14pt &quot;Helvetica&quot;;</string>
         </property>
         <property name="text">
          <string>print</string>
-        </property>
-       </widget>
-       <widget class="QComboBox" name="plan_zone_cbox">
-        <property name="geometry">
-         <rect>
-          <x>10</x>
-          <y>290</y>
-          <width>361</width>
-          <height>22</height>
-         </rect>
-        </property>
-       </widget>
-       <widget class="QTableWidget" name="attribute_twidget">
-        <property name="geometry">
-         <rect>
-          <x>10</x>
-          <y>320</y>
-          <width>361</width>
-          <height>131</height>
-         </rect>
-        </property>
-        <column>
-         <property name="text">
-          <string>Attribute Name</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>Type</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>Description</string>
-         </property>
-        </column>
-       </widget>
-       <widget class="QPushButton" name="load_template_button">
-        <property name="geometry">
-         <rect>
-          <x>240</x>
-          <y>460</y>
-          <width>131</width>
-          <height>23</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Load Template</string>
         </property>
        </widget>
       </widget>

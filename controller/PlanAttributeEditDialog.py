@@ -34,7 +34,7 @@ from ..model.Enumerations import ApplicationType, UserRight
 from ..model.SdFtpConnection import *
 from ..model.SdFtpPermission import *
 from ..model.PlProjectParcel import *
-from ..model.ClZoneActivity import *
+from ..model.ClPlanZone import *
 from ..model.Constants import *
 from ..model.SetFilterPlanLayer import *
 from ..model.ClAttributeZone import *
@@ -99,15 +99,15 @@ class PlanAttributeEditDialog(QDialog, Ui_PlanAttributeEditDialog, DatabaseHelpe
         # self.attribute_twidget.itemDropped.connect(self.on_application_twidget_itemDropped)
         # self.attribute_twidget.cellChanged.connect(self.on_application_twidget_cellChanged)
 
-        attributes = self.session.query(LdAttribute, ClZoneActivity).\
-            join(ClZoneActivity, LdAttribute.id == ClZoneActivity.attribute_id).\
-            filter(ClZoneActivity.process_id == self.process_type).order_by(LdAttribute.id.desc()).all()
+        attributes = self.session.query(LdAttribute, ClPlanZone).\
+            join(ClPlanZone, LdAttribute.id == ClPlanZone.attribute_id).\
+            filter(ClPlanZone.process_id == self.process_type).order_by(LdAttribute.id.desc()).all()
         for value in attributes:
             attribute_row = self.attribute_twidget.rowCount()
             attribute = value.LdAttribute
             attribute_type = value.LdAttribute.attribute_type
 
-            attribute_process = value.ClZoneActivity
+            attribute_process = value.ClPlanZone
 
             name_item = QTableWidgetItem(unicode(attribute.attribute_name_mn))
             name_item.setData(Qt.UserRole, attribute.id)

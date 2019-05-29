@@ -4,7 +4,7 @@ from sqlalchemy import Column, Integer, String, Date, Sequence, ForeignKey, Date
 from sqlalchemy.orm import relationship, backref
 from geoalchemy2 import Geometry
 from CtApp1Ext import *
-from ClZoneActivity import *
+from ClPlanZone import *
 
 class PlProjectParcelZoneActivity(Base):
 
@@ -36,7 +36,7 @@ class PlProjectParcelZoneActivity(Base):
     project_ref = relationship("PlProject")
 
     zone_activity_id = Column(Integer, ForeignKey('cl_zone_activity.zone_activity_id'))
-    zone_activity_ref = relationship("ClZoneActivity")
+    zone_activity_ref = relationship("ClPlanZone")
 
     au1 = Column(String, ForeignKey('au_level1.code'))
     au1_ref = relationship("AuLevel1")

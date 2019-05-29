@@ -4,7 +4,7 @@ from sqlalchemy import Column, Integer, String, Date, Sequence, ForeignKey, Date
 from sqlalchemy.orm import relationship, backref
 from geoalchemy2 import Geometry
 from CtApp1Ext import *
-from ClZoneActivity import *
+from ClPlanZone import *
 
 class SetZoneActivityOverlap(Base):
 
@@ -18,8 +18,8 @@ class SetZoneActivityOverlap(Base):
 
     # foreign keys:
     zone_activity_id_src = Column(Integer, ForeignKey('cl_zone_activity.zone_activity_id'), primary_key=True)
-    zone_activity_id_src_ref = relationship("ClZoneActivity")
+    zone_activity_id_src_ref = relationship("ClPlanZone")
 
     zone_activity_id_trg = Column(Integer, ForeignKey('cl_zone_activity.zone_activity_id'), primary_key=True)
-    zone_activity_id_trg_ref = relationship("ClZoneActivity")
+    zone_activity_id_trg_ref = relationship("ClPlanZone")
 

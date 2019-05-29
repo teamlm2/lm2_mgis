@@ -12,10 +12,10 @@ class SetFilterPlanLayer(Base):
     user_id = Column(Integer, ForeignKey('sd_user.user_id'), primary_key=True)
     user_ref = relationship("SdUser")
 
-    process_type = Column(Integer, ForeignKey('cl_zone_activity.zone_activity_id'), primary_key=True)
-    process_ref = relationship("ClZoneActivity")
+    process_type = Column(Integer, ForeignKey('cl_plan_zone.plan_zone_id'), primary_key=True)
+    # process_ref = relationship("ClPlanZone")
 
-    plan_type = Column(Integer, ForeignKey('cl_plan_type.code'), primary_key=True)
+    plan_type = Column(Integer, ForeignKey('cl_plan_type.plan_type_id'), primary_key=True)
     plan_type_ref = relationship("ClPlanType")
 
     au2 = Column(String, ForeignKey('au_level2.code'), primary_key=True)
