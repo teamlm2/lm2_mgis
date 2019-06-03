@@ -113,6 +113,9 @@ class LayerUtils(object):
     @staticmethod
     def load_layer_by_name_report(layer_name, id, restrictions=[]):
 
+        print '---'
+        print restrictions
+        print '---'
         restrictions = restrictions.split(",")
 
         if len(restrictions) > 0:
