@@ -13,10 +13,7 @@
     <edittype widgetv2type="TextEdit" name="citizen_name">
       <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
     </edittype>
-    <edittype widgetv2type="TextEdit" name="mortgage_status">
-      <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
-    </edittype>
-    <edittype widgetv2type="TextEdit" name="mortgage_name">
+    <edittype widgetv2type="TextEdit" name="description">
       <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
     </edittype>
   </edittypes>
@@ -25,12 +22,12 @@
       <symbol alpha="1" clip_to_extent="1" type="fill" name="0">
         <layer pass="0" class="SimpleFill" locked="0">
           <prop k="border_width_map_unit_scale" v="0,0,0,0,0,0"/>
-          <prop k="color" v="213,14,97,255"/>
+          <prop k="color" v="136,79,52,255"/>
           <prop k="joinstyle" v="bevel"/>
           <prop k="offset" v="0,0"/>
           <prop k="offset_map_unit_scale" v="0,0,0,0,0,0"/>
           <prop k="offset_unit" v="MM"/>
-          <prop k="outline_color" v="0,9,26,255"/>
+          <prop k="outline_color" v="0,7,20,255"/>
           <prop k="outline_style" v="solid"/>
           <prop k="outline_width" v="0.26"/>
           <prop k="outline_width_unit" v="MM"/>
@@ -268,8 +265,7 @@
     <alias field="app_no" index="1" name="Өргөдлийн дугаар"/>
     <alias field="parcel_id" index="2" name="Нэгж талбарын дугаар&#xa;"/>
     <alias field="citizen_name" index="3" name="Газрын эзэн"/>
-    <alias field="mortgage_status" index="4" name="Барьцааны төлөв"/>
-    <alias field="mortgage_name" index="5" name="Барьцаалагч"/>
+    <alias field="description" index="4" name=""/>
   </aliases>
   <excludeAttributesWMS/>
   <excludeAttributesWFS/>
@@ -280,9 +276,8 @@
       <column width="-1" hidden="0" type="field" name="app_no"/>
       <column width="-1" hidden="0" type="field" name="parcel_id"/>
       <column width="-1" hidden="0" type="field" name="citizen_name"/>
-      <column width="-1" hidden="0" type="field" name="mortgage_status"/>
-      <column width="-1" hidden="0" type="field" name="mortgage_name"/>
       <column width="-1" hidden="1" type="actions"/>
+      <column width="-1" hidden="0" type="field" name="description"/>
     </columns>
   </attributetableconfig>
   <editform>.</editform>

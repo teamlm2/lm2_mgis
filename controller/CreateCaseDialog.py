@@ -935,10 +935,10 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
             # try:
             tmp_parcel_count = self.session.query(CaTmpParcel).filter(WKTElement(building.geometry().exportToWkt(), srid=4326).ST_Contains(CaTmpParcel.geometry)).count()
             print tmp_parcel_count
-            print self.session.query(CaTmpParcel).filter(CaTmpParcel.geometry.ST_Covers(WKTElement(building.geometry().exportToWkt(), srid=4326))).count()
+
             parcel_count = self.session.query(CaParcel).filter(
                 WKTElement(building.geometry().exportToWkt(), srid=4326).ST_Within(CaParcel.geometry)).count()
-
+            print parcel_count
             if tmp_parcel_count == 0 and parcel_count == 0:
                 PluginUtils.show_message(self, self.tr('No parcel'), self.tr('This building no parcel.'))
                 return

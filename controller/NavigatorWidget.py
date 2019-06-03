@@ -7953,8 +7953,9 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
             tmp_parcel_layer = LayerUtils.layer_by_data_source("data_soums_union", "view_court_parcel")
             if tmp_parcel_layer is None:
                 mygroup = root.findGroup(u"Тайлан")
-                vlayer = LayerUtils.load_layer_by_name_report("view_court_parcel", "parcel_id", restrictions)
-                vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) +"template\style/view_land_tax.qml")
+                vlayer = LayerUtils.load_union_layer_by_name("view_court_parcel", "gid")
+                vlayer.loadNamedStyle(
+                    str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "template\style/view_court_parcel.qml")
                 vlayer.setLayerName(self.tr("Court"))
                 mygroup.addLayer(vlayer)
 

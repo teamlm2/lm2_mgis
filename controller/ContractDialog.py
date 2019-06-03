@@ -2086,11 +2086,11 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         #     PluginUtils.show_error(self, self.tr("Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
         #     return
 
-        if not application.property_no:
-            if not application.parcel_ref.property_no:
-                PluginUtils.show_message(self, self.tr("Warning"),
-                                       self.tr("Not property number!"))
-                return
+        # if not application.property_no:
+        #     if not application.parcel_ref.property_no:
+        #         PluginUtils.show_message(self, self.tr("Warning"),
+        #                                self.tr("Not property number!"))
+        #         return
 
         self.application_this_contract_based_edit.setText(application.app_no)
         self.application_type_edit.setText(application.app_type_ref.description)
@@ -4104,6 +4104,23 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
     @pyqtSlot()
     def on_print_certificate_button_clicked(self):
+
+        current_app_no = self.application_this_contract_based_edit.text()
+
+        if current_app_no == "":
+            return
+        # try:
+        application = self.session.query(CtApplication).filter_by(app_no=current_app_no).one()
+
+        # except SQLAlchemyError, e:
+        #     PluginUtils.show_error(self, self.tr("Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+        #     return
+
+        if not application.property_no:
+            if not application.parcel_ref.property_no:
+                PluginUtils.show_message(self, self.tr("Warning"),
+                                         self.tr("Not property number!"))
+                return
 
         app_no = self.application_this_contract_based_edit.text()
         contract_no = self.contract_num_edit.text()
