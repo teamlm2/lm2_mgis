@@ -498,6 +498,9 @@ font: 75 14pt &quot;Helvetica&quot;;</string>
           <height>251</height>
          </rect>
         </property>
+        <attribute name="verticalHeaderShowSortIndicator" stdset="0">
+         <bool>true</bool>
+        </attribute>
         <column>
          <property name="text">
           <string>Attribute Name</string>

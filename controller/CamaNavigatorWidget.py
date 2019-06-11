@@ -409,47 +409,49 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
     @pyqtSlot()
     def on_price_calc_button_clicked(self):
 
+
+
         p_price = float(self.parcel_all_base_price.text())
-        self.parcel_calc_price_value = p_price
-
-        if self.elevation_value_edit.text() and self.parcel_calc_price_value:
-            value = float(self.elevation_value_edit.text())
-            self.parcel_calc_price_value = self.parcel_calc_price_value * value
-
-        if self.slopy_value_edit.text() and self.parcel_calc_price_value:
-            value = float(self.slopy_value_edit.text())
-            self.parcel_calc_price_value = self.parcel_calc_price_value * value
-
-        if self.rain_replicate_value_edit.text() and self.parcel_calc_price_value:
-            value = float(self.rain_replicate_value_edit.text())
-            self.parcel_calc_price_value = self.parcel_calc_price_value * value
-
-        if self.earthquake_value_edit.text() and self.parcel_calc_price_value:
-            value = float(self.earthquake_value_edit.text())
-            self.parcel_calc_price_value = self.parcel_calc_price_value * value
-
-        if self.soil_quality_value_edit.text() and self.parcel_calc_price_value:
-            value = float(self.soil_quality_value_edit.text())
-            self.parcel_calc_price_value = self.parcel_calc_price_value * value
-
-        if self.air_quality_value_edit.text() and self.parcel_calc_price_value:
-            value = float(self.air_quality_value_edit.text())
-            self.parcel_calc_price_value = self.parcel_calc_price_value * value
-
-        if self.permafrost_value_edit.text() and self.parcel_calc_price_value:
-            value = float(self.permafrost_value_edit.text())
-            self.parcel_calc_price_value = self.parcel_calc_price_value * value
-
-        if self.water_quality_value_edit.text() and self.parcel_calc_price_value:
-            value = float(self.water_quality_value_edit.text())
-            self.parcel_calc_price_value = self.parcel_calc_price_value * value
-
+        # self.parcel_calc_price_value = p_price
         #
-        if self.shcool_value_edit.text() and self.parcel_calc_price_value:
-            value = float(self.shcool_value_edit.text())
-            self.parcel_calc_price_value = self.parcel_calc_price_value * value
-
-        self.parcel_calc_base_price.setText(str(self.parcel_calc_price_value))
+        # if self.elevation_value_edit.text() and self.parcel_calc_price_value:
+        #     value = float(self.elevation_value_edit.text())
+        #     self.parcel_calc_price_value = self.parcel_calc_price_value * value
+        #
+        # if self.slopy_value_edit.text() and self.parcel_calc_price_value:
+        #     value = float(self.slopy_value_edit.text())
+        #     self.parcel_calc_price_value = self.parcel_calc_price_value * value
+        #
+        # if self.rain_replicate_value_edit.text() and self.parcel_calc_price_value:
+        #     value = float(self.rain_replicate_value_edit.text())
+        #     self.parcel_calc_price_value = self.parcel_calc_price_value * value
+        #
+        # if self.earthquake_value_edit.text() and self.parcel_calc_price_value:
+        #     value = float(self.earthquake_value_edit.text())
+        #     self.parcel_calc_price_value = self.parcel_calc_price_value * value
+        #
+        # if self.soil_quality_value_edit.text() and self.parcel_calc_price_value:
+        #     value = float(self.soil_quality_value_edit.text())
+        #     self.parcel_calc_price_value = self.parcel_calc_price_value * value
+        #
+        # if self.air_quality_value_edit.text() and self.parcel_calc_price_value:
+        #     value = float(self.air_quality_value_edit.text())
+        #     self.parcel_calc_price_value = self.parcel_calc_price_value * value
+        #
+        # if self.permafrost_value_edit.text() and self.parcel_calc_price_value:
+        #     value = float(self.permafrost_value_edit.text())
+        #     self.parcel_calc_price_value = self.parcel_calc_price_value * value
+        #
+        # if self.water_quality_value_edit.text() and self.parcel_calc_price_value:
+        #     value = float(self.water_quality_value_edit.text())
+        #     self.parcel_calc_price_value = self.parcel_calc_price_value * value
+        #
+        # #
+        # if self.shcool_value_edit.text() and self.parcel_calc_price_value:
+        #     value = float(self.shcool_value_edit.text())
+        #     self.parcel_calc_price_value = self.parcel_calc_price_value * value
+        #
+        # self.parcel_calc_base_price.setText(str(self.parcel_calc_price_value))
 
     @pyqtSlot(str)
     def on_elevation_edit_textChanged(self, text):

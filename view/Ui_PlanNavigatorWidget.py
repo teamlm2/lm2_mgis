@@ -181,6 +181,7 @@ class Ui_PlanNavigatorWidget(object):
         self.attribute_twidget.setHorizontalHeaderItem(1, item)
         item = QtGui.QTableWidgetItem()
         self.attribute_twidget.setHorizontalHeaderItem(2, item)
+        self.attribute_twidget.verticalHeader().setSortIndicatorShown(True)
         self.process_type_treewidget = QtGui.QTreeWidget(self.tab)
         self.process_type_treewidget.setGeometry(QtCore.QRect(10, 52, 361, 251))
         self.process_type_treewidget.setObjectName(_fromUtf8("process_type_treewidget"))
