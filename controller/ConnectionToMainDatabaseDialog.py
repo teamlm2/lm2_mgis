@@ -83,6 +83,12 @@ class ConnectionToMainDatabaseDialog(QDialog, Ui_ConnectionToMainDatabaseDialog)
         user = self.user_name_edit.text().strip()
         password = self.password_edit.text().strip()
 
+        if user == password:
+            PluginUtils.show_message(self, u'Анхааруулга',
+                                     u'Хэрэглэгчийн нэр болон нууц үг адилхан байж болохгүй!!!. '
+                                     u'Та нууц үгээ Хэрэглэгчийн менежмэнт хэсгээр орж яг одоо солино уу!!!.')
+            return
+
         self.__password = password
         if not self.password_edit.text():
             PluginUtils.show_message(self, self.tr("Password error"),

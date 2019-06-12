@@ -976,6 +976,73 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         self.main_tree_widget.addTopLevelItem(self.item_polygon_main)
         self.main_tree_widget.setContextMenuPolicy(Qt.CustomContextMenu)
 
+    def __validaty_of_new_parcel(self, parcel):
+
+        valid = True
+        error_message = self.tr("The parcel info can't be saved. The following errors have been found: ")
+
+        return valid, error_message
+
+    def __add_new_parcel(self, parcel):
+
+        new_parcel = PlProjectParcel()
+
+        new_parcel.project_id = self.plan.project_id
+        new_parcel.project_ref = self.plan
+        new_parcel.valid_from = PluginUtils.convert_qt_date_to_python(QDateTime().currentDateTime())
+        new_parcel.au1 = self.au1
+        new_parcel.au2 = self.au2
+        if self.point_rbutton.isChecked():
+            new_parcel.point_geom = WKTElement(parcel.geometry().exportToWkt(), srid=4326)
+        elif self.line_rbutton.isChecked():
+            new_parcel.line_geom = WKTElement(parcel.geometry().exportToWkt(), srid=4326)
+        elif self.polygon_rbutton.isChecked():
+            new_parcel.polygon_geom = WKTElement(parcel.geometry().exportToWkt(), srid=4326)
+
+        self.session.add(new_parcel)
+        self.session.flush()
+        return new_parcel
+
+    def __add_new_parcel_attributes(self, parcel, new_parcel, provider):
+
+        fields = provider.fields()
+        for field in fields:
+            key = field.name()
+            index = provider.fieldNameIndex(key)
+            print parcel.attributes()[index]
+
+    def __import_template_data(self, file_path):
+
+        parcel_shape_layer = QgsVectorLayer(file_path, "tmp_parcel_shape", "ogr")
+
+        if not parcel_shape_layer.isValid():
+            PluginUtils.show_error(self, self.tr("Error loading layer"), self.tr("The layer is invalid."))
+            return
+
+        if parcel_shape_layer.crs().postgisSrid() != 4326:
+            PluginUtils.show_error(self, self.tr("Error loading layer"),
+                                   self.tr("The crs of the layer has to be 4326."))
+            return
+
+        iterator = parcel_shape_layer.getFeatures()
+        provider = parcel_shape_layer.dataProvider()
+        fieldNames = []
+        fields = provider.fields()
+        for field in fields:
+            fieldNames.append(field.name())
+
+        for parcel in iterator:
+            validaty_result = self.__validaty_of_new_parcel(parcel)
+            if not validaty_result[0]:
+                log_measage = validaty_result[1]
+                PluginUtils.show_error(self, self.tr("Invalid parcel info"), log_measage)
+                return
+
+            new_parcel = self.__add_new_parcel(parcel)
+            self.__add_new_parcel_attributes(parcel, new_parcel, provider)
+
+        print fieldNames
+
     @pyqtSlot()
     def on_open_parcel_file_button_clicked(self):
 
@@ -993,7 +1060,8 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
             selected_file = file_dialog.selectedFiles()[0]
             file_path = QFileInfo(selected_file).filePath()
             self.parcel_shape_edit.setText(file_path)
-            self.__import_new_parcels(file_path)
+            # self.__import_new_parcels(file_path)
+            self.__import_template_data(file_path)
             self.open_parcel_file_button.setEnabled(False)
 
     def __import_new_parcels(self, file_path):
@@ -1090,6 +1158,9 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
 
         provider = layer.dataProvider()
         for key, item in column_names.iteritems():
+            print '--'
+            print key
+            print '--'
             index = provider.fieldNameIndex(key)
             if index != -1:
                 value = parcel_feature.attributes()[index]

@@ -56,11 +56,6 @@ class ApplicationDocumentDelegate(QStyledItemDelegate):
             if index.isValid() and event.type() == QEvent.MouseButtonRelease:
                 app_id = self.parent.current_application().app_id
                 role = self.widget.item(index.row(), FILE_TYPE_COLUMN).data(Qt.UserRole)
-
-                archive_app_path = FilePath.app_file_path() + '/' + str(self.parent.current_application_no())
-                # if self.parent.current_application().parcel:
-                #     archive_ftp_path = FilePath.app_ftp_parent_parcel_path() + '/' + str(self.parent.current_application().parcel) + '/' + str(self.parent.current_application_no())
-                # else:
                 archive_ftp_path = FilePath.app_ftp_parent_path() + '/' + str(self.parent.current_application_no())
                 if event.button() == Qt.RightButton:
                     return False
@@ -112,7 +107,6 @@ class ApplicationDocumentDelegate(QStyledItemDelegate):
                         # try:
 
                             self.widget.item(index.row(), FILE_NAME_COLUMN).setText(file_name)
-                        #     shutil.copy2(selected_file, archive_app_path+'/'+file_name)
                             check_item = self.widget.item(index.row(), PROVIDED_COLUMN)
                             check_item.setCheckState(True)
                         #
@@ -183,6 +177,52 @@ class ApplicationDocumentDelegate(QStyledItemDelegate):
                         except SQLAlchemyError, e:
                             PluginUtils.show_error(self, self.tr("File Error"), self.tr("Could not execute: {0}").format(e.message))
                             return True
+
+                        if DatabaseUtils.ftp_connect():
+                            ftp = DatabaseUtils.ftp_connect()
+                            app_doc_count = self.session.query(CtApplicationDocument).filter(
+                                CtApplicationDocument.application_id == app_id). \
+                                filter(CtApplicationDocument.role == role).count()
+                            if app_doc_count == 1:
+                                app_doc = self.session.query(CtApplicationDocument).filter(
+                                    CtApplicationDocument.application_id == app_id). \
+                                    filter(CtApplicationDocument.role == role).one()
+                                doc = self.session.query(CtDocument).filter(CtDocument.id == app_doc.document_id).one()
+
+                                archive_app_path = r'D:/TM_LM2/view.pdf'
+                                view_pdf = open(archive_app_path, 'wb')
+                                file_url = ''
+
+                                url_splits = doc.file_url.split('/')
+                                for url_split in url_splits:
+                                    if not url_split.endswith('.pdf'):
+                                        if file_url == '':
+                                            file_url = url_split
+                                        else:
+                                            file_url = file_url + '/' + url_split
+                                print file_url
+                                print doc.name
+                                try:
+                                    ftp[0].cwd(file_url)
+                                    ftp[0].delete(doc.name)
+
+                                    self.session.query(CtApplicationDocument).filter(
+                                        CtApplicationDocument.application_id == app_id). \
+                                        filter(CtApplicationDocument.role == role).delete()
+                                    self.session.query(CtDocument).filter(
+                                        CtDocument.id == app_doc.document_id).delete()
+
+                                except Exception, e:
+                                    errorcode_string = str(e).split(None, 1)[0]
+                                    if errorcode_string == '550':
+                                        QMessageBox.information(None, QApplication.translate("LM2", "Warning"),
+                                                                QApplication.translate("LM2",
+                                                                                       "Not found directory or file, Please reupload"))
+                                    else:
+                                        QMessageBox.information(None, QApplication.translate("LM2", "Warning"),
+                                                                QApplication.translate("LM2",
+                                                                                       "Not found directory or file, Please reupload"))
+                                    return True
 
                 elif index.column() == PROVIDED_COLUMN:
                     if index.data(Qt.CheckStateRole) == Qt.Unchecked:
