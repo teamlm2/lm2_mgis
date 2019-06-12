@@ -344,7 +344,7 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
 
         # self.__load_report_settings()
         self.__load_certificate_settings()
-        self.__load_payment_settings()
+        # self.__load_payment_settings()
         self.__load_logging_settings()
 
     def __load_report_settings(self):
@@ -2343,34 +2343,35 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
 
         self.update_tax_date.setDate(QDate.currentDate())
 
-        zone_fid = self.zones_tax_lwidget.item(self.zones_tax_lwidget.currentRow()).data(Qt.UserRole)
+        if self.zones_tax_lwidget.item(self.zones_tax_lwidget.currentRow()):
+            zone_fid = self.zones_tax_lwidget.item(self.zones_tax_lwidget.currentRow()).data(Qt.UserRole)
 
-        zone = self.session.query(SetTaxAndPriceZone).filter(SetTaxAndPriceZone.zone_id == zone_fid).one()
+            zone = self.session.query(SetTaxAndPriceZone).filter(SetTaxAndPriceZone.zone_id == zone_fid).one()
 
-        zone_no = zone.zone_no
-        if len(self.landuse_code_list) == 0:
-            # if zone_no != 50 or zone_no != 60 or zone_no != 70 or zone_no != 80:
-            #     for code, description in self.session.query(ClLanduseType.code, ClLanduseType.description). \
-            #             filter(ClLanduseType.code2 != 11, ClLanduseType.code2 != 12, ClLanduseType.code2 != 13 \
-            #                    , ClLanduseType.code2 != 14, ClLanduseType.code2 != 15).all():
-            #         self.landuse_code_list.append(u'{0}: {1}'.format(code, description))
-            # else:
-            for code, description in self.session.query(ClLanduseType.code, ClLanduseType.description).all():
-                self.landuse_code_list.append(u'{0}: {1}'.format(code, description))
+            zone_no = zone.zone_no
+            if len(self.landuse_code_list) == 0:
+                # if zone_no != 50 or zone_no != 60 or zone_no != 70 or zone_no != 80:
+                #     for code, description in self.session.query(ClLanduseType.code, ClLanduseType.description). \
+                #             filter(ClLanduseType.code2 != 11, ClLanduseType.code2 != 12, ClLanduseType.code2 != 13 \
+                #                    , ClLanduseType.code2 != 14, ClLanduseType.code2 != 15).all():
+                #         self.landuse_code_list.append(u'{0}: {1}'.format(code, description))
+                # else:
+                for code, description in self.session.query(ClLanduseType.code, ClLanduseType.description).all():
+                    self.landuse_code_list.append(u'{0}: {1}'.format(code, description))
 
-        self.__set_up_twidget(self.land_tax_twidget)
+            self.__set_up_twidget(self.land_tax_twidget)
 
-        delegate = LandUseComboBoxDelegate(TAX_LAND_USE, self.landuse_code_list, self.land_tax_twidget)
-        self.land_tax_twidget.setItemDelegateForColumn(TAX_LAND_USE, delegate)
-        # delegate = IntegerSpinBoxDelegate(TAX_BASE_VALUE_PER_M2, 0, 10000, 0, 5, self.land_tax_twidget)
-        delegate = DoubleSpinBoxDelegate(TAX_BASE_VALUE_PER_M2, 0, 100000, 0, 0.01, self.land_tax_twidget)
-        self.land_tax_twidget.setItemDelegateForColumn(TAX_BASE_VALUE_PER_M2, delegate)
-        delegate = DoubleSpinBoxDelegate(TAX_BASE_TAX_RATE, 0, 100, 0, 0.01, self.land_tax_twidget)
-        self.land_tax_twidget.setItemDelegateForColumn(TAX_BASE_TAX_RATE, delegate)
-        delegate = IntegerSpinBoxDelegate(TAX_SUBSIDIZED_AREA, 0, 10000, 0, 5, self.land_tax_twidget)
-        self.land_tax_twidget.setItemDelegateForColumn(TAX_SUBSIDIZED_AREA, delegate)
-        delegate = DoubleSpinBoxDelegate(TAX_SUBSIDIZED_TAX_RATE, 0, 100, 0, 0.01, self.land_tax_twidget)
-        self.land_tax_twidget.setItemDelegateForColumn(TAX_SUBSIDIZED_TAX_RATE, delegate)
+            delegate = LandUseComboBoxDelegate(TAX_LAND_USE, self.landuse_code_list, self.land_tax_twidget)
+            self.land_tax_twidget.setItemDelegateForColumn(TAX_LAND_USE, delegate)
+            # delegate = IntegerSpinBoxDelegate(TAX_BASE_VALUE_PER_M2, 0, 10000, 0, 5, self.land_tax_twidget)
+            delegate = DoubleSpinBoxDelegate(TAX_BASE_VALUE_PER_M2, 0, 100000, 0, 0.01, self.land_tax_twidget)
+            self.land_tax_twidget.setItemDelegateForColumn(TAX_BASE_VALUE_PER_M2, delegate)
+            delegate = DoubleSpinBoxDelegate(TAX_BASE_TAX_RATE, 0, 100, 0, 0.01, self.land_tax_twidget)
+            self.land_tax_twidget.setItemDelegateForColumn(TAX_BASE_TAX_RATE, delegate)
+            delegate = IntegerSpinBoxDelegate(TAX_SUBSIDIZED_AREA, 0, 10000, 0, 5, self.land_tax_twidget)
+            self.land_tax_twidget.setItemDelegateForColumn(TAX_SUBSIDIZED_AREA, delegate)
+            delegate = DoubleSpinBoxDelegate(TAX_SUBSIDIZED_TAX_RATE, 0, 100, 0, 0.01, self.land_tax_twidget)
+            self.land_tax_twidget.setItemDelegateForColumn(TAX_SUBSIDIZED_TAX_RATE, delegate)
 
     def __setup_doc_twidget(self):
 

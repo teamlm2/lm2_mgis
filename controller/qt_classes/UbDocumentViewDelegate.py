@@ -59,6 +59,7 @@ class UbDocumentViewDelegate(QStyledItemDelegate):
                     return False
 
                 if index.column() == VIEW_COLUMN:
+
                     ftp_host = QSettings().value(SettingsConstants.FTP_IP)
                     ftp_user = QSettings().value(SettingsConstants.FTP_USER)
                     ftp = FTP(ftp_host, ftp_user, ftp_user)
@@ -70,6 +71,7 @@ class UbDocumentViewDelegate(QStyledItemDelegate):
                     file_name = str(n.split('/')[-1])
                     dir = str(n.split('/')[0])+'/'+str(n.split('/')[1])
 
+                    dir = subdir + '/' + dir
                     ftp.cwd(dir)
 
                     view_pdf = open(FilePath.view_file_path(), 'wb')

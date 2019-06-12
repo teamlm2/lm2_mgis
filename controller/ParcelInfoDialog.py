@@ -3221,24 +3221,66 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
                 PluginUtils.show_message(self, self.tr("LM2", "FTP connection"), self.tr("Document server not connect!!!"))
                 return
 
+    def __ftp_find_file(self, files, ftp, doc_id):
+
+        if not files:
+            ftp.cwd('/home/administrator/Archive-UB/BGD')
+            files = ftp.nlst(str(doc_id))
+        if not files:
+            ftp.cwd('/home/administrator/Archive-UB/BHD')
+            files = ftp.nlst(str(doc_id))
+        if not files:
+            ftp.cwd('/home/administrator/Archive-UB/BND')
+            files = ftp.nlst(str(doc_id))
+        if not files:
+            ftp.cwd('/home/administrator/Archive-UB/BZD')
+            files = ftp.nlst(str(doc_id))
+        if not files:
+            ftp.cwd('/home/administrator/Archive-UB/CHD')
+            files = ftp.nlst(str(doc_id))
+        if not files:
+            ftp.cwd('/home/administrator/Archive-UB/HUD')
+            files = ftp.nlst(str(doc_id))
+        if not files:
+            ftp.cwd('/home/administrator/Archive-UB/ND')
+            files = ftp.nlst(str(doc_id))
+        if not files:
+            ftp.cwd('/home/administrator/Archive-UB/SBD')
+            files = ftp.nlst(str(doc_id))
+        if not files:
+            ftp.cwd('/home/administrator/Archive-UB/SHD')
+            files = ftp.nlst(str(doc_id))
+
+        return files, ftp.pwd()
+
     @pyqtSlot()
     def on_load_docs_button_clicked(self):
 
         self.doc_twidget.setRowCount(0)
         ftp_host = QSettings().value(SettingsConstants.FTP_IP)
         ftp_user = QSettings().value(SettingsConstants.FTP_USER)
+
         ftp = FTP(ftp_host, ftp_user, ftp_user)
 
         doc_id = self.documet_cbox.itemData(self.documet_cbox.currentIndex())
 
         files = []
         is_find_doc = False
+        parent_path = ''
         if doc_id:
 
             try:
+                # print ftp.dir()
+                # ftp.cwd('..')
                 if doc_id in ftp.nlst():
                     files = ftp.nlst(str(doc_id))
+                else:
+                    files = self.__ftp_find_file(files, ftp, doc_id)[0]
+                    parent_path = self.__ftp_find_file(files, ftp, doc_id)[1]
+
             except error_perm:
+                files = self.__ftp_find_file(files, ftp, doc_id)[0]
+                parent_path = self.__ftp_find_file(files, ftp, doc_id)[1]
                 is_find_doc = True
 
             if is_find_doc:
@@ -3262,7 +3304,9 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
 
                         file_name = str(n.split('/')[-1])
                         doc_no = str(n.split('/')[-2])[:2]
-                        subdir = str(n.split('/')[0]) + '/' + str(n.split('/')[1]) + '/' + str(n.split('/')[2])
+
+                        subdir = parent_path + '/' + str(n.split('/')[0]) + '/' + str(n.split('/')[1]) + '/' + str(n.split('/')[2])
+                        # subdir = str(n.split('/')[0]) + '/' + str(n.split('/')[1]) + '/' + str(n.split('/')[2])
 
                         if doc_no in doc_no_list:
                             document = self.session.query(ClDocumentRole).filter(ClDocumentRole.code == doc_no).one()
@@ -3272,7 +3316,7 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
 
                             item_name = QTableWidgetItem()
                             item_name.setText(str(file_name))
-                            item_name.setData(Qt.UserRole, subdir)
+                            item_name.setData(Qt.UserRole, ftp.pwd())
                             item_name.setData(Qt.UserRole + 1, n)
 
                             item_description = QTableWidgetItem()

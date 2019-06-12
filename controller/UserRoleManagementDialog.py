@@ -717,10 +717,26 @@ class UserRoleManagementDialog(QDialog, Ui_UserRoleManagementDialog):
                 else:
                     role = self.db_session.query(SetRole).filter(SetRole.user_name == user_name).filter(
                         SetRole.user_name_real == self.username_real_lbl.text()).one()
-                sd_user = self.db_session.query(SdUser).filter(
-                    SdUser.gis_user_real == role.user_name_real).first()
+                sd_user_count = self.db_session.query(SdUser).filter(
+                    SdUser.gis_user_real == role.user_name_real).count()
                 user_pass = hashlib.md5(password).hexdigest()
-                sd_user.password = user_pass
+                date_time_string = QDateTime.currentDateTime().toString(Constants.DATABASE_DATETIME_FORMAT)
+                if sd_user_count == 0:
+                    sd_user = SdUser()
+                    sd_user.username = role.user_name
+                    sd_user.email = role.email
+                    sd_user.password = user_pass
+                    sd_user.firstname = role.first_name
+                    sd_user.lastname = role.surname
+                    sd_user.created_at = datetime.strptime(date_time_string, Constants.PYTHON_DATETIME_FORMAT)
+                    sd_user.created_by = None
+                    sd_user.gis_user_real = role.user_name_real
+                    self.db_session.add(sd_user)
+                else:
+                    sd_user = self.db_session.query(SdUser).filter(
+                        SdUser.gis_user_real == role.user_name_real).first()
+
+                    sd_user.password = user_pass
 
             groups = self.__groupsByUser(user_name)
             for group in groups:
@@ -887,6 +903,7 @@ class UserRoleManagementDialog(QDialog, Ui_UserRoleManagementDialog):
             user_pass = hashlib.md5(password).hexdigest()
 
             date_time_string = QDateTime.currentDateTime().toString(Constants.DATABASE_DATETIME_FORMAT)
+            print sd_user_count
             if sd_user_count == 0:
                 sd_user = SdUser()
                 sd_user.username = role.user_name
@@ -937,7 +954,6 @@ class UserRoleManagementDialog(QDialog, Ui_UserRoleManagementDialog):
                     sd_employee.department_id = role.department
                     sd_employee.position_id = role.position
                     break
-
 
             self.db_session.flush()
             self.db_session.commit()
