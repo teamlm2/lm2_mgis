@@ -563,8 +563,8 @@ class UserRoleManagementDialog(QDialog, Ui_UserRoleManagementDialog):
 
         self.phone_edit.setText(user.phone)
         self.mac_address_edit.setText(user.mac_addresses)
-        self.password_edit.setText(self.PW_PLACEHOLDER)
-        self.retype_password_edit.setText(self.PW_PLACEHOLDER)
+        # self.password_edit.setText(self.PW_PLACEHOLDER)
+        # self.retype_password_edit.setText(self.PW_PLACEHOLDER)
         self.register_edit.setText(user.user_register)
         # populate groups
         self.__populate_group_lwidget()
@@ -586,53 +586,53 @@ class UserRoleManagementDialog(QDialog, Ui_UserRoleManagementDialog):
         aimag_codes = restriction_au_level1.split(',')
 
         try:
-            if len(aimag_codes) == self.db_session.query(AuLevel1).count():  # all Aimags
+            # if len(aimag_codes) == self.db_session.query(AuLevel1).count():  # all Aimags
+            #     item = QListWidgetItem("*")
+            #     item.setData(Qt.UserRole, "*")
+            #     self.aimag_lwidget.addItem(item)
+            #     self.soum_lwidget.addItem(item)
+            # else:
+            for code in aimag_codes:
+                code = code.strip()
+                aimag = self.db_session.query(AuLevel1).filter(AuLevel1.code == code).one()
+                item = QListWidgetItem(aimag.name)
+                item.setData(Qt.UserRole, aimag.code)
+                self.aimag_lwidget.addItem(item)
+
+            restriction_au_level2 = user.restriction_au_level2
+            soum_codes = restriction_au_level2.split(',')
+
+            # Find districts among the Aimags:
+            l1_district_entries = filter(lambda x: x.startswith('1') or x.startswith('01'), aimag_codes)
+            l2_district_entries = filter(lambda x: x.startswith('1') or x.startswith('01'), soum_codes)
+
+            true_aimags = filter(lambda x: not x.startswith('1') and not x.startswith('01'), aimag_codes)
+
+            if len(aimag_codes)-len(l1_district_entries) == 1 and \
+                    len(soum_codes)-len(l2_district_entries) == self.db_session.query(AuLevel2)\
+                                                                .filter(AuLevel2.code.startswith(true_aimags[0]))\
+                                                                .count():
                 item = QListWidgetItem("*")
                 item.setData(Qt.UserRole, "*")
-                self.aimag_lwidget.addItem(item)
                 self.soum_lwidget.addItem(item)
             else:
-                for code in aimag_codes:
+                for code in soum_codes:
                     code = code.strip()
-                    aimag = self.db_session.query(AuLevel1).filter(AuLevel1.code == code).one()
-                    item = QListWidgetItem(aimag.name)
-                    item.setData(Qt.UserRole, aimag.code)
-                    self.aimag_lwidget.addItem(item)
-
-                restriction_au_level2 = user.restriction_au_level2
-                soum_codes = restriction_au_level2.split(',')
-
-                # Find districts among the Aimags:
-                l1_district_entries = filter(lambda x: x.startswith('1') or x.startswith('01'), aimag_codes)
-                l2_district_entries = filter(lambda x: x.startswith('1') or x.startswith('01'), soum_codes)
-
-                true_aimags = filter(lambda x: not x.startswith('1') and not x.startswith('01'), aimag_codes)
-
-                if len(aimag_codes)-len(l1_district_entries) == 1 and \
-                        len(soum_codes)-len(l2_district_entries) == self.db_session.query(AuLevel2)\
-                                                                    .filter(AuLevel2.code.startswith(true_aimags[0]))\
-                                                                    .count():
-                    item = QListWidgetItem("*")
-                    item.setData(Qt.UserRole, "*")
+                    soum = self.db_session.query(AuLevel2).filter(AuLevel2.code == code).one()
+                    item = QListWidgetItem(soum.name+'_'+soum.code)
+                    item.setData(Qt.UserRole, soum.code)
                     self.soum_lwidget.addItem(item)
-                else:
-                    for code in soum_codes:
-                        code = code.strip()
-                        soum = self.db_session.query(AuLevel2).filter(AuLevel2.code == code).one()
-                        item = QListWidgetItem(soum.name+'_'+soum.code)
-                        item.setData(Qt.UserRole, soum.code)
-                        self.soum_lwidget.addItem(item)
 
-                        self.soums_list.append(soum.code)
-                        self.department_cbox.clear()
-                        organization = self.organization_cbox.itemData(self.organization_cbox.currentIndex())
+                    self.soums_list.append(soum.code)
+                    self.department_cbox.clear()
+                    organization = self.organization_cbox.itemData(self.organization_cbox.currentIndex())
 
-                        departments = self.db_session.query(SdDepartment). \
-                            filter(SdDepartment.organization == organization). \
-                            filter(SdDepartment.au2.in_(self.soums_list)).all()
+                    departments = self.db_session.query(SdDepartment). \
+                        filter(SdDepartment.organization == organization). \
+                        filter(SdDepartment.au2.in_(self.soums_list)).all()
 
-                        for department in departments:
-                            self.department_cbox.addItem(department.name, department.department_id)
+                    for department in departments:
+                        self.department_cbox.addItem(department.name, department.department_id)
 
         except NoResultFound:
             pass
@@ -680,6 +680,7 @@ class UserRoleManagementDialog(QDialog, Ui_UserRoleManagementDialog):
         email = ''
         if self.email_edit.text():
             email = self.email_edit.text().strip()
+
         if self.has_privilege:
             try:
                 self.db_session.execute("SET ROLE role_management")
@@ -903,7 +904,7 @@ class UserRoleManagementDialog(QDialog, Ui_UserRoleManagementDialog):
             user_pass = hashlib.md5(password).hexdigest()
 
             date_time_string = QDateTime.currentDateTime().toString(Constants.DATABASE_DATETIME_FORMAT)
-            print sd_user_count
+
             if sd_user_count == 0:
                 sd_user = SdUser()
                 sd_user.username = role.user_name
@@ -965,6 +966,7 @@ class UserRoleManagementDialog(QDialog, Ui_UserRoleManagementDialog):
             return True
         else:
             if password != self.PW_PLACEHOLDER:
+
                 self.db_session.execute(u"ALTER ROLE {0} PASSWORD '{1}'".format(user_name, password))
 
                 active_role_count = self.db_session.query(SetRole).filter(SetRole.user_name == user_name).filter(
@@ -1116,20 +1118,48 @@ class UserRoleManagementDialog(QDialog, Ui_UserRoleManagementDialog):
             if len(self.aimag_lwidget.findItems("*", Qt.MatchExactly)) == 0:
                 if au_level1_name == '*':
                     self.aimag_lwidget.clear()
-                    # self.soum_lwidget.clear()
-                    item = QListWidgetItem("*")
-                    item.setData(Qt.UserRole, "*")
-                    self.soum_lwidget.addItem(item)
-                item = QListWidgetItem(au_level1_name)
-                item.setData(Qt.UserRole, au_level1_code)
-                self.aimag_lwidget.addItem(item)
-                self.aimag_lwidget.setCurrentItem(item)
+                    self.soum_lwidget.clear()
+                    # aimag_lwidget = self.aimag_lwidget
+                    # soum_lwidget = self.soum_lwidget
+                    self.__all_au1()
+                    # item = QListWidgetItem("*")
+                    # item.setData(Qt.UserRole, "*")
+                    # self.soum_lwidget.addItem(item)
+                else:
+                    item = QListWidgetItem(au_level1_name)
+                    item.setData(Qt.UserRole, au_level1_code)
+                    self.aimag_lwidget.addItem(item)
+                    self.aimag_lwidget.setCurrentItem(item)
 
         # if self.aimag_lwidget.count() > 1:
         #     self.soum_lwidget.clear()
         #     item = QListWidgetItem("*")
         #     item.setData(Qt.UserRole, "*")
         #     self.soum_lwidget.addItem(item)
+
+    def __all_au1(self):
+
+        all_au1 = self.db_session.query(AuLevel1).all()
+        for au1 in all_au1:
+            au_level1_name = au1.name
+            au_level1_code = au1.code
+            item = QListWidgetItem(au_level1_name)
+            item.setData(Qt.UserRole, au_level1_code)
+            self.aimag_lwidget.addItem(item)
+
+            self.__all_au2(au_level1_code)
+
+    def __all_au2(self, au_level1_code):
+
+        soums = self.db_session.query(AuLevel2.code, AuLevel2.name).filter(
+            AuLevel2.code.startswith(au_level1_code)).order_by(AuLevel2.name)
+        for soum in soums:
+            au_level2_name = soum.name
+            au_level2_code = soum.code
+            item = QListWidgetItem(au_level2_name + '_' + au_level2_code)
+            item.setData(Qt.UserRole, au_level2_code)
+            self.soum_lwidget.addItem(item)
+            self.soums_list.append(au_level2_code)
 
     @pyqtSlot()
     def on_up_aimag_button_clicked(self):
@@ -1146,6 +1176,8 @@ class UserRoleManagementDialog(QDialog, Ui_UserRoleManagementDialog):
         au_level2_name = self.soum_cbox.currentText()
         au_level2_code = self.soum_cbox.itemData(self.soum_cbox.currentIndex(), Qt.UserRole)
 
+        if not au_level2_code:
+            return
         itemsList = self.aimag_lwidget.selectedItems()
         if au_level2_code == -1:
             if self.aimag_lwidget.currentItem() is None:

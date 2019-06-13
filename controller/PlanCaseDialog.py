@@ -983,7 +983,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
 
         return valid, error_message
 
-    def __add_new_parcel(self, parcel):
+    def __add_new_parcel(self, parcel, parcel_shape_layer):
 
         new_parcel = PlProjectParcel()
 
@@ -999,6 +999,8 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         elif self.polygon_rbutton.isChecked():
             new_parcel.polygon_geom = WKTElement(parcel.geometry().exportToWkt(), srid=4326)
 
+        self.__copy_parcel_attributes(parcel, new_parcel, parcel_shape_layer)
+
         self.session.add(new_parcel)
         self.session.flush()
         return new_parcel
@@ -1009,7 +1011,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         for field in fields:
             key = field.name()
             index = provider.fieldNameIndex(key)
-            print parcel.attributes()[index]
+            # print parcel.attributes()[index]
 
     def __import_template_data(self, file_path):
 
@@ -1031,6 +1033,10 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         for field in fields:
             fieldNames.append(field.name())
 
+        count = 0
+        approved_count = 0
+        refused_count = 0
+
         for parcel in iterator:
             validaty_result = self.__validaty_of_new_parcel(parcel)
             if not validaty_result[0]:
@@ -1038,10 +1044,38 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
                 PluginUtils.show_error(self, self.tr("Invalid parcel info"), log_measage)
                 return
 
-            new_parcel = self.__add_new_parcel(parcel)
-            self.__add_new_parcel_attributes(parcel, new_parcel, provider)
+            count += 1
+            id = QDateTime().currentDateTime().toString("MMddhhmmss") + str(count)
+            header = str(count)
+            if self.__get_attribute(parcel, parcel_shape_layer)[0]:
+                process_type = self.__get_attribute(parcel, parcel_shape_layer)[0]
+                header = header + ':' + '(' + str(process_type.code) + ')' + unicode(process_type.name)
+            if self.__get_attribute(parcel, parcel_shape_layer)[2]:
+                landname = self.__get_attribute(parcel, parcel_shape_layer)[2]
+                header = header + '/' + unicode(landname) + '/'
+            if self.__approved_parcel_check(parcel, parcel_shape_layer, id):
+                new_parcel = self.__add_new_parcel(parcel, parcel_shape_layer)
+                self.__add_new_parcel_attributes(parcel, new_parcel, provider)
 
-        print fieldNames
+                main_parcel_item = QTreeWidgetItem()
+                main_parcel_item.setText(0, header)
+                main_parcel_item.setIcon(0, QIcon(QPixmap(":/plugins/lm2/parcel_red.png")))
+                main_parcel_item.setData(0, Qt.UserRole, id)
+                main_parcel_item.setData(0, Qt.UserRole + 1, APPROVED)
+                self.approved_item.addChild(main_parcel_item)
+                approved_count += 1
+
+            else:
+                main_parcel_item = QTreeWidgetItem()
+                main_parcel_item.setText(0, header)
+                main_parcel_item.setIcon(0, QIcon(QPixmap(":/plugins/lm2/parcel_red.png")))
+                main_parcel_item.setData(0, Qt.UserRole, id)
+                main_parcel_item.setData(0, Qt.UserRole + 1, REFUSED)
+                self.refused_item.addChild(main_parcel_item)
+                refused_count += 1
+
+        self.approved_item.setText(0, self.tr("Approved") + ' (' + str(approved_count) + ')')
+        self.refused_item.setText(0, self.tr("Refused") + ' (' + str(refused_count) + ')')
 
     @pyqtSlot()
     def on_open_parcel_file_button_clicked(self):
@@ -1061,6 +1095,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
             file_path = QFileInfo(selected_file).filePath()
             self.parcel_shape_edit.setText(file_path)
             # self.__import_new_parcels(file_path)
+
             self.__import_template_data(file_path)
             self.open_parcel_file_button.setEnabled(False)
 
@@ -1145,9 +1180,9 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
     def __get_attribute(self, parcel_feature, layer):
 
         column_name_parcel_id = "id"
-        column_name_plan_code = "plan_code"
+        column_name_plan_code = "badedturl"
         column_name_landuse = "landuse"
-        column_name_landname = "landname"
+        column_name_landname = "gaz_add"
         column_name_khashaa = "address_kh"
         column_name_street = "address_st"
         column_name_comment = "comment"
@@ -1158,9 +1193,6 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
 
         provider = layer.dataProvider()
         for key, item in column_names.iteritems():
-            print '--'
-            print key
-            print '--'
             index = provider.fieldNameIndex(key)
             if index != -1:
                 value = parcel_feature.attributes()[index]
@@ -1191,9 +1223,9 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         valid = True
 
         column_name_parcel_id = "id"
-        column_name_plan_code = "plan_code"
+        column_name_plan_code = "badedturl"
         column_name_landuse = "landuse"
-        column_name_landname = "landname"
+        column_name_landname = "gaz_add"
         column_name_khashaa = "address_kh"
         column_name_street = "address_st"
         column_name_comment = "comment"
@@ -1234,7 +1266,6 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         #     self.message_label.setText(error_message)
 
         # try:
-
         if column_names[column_name_plan_code]:
             count = self.session.query(ClPlanZone).filter(ClPlanZone.code == column_names[column_name_plan_code]).count()
             if count == 0:
@@ -1242,6 +1273,11 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
                 message = unicode(u'Үйл ажиллагааны ангиллын дугаар буруу байна.')
                 error_message = error_message + "\n" + message
                 self.message_label.setText(error_message)
+        else:
+            valid = False
+            message = unicode(u'Үйл ажиллагааны ангиллын дугаар буруу байна.')
+            error_message = error_message + "\n" + message
+            self.message_label.setText(error_message)
         # except SQLAlchemyError, e:
         #     valid = False
         #     message = unicode(u'Үйл ажиллагааны ангиллын дугаар буруу байна.')
@@ -1276,12 +1312,12 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
 
         return valid
 
-    def __copy_parcel_attributes(self, parcel_feature, parcel_object, layer):
+    def __copy_parcel_attributes(self, parcel, new_parcel, parcel_shape_layer):
 
         column_name_parcel_id = "id"
-        column_name_plan_code = "plan_code"
+        column_name_plan_code = "badedturl"
         column_name_landuse = "landuse"
-        column_name_landname = "landname"
+        column_name_landname = "gaz_add"
         column_name_khashaa = "address_kh"
         column_name_street = "address_st"
         column_name_comment = "comment"
@@ -1290,11 +1326,11 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
                         column_name_landname: "", column_name_khashaa: "", column_name_street: "",
                         column_name_comment: ""}
 
-        provider = layer.dataProvider()
+        provider = parcel_shape_layer.dataProvider()
         for key, item in column_names.iteritems():
             index = provider.fieldNameIndex(key)
             if index != -1:
-                value = parcel_feature.attributes()[index]
+                value = parcel.attributes()[index]
                 column_names[key] = value
 
         id = 0
@@ -1321,15 +1357,18 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
             comment = column_names[column_name_comment]
 
         zone_type_count = self.session.query(ClPlanZone).filter(ClPlanZone.code == plan_code).count()
+        if zone_type_count == 0:
+            PluginUtils.show_error(self, self.tr("Error loading layer"), self.tr("The layer is invalid."))
+            return
         if zone_type_count == 1:
 
             zone_type = self.session.query(ClPlanZone).filter(ClPlanZone.code == plan_code).one()
-            parcel_object.plan_zone_id = zone_type.plan_zone_id
-            parcel_object.badedturl = plan_code
-        parcel_object.landuse = landuse
-        parcel_object.gazner = landname
+            new_parcel.plan_zone_id = zone_type.plan_zone_id
+            new_parcel.badedturl = plan_code
+            # new_parcel.landuse = landuse
+            new_parcel.gazner = landname
 
-        return parcel_object
+        return new_parcel
 
     @pyqtSlot()
     def new_zoom_to_selected_clicked(self):

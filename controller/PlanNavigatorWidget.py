@@ -2147,14 +2147,19 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
         layer = QgsVectorLayer('Polygon?crs=epsg:4326', 'PlanTemplate', 'memory')
         pr = layer.dataProvider()
         fields = []
+        fields.append(QgsField('badedturl', QVariant.String))
         row_count = self.attribute_twidget.rowCount()
         for row in range(row_count):
             item = self.attribute_twidget.item(row, 0)
             attribute_id = item.data(Qt.UserRole)
             attribute = self.session.query(ClAttributeZone).filter(ClAttributeZone.attribute_id == attribute_id).one()
 
-            fields.append(QgsField(attribute.attribute_name, QVariant.String))
-
+            attr_type = QVariant.String
+            if attribute.attribute_type == 'number':
+                attr_type = QVariant.Double
+            elif attribute.attribute_type == 'date':
+                attr_type = QVariant.Date
+            fields.append(QgsField(attribute.attribute_name, attr_type))
 
         pr.addAttributes(fields)
         layer.updateFields()
