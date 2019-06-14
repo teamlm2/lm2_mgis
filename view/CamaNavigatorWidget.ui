@@ -119,7 +119,7 @@
        </rect>
       </property>
       <property name="currentIndex">
-       <number>3</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
@@ -1992,7 +1992,7 @@
         <property name="geometry">
          <rect>
           <x>301</x>
-          <y>200</y>
+          <y>203</y>
           <width>75</width>
           <height>23</height>
          </rect>
@@ -2033,13 +2033,39 @@ font: 75 14pt &quot;Helvetica&quot;;</string>
         <property name="geometry">
          <rect>
           <x>388</x>
-          <y>200</y>
+          <y>203</y>
           <width>75</width>
           <height>23</height>
          </rect>
         </property>
         <property name="text">
          <string>Apply</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="print_button">
+        <property name="geometry">
+         <rect>
+          <x>216</x>
+          <y>203</y>
+          <width>75</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Print</string>
+        </property>
+       </widget>
+       <widget class="QProgressBar" name="print_pbar">
+        <property name="geometry">
+         <rect>
+          <x>218</x>
+          <y>190</y>
+          <width>243</width>
+          <height>11</height>
+         </rect>
+        </property>
+        <property name="value">
+         <number>0</number>
         </property>
        </widget>
       </widget>

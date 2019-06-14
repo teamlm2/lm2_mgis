@@ -47,6 +47,7 @@ import xlsxwriter
 import time
 import urllib
 import urllib2
+import json
 
 LANDUSE_1 = u'Хөдөө аж ахуйн газар'
 LANDUSE_2 = u'Хот, тосгон, бусад суурины газар'
@@ -94,6 +95,9 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
         self.cadastre_rbutton.isCheckable()
         self.__setup_twidget()
         self.__setup_context_menu()
+        self.print_pbar.setVisible(False)
+        self.print_pbar.setMinimum(1)
+        self.print_pbar.setValue(0)
 
     def __setup_context_menu(self):
 
@@ -882,9 +886,9 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
         # return
         filter_is_set = False
         if self.parcel_num_edit.text():
-            if len(self.parcel_num_edit.text()) < 5:
-                self.error_label.setText(self.tr("parcel find search character should be at least 4"))
-                return
+            # if len(self.parcel_num_edit.text()) < 5:
+            #     self.error_label.setText(self.tr("parcel find search character should be at least 4"))
+            #     return
             filter_is_set = True
             parcel_no = "%" + self.parcel_num_edit.text() + "%"
             parcels = parcels.filter(CaParcel.parcel_id.ilike(parcel_no))
@@ -929,6 +933,10 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
             self.cadastre_current_twidget.insertRow(count)
             address_khashaa = ''
             address_streetname = ''
+            # coord_x = func.ST_X(func.ST_Centroid(parcel.geometry))
+            # coord_y = func.ST_Y(func.ST_Centroid(parcel.geometry))
+            c_p = self.session.query(func.ST_X(func.ST_Centroid(CaParcel.geometry)), func.ST_Y(func.ST_Centroid(CaParcel.geometry))).filter(CaParcel.parcel_id == parcel.parcel_id).one()
+
             if parcel.address_khashaa:
                 address_khashaa = parcel.address_khashaa
             if parcel.address_streetname:
@@ -937,6 +945,8 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
             item.setCheckState(Qt.Unchecked)
             item.setIcon(QIcon(QPixmap(":/plugins/lm2/parcel.png")))
             item.setData(Qt.UserRole, parcel.parcel_id)
+            item.setData(Qt.UserRole + 1, parcel.area_m2)
+            item.setData(Qt.UserRole + 2, c_p)
             self.cadastre_current_twidget.setItem(count, 0, item)
 
             factor_elevation_count = self.session.query(CmParcelFactorValue).\
@@ -1125,3 +1135,137 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
         self.parcel_streetname_edit.clear()
         self.parcel_khashaa_edit.clear()
         self.is_no_calculate_chbox.setCheckState(Qt.Unchecked)
+
+    @pyqtSlot()
+    def on_print_button_clicked(self):
+
+        self.print_pbar.setVisible(True)
+
+        default_path = r'D:/TM_LM2/cama/reports'
+        if not os.path.exists(default_path):
+            os.makedirs(default_path)
+
+        workbook = xlsxwriter.Workbook(default_path + "/" + "cama_calc_payment.xlsx")
+        worksheet = workbook.add_worksheet()
+
+        format = workbook.add_format()
+        format.set_text_wrap()
+        format.set_align('center')
+        format.set_align('vcenter')
+        format.set_font_name('Times New Roman')
+        format.set_font_size(8)
+
+        format_header = workbook.add_format()
+        format_header.set_text_wrap()
+        format_header.set_align('vcenter')
+        format_header.set_font_name('Times New Roman')
+        format_header.set_font_size(10)
+        format_header.set_bold()
+
+        head_text = self.working_l1_cbox.currentText() + u' аймаг/хот-н ' + self.working_l2_cbox.currentText() + u' сум/дүүрэг-н нэгж талбарын үнэлэгдсэн үнийн тайлан'
+        worksheet.write(1, 0, u'Нэгж талбарын дугаар', format)
+        worksheet.merge_range('A2:M2', head_text, format_header)
+
+        r_row = 3
+
+        worksheet.write(r_row, 0, u'Нэгж талбарын дугаар', format)
+        worksheet.write(r_row, 1, u'Талбайн хэмжээ', format)
+        worksheet.write(r_row, 2, u'Өндөршил', format)
+        worksheet.write(r_row, 3, u'Налуужилт', format)
+        worksheet.write(r_row, 4, u'Сургууль', format)
+        worksheet.write(r_row, 5, u'Цэцэрлэг', format)
+        worksheet.write(r_row, 6, u'Эмнэлэг', format)
+        worksheet.write(r_row, 7, u'Хөрсний бохирдол', format)
+        worksheet.write(r_row, 8, u'Үер усны эрсдэл', format)
+        worksheet.write(r_row, 9, u'Хотын төв хүртэлх зай', format)
+        worksheet.write(r_row, 10, u'Тооцоологдсон үнэ/₮/', format)
+
+        rows = self.cadastre_current_twidget.rowCount()
+
+        factors = self.session.query(CmFactor).\
+            filter(or_(CmFactor.id == 2, CmFactor.id == 3, CmFactor.id == 16, CmFactor.id == 17, CmFactor.id == 18, CmFactor.id == 37, CmFactor.id == 5, CmFactor.id == 9)).all()
+        print len(range(rows))
+        pbar_count = len(range(rows))
+        self.print_pbar.setValue(0)
+        self.print_pbar.setMaximum(pbar_count)
+        for row in range(rows):
+
+            dis_shl = 0
+            dis_hos = 0
+            dis_kid = 0
+            valuation = 0
+            dis_center = 1000
+            slope = 0
+            risk_flood = 2
+            risk_soil = 3
+
+            item = self.cadastre_current_twidget.item(row, 0)
+            parcel_id = item.data(Qt.UserRole)
+            area = (item.data(Qt.UserRole + 1))
+            coords = item.data(Qt.UserRole + 2)
+            coord_x = (coords[0])
+            coord_y = (coords[1])
+            for factor in factors:
+                count = self.session.query(CmParcelFactorValue).\
+                    filter(CmParcelFactorValue.parcel_id == parcel_id). \
+                    filter(CmParcelFactorValue.factor_id == factor.id). \
+                    filter(CmParcelFactorValue.in_active == True).count()
+
+                if count == 1:
+                    value = self.session.query(CmParcelFactorValue). \
+                        filter(CmParcelFactorValue.parcel_id == parcel_id). \
+                        filter(CmParcelFactorValue.factor_id == factor.id). \
+                        filter(CmParcelFactorValue.in_active == True).one()
+
+                    if factor.id == 2:
+                        valuation = int(value.factor_value)
+                    if factor.id == 3:
+                        slope = int(value.factor_value)
+                    if factor.id == 5:
+                        risk_flood = int(value.factor_value)
+                    if factor.id == 9:
+                        risk_soil = int(value.factor_value)
+                    if factor.id == 16:
+                        dis_shl = int(value.factor_value)
+                    if factor.id == 17:
+                        dis_kid = int(value.factor_value)
+                    if factor.id == 18:
+                        dis_hos = int(value.factor_value)
+                    if factor.id == 37:
+                        dis_center = int(value.factor_value)
+
+            params = 'area=' + str(area) + '&coord_x=' + str(coord_x) + '&coord_y=' + str(coord_y) + '&valuation=' + str(valuation) + \
+                     '&slope=' + str(slope) + '&risk_flood=' + str(risk_flood) + '&risk_soil=' + str(risk_soil) + '&dis_shl=' + str(dis_shl) + \
+                     '&dis_kid=' + str(dis_kid) + '&dis_hos=' + str(dis_hos) + '&dis_center=' + str(dis_center)
+
+            url = 'http://192.168.88.253:5000/test?' + params
+            # print url
+            respons = urllib.request.urlopen(url)
+            # print respons
+            data = json.loads(respons.read().decode(respons.info().get_param('charset') or 'utf-8'))
+            calc_value = data['value']
+            # print parcel_id + '-' + unicode(data['value'])
+
+            r_row = r_row + 1
+            worksheet.write(r_row, 0, parcel_id, format)
+            worksheet.write(r_row, 1, area, format)
+            worksheet.write(r_row, 2, valuation, format)
+            worksheet.write(r_row, 3, slope, format)
+            worksheet.write(r_row, 4, dis_shl, format)
+            worksheet.write(r_row, 5, dis_kid, format)
+            worksheet.write(r_row, 6, dis_hos, format)
+            worksheet.write(r_row, 7, risk_soil, format)
+            worksheet.write(r_row, 8, risk_flood, format)
+            worksheet.write(r_row, 9, dis_center, format)
+            worksheet.write(r_row, 10, calc_value, format)
+
+            value_p = self.print_pbar.value() + 1
+            self.print_pbar.setValue(value_p)
+
+        try:
+            workbook.close()
+            QDesktopServices.openUrl(
+                QUrl.fromLocalFile(default_path + "/" + "cama_calc_payment.xlsx"))
+        except IOError, e:
+            PluginUtils.show_error(self, self.tr("Out error"),
+                                   self.tr("This file is already opened. Please close re-run"))

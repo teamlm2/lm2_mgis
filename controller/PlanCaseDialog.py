@@ -1365,6 +1365,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
             zone_type = self.session.query(ClPlanZone).filter(ClPlanZone.code == plan_code).one()
             new_parcel.plan_zone_id = zone_type.plan_zone_id
             new_parcel.badedturl = plan_code
+
             # new_parcel.landuse = landuse
             new_parcel.gazner = landname
 
