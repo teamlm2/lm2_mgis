@@ -6,7 +6,7 @@ from geoalchemy2 import Geometry
 from CtApp1Ext import *
 from LdProcessPlan import *
 
-class LdAttributeGroup(Base):
+class ClAttributeZoneGroup(Base):
 
     __tablename__ = 'ld_attribute_group'
 

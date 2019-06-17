@@ -6,7 +6,7 @@ from geoalchemy2 import Geometry
 from CtApp1Ext import *
 from LdProcessPlan import *
 
-class LdAttributeProcess(Base):
+class ClAttributeZoneProcess(Base):
 
     __tablename__ = 'ld_attribute_process'
 
@@ -19,5 +19,5 @@ class LdAttributeProcess(Base):
     process_ref = relationship("LdProcessPlan")
 
     attribute_id = Column(Integer, ForeignKey('ld_attribute.id'))
-    attribute_ref = relationship("LdAttribute")
+    attribute_ref = relationship("ClAttributeZone")
 

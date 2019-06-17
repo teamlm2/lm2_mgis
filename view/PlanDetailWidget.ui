@@ -123,7 +123,7 @@ font: 75 14pt &quot;Helvetica&quot;;</string>
         <x>4</x>
         <y>27</y>
         <width>572</width>
-        <height>221</height>
+        <height>201</height>
        </rect>
       </property>
       <property name="title">
@@ -243,8 +243,8 @@ font: 75 14pt &quot;Helvetica&quot;;</string>
       <widget class="QPushButton" name="main_edit_attribute_button">
        <property name="geometry">
         <rect>
-         <x>204</x>
-         <y>179</y>
+         <x>7</x>
+         <y>170</y>
          <width>81</width>
          <height>23</height>
         </rect>
@@ -292,8 +292,8 @@ font: 75 14pt &quot;Helvetica&quot;;</string>
       <widget class="QPushButton" name="main_zone_load_button">
        <property name="geometry">
         <rect>
-         <x>23</x>
-         <y>179</y>
+         <x>484</x>
+         <y>170</y>
          <width>81</width>
          <height>23</height>
         </rect>
@@ -302,33 +302,30 @@ font: 75 14pt &quot;Helvetica&quot;;</string>
         <string>Load</string>
        </property>
       </widget>
-      <widget class="QProgressBar" name="main_load_pbar">
+      <widget class="QPushButton" name="get_data_layer_button">
        <property name="geometry">
         <rect>
-         <x>304</x>
-         <y>179</y>
-         <width>261</width>
-         <height>23</height>
-        </rect>
-       </property>
-       <property name="value">
-        <number>0</number>
-       </property>
-       <property name="textDirection">
-        <enum>QProgressBar::TopToBottom</enum>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="main_to_layer_button">
-       <property name="geometry">
-        <rect>
-         <x>114</x>
-         <y>179</y>
+         <x>100</x>
+         <y>170</y>
          <width>81</width>
          <height>23</height>
         </rect>
        </property>
        <property name="text">
-        <string>To Layer</string>
+        <string>Get Data layer</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="parcel_clear_button">
+       <property name="geometry">
+        <rect>
+         <x>400</x>
+         <y>170</y>
+         <width>75</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Clear</string>
        </property>
       </widget>
      </widget>
@@ -374,10 +371,10 @@ font: 75 14pt &quot;Helvetica&quot;;</string>
      <widget class="QTreeWidget" name="main_tree_widget">
       <property name="geometry">
        <rect>
-        <x>9</x>
-        <y>270</y>
-        <width>559</width>
-        <height>431</height>
+        <x>4</x>
+        <y>260</y>
+        <width>573</width>
+        <height>485</height>
        </rect>
       </property>
       <column>
@@ -385,6 +382,46 @@ font: 75 14pt &quot;Helvetica&quot;;</string>
         <string>Result</string>
        </property>
       </column>
+     </widget>
+     <widget class="QLabel" name="parcel_results_label">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>230</y>
+        <width>181</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <family>Lucida Grande</family>
+        <pointsize>14</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>Results:</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+      </property>
+     </widget>
+     <widget class="QProgressBar" name="main_load_pbar">
+      <property name="geometry">
+       <rect>
+        <x>310</x>
+        <y>230</y>
+        <width>261</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="value">
+       <number>0</number>
+      </property>
+      <property name="textDirection">
+       <enum>QProgressBar::TopToBottom</enum>
+      </property>
      </widget>
     </widget>
    </widget>

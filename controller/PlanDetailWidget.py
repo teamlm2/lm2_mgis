@@ -165,7 +165,8 @@ class PlanDetailWidget(QDockWidget, Ui_PlanDetailWidget, DatabaseHelper):
         values = self.session.query(PlProjectParcel). \
             filter(PlProjectParcel.project_id == self.plan.project_id)
 
-        self.main_load_pbar.setMaximum(values.count())
+        all_count = values.count()
+        self.main_load_pbar.setMaximum(all_count)
 
         points = self.session.query(PlProjectParcel). \
             filter(PlProjectParcel.project_id == self.plan.project_id). \
@@ -204,6 +205,7 @@ class PlanDetailWidget(QDockWidget, Ui_PlanDetailWidget, DatabaseHelper):
                 join(ClZoneSub, PlProjectParcel.plan_zone_id == ClZoneSub.plan_zone_id). \
                 filter(ClZoneSub.description.ilike(process_text))
 
+        count = 0
         tree = self.main_tree_widget
         for value in polygons:
             name = ''
@@ -224,6 +226,9 @@ class PlanDetailWidget(QDockWidget, Ui_PlanDetailWidget, DatabaseHelper):
                     value_p = self.main_load_pbar.value() + 1
                     self.main_load_pbar.setValue(value_p)
 
+                    count += 1
+                    self.parcel_results_label.setText(self.tr("Results: ") + str(all_count) + '/' + str(count))
+
         for value in points:
             name = ''
             if value.gazner:
@@ -243,6 +248,9 @@ class PlanDetailWidget(QDockWidget, Ui_PlanDetailWidget, DatabaseHelper):
                     value_p = self.main_load_pbar.value() + 1
                     self.main_load_pbar.setValue(value_p)
 
+                    count += 1
+                    self.parcel_results_label.setText(self.tr("Results: ") + str(all_count) + '/' + str(count))
+
         for value in lines:
             name = ''
             if value.gazner:
@@ -261,6 +269,9 @@ class PlanDetailWidget(QDockWidget, Ui_PlanDetailWidget, DatabaseHelper):
                     self.item_line_main.addChild(item)
                     value_p = self.main_load_pbar.value() + 1
                     self.main_load_pbar.setValue(value_p)
+
+                    count += 1
+                    self.parcel_results_label.setText(self.tr("Results: ") + str(all_count) + '/' + str(count))
 
         self.main_tree_widget.expandAll()
         self.main_load_pbar.setVisible(False)
@@ -337,7 +348,7 @@ class PlanDetailWidget(QDockWidget, Ui_PlanDetailWidget, DatabaseHelper):
         b = set(self.process_types)
 
         process_type = list(b)[0]
-        self.current_dialog = PlanAttributeEditDialog(self.plugin, self, parcel_list, process_type, self.plan.project_id,True,
+        self.current_dialog = PlanAttributeEditDialog(self.plugin, self, parcel_list, process_type, self.plan,True,
                                                     self.plugin.iface.mainWindow())
         self.current_dialog.show()
 
@@ -405,3 +416,24 @@ class PlanDetailWidget(QDockWidget, Ui_PlanDetailWidget, DatabaseHelper):
                 self.parcels.remove(code)
             if process_type in self.process_types:
                 self.process_types.remove(process_type)
+
+    def __remove_parcel_items(self):
+
+        self.__setup_main_tree_widget()
+        self.parcel_results_label.setText("")
+
+    @pyqtSlot()
+    def on_parcel_clear_button_clicked(self):
+
+        self.__remove_parcel_items()
+        # self.__clear_parcel()
+
+    @pyqtSlot()
+    def on_get_data_layer_button_clicked(self):
+
+        print '---'
+        print self.item_polygon_main.childCount()
+        print self.item_line_main.childCount()
+        print self.item_point_main.childCount()
+
+

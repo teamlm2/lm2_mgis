@@ -45,6 +45,8 @@ from ..model.PlSetRightFormRightType import *
 from ..model.PlProjectParcelRefParcel import *
 from ..model.ParcelSearch import *
 from ..model.CaParcelTbl import *
+from ..model.PlProjectParcelAttributeValue import *
+from ..model.ClAttributeZone import *
 from ..view.Ui_PlanCaseDialog import *
 from .qt_classes.ApplicantDocumentDelegate import ApplicationDocumentDelegate
 from .qt_classes.DocumentsTableWidget import DocumentsTableWidget
@@ -992,6 +994,8 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         new_parcel.valid_from = PluginUtils.convert_qt_date_to_python(QDateTime().currentDateTime())
         new_parcel.au1 = self.au1
         new_parcel.au2 = self.au2
+        new_parcel.created_at = DatabaseUtils.current_date_time()
+        new_parcel.created_by = DatabaseUtils.current_sd_user().user_id
         if self.point_rbutton.isChecked():
             new_parcel.point_geom = WKTElement(parcel.geometry().exportToWkt(), srid=4326)
         elif self.line_rbutton.isChecked():
@@ -1009,9 +1013,35 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
 
         fields = provider.fields()
         for field in fields:
+
             key = field.name()
             index = provider.fieldNameIndex(key)
-            # print parcel.attributes()[index]
+            attribute_value = parcel.attributes()[index]
+            if attribute_value:
+                attribute_count = self.session.query(ClAttributeZone).filter(ClAttributeZone.attribute_name == str(key)).count()
+                if attribute_count > 0:
+                    attribute = self.session.query(ClAttributeZone).filter(ClAttributeZone.attribute_name == key).first()
+                    attribute_id = attribute.attribute_id
+                    count = self.session.query(PlProjectParcelAttributeValue).\
+                        filter(PlProjectParcelAttributeValue.parcel_id == new_parcel.parcel_id).\
+                        filter(PlProjectParcelAttributeValue.attribute_id == attribute_id).count()
+                    if count == 0:
+                        parcel_attribute_value = PlProjectParcelAttributeValue()
+                        parcel_attribute_value.attribute_id = attribute_id
+                        parcel_attribute_value.parcel_id = new_parcel.parcel_id
+                        parcel_attribute_value.attribute_value = attribute_value
+                        parcel_attribute_value.created_at = DatabaseUtils.current_date_time()
+                        parcel_attribute_value.created_by = DatabaseUtils.current_sd_user().user_id
+                        self.session.add(parcel_attribute_value)
+                    else:
+                        parcel_attribute_value = self.session.query(PlProjectParcelAttributeValue). \
+                            filter(PlProjectParcelAttributeValue.parcel_id == new_parcel.parcel_id). \
+                            filter(PlProjectParcelAttributeValue.attribute_id == attribute_id).first()
+
+                        parcel_attribute_value.attribute_value = attribute_value
+                        parcel_attribute_value.updated_at = DatabaseUtils.current_date_time()
+                        parcel_attribute_value.updated_by = DatabaseUtils.current_sd_user().user_id
+
 
     def __import_template_data(self, file_path):
 
@@ -1038,6 +1068,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         refused_count = 0
 
         for parcel in iterator:
+            feature_id = parcel.id()
             validaty_result = self.__validaty_of_new_parcel(parcel)
             if not validaty_result[0]:
                 log_measage = validaty_result[1]
@@ -1062,6 +1093,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
                 main_parcel_item.setIcon(0, QIcon(QPixmap(":/plugins/lm2/parcel_red.png")))
                 main_parcel_item.setData(0, Qt.UserRole, id)
                 main_parcel_item.setData(0, Qt.UserRole + 1, APPROVED)
+                main_parcel_item.setData(0, Qt.UserRole + 2, feature_id)
                 self.approved_item.addChild(main_parcel_item)
                 approved_count += 1
 
@@ -1071,6 +1103,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
                 main_parcel_item.setIcon(0, QIcon(QPixmap(":/plugins/lm2/parcel_red.png")))
                 main_parcel_item.setData(0, Qt.UserRole, id)
                 main_parcel_item.setData(0, Qt.UserRole + 1, REFUSED)
+                main_parcel_item.setData(0, Qt.UserRole + 2, feature_id)
                 self.refused_item.addChild(main_parcel_item)
                 refused_count += 1
 
@@ -1300,7 +1333,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         parcel_overlaps_count = self.session.query(PlProjectParcel).\
             join(PlProject, PlProjectParcel.project_id == PlProject.project_id). \
             filter(PlProjectParcel.project_id == self.plan.project_id).\
-            filter(parcel_geometry.ST_Intersects(PlProjectParcel.polygon_geom)).count()
+            filter(parcel_geometry.ST_Covers(PlProjectParcel.polygon_geom)).count()
         if parcel_overlaps_count > 0:
             valid = False
             message = unicode(u'Нэгж талбар давхардаж байна.')
@@ -1376,8 +1409,17 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
 
         selected_item = self.result_twidget.selectedItems()[0]
 
+        file_path = self.parcel_shape_edit.text()
+
         if selected_item is None:
             return
+
+        parcel_shape_layer = QgsVectorLayer(file_path, "tmp_parcel_shape", "ogr")
+
+        feature_id = self.result_twidget.currentItem().data(0, Qt.UserRole + 2)
+
+        parcel_shape_layer.select(feature_id)
+        self.plugin.iface.mapCanvas().zoomToSelected(parcel_shape_layer)
 
     @pyqtSlot()
     def on_apply_button_clicked(self):

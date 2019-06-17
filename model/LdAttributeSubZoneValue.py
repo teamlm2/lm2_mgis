@@ -6,7 +6,7 @@ from geoalchemy2 import Geometry
 from CtApp1Ext import *
 from LdProcessPlan import *
 
-class LdAttributeSubZoneValue(Base):
+class ClAttributeZoneSubZoneValue(Base):
 
     __tablename__ = 'ld_attribute_sub_zone_value'
 
@@ -16,7 +16,7 @@ class LdAttributeSubZoneValue(Base):
 
     # foreign keys:
     attribute_process_id = Column(Integer, ForeignKey('ld_attribute_process.id'))
-    attribute_process_ref = relationship("LdAttributeProcess")
+    attribute_process_ref = relationship("ClAttributeZoneProcess")
 
     parcel_id = Column(Integer, ForeignKey('ld_project_sub_zone_parcel.parcel_id'))
     parcel_ref = relationship("LdProjectSubZone")

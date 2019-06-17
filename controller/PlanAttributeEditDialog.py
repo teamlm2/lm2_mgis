@@ -63,7 +63,7 @@ ATTRIBUTE_VALUE = 1
 
 class PlanAttributeEditDialog(QDialog, Ui_PlanAttributeEditDialog, DatabaseHelper):
 
-    def __init__(self, plugin, navigator, parcel_list, process_type, plan_draft_id, attribute_update=False, parent=None):
+    def __init__(self, plugin, navigator, parcel_list, process_type, plan, attribute_update=False, parent=None):
 
         super(PlanAttributeEditDialog, self).__init__(parent)
         DatabaseHelper.__init__(self)
@@ -76,7 +76,7 @@ class PlanAttributeEditDialog(QDialog, Ui_PlanAttributeEditDialog, DatabaseHelpe
         self.plugin = plugin
         self.parcel_list = parcel_list
         self.process_type = process_type
-        self.plan_draft_id = plan_draft_id
+        self.plan = plan
         self.au2 = DatabaseUtils.working_l2_code()
         self.au1 = DatabaseUtils.working_l1_code()
 
@@ -84,8 +84,6 @@ class PlanAttributeEditDialog(QDialog, Ui_PlanAttributeEditDialog, DatabaseHelpe
         self.user_id = self.user.user_id
         self.attribute_row = 0
         self.attribute_twidget = None
-        print process_type
-        print parcel_list
         self.__setup_attribute_twidget()
 
     def __setup_attribute_twidget(self):
@@ -98,35 +96,33 @@ class PlanAttributeEditDialog(QDialog, Ui_PlanAttributeEditDialog, DatabaseHelpe
 
         # self.attribute_twidget.itemDropped.connect(self.on_application_twidget_itemDropped)
         # self.attribute_twidget.cellChanged.connect(self.on_application_twidget_cellChanged)
+        attributes = self.session.query(ClAttributeZone, SetPlanZoneAttribute).\
+            join(SetPlanZoneAttribute, ClAttributeZone.attribute_id == SetPlanZoneAttribute.attribute_id).\
+            filter(SetPlanZoneAttribute.plan_type_id == self.plan.plan_type_id).\
+            filter(SetPlanZoneAttribute.plan_zone_id == self.process_type).order_by(ClAttributeZone.attribute_id.desc()).all()
 
-        attributes = self.session.query(LdAttribute, ClPlanZone).\
-            join(ClPlanZone, LdAttribute.id == ClPlanZone.attribute_id).\
-            filter(ClPlanZone.process_id == self.process_type).order_by(LdAttribute.id.desc()).all()
         for value in attributes:
             attribute_row = self.attribute_twidget.rowCount()
-            attribute = value.LdAttribute
-            attribute_type = value.LdAttribute.attribute_type
+            attribute = value.ClAttributeZone
+            attribute_type = value.ClAttributeZone.attribute_type
 
-            attribute_process = value.ClPlanZone
+            attribute_process = value.SetPlanZoneAttribute
 
             name_item = QTableWidgetItem(unicode(attribute.attribute_name_mn))
-            name_item.setData(Qt.UserRole, attribute.id)
+            name_item.setData(Qt.UserRole, attribute.attribute_id)
             name_item.setData(Qt.UserRole + 1, attribute_type)
             name_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
 
             attribute_value = ''
-            attribute_process_id = attribute_process.id
+            attribute_process_id = attribute_process.attribute_id
             for parcel_id in self.parcel_list:
                 value_count = self.session.query(PlProjectParcelAttributeValue).\
-                    filter(PlProjectParcelAttributeValue.plan_draft_id == self.plan_draft_id).\
                     filter(PlProjectParcelAttributeValue.parcel_id == parcel_id).\
-                    filter(PlProjectParcelAttributeValue.attribute_process_id == attribute_process_id).count()
-                print value_count
+                    filter(PlProjectParcelAttributeValue.attribute_id == attribute_process_id).count()
                 if value_count > 0:
                     values = self.session.query(PlProjectParcelAttributeValue). \
-                        filter(PlProjectParcelAttributeValue.plan_draft_id == self.plan_draft_id). \
                         filter(PlProjectParcelAttributeValue.parcel_id == parcel_id). \
-                        filter(PlProjectParcelAttributeValue.attribute_process_id == attribute_process.id).all()
+                        filter(PlProjectParcelAttributeValue.attribute_id == attribute_process_id).all()
                     for value in values:
                         if value.attribute_value:
                             attribute_value = value.attribute_value
@@ -179,31 +175,27 @@ class PlanAttributeEditDialog(QDialog, Ui_PlanAttributeEditDialog, DatabaseHelpe
                     date_string = qt_date.toString(Constants.DATE_FORMAT)
                     attribute_value = date_string
                 elif attribute_type == 'text':
-                    attribute_value = str(self.attribute_twidget.cellWidget(row, ATTRIBUTE_VALUE).text())
-                print attribute_value
+                    attribute_value = unicode(self.attribute_twidget.cellWidget(row, ATTRIBUTE_VALUE).text())
 
-                count = self.session.query(PlProjectParcelAttributeValue).\
-                    filter(PlProjectParcelAttributeValue.parcel_id == parcel_id).\
-                    filter(PlProjectParcelAttributeValue.plan_draft_id == self.plan_draft_id).\
-                    filter(PlProjectParcelAttributeValue.attribute_process_id == attribute_process_id).count()
+                count = self.session.query(PlProjectParcelAttributeValue). \
+                    filter(PlProjectParcelAttributeValue.parcel_id == parcel_id). \
+                    filter(PlProjectParcelAttributeValue.attribute_id == attribute_process_id).count()
 
                 if count == 1:
                     value = self.session.query(PlProjectParcelAttributeValue). \
                         filter(PlProjectParcelAttributeValue.parcel_id == parcel_id). \
-                        filter(PlProjectParcelAttributeValue.plan_draft_id == self.plan_draft_id). \
-                        filter(PlProjectParcelAttributeValue.attribute_process_id == attribute_process_id).one()
+                        filter(PlProjectParcelAttributeValue.attribute_id == attribute_process_id).one()
                     value.attribute_value = attribute_value
                 elif count == 0:
                     new_value = PlProjectParcelAttributeValue()
-                    new_value.attribute_process_id = attribute_process_id
-                    new_value.plan_draft_id = self.plan_draft_id
+                    new_value.attribute_id = attribute_process_id
                     new_value.parcel_id = parcel_id
                     new_value.attribute_value = attribute_value
 
                     self.session.add(new_value)
 
     @pyqtSlot()
-    def on_ok_button_clicked(self):
+    def on_apply_button_clicked(self):
 
         self.create_savepoint()
         self.__save_attribute()

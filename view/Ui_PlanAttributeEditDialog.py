@@ -26,9 +26,9 @@ class Ui_PlanAttributeEditDialog(object):
     def setupUi(self, PlanAttributeEditDialog):
         PlanAttributeEditDialog.setObjectName(_fromUtf8("PlanAttributeEditDialog"))
         PlanAttributeEditDialog.resize(461, 601)
-        self.ok_button = QtGui.QPushButton(PlanAttributeEditDialog)
-        self.ok_button.setGeometry(QtCore.QRect(296, 572, 75, 23))
-        self.ok_button.setObjectName(_fromUtf8("ok_button"))
+        self.apply_button = QtGui.QPushButton(PlanAttributeEditDialog)
+        self.apply_button.setGeometry(QtCore.QRect(296, 572, 75, 23))
+        self.apply_button.setObjectName(_fromUtf8("apply_button"))
         self.help_button = QtGui.QPushButton(PlanAttributeEditDialog)
         self.help_button.setGeometry(QtCore.QRect(210, 572, 75, 23))
         self.help_button.setStyleSheet(_fromUtf8("image: url(:/plugins/lm2/help_button.png);"))
@@ -68,7 +68,7 @@ class Ui_PlanAttributeEditDialog(object):
 
     def retranslateUi(self, PlanAttributeEditDialog):
         PlanAttributeEditDialog.setWindowTitle(_translate("PlanAttributeEditDialog", "Dialog", None))
-        self.ok_button.setText(_translate("PlanAttributeEditDialog", "Ok", None))
+        self.apply_button.setText(_translate("PlanAttributeEditDialog", "Apply", None))
         self.close_button.setText(_translate("PlanAttributeEditDialog", "Close", None))
         self.label.setText(_translate("PlanAttributeEditDialog", "Edit parcels attribute", None))
         self.attribute_group_box.setTitle(_translate("PlanAttributeEditDialog", "Attribute Information", None))

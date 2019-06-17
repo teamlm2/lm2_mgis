@@ -76,6 +76,12 @@ class DatabaseUtils():
         return convRights
 
     @staticmethod
+    def __current_date_time():
+
+        date_time_string = QDateTime.currentDateTime().toString(Constants.DATABASE_DATETIME_FORMAT)
+        return datetime.strptime(date_time_string, Constants.PYTHON_DATETIME_FORMAT)
+
+    @staticmethod
     def current_user():
 
         try:

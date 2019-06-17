@@ -264,7 +264,7 @@ class Ui_PlanCaseDialog(object):
         self.parcel_shape_edit.setReadOnly(True)
         self.parcel_shape_edit.setObjectName(_fromUtf8("parcel_shape_edit"))
         self.label = QtGui.QLabel(self.import_groupbox)
-        self.label.setGeometry(QtCore.QRect(10, 85, 112, 16))
+        self.label.setGeometry(QtCore.QRect(10, 85, 311, 16))
         self.label.setObjectName(_fromUtf8("label"))
         self.open_parcel_file_button = QtGui.QPushButton(self.import_groupbox)
         self.open_parcel_file_button.setGeometry(QtCore.QRect(330, 102, 42, 25))
@@ -306,7 +306,7 @@ class Ui_PlanCaseDialog(object):
         self.error_label.setObjectName(_fromUtf8("error_label"))
 
         self.retranslateUi(PlanCaseDialog)
-        self.tabWidget.setCurrentIndex(0)
+        self.tabWidget.setCurrentIndex(2)
         QtCore.QMetaObject.connectSlotsByName(PlanCaseDialog)
 
     def retranslateUi(self, PlanCaseDialog):
@@ -340,6 +340,7 @@ class Ui_PlanCaseDialog(object):
         self.label_22.setText(_translate("PlanCaseDialog", "Parcel Number", None))
         self.cadastre_form_change_button.setText(_translate("PlanCaseDialog", "Change", None))
         self.cadastre_change_form_check_box.setText(_translate("PlanCaseDialog", "Change right form", None))
+        self.cadastre_current_twidget.setSortingEnabled(True)
         item = self.cadastre_current_twidget.horizontalHeaderItem(0)
         item.setText(_translate("PlanCaseDialog", "Cadastre Parcel Information", None))
         item = self.cadastre_current_twidget.horizontalHeaderItem(1)
