@@ -43,9 +43,12 @@ from ..model.AuMpa import *
 from ..model.AuMpaZone import *
 from ..model.Enumerations import PersonType, UserRight
 from ..model.DatabaseHelper import *
+from ..model.CaUBParcelTbl import *
 from ..utils.SessionHandler import SessionHandler
 from ..utils.FilePath import *
+from ..utils.FtpConnection import *
 from .qt_classes.UbDocumentViewDelegate import UbDocumentViewDelegate
+from .qt_classes.UbNewDocumentViewDelegate import UbNewDocumentViewDelegate
 import math
 import locale
 import os
@@ -356,6 +359,18 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
 
         delegate = UbDocumentViewDelegate(self.doc_twidget, self)
         self.doc_twidget.setItemDelegate(delegate)
+
+        self.new_doc_twidget.setAlternatingRowColors(True)
+        self.new_doc_twidget.setEditTriggers(QTableWidget.NoEditTriggers)
+        self.new_doc_twidget.setSelectionBehavior(QTableWidget.SelectRows)
+        self.new_doc_twidget.setSelectionMode(QTableWidget.SingleSelection)
+
+        self.new_doc_twidget.horizontalHeader().resizeSection(0, 50)
+        self.new_doc_twidget.horizontalHeader().resizeSection(1, 250)
+        self.new_doc_twidget.horizontalHeader().resizeSection(2, 50)
+
+        new_delegate = UbNewDocumentViewDelegate(self.new_doc_twidget, self)
+        self.new_doc_twidget.setItemDelegate(new_delegate)
 
         self.doc_info_twidget.setAlternatingRowColors(True)
         self.doc_info_twidget.setEditTriggers(QTableWidget.NoEditTriggers)
@@ -741,9 +756,7 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
             parcel_subjects = self.session.query(UbGisSubject).filter(UbGisSubject.objectid == object_id).all()
             for parcel_subject in parcel_subjects:
                 if parcel_subject.oldpid:
-                    parcel_id = parcel_subject.pid
                     ub_parcel = self.session.query(CaUBParcel).filter(CaUBParcel.old_parcel_id == parcel_subject.oldpid).one()
-
                     self.parcel_id_edit.setText(ub_parcel.parcel_id)
                     self.edit_status_cbox.setCurrentIndex(self.edit_status_cbox.findData(ub_parcel.edit_status))
                 self.old_parcel_id_edit.setText(parcel_subject.oldpid)
@@ -1349,36 +1362,38 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
 
     def __validate_person_name(self, text):
 
-        if not text:
-            text = ''
-        if len(text) <= 0:
-            return False
-
-        first_letter = text[0]
-        rest = text[1:]
-        result_capital = self.capital_asci_letter_validator.regExp().indexIn(rest)
-        result_lower = self.lower_case_asci_letter_validator.regExp().indexIn(rest)
-
-        if first_letter not in Constants.CAPITAL_MONGOLIAN:
-            self.error_label.setText(self.tr("The first letter and the letter after of a "
-                                             "name and the letter after a \"-\"  should be a capital letters."))
-            return False
-
-        if len(rest) > 0:
-
-            if result_capital != -1 or result_lower != -1:
-                self.error_label.setText(self.tr("Only mongolian characters are allowed."))
+        person_type = self.person_type_cbox.itemData(self.person_type_cbox.currentIndex())
+        if person_type == 10 or person_type == 20 or person_type == 50:
+            if not text:
+                text = ''
+            if len(text) <= 0:
                 return False
 
-            for i in range(len(rest)):
-                if rest[i] not in Constants.LOWER_CASE_MONGOLIAN and rest[i] != "-":
-                    if len(rest) - 1 == i:
-                        return True
+            first_letter = text[0]
+            rest = text[1:]
+            result_capital = self.capital_asci_letter_validator.regExp().indexIn(rest)
+            result_lower = self.lower_case_asci_letter_validator.regExp().indexIn(rest)
 
-                    if rest[i - 1] != "-":
-                        self.error_label.setText(
-                            self.tr("Capital letters are only allowed at the beginning of a name or after a \"-\". "))
-                        return False
+            if first_letter not in Constants.CAPITAL_MONGOLIAN:
+                self.error_label.setText(self.tr("The first letter and the letter after of a "
+                                                 "name and the letter after a \"-\"  should be a capital letters."))
+                return False
+
+            if len(rest) > 0:
+
+                if result_capital != -1 or result_lower != -1:
+                    self.error_label.setText(self.tr("Only mongolian characters are allowed."))
+                    return False
+
+                for i in range(len(rest)):
+                    if rest[i] not in Constants.LOWER_CASE_MONGOLIAN and rest[i] != "-":
+                        if len(rest) - 1 == i:
+                            return True
+
+                        if rest[i - 1] != "-":
+                            self.error_label.setText(
+                                self.tr("Capital letters are only allowed at the beginning of a name or after a \"-\". "))
+                            return False
 
         return True
 
@@ -2389,7 +2404,7 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
 
             if not self.__validate_company_name(text):
                 valid = False
-                street_error = self.tr("Person Middle name error!.")
+                street_error = self.tr("Company contact Middle name error!.")
                 error_message = error_message + "\n \n" + street_error
 
         # type of private person
@@ -2447,7 +2462,7 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
 
             if not self.__validate_company_name(text):
                 valid = False
-                street_error = self.tr("Person first name error!.")
+                street_error = self.tr("Company contact first name error!.")
                 error_message = error_message + "\n \n" + street_error
 
         # type of private person
@@ -3270,8 +3285,6 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
         if doc_id:
 
             try:
-                # print ftp.dir()
-                # ftp.cwd('..')
                 if doc_id in ftp.nlst():
                     files = ftp.nlst(str(doc_id))
                 else:
@@ -3767,3 +3780,108 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
     def on_current_dialog_closed(self):
 
         DialogInspector().set_dialog_visible(False)
+
+    def check_dir_ftp(self, dir, ftp_conn):
+
+        filelist = []
+        ftp_conn.retrlines('LIST', filelist.append)
+        found = False
+
+        for f in filelist:
+            if f.split()[-1] == dir and f.lower().startswith('d'):
+                found = True
+
+        return found
+
+    @pyqtSlot()
+    def on_load_new_docs_button_clicked(self):
+
+        self.new_doc_twidget.setRowCount(0)
+        is_find_doc = False
+        archive_path = 'mgis/ub_archive'
+        if not self.parcel_id_edit.text():
+            return
+
+        base_parcel_id = None
+        parcel_id = self.parcel_id_edit.text()
+        ub_parcel_count = self.session.query(CaUBParcelTbl).filter(CaUBParcelTbl.parcel_id == parcel_id).count()
+        if ub_parcel_count > 0:
+            ub_parcel = self.session.query(CaUBParcelTbl).filter(CaUBParcelTbl.parcel_id == parcel_id).first()
+            base_parcel_id = ub_parcel.parcel_base_id
+
+        if not base_parcel_id:
+            return
+
+        if not self.decision_no_edit.text():
+            return
+
+        files = None
+        decision_no = self.decision_no_edit.text()
+        decision_no = decision_no.replace('/', '')
+        if DatabaseUtils.ftp_connect():
+            ftp = DatabaseUtils.ftp_connect()
+            ftp = ftp[0]
+            ftp.cwd(archive_path)
+            # FtpConnection.chdir(archive_ftp_path_role, ftp[0])
+
+            try:
+                if str(base_parcel_id) in ftp.nlst():
+                    files = ftp.nlst(str(base_parcel_id))
+                else:
+                    is_find_doc = False
+            except error_perm:
+                is_find_doc = False
+
+            if not files:
+                return
+
+            ch_path = None
+            for f in files:
+                doc_decision = f.split('/')[-1]
+                doc_decision = doc_decision.decode('utf8')
+                doc_decision_no = doc_decision.split('-')[-1]
+                if doc_decision_no == decision_no:
+                    ch_path = f
+                    print 'ok'
+
+            if not ch_path:
+                return
+
+            ftp.cwd(ch_path)
+
+            try:
+                files = ftp.nlst()
+            except error_perm:
+                is_find_doc = False
+
+            if not files:
+                return
+
+            for f in files:
+
+                if self.__is_file(ftp, f):
+                    file_full_name = f
+                    file_name = f.split('.')[0]
+                    file_type = str(f.split('.')[-1])
+                    doc_no = file_name[-2:]
+
+                    if self.session.query(ClDocumentRole).filter(ClDocumentRole.code == doc_no).count() == 1:
+                        document = self.session.query(ClDocumentRole).filter(ClDocumentRole.code == doc_no).one()
+
+                        row = self.new_doc_twidget.rowCount()
+                        self.new_doc_twidget.insertRow(row)
+
+                        item_name = QTableWidgetItem()
+                        item_name.setText(str(file_name))
+                        item_name.setData(Qt.UserRole, ftp)
+                        item_name.setData(Qt.UserRole + 1, file_full_name)
+                        item_name.setData(Qt.UserRole + 2, file_type)
+
+                        item_description = QTableWidgetItem()
+                        item_description.setText(document.description)
+
+                        item_view = QTableWidgetItem()
+
+                        self.new_doc_twidget.setItem(row, 0, item_name)
+                        self.new_doc_twidget.setItem(row, 1, item_description)
+                        self.new_doc_twidget.setItem(row, 2, item_view)

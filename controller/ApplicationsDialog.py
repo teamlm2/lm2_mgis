@@ -1814,33 +1814,34 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
             return
 
         for docType in required_doc_types:
-            item_provided = QTableWidgetItem()
-            item_provided.setCheckState(Qt.Unchecked)
+            if docType.document_role_ref:
+                item_provided = QTableWidgetItem()
+                item_provided.setCheckState(Qt.Unchecked)
 
-            item_doc_type = QTableWidgetItem(docType.document_role_ref.description)
-            item_doc_type.setData(Qt.UserRole, docType.document_role_ref.code)
-            item_doc_type.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+                item_doc_type = QTableWidgetItem(docType.document_role_ref.description)
+                item_doc_type.setData(Qt.UserRole, docType.document_role_ref.code)
+                item_doc_type.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
 
-            item_name = QTableWidgetItem("")
-            item_name.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
-            if docType.document_role_ref.is_ubeg_required:
-                item_doc_type.setBackground(Qt.yellow)
-                item_doc_type.setBackground(Qt.yellow)
-                item_name.setBackground(Qt.yellow)
+                item_name = QTableWidgetItem("")
+                item_name.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+                if docType.document_role_ref.is_ubeg_required:
+                    item_doc_type.setBackground(Qt.yellow)
+                    item_doc_type.setBackground(Qt.yellow)
+                    item_name.setBackground(Qt.yellow)
 
-            item_open = QTableWidgetItem("")
-            item_remove = QTableWidgetItem("")
-            item_view = QTableWidgetItem("")
+                item_open = QTableWidgetItem("")
+                item_remove = QTableWidgetItem("")
+                item_view = QTableWidgetItem("")
 
-            row = self.documents_twidget.rowCount()
+                row = self.documents_twidget.rowCount()
 
-            self.documents_twidget.insertRow(row)
-            self.documents_twidget.setItem(row, DOC_PROVIDED_COLUMN, item_provided)
-            self.documents_twidget.setItem(row, DOC_FILE_TYPE_COLUMN, item_doc_type)
-            self.documents_twidget.setItem(row, DOC_FILE_NAME_COLUMN, item_name)
-            self.documents_twidget.setItem(row, DOC_OPEN_FILE_COLUMN, item_open)
-            self.documents_twidget.setItem(row, DOC_DELETE_COLUMN, item_remove)
-            self.documents_twidget.setItem(row, DOC_VIEW_COLUMN, item_view)
+                self.documents_twidget.insertRow(row)
+                self.documents_twidget.setItem(row, DOC_PROVIDED_COLUMN, item_provided)
+                self.documents_twidget.setItem(row, DOC_FILE_TYPE_COLUMN, item_doc_type)
+                self.documents_twidget.setItem(row, DOC_FILE_NAME_COLUMN, item_name)
+                self.documents_twidget.setItem(row, DOC_OPEN_FILE_COLUMN, item_open)
+                self.documents_twidget.setItem(row, DOC_DELETE_COLUMN, item_remove)
+                self.documents_twidget.setItem(row, DOC_VIEW_COLUMN, item_view)
         #
         self.__update_documents_file_twidget()
 

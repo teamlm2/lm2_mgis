@@ -299,28 +299,29 @@ class OwnRecordDialog(QDialog, Ui_OwnRecordDialog, DatabaseHelper):
         required_doc_types = self.session.query(SetContractDocumentRole).all()
 
         for docType in required_doc_types:
-            item_provided = QTableWidgetItem()
-            item_provided.setCheckState(Qt.Unchecked)
+            if docType.role_ref:
+                item_provided = QTableWidgetItem()
+                item_provided.setCheckState(Qt.Unchecked)
 
-            item_doc_type = QTableWidgetItem(docType.role_ref.description)
-            item_doc_type.setData(Qt.UserRole, docType.role_ref.code)
-            item_doc_type.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+                item_doc_type = QTableWidgetItem(docType.role_ref.description)
+                item_doc_type.setData(Qt.UserRole, docType.role_ref.code)
+                item_doc_type.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
 
-            item_name = QTableWidgetItem("")
-            item_name.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+                item_name = QTableWidgetItem("")
+                item_name.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
 
-            item_view = QTableWidgetItem("")
-            item_delete = QTableWidgetItem("")
-            item_open = QTableWidgetItem("")
-            row = self.doc_twidget.rowCount()
+                item_view = QTableWidgetItem("")
+                item_delete = QTableWidgetItem("")
+                item_open = QTableWidgetItem("")
+                row = self.doc_twidget.rowCount()
 
-            self.doc_twidget.insertRow(row)
-            self.doc_twidget.setItem(row, DOC_TYPE_COLUMN, item_doc_type)
-            self.doc_twidget.setItem(row, DOC_NAME_COLUMN, item_name)
-            self.doc_twidget.setItem(row, DOC_PROVIDED_COLUMN, item_provided)
-            self.doc_twidget.setItem(row, DOC_VIEW_COLUMN, item_view)
-            self.doc_twidget.setItem(row, DOC_OPEN_COLUMN, item_open)
-            self.doc_twidget.setItem(row, DOC_REMOVE_COLUMN, item_delete)
+                self.doc_twidget.insertRow(row)
+                self.doc_twidget.setItem(row, DOC_TYPE_COLUMN, item_doc_type)
+                self.doc_twidget.setItem(row, DOC_NAME_COLUMN, item_name)
+                self.doc_twidget.setItem(row, DOC_PROVIDED_COLUMN, item_provided)
+                self.doc_twidget.setItem(row, DOC_VIEW_COLUMN, item_view)
+                self.doc_twidget.setItem(row, DOC_OPEN_COLUMN, item_open)
+                self.doc_twidget.setItem(row, DOC_REMOVE_COLUMN, item_delete)
 
     @pyqtSlot()
     def on_load_app_doc_button_clicked(self):

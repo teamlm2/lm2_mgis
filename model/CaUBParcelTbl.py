@@ -6,9 +6,9 @@ from geoalchemy2 import Geometry
 from ClLanduseType import *
 from ClUbEditStatus import *
 
-class CaUBParcel(Base):
+class CaUBParcelTbl(Base):
 
-    __tablename__ = 'ca_ub_parcel'
+    __tablename__ = 'ca_ub_parcel_tbl'
 
     parcel_id = Column(String)
     old_parcel_id = Column(String, primary_key=True)
@@ -21,6 +21,7 @@ class CaUBParcel(Base):
     valid_from = Column(Date)
     valid_till = Column(Date)
     geometry = Column(Geometry('POLYGON', 4326))
+    parcel_base_id = Column(String)
     # foreign keys:
     landuse = Column(Integer, ForeignKey('cl_landuse_type.code'))
     landuse_ref = relationship("ClLanduseType")
