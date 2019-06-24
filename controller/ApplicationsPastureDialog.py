@@ -56,6 +56,7 @@ from ..model.CtApplicationParcelPasture import *
 from ..model.CtGroupMember import *
 from ..model.CtAppGroupBoundary import *
 from ..model.SetApplicationTypeDocumentRole import *
+from ..model.ClRightType import *
 from .qt_classes.PastureApplicationDocumentDelegate import PastureApplicationDocumentDelegate
 from .qt_classes.DocumentsTableWidget import DocumentsTableWidget
 from .qt_classes.DragTreeWidget import DragTreeWidget
@@ -271,6 +272,10 @@ class ApplicationsPastureDialog(QDialog, Ui_ApplicationsPastureDialog, DatabaseH
         self.approved_land_use_type_cbox.setCurrentIndex(self.approved_land_use_type_cbox.findData(self.application.approved_landuse))
         self.requested_land_use_type_cbox.setCurrentIndex(self.requested_land_use_type_cbox.findData(self.application.requested_landuse))
 
+        rigth_types = self.session.query(ClRightType).filter(ClRightType.code == 1).all()
+        for item in rigth_types:
+            self.rigth_type_cbox.addItem(item.description, item.code)
+
         if self.application.requested_duration:
             self.requested_year_spin_box.setValue(self.application.requested_duration)
 
@@ -399,7 +404,7 @@ class ApplicationsPastureDialog(QDialog, Ui_ApplicationsPastureDialog, DatabaseH
                   self.tr("Surname/Company"),
                   self.tr("First Name")]
 
-        self.applicant_twidget.head
+        # self.applicant_twidget.head
         self.applicant_twidget.setup_header(header)
         self.applicant_twidget.itemClicked.connect(self.on_application_twidget_cellChanged)
 
@@ -456,6 +461,8 @@ class ApplicationsPastureDialog(QDialog, Ui_ApplicationsPastureDialog, DatabaseH
         user_start = 'user' + user_code
 
         try:
+            rigth_types = self.session.query(ClRightType).filter(ClRightType.code == 1).all()
+
             application_types = self.session.query(ClApplicationType).\
                 filter(or_(ClApplicationType.code == ApplicationType.pasture_use, ClApplicationType.code == 27)).\
                 order_by(ClApplicationType.code).all()
@@ -473,6 +480,9 @@ class ApplicationsPastureDialog(QDialog, Ui_ApplicationsPastureDialog, DatabaseH
         except SQLAlchemyError, e:
             PluginUtils.show_error(self, self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
 
+        for item in rigth_types:
+            self.rigth_type_cbox.addItem(item.description, item.code)
+
         for item in application_types:
             self.application_type_cbox.addItem(item.description, item.code)
 
@@ -489,7 +499,7 @@ class ApplicationsPastureDialog(QDialog, Ui_ApplicationsPastureDialog, DatabaseH
                 if sd_user:
                     lastname = sd_user.lastname
                     firstname = sd_user.firstname
-                self.next_officer_in_charge_cbox.addItem(lastname + ", " + firstname, sd_user.user_id)
+                    self.next_officer_in_charge_cbox.addItem(lastname + ", " + firstname, sd_user.user_id)
 
         for item in landuse_types:
             self.approved_land_use_type_cbox.addItem(str(item.code) + ": " + item.description, item.code)
@@ -1193,11 +1203,15 @@ class ApplicationsPastureDialog(QDialog, Ui_ApplicationsPastureDialog, DatabaseH
     @pyqtSlot(int)
     def on_application_type_cbox_currentIndexChanged(self, index):
 
+        app_type = self.application_type_cbox.itemData(self.application_type_cbox.currentIndex())
+
         self.__generate_application_number()
 
         self.__set_visible_tabs()
 
         self.__app_type_visible()
+
+        self.__translate_change_text(app_type)
 
     @pyqtSlot()
     def on_application_status_twidget_itemSelectionChanged(self):
@@ -1478,8 +1492,7 @@ class ApplicationsPastureDialog(QDialog, Ui_ApplicationsPastureDialog, DatabaseH
             self.application.au2 = DatabaseUtils.current_working_soum_schema()
             self.application.au1 = DatabaseUtils.working_l1_code()
 
-            # rigth_type = self.rigth_type_cbox.itemData(self.rigth_type_cbox.currentIndex())
-            rigth_type = 1
+            rigth_type = self.rigth_type_cbox.itemData(self.rigth_type_cbox.currentIndex())
             self.application.right_type = rigth_type
 
             status = self.session.query(func.max(CtApplicationStatus.status)).\
@@ -2171,6 +2184,10 @@ class ApplicationsPastureDialog(QDialog, Ui_ApplicationsPastureDialog, DatabaseH
 
         app_type = self.application_type_cbox.itemData(self.application_type_cbox.currentIndex())
 
+        self.application_tab_widget.removeTab(self.application_tab_widget.indexOf(self.boundary_tab))
+        self.application_tab_widget.removeTab(self.application_tab_widget.indexOf(self.parcel_tab))
+        self.application_tab_widget.removeTab(self.application_tab_widget.indexOf(self.person_group_parcel_tab))
+
         self.requested_year_spin_box.setVisible(False)
         self.approved_year_spin_box.setVisible(False)
         self.duration_approved_label.setVisible(False)
@@ -2180,11 +2197,15 @@ class ApplicationsPastureDialog(QDialog, Ui_ApplicationsPastureDialog, DatabaseH
 
         #type: 26 or 27
 
-        # if app_type == ApplicationType.pasture_use:
-        #     self.application_tab_widget.removeTab(self.application_tab_widget.indexOf(self.document_tab))
-        # elif app_type == ApplicationType.legitimate_rights:
-        #     self.application_tab_widget.insertTab(self.application_tab_widget.count() - 2, self.document_tab,
-        #                                       self.tr("Application Documents"))
+        if app_type == ApplicationType.pasture_use:
+            self.application_tab_widget.insertTab(self.application_tab_widget.count() - 1, self.boundary_tab,
+                                                  self.tr("PUG Boundary"))
+            self.application_tab_widget.insertTab(self.application_tab_widget.count() - 1, self.parcel_tab,
+                                                  self.tr("Pasture parcel"))
+
+        elif app_type == ApplicationType.legitimate_rights:
+            self.application_tab_widget.insertTab(self.application_tab_widget.count() - 1, self.person_group_parcel_tab,
+                                              self.tr("Person Group Parcel"))
 
         self.requested_year_spin_box.setVisible(True)
         self.approved_year_spin_box.setVisible(True)
@@ -3001,3 +3022,12 @@ class ApplicationsPastureDialog(QDialog, Ui_ApplicationsPastureDialog, DatabaseH
 
         layer.setSelectedFeatures(feature_ids)
         self.plugin.iface.mapCanvas().zoomToSelected(layer)
+
+    def __translate_change_text(self, app_type):
+
+        # application
+        if app_type == 26:
+            self.person_group_gbox.setTitle(self.tr('PUG Person Group'))
+        if app_type == 27:
+            self.person_group_gbox.setTitle(self.tr('TNC Person Group'))
+

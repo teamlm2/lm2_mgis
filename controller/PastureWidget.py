@@ -528,7 +528,7 @@ class PastureWidget(QDockWidget, Ui_PastureWidget, DatabaseHelper):
 
         if cl_pasturetype is not None:
             for pasture in cl_pasturetype:
-                self.app_type_cbox.addItem(str(pasture.code)+':'+pasture.description, pasture.code)
+                self.app_type_cbox.addItem(pasture.description, pasture.code)
 
     @pyqtSlot()
     def on_current_dialog_closed(self):
@@ -818,7 +818,31 @@ class PastureWidget(QDockWidget, Ui_PastureWidget, DatabaseHelper):
 
         root = QgsProject.instance().layerTreeRoot()
 
-        restrictions = DatabaseUtils.working_l2_code()
+        self.__pug_group_layers(root)
+
+        self.__tnc_group_layers(root)
+
+    def __tnc_group_layers(self, root):
+
+        mygroup = root.findGroup(u'Байгалын нөөц')
+        if mygroup is None:
+            mygroup = root.insertGroup(8, "PUG")
+
+        is_person_group_layer = False
+        layers = self.plugin.iface.legendInterface().layers()
+        vlayer_parcel = LayerUtils.load_union_layer_by_name("ca_pasture_parcel", "parcel_id")
+        for layer in layers:
+            if layer.name() == u"Байгалын нөөцийн хил":
+                is_person_group_layer = True
+        if not is_person_group_layer:
+            mygroup.addLayer(vlayer_parcel)
+
+        vlayer_parcel.setLayerName(u'Байгалын нөөцийн хил')
+        vlayer_parcel.loadNamedStyle(
+            str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "template\style/tnc_boundary.qml")
+
+
+    def __pug_group_layers(self, root):
 
         mygroup = root.findGroup("PUG")
         if mygroup is None:
@@ -878,11 +902,13 @@ class PastureWidget(QDockWidget, Ui_PastureWidget, DatabaseHelper):
             mygroup.addLayer(natural_zone_layaer)
 
         vlayer.setLayerName(QApplication.translate("Plugin", "PUGBoundary"))
-        vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "template\style/pug_boundary.qml")
+        vlayer.loadNamedStyle(
+            str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "template\style/pug_boundary.qml")
         vlayer_eco.setLayerName(QApplication.translate("Plugin", "PUGEcological"))
         vlayer_eco.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "template\style/pug_eco.qml")
         vlayer_parcel.setLayerName(QApplication.translate("Plugin", "PUGParcel"))
-        vlayer_parcel.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "template\style/pug_parcel.qml")
+        vlayer_parcel.loadNamedStyle(
+            str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "template\style/pug_parcel.qml")
         vlayer_building.setLayerName(QApplication.translate("Plugin", "PUGBuilding"))
 
         monitoring_layer.setLayerName(QApplication.translate("Plugin", "PastureMonitoringPoint"))

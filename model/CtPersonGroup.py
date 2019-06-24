@@ -21,5 +21,8 @@ class CtPersonGroup(Base):
     au2 = Column(String)
     bags = relationship("AuLevel3", secondary=bag_table)
 
+    group_type = Column(Integer, ForeignKey('cl_person_group_type.code'))
+    group_type_ref = relationship("ClPersonGroupType")
+
     members = relationship("CtGroupMember", backref="member_ref",
                                 lazy='dynamic', cascade="all, delete-orphan")

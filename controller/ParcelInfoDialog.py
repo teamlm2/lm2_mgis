@@ -3821,6 +3821,7 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
         if DatabaseUtils.ftp_connect():
             ftp = DatabaseUtils.ftp_connect()
             ftp = ftp[0]
+            print ftp.pwd()
             ftp.cwd(archive_path)
             # FtpConnection.chdir(archive_ftp_path_role, ftp[0])
 

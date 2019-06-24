@@ -22,6 +22,7 @@ from ..model.PersonSearch import *
 from ..model.BsPerson import *
 from ..model.CtGroupMember import *
 from ..model.ClMemberRole import *
+from ..model.ClPersonGroupType import *
 import os
 
 class MemberGroupDialog(QDialog, Ui_MemberGroupDialog, DatabaseHelper):
@@ -39,6 +40,13 @@ class MemberGroupDialog(QDialog, Ui_MemberGroupDialog, DatabaseHelper):
 
         self.__setup_validators()
         self.__setup_ui()
+        self.__setup_cbox()
+
+    def __setup_cbox(self):
+
+        group_types = self.session.query(ClPersonGroupType).all()
+        for value in group_types:
+            self.group_type_cbox.addItem(value.description, value.code)
 
     def __setup_twidget(self):
 
@@ -289,20 +297,20 @@ class MemberGroupDialog(QDialog, Ui_MemberGroupDialog, DatabaseHelper):
         new_text = self.__capitalize_after_minus(new_text)
         return new_text
 
-    @pyqtSlot(str)
-    def on_group_name_edit_textChanged(self, text):
-
-        self.group_name_edit.setStyleSheet(self.styleSheet())
-
-        new_text = self.__auto_correct_person_name(text)
-        if new_text != text:
-            self.group_name_edit.setText(new_text)
-            return
-
-        if not self.__validate_person_name(text):
-            self.group_name_edit.setStyleSheet(Constants.ERROR_LINEEDIT_STYLESHEET)
-        else:
-            self.error_label.clear()
+    # @pyqtSlot(str)
+    # def on_group_name_edit_textChanged(self, text):
+    #
+    #     self.group_name_edit.setStyleSheet(self.styleSheet())
+    #
+    #     new_text = self.__auto_correct_person_name(text)
+    #     if new_text != text:
+    #         self.group_name_edit.setText(new_text)
+    #         return
+    #
+    #     if not self.__validate_person_name(text):
+    #         self.group_name_edit.setStyleSheet(Constants.ERROR_LINEEDIT_STYLESHEET)
+    #     else:
+    #         self.error_label.clear()
 
     @pyqtSlot()
     def on_bag_add_button_clicked(self):
@@ -429,6 +437,12 @@ class MemberGroupDialog(QDialog, Ui_MemberGroupDialog, DatabaseHelper):
         item.setData(Qt.UserRole, ('No Contract'))
 
         self.group_twidget.setItem(row, 2, item)
+
+        group_type = self.group_type_cbox.itemData(self.group_type_cbox.currentIndex())
+        group_type_txt = self.group_type_cbox.currentText()
+        item = QTableWidgetItem(group_type_txt)
+        item.setData(Qt.UserRole, group_type)
+        self.group_twidget.setItem(row, 3, item)
 
         self.group_twidget.selectRow(row)
 
@@ -579,6 +593,7 @@ class MemberGroupDialog(QDialog, Ui_MemberGroupDialog, DatabaseHelper):
             for row in range(self.group_twidget.rowCount()):
                 new_row = False
                 id = self.group_twidget.item(row, 0).data(Qt.UserRole)
+                group_type = self.group_twidget.item(row, 3).data(Qt.UserRole)
                 if id == -1:
                     new_row = True
                     pug_group = CtPersonGroup()
@@ -591,6 +606,7 @@ class MemberGroupDialog(QDialog, Ui_MemberGroupDialog, DatabaseHelper):
                 created_date = PluginUtils.convert_qt_date_to_python(QDate().currentDate())
                 pug_group.created_date = created_date
                 pug_group.au2 = au2
+                pug_group.group_type = group_type
 
                 if new_row:
                     self.session.add(pug_group)
@@ -628,6 +644,10 @@ class MemberGroupDialog(QDialog, Ui_MemberGroupDialog, DatabaseHelper):
 
                 item  = QTableWidgetItem(group.is_contract)
                 self.group_twidget.setItem(row, 2, item)
+
+                item = QTableWidgetItem(group.group_type_ref.description)
+                item.setData(Qt.UserRole, group.group_type)
+                self.group_twidget.setItem(row, 3, item)
 
                 row += 1
 
