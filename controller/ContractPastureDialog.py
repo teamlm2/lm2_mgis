@@ -182,6 +182,10 @@ class ContractPastureDialog(QDialog, Ui_ContractPastureDialog, DatabaseHelper):
             self.contract_num_edit.setText(number)
             self.contract.contract_no = number
 
+            app_type = None
+            obj_type = 'contract\Contract'
+            PluginUtils.generate_auto_app_no(str(year), app_type, soum, obj_type, self.session)
+
         except SQLAlchemyError, e:
             raise LM2Exception(self.tr("Database Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
 

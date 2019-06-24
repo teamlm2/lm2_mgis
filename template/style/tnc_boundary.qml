@@ -1,172 +1,79 @@
 <!DOCTYPE qgis PUBLIC 'http://mrcc.com/qgis.dtd' 'SYSTEM'>
 <qgis version="2.18.2" simplifyAlgorithm="0" minimumScale="0" maximumScale="1e+08" simplifyDrawingHints="1" minLabelScale="0" maxLabelScale="1e+08" simplifyDrawingTol="1" simplifyMaxScale="1" hasScaleBasedVisibilityFlag="0" simplifyLocal="1" scaleBasedLabelVisibilityFlag="0">
   <edittypes>
-    <edittype widgetv2type="TextEdit" name="code">
+    <edittype widgetv2type="TextEdit" name="parcel_id">
       <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
     </edittype>
-    <edittype widgetv2type="TextEdit" name="name">
+    <edittype widgetv2type="TextEdit" name="old_parcel_id">
       <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
     </edittype>
-    <edittype widgetv2type="TextEdit" name="name_en">
+    <edittype widgetv2type="TextEdit" name="geo_id">
       <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
     </edittype>
-    <edittype widgetv2type="TextEdit" name="area_m2">
+    <edittype widgetv2type="TextEdit" name="landuse">
       <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
     </edittype>
-    <edittype widgetv2type="TextEdit" name="color_code">
+    <edittype widgetv2type="TextEdit" name="area_ga">
+      <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
+    </edittype>
+    <edittype widgetv2type="TextEdit" name="capacity">
+      <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
+    </edittype>
+    <edittype widgetv2type="TextEdit" name="address_neighbourhood">
+      <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
+    </edittype>
+    <edittype widgetv2type="TextEdit" name="pasture_type">
+      <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
+    </edittype>
+    <edittype widgetv2type="TextEdit" name="valid_from">
+      <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
+    </edittype>
+    <edittype widgetv2type="TextEdit" name="valid_till">
+      <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
+    </edittype>
+    <edittype widgetv2type="TextEdit" name="days">
+      <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
+    </edittype>
+    <edittype widgetv2type="TextEdit" name="pasture">
+      <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
+    </edittype>
+    <edittype widgetv2type="TextEdit" name="au2">
+      <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
+    </edittype>
+    <edittype widgetv2type="TextEdit" name="short_parcel_id">
+      <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
+    </edittype>
+    <edittype widgetv2type="TextEdit" name="long_parcel_id">
+      <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
+    </edittype>
+    <edittype widgetv2type="TextEdit" name="parcel_base_id">
+      <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
+    </edittype>
+    <edittype widgetv2type="TextEdit" name="org_type">
+      <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
+    </edittype>
+    <edittype widgetv2type="TextEdit" name="group_type">
       <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
     </edittype>
   </edittypes>
-  <renderer-v2 attr="name" forceraster="0" symbollevels="0" type="categorizedSymbol" enableorderby="0">
-    <categories>
-      <category render="true" symbol="0" value="Нуур" label="Нуур"/>
-      <category render="true" symbol="1" value="Ойт хээрийн" label="Ойт хээрийн"/>
-      <category render="true" symbol="2" value="Өндөр уул" label="Өндөр уул"/>
-      <category render="true" symbol="3" value="Тайгын ойн бүслүүр" label="Тайгын ойн бүслүүр"/>
-      <category render="true" symbol="4" value="Хуурай хээрийн" label="Хуурай хээрийн"/>
-      <category render="true" symbol="5" value="Цөлийн" label="Цөлийн"/>
-      <category render="true" symbol="6" value="Цөлийн хээрийн" label="Цөлийн хээрийн"/>
-      <category render="true" symbol="7" value="" label=""/>
-    </categories>
+  <renderer-v2 forceraster="0" symbollevels="0" type="singleSymbol" enableorderby="0">
     <symbols>
       <symbol alpha="1" clip_to_extent="1" type="fill" name="0">
         <layer pass="0" class="SimpleFill" locked="0">
           <prop k="border_width_map_unit_scale" v="0,0,0,0,0,0"/>
-          <prop k="color" v="9,39,209,255"/>
+          <prop k="color" v="22,61,214,0"/>
           <prop k="joinstyle" v="bevel"/>
           <prop k="offset" v="0,0"/>
           <prop k="offset_map_unit_scale" v="0,0,0,0,0,0"/>
           <prop k="offset_unit" v="MM"/>
           <prop k="outline_color" v="0,0,0,255"/>
-          <prop k="outline_style" v="solid"/>
-          <prop k="outline_width" v="0.26"/>
-          <prop k="outline_width_unit" v="MM"/>
-          <prop k="style" v="solid"/>
-        </layer>
-      </symbol>
-      <symbol alpha="1" clip_to_extent="1" type="fill" name="1">
-        <layer pass="0" class="SimpleFill" locked="0">
-          <prop k="border_width_map_unit_scale" v="0,0,0,0,0,0"/>
-          <prop k="color" v="56,168,0,255"/>
-          <prop k="joinstyle" v="bevel"/>
-          <prop k="offset" v="0,0"/>
-          <prop k="offset_map_unit_scale" v="0,0,0,0,0,0"/>
-          <prop k="offset_unit" v="MM"/>
-          <prop k="outline_color" v="0,0,0,255"/>
-          <prop k="outline_style" v="solid"/>
-          <prop k="outline_width" v="0.26"/>
-          <prop k="outline_width_unit" v="MM"/>
-          <prop k="style" v="solid"/>
-        </layer>
-      </symbol>
-      <symbol alpha="1" clip_to_extent="1" type="fill" name="2">
-        <layer pass="0" class="SimpleFill" locked="0">
-          <prop k="border_width_map_unit_scale" v="0,0,0,0,0,0"/>
-          <prop k="color" v="232,168,255,255"/>
-          <prop k="joinstyle" v="bevel"/>
-          <prop k="offset" v="0,0"/>
-          <prop k="offset_map_unit_scale" v="0,0,0,0,0,0"/>
-          <prop k="offset_unit" v="MM"/>
-          <prop k="outline_color" v="0,0,0,255"/>
-          <prop k="outline_style" v="solid"/>
-          <prop k="outline_width" v="0.26"/>
-          <prop k="outline_width_unit" v="MM"/>
-          <prop k="style" v="solid"/>
-        </layer>
-      </symbol>
-      <symbol alpha="1" clip_to_extent="1" type="fill" name="3">
-        <layer pass="0" class="SimpleFill" locked="0">
-          <prop k="border_width_map_unit_scale" v="0,0,0,0,0,0"/>
-          <prop k="color" v="0,169,132,255"/>
-          <prop k="joinstyle" v="bevel"/>
-          <prop k="offset" v="0,0"/>
-          <prop k="offset_map_unit_scale" v="0,0,0,0,0,0"/>
-          <prop k="offset_unit" v="MM"/>
-          <prop k="outline_color" v="0,0,0,255"/>
-          <prop k="outline_style" v="solid"/>
-          <prop k="outline_width" v="0.26"/>
-          <prop k="outline_width_unit" v="MM"/>
-          <prop k="style" v="solid"/>
-        </layer>
-      </symbol>
-      <symbol alpha="1" clip_to_extent="1" type="fill" name="4">
-        <layer pass="0" class="SimpleFill" locked="0">
-          <prop k="border_width_map_unit_scale" v="0,0,0,0,0,0"/>
-          <prop k="color" v="255,255,115,255"/>
-          <prop k="joinstyle" v="bevel"/>
-          <prop k="offset" v="0,0"/>
-          <prop k="offset_map_unit_scale" v="0,0,0,0,0,0"/>
-          <prop k="offset_unit" v="MM"/>
-          <prop k="outline_color" v="0,0,0,255"/>
-          <prop k="outline_style" v="solid"/>
-          <prop k="outline_width" v="0.26"/>
-          <prop k="outline_width_unit" v="MM"/>
-          <prop k="style" v="solid"/>
-        </layer>
-      </symbol>
-      <symbol alpha="1" clip_to_extent="1" type="fill" name="5">
-        <layer pass="0" class="SimpleFill" locked="0">
-          <prop k="border_width_map_unit_scale" v="0,0,0,0,0,0"/>
-          <prop k="color" v="255,194,158,255"/>
-          <prop k="joinstyle" v="bevel"/>
-          <prop k="offset" v="0,0"/>
-          <prop k="offset_map_unit_scale" v="0,0,0,0,0,0"/>
-          <prop k="offset_unit" v="MM"/>
-          <prop k="outline_color" v="0,0,0,255"/>
-          <prop k="outline_style" v="solid"/>
-          <prop k="outline_width" v="0.26"/>
-          <prop k="outline_width_unit" v="MM"/>
-          <prop k="style" v="solid"/>
-        </layer>
-      </symbol>
-      <symbol alpha="1" clip_to_extent="1" type="fill" name="6">
-        <layer pass="0" class="SimpleFill" locked="0">
-          <prop k="border_width_map_unit_scale" v="0,0,0,0,0,0"/>
-          <prop k="color" v="255,209,209,255"/>
-          <prop k="joinstyle" v="bevel"/>
-          <prop k="offset" v="0,0"/>
-          <prop k="offset_map_unit_scale" v="0,0,0,0,0,0"/>
-          <prop k="offset_unit" v="MM"/>
-          <prop k="outline_color" v="0,0,0,255"/>
-          <prop k="outline_style" v="solid"/>
-          <prop k="outline_width" v="0.26"/>
-          <prop k="outline_width_unit" v="MM"/>
-          <prop k="style" v="solid"/>
-        </layer>
-      </symbol>
-      <symbol alpha="1" clip_to_extent="1" type="fill" name="7">
-        <layer pass="0" class="SimpleFill" locked="0">
-          <prop k="border_width_map_unit_scale" v="0,0,0,0,0,0"/>
-          <prop k="color" v="233,174,115,255"/>
-          <prop k="joinstyle" v="bevel"/>
-          <prop k="offset" v="0,0"/>
-          <prop k="offset_map_unit_scale" v="0,0,0,0,0,0"/>
-          <prop k="offset_unit" v="MM"/>
-          <prop k="outline_color" v="0,0,0,255"/>
-          <prop k="outline_style" v="solid"/>
-          <prop k="outline_width" v="0.26"/>
+          <prop k="outline_style" v="dot"/>
+          <prop k="outline_width" v="0.46"/>
           <prop k="outline_width_unit" v="MM"/>
           <prop k="style" v="solid"/>
         </layer>
       </symbol>
     </symbols>
-    <source-symbol>
-      <symbol alpha="1" clip_to_extent="1" type="fill" name="0">
-        <layer pass="0" class="SimpleFill" locked="0">
-          <prop k="border_width_map_unit_scale" v="0,0,0,0,0,0"/>
-          <prop k="color" v="46,195,130,255"/>
-          <prop k="joinstyle" v="bevel"/>
-          <prop k="offset" v="0,0"/>
-          <prop k="offset_map_unit_scale" v="0,0,0,0,0,0"/>
-          <prop k="offset_unit" v="MM"/>
-          <prop k="outline_color" v="0,0,0,255"/>
-          <prop k="outline_style" v="solid"/>
-          <prop k="outline_width" v="0.26"/>
-          <prop k="outline_width_unit" v="MM"/>
-          <prop k="style" v="solid"/>
-        </layer>
-      </symbol>
-    </source-symbol>
     <rotation/>
     <sizescale scalemethod="diameter"/>
   </renderer-v2>
@@ -196,9 +103,9 @@
     <property key="labeling/dist" value="0"/>
     <property key="labeling/distInMapUnits" value="false"/>
     <property key="labeling/distMapUnitScale" value="0,0,0,0,0,0"/>
-    <property key="labeling/drawLabels" value="false"/>
-    <property key="labeling/enabled" value="false"/>
-    <property key="labeling/fieldName" value=""/>
+    <property key="labeling/drawLabels" value="true"/>
+    <property key="labeling/enabled" value="true"/>
+    <property key="labeling/fieldName" value="pasture_type"/>
     <property key="labeling/fitInPolygonOnly" value="false"/>
     <property key="labeling/fontCapitals" value="0"/>
     <property key="labeling/fontFamily" value="MS Shell Dlg 2"/>
@@ -215,7 +122,7 @@
     <property key="labeling/fontWeight" value="50"/>
     <property key="labeling/fontWordSpacing" value="0"/>
     <property key="labeling/formatNumbers" value="false"/>
-    <property key="labeling/isExpression" value="true"/>
+    <property key="labeling/isExpression" value="false"/>
     <property key="labeling/labelOffsetInMapUnits" value="true"/>
     <property key="labeling/labelOffsetMapUnitScale" value="0,0,0,0,0,0"/>
     <property key="labeling/labelPerPart" value="false"/>
@@ -316,11 +223,11 @@
   </customproperties>
   <blendMode>0</blendMode>
   <featureBlendMode>0</featureBlendMode>
-  <layerTransparency>50</layerTransparency>
-  <displayfield>name</displayfield>
+  <layerTransparency>0</layerTransparency>
+  <displayfield>parcel_id</displayfield>
   <label>0</label>
   <labelattributes>
-    <label fieldname="" text="Label"/>
+    <label fieldname="" text="Шошго"/>
     <family fieldname="" name="MS Shell Dlg 2"/>
     <size fieldname="" units="pt" value="12"/>
     <bold fieldname="" on="0"/>
@@ -342,7 +249,6 @@
   <SingleCategoryDiagramRenderer diagramType="Histogram" sizeLegend="0" attributeLegend="1">
     <DiagramCategory penColor="#000000" labelPlacementMethod="XHeight" penWidth="0" diagramOrientation="Up" sizeScale="0,0,0,0,0,0" minimumSize="0" barWidth="5" penAlpha="255" maxScaleDenominator="1e+08" backgroundColor="#ffffff" transparency="0" width="15" scaleDependency="Area" backgroundAlpha="255" angleOffset="1440" scaleBasedVisibility="0" enabled="0" height="15" lineSizeScale="0,0,0,0,0,0" sizeType="MM" lineSizeType="MM" minScaleDenominator="inf">
       <fontProperties description="MS Shell Dlg 2,8.25,-1,5,50,0,0,0,0,0" style=""/>
-      <attribute field="" color="#000000" label=""/>
     </DiagramCategory>
     <symbol alpha="1" clip_to_extent="1" type="marker" name="sizeSymbol">
       <layer pass="0" class="SimpleMarker" locked="0">
@@ -368,31 +274,57 @@
     </symbol>
   </SingleCategoryDiagramRenderer>
   <DiagramLayerSettings yPosColumn="-1" showColumn="-1" linePlacementFlags="10" placement="0" dist="0" xPosColumn="-1" priority="0" obstacle="0" zIndex="0" showAll="1"/>
-  <annotationform>.</annotationform>
+  <annotationform></annotationform>
   <aliases>
-    <alias field="code" index="0" name=""/>
-    <alias field="name" index="1" name=""/>
-    <alias field="name_en" index="2" name=""/>
-    <alias field="area_m2" index="3" name=""/>
-    <alias field="color_code" index="4" name=""/>
+    <alias field="parcel_id" index="0" name=""/>
+    <alias field="old_parcel_id" index="1" name=""/>
+    <alias field="geo_id" index="2" name=""/>
+    <alias field="landuse" index="3" name=""/>
+    <alias field="area_ga" index="4" name=""/>
+    <alias field="capacity" index="5" name=""/>
+    <alias field="address_neighbourhood" index="6" name=""/>
+    <alias field="pasture_type" index="7" name=""/>
+    <alias field="valid_from" index="8" name=""/>
+    <alias field="valid_till" index="9" name=""/>
+    <alias field="days" index="10" name=""/>
+    <alias field="pasture" index="11" name=""/>
+    <alias field="au2" index="12" name=""/>
+    <alias field="short_parcel_id" index="13" name=""/>
+    <alias field="long_parcel_id" index="14" name=""/>
+    <alias field="parcel_base_id" index="15" name=""/>
+    <alias field="org_type" index="16" name=""/>
+    <alias field="group_type" index="17" name=""/>
   </aliases>
   <excludeAttributesWMS/>
   <excludeAttributesWFS/>
   <attributeactions default="-1"/>
-  <attributetableconfig actionWidgetStyle="dropDown" sortExpression="&quot;code&quot;" sortOrder="0">
+  <attributetableconfig actionWidgetStyle="dropDown" sortExpression="" sortOrder="538976288">
     <columns>
-      <column width="-1" hidden="0" type="field" name="code"/>
-      <column width="-1" hidden="0" type="field" name="name"/>
-      <column width="-1" hidden="0" type="field" name="name_en"/>
-      <column width="-1" hidden="0" type="field" name="area_m2"/>
-      <column width="-1" hidden="0" type="field" name="color_code"/>
+      <column width="-1" hidden="0" type="field" name="parcel_id"/>
+      <column width="-1" hidden="0" type="field" name="old_parcel_id"/>
+      <column width="-1" hidden="0" type="field" name="geo_id"/>
+      <column width="-1" hidden="0" type="field" name="landuse"/>
+      <column width="-1" hidden="0" type="field" name="area_ga"/>
+      <column width="-1" hidden="0" type="field" name="capacity"/>
+      <column width="-1" hidden="0" type="field" name="address_neighbourhood"/>
+      <column width="-1" hidden="0" type="field" name="pasture_type"/>
+      <column width="-1" hidden="0" type="field" name="valid_from"/>
+      <column width="-1" hidden="0" type="field" name="valid_till"/>
+      <column width="-1" hidden="0" type="field" name="days"/>
+      <column width="-1" hidden="0" type="field" name="pasture"/>
+      <column width="-1" hidden="0" type="field" name="au2"/>
+      <column width="-1" hidden="0" type="field" name="short_parcel_id"/>
+      <column width="-1" hidden="0" type="field" name="long_parcel_id"/>
+      <column width="-1" hidden="0" type="field" name="parcel_base_id"/>
+      <column width="-1" hidden="0" type="field" name="org_type"/>
+      <column width="-1" hidden="0" type="field" name="group_type"/>
       <column width="-1" hidden="1" type="actions"/>
     </columns>
   </attributetableconfig>
-  <editform>.</editform>
+  <editform></editform>
   <editforminit/>
   <editforminitcodesource>0</editforminitcodesource>
-  <editforminitfilepath>.</editforminitfilepath>
+  <editforminitfilepath></editforminitfilepath>
   <editforminitcode><![CDATA[# -*- coding: utf-8 -*-
 """
 QGIS forms can have a Python function that is called when the form is

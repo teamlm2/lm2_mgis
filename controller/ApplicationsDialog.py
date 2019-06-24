@@ -2697,6 +2697,7 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
         #check if the app_no is still valid, otherwise generate new one
         if not self.attribute_update:
             app_no_count = self.session.query(CtApplication).filter(CtApplication.app_no == app_no).count()
+            print app_no_count
             if app_no_count > 0:
 
                 self.__generate_application_number()
@@ -2706,12 +2707,12 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
 
                 PluginUtils.show_message(self, self.tr("Application Number"), self.tr("The application number was updated to the next available number."))
 
-                soum_code = self.application_num_first_edit.text()
-                app_type = self.application_num_type_edit.text()
-                year = self.application_num_last_edit.text()
-                # year_filter = "%-" + str(year)
-                obj_type = 'application\Application'
-                PluginUtils.generate_auto_app_no(year, app_type, soum_code, obj_type, self.session)
+            soum_code = self.application_num_first_edit.text()
+            app_type = self.application_num_type_edit.text()
+            year = self.application_num_last_edit.text()
+            # year_filter = "%-" + str(year)
+            obj_type = 'application\Application'
+            PluginUtils.generate_auto_app_no(year, app_type, soum_code, obj_type, self.session)
 
         self.application.app_no = app_no
         self.application.requested_landuse = self.requested_land_use_type_cbox.itemData(self.requested_land_use_type_cbox.currentIndex())

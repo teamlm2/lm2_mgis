@@ -74,6 +74,8 @@ from ..model.SdFtpConnection import *
 from ..model.SdFtpPermission import *
 from ..model.SdEmployee import *
 from ..model.SdDepartment import *
+from ..model.CaPastureParcelTbl import *
+from ..model.ClPersonGroupType import *
 from ..utils.SessionHandler import SessionHandler
 from ..utils.PluginUtils import PluginUtils
 from ..utils.DatabaseUtils import DatabaseUtils
@@ -476,6 +478,7 @@ class ApplicationsPastureDialog(QDialog, Ui_ApplicationsPastureDialog, DatabaseH
 
             PluginUtils.populate_au_level3_cbox(self.bag_parcel_cbox, l2_code)
             PluginUtils.populate_au_level3_cbox(self.bag_boundary_cbox, l2_code)
+            PluginUtils.populate_au_level3_cbox(self.bag_group_parcel_cbox, l2_code)
 
         except SQLAlchemyError, e:
             PluginUtils.show_error(self, self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
@@ -1480,6 +1483,13 @@ class ApplicationsPastureDialog(QDialog, Ui_ApplicationsPastureDialog, DatabaseH
                      + self.application_num_middle_edit.text() + "-" + self.application_num_last_edit.text()
 
                     PluginUtils.show_message(self, self.tr("Application Number"), self.tr("The application number was updated to the next available number."))
+
+                soum_code = self.application_num_first_edit.text()
+                app_type = self.application_num_type_edit.text()
+                year = self.application_num_last_edit.text()
+                # year_filter = "%-" + str(year)
+                obj_type = 'application\Application'
+                PluginUtils.generate_auto_app_no(year, app_type, soum_code, obj_type, self.session)
 
             self.application.app_no = app_no
             self.application.requested_landuse = self.requested_land_use_type_cbox.itemData(self.requested_land_use_type_cbox.currentIndex())
@@ -2618,10 +2628,11 @@ class ApplicationsPastureDialog(QDialog, Ui_ApplicationsPastureDialog, DatabaseH
     def __search_parcels(self):
 
         au2 = DatabaseUtils.working_l2_code()
-        parcels = self.session.query(CaPastureParcel.parcel_id, CaPastureParcel.landuse, \
-                                     CaPastureParcel.pasture_type, CaPastureParcel.area_ga, CaPastureParcel.geometry) \
-            .filter(AuLevel2.geometry.ST_Contains(func.ST_Centroid(CaPastureParcel.geometry))) \
-            .filter(AuLevel2.code == au2)
+        parcels = self.session.query(CaPastureParcelTbl.parcel_id, CaPastureParcelTbl.landuse, \
+                                     CaPastureParcelTbl.pasture_type, CaPastureParcelTbl.area_ga, CaPastureParcelTbl.geometry) \
+            .filter(AuLevel2.geometry.ST_Contains(func.ST_Centroid(CaPastureParcelTbl.geometry))) \
+            .filter(AuLevel2.code == au2) \
+            .filter(CaPastureParcelTbl.group_type == 1)
 
         # if self.assigned_boundary_twidget.rowCount() == 1:
         #     boundary_id = self.assigned_boundary_twidget.item(0, 0).data(Qt.UserRole)
@@ -2632,24 +2643,24 @@ class ApplicationsPastureDialog(QDialog, Ui_ApplicationsPastureDialog, DatabaseH
         if not self.bag_parcel_cbox.itemData(self.bag_parcel_cbox.currentIndex()) == -1:
             value = self.bag_parcel_cbox.itemData(self.bag_parcel_cbox.currentIndex())
             bag = self.session.query(AuLevel3).filter(AuLevel3.code == value).one()
-            parcels = parcels.filter(CaPastureParcel.geometry.ST_Covers(bag.geometry))
+            parcels = parcels.filter(CaPastureParcelTbl.geometry.ST_Covers(bag.geometry))
         else:
             parcels = parcels
 
         if self.search_parcel_num_edit.text():
             parcel_no = "%" + self.search_parcel_num_edit.text() + "%"
-            parcels = parcels.filter(CaPastureParcel.parcel_id.ilike(parcel_no))
+            parcels = parcels.filter(CaPastureParcelTbl.parcel_id.ilike(parcel_no))
         else:
             parcels = parcels
 
         self.result_parcel_twidget.setRowCount(0)
 
-        if parcels.distinct(CaPastureParcel.parcel_id).count() == 0:
+        if parcels.distinct(CaPastureParcelTbl.parcel_id).count() == 0:
             self.error_label.setText(self.tr("No parcels found for this search filter."))
             return
 
         count = 0
-        for parcel in parcels.distinct(CaPastureParcel.parcel_id,CaPastureParcel.landuse,CaPastureParcel.area_ga).all():
+        for parcel in parcels.distinct(CaPastureParcelTbl.parcel_id,CaPastureParcelTbl.landuse,CaPastureParcelTbl.area_ga).all():
             land_use = ''
             landuse_code = None
             landuse_count = self.session.query(ClLanduseType).filter(ClLanduseType.code == parcel.landuse).count()
@@ -2671,6 +2682,69 @@ class ApplicationsPastureDialog(QDialog, Ui_ApplicationsPastureDialog, DatabaseH
             item = QTableWidgetItem(str(parcel.area_ga))
             item.setData(Qt.UserRole, parcel.area_ga)
             self.result_parcel_twidget.setItem(count, 2, item)
+
+            count += 1
+
+        self.error_label.setText("")
+
+    @pyqtSlot()
+    def on_find_group_parcel_number_button_clicked(self):
+
+        self.__search_person_group_parcels()
+
+    def __search_person_group_parcels(self):
+
+        au2 = DatabaseUtils.working_l2_code()
+        parcels = self.session.query(CaPastureParcelTbl.parcel_id, CaPastureParcelTbl.landuse, \
+                                     CaPastureParcelTbl.pasture_type, CaPastureParcelTbl.area_ga,
+                                     CaPastureParcelTbl.geometry) \
+            .filter(AuLevel2.geometry.ST_Contains(func.ST_Centroid(CaPastureParcelTbl.geometry))) \
+            .filter(AuLevel2.code == au2) \
+            .filter(CaPastureParcelTbl.group_type == 2)
+
+        if not self.bag_group_parcel_cbox.itemData(self.bag_group_parcel_cbox.currentIndex()) == -1:
+            value = self.bag_group_parcel_cbox.itemData(self.bag_group_parcel_cbox.currentIndex())
+            bag = self.session.query(AuLevel3).filter(AuLevel3.code == value).one()
+            parcels = parcels.filter(CaPastureParcelTbl.geometry.ST_Covers(bag.geometry))
+        else:
+            parcels = parcels
+
+        if self.search_group_parcel_num_edit.text():
+            parcel_no = "%" + self.search_group_parcel_num_edit.text() + "%"
+            parcels = parcels.filter(CaPastureParcelTbl.parcel_id.ilike(parcel_no))
+        else:
+            parcels = parcels
+
+        self.result_group_parcel_twidget.setRowCount(0)
+
+        if parcels.distinct(CaPastureParcelTbl.parcel_id).count() == 0:
+            self.error_label.setText(self.tr("No parcels found for this search filter."))
+            return
+
+        count = 0
+        for parcel in parcels.distinct(CaPastureParcelTbl.parcel_id, CaPastureParcelTbl.landuse,
+                                       CaPastureParcelTbl.area_ga).all():
+            land_use = ''
+            landuse_code = None
+            landuse_count = self.session.query(ClLanduseType).filter(ClLanduseType.code == parcel.landuse).count()
+            if landuse_count == 1:
+                landuse = self.session.query(ClLanduseType).filter(ClLanduseType.code == parcel.landuse).one()
+                landuse_code = parcel.landuse
+                land_use = str(parcel.landuse) + ':' + landuse.description
+            item = QTableWidgetItem(parcel.parcel_id)
+            item.setIcon(QIcon(QPixmap(":/plugins/lm2/parcel.png")))
+            item.setData(Qt.UserRole, parcel.parcel_id)
+            self.result_group_parcel_twidget.insertRow(count)
+
+            self.result_group_parcel_twidget.setItem(count, 0, item)
+
+            item = QTableWidgetItem(land_use)
+            item.setData(Qt.UserRole, landuse_code)
+            self.result_group_parcel_twidget.setItem(count, 1, item)
+
+            item = QTableWidgetItem(str(parcel.area_ga))
+            item.setData(Qt.UserRole, parcel.area_ga)
+            self.result_group_parcel_twidget.setItem(count, 2, item)
 
             count += 1
 
