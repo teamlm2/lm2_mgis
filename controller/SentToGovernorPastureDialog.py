@@ -41,6 +41,7 @@ from ..model.CaPastureParcel import *
 from ..model.ClPastureType import *
 from ..model.CtGroupMember import *
 from ..model.CtPersonGroup import *
+from ..model.CaPastureParcelTbl import *
 from ..utils.DatabaseUtils import *
 from .DecisionErrorDialog import DecisionErrorDialog
 from .qt_classes.ComboBoxDelegate import *
@@ -297,8 +298,7 @@ class SentToGovernorPastureDialog(QDialog, Ui_SentToGovernorPastureDialog, Datab
                 duration = str(application_instance.requested_duration)
                 app_info = [group_name,person.name, person.first_name,person.person_register,application_instance.app_no, \
                             self.draft_no_edit.text(),self.draft_date.text(),decision_level,decision_res,duration]
-                print app_info
-                print type(app_info)
+
                 app_item = QTreeWidgetItem(app_info)
                 # app_item.setText(0, group_name)
                 app_item.setIcon(0, QIcon(QPixmap(":/plugins/lm2_pasture/group.png")))
@@ -314,7 +314,7 @@ class SentToGovernorPastureDialog(QDialog, Ui_SentToGovernorPastureDialog, Datab
                 app_parcels = self.session.query(CtApplicationPUGParcel).\
                     filter(CtApplicationPUGParcel.application == app_id).all()
                 for app_parcel in app_parcels:
-                    parcel = self.session.query(CaPastureParcel).filter(CaPastureParcel.parcel_id == app_parcel.parcel).one()
+                    parcel = self.session.query(CaPastureParcelTbl).filter(CaPastureParcelTbl.parcel_id == app_parcel.parcel).one()
 
                     pasture_type_list = ''
                     parcel_pastures = self.session.query(CtApplicationParcelPasture).filter(
@@ -542,8 +542,8 @@ class SentToGovernorPastureDialog(QDialog, Ui_SentToGovernorPastureDialog, Datab
             app_parcels = self.session.query(CtApplicationPUGParcel). \
                 filter(CtApplicationPUGParcel.application == application_instance.app_id).all()
             for app_parcel in app_parcels:
-                parcel = self.session.query(CaPastureParcel).filter(
-                    CaPastureParcel.parcel_id == app_parcel.parcel).one()
+                parcel = self.session.query(CaPastureParcelTbl).filter(
+                    CaPastureParcelTbl.parcel_id == app_parcel.parcel).one()
                 pasture_type_list = ''
                 parcel_pastures = self.session.query(CtApplicationParcelPasture).filter(
                     CtApplicationParcelPasture.parcel == app_parcel.parcel).all()
@@ -705,8 +705,8 @@ class SentToGovernorPastureDialog(QDialog, Ui_SentToGovernorPastureDialog, Datab
                     app_parcels = self.session.query(CtApplicationPUGParcel). \
                         filter(CtApplicationPUGParcel.application == app_id).all()
                     for app_parcel in app_parcels:
-                        parcel = self.session.query(CaPastureParcel).filter(
-                            CaPastureParcel.parcel_id == app_parcel.parcel).one()
+                        parcel = self.session.query(CaPastureParcelTbl).filter(
+                            CaPastureParcelTbl.parcel_id == app_parcel.parcel).one()
                         pasture_type_list = ''
                         parcel_pastures = self.session.query(CtApplicationParcelPasture).filter(
                             CtApplicationParcelPasture.parcel == app_parcel.parcel).all()
@@ -922,16 +922,65 @@ class SentToGovernorPastureDialog(QDialog, Ui_SentToGovernorPastureDialog, Datab
         if self.draft_no_edit.text() == "":
             PluginUtils.show_message(self,self.tr("Draft No None"),self.tr("Draft No null!!!"))
             return
-        au_level2 = DatabaseUtils.current_working_soum_schema()
-        au_level1 = au_level2[:3]
 
-        try:
-            soum = self.session.query(AuLevel2).filter(AuLevel2.code == au_level2).one()
-        except SQLAlchemyError, e:
-            self.rollback()
-            PluginUtils.show_error(self, self.tr("Query Error"),
-                                   self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
-            return
+        c_year = ''
+        c_month = ''
+        c_day = ''
+        area_ga = 0
+        group_name = ''
+        parcel_address = ''
+        aimag_name = ''
+        sum_name = ''
+        bag_name = ''
+
+        root = self.draft_detail_twidget.invisibleRootItem()
+        child_count = root.childCount()
+        count = 0
+        for i in range(child_count):
+            if count == 1:
+                break
+            item = root.child(i)
+            group_name = item.text(0)
+            app_no = item.text(4)
+            decision_date = item.text(6)
+            c_year = decision_date.split('-')[0]
+            c_month = decision_date.split('-')[1]
+            c_day = decision_date.split('-')[2]
+            app = self.session.query(CtApplication).filter(CtApplication.app_no == app_no).one()
+            app_parcels = self.session.query(CtApplicationParcelPasture).filter(CtApplicationParcelPasture.application == app.app_id).all()
+            parcel_count = 0
+            for app_parcel in app_parcels:
+                parcel_id = app_parcel.parcel
+                parcel = self.session.query(CaPastureParcelTbl).filter(CaPastureParcelTbl.parcel_id == parcel_id).one()
+
+                count = self.session.query(AuLevel3).filter(
+                    AuLevel3.geometry.ST_Within(func.ST_Centroid(parcel.geometry))).count()
+                if count == 1:
+                    value = self.session.query(AuLevel3).filter(
+                        AuLevel3.geometry.ST_Within(func.ST_Centroid(parcel.geometry))).first()
+                    bag_name = value.name
+
+                count = self.session.query(AuLevel2).filter(
+                    AuLevel3.geometry.ST_Within(func.ST_Centroid(parcel.geometry))).count()
+                if count == 1:
+                    value = self.session.query(AuLevel2).filter(
+                        AuLevel2.geometry.ST_Within(func.ST_Centroid(parcel.geometry))).first()
+                    sum_name = value.name
+
+                count = self.session.query(AuLevel1).filter(
+                    AuLevel3.geometry.ST_Within(func.ST_Centroid(parcel.geometry))).count()
+                if count == 1:
+                    value = self.session.query(AuLevel1).filter(
+                        AuLevel1.geometry.ST_Within(func.ST_Centroid(parcel.geometry))).first()
+                    aimag_name = value.name
+
+                area_ga = area_ga + parcel.area_ga
+                if parcel_count == 0:
+                    parcel_address = parcel.address_neighbourhood
+                if parcel_count > 0:
+                    parcel_address = parcel_address + ', ' + parcel.address_neighbourhood
+                parcel_count = parcel_count + 1
+            count = count + 1
 
         path = os.path.join(os.path.dirname(__file__), "../view/map/pasture/")
 
@@ -943,7 +992,8 @@ class SentToGovernorPastureDialog(QDialog, Ui_SentToGovernorPastureDialog, Datab
         if application.app_type == ApplicationType.pasture_use:
             tpl = DocxTemplate(path + 'draft_pasture.docx')
         elif application.app_type == ApplicationType.legitimate_rights:
-            tpl = DocxTemplate(path + 'draft_rights.docx')
+            # tpl = DocxTemplate(path + 'draft_rights.docx')
+            tpl = DocxTemplate(path + 'draft_tnc.docx')
         else:
             tpl = DocxTemplate(path + 'draft_pasture.docx')
 
@@ -960,10 +1010,20 @@ class SentToGovernorPastureDialog(QDialog, Ui_SentToGovernorPastureDialog, Datab
         sum_officer = user.position_ref.name
         o_surname = user.surname
         o_firstname = user.first_name
+
         context = {
             'sum_officer': sum_officer,
             'o_surname': o_surname,
-            'o_firstname': o_firstname
+            'o_firstname': o_firstname,
+            'c_year': c_year,
+            'c_month': c_month,
+            'c_day': c_day,
+            'area_ga': area_ga,
+            'group_name': group_name,
+            'parcel_address': parcel_address,
+            'aimag_name': aimag_name,
+            'sum_name': sum_name,
+            'bag_name': bag_name,
         }
 
         tpl.render(context)

@@ -13,7 +13,7 @@ class CtContractPastureValue(Base):
     __tablename__ = 'ct_contract_pasture_value'
 
     contract = Column(Integer, ForeignKey('ct_contract.contract_id'), primary_key=True)
-    parcel = Column(String, ForeignKey('ca_pasture_parcel.parcel_id'), primary_key=True)
+    parcel = Column(String, ForeignKey('ca_pasture_parcel_tbl.parcel_id'), primary_key=True)
     current_value = Column(Numeric)
     value_year = Column(Integer, primary_key=True)
     contract_no = Column(String)

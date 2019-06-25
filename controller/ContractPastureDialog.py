@@ -58,6 +58,7 @@ from ..model.SetApplicationTypeDocumentRole import SetApplicationTypeDocumentRol
 from ..model.CtApplicationStatus import *
 from ..model.SetCertificate import *
 from ..model.CaPastureMonitoring import *
+from ..model.CaPastureParcelTbl import *
 from ..utils.FileUtils import FileUtils
 from ..utils.PluginUtils import PluginUtils
 from ..utils.LayerUtils import LayerUtils
@@ -509,8 +510,8 @@ class ContractPastureDialog(QDialog, Ui_ContractPastureDialog, DatabaseHelper):
         app_pug_parcels = self.session.query(CtApplicationPUGParcel). \
             filter(CtApplicationPUGParcel.application == application.app_id).all()
         for pug_parcel in app_pug_parcels:
-            parcel = self.session.query(CaPastureParcel).filter(
-                CaPastureParcel.parcel_id == pug_parcel.parcel).one()
+            parcel = self.session.query(CaPastureParcelTbl).filter(
+                CaPastureParcelTbl.parcel_id == pug_parcel.parcel).one()
 
             item = QTableWidgetItem(parcel.parcel_id)
             item.setIcon(QIcon(QPixmap(":/plugins/lm2/parcel.png")))
@@ -1429,7 +1430,8 @@ class ContractPastureDialog(QDialog, Ui_ContractPastureDialog, DatabaseHelper):
         if app_type == str(ApplicationType.pasture_use):
             tpl = DocxTemplate(path+'pasture/contract_pasture.docx')
         elif app_type == str(ApplicationType.legitimate_rights):
-            tpl = DocxTemplate(path + 'pasture/contract_rights.docx')
+            # tpl = DocxTemplate(path + 'pasture/contract_rights.docx')
+            tpl = DocxTemplate(path + 'pasture/contract_tnc.docx')
         aimag_name = aimag.name
         soum_name = soum.name
         contract_no = self.contract_num_edit.text()
@@ -1568,7 +1570,7 @@ class ContractPastureDialog(QDialog, Ui_ContractPastureDialog, DatabaseHelper):
             for row in range(self.assigned_parcel_twidget.rowCount()):
                 parcel_id = self.assigned_parcel_twidget.item(row, 0).data(Qt.UserRole)
                 area_ga = self.assigned_parcel_twidget.item(row, 2).text()
-                parcel_geometry = self.session.query(CaPastureParcel.geometry).filter(CaPastureParcel.parcel_id == parcel_id).one()
+                parcel_geometry = self.session.query(CaPastureParcelTbl.geometry).filter(CaPastureParcelTbl.parcel_id == parcel_id).one()
                 admin_unit_l3_name = self.session.query(AuLevel3.name).filter(AuLevel3.geometry.ST_Intersects(parcel_geometry[0])).first()
                 if admin_unit_l3_names == '':
                     admin_unit_l3_names = admin_unit_l3_name[0]

@@ -8,8 +8,8 @@ class CtApplicationParcelPasture(Base):
 
     __tablename__ = 'ct_application_parcel_pasture'
 
-    parcel = Column(String, ForeignKey('ca_pasture_parcel.parcel_id'), primary_key=True)
-    application = Column(String, ForeignKey('ct_application.app_id'), primary_key=True)
+    parcel = Column(String, ForeignKey('ca_pasture_parcel_tbl.parcel_id'), primary_key=True)
+    application = Column(Integer, ForeignKey('ct_application.app_id'), primary_key=True)
     pasture = Column(Integer, ForeignKey('cl_pasture_type.code'), primary_key=True)
     app_no = Column(String)
 

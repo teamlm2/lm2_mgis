@@ -131,6 +131,7 @@ class PastureWidget(QDockWidget, Ui_PastureWidget, DatabaseHelper):
     def on_zoom_to_parcel_action_clicked(self):
 
         app = self.__selected_application()
+        app_type = app.app_type
         app_parcels = self.session.query(CtApplicationPUGParcel).\
             filter(CtApplicationPUGParcel.application == app.app_id).all()
 
@@ -143,17 +144,20 @@ class PastureWidget(QDockWidget, Ui_PastureWidget, DatabaseHelper):
             if app_parcel.parcel is not None:
                 parcels.append(app_parcel.parcel)
 
-        self.__zoom_to_parcel_ids(parcels)
+        self.__zoom_to_parcel_ids(parcels, app_type)
 
-    def __zoom_to_parcel_ids(self, parcel_ids, layer_name = None):
+    def __zoom_to_parcel_ids(self, parcel_ids, app_type, layer_name = None):
 
         LayerUtils.deselect_all()
         if layer_name is None:
             for parcel_id in parcel_ids:
                 if len(parcel_id) == 10:
-                    layer_name = "ca_pasture_parcel"
+                    if app_type == 26:
+                        layer_name = "ca_pasture_parcel"
+                    else:
+                        layer_name = "ca_person_group_parcel"
 
-        layer = LayerUtils.layer_by_data_source("s" + DatabaseUtils.current_working_soum_schema(), layer_name)
+        layer = LayerUtils.layer_by_data_source("data_soums_union", layer_name)
 
         restrictions = DatabaseUtils.working_l2_code()
         if layer is None:

@@ -302,27 +302,51 @@ class ApplicationsPastureDialog(QDialog, Ui_ApplicationsPastureDialog, DatabaseH
 
     def __parcels_mapping(self):
 
+        app_type = self.application.app_type
         app_pug_parcels = self.session.query(CtApplicationPUGParcel).\
             filter(CtApplicationPUGParcel.application == self.application.app_id).all()
-        for pug_parcel in app_pug_parcels:
-            parcel = self.session.query(CaPastureParcel).filter(CaPastureParcel.parcel_id == pug_parcel.parcel).one()
 
-            item = QTableWidgetItem(parcel.parcel_id)
-            item.setIcon(QIcon(QPixmap(":/plugins/lm2/parcel.png")))
-            item.setData(Qt.UserRole, parcel.parcel_id)
+        if app_type == 26:
+            for pug_parcel in app_pug_parcels:
+                parcel = self.session.query(CaPastureParcelTbl).filter(CaPastureParcelTbl.parcel_id == pug_parcel.parcel).one()
 
-            count = self.assigned_parcel_twidget.rowCount()
-            self.assigned_parcel_twidget.insertRow(count)
+                item = QTableWidgetItem(parcel.parcel_id)
+                item.setIcon(QIcon(QPixmap(":/plugins/lm2/parcel.png")))
+                item.setData(Qt.UserRole, parcel.parcel_id)
 
-            self.assigned_parcel_twidget.setItem(count, 0, item)
+                count = self.assigned_parcel_twidget.rowCount()
+                self.assigned_parcel_twidget.insertRow(count)
 
-            item = QTableWidgetItem(parcel.address_neighbourhood)
-            item.setData(Qt.UserRole, parcel.address_neighbourhood)
-            self.assigned_parcel_twidget.setItem(count, 1, item)
+                self.assigned_parcel_twidget.setItem(count, 0, item)
 
-            item = QTableWidgetItem(str(parcel.area_ga))
-            item.setData(Qt.UserRole, parcel.area_ga)
-            self.assigned_parcel_twidget.setItem(count, 2, item)
+                item = QTableWidgetItem(parcel.address_neighbourhood)
+                item.setData(Qt.UserRole, parcel.address_neighbourhood)
+                self.assigned_parcel_twidget.setItem(count, 1, item)
+
+                item = QTableWidgetItem(str(parcel.area_ga))
+                item.setData(Qt.UserRole, parcel.area_ga)
+                self.assigned_parcel_twidget.setItem(count, 2, item)
+        else:
+            for pug_parcel in app_pug_parcels:
+                parcel = self.session.query(CaPastureParcelTbl).filter(
+                    CaPastureParcelTbl.parcel_id == pug_parcel.parcel).one()
+
+                item = QTableWidgetItem(parcel.parcel_id)
+                item.setIcon(QIcon(QPixmap(":/plugins/lm2/parcel.png")))
+                item.setData(Qt.UserRole, parcel.parcel_id)
+
+                count = self.assigned_group_parcel_twidget.rowCount()
+                self.assigned_group_parcel_twidget.insertRow(count)
+
+                self.assigned_group_parcel_twidget.setItem(count, 0, item)
+
+                item = QTableWidgetItem(parcel.address_neighbourhood)
+                item.setData(Qt.UserRole, parcel.address_neighbourhood)
+                self.assigned_group_parcel_twidget.setItem(count, 1, item)
+
+                item = QTableWidgetItem(str(parcel.area_ga))
+                item.setData(Qt.UserRole, parcel.area_ga)
+                self.assigned_group_parcel_twidget.setItem(count, 2, item)
 
 
     def __boundary_mapping(self):
@@ -1899,23 +1923,24 @@ class ApplicationsPastureDialog(QDialog, Ui_ApplicationsPastureDialog, DatabaseH
 
         app_no = self.application_num_first_edit.text() + "-" + self.application_num_type_edit.text() + "-" \
                      + self.application_num_middle_edit.text() + "-" + self.application_num_last_edit.text()
-        try:
-            if self.application.app_type == 7 or self.application.app_type == 15:
-                app_person = self.session.query(CtApplicationPersonRole).\
-                    filter(CtApplicationPersonRole.application == app_no).\
-                    filter(CtApplicationPersonRole.role == Constants.NEW_RIGHT_HOLDER_CODE).all()
-            elif self.application.app_type == 2:
-                app_person = self.session.query(CtApplicationPersonRole). \
-                    filter(CtApplicationPersonRole.application == app_no). \
-                    filter(CtApplicationPersonRole.role == Constants.REMAINING_OWNER_CODE).all()
-            else:
-                app_person = self.session.query(CtApplicationPersonRole). \
-                    filter(CtApplicationPersonRole.application == app_no).all()
-            for p in app_person:
-                if p.main_applicant == True:
-                    person = self.session.query(BsPerson).filter(BsPerson.person_id == p.person).one()
-        except SQLAlchemyError, e:
-            raise LM2Exception(self.tr("Database Query Error"), self.tr("aCould not execute: {0}").format(e.message))
+
+        # try:
+        if self.application.app_type == 7 or self.application.app_type == 15:
+            app_person = self.session.query(CtApplicationPersonRole).\
+                filter(CtApplicationPersonRole.application == app_no).\
+                filter(CtApplicationPersonRole.role == Constants.NEW_RIGHT_HOLDER_CODE).all()
+        elif self.application.app_type == 2:
+            app_person = self.session.query(CtApplicationPersonRole). \
+                filter(CtApplicationPersonRole.application == app_no). \
+                filter(CtApplicationPersonRole.role == Constants.REMAINING_OWNER_CODE).all()
+        else:
+            app_person = self.session.query(CtApplicationPersonRole). \
+                filter(CtApplicationPersonRole.application == self.application.app_id).all()
+        for p in app_person:
+            if p.main_applicant == True:
+                person = self.session.query(BsPerson).filter(BsPerson.person_id == p.person).one()
+        # except SQLAlchemyError, e:
+        #     raise LM2Exception(self.tr("Database Query Error"), self.tr("aCould not execute: {0}").format(e.message))
         item = map_composition.getComposerItemById("person_name")
         first_name = ''
         if person.first_name == None:
@@ -1975,8 +2000,7 @@ class ApplicationsPastureDialog(QDialog, Ui_ApplicationsPastureDialog, DatabaseH
         app_id = self.application.app_id
         try:
             app_status = self.session.query(CtApplicationStatus).\
-                filter(CtApplicationStatus.application == app_id).\
-                filter(CtApplicationStatus.status == 8).all()
+                filter(CtApplicationStatus.application == app_id).all()
             for p in app_status:
                 sd_officer = self.session.query(SdUser).filter(SdUser.user_id == p.officer_in_charge).one()
                 officer = sd_officer.gis_user_real_ref
@@ -2749,6 +2773,64 @@ class ApplicationsPastureDialog(QDialog, Ui_ApplicationsPastureDialog, DatabaseH
             count += 1
 
         self.error_label.setText("")
+
+    @pyqtSlot()
+    def on_group_parcel_add_button_clicked(self):
+
+        row = self.result_group_parcel_twidget.currentRow()
+        if row == -1:
+            return
+        parcel_id = self.result_group_parcel_twidget.item(row, 0).data(Qt.UserRole)
+
+        is_register = False
+        for row in range(self.assigned_group_parcel_twidget.rowCount()):
+            id = self.assigned_group_parcel_twidget.item(row, 0).data(Qt.UserRole)
+            if id == parcel_id:
+                is_register = True
+
+        if is_register:
+            PluginUtils.show_message(self, self.tr("Parcel Duplicate"), self.tr("This parcel already connected"))
+            return
+
+        parcel = self.session.query(CaPastureParcelTbl).filter(CaPastureParcelTbl.parcel_id == parcel_id).one()
+        # pasture_type = self.session.query(ClPastureType).filter(ClPastureType.code == 1).one()
+        item = QTableWidgetItem(parcel.parcel_id)
+        item.setIcon(QIcon(QPixmap(":/plugins/lm2/parcel.png")))
+        item.setData(Qt.UserRole, parcel.parcel_id)
+
+        count = self.assigned_group_parcel_twidget.rowCount()
+        self.assigned_group_parcel_twidget.insertRow(count)
+
+        self.assigned_group_parcel_twidget.setItem(count, 0, item)
+
+        item = QTableWidgetItem(parcel.address_neighbourhood)
+        item.setData(Qt.UserRole, parcel.address_neighbourhood)
+        self.assigned_group_parcel_twidget.setItem(count, 1, item)
+
+        item = QTableWidgetItem(str(parcel.area_ga))
+        item.setData(Qt.UserRole, parcel.area_ga)
+        self.assigned_group_parcel_twidget.setItem(count, 2, item)
+
+        item = QTableWidgetItem('1')
+        item.setData(Qt.UserRole, 1)
+        self.assigned_group_parcel_twidget.setItem(count, 3, item)
+
+        item = QTableWidgetItem('12')
+        item.setData(Qt.UserRole, 12)
+        self.assigned_group_parcel_twidget.setItem(count, 4, item)
+
+        item = QTableWidgetItem('360')
+        item.setData(Qt.UserRole, 360)
+        self.assigned_group_parcel_twidget.setItem(count, 5, item)
+
+        app_pug_parcel_count = self.session.query(CtApplicationPUGParcel).filter(
+            CtApplicationPUGParcel.application == self.application.app_id). \
+            filter(CtApplicationPUGParcel.parcel == parcel_id).count()
+        if app_pug_parcel_count == 0:
+            app_pug_parcel = CtApplicationPUGParcel()
+            app_pug_parcel.application = self.application.app_id
+            app_pug_parcel.parcel = parcel_id
+            self.session.add(app_pug_parcel)
 
     @pyqtSlot()
     def on_boundary_add_button_clicked(self):
