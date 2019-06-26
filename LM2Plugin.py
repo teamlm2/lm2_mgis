@@ -22,6 +22,7 @@ from controller.LogOnDialog import *
 from controller.CreateCaseDialog import CreateCaseDialog
 from controller.SentToGovernorDialog import *
 from controller.PrintCadastreExtractMapTool import *
+from controller.PrintOtherParcelExtractMapTool import *
 from controller.ParcelInfoExtractMapTool import *
 from controller.ParcelMpaEditMapTool import *
 from controller.PrintPointExtractMapTool import *
@@ -978,6 +979,22 @@ class LM2Plugin:
 
     def __start_print_cadastre_map(self):
 
+        selectedLayers = self.iface.legendInterface().selectedLayers()
+
+        if len(selectedLayers) == 0:
+            QMessageBox.warning(self.iface.mainWindow(), QApplication.translate("Plugin", "Warning"),
+                                QApplication.translate("Plugin", "No layer has been selected. " "Please select only one printing parcel layer!"))
+            return
+
+        if len(selectedLayers) > 1:
+            QMessageBox.warning(self.iface.mainWindow(), QApplication.translate("Plugin", "Warning"),
+                                QApplication.translate("Plugin", "You might have chosen more than one layer. ""Please select only one printing parcel layer!"))
+            return
+
+        layer_name = None
+        for layer in selectedLayers:
+            layer_name = layer.name()
+
         if self.print_cadastre_map_action.isCheckable():
             self.print_cadastre_map_action.setCheckable(False)
         else:
@@ -992,8 +1009,15 @@ class LM2Plugin:
             self.print_cadastre_map_action.setChecked(True)
             return
 
-        soum = DatabaseUtils.working_l2_code()
-        layer = LayerUtils.layer_by_data_source("data_soums_union", 'ca_parcel')
+        layer = None
+        if layer_name == u'Нэгж талбар' or layer_name == 'Parcel':
+            layer = LayerUtils.layer_by_data_source("data_soums_union", 'ca_parcel')
+        elif layer_name == u'БН-н Нэгж талбар' or layer_name == 'TNCParcel':
+            layer = LayerUtils.layer_by_data_source("data_soums_union", 'ca_person_group_parcel')
+        elif layer_name == u'БАХ нэгж талбар' or layer_name == 'PUGParcel':
+            layer = LayerUtils.layer_by_data_source("data_soums_union", 'ca_pasture_parcel')
+        else:
+            layer = LayerUtils.layer_by_data_source("data_soums_union", 'ca_parcel')
 
         if layer is None:
             QMessageBox.warning(self.iface.mainWindow(), QApplication.translate( "Plugin", "No <parcel> layer"),
@@ -1013,7 +1037,18 @@ class LM2Plugin:
 
         self.iface.mapCanvas().unsetMapTool(self.iface.mapCanvas().mapTool())
 
-        mapTool = PrintCadastreExtractMapTool(self)
+        mapTool = None
+        if layer_name == u'Нэгж талбар' or layer_name == 'Parcel':
+            table_name = 'ca_parcel'
+            mapTool = PrintCadastreExtractMapTool(self, table_name, False)
+        elif layer_name == u'БН-н Нэгж талбар' or layer_name == 'TNCParcel':
+            table_name = 'ca_person_group_parcel'
+            mapTool = PrintCadastreExtractMapTool(self, table_name, True)
+        elif layer_name == u'БАХ нэгж талбар' or layer_name == 'PUGParcel':
+            table_name = 'ca_pasture_parcel'
+            mapTool = PrintCadastreExtractMapTool(self, table_name, True)
+        else:
+            mapTool = PrintCadastreExtractMapTool(self)
 
         self.iface.mapCanvas().setMapTool(mapTool)
         self.iface.mapCanvas().setCursor(QCursor(Qt.ArrowCursor))

@@ -29,6 +29,8 @@ from ..model.CtCadastrePage import *
 from ..model.Enumerations import ApplicationType, UserRight
 from ..model.SetCadastrePage import *
 from ..model.SdPosition import *
+from ..model.CtApplicationPUGParcel import *
+from ..model.CaPastureParcelTbl import *
 import math
 import locale
 import os
@@ -43,13 +45,14 @@ class PrintDialog(QDialog, Ui_PrintDialog):
     GEO_ID = 2
     OLD_PARCEL_ID = 1
 
-    def __init__(self, plugin, crs_description, parent=None):
+    def __init__(self, plugin, is_pasture, crs_description, parent=None):
 
         super(PrintDialog,  self).__init__(parent)
         self.setAttribute(Qt.WA_DeleteOnClose)
 
         self.plugin = plugin
         self.crs_description = crs_description
+        self.is_pasture = is_pasture
         self.session = SessionHandler().session_instance()
 
         self.__parcel_no = None
@@ -82,11 +85,50 @@ class PrintDialog(QDialog, Ui_PrintDialog):
 
     def __update_ui(self):
 
+        if self.is_pasture == False:
+            self.__update_ui_ca_parcel()
+        else:
+            self.__update_ui_ca_parcel_pasture()
+
+    def __update_ui_ca_parcel_pasture(self):
+
+        self.setWindowTitle(self.tr('Print map for parcel: <{0}>. Select the right holder.'.format(self.__parcel_no)))
+        self.right_holder_twidget.clearContents()
+        # self.session = SessionHandler().session_instance()
+        app_parcels = self.session.query(CtApplicationPUGParcel).filter(CtApplicationPUGParcel.parcel == self.__parcel_no.strip()).all()
+
+        ct_applications = self.session.query(CtApplication).filter(
+            CtApplication.parcel.ilike(self.__parcel_no.strip())).all()
+
+        # for application in ct_applications:
+        for app_parcel in app_parcels:
+            application = self.session.query(CtApplication).filter(CtApplication.app_id == app_parcel.application).one()
+            if application.contracts.count() > 0:
+                for contract_role in application.contracts:
+                    if contract_role.role == Constants.APPLICATION_ROLE_CREATES:
+                        contract = contract_role.contract_ref
+                        # if contract.cancellation_date is None:
+                        for stakeholder in application.stakeholders:
+                            person = stakeholder.person_ref
+                            self.__add_contract_person(1, contract.status, contract.contract_no,
+                                                       contract.contract_date, application, person)
+
+
+
+
+        self.right_holder_twidget.resizeColumnsToContents()
+
+        if self.right_holder_twidget.rowCount() > 0:
+            self.right_holder_twidget.selectRow(0)
+
+    def __update_ui_ca_parcel(self):
+
         self.setWindowTitle(self.tr('Print map for parcel: <{0}>. Select the right holder.'.format(self.__parcel_no)))
         self.right_holder_twidget.clearContents()
         # self.session = SessionHandler().session_instance()
 
-        ct_applications = self.session.query(CtApplication).filter(CtApplication.parcel.ilike(self.__parcel_no.strip())).all()
+        ct_applications = self.session.query(CtApplication).filter(
+            CtApplication.parcel.ilike(self.__parcel_no.strip())).all()
 
         for application in ct_applications:
             if application.contracts.count() > 0:
@@ -98,23 +140,25 @@ class PrintDialog(QDialog, Ui_PrintDialog):
                             person = stakeholder.person_ref
                             if stakeholder.role == Constants.APPLICANT_ROLE_CODE or stakeholder.role == Constants.REMAINING_OWNER_CODE or stakeholder.role == Constants.NEW_RIGHT_HOLDER_CODE:
                                 # self.__add_contract_person(1,contract.status, contract.contract_no, contract.contract_date, application, person)
-                                    if application.app_type == 2:
-                                       if stakeholder.role == Constants.REMAINING_OWNER_CODE:
-                                            person = stakeholder.person_ref
-                                            self.__add_contract_person(1, contract.status, contract.contract_no,
-                                                                       contract.contract_date, application, person)
-                                    elif (application.app_type == 7 or application.app_type == 14 or application.app_type == 15):
-                                        if stakeholder.role == Constants.NEW_RIGHT_HOLDER_CODE:
-                                            person = stakeholder.person_ref
-                                            self.__add_contract_person(1, contract.status, contract.contract_no,
-                                                                       contract.contract_date, application, person)
-                                    else:
+                                if application.app_type == 2:
+                                    if stakeholder.role == Constants.REMAINING_OWNER_CODE:
                                         person = stakeholder.person_ref
                                         self.__add_contract_person(1, contract.status, contract.contract_no,
                                                                    contract.contract_date, application, person)
+                                elif (
+                                            application.app_type == 7 or application.app_type == 14 or application.app_type == 15):
+                                    if stakeholder.role == Constants.NEW_RIGHT_HOLDER_CODE:
+                                        person = stakeholder.person_ref
+                                        self.__add_contract_person(1, contract.status, contract.contract_no,
+                                                                   contract.contract_date, application, person)
+                                else:
+                                    person = stakeholder.person_ref
+                                    self.__add_contract_person(1, contract.status, contract.contract_no,
+                                                               contract.contract_date, application, person)
             else:
                 for stakeholder in application.stakeholders:
                     person = stakeholder.person_ref
+
                     if stakeholder.role == Constants.APPLICANT_ROLE_CODE or stakeholder.role == Constants.REMAINING_OWNER_CODE or stakeholder.role == Constants.NEW_RIGHT_HOLDER_CODE:
                         if application.app_type == 2:
                             if stakeholder.role == Constants.REMAINING_OWNER_CODE:
@@ -145,7 +189,8 @@ class PrintDialog(QDialog, Ui_PrintDialog):
                                     self.__add_contract_person(0, record.status, record.record_no,
                                                                record.record_date, application, person)
                             else:
-                                self.__add_contract_person(0,record.status, record.record_no, record.record_date, application, person)
+                                self.__add_contract_person(0, record.status, record.record_no, record.record_date,
+                                                           application, person)
 
         self.right_holder_twidget.resizeColumnsToContents()
 
@@ -473,10 +518,16 @@ class PrintDialog(QDialog, Ui_PrintDialog):
 
         #parcel area
         item = map_composition.getComposerItemById("area")
-        parcel = self.session.query(CaParcel).filter(CaParcel.parcel_id == self.__parcel_no).one()
-        item.setText(str(int(parcel.area_m2)))
-        # item.setText(str((round(self.__geometry.area(), 2))))
-        item.adjustSizeToText()
+        if self.is_pasture == False:
+            parcel = self.session.query(CaParcel).filter(CaParcel.parcel_id == self.__parcel_no).one()
+            item.setText(str(int(parcel.area_m2)))
+            # item.setText(str((round(self.__geometry.area(), 2))))
+            item.adjustSizeToText()
+        else:
+            parcel = self.session.query(CaPastureParcelTbl).filter(CaPastureParcelTbl.parcel_id == self.__parcel_no).one()
+            item.setText(str(int(parcel.area_ga)))
+            # item.setText(str((round(self.__geometry.area(), 2))))
+            item.adjustSizeToText()
 
         #print print date
         item = map_composition.getComposerItemById("print_date")
@@ -793,8 +844,13 @@ class PrintDialog(QDialog, Ui_PrintDialog):
     def __add_admin_unit_l2_name_h(self, map_composition):
 
         # try:
-        parcel_geometry = self.session.query(CaParcel.geometry).filter(CaParcel.parcel_id == self.__parcel_no).one()
-        admin_unit_l2_name = self.session.query(AuLevel2.name).filter(AuLevel2.geometry.ST_Intersects(func.ST_Centroid(parcel_geometry[0]))).first()
+        if self.is_pasture == False:
+            parcel_geometry = self.session.query(CaParcel.geometry).filter(CaParcel.parcel_id == self.__parcel_no).one()
+            admin_unit_l2_name = self.session.query(AuLevel2.name).filter(AuLevel2.geometry.ST_Intersects(func.ST_Centroid(parcel_geometry[0]))).first()
+        else:
+            parcel_geometry = self.session.query(CaPastureParcelTbl.geometry).filter(CaPastureParcelTbl.parcel_id == self.__parcel_no).one()
+            admin_unit_l2_name = self.session.query(AuLevel2.name).filter(
+                AuLevel2.geometry.ST_Intersects(func.ST_Centroid(parcel_geometry[0]))).first()
         #
         # except SQLAlchemyError, e:
         #     raise LM2Exception(self.tr("Database Query Error"), self.tr("bCould not execute: {0}").format(e.message))
@@ -806,9 +862,13 @@ class PrintDialog(QDialog, Ui_PrintDialog):
     def __add_admin_unit_l2_name(self, map_composition):
 
         # try:
-        parcel_geometry = self.session.query(CaParcel.geometry).filter(CaParcel.parcel_id == self.__parcel_no).one()
-        admin_unit_l2_name = self.session.query(AuLevel2.name).filter(AuLevel2.geometry.ST_Intersects(func.ST_Centroid(parcel_geometry[0]))).first()
-
+        if self.is_pasture == False:
+            parcel_geometry = self.session.query(CaParcel.geometry).filter(CaParcel.parcel_id == self.__parcel_no).one()
+            admin_unit_l2_name = self.session.query(AuLevel2.name).filter(AuLevel2.geometry.ST_Intersects(func.ST_Centroid(parcel_geometry[0]))).first()
+        else:
+            parcel_geometry = self.session.query(CaPastureParcelTbl.geometry).filter(CaPastureParcelTbl.parcel_id == self.__parcel_no).one()
+            admin_unit_l2_name = self.session.query(AuLevel2.name).filter(
+                AuLevel2.geometry.ST_Intersects(func.ST_Centroid(parcel_geometry[0]))).first()
         # except SQLAlchemyError, e:
         #     raise LM2Exception(self.tr("Database Query Error"), self.tr("bCould not execute: {0}").format(e.message))
 
@@ -819,9 +879,13 @@ class PrintDialog(QDialog, Ui_PrintDialog):
     def __add_admin_unit_l3_name_h(self, map_composition):
 
         # try:
-        parcel_geometry = self.session.query(CaParcel.geometry).filter(CaParcel.parcel_id == self.__parcel_no).one()
-        admin_unit_l3_name = self.session.query(AuLevel3.name).filter(AuLevel3.geometry.ST_Intersects(func.ST_Centroid(parcel_geometry[0]))).first()
-
+        if self.is_pasture == False:
+            parcel_geometry = self.session.query(CaParcel.geometry).filter(CaParcel.parcel_id == self.__parcel_no).one()
+            admin_unit_l3_name = self.session.query(AuLevel3.name).filter(AuLevel3.geometry.ST_Intersects(func.ST_Centroid(parcel_geometry[0]))).first()
+        else:
+            parcel_geometry = self.session.query(CaPastureParcelTbl.geometry).filter(CaPastureParcelTbl.parcel_id == self.__parcel_no).one()
+            admin_unit_l3_name = self.session.query(AuLevel3.name).filter(
+                AuLevel3.geometry.ST_Intersects(func.ST_Centroid(parcel_geometry[0]))).first()
         # except SQLAlchemyError, e:
         #     PluginUtils.show_error(self, self.tr("Database Query Error"), self.tr("cCould not execute: {0}").format(e.message))
         #     return
@@ -833,9 +897,13 @@ class PrintDialog(QDialog, Ui_PrintDialog):
     def __add_admin_unit_l3_name(self, map_composition):
 
         # try:
-        parcel_geometry = self.session.query(CaParcel.geometry).filter(CaParcel.parcel_id == self.__parcel_no).one()
-        admin_unit_l3_name = self.session.query(AuLevel3.name).filter(AuLevel3.geometry.ST_Intersects(func.ST_Centroid(parcel_geometry[0]))).first()
-
+        if self.is_pasture == False:
+            parcel_geometry = self.session.query(CaParcel.geometry).filter(CaParcel.parcel_id == self.__parcel_no).one()
+            admin_unit_l3_name = self.session.query(AuLevel3.name).filter(AuLevel3.geometry.ST_Intersects(func.ST_Centroid(parcel_geometry[0]))).first()
+        else:
+            parcel_geometry = self.session.query(CaPastureParcelTbl.geometry).filter(CaPastureParcelTbl.parcel_id == self.__parcel_no).one()
+            admin_unit_l3_name = self.session.query(AuLevel3.name).filter(
+                AuLevel3.geometry.ST_Intersects(func.ST_Centroid(parcel_geometry[0]))).first()
         # except SQLAlchemyError, e:
         #     PluginUtils.show_error(self, self.tr("Database Query Error"), self.tr("cCould not execute: {0}").format(e.message))
         #     return
@@ -1545,7 +1613,10 @@ class PrintDialog(QDialog, Ui_PrintDialog):
         twidget_item = self.right_holder_twidget.item(selected_row, self.FIRSTNAME)
         right_type = twidget_item.data(Qt.UserRole)
 
-        parcel_geometry = self.session.query(CaParcel.geometry).filter(CaParcel.parcel_id == self.__parcel_no).one()
+        if self.is_pasture == False:
+            parcel_geometry = self.session.query(CaParcel.geometry).filter(CaParcel.parcel_id == self.__parcel_no).one()
+        else:
+            parcel_geometry = self.session.query(CaPastureParcelTbl.geometry).filter(CaPastureParcelTbl.parcel_id == self.__parcel_no).one()
         admin_unit_l1_name = self.session.query(AuLevel1.name).filter(
             AuLevel1.geometry.ST_Intersects(func.ST_Centroid(parcel_geometry[0]))).first()
         admin_unit_l2_name = self.session.query(AuLevel2.name).filter(

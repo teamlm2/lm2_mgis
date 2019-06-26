@@ -19,9 +19,9 @@ import math
 import locale
 import os
 
-class PrintCadastreExtractMapTool(QgsMapTool):
+class PrintOtherParcelExtractMapTool(QgsMapTool):
 
-    def __init__(self, plugin, table_name, is_pasture):
+    def __init__(self, plugin, table_name):
         """The constructor.
         Initializes the map tool.
 
@@ -34,13 +34,13 @@ class PrintCadastreExtractMapTool(QgsMapTool):
 
         self.plugin = plugin
         self.table_name = table_name
-        self.is_pasture = is_pasture
         self.double_click = False
 
         self.plugin.iface.mainWindow().statusBar().showMessage(self.tr("Click on a parcel!"))
 
         self.current_dialog = None
         self.dialog_position = None
+        print table_name
 
     def activate(self):
 
@@ -131,7 +131,7 @@ class PrintCadastreExtractMapTool(QgsMapTool):
                 self.dialog_position = self.current_dialog.pos()
                 self.current_dialog.set_parcel_data(parcel_no, result_feature)
             else:
-                self.current_dialog = PrintDialog(self.plugin, self.is_pasture, coordinate_system.description(), self.plugin.iface.mainWindow())
+                self.current_dialog = PrintDialog(self.plugin, coordinate_system.description(), self.plugin.iface.mainWindow())
                 self.current_dialog.setModal(False)
                 self.connect(self.current_dialog, SIGNAL("rejected()"), self.__clean_up)
                 self.current_dialog.set_parcel_data(parcel_no, result_feature)
@@ -306,7 +306,7 @@ class PrintCadastreExtractMapTool(QgsMapTool):
             self.dialog_position = self.current_dialog.pos()
             self.current_dialog.set_building_data(building_id_list)
         else:
-            self.current_dialog = PrintDialog(self.plugin, self.is_pasture, coordinate_system.description(), self.plugin.iface.mainWindow())
+            self.current_dialog = PrintDialog(self.plugin, coordinate_system.description(), self.plugin.iface.mainWindow())
             self.current_dialog.setModal(False)
             self.connect(self.current_dialog, SIGNAL("rejected()"), self.__clean_up)
             self.current_dialog.set_building_data(building_id_list)
