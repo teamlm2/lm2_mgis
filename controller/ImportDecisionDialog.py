@@ -579,7 +579,6 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
             filter(CaTmpParcel.parcel_id == tmp_parcel_id).count()
 
         parcels_to_be_inserted = self.session.query(CaTmpParcel). \
-            filter(CaTmpParcel.parcel_id.startswith(soum_code+'-')). \
             filter(CaTmpParcel.parcel_id == tmp_parcel_id).all()
         maintenance_case = self.session.query(CaMaintenanceCase).filter(CaMaintenanceCase.id == maintenance_case_id).one()
         parcel_id = ''
