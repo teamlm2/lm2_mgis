@@ -18,7 +18,10 @@ from ..view.Ui_ParcelInfoStatisticDialog import *
 from inspect import currentframe
 from ..utils.FileUtils import FileUtils
 from ..utils.LayerUtils import LayerUtils
+from ..model.SetRole import *
+from ..model.UbGisSubject import *
 from ..model.DatabaseHelper import *
+from ..model import Constants
 from .qt_classes.DoubleSpinBoxDelegate import *
 import os
 import locale
@@ -41,7 +44,18 @@ class ParcelInfoStatisticDialog(QDialog, Ui_ParcelInfoStatisticDialog, DatabaseH
         self.session = SessionHandler().session_instance()
         self.plugin = plugin
 
+        self.finish_date.setDate(QDate.currentDate())
         self.__setup_table_widget()
+        self.__setup_cbox()
+
+    def __setup_cbox(self):
+
+        set_roles = self.session.query(SetRole).filter(SetRole.restriction_au_level1 == '011').\
+            filter(SetRole.is_active == True).order_by(SetRole.user_name.asc()).all()
+
+        self.user_name_cbox.addItem("*", -1)
+        for value in set_roles:
+            self.user_name_cbox.addItem(value.user_name + '/' + value.first_name + ' ' + value.surname, value.user_name)
 
     def __setup_table_widget(self):
 
@@ -51,8 +65,72 @@ class ParcelInfoStatisticDialog(QDialog, Ui_ParcelInfoStatisticDialog, DatabaseH
         self.result_twidget.setSelectionMode(QTableWidget.SingleSelection)
         self.result_twidget.setSortingEnabled(True)
 
+        self.result_user_twidget.setAlternatingRowColors(True)
+        self.result_user_twidget.setEditTriggers(QTableWidget.NoEditTriggers)
+        self.result_user_twidget.setSelectionBehavior(QTableWidget.SelectRows)
+        self.result_user_twidget.setSelectionMode(QTableWidget.SingleSelection)
+        self.result_user_twidget.setSortingEnabled(True)
+
+    @pyqtSlot(int)
+    def on_finish_date_checkbox_stateChanged(self, state):
+
+        if state == Qt.Checked:
+            self.finish_date.setEnabled(True)
+        else:
+            self.finish_date.setEnabled(False)
+
     @pyqtSlot()
     def on_find_button_clicked(self):
+
+        if self.tabWidget.currentWidget() == self.ubgis_stat_tab:
+            self.__ubgis_static()
+        elif self.tabWidget.currentWidget() == self.ubgis_finish_tab:
+            self.__ubgis_finish_static()
+        else:
+            return
+
+    def __ubgis_finish_static(self):
+
+        self.result_user_twidget.setRowCount(0)
+
+        finish_parcels = self.session.query(func.count(UbGisSubject.finish_user).label("count"), UbGisSubject.finish_user). \
+            filter(UbGisSubject.is_finish == True). \
+            filter(UbGisSubject.finish_user != None). \
+            group_by(UbGisSubject.finish_user)
+        filter_is_set = False
+        if self.user_name_cbox.currentIndex() != -1:
+            if not self.user_name_cbox.itemData(self.user_name_cbox.currentIndex()) == -1:
+                filter_is_set = True
+                user_name = self.user_name_cbox.itemData(self.user_name_cbox.currentIndex())
+
+                finish_parcels = finish_parcels.filter(UbGisSubject.finish_user == user_name)
+
+        if self.finish_date_checkbox.isChecked():
+            filter_is_set = True
+            qt_date = self.finish_date.date().toString(Constants.DATABASE_DATE_FORMAT)
+            python_date = datetime.strptime(str(qt_date), Constants.PYTHON_DATE_FORMAT)
+
+            finish_parcels = finish_parcels.filter(UbGisSubject.finish_date >= python_date)
+
+        row = 0
+        for value in finish_parcels:
+            self.result_user_twidget.insertRow(row)
+
+            item = QTableWidgetItem()
+            item.setText(value.finish_user)
+            item.setData(Qt.UserRole, value.finish_user)
+            self.result_user_twidget.setItem(row, 0, item)
+
+            item = QTableWidgetItem()
+            item.setText(str(value.count))
+            item.setData(Qt.UserRole, value.count)
+            self.result_user_twidget.setItem(row, 1, item)
+
+            row = + 1
+
+        self.result_user_twidget.resizeColumnsToContents()
+
+    def __ubgis_static(self):
 
         self.result_twidget.setRowCount(0)
         sql = "select * from data_ub.view_ub_statistic_all  "
@@ -60,7 +138,6 @@ class ParcelInfoStatisticDialog(QDialog, Ui_ParcelInfoStatisticDialog, DatabaseH
         result = self.session.execute(sql)
         row = 0
         for item_row in result:
-
             self.result_twidget.insertRow(row)
 
             item = QTableWidgetItem()
