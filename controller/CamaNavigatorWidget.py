@@ -1234,12 +1234,12 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
                     if factor.id == 37:
                         dis_center = int(value.factor_value)
 
-            params = 'area=' + str(area) + '&coord_x=' + str(coord_x) + '&coord_y=' + str(coord_y) + '&valuation=' + str(valuation) + \
-                     '&slope=' + str(slope) + '&risk_flood=' + str(risk_flood) + '&risk_soil=' + str(risk_soil) + '&dis_shl=' + str(dis_shl) + \
-                     '&dis_kid=' + str(dis_kid) + '&dis_hos=' + str(dis_hos) + '&dis_center=' + str(dis_center)
+            params = 'area=' + str(area) + '&coord_x=' + str(coord_x) + '&coord_y=' + str(coord_y) + '&surface_elevation=' + str(valuation) + \
+                     '&surface_slope=' + str(slope) + '&blood_frequence=' + str(risk_flood) + '&soil_pollution_level=' + str(risk_soil) + '&distanes_to_school=' + str(dis_shl) + \
+                     '&distanes_to_kindergarten=' + str(dis_kid) + '&distanes_to_hospital=' + str(dis_hos) + '&distance_to_center=' + str(dis_center)
 
             url = 'http://192.168.88.253:5000/test?' + params
-            # print url
+            print url
             respons = urllib.request.urlopen(url)
             # print respons
             data = json.loads(respons.read().decode(respons.info().get_param('charset') or 'utf-8'))

@@ -55,7 +55,7 @@ class ParcelInfoStatisticDialog(QDialog, Ui_ParcelInfoStatisticDialog, DatabaseH
     def on_find_button_clicked(self):
 
         self.result_twidget.setRowCount(0)
-        sql = "select * from webgis.view_ub_statistic_all  "
+        sql = "select * from data_ub.view_ub_statistic_all  "
 
         result = self.session.execute(sql)
         row = 0

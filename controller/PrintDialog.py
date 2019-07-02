@@ -1356,17 +1356,17 @@ class PrintDialog(QDialog, Ui_PrintDialog):
 
     def __cadastre_page_settings(self):
 
-        soum = DatabaseUtils.working_l2_code()
-        soum_filter = str(soum) + "-%"
+        employee = DatabaseUtils.current_employee()
+        department_id = employee.department_id
         count = self.session.query(SetCadastrePage.range_first_no,
                                                            SetCadastrePage.range_last_no,
                                                            SetCadastrePage.current_no) \
-            .filter(SetCadastrePage.id.like(soum_filter)) \
+            .filter(SetCadastrePage.department_id == department_id) \
             .order_by(SetCadastrePage.register_date.desc()).limit(1).count()
         if count == 1:
             first_no, last_no, current_no = self.session.query(SetCadastrePage.range_first_no, SetCadastrePage.range_last_no,
                                                                SetCadastrePage.current_no) \
-                .filter(SetCadastrePage.id.like(soum_filter)) \
+                .filter(SetCadastrePage.department_id == department_id) \
                 .order_by(SetCadastrePage.register_date.desc()).limit(1).one()
 
             return {Constants.CADASTRE_PAGE_FIRST_NUMBER: first_no, Constants.CADASTRE_PAGE_LAST_NUMBER: last_no,
@@ -1376,7 +1376,6 @@ class PrintDialog(QDialog, Ui_PrintDialog):
 
     def __cadastre_page_interval_settings(self, id):
 
-        soum = DatabaseUtils.working_l2_code()
         count = self.session.query(SetCadastrePage.range_first_no,
                                    SetCadastrePage.range_last_no,
                                    SetCadastrePage.current_no) \
@@ -1427,6 +1426,14 @@ class PrintDialog(QDialog, Ui_PrintDialog):
     @pyqtSlot(int)
     def on_cadastre_checkbox_stateChanged(self, state):
 
+
+        employee = DatabaseUtils.current_employee()
+        if not employee:
+            return
+        if not employee.department_id:
+            return
+        department_id = employee.department_id
+   
         self.cadastre_page_interval_cbox.clear()
         soum = DatabaseUtils.working_l2_code()
         soum_filter = str(soum) + "-%"
@@ -1435,7 +1442,7 @@ class PrintDialog(QDialog, Ui_PrintDialog):
                                    SetCadastrePage.range_last_no,
                                    SetCadastrePage.id,
                                    SetCadastrePage.current_no) \
-            .filter(SetCadastrePage.id.like(soum_filter)) \
+            .filter(SetCadastrePage.department_id == department_id) \
             .order_by(SetCadastrePage.range_first_no.asc()).all()
 
         for set_cadastre_page in set_cadastre_pages:

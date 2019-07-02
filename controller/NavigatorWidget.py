@@ -7990,14 +7990,14 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
 
         if self.is_parcel_checkbox.isChecked():
             parcel_result_count = self.session.query(ParcelSearch).filter(ParcelSearch.parcel_id == id).count()
-
             if parcel_result_count > 1:
-                parcel_results = self.session.query(ParcelSearch).filter(ParcelSearch.parcel_id == id).all()
-                for parcel in parcel_results:
-
-                    if parcel.main_applicant:
-                        parcel_result = self.session.query(ParcelSearch).filter(ParcelSearch.parcel_id == id).\
-                            filter(ParcelSearch.main_applicant == True).one()
+                parcel_result = self.session.query(ParcelSearch).filter(ParcelSearch.parcel_id == id).first()
+                # parcel_results = self.session.query(ParcelSearch).filter(ParcelSearch.parcel_id == id).all()
+                # for parcel in parcel_results:
+                #     parcel_result = self.session.query(ParcelSearch).filter(ParcelSearch.parcel_id == id).first()
+                    # if parcel.main_applicant:
+                    #     parcel_result = self.session.query(ParcelSearch).filter(ParcelSearch.parcel_id == id).\
+                    #         filter(ParcelSearch.main_applicant == True).one()
                     # if parcel.person_role == 70:
                     #     parcel_result = self.session.query(ParcelSearch).filter(ParcelSearch.parcel_id == id)\
                     #         .filter(ParcelSearch.person_role == 70).filter(ParcelSearch.main_applicant == True).one()
@@ -8014,20 +8014,20 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
                 aimag_code = soum_code[:3]
                 self.working_l1_cbox.setCurrentIndex(self.working_l1_cbox.findData(aimag_code))
                 self.working_l2_cbox.setCurrentIndex(self.working_l2_cbox.findData(soum_code))
-
-            self.parcel_num_edit.setText(parcel_result.parcel_id)
-            self.geo_id_edit.setText(parcel_result.geo_id)
-            self.parcel_right_holder_name_edit.setText(parcel_result.first_name)
-            self.parcel_app_num_edit.setText(parcel_result.app_no)
-            self.parcel_decision_num_edit.setText(parcel_result.decision_no)
-            if parcel_result.contract_no != None:
-                self.parcel_contract_num_edit.setText(parcel_result.contract_no)
-            else:
-                self.parcel_contract_num_edit.setText(parcel_result.record_no)
-            self.personal_parcel_edit.setText(parcel_result.person_register)
-            self.land_use_type_cbox.setCurrentIndex(self.land_use_type_cbox.findData(parcel_result.landuse))
-            self.parcel_streetname_edit.setText(parcel_result.address_streetname)
-            self.parcel_khashaa_edit.setText(parcel_result.address_khashaa)
+            if parcel_result:
+                self.parcel_num_edit.setText(parcel_result.parcel_id)
+                self.geo_id_edit.setText(parcel_result.geo_id)
+                self.parcel_right_holder_name_edit.setText(parcel_result.first_name)
+                self.parcel_app_num_edit.setText(parcel_result.app_no)
+                self.parcel_decision_num_edit.setText(parcel_result.decision_no)
+                if parcel_result.contract_no != None:
+                    self.parcel_contract_num_edit.setText(parcel_result.contract_no)
+                else:
+                    self.parcel_contract_num_edit.setText(parcel_result.record_no)
+                self.personal_parcel_edit.setText(parcel_result.person_register)
+                self.land_use_type_cbox.setCurrentIndex(self.land_use_type_cbox.findData(parcel_result.landuse))
+                self.parcel_streetname_edit.setText(parcel_result.address_streetname)
+                self.parcel_khashaa_edit.setText(parcel_result.address_khashaa)
         else:
             parcel_result = self.session.query(TmpParcelSearch).filter(TmpParcelSearch.parcel_id == id).one()
 
@@ -13255,13 +13255,19 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
             self.error_label.setText("")
             self.parcel_results_label.setText(self.tr("Results: ") + str(count))
 
-    # @pyqtSlot()
-    # def on_p_button_clicked(self):
-    #
-    #     commercial = 'creative'
-    #     beingPaidForIt = True
-    #     renderer = Renderer('SimpleTest.odt', globals(), 'result.odt')
-    #     renderer.run()
+    @pyqtSlot()
+    def on_p_button_clicked(self):
+
+        itemsList = self.qa_lwidget.selectedItems()
+        code = '0'
+        for item in itemsList:
+            code = str(item.text()[:2])
+        if code == '09':
+            self.current_dialog = ParcelInfoStatisticDialog(self.plugin, self.plugin.iface.mainWindow())
+            self.current_dialog.setModal(False)
+            self.current_dialog.rejected.connect(self.on_current_dialog_closed)
+            DialogInspector().set_dialog_visible(True)
+            self.current_dialog.show()
 
     @pyqtSlot(str)
     def on_parcel_streetname_edit_textChanged(self, text):
