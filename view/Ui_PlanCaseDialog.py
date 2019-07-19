@@ -284,7 +284,7 @@ class Ui_PlanCaseDialog(object):
         self.polygon_rbutton.setGeometry(QtCore.QRect(10, 60, 82, 17))
         self.polygon_rbutton.setObjectName(_fromUtf8("polygon_rbutton"))
         self.message_label = QtGui.QLabel(self.tab)
-        self.message_label.setGeometry(QtCore.QRect(12, 150, 377, 71))
+        self.message_label.setGeometry(QtCore.QRect(12, 150, 377, 241))
         font = QtGui.QFont()
         font.setBold(True)
         font.setWeight(75)

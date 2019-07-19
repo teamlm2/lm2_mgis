@@ -979,24 +979,41 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         self.main_tree_widget.addTopLevelItem(self.item_polygon_main)
         self.main_tree_widget.setContextMenuPolicy(Qt.CustomContextMenu)
 
-    def __validaty_of_new_parcel(self, parcel, parcel_shape_layer):
+    def __validaty_of_new_parcel(self, parcel, parcel_shape_layer, id):
 
         valid = True
-        error_message = self.tr("The parcel info can't be saved. The following errors have been found: ")
+        error_message = u''
+
+        check_value = self.__approved_parcel_check(parcel, parcel_shape_layer, id, error_message)
+        if not check_value[0]:
+            valid = False
+            error_message = error_message + "\n" + check_value[1]
 
         parcel_geometry = WKTElement(parcel.geometry().exportToWkt(), srid=4326)
         polygon_count = self.session.query(PlProjectParcel). \
             filter(parcel_geometry.ST_Intersects(PlProjectParcel.polygon_geom)).count()
 
-        print polygon_count
-        if polygon_count > 0:
+        polygon_values = self.session.query(PlProjectParcel). \
+            filter(parcel_geometry.ST_Overlaps(PlProjectParcel.polygon_geom)).all()
+        for value in polygon_values:
+            plan_zone = value.plan_zone_ref
+            message = value.project_ref.code + unicode(u' дугаартай ГЗБТөлөвлөгөөний ') + \
+                      '/'+plan_zone.code+'/' + unicode(plan_zone.name) + u' арга хэмжээтэй давхцаж байна.'
+            error_message = error_message + "\n" + message
             valid = False
+        # if polygon_count > 0:
+        #     message = unicode(u'Бусад ГЗБТөлөвлөгөөний зөвшөөрөгдөхгүй арга хэмжээтэй давхцаж байна. ')
+        #     error_message = error_message + "\n" + message
+        #     valid = False
 
         header = ''
         if self.__get_attribute(parcel, parcel_shape_layer)[0]:
             process_type = self.__get_attribute(parcel, parcel_shape_layer)[0]
             header = header + ':' + '(' + str(process_type.code) + ')' + unicode(process_type.name)
             print header
+
+        if not valid:
+            self.error_dic[id] = error_message
 
         return valid, error_message
 
@@ -1093,35 +1110,22 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
             if self.__get_attribute(parcel, parcel_shape_layer)[2]:
                 landname = self.__get_attribute(parcel, parcel_shape_layer)[2]
                 header = header + '/' + unicode(landname) + '/'
-            if self.__approved_parcel_check(parcel, parcel_shape_layer, id):
-                validaty_result = self.__validaty_of_new_parcel(parcel, parcel_shape_layer)
-                print validaty_result[0]
-                if not validaty_result[0]:
-                    log_measage = validaty_result[1]
-                    self.error_dic[id] = log_measage
-                    self.message_label.setText(log_measage)
-                    # PluginUtils.show_error(self, self.tr("Invalid parcel info"), log_measage)
-                    # return
-                    main_parcel_item = QTreeWidgetItem()
-                    main_parcel_item.setText(0, header)
-                    main_parcel_item.setIcon(0, QIcon(QPixmap(":/plugins/lm2/parcel_red.png")))
-                    main_parcel_item.setData(0, Qt.UserRole, id)
-                    main_parcel_item.setData(0, Qt.UserRole + 1, REFUSED)
-                    main_parcel_item.setData(0, Qt.UserRole + 2, feature_id)
-                    self.refused_item.addChild(main_parcel_item)
-                    refused_count += 1
-                else:
-                    new_parcel = self.__add_new_parcel(parcel, parcel_shape_layer)
-                    self.__add_new_parcel_attributes(parcel, new_parcel, provider)
 
-                    main_parcel_item = QTreeWidgetItem()
-                    main_parcel_item.setText(0, header)
-                    main_parcel_item.setIcon(0, QIcon(QPixmap(":/plugins/lm2/parcel_red.png")))
-                    main_parcel_item.setData(0, Qt.UserRole, id)
-                    main_parcel_item.setData(0, Qt.UserRole + 1, APPROVED)
-                    main_parcel_item.setData(0, Qt.UserRole + 2, feature_id)
-                    self.approved_item.addChild(main_parcel_item)
-                    approved_count += 1
+            validaty_result = self.__validaty_of_new_parcel(parcel, parcel_shape_layer, id)
+            print validaty_result[0]
+            if validaty_result[0]:
+                log_measage = validaty_result[1]
+                new_parcel = self.__add_new_parcel(parcel, parcel_shape_layer)
+                self.__add_new_parcel_attributes(parcel, new_parcel, provider)
+
+                main_parcel_item = QTreeWidgetItem()
+                main_parcel_item.setText(0, header)
+                main_parcel_item.setIcon(0, QIcon(QPixmap(":/plugins/lm2/parcel_red.png")))
+                main_parcel_item.setData(0, Qt.UserRole, id)
+                main_parcel_item.setData(0, Qt.UserRole + 1, APPROVED)
+                main_parcel_item.setData(0, Qt.UserRole + 2, feature_id)
+                self.approved_item.addChild(main_parcel_item)
+                approved_count += 1
             else:
                 main_parcel_item = QTreeWidgetItem()
                 main_parcel_item.setText(0, header)
@@ -1193,7 +1197,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
             if self.__get_attribute(parcel, parcel_shape_layer)[2]:
                 landname = self.__get_attribute(parcel, parcel_shape_layer)[2]
                 header = header + '/' + unicode(landname) + '/'
-            if self.__approved_parcel_check(parcel, parcel_shape_layer, id):
+            if self.__approved_parcel_check(parcel, parcel_shape_layer, id, ''):
 
                 new_parcel = PlProjectParcel()
 
@@ -1275,7 +1279,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
 
         return process_type, landuse, landname
 
-    def __approved_parcel_check(self, parcel_feature, layer, id):
+    def __approved_parcel_check(self, parcel_feature, layer, id, error_message):
 
         working_soum_code = DatabaseUtils.working_l2_code()
         valid = True
@@ -1300,7 +1304,6 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
             if index != -1:
                 value = parcel_feature.attributes()[index]
                 column_names[key] = value
-        error_message = u''
 
         # try:
         # if column_names[column_name_landuse] != None:
@@ -1365,10 +1368,10 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
 
             error_message = error_message + "\n" + message
 
-        if not valid:
-            self.error_dic[id] = error_message
+        # if not valid:
+        #     self.error_dic[id] = error_message
 
-        return valid
+        return valid, error_message
 
     def __copy_parcel_attributes(self, parcel, new_parcel, parcel_shape_layer):
 
