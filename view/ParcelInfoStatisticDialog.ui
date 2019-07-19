@@ -255,6 +255,16 @@
      </column>
      <column>
       <property name="text">
+       <string>Lastname</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Firstname</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
        <string>Count</string>
       </property>
      </column>

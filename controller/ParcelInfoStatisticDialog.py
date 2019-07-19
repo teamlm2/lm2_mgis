@@ -114,6 +114,10 @@ class ParcelInfoStatisticDialog(QDialog, Ui_ParcelInfoStatisticDialog, DatabaseH
 
         row = 0
         for value in finish_parcels:
+            set_role_count = self.session.query(SetRole). \
+                filter(SetRole.user_name == value.finish_user). \
+                filter(SetRole.is_active == True).count()
+
             self.result_user_twidget.insertRow(row)
 
             item = QTableWidgetItem()
@@ -121,10 +125,24 @@ class ParcelInfoStatisticDialog(QDialog, Ui_ParcelInfoStatisticDialog, DatabaseH
             item.setData(Qt.UserRole, value.finish_user)
             self.result_user_twidget.setItem(row, 0, item)
 
+            if set_role_count > 0:
+                set_role = self.session.query(SetRole). \
+                    filter(SetRole.user_name == value.finish_user). \
+                    filter(SetRole.is_active == True).first()
+                item = QTableWidgetItem()
+                item.setText(set_role.surname)
+                item.setData(Qt.UserRole, set_role.surname)
+                self.result_user_twidget.setItem(row, 1, item)
+
+                item = QTableWidgetItem()
+                item.setText(set_role.first_name)
+                item.setData(Qt.UserRole, set_role.first_name)
+                self.result_user_twidget.setItem(row, 2, item)
+
             item = QTableWidgetItem()
             item.setText(str(value.count))
             item.setData(Qt.UserRole, value.count)
-            self.result_user_twidget.setItem(row, 1, item)
+            self.result_user_twidget.setItem(row, 3, item)
 
             row = + 1
 
@@ -182,6 +200,69 @@ class ParcelInfoStatisticDialog(QDialog, Ui_ParcelInfoStatisticDialog, DatabaseH
     @pyqtSlot()
     def on_print_button_clicked(self):
 
+        if self.tabWidget.currentWidget() == self.ubgis_stat_tab:
+            self.__ubgis_static_print()
+        elif self.tabWidget.currentWidget() == self.ubgis_finish_tab:
+            self.__ubgis_finish_static_print()
+        else:
+            return
+
+    def __ubgis_finish_static_print(self):
+
+        default_path = r'D:/TM_LM2/reports'
+
+        # path = os.path.join(os.path.dirname(__file__), "../view/map/report_temp/")
+        workbook = xlsxwriter.Workbook(default_path + "/" + "finish_parcel_info_statistic.xlsx")
+        worksheet = workbook.add_worksheet()
+
+        worksheet.set_row(3, 20)
+        # worksheet.set_landscape()
+        # worksheet.set_paper(9)
+        worksheet.set_margins(left=0.3, right=0.3)
+
+        format_header = workbook.add_format()
+        # format_header.set_text_wrap()
+        format_header.set_align('center')
+        format_header.set_align('vcenter')
+        format_header.set_font_name('Times New Roman')
+        format_header.set_font_size(14)
+        format_header.set_bold()
+
+        format_normal = workbook.add_format()
+        # format_normal.set_text_wrap()
+        # format_normal.set_border(1)
+        format_normal.set_font_name('Times New Roman')
+        format_normal.set_font_size(12)
+        # format_normal.set_bold()
+
+        worksheet.merge_range('B2:L2', u'Хэрэглэгчийн Нэгж талбарыг баталгаажуулж үндсэн мэдээллийн санд оруулж буй тайлан', format_header)
+
+        worksheet.write(3, 0, u'№', format_normal)
+        worksheet.write(3, 1, u'Хэрэглэгчийн нэр', format_normal)
+        worksheet.write(3, 2, u'Овог', format_normal)
+        worksheet.write(3, 3, u'Нэг', format_normal)
+        worksheet.write(3, 4, u'Тоо', format_normal)
+
+        row_count = range(self.result_user_twidget.rowCount())
+
+        x_row = 4
+        for row in row_count:
+            worksheet.write(x_row, 0, row + 1, format_normal)
+            worksheet.write(x_row, 1, self.result_user_twidget.item(row, 0).text(), format_normal)
+            worksheet.write(x_row, 2, self.result_user_twidget.item(row, 1).text(), format_normal)
+            worksheet.write(x_row, 3, self.result_user_twidget.item(row, 2).text(), format_normal)
+            worksheet.write(x_row, 4, self.result_user_twidget.item(row, 3).text(), format_normal)
+
+            x_row += 1
+
+        # try:
+        workbook.close()
+        QDesktopServices.openUrl(QUrl.fromLocalFile(default_path + "/" + "finish_parcel_info_statistic.xlsx"))
+        # except IOError, e:
+        #     PluginUtils.show_error(self, self.tr("Out error"), self.tr("This file is already opened. Please close re-run"))
+
+    def __ubgis_static_print(self):
+
         default_path = r'D:/TM_LM2/reports'
 
         # path = os.path.join(os.path.dirname(__file__), "../view/map/report_temp/")
@@ -214,7 +295,7 @@ class ParcelInfoStatisticDialog(QDialog, Ui_ParcelInfoStatisticDialog, DatabaseH
 
         x_row = 5
         for row in row_count:
-            worksheet.write(x_row, 0, row+1, format_normal)
+            worksheet.write(x_row, 0, row + 1, format_normal)
             worksheet.write(x_row, 1, self.result_twidget.item(row, 0).text(), format_normal)
             worksheet.write(x_row, 2, self.result_twidget.item(row, 1).text(), format_normal)
             worksheet.write(x_row, 3, self.result_twidget.item(row, 2).text(), format_normal)
@@ -230,4 +311,3 @@ class ParcelInfoStatisticDialog(QDialog, Ui_ParcelInfoStatisticDialog, DatabaseH
         QDesktopServices.openUrl(QUrl.fromLocalFile(default_path + "/" + "parcel_info_statistic.xlsx"))
         # except IOError, e:
         #     PluginUtils.show_error(self, self.tr("Out error"), self.tr("This file is already opened. Please close re-run"))
-
