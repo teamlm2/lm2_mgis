@@ -93,7 +93,7 @@
        </size>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <property name="usesScrollButtons">
        <bool>true</bool>
@@ -908,7 +908,7 @@ font: 75 14pt &quot;Helvetica&quot;;</string>
          <attribute name="title">
           <string>Other Layer</string>
          </attribute>
-         <widget class="QPushButton" name="au_level2_button_2">
+         <widget class="QPushButton" name="au_level2_button">
           <property name="geometry">
            <rect>
             <x>16</x>
@@ -921,7 +921,7 @@ font: 75 14pt &quot;Helvetica&quot;;</string>
            <string>Сум/Дүүргийн хил</string>
           </property>
          </widget>
-         <widget class="QPushButton" name="au_level1_button_2">
+         <widget class="QPushButton" name="au_level1_button">
           <property name="geometry">
            <rect>
             <x>16</x>
@@ -950,7 +950,7 @@ font: 75 14pt &quot;Helvetica&quot;;</string>
            <string>layer view</string>
           </property>
          </widget>
-         <widget class="QPushButton" name="fee_tax_zone_button_2">
+         <widget class="QPushButton" name="fee_tax_zone_button">
           <property name="geometry">
            <rect>
             <x>16</x>
@@ -973,7 +973,7 @@ font: 75 14pt &quot;Helvetica&quot;;</string>
            </rect>
           </property>
          </widget>
-         <widget class="QPushButton" name="valuation_zone_button_2">
+         <widget class="QPushButton" name="valuation_zone_button">
           <property name="geometry">
            <rect>
             <x>190</x>
@@ -986,7 +986,7 @@ font: 75 14pt &quot;Helvetica&quot;;</string>
            <string>Үнэлгээний бүс</string>
           </property>
          </widget>
-         <widget class="QPushButton" name="sec_zone_button_2">
+         <widget class="QPushButton" name="sec_zone_button">
           <property name="geometry">
            <rect>
             <x>190</x>
@@ -999,7 +999,7 @@ font: 75 14pt &quot;Helvetica&quot;;</string>
            <string>Хамгаалалтын зурвас</string>
           </property>
          </widget>
-         <widget class="QPushButton" name="au_level3_button_2">
+         <widget class="QPushButton" name="au_level3_button">
           <property name="geometry">
            <rect>
             <x>16</x>
@@ -1025,7 +1025,7 @@ font: 75 14pt &quot;Helvetica&quot;;</string>
            <string>Type</string>
           </property>
          </widget>
-         <widget class="QPushButton" name="mpa_zone_button_2">
+         <widget class="QPushButton" name="mpa_zone_button">
           <property name="geometry">
            <rect>
             <x>190</x>
@@ -1038,7 +1038,7 @@ font: 75 14pt &quot;Helvetica&quot;;</string>
            <string>Тусгай хамгаалалтай газар</string>
           </property>
          </widget>
-         <widget class="QPushButton" name="free_zone_button_2">
+         <widget class="QPushButton" name="free_zone_button">
           <property name="geometry">
            <rect>
             <x>190</x>

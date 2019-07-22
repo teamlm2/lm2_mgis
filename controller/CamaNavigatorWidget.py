@@ -790,9 +790,13 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
             count = self.price_interval_twidget.rowCount()
             self.price_interval_twidget.insertRow(count)
 
-            self.price_interval_twidget.setCellWidget(count, 0, delegate_integer)
-            self.price_interval_twidget.setCellWidget(count, 1, delegate_double_min)
-            self.price_interval_twidget.setCellWidget(count, 2, delegate_double_max)
+            item = QTableWidgetItem()
+            item.setCheckState(Qt.Unchecked)
+
+            self.price_interval_twidget.setItem(count, 0, item)
+            self.price_interval_twidget.setCellWidget(count, 1, delegate_integer)
+            self.price_interval_twidget.setCellWidget(count, 2, delegate_double_min)
+            self.price_interval_twidget.setCellWidget(count, 3, delegate_double_max)
 
             level_no = level_no + 1
 
@@ -801,12 +805,13 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
     def on_view_layer_button_clicked(self):
 
         sql = ""
+        sql_zone = ""
         rows = self.price_interval_twidget.rowCount()
 
         for row in range(rows):
-            zone_no = str(self.price_interval_twidget.cellWidget(row, 0).value())
-            begin_value = str(self.price_interval_twidget.cellWidget(row, 1).value())
-            end_value = str(self.price_interval_twidget.cellWidget(row, 2).value())
+            zone_no = str(self.price_interval_twidget.cellWidget(row, 1).value())
+            begin_value = str(self.price_interval_twidget.cellWidget(row, 2).value())
+            end_value = str(self.price_interval_twidget.cellWidget(row, 3).value())
             if (row + 1) == rows:
                 end_value = " <= " + end_value
             else:
@@ -817,9 +822,16 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
                      "join data_soums_union.ca_parcel_tbl parcel on parcel_price.parcel_id = parcel.parcel_id " \
                      "where parcel.au2 = '01125' and (parcel_price.base_price_m2 >= " + begin_value + " and parcel_price.base_price_m2  "+ end_value +")"
 
-            sql = sql + select
-        sql = "(" + sql + ")"
+            if sql_zone:
+                sql_zone = sql_zone + "UNION" + "\n"
+            select_zone = "select " + zone_no + " as zone_no, st_buffer(st_buffer((st_dump(st_union(st_buffer(parcel.geometry, 0.001)))).geom, -0.001), 0.0002) as geometry from data_cama.cm_parcel_base_price parcel_price " \
+                  "join data_soums_union.ca_parcel_tbl parcel on parcel_price.parcel_id = parcel.parcel_id where parcel.au2 = '01125' and (parcel_price.base_price_m2 >= " + begin_value + " and parcel_price.base_price_m2   "+ end_value +") "
 
+            sql = sql + select
+            sql_zone = sql_zone + select_zone
+
+        sql = "(" + sql + ")"
+        # print sql
         root = QgsProject.instance().layerTreeRoot()
         mygroup = root.findGroup(u"CAMA")
         layer_name = 'Parcel Zone Classify'
@@ -841,6 +853,26 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
         if myalayer is None:
             mygroup.addLayer(vlayer_parcel)
 
+        layer_name = 'Test Zone Classify'
+        for id, layer in layers.iteritems():
+            if layer.type() == QgsMapLayer.VectorLayer:
+                if layer.name() == layer_name:
+                    layer_list.append(id)
+
+        # sql = "select row_number() over() as gid, * from ( " \
+        #         "select 1 as zone_no, st_buffer(st_buffer((st_dump(st_union(st_buffer(parcel.geometry, 0.001)))).geom, -0.001), 0.0002) as geometry from data_cama.cm_parcel_base_price parcel_price join data_soums_union.ca_parcel_tbl parcel on parcel_price.parcel_id = parcel.parcel_id where parcel.au2 = '01125' and (parcel_price.base_price_m2 >= 2045.52 and parcel_price.base_price_m2   < 129034.14) " \
+        #         ")xxx "
+        sql_zone = "select row_number() over() as gid, * from ( " + sql_zone + " )xxx"
+        sql_zone = "(" + sql_zone + ")"
+        print sql_zone
+        vlayer_parcel = LayerUtils.layer_by_data_source("", sql_zone)
+        if vlayer_parcel:
+            QgsMapLayerRegistry.instance().removeMapLayers(layer_list)
+        vlayer_parcel = LayerUtils.load_temp_table(sql_zone, layer_name)
+
+        myalayer = root.findLayer(vlayer_parcel.id())
+        if myalayer is None:
+            mygroup.addLayer(vlayer_parcel)
 
     @pyqtSlot()
     def on_valuation_button_clicked(self):

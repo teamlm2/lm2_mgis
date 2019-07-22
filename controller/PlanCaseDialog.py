@@ -48,6 +48,8 @@ from ..model.CaParcelTbl import *
 from ..model.PlProjectParcelAttributeValue import *
 from ..model.ClAttributeZone import *
 from ..model.SetPlanZoneRelation import *
+from ..model.PlBaseConditionParcel import *
+from ..model.ClBaseConditionType import *
 from ..view.Ui_PlanCaseDialog import *
 from .qt_classes.ApplicantDocumentDelegate import ApplicationDocumentDelegate
 from .qt_classes.DocumentsTableWidget import DocumentsTableWidget
@@ -989,28 +991,57 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
             valid = False
             error_message = error_message + "\n" + check_value[1]
 
+        process_type = self.__get_attribute(parcel, parcel_shape_layer)[0]
+        plan_zone_id = process_type.plan_zone_id
+        # header = ''
+        # if self.__get_attribute(parcel, parcel_shape_layer)[0]:
+        #     process_type = self.__get_attribute(parcel, parcel_shape_layer)[0]
+        #     header = header + ':' + '(' + str(process_type.code) + ')' + unicode(process_type.name)
+        #     print header
         parcel_geometry = WKTElement(parcel.geometry().exportToWkt(), srid=4326)
-        polygon_count = self.session.query(PlProjectParcel). \
-            filter(parcel_geometry.ST_Intersects(PlProjectParcel.polygon_geom)).count()
 
+        # parcel overlap not approved plan zone
         polygon_values = self.session.query(PlProjectParcel). \
-            filter(parcel_geometry.ST_Overlaps(PlProjectParcel.polygon_geom)).all()
+            filter(parcel_geometry.ST_Overlaps(PlProjectParcel.polygon_geom)).\
+            filter(PlProjectParcel.valid_till == None).all()
         for value in polygon_values:
             plan_zone = value.plan_zone_ref
-            message = value.project_ref.code + unicode(u' дугаартай ГЗБТөлөвлөгөөний ') + \
-                      '/'+plan_zone.code+'/' + unicode(plan_zone.name) + u' арга хэмжээтэй давхцаж байна.'
-            error_message = error_message + "\n" + message
-            valid = False
-        # if polygon_count > 0:
-        #     message = unicode(u'Бусад ГЗБТөлөвлөгөөний зөвшөөрөгдөхгүй арга хэмжээтэй давхцаж байна. ')
-        #     error_message = error_message + "\n" + message
-        #     valid = False
+            plan_zone_relation_count = self.session.query(SetPlanZoneRelation). \
+                  filter(SetPlanZoneRelation.parent_plan_zone_id == plan_zone.plan_zone_id).\
+                  filter(SetPlanZoneRelation.child_plan_zone_id == plan_zone_id).count()
+            if plan_zone_relation_count == 0:
+                message = value.project_ref.code + unicode(u' дугаартай ГЗБТөлөвлөгөөний ') + \
+                          '/'+plan_zone.code+'/' + unicode(plan_zone.name) + u' арга хэмжээтэй давхцаж байна.'
+                error_message = error_message + "\n" + message
+                valid = False
 
-        header = ''
-        if self.__get_attribute(parcel, parcel_shape_layer)[0]:
-            process_type = self.__get_attribute(parcel, parcel_shape_layer)[0]
-            header = header + ':' + '(' + str(process_type.code) + ')' + unicode(process_type.name)
-            print header
+        point_values = self.session.query(PlProjectParcel). \
+            filter(parcel_geometry.ST_Overlaps(PlProjectParcel.point_geom)). \
+            filter(PlProjectParcel.valid_till == None).all()
+        for value in point_values:
+            plan_zone = value.plan_zone_ref
+            plan_zone_relation_count = self.session.query(SetPlanZoneRelation). \
+                filter(SetPlanZoneRelation.parent_plan_zone_id == plan_zone.plan_zone_id). \
+                filter(SetPlanZoneRelation.child_plan_zone_id == plan_zone_id).count()
+            if plan_zone_relation_count == 0:
+                message = value.project_ref.code + unicode(u' дугаартай ГЗБТөлөвлөгөөний ') + \
+                          '/' + plan_zone.code + '/' + unicode(plan_zone.name) + u' арга хэмжээтэй давхцаж байна.'
+                error_message = error_message + "\n" + message
+                valid = False
+
+        line_values = self.session.query(PlProjectParcel). \
+            filter(parcel_geometry.ST_Overlaps(PlProjectParcel.line_geom)). \
+            filter(PlProjectParcel.valid_till == None).all()
+        for value in line_values:
+            plan_zone = value.plan_zone_ref
+            plan_zone_relation_count = self.session.query(SetPlanZoneRelation). \
+                filter(SetPlanZoneRelation.parent_plan_zone_id == plan_zone.plan_zone_id). \
+                filter(SetPlanZoneRelation.child_plan_zone_id == plan_zone_id).count()
+            if plan_zone_relation_count == 0:
+                message = value.project_ref.code + unicode(u' дугаартай ГЗБТөлөвлөгөөний ') + \
+                          '/' + plan_zone.code + '/' + unicode(plan_zone.name) + u' арга хэмжээтэй давхцаж байна.'
+                error_message = error_message + "\n" + message
+                valid = False
 
         if not valid:
             self.error_dic[id] = error_message
@@ -1112,9 +1143,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
                 header = header + '/' + unicode(landname) + '/'
 
             validaty_result = self.__validaty_of_new_parcel(parcel, parcel_shape_layer, id)
-            print validaty_result[0]
             if validaty_result[0]:
-                log_measage = validaty_result[1]
                 new_parcel = self.__add_new_parcel(parcel, parcel_shape_layer)
                 self.__add_new_parcel_attributes(parcel, new_parcel, provider)
 
@@ -1265,9 +1294,9 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
 
         process_type = None
         if plan_code:
-            count = self.session.query(ClPlanZone).filter(ClPlanZone.plan_zone_id == plan_code).count()
+            count = self.session.query(ClPlanZone).filter(ClPlanZone.code == plan_code).count()
             if count == 1:
-                process_type = self.session.query(ClPlanZone).filter(ClPlanZone.plan_zone_id == plan_code).one()
+                process_type = self.session.query(ClPlanZone).filter(ClPlanZone.code == plan_code).one()
         landuse = None
         if landuse_code:
             count = self.session.query(ClLanduseType).filter(ClLanduseType.code == landuse_code).count()

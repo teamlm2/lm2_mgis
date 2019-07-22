@@ -1780,12 +1780,12 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
 
         root = QgsProject.instance().layerTreeRoot()
         mygroup = root.findGroup(u"Мэдээний хяналт")
-        vlayer = LayerUtils.layer_by_data_source("data_landuse", "ca_sec_parcel")
+        vlayer = LayerUtils.layer_by_data_source("data_plan", "pl_view_base_condition_parcel")
         if vlayer is None:
-            vlayer = LayerUtils.load_layer_base_layer("ca_sec_parcel", "parcel_id", "data_landuse")
+            vlayer = LayerUtils.load_layer_base_layer("pl_view_base_condition_parcel", "parcel_id", "data_plan")
         vlayer.loadNamedStyle(
-            str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/ca_sec_parcel.qml")
-        vlayer.setLayerName(self.tr("Parcel Sec"))
+            str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/plan_base_condition_parcel.qml")
+        vlayer.setLayerName(self.tr("Safety base zone"))
         myalayer = root.findLayer(vlayer.id())
         if myalayer is None:
             mygroup.addLayer(vlayer)
