@@ -831,7 +831,7 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
             sql_zone = sql_zone + select_zone
 
         sql = "(" + sql + ")"
-        # print sql
+
         root = QgsProject.instance().layerTreeRoot()
         mygroup = root.findGroup(u"CAMA")
         layer_name = 'Parcel Zone Classify'
@@ -842,7 +842,6 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
             if layer.type() == QgsMapLayer.VectorLayer:
                 if layer.name() == layer_name:
                     layer_list.append(id)
-
 
         vlayer_parcel = LayerUtils.layer_by_data_source("", sql)
         if vlayer_parcel:
@@ -859,12 +858,9 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
                 if layer.name() == layer_name:
                     layer_list.append(id)
 
-        # sql = "select row_number() over() as gid, * from ( " \
-        #         "select 1 as zone_no, st_buffer(st_buffer((st_dump(st_union(st_buffer(parcel.geometry, 0.001)))).geom, -0.001), 0.0002) as geometry from data_cama.cm_parcel_base_price parcel_price join data_soums_union.ca_parcel_tbl parcel on parcel_price.parcel_id = parcel.parcel_id where parcel.au2 = '01125' and (parcel_price.base_price_m2 >= 2045.52 and parcel_price.base_price_m2   < 129034.14) " \
-        #         ")xxx "
         sql_zone = "select row_number() over() as gid, * from ( " + sql_zone + " )xxx"
         sql_zone = "(" + sql_zone + ")"
-        print sql_zone
+
         vlayer_parcel = LayerUtils.layer_by_data_source("", sql_zone)
         if vlayer_parcel:
             QgsMapLayerRegistry.instance().removeMapLayers(layer_list)

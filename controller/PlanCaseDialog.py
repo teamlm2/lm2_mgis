@@ -50,6 +50,7 @@ from ..model.ClAttributeZone import *
 from ..model.SetPlanZoneRelation import *
 from ..model.PlBaseConditionParcel import *
 from ..model.ClBaseConditionType import *
+from ..model.SetPlanZoneBaseConditionType import *
 from ..view.Ui_PlanCaseDialog import *
 from .qt_classes.ApplicantDocumentDelegate import ApplicationDocumentDelegate
 from .qt_classes.DocumentsTableWidget import DocumentsTableWidget
@@ -984,6 +985,8 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
     def __validaty_of_new_parcel(self, parcel, parcel_shape_layer, id):
 
         valid = True
+        plan_zone_message = unicode(u'* (ЗӨВШӨӨРӨГДӨХГҮЙ БҮС/АРГА ХЭМЖЭЭ/) ')
+        base_condition_message = unicode(u'* (ЗӨВШӨӨРӨГДӨХГҮЙ ХАМГААЛЛАЛТЫН БҮС/ЗУРВАС/) ')
         error_message = u''
 
         check_value = self.__approved_parcel_check(parcel, parcel_shape_layer, id, error_message)
@@ -993,11 +996,6 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
 
         process_type = self.__get_attribute(parcel, parcel_shape_layer)[0]
         plan_zone_id = process_type.plan_zone_id
-        # header = ''
-        # if self.__get_attribute(parcel, parcel_shape_layer)[0]:
-        #     process_type = self.__get_attribute(parcel, parcel_shape_layer)[0]
-        #     header = header + ':' + '(' + str(process_type.code) + ')' + unicode(process_type.name)
-        #     print header
         parcel_geometry = WKTElement(parcel.geometry().exportToWkt(), srid=4326)
 
         # parcel overlap not approved plan zone
@@ -1006,12 +1004,15 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
             filter(PlProjectParcel.valid_till == None).all()
         for value in polygon_values:
             plan_zone = value.plan_zone_ref
+            project = value.project_ref
+            plan_type = project.plan_type_ref
             plan_zone_relation_count = self.session.query(SetPlanZoneRelation). \
                   filter(SetPlanZoneRelation.parent_plan_zone_id == plan_zone.plan_zone_id).\
                   filter(SetPlanZoneRelation.child_plan_zone_id == plan_zone_id).count()
             if plan_zone_relation_count == 0:
-                message = value.project_ref.code + unicode(u' дугаартай ГЗБТөлөвлөгөөний ') + \
-                          '/'+plan_zone.code+'/' + unicode(plan_zone.name) + u' арга хэмжээтэй давхцаж байна.'
+                message = plan_zone_message + value.project_ref.code + unicode(u' дугаартай ') + plan_type.short_name + \
+                          unicode(u'-ний ') + \
+                          '/'+plan_zone.code+'/' + unicode(plan_zone.name) + unicode(u' арга хэмжээтэй давхцаж байна.')
                 error_message = error_message + "\n" + message
                 valid = False
 
@@ -1020,12 +1021,15 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
             filter(PlProjectParcel.valid_till == None).all()
         for value in point_values:
             plan_zone = value.plan_zone_ref
+            project = value.project_ref
+            plan_type = project.plan_type_ref
             plan_zone_relation_count = self.session.query(SetPlanZoneRelation). \
                 filter(SetPlanZoneRelation.parent_plan_zone_id == plan_zone.plan_zone_id). \
                 filter(SetPlanZoneRelation.child_plan_zone_id == plan_zone_id).count()
             if plan_zone_relation_count == 0:
-                message = value.project_ref.code + unicode(u' дугаартай ГЗБТөлөвлөгөөний ') + \
-                          '/' + plan_zone.code + '/' + unicode(plan_zone.name) + u' арга хэмжээтэй давхцаж байна.'
+                message = plan_zone_message + value.project_ref.code + unicode(u' дугаартай ') + plan_type.short_name + \
+                          unicode(u'-ний ') + \
+                          '/' + plan_zone.code + '/' + unicode(plan_zone.name) + unicode(u' арга хэмжээтэй давхцаж байна.')
                 error_message = error_message + "\n" + message
                 valid = False
 
@@ -1034,12 +1038,29 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
             filter(PlProjectParcel.valid_till == None).all()
         for value in line_values:
             plan_zone = value.plan_zone_ref
+            project = value.project_ref
+            plan_type = project.plan_type_ref
             plan_zone_relation_count = self.session.query(SetPlanZoneRelation). \
                 filter(SetPlanZoneRelation.parent_plan_zone_id == plan_zone.plan_zone_id). \
                 filter(SetPlanZoneRelation.child_plan_zone_id == plan_zone_id).count()
             if plan_zone_relation_count == 0:
-                message = value.project_ref.code + unicode(u' дугаартай ГЗБТөлөвлөгөөний ') + \
-                          '/' + plan_zone.code + '/' + unicode(plan_zone.name) + u' арга хэмжээтэй давхцаж байна.'
+                message = plan_zone_message + value.project_ref.code + unicode(u' дугаартай ') + plan_type.short_name + \
+                          unicode(u'-ний ') + \
+                          '/' + plan_zone.code + '/' + unicode(plan_zone.name) + unicode(u' арга хэмжээтэй давхцаж байна.')
+                error_message = error_message + "\n" + message
+                valid = False
+
+        # base condition overlaps
+        values = self.session.query(PlBaseConditionParcel).\
+            filter(parcel_geometry.ST_Overlaps(PlBaseConditionParcel.geometry)).all()
+
+        for value in values:
+            type = value.base_condition_type_ref
+            count = self.session.query(SetPlanZoneBaseConditionType).\
+                filter(SetPlanZoneBaseConditionType.plan_zone_id == plan_zone_id). \
+                filter(SetPlanZoneBaseConditionType.base_condition_type_id == type.base_condition_type_id).count()
+            if count == 1:
+                message = base_condition_message + type.short_name + unicode(u' -тэй давхцаж байна. ')
                 error_message = error_message + "\n" + message
                 valid = False
 
@@ -1360,12 +1381,12 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
             count = self.session.query(ClPlanZone).filter(ClPlanZone.code == column_names[column_name_plan_code]).count()
             if count == 0:
                 valid = False
-                message = unicode(u'Үйл ажиллагааны ангиллын дугаар буруу байна.')
+                message = '*' + unicode(u' Үйл ажиллагааны ангиллын дугаар буруу байна.')
                 error_message = error_message + "\n" + message
                 self.message_label.setText(error_message)
         else:
             valid = False
-            message = unicode(u'Үйл ажиллагааны ангиллын дугаар буруу байна.')
+            message = '*' + unicode(u' Үйл ажиллагааны ангиллын дугаар буруу байна.')
             error_message = error_message + "\n" + message
             self.message_label.setText(error_message)
         # except SQLAlchemyError, e:
@@ -1383,7 +1404,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
 
         if is_out_parcel:
             valid = False
-            message = unicode(u'Сумын хилийн гадна байна.')
+            message = '*' + unicode(u' Сумын хилийн гадна байна.')
             error_message = error_message + "\n" + message
             self.message_label.setText(error_message)
 
@@ -1393,7 +1414,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
             filter(parcel_geometry.ST_Covers(PlProjectParcel.polygon_geom)).count()
         if parcel_overlaps_count > 0:
             valid = False
-            message = unicode(u'Нэгж талбар давхардаж байна.')
+            message = '*' + unicode(u' Нэгж талбар давхардаж байна.')
 
             error_message = error_message + "\n" + message
 
