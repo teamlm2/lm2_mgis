@@ -51,6 +51,7 @@ from ..model.SetPlanZoneRelation import *
 from ..model.PlBaseConditionParcel import *
 from ..model.ClBaseConditionType import *
 from ..model.SetPlanZoneBaseConditionType import *
+from ..model.SetPlanZonePlanType import *
 from ..view.Ui_PlanCaseDialog import *
 from .qt_classes.ApplicantDocumentDelegate import ApplicationDocumentDelegate
 from .qt_classes.DocumentsTableWidget import DocumentsTableWidget
@@ -1142,6 +1143,10 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
 
         iterator = parcel_shape_layer.getFeatures()
         provider = parcel_shape_layer.dataProvider()
+
+        if self.if_single_type_chbox.isChecked():
+            self.__shp_edit_attribute(parcel_shape_layer)
+
         fieldNames = []
         fields = provider.fields()
         for field in fields:
@@ -1174,6 +1179,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
                 main_parcel_item.setData(0, Qt.UserRole, id)
                 main_parcel_item.setData(0, Qt.UserRole + 1, APPROVED)
                 main_parcel_item.setData(0, Qt.UserRole + 2, feature_id)
+                main_parcel_item.setToolTip(0, header)
                 self.approved_item.addChild(main_parcel_item)
                 approved_count += 1
             else:
@@ -1183,6 +1189,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
                 main_parcel_item.setData(0, Qt.UserRole, id)
                 main_parcel_item.setData(0, Qt.UserRole + 1, REFUSED)
                 main_parcel_item.setData(0, Qt.UserRole + 2, feature_id)
+                main_parcel_item.setToolTip(0, header)
                 self.refused_item.addChild(main_parcel_item)
                 refused_count += 1
 
@@ -1720,6 +1727,59 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
             self.cadastre_right_type_change_cbox.setEnabled(False)
             self.cadastre_form_change_button.setEnabled(False)
             # self.cadastre_form_type_change_cbox.clear()
+
+    @pyqtSlot(int)
+    def on_if_single_type_chbox_stateChanged(self, state):
+
+        if state == Qt.Checked:
+            self.shp_process_type_cbox.setEnabled(True)
+            plan_type = self.plan.plan_type_ref
+            values = self.session.query(ClPlanZone.plan_zone_id, ClPlanZone.code, ClPlanZone.name). \
+                join(SetPlanZonePlanType, ClPlanZone.plan_zone_id == SetPlanZonePlanType.plan_zone_id). \
+                filter(SetPlanZonePlanType.plan_type_id == plan_type.plan_type_id). \
+                group_by(ClPlanZone.plan_zone_id, ClPlanZone.code, ClPlanZone.name). \
+                order_by(ClPlanZone.code)
+
+            for value in values:
+                self.shp_process_type_cbox.addItem(str(value.code) + ':' + value.name, value.code)
+
+            for index in range(self.shp_process_type_cbox.count()):
+                self.shp_process_type_cbox.setItemData(index, self.shp_process_type_cbox.itemText(index), Qt.ToolTipRole)
+
+        else:
+            self.shp_process_type_cbox.clear()
+            self.shp_process_type_cbox.setEnabled(False)
+
+    @pyqtSlot(int)
+    def on_shp_process_type_cbox_currentIndexChanged(self, index):
+
+        self.shp_process_type_cbox.setToolTip(self.shp_process_type_cbox.currentText())
+
+
+
+
+    def __shp_edit_attribute(self, parcel_shape_layer):
+
+        code = self.shp_process_type_cbox.itemData(self.shp_process_type_cbox.currentIndex())
+        layer = parcel_shape_layer
+
+        # features = layer.getFeatures()
+
+        provider = layer.dataProvider()
+        features = provider.getFeatures()
+        # p = features.next()
+        # p.attributes()
+
+        updateMap = {}
+
+
+        for feature in features:
+            fieldIdx = feature.fields().indexFromName('badedturl')
+            updateMap[feature.id()] = {fieldIdx: code}
+        print updateMap
+        provider.changeAttributeValues(updateMap)
+        layer.commitChanges()
+        self.plugin.iface.mapCanvas().refresh()
 
     @pyqtSlot()
     def on_form_change_button_clicked(self):

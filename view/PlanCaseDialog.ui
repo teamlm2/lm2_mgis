@@ -41,9 +41,9 @@
    <widget class="QLineEdit" name="type_edit">
     <property name="geometry">
      <rect>
-      <x>220</x>
+      <x>190</x>
       <y>32</y>
-      <width>270</width>
+      <width>304</width>
       <height>20</height>
      </rect>
     </property>
@@ -54,9 +54,9 @@
    <widget class="QLabel" name="label_3">
     <property name="geometry">
      <rect>
-      <x>220</x>
+      <x>190</x>
       <y>15</y>
-      <width>81</width>
+      <width>231</width>
       <height>16</height>
      </rect>
     </property>
@@ -82,7 +82,7 @@
      <rect>
       <x>90</x>
       <y>32</y>
-      <width>122</width>
+      <width>91</width>
       <height>20</height>
      </rect>
     </property>
@@ -825,7 +825,7 @@
        <x>11</x>
        <y>0</y>
        <width>381</width>
-       <height>141</height>
+       <height>181</height>
       </rect>
      </property>
      <property name="title">
@@ -835,7 +835,7 @@
       <property name="geometry">
        <rect>
         <x>9</x>
-        <y>104</y>
+        <y>98</y>
         <width>311</width>
         <height>21</height>
        </rect>
@@ -848,7 +848,7 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>85</y>
+        <y>79</y>
         <width>311</width>
         <height>16</height>
        </rect>
@@ -861,7 +861,7 @@
       <property name="geometry">
        <rect>
         <x>330</x>
-        <y>102</y>
+        <y>96</y>
         <width>42</width>
         <height>25</height>
        </rect>
@@ -878,7 +878,7 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>20</y>
+        <y>14</y>
         <width>82</width>
         <height>17</height>
        </rect>
@@ -891,7 +891,7 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>40</y>
+        <y>34</y>
         <width>82</width>
         <height>17</height>
        </rect>
@@ -907,7 +907,7 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>60</y>
+        <y>54</y>
         <width>82</width>
         <height>17</height>
        </rect>
@@ -916,14 +916,43 @@
        <string>Polygon</string>
       </property>
      </widget>
+     <widget class="QComboBox" name="shp_process_type_cbox">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>146</y>
+        <width>361</width>
+        <height>22</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string/>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="if_single_type_chbox">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>126</y>
+        <width>361</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Зөвхөн нэг арга хэмжээгээр оруулах</string>
+      </property>
+     </widget>
     </widget>
     <widget class="QLabel" name="message_label">
      <property name="geometry">
       <rect>
        <x>12</x>
-       <y>150</y>
+       <y>200</y>
        <width>377</width>
-       <height>241</height>
+       <height>191</height>
       </rect>
      </property>
      <property name="font">
