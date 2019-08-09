@@ -93,7 +93,7 @@
        </size>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <property name="usesScrollButtons">
        <bool>true</bool>
@@ -479,9 +479,9 @@ font: 75 14pt &quot;Helvetica&quot;;</string>
        <widget class="QPushButton" name="load_template_button">
         <property name="geometry">
          <rect>
-          <x>240</x>
+          <x>270</x>
           <y>310</y>
-          <width>131</width>
+          <width>100</width>
           <height>23</height>
          </rect>
         </property>
@@ -521,9 +521,9 @@ font: 75 14pt &quot;Helvetica&quot;;</string>
         <property name="geometry">
          <rect>
           <x>10</x>
-          <y>52</y>
+          <y>72</y>
           <width>361</width>
-          <height>251</height>
+          <height>231</height>
          </rect>
         </property>
         <column>
@@ -548,14 +548,40 @@ font: 75 14pt &quot;Helvetica&quot;;</string>
        <widget class="QPushButton" name="load_attribute_button">
         <property name="geometry">
          <rect>
-          <x>90</x>
+          <x>140</x>
           <y>310</y>
-          <width>131</width>
+          <width>100</width>
           <height>23</height>
          </rect>
         </property>
         <property name="text">
          <string>Load Attribute</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="save_default_zone_button">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>310</y>
+          <width>100</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Save Default</string>
+        </property>
+       </widget>
+       <widget class="QCheckBox" name="default_plan_zone_chbox">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>50</y>
+          <width>151</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Default plan zone</string>
         </property>
        </widget>
       </widget>

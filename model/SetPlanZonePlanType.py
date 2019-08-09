@@ -17,3 +17,5 @@ class SetPlanZonePlanType(Base):
     plan_zone_id = Column(Integer, ForeignKey('cl_plan_zone.plan_zone_id'), primary_key=True)
     plan_zone_ref = relationship("ClPlanZone")
 
+    is_default = Column(Boolean)
+

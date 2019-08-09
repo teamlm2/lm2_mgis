@@ -81,8 +81,9 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
         self.plan = None
         self.process_type_treewidget.connect(self.process_type_treewidget, SIGNAL("itemClicked(QTreeWidgetItem*, int)"), self.__on_click_plan_zone_treewidget)
 
-    def __process_type_mapping(self, plan_type):
+    def __process_type_mapping(self, plan_type, is_default):
 
+        self.process_type_treewidget.clear()
         tree = self.process_type_treewidget
         parent_types = Constants.plan_process_type_parent
         for parent_type in parent_types:
@@ -92,10 +93,17 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
             parent.setFlags(parent.flags() | Qt.ItemIsTristate | Qt.ItemIsUserCheckable)
             parent_type_value = str(parent_type) + '%'
             if plan_type != -1:
-                sub_types = self.session.query(SetPlanZonePlanType).\
-                    join(ClPlanZone, ClPlanZone.plan_zone_id == SetPlanZonePlanType.plan_zone_id). \
-                    filter(SetPlanZonePlanType.plan_type_id == plan_type). \
-                    filter(ClPlanZone.code.ilike(parent_type_value))
+                if is_default:
+                    sub_types = self.session.query(SetPlanZonePlanType).\
+                        join(ClPlanZone, ClPlanZone.plan_zone_id == SetPlanZonePlanType.plan_zone_id). \
+                        filter(SetPlanZonePlanType.plan_type_id == plan_type). \
+                        filter(SetPlanZonePlanType.is_default == is_default). \
+                        filter(ClPlanZone.code.ilike(parent_type_value))
+                else:
+                    sub_types = self.session.query(SetPlanZonePlanType). \
+                        join(ClPlanZone, ClPlanZone.plan_zone_id == SetPlanZonePlanType.plan_zone_id). \
+                        filter(SetPlanZonePlanType.plan_type_id == plan_type). \
+                        filter(ClPlanZone.code.ilike(parent_type_value))
             else:
                 sub_types = self.session.query(SetPlanZonePlanType). \
                     join(ClPlanZone, ClPlanZone.plan_zone_id == SetPlanZonePlanType.plan_zone_id). \
@@ -2130,6 +2138,20 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
         return is_true
 
     @pyqtSlot()
+    def on_save_default_zone_button_clicked(self):
+
+        root = self.process_type_treewidget.invisibleRootItem()
+        child_count = root.childCount()
+        for i in range(child_count):
+            parent_item = root.child(i)
+            for i in range(parent_item.childCount()):
+                child_item = parent_item.child(i)
+                if child_item.checkState(0) == QtCore.Qt.Checked:
+                    print child_item.data(0, Qt.UserRole)
+
+        plan_zone_plan_type = SetPlanZonePlanType()
+
+    @pyqtSlot()
     def on_load_attribute_button_clicked(self):
 
         self.attribute_twidget.setRowCount(0)
@@ -2172,9 +2194,24 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
     @pyqtSlot(int)
     def on_tmp_plan_type_cbox_currentIndexChanged(self, index):
 
-        self.process_type_treewidget.clear()
         plan_type = self.tmp_plan_type_cbox.itemData(index)
-        self.__process_type_mapping(plan_type)
+        is_default = True
+        if self.default_plan_zone_chbox.isChecked():
+            is_default = True
+        else:
+            is_default = False
+        self.__process_type_mapping(plan_type, is_default)
+
+    @pyqtSlot(int)
+    def on_default_plan_zone_chbox_stateChanged(self, state):
+
+        plan_type = self.tmp_plan_type_cbox.itemData(self.tmp_plan_type_cbox.currentIndex())
+        if state == Qt.Checked:
+            is_default = True
+            self.__process_type_mapping(plan_type, is_default)
+        else:
+            is_default = False
+            self.__process_type_mapping(plan_type, is_default)
 
     @pyqtSlot(QTreeWidgetItem)
     def on_process_type_treewidget_itemClicked(self, item):
