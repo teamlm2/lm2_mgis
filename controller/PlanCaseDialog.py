@@ -86,6 +86,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         self.is_file_import = False
         self.approved_item = None
         self.refused_item = None
+        self.file_path = None
         self.au2 = DatabaseUtils.working_l2_code()
         self.au1 = DatabaseUtils.working_l1_code()
         self.error_dic = {}
@@ -97,6 +98,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         self.__setup_data()
         self.__setup_current_tree_widget()
         self.__setup_twidget()
+        self.__result_twidget_setup()
         self.__setup_context_menu()
         self.__setup_cbox()
         self.main_parcels = []
@@ -133,6 +135,8 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         self.cadastre_current_twidget.setSelectionBehavior(QAbstractItemView.SelectRows)
         # self.cadastre_current_twidget.setContextMenuPolicy(Qt.CustomContextMenu)
         # self.cadastre_current_twidget.customContextMenuRequested.connect(self.on_custom_context_menu_requested)
+
+    def __result_twidget_setup(self):
 
         self.result_twidget.setSelectionMode(QAbstractItemView.SingleSelection)
         self.result_twidget.setSelectionBehavior(QAbstractItemView.SelectRows)
@@ -1127,9 +1131,12 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
                         parcel_attribute_value.updated_at = DatabaseUtils.current_date_time()
                         parcel_attribute_value.updated_by = DatabaseUtils.current_sd_user().user_id
 
-
     def __import_template_data(self, file_path):
 
+        self.result_twidget.clear()
+        self.__result_twidget_setup()
+        # SessionHandler().destroy_session()
+        self.session = SessionHandler().session_instance()
         parcel_shape_layer = QgsVectorLayer(file_path, "tmp_parcel_shape", "ogr")
 
         if not parcel_shape_layer.isValid():
@@ -1144,8 +1151,8 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         iterator = parcel_shape_layer.getFeatures()
         provider = parcel_shape_layer.dataProvider()
 
-        if self.if_single_type_chbox.isChecked():
-            self.__shp_edit_attribute(parcel_shape_layer)
+        # if self.if_single_type_chbox.isChecked():
+        #     self.__shp_edit_attribute(parcel_shape_layer)
 
         fieldNames = []
         fields = provider.fields()
@@ -1161,22 +1168,25 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
             count += 1
             id = QDateTime().currentDateTime().toString("MMddhhmmss") + str(count)
             header = str(count)
-            if self.__get_attribute(parcel, parcel_shape_layer)[0]:
-                process_type = self.__get_attribute(parcel, parcel_shape_layer)[0]
-                header = header + ':' + '(' + str(process_type.code) + ')' + unicode(process_type.name)
-            if self.__get_attribute(parcel, parcel_shape_layer)[2]:
-                landname = self.__get_attribute(parcel, parcel_shape_layer)[2]
-                header = header + '/' + unicode(landname) + '/'
+            if self.if_single_type_chbox.isChecked():
+                header = self.shp_process_type_cbox.currentText()
+            else:
+                if self.__get_attribute(parcel, parcel_shape_layer)[0]:
+                    process_type = self.__get_attribute(parcel, parcel_shape_layer)[0]
+                    header = header + ':' + '(' + str(process_type.code) + ')' + unicode(process_type.name)
+                if self.__get_attribute(parcel, parcel_shape_layer)[2]:
+                    landname = self.__get_attribute(parcel, parcel_shape_layer)[2]
+                    header = header + '/' + unicode(landname) + '/'
 
-            validaty_result = self.__validaty_of_new_parcel(parcel, parcel_shape_layer, id)
+            validaty_result = self.__validaty_of_new_parcel(parcel, parcel_shape_layer, feature_id)
             if validaty_result[0]:
-                new_parcel = self.__add_new_parcel(parcel, parcel_shape_layer)
-                self.__add_new_parcel_attributes(parcel, new_parcel, provider)
+                # new_parcel = self.__add_new_parcel(parcel, parcel_shape_layer)
+                # self.__add_new_parcel_attributes(parcel, new_parcel, provider)
 
                 main_parcel_item = QTreeWidgetItem()
                 main_parcel_item.setText(0, header)
                 main_parcel_item.setIcon(0, QIcon(QPixmap(":/plugins/lm2/parcel_red.png")))
-                main_parcel_item.setData(0, Qt.UserRole, id)
+                main_parcel_item.setData(0, Qt.UserRole, feature_id)
                 main_parcel_item.setData(0, Qt.UserRole + 1, APPROVED)
                 main_parcel_item.setData(0, Qt.UserRole + 2, feature_id)
                 main_parcel_item.setToolTip(0, header)
@@ -1186,7 +1196,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
                 main_parcel_item = QTreeWidgetItem()
                 main_parcel_item.setText(0, header)
                 main_parcel_item.setIcon(0, QIcon(QPixmap(":/plugins/lm2/parcel_red.png")))
-                main_parcel_item.setData(0, Qt.UserRole, id)
+                main_parcel_item.setData(0, Qt.UserRole, feature_id)
                 main_parcel_item.setData(0, Qt.UserRole + 1, REFUSED)
                 main_parcel_item.setData(0, Qt.UserRole + 2, feature_id)
                 main_parcel_item.setToolTip(0, header)
@@ -1213,6 +1223,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
             selected_file = file_dialog.selectedFiles()[0]
             file_path = QFileInfo(selected_file).filePath()
             self.parcel_shape_edit.setText(file_path)
+            self.file_path = file_path
             # self.__import_new_parcels(file_path)
 
             self.__import_template_data(file_path)
@@ -1506,10 +1517,26 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         parcel_shape_layer.select(feature_id)
         self.plugin.iface.mapCanvas().zoomToSelected(parcel_shape_layer)
 
+    def __save_new_parcel(self):
+
+        file_path = self.file_path
+        parcel_shape_layer = QgsVectorLayer(file_path, "tmp_parcel_shape", "ogr")
+        iterator = parcel_shape_layer.getFeatures()
+        provider = parcel_shape_layer.dataProvider()
+
+        for parcel in iterator:
+            feature_id = parcel.id()
+            validaty_result = self.__validaty_of_new_parcel(parcel, parcel_shape_layer, feature_id)
+            if validaty_result[0]:
+                new_parcel = self.__add_new_parcel(parcel, parcel_shape_layer)
+                self.__add_new_parcel_attributes(parcel, new_parcel, provider)
+
     @pyqtSlot()
     def on_apply_button_clicked(self):
 
         self.create_savepoint()
+
+        self.__save_new_parcel()
 
         self.commit()
 
@@ -1755,7 +1782,11 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
 
         self.shp_process_type_cbox.setToolTip(self.shp_process_type_cbox.currentText())
 
+        # feature_id = self.result_twidget.currentItem().data(0, Qt.UserRole + 2)
+        #
+        # self.approved_item
 
+        self.__import_template_data(self.file_path)
 
 
     def __shp_edit_attribute(self, parcel_shape_layer):
@@ -1772,13 +1803,14 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
 
         updateMap = {}
 
-
+        layer.startEditing()
         for feature in features:
             fieldIdx = feature.fields().indexFromName('badedturl')
             updateMap[feature.id()] = {fieldIdx: code}
         print updateMap
         provider.changeAttributeValues(updateMap)
         layer.commitChanges()
+        self.plugin.iface.vectorLayerTools().stopEditing(layer)
         self.plugin.iface.mapCanvas().refresh()
 
     @pyqtSlot()
