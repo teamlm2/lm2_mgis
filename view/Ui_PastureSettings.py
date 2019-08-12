@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'D:\work\LAND_MANAGER\lm2\view\PastureSettings.ui'
+# Form implementation generated from reading ui file '.\PastureSettings.ui'
 #
 # Created by: PyQt4 UI code generator 4.11.4
 #
@@ -142,30 +142,30 @@ class Ui_PastureSettings(object):
         self.live_stock_convert_twidget.setHorizontalHeaderItem(0, item)
         item = QtGui.QTableWidgetItem()
         self.live_stock_convert_twidget.setHorizontalHeaderItem(1, item)
-        self.widget = QtGui.QWidget(self.groupBox_2)
-        self.widget.setGeometry(QtCore.QRect(10, 17, 199, 171))
-        self.widget.setObjectName(_fromUtf8("widget"))
-        self.verticalLayout = QtGui.QVBoxLayout(self.widget)
+        self.layoutWidget = QtGui.QWidget(self.groupBox_2)
+        self.layoutWidget.setGeometry(QtCore.QRect(10, 17, 199, 171))
+        self.layoutWidget.setObjectName(_fromUtf8("layoutWidget"))
+        self.verticalLayout = QtGui.QVBoxLayout(self.layoutWidget)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
-        self.app_type_pasture_type_rbutton = QtGui.QRadioButton(self.widget)
+        self.app_type_pasture_type_rbutton = QtGui.QRadioButton(self.layoutWidget)
         self.app_type_pasture_type_rbutton.setObjectName(_fromUtf8("app_type_pasture_type_rbutton"))
         self.verticalLayout.addWidget(self.app_type_pasture_type_rbutton)
-        self.app_type_doc_type_rbutton = QtGui.QRadioButton(self.widget)
+        self.app_type_doc_type_rbutton = QtGui.QRadioButton(self.layoutWidget)
         self.app_type_doc_type_rbutton.setObjectName(_fromUtf8("app_type_doc_type_rbutton"))
         self.verticalLayout.addWidget(self.app_type_doc_type_rbutton)
-        self.contract_doc_type_rbutton = QtGui.QRadioButton(self.widget)
+        self.contract_doc_type_rbutton = QtGui.QRadioButton(self.layoutWidget)
         self.contract_doc_type_rbutton.setObjectName(_fromUtf8("contract_doc_type_rbutton"))
         self.verticalLayout.addWidget(self.contract_doc_type_rbutton)
-        self.natural_zone_land_form_rbutton = QtGui.QRadioButton(self.widget)
+        self.natural_zone_land_form_rbutton = QtGui.QRadioButton(self.layoutWidget)
         self.natural_zone_land_form_rbutton.setObjectName(_fromUtf8("natural_zone_land_form_rbutton"))
         self.verticalLayout.addWidget(self.natural_zone_land_form_rbutton)
-        self.natural_zone_land_plants_rbutton = QtGui.QRadioButton(self.widget)
+        self.natural_zone_land_plants_rbutton = QtGui.QRadioButton(self.layoutWidget)
         self.natural_zone_land_plants_rbutton.setObjectName(_fromUtf8("natural_zone_land_plants_rbutton"))
         self.verticalLayout.addWidget(self.natural_zone_land_plants_rbutton)
-        self.formula_type_land_form_rbutton = QtGui.QRadioButton(self.widget)
+        self.formula_type_land_form_rbutton = QtGui.QRadioButton(self.layoutWidget)
         self.formula_type_land_form_rbutton.setObjectName(_fromUtf8("formula_type_land_form_rbutton"))
         self.verticalLayout.addWidget(self.formula_type_land_form_rbutton)
-        self.live_stock_convert_rbutton = QtGui.QRadioButton(self.widget)
+        self.live_stock_convert_rbutton = QtGui.QRadioButton(self.layoutWidget)
         self.live_stock_convert_rbutton.setObjectName(_fromUtf8("live_stock_convert_rbutton"))
         self.verticalLayout.addWidget(self.live_stock_convert_rbutton)
         self.tabWidget.addTab(self.tab, _fromUtf8(""))
@@ -352,7 +352,7 @@ class Ui_PastureSettings(object):
         self.apply_button.setObjectName(_fromUtf8("apply_button"))
 
         self.retranslateUi(PastureSettings)
-        self.tabWidget.setCurrentIndex(4)
+        self.tabWidget.setCurrentIndex(2)
         self.formula_tab_widget.setCurrentIndex(1)
         QtCore.QMetaObject.connectSlotsByName(PastureSettings)
 
@@ -390,6 +390,7 @@ class Ui_PastureSettings(object):
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_6), _translate("PastureSettings", "Codelists", None))
         self.groupBox.setTitle(_translate("PastureSettings", "Connect", None))
         self.label.setText(_translate("PastureSettings", "Base Type", None))
+        self.connect_type_twidget.setSortingEnabled(True)
         item = self.connect_type_twidget.horizontalHeaderItem(0)
         item.setText(_translate("PastureSettings", "Check", None))
         item = self.connect_type_twidget.horizontalHeaderItem(1)

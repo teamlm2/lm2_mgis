@@ -116,8 +116,12 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
                 child.setFlags(child.flags() | Qt.ItemIsUserCheckable)
                 child.setText(0, str(sub_type.code) + ': ' + sub_type.name)
                 child.setData(0, Qt.UserRole, sub_type.code)
+                child.setToolTip(0, str(sub_type.code) + ': ' + sub_type.name)
                 child.setFlags(child.flags() | Qt.ItemIsTristate | Qt.ItemIsUserCheckable)
-                child.setCheckState(0, Qt.Unchecked)
+                if value.is_default == True:
+                    child.setCheckState(0, Qt.Checked)
+                else:
+                    child.setCheckState(0, Qt.Unchecked)
 
         tree.show()
 
@@ -602,14 +606,14 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
         self.plan_results_twidget.setContextMenuPolicy(Qt.CustomContextMenu)
         self.plan_results_twidget.customContextMenuRequested.connect(self.on_custom_context_menu_requested)
 
-        self.case_results_twidget.setColumnCount(1)
-        self.case_results_twidget.setDragEnabled(False)
-        self.case_results_twidget.horizontalHeader().setResizeMode(0, QHeaderView.Stretch)
-        self.case_results_twidget.horizontalHeader().setVisible(False)
-        self.case_results_twidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
-        self.case_results_twidget.setSelectionBehavior(QAbstractItemView.SelectRows)
-        self.case_results_twidget.setContextMenuPolicy(Qt.CustomContextMenu)
-        self.case_results_twidget.customContextMenuRequested.connect(self.on_custom_context_menu_requested)
+        # self.case_results_twidget.setColumnCount(1)
+        # self.case_results_twidget.setDragEnabled(False)
+        # self.case_results_twidget.horizontalHeader().setResizeMode(0, QHeaderView.Stretch)
+        # self.case_results_twidget.horizontalHeader().setVisible(False)
+        # self.case_results_twidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        # self.case_results_twidget.setSelectionBehavior(QAbstractItemView.SelectRows)
+        # self.case_results_twidget.setContextMenuPolicy(Qt.CustomContextMenu)
+        # self.case_results_twidget.customContextMenuRequested.connect(self.on_custom_context_menu_requested)
 
     def __working_l1_changed(self, index):
 
@@ -862,30 +866,6 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
             return None
 
         return application_instance
-
-    def __selected_maintenance_case(self):
-
-        selected_items = self.case_results_twidget.selectedItems()
-        case_instance = None
-
-        if len(selected_items) != 1:
-            self.error_label.setText(self.tr("Only single selection allowed."))
-            return None
-
-        selected_case_item = selected_items[0]
-        item_id = selected_case_item.data(Qt.UserRole)
-        soum = selected_case_item.data(Qt.UserRole + 1)
-
-        DatabaseUtils.set_working_schema(soum)
-
-        try:
-            case_instance = self.session.query(CaMaintenanceCase).filter_by(id=item_id).one()
-        except SQLAlchemyError, e:
-            PluginUtils.show_message(self, self.tr("LM2", "Sql Error"), e.message)
-            return None
-
-        return case_instance
-
 
     @pyqtSlot(int)
     def on_plan_date_checkbox_stateChanged(self, state):
@@ -1221,34 +1201,6 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
 
         self.__search_cases()
         DatabaseUtils.set_working_schema()
-
-    @pyqtSlot()
-    def on_case_finalize_button_clicked(self):
-
-        if DialogInspector().dialog_visible():
-            return
-
-        case_instance = self.__selected_maintenance_case()
-
-        if case_instance is not None:
-
-            if case_instance.completion_date is None:
-                selected_item = self.case_results_twidget.selectedItems()[0]
-                soum = selected_item.data(Qt.UserRole + 1)
-
-                self.current_dialog = FinalizeCaseDialog(case_instance, soum, self.plugin, self.plugin.iface.mainWindow())
-                DialogInspector().set_dialog_visible(True)
-                self.current_dialog.rejected.connect(self.on_current_dialog_closed)
-                self.current_dialog.setModal(False)
-                self.current_dialog.show()
-
-            else:
-                PluginUtils.show_message(self, self.tr("Maintenance Case"), self.tr("The maintenance case is already finalized."))
-                return
-
-        self.__search_cases()
-
-        self.plugin.iface.mapCanvas().refresh()
 
     @pyqtSlot()
     def on_case_create_button_clicked(self):
@@ -1598,26 +1550,6 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
 
         plan_instance = self.__selected_plan()
         QApplication.clipboard().setText(plan_instance.code)
-
-    @pyqtSlot(QTableWidgetItem)
-    def on_case_results_twidget_itemDoubleClicked(self, item):
-
-        if DialogInspector().dialog_visible():
-            return
-
-        case_instance = self.__selected_maintenance_case()
-
-        selected_case_item = self.case_results_twidget.selectedItems()[0]
-        soum = selected_case_item.data(Qt.UserRole + 1)
-
-        DatabaseUtils.set_working_schema(soum)
-
-        if case_instance is not None:
-            self.current_dialog = CreateCaseDialog(self.plugin, case_instance, True, self.plugin.iface.mainWindow())
-            self.current_dialog.rejected.connect(self.on_current_dialog_closed)
-            DialogInspector().set_dialog_visible(True)
-            self.current_dialog.setModal(False)
-            self.current_dialog.show()
 
     @pyqtSlot(int)
     def on_tabWidget_currentChanged(self):
@@ -2140,16 +2072,35 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
     @pyqtSlot()
     def on_save_default_zone_button_clicked(self):
 
+        plan_type = self.tmp_plan_type_cbox.itemData(self.tmp_plan_type_cbox.currentIndex())
         root = self.process_type_treewidget.invisibleRootItem()
         child_count = root.childCount()
         for i in range(child_count):
             parent_item = root.child(i)
             for i in range(parent_item.childCount()):
                 child_item = parent_item.child(i)
+                zone_code = child_item.data(0, Qt.UserRole)
+                zone = self.session.query(ClPlanZone).filter(ClPlanZone.code == zone_code).one()
                 if child_item.checkState(0) == QtCore.Qt.Checked:
-                    print child_item.data(0, Qt.UserRole)
-
-        plan_zone_plan_type = SetPlanZonePlanType()
+                    count = self.session.query(SetPlanZonePlanType).\
+                        filter(SetPlanZonePlanType.plan_type_id == plan_type). \
+                        filter(SetPlanZonePlanType.plan_zone_id == zone.plan_zone_id). \
+                        filter(SetPlanZonePlanType.is_default == True).count()
+                    if count == 0:
+                        plan_zone_plan_type = self.session.query(SetPlanZonePlanType). \
+                            filter(SetPlanZonePlanType.plan_type_id == plan_type). \
+                            filter(SetPlanZonePlanType.plan_zone_id == zone.plan_zone_id).one()
+                        plan_zone_plan_type.is_default = True
+                else:
+                    count = self.session.query(SetPlanZonePlanType). \
+                        filter(SetPlanZonePlanType.plan_type_id == plan_type). \
+                        filter(SetPlanZonePlanType.plan_zone_id == zone.plan_zone_id). \
+                        filter(SetPlanZonePlanType.is_default == True).count()
+                    if count == 1:
+                        plan_zone_plan_type = self.session.query(SetPlanZonePlanType). \
+                            filter(SetPlanZonePlanType.plan_type_id == plan_type). \
+                            filter(SetPlanZonePlanType.plan_zone_id == zone.plan_zone_id).one()
+                        plan_zone_plan_type.is_default = False
 
     @pyqtSlot()
     def on_load_attribute_button_clicked(self):

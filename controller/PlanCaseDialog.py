@@ -1395,18 +1395,19 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         #     self.message_label.setText(error_message)
 
         # try:
-        if column_names[column_name_plan_code]:
-            count = self.session.query(ClPlanZone).filter(ClPlanZone.code == column_names[column_name_plan_code]).count()
-            if count == 0:
+        if not self.if_single_type_chbox.isChecked():
+            if column_names[column_name_plan_code]:
+                count = self.session.query(ClPlanZone).filter(ClPlanZone.code == column_names[column_name_plan_code]).count()
+                if count == 0:
+                    valid = False
+                    message = '*' + unicode(u' Үйл ажиллагааны ангиллын дугаар буруу байна.')
+                    error_message = error_message + "\n" + message
+                    self.message_label.setText(error_message)
+            else:
                 valid = False
                 message = '*' + unicode(u' Үйл ажиллагааны ангиллын дугаар буруу байна.')
                 error_message = error_message + "\n" + message
                 self.message_label.setText(error_message)
-        else:
-            valid = False
-            message = '*' + unicode(u' Үйл ажиллагааны ангиллын дугаар буруу байна.')
-            error_message = error_message + "\n" + message
-            self.message_label.setText(error_message)
         # except SQLAlchemyError, e:
         #     valid = False
         #     message = unicode(u'Үйл ажиллагааны ангиллын дугаар буруу байна.')

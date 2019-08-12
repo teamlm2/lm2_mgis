@@ -149,6 +149,8 @@ class PastureSettings(QDialog, Ui_PastureSettings, DatabaseHelper):
     def on_natural_zone_cbox_currentIndexChanged(self, index):
 
         self.land_form_twidget.setRowCount(0)
+        self.plants_comp_cbox.clear()
+        self.plants_cbox.clear()
         natural_zone_code = self.natural_zone_cbox.itemData(self.natural_zone_cbox.currentIndex())
         self.plants_cbox.clear()
         nz_plants = self.session.query(PsNaturalZonePlants).filter(PsNaturalZonePlants.natural_zone == natural_zone_code).all()
