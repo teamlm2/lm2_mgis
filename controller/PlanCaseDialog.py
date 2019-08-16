@@ -998,9 +998,17 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         if not check_value[0]:
             valid = False
             error_message = error_message + "\n" + check_value[1]
-
-        process_type = self.__get_attribute(parcel, parcel_shape_layer)[0]
-        plan_zone_id = process_type.plan_zone_id
+        plan_zone_id = None
+        if self.if_single_type_chbox.isChecked():
+            code = self.shp_process_type_cbox.itemData(self.shp_process_type_cbox.currentIndex())
+            plan_zone_count = self.session.query(ClPlanZone).filter(ClPlanZone.code == code).count()
+            if plan_zone_count == 1:
+                plan_zone = self.session.query(ClPlanZone).filter(ClPlanZone.code == code).one()
+                plan_zone_id = plan_zone.plan_zone_id
+        else:
+            process_type = self.__get_attribute(parcel, parcel_shape_layer)[0]
+            if process_type:
+                plan_zone_id = process_type.plan_zone_id
         parcel_geometry = WKTElement(parcel.geometry().exportToWkt(), srid=4326)
 
         # parcel overlap not approved plan zone
@@ -1470,6 +1478,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         address_khashaa = 0
         address_streetname = ''
         comment = ''
+        plan_zone_id = None
 
         if column_names[column_name_parcel_id] != None:
             id = column_names[column_name_parcel_id]
@@ -1486,14 +1495,22 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         if column_names[column_name_comment] != None:
             comment = column_names[column_name_comment]
 
-        zone_type_count = self.session.query(ClPlanZone).filter(ClPlanZone.code == plan_code).count()
-        if zone_type_count == 0:
-            PluginUtils.show_error(self, self.tr("Error loading layer"), self.tr("The layer is invalid."))
-            return
-        if zone_type_count == 1:
-
-            zone_type = self.session.query(ClPlanZone).filter(ClPlanZone.code == plan_code).one()
-            new_parcel.plan_zone_id = zone_type.plan_zone_id
+        if self.if_single_type_chbox.isChecked():
+            code = self.shp_process_type_cbox.itemData(self.shp_process_type_cbox.currentIndex())
+            plan_zone_count = self.session.query(ClPlanZone).filter(ClPlanZone.code == code).count()
+            if plan_zone_count == 1:
+                plan_zone = self.session.query(ClPlanZone).filter(ClPlanZone.code == code).one()
+                plan_zone_id = plan_zone.plan_zone_id
+        else:
+            zone_type_count = self.session.query(ClPlanZone).filter(ClPlanZone.code == plan_code).count()
+            if zone_type_count == 0:
+                PluginUtils.show_error(self, self.tr("Error loading layer"), self.tr("The layer is invalid."))
+                return
+            if zone_type_count == 1:
+                zone_type = self.session.query(ClPlanZone).filter(ClPlanZone.code == plan_code).one()
+                plan_zone_id = zone_type.plan_zone_id
+        if plan_zone_id:
+            new_parcel.plan_zone_id = plan_zone_id
             new_parcel.badedturl = plan_code
 
             # new_parcel.landuse = landuse
@@ -1563,6 +1580,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
     @pyqtSlot()
     def on_result_twidget_itemSelectionChanged(self):
 
+        print self.result_twidget.selectedItems()
         current_item = self.result_twidget.selectedItems()[0]
         object_type = current_item.data(0, Qt.UserRole + 1)
         object_id = current_item.data(0, Qt.UserRole)
@@ -1779,6 +1797,41 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
             self.shp_process_type_cbox.setEnabled(False)
 
     @pyqtSlot(int)
+    def on_default_plan_zone_chbox_stateChanged(self, state):
+
+        self.shp_process_type_cbox.clear()
+        if state == Qt.Checked:
+            is_default = True
+            plan_type = self.plan.plan_type_ref
+            values = self.session.query(ClPlanZone.plan_zone_id, ClPlanZone.code, ClPlanZone.name). \
+                join(SetPlanZonePlanType, ClPlanZone.plan_zone_id == SetPlanZonePlanType.plan_zone_id). \
+                filter(SetPlanZonePlanType.plan_type_id == plan_type.plan_type_id). \
+                filter(SetPlanZonePlanType.is_default == is_default). \
+                group_by(ClPlanZone.plan_zone_id, ClPlanZone.code, ClPlanZone.name). \
+                order_by(ClPlanZone.code)
+
+            for value in values:
+                self.shp_process_type_cbox.addItem(str(value.code) + ':' + value.name, value.code)
+
+            for index in range(self.shp_process_type_cbox.count()):
+                self.shp_process_type_cbox.setItemData(index, self.shp_process_type_cbox.itemText(index),
+                                                       Qt.ToolTipRole)
+        else:
+            plan_type = self.plan.plan_type_ref
+            values = self.session.query(ClPlanZone.plan_zone_id, ClPlanZone.code, ClPlanZone.name). \
+                join(SetPlanZonePlanType, ClPlanZone.plan_zone_id == SetPlanZonePlanType.plan_zone_id). \
+                filter(SetPlanZonePlanType.plan_type_id == plan_type.plan_type_id). \
+                group_by(ClPlanZone.plan_zone_id, ClPlanZone.code, ClPlanZone.name). \
+                order_by(ClPlanZone.code)
+
+            for value in values:
+                self.shp_process_type_cbox.addItem(str(value.code) + ':' + value.name, value.code)
+
+            for index in range(self.shp_process_type_cbox.count()):
+                self.shp_process_type_cbox.setItemData(index, self.shp_process_type_cbox.itemText(index),
+                                                       Qt.ToolTipRole)
+
+    @pyqtSlot(int)
     def on_shp_process_type_cbox_currentIndexChanged(self, index):
 
         self.shp_process_type_cbox.setToolTip(self.shp_process_type_cbox.currentText())
@@ -1808,7 +1861,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         for feature in features:
             fieldIdx = feature.fields().indexFromName('badedturl')
             updateMap[feature.id()] = {fieldIdx: code}
-        print updateMap
+
         provider.changeAttributeValues(updateMap)
         layer.commitChanges()
         self.plugin.iface.vectorLayerTools().stopEditing(layer)

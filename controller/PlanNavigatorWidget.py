@@ -846,8 +846,6 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
 
         self.plugin.iface.mapCanvas().refresh()
 
-
-
     def __selected_application(self):
 
         selected_items = self.plan_results_twidget.selectedItems()
@@ -1816,29 +1814,32 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
         myalayer = root.findLayer(vlayer_parcel.id())
         if myalayer is None:
             mygroup.addLayer(vlayer_parcel)
-            parcels = self.session.query(PlProjectParcel.badedturl). \
+            parcels = self.session.query(PlProjectParcel.plan_zone_id). \
                 filter(PlProjectParcel.project_id == self.plan.project_id). \
                 filter(PlProjectParcel.polygon_geom != None).group_by(
-                PlProjectParcel.badedturl).order_by(
-                PlProjectParcel.badedturl.asc()).all()
+                PlProjectParcel.plan_zone_id).order_by(
+                PlProjectParcel.plan_zone_id.asc()).all()
             categories = []
             for parcel in parcels:
+                plan_zone_id = parcel.plan_zone_id
+                plan_zone = self.session.query(ClPlanZone).filter(ClPlanZone.plan_zone_id == plan_zone_id).one()
                 count = self.session.query(SetZoneColor).filter(
-                    SetZoneColor.code == parcel.badedturl).count()
+                    SetZoneColor.code == plan_zone.code).count()
 
                 if count == 1:
                     style = self.session.query(SetZoneColor).filter(
-                        SetZoneColor.code == parcel.badedturl).one()
+                        SetZoneColor.code == plan_zone.code).one()
                     fill_color = style.fill_color
                     boundary_color = style.boundary_color
                     opacity = 0.5
-                    code = str(int(style.code))
+                    # code = str(int(style.code))
+                    code = str(int(plan_zone_id))
                     description = str(int(style.code)) + ': ' + style.description
 
                     self.__categorized_style(categories, vlayer_parcel, fill_color, boundary_color, opacity, code,
                                              description)
 
-            expression = 'badedturl'  # field name
+            expression = 'plan_zone_id'  # field name
             renderer = QgsCategorizedSymbolRendererV2(expression, categories)
             vlayer_parcel.setRendererV2(renderer)
 
@@ -1852,19 +1853,21 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
         myalayer = root.findLayer(vlayer_parcel.id())
         if myalayer is None:
             mygroup.addLayer(vlayer_parcel)
-            parcels = self.session.query(PlProjectParcel.badedturl). \
+            parcels = self.session.query(PlProjectParcel.plan_zone_id). \
                 filter(PlProjectParcel.project_id == self.plan.project_id). \
                 filter(PlProjectParcel.line_geom != None).group_by(
-                PlProjectParcel.badedturl).order_by(
-                PlProjectParcel.badedturl.asc()).all()
+                PlProjectParcel.plan_zone_id).order_by(
+                PlProjectParcel.plan_zone_id.asc()).all()
             categories = []
             for parcel in parcels:
+                plan_zone_id = parcel.plan_zone_id
+                plan_zone = self.session.query(ClPlanZone).filter(ClPlanZone.plan_zone_id == plan_zone_id).one()
                 count = self.session.query(SetZoneColor).filter(
-                    SetZoneColor.code == parcel.badedturl).count()
+                    SetZoneColor.code == plan_zone.code).count()
 
                 if count == 1:
                     style = self.session.query(SetZoneColor).filter(
-                        SetZoneColor.code == parcel.badedturl).one()
+                        SetZoneColor.code == plan_zone.code).one()
                     fill_color = style.fill_color
                     boundary_color = style.boundary_color
                     opacity = 0.5
@@ -1888,19 +1891,21 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
         myalayer = root.findLayer(vlayer_parcel.id())
         if myalayer is None:
             mygroup.addLayer(vlayer_parcel)
-            parcels = self.session.query(PlProjectParcel.badedturl). \
+            parcels = self.session.query(PlProjectParcel.plan_zone_id). \
                 filter(PlProjectParcel.project_id == self.plan.project_id). \
                 filter(PlProjectParcel.point_geom != None).group_by(
-                PlProjectParcel.badedturl).order_by(
-                PlProjectParcel.badedturl.asc()).all()
+                PlProjectParcel.plan_zone_id).order_by(
+                PlProjectParcel.plan_zone_id.asc()).all()
             categories = []
             for parcel in parcels:
+                plan_zone_id = parcel.plan_zone_id
+                plan_zone = self.session.query(ClPlanZone).filter(ClPlanZone.plan_zone_id == plan_zone_id).one()
                 count = self.session.query(SetZoneColor).filter(
-                    SetZoneColor.code == parcel.badedturl).count()
+                    SetZoneColor.code == plan_zone.code).count()
 
                 if count == 1:
                     style = self.session.query(SetZoneColor).filter(
-                        SetZoneColor.code == parcel.badedturl).one()
+                        SetZoneColor.code == plan_zone.code).one()
                     fill_color = style.fill_color
                     boundary_color = style.boundary_color
                     opacity = 0.5
@@ -1928,14 +1933,7 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
         root_group = root.findGroup(u"Ажиллаж байгаа")
 
         if not root_group is None:
-            # root.removeGroup('Ажиллаж байгаа')
             root.removeChildNode(root_group)
-            # for child in root_group.children():
-            #     dump = child.dump()
-            #     id = dump.split("=")[-1].strip()
-            #     QgsMapLayerRegistry.instance().removeMapLayer(id)
-            # print 'dddddd'
-            # root.removeChildNode(root_group)
         LayerUtils.refresh_layer_plan()
         root_group = root.findGroup(u"Ажиллаж байгаа")
 
@@ -1957,13 +1955,13 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
             QgsMapLayerRegistry.instance().removeMapLayers(layer_list)
 
         parent_group = self.__create_layer_group(root_group, unicode(group_name))
-        parent_group.setExpanded(False)
-
-        sql = "select base_code from ( " \
-              "select substring(zone.code, 1, 1) base_code from data_plan.pl_project_parcel parcel " \
-              "join data_plan.cl_plan_zone zone on parcel.plan_zone_id = zone.plan_zone_id " \
-              "where project_id = " + str(
-            project_id) + " group by zone.code order by zone.code )xxx group by base_code order by base_code "
+        # parent_group.setExpanded(False)
+        #
+        # sql = "select base_code from ( " \
+        #       "select substring(zone.code, 1, 1) base_code from data_plan.pl_project_parcel parcel " \
+        #       "join data_plan.cl_plan_zone zone on parcel.plan_zone_id = zone.plan_zone_id " \
+        #       "where project_id = " + str(
+        #     project_id) + " group by zone.code order by zone.code )xxx group by base_code order by base_code "
 
         # values = self.session.execute(sql).fetchall()
         # parent_types = Constants.plan_process_type_parent
@@ -2101,6 +2099,8 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
                             filter(SetPlanZonePlanType.plan_type_id == plan_type). \
                             filter(SetPlanZonePlanType.plan_zone_id == zone.plan_zone_id).one()
                         plan_zone_plan_type.is_default = False
+
+        self.session.commit()
 
     @pyqtSlot()
     def on_load_attribute_button_clicked(self):

@@ -825,7 +825,7 @@
        <x>11</x>
        <y>0</y>
        <width>381</width>
-       <height>181</height>
+       <height>191</height>
       </rect>
      </property>
      <property name="title">
@@ -835,7 +835,7 @@
       <property name="geometry">
        <rect>
         <x>9</x>
-        <y>152</y>
+        <y>162</y>
         <width>311</width>
         <height>21</height>
        </rect>
@@ -848,7 +848,7 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>133</y>
+        <y>143</y>
         <width>311</width>
         <height>16</height>
        </rect>
@@ -861,7 +861,7 @@
       <property name="geometry">
        <rect>
         <x>330</x>
-        <y>150</y>
+        <y>160</y>
         <width>42</width>
         <height>25</height>
        </rect>
@@ -878,7 +878,7 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>68</y>
+        <y>83</y>
         <width>82</width>
         <height>17</height>
        </rect>
@@ -891,7 +891,7 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>88</y>
+        <y>103</y>
         <width>82</width>
         <height>17</height>
        </rect>
@@ -907,7 +907,7 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>108</y>
+        <y>123</y>
         <width>82</width>
         <height>17</height>
        </rect>
@@ -923,7 +923,7 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>35</y>
+        <y>56</y>
         <width>361</width>
         <height>22</height>
        </rect>
@@ -943,6 +943,19 @@
       </property>
       <property name="text">
        <string>Зөвхөн нэг арга хэмжээгээр оруулах</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="default_plan_zone_chbox">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>34</y>
+        <width>151</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Default plan zone</string>
       </property>
      </widget>
     </widget>
