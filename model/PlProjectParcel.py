@@ -18,6 +18,7 @@ class PlProjectParcel(Base):
     valid_from = Column(Date)
     valid_till = Column(Date)
     badedturl = Column(String)
+    is_active = Column(Boolean)
 
     polygon_geom = Column(Geometry('POLYGON', 4326))
     line_geom = Column(Geometry('LINESTRING', 4326))

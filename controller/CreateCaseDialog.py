@@ -20,6 +20,9 @@ from ..controller.ApplicationsDialog import *
 from ..model.ApplicationSearch import *
 from ..model.AuMpa import *
 # from ..model.CaPlanParcel import *
+from ..model.PlProjectParcel import *
+from ..model.PlProject import *
+from ..model.ClPlanType import *
 
 class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
 
@@ -714,6 +717,7 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
             return
 
         working_soum_code = DatabaseUtils.working_l2_code()
+        au1 = DatabaseUtils.working_l1_code()
         iterator = parcel_shape_layer.getFeatures()
         count = 0
         # try:
@@ -765,6 +769,20 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
 
             # parcel_plan_c = self.session.query(CaPlanParcel.parcel_id) \
             #     .filter(CaPlanParcel.geometry.ST_Within(WKTElement(parcel.geometry().exportToWkt(), srid=4326))).count()
+            #
+            # if parcel_plan_c == 0:
+            #     PluginUtils.show_message(self, self.tr("Error"), self.tr("This parcel not in cadastre plan!!!"))
+            #     return
+            if au1 == '011':
+                plan_type = self.session.query(ClPlanType).filter(ClPlanType.code == '05').one()
+            else:
+                plan_type = self.session.query(ClPlanType).filter(ClPlanType.code == '07').one()
+
+            # parcel_plan_c = self.session.query(PlProjectParcel). \
+            #     join(PlProject, PlProjectParcel.project_id == PlProject.project_id). \
+            #     filter(PlProjectParcel.is_active == True). \
+            #     filter(PlProjectParcel.au2 == working_soum_code). \
+            #     filter(PlProject.plan_type_id == plan_type.plan_type_id).count()
             #
             # if parcel_plan_c == 0:
             #     PluginUtils.show_message(self, self.tr("Error"), self.tr("This parcel not in cadastre plan!!!"))
