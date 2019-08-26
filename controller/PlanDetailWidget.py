@@ -341,10 +341,10 @@ class PlanDetailWidget(QDockWidget, Ui_PlanDetailWidget, DatabaseHelper):
                                      u'Жагсаалтаас сонгоно уу!')
             return
 
-        if not self.__parcels_process_type_check():
-            PluginUtils.show_message(self, u'Анхааруулга',
-                                     u'Сонгосон нэгж талбаруудын үйл ажиллагааны төрөл зөвшөөрөгдөхгүй байна.')
-            return
+        #if not self.__parcels_process_type_check():
+        #    PluginUtils.show_message(self, u'Анхааруулга',
+        #                             u'Сонгосон нэгж талбаруудын үйл ажиллагааны төрөл зөвшөөрөгдөхгүй байна.')
+        #   return
         b = set(self.process_types)
 
         process_type = list(b)[0]

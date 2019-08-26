@@ -52,6 +52,7 @@ from ..model.PlBaseConditionParcel import *
 from ..model.ClBaseConditionType import *
 from ..model.SetPlanZoneBaseConditionType import *
 from ..model.SetPlanZonePlanType import *
+from ..model.PlProjectPlanZone import *
 from ..view.Ui_PlanCaseDialog import *
 from .qt_classes.ApplicantDocumentDelegate import ApplicationDocumentDelegate
 from .qt_classes.DocumentsTableWidget import DocumentsTableWidget
@@ -611,8 +612,8 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         self.cad_process_type_cbox.clear()
         self.cad_process_type_cbox.addItem("*", -1)
         values = self.session.query(ClPlanZone.plan_zone_id, ClPlanZone.code, ClPlanZone.name). \
-            join(PlProjectParcel, ClPlanZone.plan_zone_id == PlProjectParcel.plan_zone_id). \
-            filter(PlProjectParcel.project_id == self.plan.project_id). \
+            join(PlProjectPlanZone, ClPlanZone.plan_zone_id == PlProjectPlanZone.plan_zone_id). \
+            filter(PlProjectPlanZone.project_id == self.plan.project_id). \
             group_by(ClPlanZone.plan_zone_id, ClPlanZone.code, ClPlanZone.name). \
             order_by(ClPlanZone.code)
         for value in values:
@@ -1018,16 +1019,17 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         for value in polygon_values:
             plan_zone = value.plan_zone_ref
             project = value.project_ref
-            plan_type = project.plan_type_ref
-            plan_zone_relation_count = self.session.query(SetPlanZoneRelation). \
-                  filter(SetPlanZoneRelation.parent_plan_zone_id == plan_zone.plan_zone_id).\
-                  filter(SetPlanZoneRelation.child_plan_zone_id == plan_zone_id).count()
-            if plan_zone_relation_count == 0:
-                message = plan_zone_message + value.project_ref.code + unicode(u' дугаартай ') + plan_type.short_name + \
-                          unicode(u'-ний ') + \
-                          '/'+plan_zone.code+'/' + unicode(plan_zone.name) + unicode(u' арга хэмжээтэй давхцаж байна.')
-                error_message = error_message + "\n" + message
-                valid = False
+            if project:
+                plan_type = project.plan_type_ref
+                plan_zone_relation_count = self.session.query(SetPlanZoneRelation). \
+                    filter(SetPlanZoneRelation.parent_plan_zone_id == plan_zone.plan_zone_id).\
+                    filter(SetPlanZoneRelation.child_plan_zone_id == plan_zone_id).count()
+                if plan_zone_relation_count == 0:
+                    message = plan_zone_message + value.project_ref.code + unicode(u' дугаартай ') + plan_type.short_name + \
+                            unicode(u'-ний ') + \
+                            '/'+plan_zone.code+'/' + unicode(plan_zone.name) + unicode(u' арга хэмжээтэй давхцаж байна.')
+                    error_message = error_message + "\n" + message
+                    valid = False
 
         point_values = self.session.query(PlProjectParcel). \
             filter(parcel_geometry.ST_Overlaps(PlProjectParcel.point_geom)). \
@@ -1148,7 +1150,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         parcel_shape_layer = QgsVectorLayer(file_path, "tmp_parcel_shape", "ogr")
 
         if not parcel_shape_layer.isValid():
-            PluginUtils.show_error(self, self.tr("Error loading layer"), self.tr("The layer is invalid."))
+            # PluginUtils.show_error(self, self.tr("Error loading layer"), self.tr("The layer is invalid."))
             return
 
         if parcel_shape_layer.crs().postgisSrid() != 4326:
@@ -1235,7 +1237,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
             # self.__import_new_parcels(file_path)
 
             self.__import_template_data(file_path)
-            self.open_parcel_file_button.setEnabled(False)
+            # self.open_parcel_file_button.setEnabled(False)
 
     def __import_new_parcels(self, file_path):
 
@@ -2072,31 +2074,51 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         if not len(self.cadastre_twidget.selectedItems()):
             return
 
-        plan_zone = self.__set_cad_parcel_values()
+        # if self.__set_cad_parcel_values()[1]:
+        # plan_zone = self.__set_cad_parcel_values()[0]
 
-        items = self.cadastre_twidget.selectedItems()
+        values = self.session.query(ClPlanZone.plan_zone_id, ClPlanZone.code, ClPlanZone.name). \
+            join(PlProjectPlanZone, ClPlanZone.plan_zone_id == PlProjectPlanZone.plan_zone_id). \
+            filter(PlProjectPlanZone.project_id == self.plan.project_id). \
+            group_by(ClPlanZone.plan_zone_id, ClPlanZone.code, ClPlanZone.name). \
+            order_by(ClPlanZone.code)
 
-        for item in items:
-            parcel_id = item.data(Qt.UserRole)
-            parcel_text = item.text()
+        plan_zones = []
+        for value in values:
+            desc = str(value.code) + ':-' + value.name
+            plan_zones.append(desc)
 
-            parcel = self.session.query(CaParcelTbl).filter(CaParcelTbl.parcel_id == parcel_id).one()
-            if self.__cad_parcel_duplicate_check(parcel):
-                new_parcel = self.__add_cad_parcel_ref(parcel, plan_zone)
+        item, ok = QInputDialog.getItem(self, "select input dialog",
+                                        "list of languages", plan_zones, 0, False)
 
-                row_count = self.cadastre_current_twidget.rowCount()
-                self.cadastre_current_twidget.insertRow(row_count)
+        zone_code, zone_desc = item.split(':-')
 
-                item = QTableWidgetItem(parcel_text)
-                item.setCheckState(Qt.Checked)
-                item.setIcon(QIcon(QPixmap(":/plugins/lm2/parcel_red.png")))
-                item.setData(Qt.UserRole, parcel_id)
-                item.setData(Qt.UserRole + 1, new_parcel.parcel_id)
-                self.cadastre_current_twidget.setItem(row_count, 0, item)
+        plan_zone = self.session.query(ClPlanZone).filter(ClPlanZone.code == zone_code).one()
 
-                item = QTableWidgetItem(plan_zone.code + ':' + plan_zone.name)
-                item.setData(Qt.UserRole, plan_zone.plan_zone_id)
-                self.cadastre_current_twidget.setItem(row_count, 1, item)
+        if ok:
+            items = self.cadastre_twidget.selectedItems()
+
+            for item in items:
+                parcel_id = item.data(Qt.UserRole)
+                parcel_text = item.text()
+
+                parcel = self.session.query(CaParcelTbl).filter(CaParcelTbl.parcel_id == parcel_id).one()
+                if self.__cad_parcel_duplicate_check(parcel):
+                    new_parcel = self.__add_cad_parcel_ref(parcel, plan_zone)
+
+                    row_count = self.cadastre_current_twidget.rowCount()
+                    self.cadastre_current_twidget.insertRow(row_count)
+
+                    item = QTableWidgetItem(parcel_text)
+                    item.setCheckState(Qt.Checked)
+                    item.setIcon(QIcon(QPixmap(":/plugins/lm2/parcel_red.png")))
+                    item.setData(Qt.UserRole, parcel_id)
+                    item.setData(Qt.UserRole + 1, new_parcel.parcel_id)
+                    self.cadastre_current_twidget.setItem(row_count, 0, item)
+
+                    item = QTableWidgetItem(plan_zone.code + ':' + plan_zone.name)
+                    item.setData(Qt.UserRole, plan_zone.plan_zone_id)
+                    self.cadastre_current_twidget.setItem(row_count, 1, item)
 
     @pyqtSlot()
     def on_cad_remove_button_clicked(self):
@@ -2105,6 +2127,13 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
             return
 
         items = self.cadastre_current_twidget.selectedItems()
+        for item in items:
+            if item.checkState() == Qt.Checked:
+                parcel_id = item.data(Qt.UserRole+1)
+                self.session.query(PlProjectParcelRefParcel).filter(PlProjectParcelRefParcel.parcel_id == parcel_id).delete()
+                self.session.query(PlProjectParcel).filter(PlProjectParcel.parcel_id == parcel_id).delete()
+
+        self.__plan_cadastre_find()
 
     def __add_cad_parcel_ref(self, parcel, plan_zone):
 
@@ -2151,8 +2180,8 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
     def __set_cad_parcel_values(self):
 
         values = self.session.query(ClPlanZone.plan_zone_id, ClPlanZone.code, ClPlanZone.name). \
-            join(PlProjectParcel, ClPlanZone.plan_zone_id == PlProjectParcel.plan_zone_id). \
-            filter(PlProjectParcel.project_id == self.plan.project_id). \
+            join(PlProjectPlanZone, ClPlanZone.plan_zone_id == PlProjectPlanZone.plan_zone_id). \
+            filter(PlProjectPlanZone.project_id == self.plan.project_id). \
             group_by(ClPlanZone.plan_zone_id, ClPlanZone.code, ClPlanZone.name). \
             order_by(ClPlanZone.code)
 
@@ -2163,11 +2192,12 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
 
         item, ok = QInputDialog.getItem(self, "select input dialog",
                                         "list of languages", plan_zones, 0, False)
+
         zone_code, zone_desc = item.split(':-')
 
         plan_zone = self.session.query(ClPlanZone).filter(ClPlanZone.code == zone_code).one()
 
-        return plan_zone
+        return plan_zone, ok
 
     @pyqtSlot()
     def on_cadastre_form_change_button_clicked(self):
