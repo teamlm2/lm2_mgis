@@ -65,7 +65,7 @@ class ApplicationType:
     legitimate_rights = 27
     your_request = 28
     court_decision = 29
-
+    spa_parcel = 31
 
 class PersonType:
 

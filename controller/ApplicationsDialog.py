@@ -4144,7 +4144,6 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
         else:
             return True
 
-
     def __copy_applicant_from_navigator(self):
 
         app_type = self.application_type_cbox.itemData(self.application_type_cbox.currentIndex())

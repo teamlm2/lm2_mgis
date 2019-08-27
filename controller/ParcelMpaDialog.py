@@ -2479,9 +2479,9 @@ class ParcelMpaDialog(QDockWidget, Ui_ParcelMpaDialog, DatabaseHelper):
 
         root = QgsProject.instance().layerTreeRoot()
 
-        mygroup = root.findGroup(u"Тусгай хамгаалалттай газар")
+        mygroup = root.findGroup(u"Тусгай хэрэгцээний газар")
         if mygroup is None:
-            mygroup = root.insertGroup(8, u"Тусгай хамгаалалттай газар")
+            mygroup = root.insertGroup(8, u"Тусгай хэрэгцээний газар")
 
         is_pug_parcel = False
 

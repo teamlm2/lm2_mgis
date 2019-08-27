@@ -1207,7 +1207,7 @@ class Ui_NavigatorWidget(object):
         self.plan_button.setText(_translate("NavigatorWidget", "ГЗБТөлөвгөгөө", None))
         self.fee_tax_zone_button.setText(_translate("NavigatorWidget", "Төлбөр, Татварын бүс", None))
         self.au_level2_button.setText(_translate("NavigatorWidget", "Сум/Дүүргийн хил", None))
-        self.mpa_zone_button.setText(_translate("NavigatorWidget", "Тусгай хамгаалалтай газар", None))
+        self.mpa_zone_button.setText(_translate("NavigatorWidget", "Тусгай хэрэгцээний газар", None))
         self.sec_zone_button.setText(_translate("NavigatorWidget", "Хамгаалалтын зурвас", None))
         self.au_level1_button.setText(_translate("NavigatorWidget", "Аймаг/Нийслэлийн хил", None))
         self.free_zone_button.setText(_translate("NavigatorWidget", "Чөлөөт бүс", None))

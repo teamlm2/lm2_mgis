@@ -401,9 +401,9 @@ class LayerUtils(object):
         mygroup = root.findGroup(u"Кадастрын төлөвлөгөө")
         if mygroup is None:
             cadastre_plan_group = root.insertGroup(3, u"Кадастрын төлөвлөгөө")
-        mygroup = root.findGroup(u"Тусгай хамгаалалттай газар")
+        mygroup = root.findGroup(u"Тусгай хэрэгцээний газар")
         if mygroup is None:
-            cadastre_plan_group = root.insertGroup(6, u"Тусгай хамгаалалттай газар")
+            cadastre_plan_group = root.insertGroup(6, u"Тусгай хэрэгцээний газар")
         mygroup = root.findGroup(u"Кадастрын өөрчлөлт")
         if mygroup is None:
             cadastre_maintenance_group = root.insertGroup(2, u"Кадастрын өөрчлөлт")

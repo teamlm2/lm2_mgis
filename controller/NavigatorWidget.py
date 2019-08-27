@@ -13494,7 +13494,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
     def on_mpa_zone_button_clicked(self):
 
         root = QgsProject.instance().layerTreeRoot()
-        mygroup = root.findGroup(u"Тусгай хамгаалалттай газар")
+        mygroup = root.findGroup(u"Тусгай хэрэгцээний газар")
         vlayer = LayerUtils.layer_by_data_source("admin_units", "au_mpa")
         if vlayer is None:
             vlayer = LayerUtils.load_layer_base_layer("au_mpa", "id", "admin_units")
@@ -13510,6 +13510,18 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         myalayer = root.findLayer(vlayer.id())
         if myalayer is None:
             mygroup.addLayer(vlayer)
+
+        # spa parcel
+        vlayer = LayerUtils.layer_by_data_source("data_soums_union", "ca_spa_parcel")
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer("ca_spa_parcel", "id", "data_soums_union")
+        vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))) + "/template\style/ca_parcel.qml")
+        vlayer.setLayerName(QApplication.translate("Plugin", "SPA Parcel"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            mygroup.addLayer(vlayer)
+            vlayer.setReadOnly(True)
+
 
     def __sent_to_ubeg(self):
 

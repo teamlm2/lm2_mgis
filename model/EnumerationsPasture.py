@@ -21,6 +21,7 @@ class ApplicationType:
 
     pasture_use = 26
     right_land = 27
+    spa_parcel = 31
 
     # pasture_use = 26  # r
     legitimate_rights = 27  # r

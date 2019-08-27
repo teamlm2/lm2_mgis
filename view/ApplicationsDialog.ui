@@ -63,7 +63,7 @@
     <string notr="true">QTabBar::tab { width: 150px; }</string>
    </property>
    <property name="currentIndex">
-    <number>3</number>
+    <number>0</number>
    </property>
    <property name="usesScrollButtons">
     <bool>true</bool>

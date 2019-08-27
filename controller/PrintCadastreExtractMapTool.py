@@ -100,6 +100,7 @@ class PrintCadastreExtractMapTool(QgsMapTool):
             attribute_map = result_feature.attributes()
 
             parcel_no = attribute_map[idx_parcel_id]
+            print parcel_no
             tmp_old_parcel_no = attribute_map[idx_old_id]
 
             coordinate_system = layer.crs()
@@ -306,7 +307,7 @@ class PrintCadastreExtractMapTool(QgsMapTool):
             self.dialog_position = self.current_dialog.pos()
             self.current_dialog.set_building_data(building_id_list)
         else:
-            self.current_dialog = PrintDialog(self.plugin, self.is_pasture, coordinate_system.description(), self.plugin.iface.mainWindow())
+            self.current_dialog = PrintDialog(self.plugin, self.table_name, coordinate_system.description(), self.plugin.iface.mainWindow())
             self.current_dialog.setModal(False)
             self.connect(self.current_dialog, SIGNAL("rejected()"), self.__clean_up)
             self.current_dialog.set_building_data(building_id_list)

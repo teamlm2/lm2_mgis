@@ -31,10 +31,15 @@ from ..model.SetCadastrePage import *
 from ..model.SdPosition import *
 from ..model.CtApplicationPUGParcel import *
 from ..model.CaPastureParcelTbl import *
+from ..model.CaSpaParcelTbl import *
 import math
 import locale
 import os
 from docxtpl import DocxTemplate, RichText
+
+TABLE_PARCEL = 'ca_parcel'
+TABLE_PASTURE_PARCEL = 'ca_pasture_parcel'
+TABLE_SPA_PARCEL = 'ca_spa_parcel'
 
 class PrintDialog(QDialog, Ui_PrintDialog):
 
@@ -45,14 +50,15 @@ class PrintDialog(QDialog, Ui_PrintDialog):
     GEO_ID = 2
     OLD_PARCEL_ID = 1
 
-    def __init__(self, plugin, is_pasture, crs_description, parent=None):
+
+    def __init__(self, plugin, table_name, crs_description, parent=None):
 
         super(PrintDialog,  self).__init__(parent)
         self.setAttribute(Qt.WA_DeleteOnClose)
 
         self.plugin = plugin
         self.crs_description = crs_description
-        self.is_pasture = is_pasture
+        self.table_name = table_name
         self.session = SessionHandler().session_instance()
 
         self.__parcel_no = None
@@ -85,17 +91,23 @@ class PrintDialog(QDialog, Ui_PrintDialog):
 
     def __update_ui(self):
 
-        if self.is_pasture == False:
+        if self.table_name == TABLE_PARCEL:
             self.__update_ui_ca_parcel()
-        else:
+        elif self.table_name == TABLE_PASTURE_PARCEL:
             self.__update_ui_ca_parcel_pasture()
+        else:
+            self.__update_ui_ca_spa_parcel()
+
+    def __update_ui_ca_spa_parcel(self):
+
+        print ''
 
     def __update_ui_ca_parcel_pasture(self):
 
-        self.setWindowTitle(self.tr('Print map for parcel: <{0}>. Select the right holder.'.format(self.__parcel_no)))
+        self.setWindowTitle(self.tr('Print map for parcel: <{0}>. Select the right holder.'.format(str(self.__parcel_no))))
         self.right_holder_twidget.clearContents()
         # self.session = SessionHandler().session_instance()
-        app_parcels = self.session.query(CtApplicationPUGParcel).filter(CtApplicationPUGParcel.parcel == self.__parcel_no.strip()).all()
+        app_parcels = self.session.query(CtApplicationPUGParcel).filter(CtApplicationPUGParcel.parcel == str(self.__parcel_no).strip()).all()
 
         ct_applications = self.session.query(CtApplication).filter(
             CtApplication.parcel.ilike(self.__parcel_no.strip())).all()
@@ -280,7 +292,7 @@ class PrintDialog(QDialog, Ui_PrintDialog):
 
     def set_parcel_data(self, parcel_no, feature):
 
-        self.__parcel_no = parcel_no
+        self.__parcel_no = str(parcel_no)
         self.__geometry = QgsGeometry(feature.geometry())
         self.__feature = feature
         self.__update_ui()
@@ -325,11 +337,18 @@ class PrintDialog(QDialog, Ui_PrintDialog):
         boundary_points_count = point_layer.featureCount()
         building_points_count = building_point_layer.featureCount()
 
-        if boundary_points_count > 7 or building_points_count > 8:
-            template = path + "cadastre_extract_extented.qpt"
-            self.__second_page_enabled = True
+        if self.table_name == TABLE_SPA_PARCEL:
+            if boundary_points_count > 7 or building_points_count > 8:
+                template = path + "spa_cadastre_extract_extented.qpt"
+                self.__second_page_enabled = True
+            else:
+                template = path + "spa_cadastre_extract.qpt"
         else:
-            template = path + "cadastre_extract.qpt"
+            if boundary_points_count > 7 or building_points_count > 8:
+                template = path + "cadastre_extract_extented.qpt"
+                self.__second_page_enabled = True
+            else:
+                template = path + "cadastre_extract.qpt"
 
         templateDOM = QDomDocument()
         templateDOM.setContent(QFile(template), False)
@@ -376,8 +395,10 @@ class PrintDialog(QDialog, Ui_PrintDialog):
             self.__add_admin_unit_l2_name_h(map_composition)
             self.__add_admin_unit_l3_name_h(map_composition)
             self.__add_cadastre_block_code_h(map_composition)
-            self.__add_parcel_street_name_h(map_composition)
-            self.__add_khashaa_name_h(map_composition)
+
+            if self.table_name == TABLE_PARCEL:
+                self.__add_khashaa_name_h(map_composition)
+                self.__add_parcel_street_name_h(map_composition)
         self.__adjust_map_center_and_scale(overview_map, 30, 30, scale_denominator)
         self.__set_north_arrow_position(map_composition)
         self.__add_labels(map_composition)
@@ -391,8 +412,9 @@ class PrintDialog(QDialog, Ui_PrintDialog):
         self.__add_admin_unit_l2_name(map_composition)
         self.__add_admin_unit_l3_name(map_composition)
         self.__add_cadastre_block_code(map_composition)
-        self.__add_parcel_street_name(map_composition)
-        self.__add_khashaa_name(map_composition)
+        if self.table_name == TABLE_PARCEL:
+            self.__add_parcel_street_name(map_composition)
+            self.__add_khashaa_name(map_composition)
         self.__add_stamp(map_composition)
         self.__add_right_holder_information(map_composition)
         self.__addNorthArrow(map_composition)
@@ -518,14 +540,20 @@ class PrintDialog(QDialog, Ui_PrintDialog):
 
         #parcel area
         item = map_composition.getComposerItemById("area")
-        if self.is_pasture == False:
+        if self.table_name == TABLE_PARCEL:
             parcel = self.session.query(CaParcel).filter(CaParcel.parcel_id == self.__parcel_no).one()
             item.setText(str(int(parcel.area_m2)))
             # item.setText(str((round(self.__geometry.area(), 2))))
             item.adjustSizeToText()
-        else:
+        elif self.table_name == TABLE_PASTURE_PARCEL:
             parcel = self.session.query(CaPastureParcelTbl).filter(CaPastureParcelTbl.parcel_id == self.__parcel_no).one()
             item.setText(str(int(parcel.area_ga)))
+            # item.setText(str((round(self.__geometry.area(), 2))))
+            item.adjustSizeToText()
+        else:
+            parcel = self.session.query(CaSpaParcelTbl).filter(
+                CaSpaParcelTbl.parcel_id == self.__parcel_no).one()
+            item.setText(str(int(parcel.area_m2)))
             # item.setText(str((round(self.__geometry.area(), 2))))
             item.adjustSizeToText()
 
@@ -748,7 +776,7 @@ class PrintDialog(QDialog, Ui_PrintDialog):
     def __add_parcel_h_numbers(self, map_composition):
 
         item = map_composition.getComposerItemById("parcel_id_h")
-        parcel_id = self.__parcel_no
+        parcel_id = str(self.__parcel_no)
 
         # parcel_id = self.__cut_zeros_from_parcel_id(parcel_id)
 
@@ -773,7 +801,7 @@ class PrintDialog(QDialog, Ui_PrintDialog):
     def __add_parcel_numbers(self, map_composition):
 
         item = map_composition.getComposerItemById("parcel_id")
-        parcel_id = self.__parcel_no
+        parcel_id = str(self.__parcel_no)
 
         parcel_id = self.__cut_zeros_from_parcel_id(parcel_id)
 
@@ -844,11 +872,16 @@ class PrintDialog(QDialog, Ui_PrintDialog):
     def __add_admin_unit_l2_name_h(self, map_composition):
 
         # try:
-        if self.is_pasture == False:
-            parcel_geometry = self.session.query(CaParcel.geometry).filter(CaParcel.parcel_id == self.__parcel_no).one()
+        if self.table_name == TABLE_PARCEL:
+            parcel_geometry = self.session.query(CaParcel.geometry).filter(CaParcel.parcel_id == str(self.__parcel_no)).one()
             admin_unit_l2_name = self.session.query(AuLevel2.name).filter(AuLevel2.geometry.ST_Intersects(func.ST_Centroid(parcel_geometry[0]))).first()
+        elif self.table_name == TABLE_PASTURE_PARCEL:
+            parcel_geometry = self.session.query(CaPastureParcelTbl.geometry).filter(CaPastureParcelTbl.parcel_id == str(self.__parcel_no)).one()
+            admin_unit_l2_name = self.session.query(AuLevel2.name).filter(
+                AuLevel2.geometry.ST_Intersects(func.ST_Centroid(parcel_geometry[0]))).first()
         else:
-            parcel_geometry = self.session.query(CaPastureParcelTbl.geometry).filter(CaPastureParcelTbl.parcel_id == self.__parcel_no).one()
+            parcel_geometry = self.session.query(CaSpaParcelTbl.geometry).filter(
+                CaSpaParcelTbl.parcel_id == str(self.__parcel_no)).one()
             admin_unit_l2_name = self.session.query(AuLevel2.name).filter(
                 AuLevel2.geometry.ST_Intersects(func.ST_Centroid(parcel_geometry[0]))).first()
         #
@@ -862,11 +895,16 @@ class PrintDialog(QDialog, Ui_PrintDialog):
     def __add_admin_unit_l2_name(self, map_composition):
 
         # try:
-        if self.is_pasture == False:
-            parcel_geometry = self.session.query(CaParcel.geometry).filter(CaParcel.parcel_id == self.__parcel_no).one()
+        if self.table_name == TABLE_PARCEL:
+            parcel_geometry = self.session.query(CaParcel.geometry).filter(CaParcel.parcel_id == str(self.__parcel_no)).one()
             admin_unit_l2_name = self.session.query(AuLevel2.name).filter(AuLevel2.geometry.ST_Intersects(func.ST_Centroid(parcel_geometry[0]))).first()
+        elif self.table_name == TABLE_PASTURE_PARCEL:
+            parcel_geometry = self.session.query(CaPastureParcelTbl.geometry).filter(CaPastureParcelTbl.parcel_id == str(self.__parcel_no)).one()
+            admin_unit_l2_name = self.session.query(AuLevel2.name).filter(
+                AuLevel2.geometry.ST_Intersects(func.ST_Centroid(parcel_geometry[0]))).first()
         else:
-            parcel_geometry = self.session.query(CaPastureParcelTbl.geometry).filter(CaPastureParcelTbl.parcel_id == self.__parcel_no).one()
+            parcel_geometry = self.session.query(CaSpaParcelTbl.geometry).filter(
+                CaSpaParcelTbl.parcel_id == str(self.__parcel_no)).one()
             admin_unit_l2_name = self.session.query(AuLevel2.name).filter(
                 AuLevel2.geometry.ST_Intersects(func.ST_Centroid(parcel_geometry[0]))).first()
         # except SQLAlchemyError, e:
@@ -879,11 +917,16 @@ class PrintDialog(QDialog, Ui_PrintDialog):
     def __add_admin_unit_l3_name_h(self, map_composition):
 
         # try:
-        if self.is_pasture == False:
-            parcel_geometry = self.session.query(CaParcel.geometry).filter(CaParcel.parcel_id == self.__parcel_no).one()
+        if self.table_name == TABLE_PARCEL:
+            parcel_geometry = self.session.query(CaParcel.geometry).filter(CaParcel.parcel_id == str(self.__parcel_no)).one()
             admin_unit_l3_name = self.session.query(AuLevel3.name).filter(AuLevel3.geometry.ST_Intersects(func.ST_Centroid(parcel_geometry[0]))).first()
+        elif self.table_name == TABLE_PASTURE_PARCEL:
+            parcel_geometry = self.session.query(CaPastureParcelTbl.geometry).filter(CaPastureParcelTbl.parcel_id == str(self.__parcel_no)).one()
+            admin_unit_l3_name = self.session.query(AuLevel3.name).filter(
+                AuLevel3.geometry.ST_Intersects(func.ST_Centroid(parcel_geometry[0]))).first()
         else:
-            parcel_geometry = self.session.query(CaPastureParcelTbl.geometry).filter(CaPastureParcelTbl.parcel_id == self.__parcel_no).one()
+            parcel_geometry = self.session.query(CaSpaParcelTbl.geometry).filter(
+                CaSpaParcelTbl.parcel_id == str(self.__parcel_no)).one()
             admin_unit_l3_name = self.session.query(AuLevel3.name).filter(
                 AuLevel3.geometry.ST_Intersects(func.ST_Centroid(parcel_geometry[0]))).first()
         # except SQLAlchemyError, e:
@@ -897,11 +940,16 @@ class PrintDialog(QDialog, Ui_PrintDialog):
     def __add_admin_unit_l3_name(self, map_composition):
 
         # try:
-        if self.is_pasture == False:
-            parcel_geometry = self.session.query(CaParcel.geometry).filter(CaParcel.parcel_id == self.__parcel_no).one()
+        if self.table_name == TABLE_PARCEL:
+            parcel_geometry = self.session.query(CaParcel.geometry).filter(CaParcel.parcel_id == str(self.__parcel_no)).one()
             admin_unit_l3_name = self.session.query(AuLevel3.name).filter(AuLevel3.geometry.ST_Intersects(func.ST_Centroid(parcel_geometry[0]))).first()
+        elif self.table_name == TABLE_PASTURE_PARCEL:
+            parcel_geometry = self.session.query(CaPastureParcelTbl.geometry).filter(CaPastureParcelTbl.parcel_id == str(self.__parcel_no)).one()
+            admin_unit_l3_name = self.session.query(AuLevel3.name).filter(
+                AuLevel3.geometry.ST_Intersects(func.ST_Centroid(parcel_geometry[0]))).first()
         else:
-            parcel_geometry = self.session.query(CaPastureParcelTbl.geometry).filter(CaPastureParcelTbl.parcel_id == self.__parcel_no).one()
+            parcel_geometry = self.session.query(CaSpaParcelTbl.geometry).filter(
+                CaSpaParcelTbl.parcel_id == str(self.__parcel_no)).one()
             admin_unit_l3_name = self.session.query(AuLevel3.name).filter(
                 AuLevel3.geometry.ST_Intersects(func.ST_Centroid(parcel_geometry[0]))).first()
         # except SQLAlchemyError, e:
@@ -914,7 +962,7 @@ class PrintDialog(QDialog, Ui_PrintDialog):
 
     def __add_cadastre_block_code_h(self, map_composition):
 
-        cadastre_block_number = self.__parcel_no[4:7]
+        cadastre_block_number = str(self.__parcel_no)[4:7]
 
         item = map_composition.getComposerItemById("cadastre_block_name_h")
         item.setText(cadastre_block_number)
@@ -922,7 +970,7 @@ class PrintDialog(QDialog, Ui_PrintDialog):
 
     def __add_cadastre_block_code(self, map_composition):
 
-        cadastre_block_number = self.__parcel_no[4:7]
+        cadastre_block_number = str(self.__parcel_no)[4:7]
         item = map_composition.getComposerItemById("cadastre_block_name")
         item.setText(cadastre_block_number)
         item.adjustSizeToText()
@@ -1099,7 +1147,7 @@ class PrintDialog(QDialog, Ui_PrintDialog):
         file_dialog.setFileMode(QFileDialog.AnyFile)
         file_dialog.setAcceptMode(QFileDialog.AcceptSave)
         file_dialog.setDirectory(default_path)
-        file_dialog.selectFile('parcel_' + self.__parcel_no + ".pdf")
+        file_dialog.selectFile('parcel_' + str(self.__parcel_no) + ".pdf")
         if file_dialog.exec_():
             file_path = file_dialog.selectedFiles()[0]
             if file_path is None or type(file_path) == QPyNullVariant:
@@ -1509,7 +1557,7 @@ class PrintDialog(QDialog, Ui_PrintDialog):
             PluginUtils.show_message(self, self.tr("Value"), self.tr("Please enter cadasre page number!!!"))
             return
 
-        parcel_id = self.__parcel_no
+        parcel_id = str(self.__parcel_no)
         current_row = self.right_holder_twidget.currentRow()
         person_id = self.right_holder_twidget.item(current_row, 0).data(Qt.UserRole + 1)
         cadastre_page_number = self.cadastre_page_sbox.value()
@@ -1562,7 +1610,7 @@ class PrintDialog(QDialog, Ui_PrintDialog):
             PluginUtils.show_message(self, self.tr("Value"), self.tr("Please enter cadasre page number!!!"))
             return
 
-        parcel_id = self.__parcel_no
+        parcel_id = str(self.__parcel_no)
         current_row = self.right_holder_twidget.currentRow()
         person_id = self.right_holder_twidget.item(current_row, 0).data(Qt.UserRole+1)
         cadastre_page_number = self.cadastre_page_sbox.value()
@@ -1608,7 +1656,7 @@ class PrintDialog(QDialog, Ui_PrintDialog):
         if twidget_item is None:
             return
 
-        parcel_id = self.__parcel_no
+        parcel_id = str(self.__parcel_no)
 
         right_holder_name = twidget_item.text()
 
@@ -1620,10 +1668,13 @@ class PrintDialog(QDialog, Ui_PrintDialog):
         twidget_item = self.right_holder_twidget.item(selected_row, self.FIRSTNAME)
         right_type = twidget_item.data(Qt.UserRole)
 
-        if self.is_pasture == False:
-            parcel_geometry = self.session.query(CaParcel.geometry).filter(CaParcel.parcel_id == self.__parcel_no).one()
+        if self.table_name == TABLE_PARCEL:
+            parcel_geometry = self.session.query(CaParcel.geometry).filter(CaParcel.parcel_id == str(self.__parcel_no)).one()
+        elif self.table_name == TABLE_PASTURE_PARCEL:
+            parcel_geometry = self.session.query(CaPastureParcelTbl.geometry).filter(CaPastureParcelTbl.parcel_id == str(self.__parcel_no)).one()
         else:
-            parcel_geometry = self.session.query(CaPastureParcelTbl.geometry).filter(CaPastureParcelTbl.parcel_id == self.__parcel_no).one()
+            parcel_geometry = self.session.query(CaSpaParcelTbl.geometry).filter(
+                CaSpaParcelTbl.parcel_id == str(self.__parcel_no)).one()
         admin_unit_l1_name = self.session.query(AuLevel1.name).filter(
             AuLevel1.geometry.ST_Intersects(func.ST_Centroid(parcel_geometry[0]))).first()
         admin_unit_l2_name = self.session.query(AuLevel2.name).filter(

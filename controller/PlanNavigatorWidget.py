@@ -1732,7 +1732,7 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
     def on_mpa_zone_button_clicked(self):
 
         root = QgsProject.instance().layerTreeRoot()
-        mygroup = root.findGroup(u"Тусгай хамгаалалттай газар")
+        mygroup = root.findGroup(u"Тусгай хэрэгцээний газар")
         vlayer = LayerUtils.layer_by_data_source("admin_units", "au_mpa")
         if vlayer is None:
             vlayer = LayerUtils.load_layer_base_layer("au_mpa", "id", "admin_units")

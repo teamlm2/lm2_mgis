@@ -549,7 +549,7 @@
            </rect>
           </property>
           <property name="text">
-           <string>Тусгай хамгаалалтай газар</string>
+           <string>Тусгай хэрэгцээний газар</string>
           </property>
          </widget>
          <widget class="QPushButton" name="sec_zone_button">
