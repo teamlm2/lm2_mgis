@@ -125,9 +125,6 @@ class PrintDialog(QDialog, Ui_PrintDialog):
                             self.__add_contract_person(1, contract.status, contract.contract_no,
                                                        contract.contract_date, application, person)
 
-
-
-
         self.right_holder_twidget.resizeColumnsToContents()
 
         if self.right_holder_twidget.rowCount() > 0:
@@ -394,9 +391,10 @@ class PrintDialog(QDialog, Ui_PrintDialog):
             self.__add_aimag_name_h(map_composition)
             self.__add_admin_unit_l2_name_h(map_composition)
             self.__add_admin_unit_l3_name_h(map_composition)
-            self.__add_cadastre_block_code_h(map_composition)
 
-            if self.table_name == TABLE_PARCEL:
+
+            if self.table_name == TABLE_PARCEL or self.table_name == TABLE_PASTURE_PARCEL:
+                self.__add_cadastre_block_code_h(map_composition)
                 self.__add_khashaa_name_h(map_composition)
                 self.__add_parcel_street_name_h(map_composition)
         self.__adjust_map_center_and_scale(overview_map, 30, 30, scale_denominator)
@@ -411,13 +409,17 @@ class PrintDialog(QDialog, Ui_PrintDialog):
         self.__add_aimag_name(map_composition)
         self.__add_admin_unit_l2_name(map_composition)
         self.__add_admin_unit_l3_name(map_composition)
-        self.__add_cadastre_block_code(map_composition)
-        if self.table_name == TABLE_PARCEL:
+
+        if self.table_name == TABLE_PARCEL or self.table_name == TABLE_PASTURE_PARCEL:
             self.__add_parcel_street_name(map_composition)
             self.__add_khashaa_name(map_composition)
+            self.__add_cadastre_block_code(map_composition)
         self.__add_stamp(map_composition)
         self.__add_right_holder_information(map_composition)
         self.__addNorthArrow(map_composition)
+
+        if self.table_name == TABLE_SPA_PARCEL:
+            self.__add_spa_parcel_info(map_composition)
 
         map_composition.exportAsPDF(file_path)
         QApplication.setOverrideCursor(QCursor(Qt.ArrowCursor))
@@ -427,6 +429,38 @@ class PrintDialog(QDialog, Ui_PrintDialog):
         map_canvas.setExtent(original_extent)
 
         QDesktopServices.openUrl(QUrl.fromLocalFile(file_path))
+
+    def __add_spa_parcel_info(self, map_composition):
+
+        parcel = self.session.query(CaSpaParcelTbl).filter(
+            CaSpaParcelTbl.parcel_id == str(self.__parcel_no)).one()
+
+        if parcel.spa_land_name:
+            item = map_composition.getComposerItemById("spa_land_name")
+            if item:
+                item.setText(parcel.spa_land_name)
+                item.adjustSizeToText()
+
+            item = map_composition.getComposerItemById("spa_land_name_h")
+            if item:
+                item.setText(parcel.spa_land_name)
+                item.adjustSizeToText()
+
+        landuse_count = self.session.query(ClLanduseType).filter(ClLanduseType.code == parcel.landuse).count()
+        if landuse_count == 1:
+            landuse = self.session.query(ClLanduseType).filter(ClLanduseType.code == parcel.landuse).one()
+            item = map_composition.getComposerItemById("landuse")
+            if item:
+                item.setText(landuse.description)
+                item.adjustSizeToText()
+
+        spa_type_count = self.session.query(ClSpaType).filter(ClSpaType.code == parcel.spa_type).count()
+        if spa_type_count == 1:
+            spa_type = self.session.query(ClSpaType).filter(ClSpaType.code == parcel.spa_type).one()
+            item = map_composition.getComposerItemById("spa_type")
+            if item:
+                item.setText(spa_type.description)
+                item.adjustSizeToText()
 
     def __print_pdf(self, map_composition, file_path):
 
