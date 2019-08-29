@@ -1011,7 +1011,9 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
             if process_type:
                 plan_zone_id = process_type.plan_zone_id
         parcel_geometry = WKTElement(parcel.geometry().exportToWkt(), srid=4326)
-
+        # if parcel_geometry.IsValid() == True:
+        #     valid = False
+        #     print parcel_geometry.IsValid()
         # parcel overlap not approved plan zone
         polygon_values = self.session.query(PlProjectParcel). \
             filter(parcel_geometry.ST_Overlaps(PlProjectParcel.polygon_geom)).\
