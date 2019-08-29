@@ -63,7 +63,7 @@
     <string notr="true">QTabBar::tab { width: 150px; }</string>
    </property>
    <property name="currentIndex">
-    <number>0</number>
+    <number>1</number>
    </property>
    <property name="usesScrollButtons">
     <bool>true</bool>
@@ -627,22 +627,22 @@
        <string>Register Number</string>
       </property>
      </widget>
-     <widget class="QLineEdit" name="lineEdit">
+     <widget class="QLineEdit" name="search_person_edit">
       <property name="geometry">
        <rect>
         <x>160</x>
         <y>19</y>
-        <width>131</width>
+        <width>151</width>
         <height>20</height>
        </rect>
       </property>
      </widget>
-     <widget class="QPushButton" name="pushButton">
+     <widget class="QPushButton" name="search_person_button">
       <property name="geometry">
        <rect>
-        <x>310</x>
+        <x>330</x>
         <y>17</y>
-        <width>75</width>
+        <width>100</width>
         <height>23</height>
        </rect>
       </property>
@@ -650,12 +650,12 @@
        <string>Find</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="pushButton_2">
+     <widget class="QPushButton" name="accept_person_button">
       <property name="geometry">
        <rect>
-        <x>310</x>
+        <x>330</x>
         <y>48</y>
-        <width>75</width>
+        <width>100</width>
         <height>23</height>
        </rect>
       </property>
@@ -663,12 +663,12 @@
        <string>Accept</string>
       </property>
      </widget>
-     <widget class="QLineEdit" name="lineEdit_2">
+     <widget class="QLineEdit" name="accept_person_edit">
       <property name="geometry">
        <rect>
-        <x>160</x>
+        <x>50</x>
         <y>50</y>
-        <width>131</width>
+        <width>261</width>
         <height>20</height>
        </rect>
       </property>
