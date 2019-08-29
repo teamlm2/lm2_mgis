@@ -2,7 +2,8 @@
 
 # Form implementation generated from reading ui file '.\ApplicationsSpaDialog.ui'
 #
-# Created by: PyQt4 UI code generator 4.11.4
+# Created: Wed Aug 28 16:31:56 2019
+#      by: PyQt4 UI code generator 4.10
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -198,18 +199,18 @@ class Ui_ApplicationsSpaDialog(object):
         self.label_5 = QtGui.QLabel(self.applicants_group_box)
         self.label_5.setGeometry(QtCore.QRect(50, 20, 101, 16))
         self.label_5.setObjectName(_fromUtf8("label_5"))
-        self.lineEdit = QtGui.QLineEdit(self.applicants_group_box)
-        self.lineEdit.setGeometry(QtCore.QRect(160, 19, 131, 20))
-        self.lineEdit.setObjectName(_fromUtf8("lineEdit"))
-        self.pushButton = QtGui.QPushButton(self.applicants_group_box)
-        self.pushButton.setGeometry(QtCore.QRect(310, 17, 75, 23))
-        self.pushButton.setObjectName(_fromUtf8("pushButton"))
-        self.pushButton_2 = QtGui.QPushButton(self.applicants_group_box)
-        self.pushButton_2.setGeometry(QtCore.QRect(310, 48, 75, 23))
-        self.pushButton_2.setObjectName(_fromUtf8("pushButton_2"))
-        self.lineEdit_2 = QtGui.QLineEdit(self.applicants_group_box)
-        self.lineEdit_2.setGeometry(QtCore.QRect(160, 50, 131, 20))
-        self.lineEdit_2.setObjectName(_fromUtf8("lineEdit_2"))
+        self.search_person_edit = QtGui.QLineEdit(self.applicants_group_box)
+        self.search_person_edit.setGeometry(QtCore.QRect(160, 19, 151, 20))
+        self.search_person_edit.setObjectName(_fromUtf8("search_person_edit"))
+        self.search_person_button = QtGui.QPushButton(self.applicants_group_box)
+        self.search_person_button.setGeometry(QtCore.QRect(330, 17, 100, 23))
+        self.search_person_button.setObjectName(_fromUtf8("search_person_button"))
+        self.accept_person_button = QtGui.QPushButton(self.applicants_group_box)
+        self.accept_person_button.setGeometry(QtCore.QRect(330, 48, 100, 23))
+        self.accept_person_button.setObjectName(_fromUtf8("accept_person_button"))
+        self.accept_person_edit = QtGui.QLineEdit(self.applicants_group_box)
+        self.accept_person_edit.setGeometry(QtCore.QRect(50, 50, 261, 20))
+        self.accept_person_edit.setObjectName(_fromUtf8("accept_person_edit"))
         self.application_tab_widget.addTab(self.applicants_tab, _fromUtf8(""))
         self.document_tab = QtGui.QWidget()
         self.document_tab.setObjectName(_fromUtf8("document_tab"))
@@ -325,7 +326,7 @@ class Ui_ApplicationsSpaDialog(object):
         self.status_label.setObjectName(_fromUtf8("status_label"))
 
         self.retranslateUi(ApplicationsSpaDialog)
-        self.application_tab_widget.setCurrentIndex(0)
+        self.application_tab_widget.setCurrentIndex(1)
         QtCore.QMetaObject.connectSlotsByName(ApplicationsSpaDialog)
         ApplicationsSpaDialog.setTabOrder(self.application_tab_widget, self.date_time_date)
         ApplicationsSpaDialog.setTabOrder(self.date_time_date, self.application_type_cbox)
@@ -383,8 +384,8 @@ class Ui_ApplicationsSpaDialog(object):
         self.applicants_group_box.setTitle(_translate("ApplicationsSpaDialog", "Applicants", None))
         self.appliciants_remove_button.setText(_translate("ApplicationsSpaDialog", "Remove", None))
         self.label_5.setText(_translate("ApplicationsSpaDialog", "Register Number", None))
-        self.pushButton.setText(_translate("ApplicationsSpaDialog", "Find", None))
-        self.pushButton_2.setText(_translate("ApplicationsSpaDialog", "Accept", None))
+        self.search_person_button.setText(_translate("ApplicationsSpaDialog", "Find", None))
+        self.accept_person_button.setText(_translate("ApplicationsSpaDialog", "Accept", None))
         self.application_tab_widget.setTabText(self.application_tab_widget.indexOf(self.applicants_tab), _translate("ApplicationsSpaDialog", "Applicants", None))
         self.documents_group_box.setTitle(_translate("ApplicationsSpaDialog", "Documents", None))
         self.label_12.setText(_translate("ApplicationsSpaDialog", "Select Applicants", None))
@@ -411,5 +412,5 @@ class Ui_ApplicationsSpaDialog(object):
         self.apply_button.setText(_translate("ApplicationsSpaDialog", "Apply", None))
         self.close_button.setText(_translate("ApplicationsSpaDialog", "Close", None))
 
-import resources_pasture_rc
 import resources_rc
+import resources_pasture_rc

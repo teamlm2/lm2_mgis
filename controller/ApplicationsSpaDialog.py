@@ -1799,6 +1799,38 @@ class ApplicationsSpaDialog(QDialog, Ui_ApplicationsSpaDialog, DatabaseHelper):
             self.applicant_twidget.setItem(inserted_row, APPLICANT_SURNAME, surname_item)
             self.applicant_twidget.setItem(inserted_row, APPLICANT_FIRST_NAME, first_name_item)
 
+    def __add_person_item(self, person):
+
+        if person:
+            main_item = QTableWidgetItem(QIcon(), "")
+            main_item.setCheckState(Qt.Unchecked)
+
+            main_item.setData(Qt.UserRole, person.person_id)
+
+            share_item = QTableWidgetItem(str(0))
+            share_item.setData(Qt.UserRole, person.person_id)
+
+            person_id_item = QTableWidgetItem(person.person_register)
+            person_id_item.setData(Qt.UserRole, person.person_id)
+            person_id_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+
+            surname_item = QTableWidgetItem(person.name)
+            surname_item.setData(Qt.UserRole, person.person_id)
+            surname_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+
+            first_name_item = QTableWidgetItem(person.first_name)
+            first_name_item.setData(Qt.UserRole, person.person_id)
+            first_name_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+
+            inserted_row = self.applicant_twidget.rowCount()
+
+            self.applicant_twidget.insertRow(inserted_row)
+            self.applicant_twidget.setItem(inserted_row, APPLICANT_MAIN, main_item)
+            self.applicant_twidget.setItem(inserted_row, APPLICANT_SHARE, share_item)
+            self.applicant_twidget.setItem(inserted_row, APPLICANT_PERSON_ID, person_id_item)
+            self.applicant_twidget.setItem(inserted_row, APPLICANT_SURNAME, surname_item)
+            self.applicant_twidget.setItem(inserted_row, APPLICANT_FIRST_NAME, first_name_item)
+
     def __add_application_status_item(self, status):
 
         item_status = QTableWidgetItem(status.status_ref.description)
@@ -1992,3 +2024,35 @@ class ApplicationsSpaDialog(QDialog, Ui_ApplicationsSpaDialog, DatabaseHelper):
                 os.system("hh.exe "+ str(os.path.dirname(os.path.realpath(__file__))[:-10]) +"help\output\help_lm2.chm::/html/application_record_created.htm")
             elif self.application_tab_widget.currentIndex() == 5:
                 os.system("hh.exe "+ str(os.path.dirname(os.path.realpath(__file__))[:-10]) +"help\output\help_lm2.chm::/html/application_print.htm")
+
+    @pyqtSlot()
+    def on_search_person_button_clicked(self):
+
+        if self.search_person_edit.text() == "":
+            return
+
+        person_register = self.search_person_edit.text()
+
+        person_count = self.session.query(BsPerson).filter(BsPerson.person_register == person_register).count()
+        if person_count == 1:
+            person = self.session.query(BsPerson).filter(BsPerson.person_register == person_register).one()
+            person_info = ''
+            if person.first_name:
+                person_info = person.person_register + ': ' + person.name + ' ' + person.first_name
+            else:
+                person_info = person.person_register + ': ' + person.name
+            self.accept_person_edit.setText(person_info)
+
+    @pyqtSlot()
+    def on_accept_person_button_clicked(self):
+
+        if self.search_person_edit.text() == "":
+            return
+
+        person_register = self.search_person_edit.text()
+
+        person_count = self.session.query(BsPerson).filter(BsPerson.person_register == person_register).count()
+        if person_count == 1:
+            person = self.session.query(BsPerson).filter(BsPerson.person_register == person_register).one()
+
+            self.__add_person_item(person)
