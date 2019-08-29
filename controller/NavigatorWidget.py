@@ -13500,7 +13500,9 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
             vlayer = LayerUtils.load_layer_base_layer("au_mpa", "id", "admin_units")
         vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/au_mpa.qml")
         vlayer.setLayerName(self.tr("Admin Unit MPA"))
-        mygroup.addLayer(vlayer)
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            mygroup.addLayer(vlayer)
 
         vlayer = LayerUtils.layer_by_data_source("admin_units", "au_mpa_zone")
         if vlayer is None:
@@ -13515,13 +13517,12 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         vlayer = LayerUtils.layer_by_data_source("data_soums_union", "ca_spa_parcel")
         if vlayer is None:
             vlayer = LayerUtils.load_layer_base_layer("ca_spa_parcel", "id", "data_soums_union")
-        vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))) + "/template\style/ca_parcel.qml")
-        vlayer.setLayerName(QApplication.translate("Plugin", "SPA Parcel"))
+        vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/ca_spa_parcel.qml")
+        vlayer.setLayerName(self.tr("SPA Parcel"))
         myalayer = root.findLayer(vlayer.id())
         if myalayer is None:
             mygroup.addLayer(vlayer)
-            vlayer.setReadOnly(True)
-
+            # vlayer.setReadOnly(True)
 
     def __sent_to_ubeg(self):
 
