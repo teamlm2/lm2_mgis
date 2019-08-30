@@ -1,4 +1,4 @@
-set search_path to data_soums_union, codelists, public;
+﻿set search_path to data_soums_union, codelists, public;
 CREATE TABLE codelists.cl_spa_type
 (
   code integer NOT NULL,
@@ -60,14 +60,14 @@ insert into codelists.cl_spa_status(code, description, short_name) values(3, 'М
 
 -----------------
 set search_path to data_soums_union, codelists, public, base;
-
+drop table ca_spa_parcel_tbl cascade;
 create table ca_spa_parcel_tbl
 (
-id serial PRIMARY key,
-parcel_id varchar(12) unique,
+parcel_id varchar(8) PRIMARY key,
 spa_land_name varchar(500),
 area_m2 decimal,
 spa_type int references codelists.cl_spa_type on update cascade on delete restrict,
+spa_mood int references codelists.cl_spa_mood on update cascade on delete restrict,
 landuse int references codelists.cl_landuse_type on update cascade on delete restrict,
 spa_law varchar(250),
 decision_level int references data_plan.cl_plan_decision_level on update cascade on delete restrict,
@@ -102,3 +102,39 @@ CREATE TRIGGER set_default_valid_time
   ON ca_spa_parcel_tbl
   FOR EACH ROW
   EXECUTE PROCEDURE set_default_valid_time();  
+
+CREATE OR REPLACE VIEW data_soums_union.ca_spa_parcel AS 
+ SELECT
+    p.parcel_id,
+    p.spa_land_name,
+    p.area_m2,
+    p.spa_type,
+    p.spa_mood,
+    p.landuse,
+    p.spa_law,
+    p.decision_level,
+    p.decision_date,
+    p.decision_no,
+    p.contract_date,
+    p.contract_no,
+    p.certificate_date,
+    p.certificate_no,
+    p.valid_from,
+    p.valid_till,
+    p.au2,
+    p.department_id,
+    p.geometry
+   FROM data_soums_union.ca_spa_parcel_tbl p
+  WHERE st_intersects(p.geometry, ( SELECT au_level2.geometry
+           FROM admin_units.au_level2
+          WHERE au_level2.code::text = (( SELECT set_role.working_au_level2::text AS au2
+                   FROM settings.set_role
+                  WHERE set_role.user_name::name = "current_user"() AND set_role.is_active = true))));
+
+ALTER TABLE data_soums_union.ca_spa_parcel
+  OWNER TO geodb_admin;
+GRANT ALL ON TABLE data_soums_union.ca_spa_parcel TO geodb_admin;
+GRANT SELECT, INSERT ON TABLE data_soums_union.ca_spa_parcel TO cadastre_view;
+GRANT SELECT ON TABLE data_soums_union.ca_spa_parcel TO reporting;
+GRANT SELECT ON TABLE data_soums_union.ca_spa_parcel TO application_view;
+GRANT SELECT, UPDATE, INSERT, DELETE ON TABLE data_soums_union.ca_spa_parcel TO cadastre_update;
