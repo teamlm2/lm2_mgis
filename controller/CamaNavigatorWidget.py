@@ -1262,11 +1262,13 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
                     if factor.id == 37:
                         dis_center = int(value.factor_value)
 
+                print factor.id
+
             params = 'area=' + str(area) + '&coord_x=' + str(coord_x) + '&coord_y=' + str(coord_y) + '&surface_elevation=' + str(valuation) + \
                      '&surface_slope=' + str(slope) + '&blood_frequence=' + str(risk_flood) + '&soil_pollution_level=' + str(risk_soil) + '&distanes_to_school=' + str(dis_shl) + \
                      '&distanes_to_kindergarten=' + str(dis_kid) + '&distanes_to_hospital=' + str(dis_hos) + '&distance_to_center=' + str(dis_center)
 
-            url = 'http://192.168.88.253:5000/test?' + params
+            url = 'http://192.168.15.202:5000/cama/api/pkl/getprices?' + params
             print url
             respons = urllib.request.urlopen(url)
             # print respons

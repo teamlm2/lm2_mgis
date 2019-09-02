@@ -148,7 +148,7 @@ class LM2Plugin:
         self.parcel_mpa_action.setCheckable(True)
 
         ###
-        self.parcel_spa_action = QAction(QIcon(":/plugins/lm2/mpa_logo.png"),
+        self.parcel_spa_action = QAction(QIcon(":/plugins/lm2/spa_logo.png"),
                                          QApplication.translate("Plugin", "SPA Parcel Info"),
                                          self.iface.mainWindow())
         self.parcel_spa_action.setCheckable(True)

@@ -37,6 +37,7 @@
     <file alias="copy.png">icons/copy.png</file>
     <file alias="gzb.png">icons/gzb.png</file>
     <file alias="mpa_logo.png">icons/mpa_logo.png</file>
+    <file alias="spa_logo.png">icons/spa_logo.png</file>
     <file alias="land_plan.png">icons/land_plan.png</file>
   </qresource>
 </RCC>

@@ -100,7 +100,7 @@
       </property>
       <widget class="QWidget" name="pasture_tab">
        <attribute name="title">
-        <string>Pasture(PUA)</string>
+        <string>SPA Parcel registration</string>
        </attribute>
        <widget class="QGroupBox" name="groupBox_18">
         <property name="geometry">
@@ -127,7 +127,7 @@
           </rect>
          </property>
         </widget>
-        <widget class="QLineEdit" name="member_name_edit">
+        <widget class="QLineEdit" name="parcel_right_holder_name_edit">
          <property name="geometry">
           <rect>
            <x>10</x>
@@ -137,7 +137,7 @@
           </rect>
          </property>
         </widget>
-        <widget class="QLineEdit" name="member_register_edit">
+        <widget class="QLineEdit" name="personal_parcel_edit">
          <property name="geometry">
           <rect>
            <x>10</x>
@@ -147,7 +147,7 @@
           </rect>
          </property>
         </widget>
-        <widget class="QLineEdit" name="pasture_contract_no_edit">
+        <widget class="QLineEdit" name="parcel_contract_num_edit">
          <property name="geometry">
           <rect>
            <x>190</x>
@@ -157,7 +157,7 @@
           </rect>
          </property>
         </widget>
-        <widget class="QLineEdit" name="pasture_app_no_edit">
+        <widget class="QLineEdit" name="parcel_app_num_edit">
          <property name="geometry">
           <rect>
            <x>190</x>
@@ -190,7 +190,7 @@
           </rect>
          </property>
          <property name="text">
-          <string>Member Name</string>
+          <string>Right Holder Name</string>
          </property>
         </widget>
         <widget class="QLabel" name="label_65">
@@ -203,7 +203,7 @@
           </rect>
          </property>
          <property name="text">
-          <string>Group member register</string>
+          <string>Register NO</string>
          </property>
         </widget>
         <widget class="QLabel" name="label_66">
@@ -327,7 +327,7 @@
           </rect>
          </property>
          <property name="text">
-          <string>Pasture Group</string>
+          <string>SPA Type</string>
          </property>
         </widget>
         <widget class="QComboBox" name="pasture_group_cbox">
@@ -353,7 +353,7 @@
           <string>Land use type</string>
          </property>
         </widget>
-        <widget class="QComboBox" name="pasture_landuse_cbox">
+        <widget class="QComboBox" name="land_use_type_cbox">
          <property name="geometry">
           <rect>
            <x>10</x>
@@ -363,7 +363,7 @@
           </rect>
          </property>
         </widget>
-        <widget class="QComboBox" name="app_type_cbox">
+        <widget class="QComboBox" name="department_cbox">
          <property name="geometry">
           <rect>
            <x>10</x>
@@ -383,7 +383,7 @@
           </rect>
          </property>
          <property name="text">
-          <string>Application type</string>
+          <string>Department</string>
          </property>
         </widget>
         <widget class="QPushButton" name="delete_button">
@@ -412,7 +412,7 @@
         <property name="title">
          <string>Results</string>
         </property>
-        <widget class="QTableWidget" name="pasture_results_twidget">
+        <widget class="QTableWidget" name="parcel_results_twidget">
          <property name="geometry">
           <rect>
            <x>5</x>
