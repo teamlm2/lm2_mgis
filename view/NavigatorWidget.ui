@@ -604,6 +604,19 @@
            <string>Үнэлгээний бүс</string>
           </property>
          </widget>
+         <widget class="QPushButton" name="to_cancel_button">
+          <property name="geometry">
+           <rect>
+            <x>16</x>
+            <y>240</y>
+            <width>161</width>
+            <height>23</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Түр цугларах, Нүүлгэх</string>
+          </property>
+         </widget>
         </widget>
        </widget>
        <widget class="QGroupBox" name="groupBox_6">

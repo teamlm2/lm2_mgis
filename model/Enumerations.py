@@ -78,4 +78,6 @@ class PersonType:
     mongolian_state_org = 40
     foreign_citizen = 50
     legal_entity_foreign = 60
+    foreign_invested_entity = 70
+    SUH = 80
 

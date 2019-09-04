@@ -2,7 +2,8 @@
 
 # Form implementation generated from reading ui file '.\NavigatorWidget.ui'
 #
-# Created by: PyQt4 UI code generator 4.11.4
+# Created: Thu Aug 29 17:12:22 2019
+#      by: PyQt4 UI code generator 4.10
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -195,6 +196,9 @@ class Ui_NavigatorWidget(object):
         self.valuation_zone_button = QtGui.QPushButton(self.groupBox_2)
         self.valuation_zone_button.setGeometry(QtCore.QRect(16, 215, 161, 23))
         self.valuation_zone_button.setObjectName(_fromUtf8("valuation_zone_button"))
+        self.to_cancel_button = QtGui.QPushButton(self.groupBox_2)
+        self.to_cancel_button.setGeometry(QtCore.QRect(16, 240, 161, 23))
+        self.to_cancel_button.setObjectName(_fromUtf8("to_cancel_button"))
         self.groupBox_6 = QtGui.QGroupBox(self.st_tm_filter_tab)
         self.groupBox_6.setGeometry(QtCore.QRect(5, 430, 371, 82))
         self.groupBox_6.setObjectName(_fromUtf8("groupBox_6"))
@@ -1212,6 +1216,7 @@ class Ui_NavigatorWidget(object):
         self.au_level1_button.setText(_translate("NavigatorWidget", "Аймаг/Нийслэлийн хил", None))
         self.free_zone_button.setText(_translate("NavigatorWidget", "Чөлөөт бүс", None))
         self.valuation_zone_button.setText(_translate("NavigatorWidget", "Үнэлгээний бүс", None))
+        self.to_cancel_button.setText(_translate("NavigatorWidget", "Түр цугларах, Нүүлгэх", None))
         self.groupBox_6.setTitle(_translate("NavigatorWidget", "Temporal Filter", None))
         self.from_date_edit.setDisplayFormat(_translate("NavigatorWidget", "yyyy-MM-dd", None))
         self.till_date_edit.setDisplayFormat(_translate("NavigatorWidget", "yyyy-MM-dd", None))

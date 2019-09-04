@@ -1184,16 +1184,16 @@ class ApplicationsSpaDialog(QDialog, Ui_ApplicationsSpaDialog, DatabaseHelper):
     def on_apply_button_clicked(self):
 
         app_type = self.application_type_cbox.itemData(self.application_type_cbox.currentIndex())
-        self.application.app_type = app_type
+        app_type = app_type
 
         # save application details
-        # validity_result = self.__validity_of_application()
-        #
-        # if not validity_result[0]:
-        #     log_message = validity_result[1]
-        #
-        #     PluginUtils.show_error(self, self.tr("Invalid application"), log_message)
-        #     return
+        validity_result = self.__validity_of_application()
+
+        if not validity_result[0]:
+            log_message = validity_result[1]
+
+            PluginUtils.show_error(self, self.tr("Invalid application"), log_message)
+            return
 
         self.__save_application()
 

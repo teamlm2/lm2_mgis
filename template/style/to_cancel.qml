@@ -1,176 +1,43 @@
 <!DOCTYPE qgis PUBLIC 'http://mrcc.com/qgis.dtd' 'SYSTEM'>
 <qgis version="2.18.16" simplifyAlgorithm="0" minimumScale="0" maximumScale="1e+08" simplifyDrawingHints="1" minLabelScale="0" maxLabelScale="1e+08" simplifyDrawingTol="1" readOnly="0" simplifyMaxScale="1" hasScaleBasedVisibilityFlag="0" simplifyLocal="1" scaleBasedLabelVisibilityFlag="0">
   <edittypes>
-    <edittype widgetv2type="TextEdit" name="parcel_id">
+    <edittype widgetv2type="TextEdit" name="gid">
       <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
     </edittype>
-    <edittype widgetv2type="TextEdit" name="old_parcel_id">
+    <edittype widgetv2type="TextEdit" name="objectid">
       <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
     </edittype>
-    <edittype widgetv2type="TextEdit" name="geo_id">
+    <edittype widgetv2type="TextEdit" name="area">
       <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
     </edittype>
-    <edittype widgetv2type="TextEdit" name="landuse">
+    <edittype widgetv2type="TextEdit" name="bairshil">
       <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
     </edittype>
-    <edittype widgetv2type="TextEdit" name="area_m2">
+    <edittype widgetv2type="TextEdit" name="tailbar">
       <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
     </edittype>
-    <edittype widgetv2type="TextEdit" name="documented_area_m2">
-      <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
-    </edittype>
-    <edittype widgetv2type="TextEdit" name="address_khashaa">
-      <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
-    </edittype>
-    <edittype widgetv2type="TextEdit" name="address_streetname">
-      <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
-    </edittype>
-    <edittype widgetv2type="TextEdit" name="address_neighbourhood">
-      <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
-    </edittype>
-    <edittype widgetv2type="TextEdit" name="valid_from">
-      <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
-    </edittype>
-    <edittype widgetv2type="TextEdit" name="valid_till">
-      <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
-    </edittype>
-    <edittype widgetv2type="TextEdit" name="edit_status">
-      <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
-    </edittype>
-    <edittype widgetv2type="TextEdit" name="au2">
+    <edittype widgetv2type="TextEdit" name="dugaar">
       <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
     </edittype>
   </edittypes>
-  <renderer-v2 attr="edit_status" forceraster="0" symbollevels="0" type="categorizedSymbol" enableorderby="0">
-    <categories>
-      <category render="true" symbol="0" value="30" label="Засвар хийгдээгүй"/>
-      <category render="true" symbol="1" value="20" label="Засвар хийгдэж байгаа"/>
-      <category render="true" symbol="2" value="10" label="Засвар дууссан"/>
-    </categories>
+  <renderer-v2 forceraster="0" symbollevels="0" type="singleSymbol" enableorderby="0">
     <symbols>
       <symbol alpha="1" clip_to_extent="1" type="fill" name="0">
-        <layer pass="0" class="SVGFill" locked="0">
-          <prop k="angle" v="0"/>
-          <prop k="color" v="255,255,255,255"/>
-          <prop k="data" v=""/>
-          <prop k="outline_color" v="0,0,0,255"/>
-          <prop k="outline_width" v="0.2"/>
-          <prop k="outline_width_map_unit_scale" v="0,0,0,0,0,0"/>
-          <prop k="outline_width_unit" v="MM"/>
-          <prop k="pattern_width_map_unit_scale" v="0,0,0,0,0,0"/>
-          <prop k="pattern_width_unit" v="MM"/>
-          <prop k="svg_outline_width_map_unit_scale" v="0,0,0,0,0,0"/>
-          <prop k="svg_outline_width_unit" v="MM"/>
-          <prop k="width" v="20"/>
-          <symbol alpha="1" clip_to_extent="1" type="line" name="@0@0">
-            <layer pass="0" class="SimpleLine" locked="0">
-              <prop k="capstyle" v="square"/>
-              <prop k="customdash" v="5;2"/>
-              <prop k="customdash_map_unit_scale" v="0,0,0,0,0,0"/>
-              <prop k="customdash_unit" v="MM"/>
-              <prop k="draw_inside_polygon" v="0"/>
-              <prop k="joinstyle" v="bevel"/>
-              <prop k="line_color" v="244,14,12,255"/>
-              <prop k="line_style" v="solid"/>
-              <prop k="line_width" v="0.46"/>
-              <prop k="line_width_unit" v="MM"/>
-              <prop k="offset" v="0"/>
-              <prop k="offset_map_unit_scale" v="0,0,0,0,0,0"/>
-              <prop k="offset_unit" v="MM"/>
-              <prop k="use_custom_dash" v="0"/>
-              <prop k="width_map_unit_scale" v="0,0,0,0,0,0"/>
-            </layer>
-          </symbol>
-        </layer>
-      </symbol>
-      <symbol alpha="1" clip_to_extent="1" type="fill" name="1">
-        <layer pass="0" class="SVGFill" locked="0">
-          <prop k="angle" v="0"/>
-          <prop k="color" v="255,255,255,255"/>
-          <prop k="data" v=""/>
-          <prop k="outline_color" v="0,0,0,255"/>
-          <prop k="outline_width" v="0.2"/>
-          <prop k="outline_width_map_unit_scale" v="0,0,0,0,0,0"/>
-          <prop k="outline_width_unit" v="MM"/>
-          <prop k="pattern_width_map_unit_scale" v="0,0,0,0,0,0"/>
-          <prop k="pattern_width_unit" v="MM"/>
-          <prop k="svg_outline_width_map_unit_scale" v="0,0,0,0,0,0"/>
-          <prop k="svg_outline_width_unit" v="MM"/>
-          <prop k="width" v="20"/>
-          <symbol alpha="1" clip_to_extent="1" type="line" name="@1@0">
-            <layer pass="0" class="SimpleLine" locked="0">
-              <prop k="capstyle" v="square"/>
-              <prop k="customdash" v="5;2"/>
-              <prop k="customdash_map_unit_scale" v="0,0,0,0,0,0"/>
-              <prop k="customdash_unit" v="MM"/>
-              <prop k="draw_inside_polygon" v="0"/>
-              <prop k="joinstyle" v="bevel"/>
-              <prop k="line_color" v="39,16,139,255"/>
-              <prop k="line_style" v="solid"/>
-              <prop k="line_width" v="0.66"/>
-              <prop k="line_width_unit" v="MM"/>
-              <prop k="offset" v="0"/>
-              <prop k="offset_map_unit_scale" v="0,0,0,0,0,0"/>
-              <prop k="offset_unit" v="MM"/>
-              <prop k="use_custom_dash" v="0"/>
-              <prop k="width_map_unit_scale" v="0,0,0,0,0,0"/>
-            </layer>
-          </symbol>
-        </layer>
-      </symbol>
-      <symbol alpha="1" clip_to_extent="1" type="fill" name="2">
         <layer pass="0" class="SimpleFill" locked="0">
           <prop k="border_width_map_unit_scale" v="0,0,0,0,0,0"/>
-          <prop k="color" v="255,255,255,0"/>
+          <prop k="color" v="13,207,194,255"/>
           <prop k="joinstyle" v="bevel"/>
           <prop k="offset" v="0,0"/>
           <prop k="offset_map_unit_scale" v="0,0,0,0,0,0"/>
           <prop k="offset_unit" v="MM"/>
-          <prop k="outline_color" v="12,141,5,255"/>
+          <prop k="outline_color" v="0,0,0,255"/>
           <prop k="outline_style" v="solid"/>
-          <prop k="outline_width" v="1.06"/>
+          <prop k="outline_width" v="0.26"/>
           <prop k="outline_width_unit" v="MM"/>
-          <prop k="style" v="solid"/>
+          <prop k="style" v="dense4"/>
         </layer>
       </symbol>
     </symbols>
-    <source-symbol>
-      <symbol alpha="1" clip_to_extent="1" type="fill" name="0">
-        <layer pass="0" class="SVGFill" locked="0">
-          <prop k="angle" v="0"/>
-          <prop k="color" v="255,255,255,255"/>
-          <prop k="data" v=""/>
-          <prop k="outline_color" v="0,0,0,255"/>
-          <prop k="outline_width" v="0.2"/>
-          <prop k="outline_width_map_unit_scale" v="0,0,0,0,0,0"/>
-          <prop k="outline_width_unit" v="MM"/>
-          <prop k="pattern_width_map_unit_scale" v="0,0,0,0,0,0"/>
-          <prop k="pattern_width_unit" v="MM"/>
-          <prop k="svg_outline_width_map_unit_scale" v="0,0,0,0,0,0"/>
-          <prop k="svg_outline_width_unit" v="MM"/>
-          <prop k="width" v="20"/>
-          <symbol alpha="1" clip_to_extent="1" type="line" name="@0@0">
-            <layer pass="0" class="SimpleLine" locked="0">
-              <prop k="capstyle" v="square"/>
-              <prop k="customdash" v="5;2"/>
-              <prop k="customdash_map_unit_scale" v="0,0,0,0,0,0"/>
-              <prop k="customdash_unit" v="MM"/>
-              <prop k="draw_inside_polygon" v="0"/>
-              <prop k="joinstyle" v="bevel"/>
-              <prop k="line_color" v="39,16,139,255"/>
-              <prop k="line_style" v="solid"/>
-              <prop k="line_width" v="0.26"/>
-              <prop k="line_width_unit" v="MM"/>
-              <prop k="offset" v="0"/>
-              <prop k="offset_map_unit_scale" v="0,0,0,0,0,0"/>
-              <prop k="offset_unit" v="MM"/>
-              <prop k="use_custom_dash" v="0"/>
-              <prop k="width_map_unit_scale" v="0,0,0,0,0,0"/>
-            </layer>
-          </symbol>
-        </layer>
-      </symbol>
-    </source-symbol>
     <rotation/>
     <sizescale scalemethod="diameter"/>
   </renderer-v2>
@@ -320,11 +187,11 @@
   </customproperties>
   <blendMode>0</blendMode>
   <featureBlendMode>0</featureBlendMode>
-  <layerTransparency>0</layerTransparency>
-  <displayfield>address_streetname</displayfield>
+  <layerTransparency>20</layerTransparency>
+  <displayfield>gid</displayfield>
   <label>0</label>
   <labelattributes>
-    <label fieldname="" text="Шошго"/>
+    <label fieldname="" text="Label"/>
     <family fieldname="" name="MS Shell Dlg 2"/>
     <size fieldname="" units="pt" value="12"/>
     <bold fieldname="" on="0"/>
@@ -346,7 +213,6 @@
   <SingleCategoryDiagramRenderer diagramType="Histogram" sizeLegend="0" attributeLegend="1">
     <DiagramCategory penColor="#000000" labelPlacementMethod="XHeight" penWidth="0" diagramOrientation="Up" sizeScale="0,0,0,0,0,0" minimumSize="0" barWidth="5" penAlpha="255" maxScaleDenominator="1e+08" backgroundColor="#ffffff" transparency="0" width="15" scaleDependency="Area" backgroundAlpha="255" angleOffset="1440" scaleBasedVisibility="0" enabled="0" height="15" lineSizeScale="0,0,0,0,0,0" sizeType="MM" lineSizeType="MM" minScaleDenominator="inf">
       <fontProperties description="MS Shell Dlg 2,8.25,-1,5,50,0,0,0,0,0" style=""/>
-      <attribute field="" color="#000000" label=""/>
     </DiagramCategory>
     <symbol alpha="1" clip_to_extent="1" type="marker" name="sizeSymbol">
       <layer pass="0" class="SimpleMarker" locked="0">
@@ -372,47 +238,33 @@
     </symbol>
   </SingleCategoryDiagramRenderer>
   <DiagramLayerSettings yPosColumn="-1" showColumn="-1" linePlacementFlags="10" placement="0" dist="0" xPosColumn="-1" priority="0" obstacle="0" zIndex="0" showAll="1"/>
-  <annotationform>.</annotationform>
+  <annotationform></annotationform>
   <aliases>
-    <alias field="parcel_id" index="0" name=""/>
-    <alias field="old_parcel_id" index="1" name=""/>
-    <alias field="geo_id" index="2" name=""/>
-    <alias field="landuse" index="3" name=""/>
-    <alias field="area_m2" index="4" name=""/>
-    <alias field="documented_area_m2" index="5" name=""/>
-    <alias field="address_khashaa" index="6" name=""/>
-    <alias field="address_streetname" index="7" name=""/>
-    <alias field="address_neighbourhood" index="8" name=""/>
-    <alias field="valid_from" index="9" name=""/>
-    <alias field="valid_till" index="10" name=""/>
-    <alias field="edit_status" index="11" name=""/>
-    <alias field="au2" index="12" name=""/>
+    <alias field="gid" index="0" name=""/>
+    <alias field="objectid" index="1" name=""/>
+    <alias field="area" index="2" name=""/>
+    <alias field="bairshil" index="3" name=""/>
+    <alias field="tailbar" index="4" name=""/>
+    <alias field="dugaar" index="5" name=""/>
   </aliases>
   <excludeAttributesWMS/>
   <excludeAttributesWFS/>
   <attributeactions default="-1"/>
-  <attributetableconfig actionWidgetStyle="dropDown" sortExpression="" sortOrder="0">
+  <attributetableconfig actionWidgetStyle="dropDown" sortExpression="" sortOrder="669106152">
     <columns>
-      <column width="-1" hidden="0" type="field" name="parcel_id"/>
-      <column width="-1" hidden="0" type="field" name="old_parcel_id"/>
-      <column width="-1" hidden="0" type="field" name="geo_id"/>
-      <column width="-1" hidden="0" type="field" name="landuse"/>
-      <column width="-1" hidden="0" type="field" name="area_m2"/>
-      <column width="-1" hidden="0" type="field" name="documented_area_m2"/>
-      <column width="-1" hidden="0" type="field" name="address_khashaa"/>
-      <column width="-1" hidden="0" type="field" name="address_streetname"/>
-      <column width="-1" hidden="0" type="field" name="address_neighbourhood"/>
-      <column width="-1" hidden="0" type="field" name="valid_from"/>
-      <column width="-1" hidden="0" type="field" name="valid_till"/>
+      <column width="-1" hidden="0" type="field" name="gid"/>
+      <column width="-1" hidden="0" type="field" name="objectid"/>
+      <column width="-1" hidden="0" type="field" name="area"/>
+      <column width="-1" hidden="0" type="field" name="bairshil"/>
+      <column width="-1" hidden="0" type="field" name="tailbar"/>
+      <column width="-1" hidden="0" type="field" name="dugaar"/>
       <column width="-1" hidden="1" type="actions"/>
-      <column width="-1" hidden="0" type="field" name="edit_status"/>
-      <column width="-1" hidden="0" type="field" name="au2"/>
     </columns>
   </attributetableconfig>
-  <editform>.</editform>
+  <editform></editform>
   <editforminit/>
   <editforminitcodesource>0</editforminitcodesource>
-  <editforminitfilepath>.</editforminitfilepath>
+  <editforminitfilepath></editforminitfilepath>
   <editforminitcode><![CDATA[# -*- coding: utf-8 -*-
 """
 QGIS forms can have a Python function that is called when the form is
@@ -438,19 +290,12 @@ def my_form_open(dialog, layer, feature):
     <fieldstyles/>
   </conditionalstyles>
   <defaults>
-    <default field="parcel_id" expression=""/>
-    <default field="old_parcel_id" expression=""/>
-    <default field="geo_id" expression=""/>
-    <default field="landuse" expression=""/>
-    <default field="area_m2" expression=""/>
-    <default field="documented_area_m2" expression=""/>
-    <default field="address_khashaa" expression=""/>
-    <default field="address_streetname" expression=""/>
-    <default field="address_neighbourhood" expression=""/>
-    <default field="valid_from" expression=""/>
-    <default field="valid_till" expression=""/>
-    <default field="edit_status" expression=""/>
-    <default field="au2" expression=""/>
+    <default field="gid" expression=""/>
+    <default field="objectid" expression=""/>
+    <default field="area" expression=""/>
+    <default field="bairshil" expression=""/>
+    <default field="tailbar" expression=""/>
+    <default field="dugaar" expression=""/>
   </defaults>
   <previewExpression></previewExpression>
   <layerGeometryType>2</layerGeometryType>

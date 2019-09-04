@@ -473,6 +473,11 @@ class PrintDialog(QDialog, Ui_PrintDialog):
                     filter(BsPerson.person_register == parcel.person_register). \
                     filter(BsPerson.parent_id == None).first()
 
+                item = map_composition.getComposerItemById("rigth_holder_name")
+                if item:
+                    item.setText(u'Хуулийн этгээдийн нэр: ' + person.name)
+                    item.adjustSizeToText()
+
     def __print_pdf(self, map_composition, file_path):
 
         dpi = int(self.dpi_edit.text())

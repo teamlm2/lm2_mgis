@@ -382,6 +382,7 @@ class UserRoleManagementDialog(QDialog, Ui_UserRoleManagementDialog):
         QListWidgetItem("land_office_administration", self.group_lwidget)
         QListWidgetItem("db_creation", self.group_lwidget)
         QListWidgetItem("role_management", self.group_lwidget)
+        QListWidgetItem("ub_parcel", self.group_lwidget)
         QListWidgetItem(self.GROUP_SEPARATOR, self.group_lwidget)
         QListWidgetItem("application_view", self.group_lwidget)
         QListWidgetItem("application_update", self.group_lwidget)

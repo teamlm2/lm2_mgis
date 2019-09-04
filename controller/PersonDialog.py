@@ -211,7 +211,8 @@ class PersonDialog(QDialog, Ui_PersonDialog, DatabaseHelper):
         if person_type == PersonType.mongolian_state_org \
                 or person_type == PersonType.mongolian_buisness \
                 or person_type == PersonType.legal_entity_foreign \
-                or person_type == PersonType.foreign_citizen:
+                or person_type == PersonType.foreign_citizen \
+                or person_type == PersonType.SUH:
             new_text = self.__auto_correct_company_name(text)
 
             if new_text != text:
@@ -576,7 +577,8 @@ class PersonDialog(QDialog, Ui_PersonDialog, DatabaseHelper):
 
         if person_type == PersonType.mongolian_buisness \
                 or person_type == PersonType.mongolian_state_org \
-                or person_type == PersonType.legal_entity_foreign:
+                or person_type == PersonType.legal_entity_foreign\
+                or person_type == PersonType.SUH:
 
             self.person.name = self.surname_company_edit.text()
             self.person.contact_surname = self.contact_surname_edit.text()

@@ -13626,3 +13626,17 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         myalayer = root.findLayer(vlayer.id())
         if myalayer is None:
             mygroup.addLayer(vlayer)
+
+    @pyqtSlot()
+    def on_to_cancel_button_clicked(self):
+
+        root = QgsProject.instance().layerTreeRoot()
+        mygroup = root.findGroup(u"Мэдээний хяналт")
+        vlayer = LayerUtils.layer_by_data_source("data_landuse", "to_cancel_view")
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer("to_cancel_view", "gid", "data_landuse")
+        vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/to_cancel.qml")
+        vlayer.setLayerName(self.tr("To_cancel"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            mygroup.addLayer(vlayer)
