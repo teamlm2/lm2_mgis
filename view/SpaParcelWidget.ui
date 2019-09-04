@@ -117,7 +117,7 @@
         <property name="title">
          <string>Criteria</string>
         </property>
-        <widget class="QLineEdit" name="pasture_parcel_id_edit">
+        <widget class="QLineEdit" name="parcel_id_edit">
          <property name="geometry">
           <rect>
            <x>190</x>
@@ -232,7 +232,7 @@
           <string>Contract No</string>
          </property>
         </widget>
-        <widget class="QDateEdit" name="pasture_app_date_edit">
+        <widget class="QDateEdit" name="app_date_edit">
          <property name="enabled">
           <bool>false</bool>
          </property>
@@ -251,7 +251,7 @@
           <bool>true</bool>
          </property>
         </widget>
-        <widget class="QPushButton" name="pasture_clear_button">
+        <widget class="QPushButton" name="clear_button">
          <property name="geometry">
           <rect>
            <x>210</x>
@@ -280,7 +280,7 @@
           <bool>true</bool>
          </property>
         </widget>
-        <widget class="QCheckBox" name="pasture_date_cbox">
+        <widget class="QCheckBox" name="app_date_cbox">
          <property name="geometry">
           <rect>
            <x>12</x>
@@ -293,7 +293,7 @@
           <string>Application Date</string>
          </property>
         </widget>
-        <widget class="QLabel" name="pasture_results_label">
+        <widget class="QLabel" name="results_label">
          <property name="geometry">
           <rect>
            <x>10</x>
@@ -330,7 +330,7 @@
           <string>SPA Type</string>
          </property>
         </widget>
-        <widget class="QComboBox" name="pasture_group_cbox">
+        <widget class="QComboBox" name="spa_type_cbox">
          <property name="geometry">
           <rect>
            <x>10</x>

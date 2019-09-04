@@ -12,7 +12,9 @@ from sqlalchemy.sql.expression import cast
 from sqlalchemy import func
 from ..controller.DraftDecisionPrintDialog import *
 from ..view.Ui_SpaParcelWidget import Ui_SpaParcelWidget
-from ..model.ClPastureType import *
+from ..model.ClSpaType import *
+from ..model.ClSpaMood import *
+from ..model.SdDepartment import *
 from ..controller.PastureMonitoringValueDialog import PastureMonitoringValueDialog
 from ..controller.MemberGroupDialog import *
 from PastureSettings import PastureSettings
@@ -30,6 +32,7 @@ from ..model.PsPastureBoundary import *
 from ..model.PsAvgDaats import *
 from ..model.AuReserveZone import *
 from ..model.PsParcel import *
+from ..model.BsPerson import *
 from ..model.PClReserveDaatsLevel import *
 from ..model.PsAvgReserveDaats import *
 from ..utils.LayerUtils import LayerUtils
@@ -76,7 +79,7 @@ class SpaParcelWidget(QDockWidget, Ui_SpaParcelWidget, DatabaseHelper):
 
         self.userSettings = None
 
-        self.pasture_app_date_edit.setDate(QDate.currentDate())
+        self.app_date_edit.setDate(QDate.currentDate())
         self.__setup_twidgets()
 
         # self.__load_role_settings()
@@ -102,14 +105,14 @@ class SpaParcelWidget(QDockWidget, Ui_SpaParcelWidget, DatabaseHelper):
         self.contract_context_menu.addSeparator()
         self.contract_context_menu.addAction(self.copy_number_action)
 
-        self.pasture_results_twidget.setColumnCount(1)
-        self.pasture_results_twidget.horizontalHeader().setResizeMode(0, QHeaderView.Stretch)
-        self.pasture_results_twidget.horizontalHeader().setVisible(False)
-        self.pasture_results_twidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
-        self.pasture_results_twidget.setSelectionBehavior(QAbstractItemView.SelectRows)
-        self.pasture_results_twidget.setDragEnabled(True)
-        self.pasture_results_twidget.setContextMenuPolicy(Qt.CustomContextMenu)
-        self.pasture_results_twidget.customContextMenuRequested.connect(self.on_custom_context_menu_requested)
+        self.parcel_results_twidget.setColumnCount(1)
+        self.parcel_results_twidget.horizontalHeader().setResizeMode(0, QHeaderView.Stretch)
+        self.parcel_results_twidget.horizontalHeader().setVisible(False)
+        self.parcel_results_twidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.parcel_results_twidget.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.parcel_results_twidget.setDragEnabled(True)
+        self.parcel_results_twidget.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.parcel_results_twidget.customContextMenuRequested.connect(self.on_custom_context_menu_requested)
 
     @pyqtSlot(QTableWidgetItem)
     def on_zoom_to_parcel_action_clicked(self):
@@ -239,9 +242,9 @@ class SpaParcelWidget(QDockWidget, Ui_SpaParcelWidget, DatabaseHelper):
     def on_custom_context_menu_requested(self, point):
 
         if self.tabWidget.currentWidget() == self.pasture_tab:
-            item = self.pasture_results_twidget.itemAt(point)
+            item = self.parcel_results_twidget.itemAt(point)
             if item is None: return
-            self.contract_context_menu.exec_(self.pasture_results_twidget.mapToGlobal(point))
+            self.contract_context_menu.exec_(self.parcel_results_twidget.mapToGlobal(point))
 
     def __working_l1_changed(self, index):
 
@@ -424,7 +427,6 @@ class SpaParcelWidget(QDockWidget, Ui_SpaParcelWidget, DatabaseHelper):
             return
         self.__zoom_to_soum(l2_code)
         self.__load_role_settings()
-        self.__setup_combo_pug()
 
     def __zoom_to_soum(self, soum_code):
 
@@ -474,17 +476,11 @@ class SpaParcelWidget(QDockWidget, Ui_SpaParcelWidget, DatabaseHelper):
 
         role.restriction_au_level2 = schema_string
 
-    def __setup_combo_pug(self):
-
-        self.pasture_group_cbox.clear()
-        au2 = DatabaseUtils.working_l2_code()
-        ct_member_group = self.session.query(CtPersonGroup).filter(CtPersonGroup.au2 == au2).all()
-        self.pasture_group_cbox.addItem("*", -1)
-        if ct_member_group is not None:
-            for member in ct_member_group:
-                self.pasture_group_cbox.addItem(member.group_name, member.group_no)
-
     def __setup_combo_boxes(self):
+
+        self.spa_type_cbox.clear()
+        self.land_use_type_cbox.clear()
+        self.department_cbox.clear()
 
         try:
             PluginUtils.populate_au_level1_cbox(self.working_l1_cbox, False)
@@ -493,30 +489,30 @@ class SpaParcelWidget(QDockWidget, Ui_SpaParcelWidget, DatabaseHelper):
             PluginUtils.populate_au_level2_cbox(self.working_l2_cbox, l1_code, False)
 
             cl_landusetype = self.session.query(ClLanduseType).all()
-            cl_pasturetype = self.session.query(ClApplicationType).\
-                filter(or_(ClApplicationType.code == ApplicationType.pasture_use, ClApplicationType.code == ApplicationType.right_land)).all()
-            ct_member_group = self.session.query(CtPersonGroup).filter(CtPersonGroup.au2 == au2).all()
+            cl_spa_type = self.session.query(ClSpaType).all()
+            cl_department = self.session.query(SdDepartment).all()
 
         except SQLAlchemyError, e:
             PluginUtils.show_message(self, self.tr("Sql Error"), e.message)
             return
 
 
-        self.pasture_group_cbox.addItem("*", -1)
-        self.pasture_landuse_cbox.addItem("*", -1)
-        self.app_type_cbox.addItem("*", -1)
-
-        if ct_member_group is not None:
-            for member in ct_member_group:
-                self.pasture_group_cbox.addItem(member.group_name, member.group_no)
+        self.spa_type_cbox.addItem("*", -1)
+        self.land_use_type_cbox.addItem("*", -1)
+        self.department_cbox.addItem("*", -1)
 
         if cl_landusetype is not None:
-            for landuse in cl_landusetype:
-                self.pasture_landuse_cbox.addItem(str(landuse.code)+':'+landuse.description, landuse.code)
+            for value in cl_landusetype:
+                self.land_use_type_cbox.addItem(str(value.code)+':'+value.description, value.code)
 
-        if cl_pasturetype is not None:
-            for pasture in cl_pasturetype:
-                self.app_type_cbox.addItem(pasture.description, pasture.code)
+        if cl_spa_type is not None:
+            for value in cl_spa_type:
+                self.spa_type_cbox.addItem(str(value.code)+':'+value.description, value.code)
+
+        if cl_department is not None:
+            for value in cl_department:
+                self.department_cbox.addItem(value.name, value.department_id)
+
 
     @pyqtSlot()
     def on_current_dialog_closed(self):
@@ -538,37 +534,36 @@ class SpaParcelWidget(QDockWidget, Ui_SpaParcelWidget, DatabaseHelper):
         self.current_dialog.show()
 
     @pyqtSlot()
-    def on_pasture_clear_button_clicked(self):
+    def on_clear_button_clicked(self):
 
-        self.__remove_pasture_items()
-        self.__clear_pasture()
+        self.__remove_items()
+        self.__clear_find_values()
 
-    def __remove_pasture_items(self):
+    def __remove_items(self):
 
-        self.pasture_results_twidget.setRowCount(0)
-        self.pasture_results_label.setText("")
+        self.parcel_results_twidget.setRowCount(0)
+        self.results_label.setText("")
 
-    def __clear_pasture(self):
+    def __clear_find_values(self):
 
-        self.pasture_parcel_id_edit.clear()
-        self.member_register_edit.clear()
+        self.parcel_id_edit.clear()
+        self.personal_parcel_edit.clear()
         self.pasture_app_no_edit.clear()
-        self.member_name_edit.clear()
-        self.pasture_contract_no_edit.clear()
-        self.pasture_app_date_edit.setDate(QDate.currentDate())
-        self.pasture_app_date_edit.setEnabled(False)
-        self.pasture_date_cbox.setChecked(False)
-        self.pasture_group_cbox.setCurrentIndex(self.pasture_group_cbox.findData(-1))
-        self.pasture_landuse_cbox.setCurrentIndex(self.pasture_landuse_cbox.findData(-1))
-        self.app_type_cbox.setCurrentIndex(self.app_type_cbox.findData(-1))
+        self.parcel_right_holder_name_edit.clear()
+        self.parcel_contract_num_edit.clear()
+        self.app_date_edit.setDate(QDate.currentDate())
+        self.app_date_edit.setEnabled(False)
+        self.app_date_cbox.setChecked(False)
+        self.spa_type_cbox.setCurrentIndex(self.spa_type_cbox.findData(-1))
+        self.land_use_type_cbox.setCurrentIndex(self.land_use_type_cbox.findData(-1))
 
     @pyqtSlot(int)
-    def on_pasture_date_cbox_stateChanged(self, state):
+    def on_app_date_cbox_stateChanged(self, state):
 
         if state == Qt.Checked:
-            self.pasture_app_date_edit.setEnabled(True)
+            self.app_date_edit.setEnabled(True)
         else:
-            self.pasture_app_date_edit.setEnabled(False)
+            self.app_date_edit.setEnabled(False)
 
     @pyqtSlot()
     def on_pasture_find_button_clicked(self):
@@ -583,56 +578,50 @@ class SpaParcelWidget(QDockWidget, Ui_SpaParcelWidget, DatabaseHelper):
 
         applications = applications.filter(or_(ApplicationPastureSearch.app_type == ApplicationType.right_land,
                    ApplicationPastureSearch.app_type == ApplicationType.pasture_use))
-        if self.pasture_group_cbox.currentIndex() != -1:
-            if not self.pasture_group_cbox.itemData(self.pasture_group_cbox.currentIndex()) == -1:
+        if self.spa_type_cbox.currentIndex() != -1:
+            if not self.spa_type_cbox.itemData(self.spa_type_cbox.currentIndex()) == -1:
                 filter_is_set = True
-                group_no = self.pasture_group_cbox.itemData(self.pasture_group_cbox.currentIndex())
+                group_no = self.spa_type_cbox.itemData(self.spa_type_cbox.currentIndex())
 
                 applications = applications.filter(ApplicationPastureSearch.group_no == group_no)
-
-        if self.app_type_cbox.currentIndex() != -1:
-            if not self.app_type_cbox.itemData(self.app_type_cbox.currentIndex()) == -1:
-                filter_is_set = True
-                app_type = self.app_type_cbox.itemData(self.app_type_cbox.currentIndex())
-                applications = applications.filter(ApplicationPastureSearch.app_type == app_type)
 
         if self.pasture_app_no_edit.text():
             filter_is_set = True
             app_no = "%" + self.pasture_app_no_edit.text() + "%"
             applications = applications.filter(ApplicationPastureSearch.app_no.ilike(app_no))
 
-        if self.member_name_edit.text():
+        if self.parcel_right_holder_name_edit.text():
             filter_is_set = True
-            right_holder = self.member_name_edit.text()
+            right_holder = self.parcel_right_holder_name_edit.text()
             if "," in right_holder:
                 right_holder_strings = right_holder.split(",")
                 surname = "%" + right_holder_strings[0].strip() + "%"
                 first_name = "%" + right_holder_strings[1].strip() + "%"
                 applications = applications.filter(and_(func.lower(ApplicationPastureSearch.name).ilike(func.lower(surname)), func.lower(ApplicationPastureSearch.first_name).ilike(func.lower(first_name))))
             else:
-                right_holder = "%" + self.member_name_edit.text() + "%"
+                right_holder = "%" + self.parcel_right_holder_name_edit.text() + "%"
                 applications = applications.filter(or_(func.lower(ApplicationPastureSearch.name).ilike(func.lower(right_holder)), func.lower(ApplicationPastureSearch.first_name).ilike(func.lower(right_holder)), func.lower(ApplicationPastureSearch.middle_name).ilike(func.lower(right_holder))))
 
-        if self.pasture_parcel_id_edit.text():
+        if self.parcel_id_edit.text():
             filter_is_set = True
-            parcel_no = "%" + self.pasture_parcel_id_edit.text() + "%"
+            parcel_no = "%" + self.parcel_id_edit.text() + "%"
 
             applications = applications.filter(ApplicationPastureSearch.parcel_id.ilike(parcel_no))
 
-        if self.member_register_edit.text():
+        if self.personal_parcel_edit.text():
             filter_is_set = True
-            register_no = "%" + self.member_register_edit.text() + "%"
+            register_no = "%" + self.personal_parcel_edit.text() + "%"
             applications = applications.filter(ApplicationPastureSearch.person_register.ilike(register_no))
 
-        if self.pasture_contract_no_edit.text():
+        if self.parcel_contract_num_edit.text():
             filter_is_set = True
-            contract_num = "%" + self.pasture_contract_no_edit.text() + "%"
+            contract_num = "%" + self.parcel_contract_num_edit.text() + "%"
             applications = applications.filter(or_(ApplicationPastureSearch.contract_no.ilike(contract_num), ApplicationPastureSearch.record_no.ilike(contract_num)))
 
 
-        if self.pasture_date_cbox.isChecked():
+        if self.app_date_cbox.isChecked():
             filter_is_set = True
-            qt_date = self.pasture_app_date_edit.date().toString(Constants.DATABASE_DATE_FORMAT)
+            qt_date = self.app_date_edit.date().toString(Constants.DATABASE_DATE_FORMAT)
             python_date = datetime.strptime(str(qt_date), Constants.PYTHON_DATE_FORMAT)
 
             applications = applications.filter(ApplicationPastureSearch.app_timestamp >= python_date)
@@ -664,19 +653,19 @@ class SpaParcelWidget(QDockWidget, Ui_SpaParcelWidget, DatabaseHelper):
             item.setIcon(QIcon(QPixmap(":/plugins/lm2/application.png")))
             item.setData(Qt.UserRole, application.app_no)
             item.setData(Qt.UserRole+1, application.app_id)
-            self.pasture_results_twidget.insertRow(count)
-            self.pasture_results_twidget.setItem(count, 0, item)
+            self.parcel_results_twidget.insertRow(count)
+            self.parcel_results_twidget.setItem(count, 0, item)
             count += 1
 
         self.error_label.setText("")
-        self.pasture_results_label.setText(self.tr("Results: ") + str(count))
+        self.results_label.setText(self.tr("Results: ") + str(count))
 
         # except SQLAlchemyError, e:
         #     PluginUtils.show_message(self, self.tr("LM2", "Sql Error"), e.message)
         #     return
 
     @pyqtSlot(QTableWidgetItem)
-    def on_pasture_results_twidget_itemDoubleClicked(self, item):
+    def on_parcel_results_twidget_itemDoubleClicked(self, item):
 
         if DialogInspector().dialog_visible():
             return
@@ -692,7 +681,7 @@ class SpaParcelWidget(QDockWidget, Ui_SpaParcelWidget, DatabaseHelper):
 
     def __selected_application(self):
 
-        selected_items = self.pasture_results_twidget.selectedItems()
+        selected_items = self.parcel_results_twidget.selectedItems()
 
         if len(selected_items) != 1:
             self.error_label.setText(self.tr("Only single selection allowed."))
@@ -735,7 +724,7 @@ class SpaParcelWidget(QDockWidget, Ui_SpaParcelWidget, DatabaseHelper):
             self.current_dialog.show()
 
     @pyqtSlot(QTableWidgetItem)
-    def on_pasture_results_twidget_itemClicked(self, item):
+    def on_parcel_results_twidget_itemClicked(self, item):
 
         id = item.data(Qt.UserRole)
         soum_code = id.split("-")[0]
@@ -745,18 +734,17 @@ class SpaParcelWidget(QDockWidget, Ui_SpaParcelWidget, DatabaseHelper):
         try:
             app_result = self.session.query(ApplicationPastureSearch).filter(ApplicationPastureSearch.app_no == id).one()
             self.pasture_app_no_edit.setText(app_result.app_no)
-            self.member_name_edit.setText(app_result.first_name)
-            self.pasture_parcel_id_edit.setText(app_result.person_register)
-            self.member_register_edit.setText(app_result.person_register)
+            self.parcel_right_holder_name_edit.setText(app_result.first_name)
+            self.parcel_id_edit.setText(app_result.person_register)
+            self.personal_parcel_edit.setText(app_result.person_register)
             if app_result.contract_no != None:
-                self.pasture_contract_no_edit.setText(app_result.contract_no)
-                self.pasture_contract_no_edit.setStyleSheet(self.styleSheet())
+                self.parcel_contract_num_edit.setText(app_result.contract_no)
+                self.parcel_contract_num_edit.setStyleSheet(self.styleSheet())
             else:
-                self.pasture_contract_no_edit.setText(self.tr('No Contract'))
-                self.pasture_contract_no_edit.setStyleSheet("color: rgb(189, 21, 38)")
+                self.parcel_contract_num_edit.setText(self.tr('No Contract'))
+                self.parcel_contract_num_edit.setStyleSheet("color: rgb(189, 21, 38)")
 
-            self.pasture_group_cbox.setCurrentIndex(self.pasture_group_cbox.findData(app_result.group_no))
-            self.app_type_cbox.setCurrentIndex(self.app_type_cbox.findData(app_result.pasture_type))
+            self.spa_type_cbox.setCurrentIndex(self.spa_type_cbox.findData(app_result.group_no))
 
         except SQLAlchemyError, e:
             PluginUtils.show_error(self, self.tr("File Error"),
@@ -915,7 +903,7 @@ class SpaParcelWidget(QDockWidget, Ui_SpaParcelWidget, DatabaseHelper):
     @pyqtSignature("")
     def on_delete_button_clicked(self):
 
-        selected_items = self.pasture_results_twidget.selectedItems()
+        selected_items = self.parcel_results_twidget.selectedItems()
 
         if len(selected_items) != 1:
             self.error_label.setText(self.tr("Only single selection allowed."))
@@ -988,7 +976,7 @@ class SpaParcelWidget(QDockWidget, Ui_SpaParcelWidget, DatabaseHelper):
 
         self.session.query(CtApplication).filter(CtApplication.app_id == app_id).delete()
 
-        selected_row = self.pasture_results_twidget.currentRow()
-        self.pasture_results_twidget.removeRow(selected_row)
+        selected_row = self.parcel_results_twidget.currentRow()
+        self.parcel_results_twidget.removeRow(selected_row)
 
         self.session.commit()

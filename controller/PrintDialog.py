@@ -16,6 +16,7 @@ from ..utils.SessionHandler import SessionHandler
 from ..utils.FileUtils import FileUtils
 from ..model.CaBuilding import *
 from ..model.CtApplication import *
+from ..model.BsPerson import *
 from ..model.ApplicationSearch import *
 from ..model.AuLevel1 import *
 from ..model.AuLevel2 import *
@@ -461,6 +462,16 @@ class PrintDialog(QDialog, Ui_PrintDialog):
             if item:
                 item.setText(spa_type.description)
                 item.adjustSizeToText()
+
+        if parcel.person_register:
+            count = self.session.query(BsPerson).\
+                filter(BsPerson.person_register == parcel.person_register).\
+                filter(BsPerson.parent_id == None).count()
+
+            if count > 0:
+                person = self.session.query(BsPerson). \
+                    filter(BsPerson.person_register == parcel.person_register). \
+                    filter(BsPerson.parent_id == None).first()
 
     def __print_pdf(self, map_composition, file_path):
 

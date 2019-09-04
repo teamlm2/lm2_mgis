@@ -33,6 +33,8 @@ class BsPerson(Base):
     address_building_no = Column(String)
     address_entrance_no = Column(String)
     address_apartment_no = Column(String)
+    parent_id = Column(Integer)
+    tin_id = Column(Integer)
     created_at = Column(DateTime)
     updated_at = Column(DateTime)
 

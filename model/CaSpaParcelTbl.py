@@ -22,6 +22,7 @@ class CaSpaParcelTbl(Base):
     contract_no = Column(String)
     certificate_date = Column(Date)
     certificate_no = Column(String)
+    person_register = Column(String)
     valid_from = Column(Date)
     valid_till = Column(Date)
     geometry = Column(Geometry('POLYGON', 4326))
