@@ -493,6 +493,7 @@ class MemberGroupDialog(QDialog, Ui_MemberGroupDialog, DatabaseHelper):
             self.group_id_edit.setText(str(group_id))
             self.group_name_edit.setText(group_name)
             pug = self.session.query(CtPersonGroup).filter(CtPersonGroup.group_no == group_id).one()
+            self.group_type_cbox.setCurrentIndex(self.group_type_cbox.findData(pug.group_type))
             bags = pug.bags
             count = 0
             self.bag_twidget.setRowCount(0)
