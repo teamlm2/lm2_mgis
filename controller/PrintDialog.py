@@ -41,6 +41,7 @@ from docxtpl import DocxTemplate, RichText
 TABLE_PARCEL = 'ca_parcel'
 TABLE_PASTURE_PARCEL = 'ca_pasture_parcel'
 TABLE_SPA_PARCEL = 'ca_spa_parcel'
+TABLE_NATURE_RESERVE_PARCEL = 'ca_person_group_parcel'
 
 class PrintDialog(QDialog, Ui_PrintDialog):
 
@@ -94,7 +95,7 @@ class PrintDialog(QDialog, Ui_PrintDialog):
 
         if self.table_name == TABLE_PARCEL:
             self.__update_ui_ca_parcel()
-        elif self.table_name == TABLE_PASTURE_PARCEL:
+        elif self.table_name == TABLE_PASTURE_PARCEL or self.table_name == TABLE_NATURE_RESERVE_PARCEL:
             self.__update_ui_ca_parcel_pasture()
         else:
             self.__update_ui_ca_spa_parcel()
@@ -394,7 +395,7 @@ class PrintDialog(QDialog, Ui_PrintDialog):
             self.__add_admin_unit_l3_name_h(map_composition)
 
 
-            if self.table_name == TABLE_PARCEL or self.table_name == TABLE_PASTURE_PARCEL:
+            if self.table_name == TABLE_PARCEL or self.table_name == TABLE_PASTURE_PARCEL or self.table_name == TABLE_NATURE_RESERVE_PARCEL:
                 self.__add_cadastre_block_code_h(map_composition)
                 self.__add_khashaa_name_h(map_composition)
                 self.__add_parcel_street_name_h(map_composition)
@@ -411,7 +412,7 @@ class PrintDialog(QDialog, Ui_PrintDialog):
         self.__add_admin_unit_l2_name(map_composition)
         self.__add_admin_unit_l3_name(map_composition)
 
-        if self.table_name == TABLE_PARCEL or self.table_name == TABLE_PASTURE_PARCEL:
+        if self.table_name == TABLE_PARCEL or self.table_name == TABLE_PASTURE_PARCEL or self.table_name == TABLE_NATURE_RESERVE_PARCEL:
             self.__add_parcel_street_name(map_composition)
             self.__add_khashaa_name(map_composition)
             self.__add_cadastre_block_code(map_composition)
@@ -595,7 +596,7 @@ class PrintDialog(QDialog, Ui_PrintDialog):
             item.setText(str(int(parcel.area_m2)))
             # item.setText(str((round(self.__geometry.area(), 2))))
             item.adjustSizeToText()
-        elif self.table_name == TABLE_PASTURE_PARCEL:
+        elif self.table_name == TABLE_PASTURE_PARCEL or self.table_name == TABLE_NATURE_RESERVE_PARCEL:
             parcel = self.session.query(CaPastureParcelTbl).filter(CaPastureParcelTbl.parcel_id == self.__parcel_no).one()
             item.setText(str(int(parcel.area_ga)))
             # item.setText(str((round(self.__geometry.area(), 2))))
@@ -925,7 +926,7 @@ class PrintDialog(QDialog, Ui_PrintDialog):
         if self.table_name == TABLE_PARCEL:
             parcel_geometry = self.session.query(CaParcel.geometry).filter(CaParcel.parcel_id == str(self.__parcel_no)).one()
             admin_unit_l2_name = self.session.query(AuLevel2.name).filter(AuLevel2.geometry.ST_Intersects(func.ST_Centroid(parcel_geometry[0]))).first()
-        elif self.table_name == TABLE_PASTURE_PARCEL:
+        elif self.table_name == TABLE_PASTURE_PARCEL or self.table_name == TABLE_NATURE_RESERVE_PARCEL:
             parcel_geometry = self.session.query(CaPastureParcelTbl.geometry).filter(CaPastureParcelTbl.parcel_id == str(self.__parcel_no)).one()
             admin_unit_l2_name = self.session.query(AuLevel2.name).filter(
                 AuLevel2.geometry.ST_Intersects(func.ST_Centroid(parcel_geometry[0]))).first()
@@ -948,7 +949,7 @@ class PrintDialog(QDialog, Ui_PrintDialog):
         if self.table_name == TABLE_PARCEL:
             parcel_geometry = self.session.query(CaParcel.geometry).filter(CaParcel.parcel_id == str(self.__parcel_no)).one()
             admin_unit_l2_name = self.session.query(AuLevel2.name).filter(AuLevel2.geometry.ST_Intersects(func.ST_Centroid(parcel_geometry[0]))).first()
-        elif self.table_name == TABLE_PASTURE_PARCEL:
+        elif self.table_name == TABLE_PASTURE_PARCEL or self.table_name == TABLE_NATURE_RESERVE_PARCEL:
             parcel_geometry = self.session.query(CaPastureParcelTbl.geometry).filter(CaPastureParcelTbl.parcel_id == str(self.__parcel_no)).one()
             admin_unit_l2_name = self.session.query(AuLevel2.name).filter(
                 AuLevel2.geometry.ST_Intersects(func.ST_Centroid(parcel_geometry[0]))).first()
@@ -970,7 +971,7 @@ class PrintDialog(QDialog, Ui_PrintDialog):
         if self.table_name == TABLE_PARCEL:
             parcel_geometry = self.session.query(CaParcel.geometry).filter(CaParcel.parcel_id == str(self.__parcel_no)).one()
             admin_unit_l3_name = self.session.query(AuLevel3.name).filter(AuLevel3.geometry.ST_Intersects(func.ST_Centroid(parcel_geometry[0]))).first()
-        elif self.table_name == TABLE_PASTURE_PARCEL:
+        elif self.table_name == TABLE_PASTURE_PARCEL or self.table_name == TABLE_NATURE_RESERVE_PARCEL:
             parcel_geometry = self.session.query(CaPastureParcelTbl.geometry).filter(CaPastureParcelTbl.parcel_id == str(self.__parcel_no)).one()
             admin_unit_l3_name = self.session.query(AuLevel3.name).filter(
                 AuLevel3.geometry.ST_Intersects(func.ST_Centroid(parcel_geometry[0]))).first()
@@ -993,7 +994,7 @@ class PrintDialog(QDialog, Ui_PrintDialog):
         if self.table_name == TABLE_PARCEL:
             parcel_geometry = self.session.query(CaParcel.geometry).filter(CaParcel.parcel_id == str(self.__parcel_no)).one()
             admin_unit_l3_name = self.session.query(AuLevel3.name).filter(AuLevel3.geometry.ST_Intersects(func.ST_Centroid(parcel_geometry[0]))).first()
-        elif self.table_name == TABLE_PASTURE_PARCEL:
+        elif self.table_name == TABLE_PASTURE_PARCEL or self.table_name == TABLE_NATURE_RESERVE_PARCEL:
             parcel_geometry = self.session.query(CaPastureParcelTbl.geometry).filter(CaPastureParcelTbl.parcel_id == str(self.__parcel_no)).one()
             admin_unit_l3_name = self.session.query(AuLevel3.name).filter(
                 AuLevel3.geometry.ST_Intersects(func.ST_Centroid(parcel_geometry[0]))).first()
@@ -1720,7 +1721,7 @@ class PrintDialog(QDialog, Ui_PrintDialog):
 
         if self.table_name == TABLE_PARCEL:
             parcel_geometry = self.session.query(CaParcel.geometry).filter(CaParcel.parcel_id == str(self.__parcel_no)).one()
-        elif self.table_name == TABLE_PASTURE_PARCEL:
+        elif self.table_name == TABLE_PASTURE_PARCEL or self.table_name == TABLE_NATURE_RESERVE_PARCEL:
             parcel_geometry = self.session.query(CaPastureParcelTbl.geometry).filter(CaPastureParcelTbl.parcel_id == str(self.__parcel_no)).one()
         else:
             parcel_geometry = self.session.query(CaSpaParcelTbl.geometry).filter(
