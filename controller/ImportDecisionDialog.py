@@ -1,4 +1,5 @@
 # coding=utf8
+
 __author__ = 'B.Ankhbold'
 
 import shutil
@@ -33,6 +34,7 @@ from ..model.SetRole import SetRole
 from ..model.CaBuilding import *
 from ..model.Enumerations import ApplicationType
 from ..model.SdConfiguration import SdConfiguration
+from ..model.SetDecisionCatchUpPermission import SetDecisionCatchUpPermission
 from .DecisionErrorDialog import DecisionErrorDialog
 from ..utils.SessionHandler import SessionHandler
 from ..utils.PluginUtils import PluginUtils
@@ -98,6 +100,28 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
             self.import_button.setEnabled(False)
             self.select_file_button.setEnabled(False)
             self.documents_groupbox.setEnabled(False)
+
+        if not self.__decision_catch_up_permission():
+            self.decision_tab_widget.removeTab(self.decision_tab_widget.indexOf(self.join_app_tab))
+
+    def __decision_catch_up_permission(self):
+
+        is_true = False
+        user = DatabaseUtils.current_user()
+
+        if user.department and user.position:
+            department_id = user.department
+            position_id = user.position
+            count = self.session.query(SetDecisionCatchUpPermission). \
+                filter(SetDecisionCatchUpPermission.department_id == department_id). \
+                filter(SetDecisionCatchUpPermission.position_id == position_id).count()
+
+            print count
+            if count > 0:
+                is_true = True
+
+        return is_true
+
 
     def __setup_mapping(self):
 

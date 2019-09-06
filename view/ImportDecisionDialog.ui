@@ -64,7 +64,7 @@
     <enum>Qt::Horizontal</enum>
    </property>
   </widget>
-  <widget class="QTabWidget" name="tabWidget">
+  <widget class="QTabWidget" name="decision_tab_widget">
    <property name="geometry">
     <rect>
      <x>0</x>
@@ -74,9 +74,9 @@
     </rect>
    </property>
    <property name="currentIndex">
-    <number>0</number>
+    <number>1</number>
    </property>
-   <widget class="QWidget" name="tab">
+   <widget class="QWidget" name="import_dec_tab">
     <attribute name="title">
      <string>Import</string>
     </attribute>
@@ -618,7 +618,7 @@
      </property>
     </widget>
    </widget>
-   <widget class="QWidget" name="tab_2">
+   <widget class="QWidget" name="join_app_tab">
     <attribute name="title">
      <string>Join application</string>
     </attribute>
@@ -829,6 +829,9 @@
       </property>
      </widget>
      <widget class="QPushButton" name="app_join_button">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
       <property name="geometry">
        <rect>
         <x>78</x>
@@ -986,6 +989,9 @@
       </property>
      </widget>
      <widget class="QPushButton" name="save_button">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
       <property name="geometry">
        <rect>
         <x>279</x>

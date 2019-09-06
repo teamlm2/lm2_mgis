@@ -27,6 +27,7 @@ from ..model.ClGroupRole import *
 from ..model.SetPositionGroupRole import *
 from ..model.SetUserPosition import *
 from ..model.SetUserGroupRole import *
+from ..model.SetDecisionCatchUpPermission import *
 from ..model.SdPosition import *
 from ..utils.PluginUtils import *
 from ..controller.UserRoleManagementDetialDialog import *
@@ -239,6 +240,15 @@ class UserRoleManagementDialog(QDialog, Ui_UserRoleManagementDialog):
 
         for organization_type in organization_types:
             self.organization_type_cbox.addItem(organization_type.description, organization_type.code)
+
+        departments = self.db_session.query(SdDepartment).order_by(SdDepartment.department_id, SdDepartment.name).all()
+        positions = self.db_session.query(SdPosition).order_by(SdPosition.name).all()
+
+        for value in departments:
+            self.dec_department_cbox.addItem(value.name, value.department_id)
+
+        for value in positions:
+            self.dec_position_cbox.addItem(value.name, value.position_id)
 
         # except SQLAlchemyError, e:
         #     PluginUtils.show_error(self, self.tr("Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
@@ -1853,7 +1863,6 @@ class UserRoleManagementDialog(QDialog, Ui_UserRoleManagementDialog):
 
                 self.db_session.add(position_gruds)
 
-
     @pyqtSlot()
     def on_apply_button_clicked(self):
 
@@ -2176,3 +2185,94 @@ class UserRoleManagementDialog(QDialog, Ui_UserRoleManagementDialog):
     def on_department_add_button_clicked(self):
 
         print ''
+
+    @pyqtSlot()
+    def on_dec_load_button_clicked(self):
+
+        self.__load_decision_catchup_conf()
+
+    def __load_decision_catchup_conf(self):
+
+        self.decision_conf_twidget.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.decision_conf_twidget.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.decision_conf_twidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.decision_conf_twidget.setSortingEnabled(True)
+
+        self.decision_conf_twidget.setRowCount(0)
+
+        values = self.db_session.query(SetDecisionCatchUpPermission).all()
+
+        for value in values:
+            row = self.decision_conf_twidget.rowCount()
+            self.decision_conf_twidget.insertRow(row)
+
+            if value.department_ref:
+                department = value.department_ref
+
+                item = QTableWidgetItem(u'{0}'.format(department.name))
+                item.setData(Qt.UserRole, department.department_id)
+                self.decision_conf_twidget.setItem(row, 0, item)
+
+            if value.department_ref:
+                position = value.position_ref
+
+                item = QTableWidgetItem(u'{0}'.format(position.name))
+                item.setData(Qt.UserRole, position.position_id)
+                self.decision_conf_twidget.setItem(row, 1, item)
+
+        self.decision_conf_twidget.resizeColumnsToContents()
+
+    @pyqtSlot()
+    def on_dec_add_button_clicked(self):
+
+        department_id = self.dec_department_cbox.itemData(self.dec_department_cbox.currentIndex())
+        position_id = self.dec_position_cbox.itemData(self.dec_position_cbox.currentIndex())
+
+        count = self.db_session.query(SetDecisionCatchUpPermission). \
+            filter(SetDecisionCatchUpPermission.department_id == department_id). \
+            filter(SetDecisionCatchUpPermission.position_id == position_id).count()
+
+        if count > 0:
+            PluginUtils.show_message(self, self.tr("Warning"), self.tr("Already registered!"))
+            return
+        conf_object = SetDecisionCatchUpPermission()
+
+        conf_object.department_id = department_id
+        conf_object.position_id = position_id
+
+        self.db_session.add(conf_object)
+
+        row = self.decision_conf_twidget.rowCount()
+        self.decision_conf_twidget.insertRow(row)
+
+        item = QTableWidgetItem((self.dec_department_cbox.currentText()))
+        item.setIcon(QIcon(QPixmap(":/plugins/lm2_pasture/group.png")))
+        item.setData(Qt.UserRole, department_id)
+        self.decision_conf_twidget.setItem(row, 0, item)
+
+        item = QTableWidgetItem((self.dec_position_cbox.currentText()))
+        item.setData(Qt.UserRole, position_id)
+        self.decision_conf_twidget.setItem(row, 1, item)
+
+    @pyqtSlot()
+    def on_dec_delete_button_clicked(self):
+
+        selected_items = self.decision_conf_twidget.selectedItems()
+
+        if len(selected_items) == 0:
+            PluginUtils.show_message(self, self.tr("Selection"), self.tr("Please select row."))
+            return
+
+        cur_row = self.decision_conf_twidget.currentRow()
+        item = self.decision_conf_twidget.item(cur_row, 0)
+        department_id = item.data(Qt.UserRole)
+
+        cur_row = self.decision_conf_twidget.currentRow()
+        item = self.decision_conf_twidget.item(cur_row, 1)
+        position_id = item.data(Qt.UserRole)
+
+        self.db_session.query(SetDecisionCatchUpPermission). \
+            filter(SetDecisionCatchUpPermission.department_id == department_id). \
+            filter(SetDecisionCatchUpPermission.position_id == position_id).delete()
+
+        self.decision_conf_twidget.removeRow(cur_row)

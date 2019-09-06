@@ -617,10 +617,21 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
         vlayer.loadNamedStyle(
             str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/cm_parcel_tbl.qml")
 
-        vlayer.setLayerName(self.tr("CAMA Base Parcel"))
+        vlayer.setLayerName(self.tr("CAMA Parcel Polygon"))
         myalayer = root.findLayer(vlayer.id())
         if myalayer is None:
             mygroup.addLayer(vlayer)
+
+        vlayer_line = LayerUtils.layer_by_data_source("data_cama",
+                                                      "cm_parcel_tbl")
+        if vlayer_line is None:
+            vlayer_line = LayerUtils.load_line_layer_base_layer(
+                "cm_parcel_tbl", "id",
+                "data_cama")
+            vlayer_line.setLayerName(self.tr("CAMA Parcel Line"))
+        myalayer = root.findLayer(vlayer_line.id())
+        if myalayer is None:
+            mygroup.addLayer(vlayer_line)
 
         vlayer = LayerUtils.layer_by_data_source("data_cama", "cm_valuation_level")
         if vlayer is None:
