@@ -1757,7 +1757,7 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
 
         session = SessionHandler().session_instance()
         soum_code = DatabaseUtils.working_l2_code()
-        schema_string = 's' + soum_code
+        # # schema_string = 's' + soum_code
         session.execute(
             set_search_path)
 
@@ -1817,7 +1817,7 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
         code = self.table_widget.item(row, CODELIST_CODE).data(Qt.UserRole)
         session = SessionHandler().session_instance()
         soum_code = DatabaseUtils.working_l2_code()
-        schema_string = 's' + soum_code
+        # # schema_string = 's' + soum_code
         session.execute(
             set_search_path)
 
@@ -1855,7 +1855,7 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
 
         session = SessionHandler().session_instance()
         soum_code = DatabaseUtils.working_l2_code()
-        schema_string = 's' + soum_code
+        # # schema_string = 's' + soum_code
         session.execute(
             set_search_path)
 
@@ -1870,7 +1870,7 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
 
         session = SessionHandler().session_instance()
         soum_code = DatabaseUtils.working_l2_code()
-        schema_string = 's' + soum_code
+        # schema_string = 's' + soum_code
         session.execute(
             set_search_path)
 
@@ -1887,7 +1887,7 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
 
         session = SessionHandler().session_instance()
         soum_code = DatabaseUtils.working_l2_code()
-        schema_string = 's' + soum_code
+        # schema_string = 's' + soum_code
         session.execute(
             set_search_path)
 
@@ -1905,7 +1905,7 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
         l2_code = DatabaseUtils.working_l2_code()
         session = SessionHandler().session_instance()
         soum_code = DatabaseUtils.working_l2_code()
-        schema_string = 's' + soum_code
+        # schema_string = 's' + soum_code
         session.execute(
             set_search_path)
 
@@ -2105,7 +2105,7 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
 
         soum_code = DatabaseUtils.working_l2_code()
         if soum_code:
-            schema_string = 's' + soum_code
+            # schema_string = 's' + soum_code
             self.session.execute(
                 set_search_path)
 
@@ -2189,7 +2189,7 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
 
         soum_code = self.zone_location_tax_cbox.itemData(idx, Qt.UserRole)
         self.zone_location_cbox.setCurrentIndex(self.zone_location_cbox.findData(soum_code))
-        schema_string = 's' + soum_code
+        # # schema_string = 's' + soum_code
 
         self.session.execute(
             set_search_path)
@@ -2495,7 +2495,7 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
         if fee_id != -1:  # already has a row in the database
             session = SessionHandler().session_instance()
             soum_code = DatabaseUtils.working_l2_code()
-            schema_string = 's' + soum_code
+            # # schema_string = 's' + soum_code
             session.execute(
                 set_search_path)
             fee = self.session.query(SetBaseFee).filter(SetBaseFee.id == fee_id).one()
@@ -2514,7 +2514,7 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
         if tax_id != -1:  # already has a row in the database
             session = SessionHandler().session_instance()
             soum_code = DatabaseUtils.working_l2_code()
-            schema_string = 's' + soum_code
+            # # schema_string = 's' + soum_code
             session.execute(
                 set_search_path)
             tax = self.session.query(SetBaseTaxAndPrice).filter(SetBaseTaxAndPrice.id == tax_id).one()
@@ -2648,7 +2648,7 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
         # try:
         session = SessionHandler().session_instance()
         soum_code = DatabaseUtils.working_l2_code()
-        schema_string = 's' + soum_code
+        # # schema_string = 's' + soum_code
         session.execute(
             set_search_path)
         from_zone = self.session.query(SetFeeZone).filter(SetFeeZone.zone_id == from_zone_fid).one()
@@ -2708,7 +2708,7 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
         # try:
         session = SessionHandler().session_instance()
         soum_code = DatabaseUtils.working_l2_code()
-        schema_string = 's' + soum_code
+        # # schema_string = 's' + soum_code
         session.execute(
             set_search_path)
         from_zone = self.session.query(SetTaxAndPriceZone).filter(SetTaxAndPriceZone.zone_id == from_zone_fid).one()
@@ -2780,7 +2780,7 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
         self.create_savepoint()
         session = SessionHandler().session_instance()
         soum_code = DatabaseUtils.working_l2_code()
-        schema_string = 's' + soum_code
+        # # schema_string = 's' + soum_code
         session.execute(
             set_search_path)
 
@@ -2915,7 +2915,7 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
         self.create_savepoint()
         session = SessionHandler().session_instance()
         soum_code = DatabaseUtils.working_l2_code()
-        schema_string = 's' + soum_code
+        # # schema_string = 's' + soum_code
         session.execute(
             set_search_path)
 
@@ -3141,7 +3141,7 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
         if company_id != -1:  # already has a row in the database
             session = SessionHandler().session_instance()
             soum_code = DatabaseUtils.working_l2_code()
-            schema_string = 's' + soum_code
+            # # schema_string = 's' + soum_code
             session.execute(
                 set_search_path)
             company = self.session.query(SetSurveyCompany).filter(SetSurveyCompany.id == company_id).one()

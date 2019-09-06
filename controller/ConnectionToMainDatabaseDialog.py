@@ -36,6 +36,7 @@ class ConnectionToMainDatabaseDialog(QDialog, Ui_ConnectionToMainDatabaseDialog)
         self.load_settings()
         self.__password = None
         self.__is_expired = False
+        self.__is_version = False
         self.__setup_validators()
         # self.mac_addr = self.get_mac_address()
 
@@ -66,6 +67,9 @@ class ConnectionToMainDatabaseDialog(QDialog, Ui_ConnectionToMainDatabaseDialog)
 
     def get_expired(self):
         return self.__is_expired
+
+    def get_is_version(self):
+        return self.__is_version
 
     @pyqtSlot()
     def on_ok_button_clicked(self):
@@ -109,6 +113,7 @@ class ConnectionToMainDatabaseDialog(QDialog, Ui_ConnectionToMainDatabaseDialog)
         if str(Constants.SETUP_VERSION) != conf.value:
             PluginUtils.show_message(self, u'Анхааруулга',
                                      u'Програмын шинэ хувилбарыг суулгана уу! ' + conf.description )
+            self.__is_version = True
             return
         # self.__layers_permission(user, password, host, port, database)
         self.reject()

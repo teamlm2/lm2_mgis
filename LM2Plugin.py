@@ -370,6 +370,9 @@ class LM2Plugin:
         DialogInspector().set_dialog_visible(True)
         dlg.rejected.connect(self.on_current_dialog_rejected)
         if not dlg.exec_():
+            if dlg.get_is_version():
+                self.__disable_menu()
+                return
             if self.navigatorWidget != None:
                 if self.navigatorWidget.isVisible():
                     self.navigatorWidget.hide()
@@ -394,7 +397,6 @@ class LM2Plugin:
                 if self.planWidget.isVisible():
                     self.planWidget.hide()
 
-            self.__disable_menu()
             SessionHandler().destroy_session()
             self.is_expired = dlg.get_expired()
 
