@@ -39,5 +39,6 @@
     <file alias="mpa_logo.png">icons/mpa_logo.png</file>
     <file alias="spa_logo.png">icons/spa_logo.png</file>
     <file alias="land_plan.png">icons/land_plan.png</file>
+    <file alias="nature_reserve.png">icons/nature_reserve.png</file>
   </qresource>
 </RCC>

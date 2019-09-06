@@ -109,7 +109,7 @@ class LM2Plugin:
         self.mark_apps_action = QAction(QIcon(":/plugins/lm2/send_to_governor.png"), QApplication.translate("Plugin", "Mark Apps As Sent To Governor"), self.iface.mainWindow())
         self.print_cadastre_map_action = QAction(QIcon(":/plugins/lm2/extract.png"), QApplication.translate("Plugin", "Print cadastre map"), self.iface.mainWindow())
         self.print_point_map_action = QAction(QIcon(":/plugins/lm2_pasture/point.png"),
-                                                 QApplication.translate("Plugin", "Print cadastre map"),
+                                                 QApplication.translate("Plugin", "Show pasture monitroing point information"),
                                                  self.iface.mainWindow())
         # self.print_cadastre_map_action.setCheckable(True)
 
@@ -136,6 +136,12 @@ class LM2Plugin:
                                         QApplication.translate("Plugin", "PUA / ER"),
                                         self.iface.mainWindow())
         self.pasture_use_action.setCheckable(True)
+        ###
+        self.nature_reserve_action = QAction(QIcon(":/plugins/lm2/nature_reserve.png"),
+                                             QApplication.translate("Plugin",
+                                                                    "Nature reserve"),
+                                             self.iface.mainWindow())
+        self.nature_reserve_action.setCheckable(True)
         ###
         self.parcel_map_action = QAction(QIcon(":/plugins/lm2/parcel_grey.png"),
                                          QApplication.translate("Plugin", "Parcel Info"),
@@ -185,6 +191,7 @@ class LM2Plugin:
         self.database_dump_action.triggered.connect(self.__show_database_dump_dialog)
         self.webgis_utility_action.triggered.connect(self.__show_webgis_utility_action)
         self.pasture_use_action.triggered.connect(self.__show_pasture_navigator_widget)
+        self.nature_reserve_action.triggered.connect(self.__show_natural_reserve_navigator_widget)
         self.parcel_map_action.triggered.connect(self.__show_parcel_navigator_widget)
         self.parcel_mpa_action.triggered.connect(self.__show_parcel_mpa_navigator_widget)
         self.parcel_spa_action.triggered.connect(self.__show_parcel_spa_navigator_widget)
@@ -206,6 +213,7 @@ class LM2Plugin:
         self.lm_toolbar.addSeparator()
         self.lm_toolbar.addAction(self.pasture_use_action)
         self.lm_toolbar.addAction(self.print_point_map_action)
+        self.lm_toolbar.addAction(self.nature_reserve_action)
         self.lm_toolbar.addSeparator()
         self.lm_toolbar.addSeparator()
         self.lm_toolbar.addAction(self.land_plan_navigator_action)
@@ -284,6 +292,7 @@ class LM2Plugin:
         self.lm_menu.addAction(self.webgis_utility_action)
         self.lm_menu.addSeparator()
         self.lm_menu.addAction(self.pasture_use_action)
+        self.lm_menu.addAction(self.nature_reserve_action)
         self.lm_menu.addAction(self.parcel_spa_action)
         # self.lm_menu.addAction(self.print_point_map_action)
         self.lm_menu.addSeparator()
@@ -293,6 +302,7 @@ class LM2Plugin:
         self.navigatorWidget = None
         self.parcelInfoWidget = None
         self.pastureWidget = None
+        self.naturalReserveWidget = None
         self.spaParcelWidget = None
         self.parcelMpaInfoWidget = None
         self.planWidget = None
@@ -323,6 +333,7 @@ class LM2Plugin:
         self.iface.removePluginMenu(QApplication.translate("Plugin", "&LM2"), self.database_dump_action)
         self.iface.removePluginMenu(QApplication.translate("Plugin", "&LM2"), self.webgis_utility_action)
         self.iface.removePluginMenu(QApplication.translate("Plugin", "&LM2"), self.pasture_use_action)
+        self.iface.removePluginMenu(QApplication.translate("Plugin", "&LM2"), self.nature_reserve_action)
         self.iface.removePluginMenu(QApplication.translate("Plugin", "&LM2"), self.parcel_spa_action)
         self.iface.removePluginMenu(QApplication.translate("Plugin", "&LM2"), self.print_point_map_action)
         self.iface.removePluginMenu(QApplication.translate("Plugin", "&LM2"), self.land_plan_navigator_action)
@@ -337,6 +348,10 @@ class LM2Plugin:
         if self.pastureWidget:
             self.iface.removeDockWidget(self.pastureWidget)
             del self.pastureWidget
+
+        if self.naturalReserveWidget:
+            self.iface.removeDockWidget(self.naturalReserveWidget)
+            del self.naturalReserveWidget
 
         if self.spaParcelWidget:
             self.iface.removeDockWidget(self.spaParcelWidget)
@@ -384,6 +399,10 @@ class LM2Plugin:
             if self.pastureWidget != None:
                 if self.pastureWidget.isVisible():
                     self.pastureWidget.hide()
+
+            if self.naturalReserveWidget != None:
+                if self.naturalReserveWidget.isVisible():
+                    self.naturalReserveWidget.hide()
 
             if self.spaParcelWidget != None:
                 if self.spaParcelWidget.isVisible():
@@ -590,6 +609,8 @@ class LM2Plugin:
                 self.navigatorWidget.show()
             if self.pastureWidget:
                 self.pastureWidget.hide()
+            if self.naturalReserveWidget:
+                self.naturalReserveWidget.hide()
             if self.spaParcelWidget:
                 self.spaParcelWidget.hide()
             if self.parcelInfoWidget:
@@ -603,10 +624,17 @@ class LM2Plugin:
 
     def __show_pasture_navigator_widget(self):
 
+        self.pastureWidget = None
+        if self.pastureWidget:
+            self.iface.removeDockWidget(self.pastureWidget)
+            del self.pastureWidget
+
         if self.pastureWidget:
             if self.pastureWidget.isVisible():
                 if self.pastureWidget:
                     self.pastureWidget.hide()
+                if self.naturalReserveWidget:
+                    self.naturalReserveWidget.hide()
                 if self.parcelMpaInfoWidget:
                     self.parcelMpaInfoWidget.hide()
                 if self.parcelInfoWidget:
@@ -634,8 +662,55 @@ class LM2Plugin:
                     self.camaWidget.hide()
                 if self.spaParcelWidget:
                     self.spaParcelWidget.hide()
+                if self.naturalReserveWidget:
+                    self.naturalReserveWidget.hide()
         else:
             self.__create_pasture()
+
+    def __show_natural_reserve_navigator_widget(self):
+
+        self.naturalReserveWidget = None
+        if self.naturalReserveWidget:
+            self.iface.removeDockWidget(self.naturalReserveWidget)
+            del self.naturalReserveWidget
+
+        if self.naturalReserveWidget:
+            if self.naturalReserveWidget.isVisible():
+                if self.pastureWidget:
+                    self.pastureWidget.hide()
+                if self.naturalReserveWidget:
+                    self.naturalReserveWidget.hide()
+                if self.parcelMpaInfoWidget:
+                    self.parcelMpaInfoWidget.hide()
+                if self.parcelInfoWidget:
+                    self.parcelInfoWidget.hide()
+                if self.planWidget:
+                    self.planWidget.hide()
+                if self.camaWidget:
+                    self.camaWidget.hide()
+                if self.spaParcelWidget:
+                    self.spaParcelWidget.hide()
+                if self.navigatorWidget:
+                    self.navigatorWidget.show()
+            else:
+                if self.naturalReserveWidget:
+                    self.naturalReserveWidget.show()
+                if self.navigatorWidget:
+                    self.navigatorWidget.hide()
+                if self.parcelMpaInfoWidget:
+                    self.parcelMpaInfoWidget.hide()
+                if self.parcelInfoWidget:
+                    self.parcelInfoWidget.hide()
+                if self.planWidget:
+                    self.planWidget.hide()
+                if self.camaWidget:
+                    self.camaWidget.hide()
+                if self.spaParcelWidget:
+                    self.spaParcelWidget.hide()
+                if self.pastureWidget:
+                    self.pastureWidget.hide()
+        else:
+            self.__create_nature_reserve()
 
     def __show_parcel_spa_navigator_widget(self):
 
@@ -652,7 +727,9 @@ class LM2Plugin:
                 if self.camaWidget:
                     self.camaWidget.hide()
                 if self.pastureWidget:
-                    self.pastureWidget.show()
+                    self.pastureWidget.hide()
+                if self.naturalReserveWidget:
+                    self.naturalReserveWidget.hide()
                 if self.navigatorWidget:
                     self.navigatorWidget.show()
             else:
@@ -670,6 +747,8 @@ class LM2Plugin:
                     self.camaWidget.hide()
                 if self.pastureWidget:
                     self.pastureWidget.hide()
+                if self.naturalReserveWidget:
+                    self.naturalReserveWidget.hide()
         else:
             self.__create_spa_parcel()
 
@@ -690,6 +769,8 @@ class LM2Plugin:
                     self.camaWidget.hide()
                 if self.spaParcelWidget:
                     self.spaParcelWidget.hide()
+                if self.naturalReserveWidget:
+                    self.naturalReserveWidget.hide()
                 if self.navigatorWidget:
                     self.navigatorWidget.show()
             else:
@@ -703,6 +784,8 @@ class LM2Plugin:
                     self.pastureWidget.hide()
                 if self.spaParcelWidget:
                     self.spaParcelWidget.hide()
+                if self.naturalReserveWidget:
+                    self.naturalReserveWidget.hide()
                 if self.planWidget:
                     self.planWidget.hide()
                 if self.camaWidget:
@@ -724,6 +807,8 @@ class LM2Plugin:
                     self.pastureWidget.hide()
                 if self.spaParcelWidget:
                     self.spaParcelWidget.hide()
+                if self.naturalReserveWidget:
+                    self.naturalReserveWidget.hide()
                 if self.parcelInfoWidget:
                     self.parcelInfoWidget.hide()
                 if self.planWidget:
@@ -741,6 +826,8 @@ class LM2Plugin:
                     self.pastureWidget.hide()
                 if self.spaParcelWidget:
                     self.spaParcelWidget.hide()
+                if self.naturalReserveWidget:
+                    self.naturalReserveWidget.hide()
                 if self.parcelInfoWidget:
                     self.parcelInfoWidget.hide()
                 if self.planWidget:
@@ -767,6 +854,8 @@ class LM2Plugin:
                     self.parcelMpaInfoWidget.hide()
                 if self.parcelInfoWidget:
                     self.parcelInfoWidget.hide()
+                if self.naturalReserveWidget:
+                    self.naturalReserveWidget.hide()
                 if self.navigatorWidget:
                     self.navigatorWidget.show()
             else:
@@ -784,6 +873,8 @@ class LM2Plugin:
                     self.parcelMpaInfoWidget.hide()
                 if self.parcelInfoWidget:
                     self.parcelInfoWidget.hide()
+                if self.naturalReserveWidget:
+                    self.naturalReserveWidget.hide()
         else:
             self.__create_cama_navigator()
         self.__start_cama_info_map()
@@ -804,6 +895,8 @@ class LM2Plugin:
                     self.parcelInfoWidget.hide()
                 if self.camaWidget:
                     self.camaWidget.hide()
+                if self.naturalReserveWidget:
+                    self.naturalReserveWidget.hide()
                 if self.navigatorWidget:
                     self.navigatorWidget.show()
             else:
@@ -813,6 +906,8 @@ class LM2Plugin:
                     self.pastureWidget.hide()
                 if self.spaParcelWidget:
                     self.spaParcelWidget.hide()
+                if self.naturalReserveWidget:
+                    self.naturalReserveWidget.hide()
                 if self.navigatorWidget:
                     self.navigatorWidget.hide()
                 if self.parcelMpaInfoWidget:
@@ -837,6 +932,13 @@ class LM2Plugin:
             self.pasture_use_action.setChecked(True)
         else:
             self.pasture_use_action.setChecked(False)
+
+    def __naturalReserveVisibilityChanged(self):
+
+        if self.naturalReserveWidget.isVisible():
+            self.nature_reserve_action.setChecked(True)
+        else:
+            self.nature_reserve_action.setChecked(False)
 
     def __spaParcelVisibilityChanged(self):
 
@@ -1289,7 +1391,7 @@ class LM2Plugin:
             self.iface.removeDockWidget(self.pastureWidget)
             del self.pastureWidget
 
-        self.pastureWidget = PastureWidget(self)
+        self.pastureWidget = PastureWidget(self,zone_rigth_type = 1)
         self.iface.addDockWidget(Qt.RightDockWidgetArea, self.pastureWidget)
 
         QObject.connect(self.pastureWidget, SIGNAL("visibilityChanged(bool)"), self.__pastureVisibilityChanged)
@@ -1304,6 +1406,34 @@ class LM2Plugin:
             self.planWidget.hide()
         if self.spaParcelWidget:
             self.spaParcelWidget.hide()
+        if self.naturalReserveWidget:
+            self.naturalReserveWidget.hide()
+
+    def __create_nature_reserve(self):
+
+        self.removeLayers()
+        # create widget
+        if self.naturalReserveWidget:
+            self.iface.removeDockWidget(self.naturalReserveWidget)
+            del self.naturalReserveWidget
+
+        self.naturalReserveWidget = PastureWidget(self, zone_rigth_type = 2)
+        self.iface.addDockWidget(Qt.RightDockWidgetArea, self.naturalReserveWidget)
+
+        QObject.connect(self.naturalReserveWidget, SIGNAL("visibilityChanged(bool)"), self.__naturalReserveVisibilityChanged)
+        self.naturalReserveWidget.show()
+        if self.navigatorWidget:
+            self.navigatorWidget.hide()
+        if self.parcelInfoWidget:
+            self.parcelInfoWidget.hide()
+        if self.parcelMpaInfoWidget:
+            self.parcelMpaInfoWidget.hide()
+        if self.planWidget:
+            self.planWidget.hide()
+        if self.spaParcelWidget:
+            self.spaParcelWidget.hide()
+        if self.pastureWidget:
+            self.pastureWidget.hide()
 
     def __create_spa_parcel(self):
 
@@ -1430,6 +1560,7 @@ class LM2Plugin:
 
         self.navigator_action.setEnabled(True)
         self.pasture_use_action.setEnabled(True)
+        self.nature_reserve_action.setEnabled(True)
         self.parcel_spa_action.setEnabled(True)
         self.parcel_map_action.setEnabled(True)
         self.land_plan_navigator_action.setEnabled(True)
@@ -1493,6 +1624,7 @@ class LM2Plugin:
         self.database_dump_action.setEnabled(True)
         self.webgis_utility_action.setEnabled(False)
         self.pasture_use_action.setEnabled(False)
+        self.nature_reserve_action.setEnabled(False)
         self.parcel_spa_action.setEnabled(False)
         self.land_plan_navigator_action.setEnabled(False)
 

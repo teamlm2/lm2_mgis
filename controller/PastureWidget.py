@@ -61,9 +61,12 @@ RESERVE_DAATS_LEVEL_1 = 1
 RESERVE_DAATS_LEVEL_2 = 2
 RESERVE_DAATS_LEVEL_3 = 3
 
+#zone_rigth_type = 1
+#zone_rigth_type = 2
+
 class PastureWidget(QDockWidget, Ui_PastureWidget, DatabaseHelper):
 
-    def __init__(self,  plugin, parent=None):
+    def __init__(self,  plugin, zone_rigth_type, parent=None):
 
         super(PastureWidget, self).__init__(parent)
         DatabaseHelper.__init__(self)
@@ -71,6 +74,10 @@ class PastureWidget(QDockWidget, Ui_PastureWidget, DatabaseHelper):
         self.setupUi(self)
         self.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
         self.plugin = plugin
+        self.zone_rigth_type = zone_rigth_type
+        self.main_tab_widget.removeTab(self.main_tab_widget.indexOf(self.app_tab))
+        self.main_tab_widget.removeTab(self.main_tab_widget.indexOf(self.monitoring_tab))
+        self.main_tab_widget.removeTab(self.main_tab_widget.indexOf(self.settings_tab))
 
         self.session = SessionHandler().session_instance()
 
@@ -79,14 +86,25 @@ class PastureWidget(QDockWidget, Ui_PastureWidget, DatabaseHelper):
         self.pasture_app_date_edit.setDate(QDate.currentDate())
         self.__setup_twidgets()
 
-        self.tabWidget.currentChanged.connect(self.__tab_widget_onChange)  # changed!
-        # self.__load_role_settings()
+        self.main_tab_widget.currentChanged.connect(self.__tab_widget_onChange)  # changed!
+        self.__load_role_settings()
 
         self.__setup_combo_boxes()
         self.__setup_validators()
 
         self.working_l1_cbox.currentIndexChanged.connect(self.__working_l1_changed)
         self.working_l2_cbox.currentIndexChanged.connect(self.__working_l2_changed)
+
+        if self.zone_rigth_type == 1:
+            self.main_tab_widget.insertTab(self.main_tab_widget.count() - 1, self.app_tab,
+                                           self.tr("Pasture(PUA)"))
+            self.main_tab_widget.insertTab(self.main_tab_widget.count() - 1, self.monitoring_tab,
+                                                  self.tr("Monitoring"))
+            self.main_tab_widget.insertTab(self.main_tab_widget.count() - 1, self.settings_tab,
+                                           self.tr("Settings"))
+        else:
+            self.main_tab_widget.insertTab(self.main_tab_widget.count() - 1, self.app_tab,
+                                           self.tr("Nature Reserve"))
 
     def __tab_widget_onChange(self, index):
 
@@ -189,7 +207,7 @@ class PastureWidget(QDockWidget, Ui_PastureWidget, DatabaseHelper):
     @pyqtSlot()
     def on_copy_number_action_clicked(self):
 
-        if self.tabWidget.currentWidget() == self.pasture_tab:
+        if self.main_tab_widget.currentWidget() == self.app_tab:
             app = self.__selected_application()
             QApplication.clipboard().setText(app.app_no)
 
@@ -254,7 +272,7 @@ class PastureWidget(QDockWidget, Ui_PastureWidget, DatabaseHelper):
     @pyqtSlot(QPoint)
     def on_custom_context_menu_requested(self, point):
 
-        if self.tabWidget.currentWidget() == self.pasture_tab:
+        if self.main_tab_widget.currentWidget() == self.app_tab:
             item = self.pasture_results_twidget.itemAt(point)
             if item is None: return
             self.contract_context_menu.exec_(self.pasture_results_twidget.mapToGlobal(point))
