@@ -397,12 +397,12 @@ class PrintDialog(QDialog, Ui_PrintDialog):
 
             if self.table_name == TABLE_PARCEL or self.table_name == TABLE_PASTURE_PARCEL or self.table_name == TABLE_NATURE_RESERVE_PARCEL:
                 self.__add_cadastre_block_code_h(map_composition)
-                self.__add_khashaa_name_h(map_composition)
+                # self.__add_khashaa_name_h(map_composition)
                 self.__add_parcel_street_name_h(map_composition)
         self.__adjust_map_center_and_scale(overview_map, 30, 30, scale_denominator)
         self.__set_north_arrow_position(map_composition)
         self.__add_labels(map_composition)
-        self.__add_parcel_numbers(map_composition)
+        # self.__add_parcel_numbers(map_composition)
         self.__create_coordinate_list(map_composition)
         self.__create_parcel_distance_list(map_composition)
         self.__create_building_distance_list(map_composition)
@@ -414,7 +414,7 @@ class PrintDialog(QDialog, Ui_PrintDialog):
 
         if self.table_name == TABLE_PARCEL or self.table_name == TABLE_PASTURE_PARCEL or self.table_name == TABLE_NATURE_RESERVE_PARCEL:
             self.__add_parcel_street_name(map_composition)
-            self.__add_khashaa_name(map_composition)
+            # self.__add_khashaa_name(map_composition)
             self.__add_cadastre_block_code(map_composition)
         self.__add_stamp(map_composition)
         self.__add_right_holder_information(map_composition)
@@ -849,9 +849,8 @@ class PrintDialog(QDialog, Ui_PrintDialog):
         item.setText(parcel_id)
         item.adjustSizeToText()
 
-    def __add_parcel_numbers(self, map_composition):
+    def __add_parcel_numbers(self):
 
-        item = map_composition.getComposerItemById("parcel_id")
         parcel_id = str(self.__parcel_no)
 
         parcel_id = self.__cut_zeros_from_parcel_id(parcel_id)
@@ -871,8 +870,7 @@ class PrintDialog(QDialog, Ui_PrintDialog):
             else:
                 parcel_id = parcel_id + u' ХНТ дугаар: ' + tmp_old_id
 
-        item.setText(parcel_id)
-        item.adjustSizeToText()
+        return parcel_id
 
     def __cut_zeros_from_parcel_id(self, parcel_id):
 
@@ -1029,27 +1027,42 @@ class PrintDialog(QDialog, Ui_PrintDialog):
     def __add_parcel_street_name_h(self, map_composition):
 
         tmp_street_name = self.__feature.attributes()[self.STREET_NAME]
+        tmp_khashaa_name = self.__feature.attributes()[self.KHASHAA_NAME]
 
         if tmp_street_name is None or type(tmp_street_name) == QPyNullVariant:
             street_name = ''
         else:
-            street_name = tmp_street_name
+            street_name = u'Гудамж:   ' + tmp_street_name
+
+        if tmp_khashaa_name is None or type(tmp_khashaa_name) == QPyNullVariant:
+            khashaa_name = ''
+        else:
+            khashaa_name = u'   Тоот:   ' + tmp_khashaa_name
+
+        street_and_kashaa = street_name  + khashaa_name
 
         item = map_composition.getComposerItemById("street_name_h")
-        item.setText(street_name)
+        item.setText(street_and_kashaa)
         item.adjustSizeToText()
 
     def __add_parcel_street_name(self, map_composition):
 
         tmp_street_name = self.__feature.attributes()[self.STREET_NAME]
+        tmp_khashaa_name = self.__feature.attributes()[self.KHASHAA_NAME]
 
         if tmp_street_name is None or type(tmp_street_name) == QPyNullVariant:
             street_name = ''
         else:
-            street_name = tmp_street_name
+            street_name = u'Гудамж:   ' + tmp_street_name
 
+        if tmp_khashaa_name is None or type(tmp_khashaa_name) == QPyNullVariant:
+            khashaa_name = ''
+        else:
+            khashaa_name = u'   Тоот:   ' + tmp_khashaa_name
+
+        street_and_kashaa = street_name + khashaa_name
         item = map_composition.getComposerItemById("street_name")
-        item.setText(street_name)
+        item.setText(street_and_kashaa)
         item.adjustSizeToText()
 
     def __add_khashaa_name_h(self, map_composition):
@@ -1080,33 +1093,47 @@ class PrintDialog(QDialog, Ui_PrintDialog):
 
     def __add_right_holder_information(self, map_composition):
 
+        right_type_txt = ''
+        person_info = ''
         selected_items = self.right_holder_twidget.selectedItems()
-        if len(selected_items) == 0:
-            return
 
-        selected_row = self.right_holder_twidget.row(selected_items[0])
+        if len(selected_items) > 0:
+            selected_row = self.right_holder_twidget.row(selected_items[0])
+            twidget_item = self.right_holder_twidget.item(selected_row, self.FAMILYNAME)
 
-        twidget_item = self.right_holder_twidget.item(selected_row, self.FAMILYNAME)
-        if twidget_item is None:
-            return
+            if twidget_item:
+                right_holder_name = twidget_item.text()
 
-        right_holder_name = twidget_item.text()
+                twidget_item = self.right_holder_twidget.item(selected_row, self.FIRSTNAME)
+                first_name = twidget_item.text()
+                right_holder_name += '' if first_name is None or type(first_name) == QPyNullVariant else ' ' + first_name
+                name = ''
+                if right_holder_name != None and right_holder_name != '':
+                    name = u'   Хуулийн этгээдийн нэр:     ' + right_holder_name
 
-        twidget_item = self.right_holder_twidget.item(selected_row, self.FIRSTNAME)
-        first_name = twidget_item.text()
-        right_holder_name += '' if first_name is None or type(first_name) == QPyNullVariant else ' ' + first_name
+            twidget_item = self.right_holder_twidget.item(selected_row, self.CODEIDCARD)
+            if twidget_item:
+                code_id_card = twidget_item.text()
+                person_register = ''
+                if code_id_card != None and code_id_card != '':
+                    person_register = u'Регистрийн дугаар:     ' + code_id_card
 
-        twidget_item = self.right_holder_twidget.item(selected_row, self.FIRSTNAME)
-        right_type = twidget_item.data(Qt.UserRole)
+                person_info = person_register + name
 
-        twidget_item = self.right_holder_twidget.item(selected_row, self.CODEIDCARD)
-        code_id_card = twidget_item.text()
-        item = map_composition.getComposerItemById("right_holder_name")
-        item.setText(right_holder_name)
-        item = map_composition.getComposerItemById("id_card_code")
-        item.setText(code_id_card)
-        item = map_composition.getComposerItemById("right_type")
-        item.setText(right_type)
+            twidget_item = self.right_holder_twidget.item(selected_row, self.FIRSTNAME)
+
+            right_type = twidget_item.data(Qt.UserRole)
+            if right_type != None and right_type != '':
+                right_type_txt = u'  Эрхийн төрөл:  ' + right_type
+
+        parcel_id = self.__add_parcel_numbers()
+        parcel_info = u'Нэгж талбарын дугаар:   ' + parcel_id + right_type_txt
+
+        item = map_composition.getComposerItemById("person_info")
+        item.setText(person_info)
+
+        item = map_composition.getComposerItemById("parcel_info")
+        item.setText(parcel_info)
 
     def __right_type_description(self, application, person_type):
 

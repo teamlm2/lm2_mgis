@@ -512,7 +512,10 @@ class PastureWidget(QDockWidget, Ui_PastureWidget, DatabaseHelper):
 
         self.pasture_group_cbox.clear()
         au2 = DatabaseUtils.working_l2_code()
-        ct_member_group = self.session.query(CtPersonGroup).filter(CtPersonGroup.au2 == au2).all()
+
+        ct_member_group = self.session.query(CtPersonGroup).\
+            filter(CtPersonGroup.au2 == au2).\
+            filter(CtPersonGroup.group_type == self.zone_rigth_type).all()
         self.pasture_group_cbox.addItem("*", -1)
         if ct_member_group is not None:
             for member in ct_member_group:
