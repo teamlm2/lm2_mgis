@@ -378,7 +378,7 @@ class ContractPastureDialog(QDialog, Ui_ContractPastureDialog, DatabaseHelper):
 
     def __setup_combo_boxes(self):
 
-        self.document_path_edit.setText(PasturePath.contrac_file_path())
+        # self.document_path_edit.setText(PasturePath.contrac_file_path())
         # try:
         restrictions = DatabaseUtils.working_l2_code()
         user = DatabaseUtils.current_user()

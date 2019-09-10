@@ -4,7 +4,6 @@ from sqlalchemy import Column, String, Float
 from geoalchemy2 import Geometry
 from Base import *
 
-
 class AuLevel1(Base):
 
     __tablename__ = 'au_level1'

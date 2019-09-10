@@ -606,7 +606,7 @@ class PastureWidget(QDockWidget, Ui_PastureWidget, DatabaseHelper):
 
         DatabaseUtils.set_working_schema()
         application = PluginUtils.create_new_application()
-        self.current_dialog = ApplicationsPastureDialog(self.plugin, application, self, False, self.plugin.iface.mainWindow())
+        self.current_dialog = ApplicationsPastureDialog(self.plugin, application, self.zone_rigth_type, self, False, self.plugin.iface.mainWindow())
         self.current_dialog.setModal(False)
         self.current_dialog.rejected.connect(self.on_current_dialog_closed)
         DialogInspector().set_dialog_visible(True)

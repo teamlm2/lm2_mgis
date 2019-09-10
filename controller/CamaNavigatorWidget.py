@@ -610,7 +610,8 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
 
         root = QgsProject.instance().layerTreeRoot()
         mygroup = root.findGroup(u"CAMA")
-
+        if not mygroup:
+            mygroup = root.insertGroup(1, u"CAMA")
         vlayer = LayerUtils.layer_by_data_source("data_cama", "cm_parcel_tbl")
         if vlayer is None:
             vlayer = LayerUtils.load_layer_base_layer("cm_parcel_tbl", "parcel_id", "data_cama")

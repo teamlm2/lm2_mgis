@@ -5,7 +5,6 @@ from sqlalchemy.orm import relationship
 from geoalchemy2 import Geometry
 from ClLanduseType import *
 
-
 class CaParcelPollution(Base):
 
     __tablename__ = 'parcel_pollution'

@@ -22,6 +22,8 @@ from ..model.SetWorkruleStatus import *
 from ..model.ClPlanType import *
 from ..model.PlProjectStatusHistory import *
 from ..model.PlProjectStatusNextOfficer import *
+from ..model.PlProjectAuLevel1 import *
+from ..model.PlProjectAuLevel2 import *
 from ..controller.PlanCaseDialog import *
 from ..utils.DatabaseUtils import *
 from ..utils.PluginUtils import *
@@ -889,8 +891,10 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
             filter_is_set = True
             l2_code = self.working_l2_cbox.itemData(self.working_l2_cbox.currentIndex())
             l1_code = self.working_l1_cbox.itemData(self.working_l1_cbox.currentIndex())
-            values = values.filter(or_(PlProject.au2 == l2_code, PlProject.au2 == None)).\
-                filter(or_(PlProject.au1 == l1_code, PlProject.au1 == None))
+            values = values.\
+                join(PlProjectAuLevel2, PlProject.project_id == PlProjectAuLevel2.project_id). \
+                filter(PlProjectAuLevel2.au2_code == l2_code). \
+                filter(PlProjectAuLevel1.au1_code == l1_code)
 
         if self.plan_num_edit.text():
             filter_is_set = True

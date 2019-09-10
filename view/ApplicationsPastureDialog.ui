@@ -1467,6 +1467,11 @@
         <string>Area(ga)</string>
        </property>
       </column>
+      <column>
+       <property name="text">
+        <string>Neighbourhood</string>
+       </property>
+      </column>
      </widget>
     </widget>
     <widget class="QGroupBox" name="search_group_box_3">

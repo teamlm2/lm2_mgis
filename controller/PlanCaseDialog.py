@@ -1010,76 +1010,85 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
             process_type = self.__get_attribute(parcel, parcel_shape_layer)[0]
             if process_type:
                 plan_zone_id = process_type.plan_zone_id
-        parcel_geometry = WKTElement(parcel.geometry().exportToWkt(), srid=4326)
-        # if parcel_geometry.IsValid() == True:
-        #     valid = False
-        #     print parcel_geometry.IsValid()
-        # parcel overlap not approved plan zone
-        polygon_values = self.session.query(PlProjectParcel). \
-            filter(parcel_geometry.ST_Overlaps(PlProjectParcel.polygon_geom)).\
-            filter(PlProjectParcel.valid_till == None).all()
-        for value in polygon_values:
-            plan_zone = value.plan_zone_ref
-            project = value.project_ref
-            if project:
-                plan_type = project.plan_type_ref
-                plan_zone_relation_count = self.session.query(SetPlanZoneRelation). \
-                    filter(SetPlanZoneRelation.parent_plan_zone_id == plan_zone.plan_zone_id).\
-                    filter(SetPlanZoneRelation.child_plan_zone_id == plan_zone_id).count()
-                if plan_zone_relation_count == 0:
-                    message = plan_zone_message + value.project_ref.code + unicode(u' дугаартай ') + plan_type.short_name + \
-                            unicode(u'-ний ') + \
-                            '/'+plan_zone.code+'/' + unicode(plan_zone.name) + unicode(u' арга хэмжээтэй давхцаж байна.')
-                    error_message = error_message + "\n" + message
-                    valid = False
 
-        point_values = self.session.query(PlProjectParcel). \
-            filter(parcel_geometry.ST_Overlaps(PlProjectParcel.point_geom)). \
-            filter(PlProjectParcel.valid_till == None).all()
-        for value in point_values:
-            plan_zone = value.plan_zone_ref
-            project = value.project_ref
-            plan_type = project.plan_type_ref
-            plan_zone_relation_count = self.session.query(SetPlanZoneRelation). \
-                filter(SetPlanZoneRelation.parent_plan_zone_id == plan_zone.plan_zone_id). \
-                filter(SetPlanZoneRelation.child_plan_zone_id == plan_zone_id).count()
-            if plan_zone_relation_count == 0:
-                message = plan_zone_message + value.project_ref.code + unicode(u' дугаартай ') + plan_type.short_name + \
-                          unicode(u'-ний ') + \
-                          '/' + plan_zone.code + '/' + unicode(plan_zone.name) + unicode(u' арга хэмжээтэй давхцаж байна.')
-                error_message = error_message + "\n" + message
+        if not parcel.geometry():
+            valid = False
+        else:
+            g = parcel.geometry()
+            if not g.isGeosValid():
                 valid = False
+            else:
+                parcel_geometry = WKTElement(parcel.geometry().exportToWkt(), srid=4326)
+                # if parcel_geometry.IsValid() == True:
+                #     valid = False
+                #     print parcel_geometry.IsValid()
+                # parcel overlap not approved plan zone
 
-        line_values = self.session.query(PlProjectParcel). \
-            filter(parcel_geometry.ST_Overlaps(PlProjectParcel.line_geom)). \
-            filter(PlProjectParcel.valid_till == None).all()
-        for value in line_values:
-            plan_zone = value.plan_zone_ref
-            project = value.project_ref
-            plan_type = project.plan_type_ref
-            plan_zone_relation_count = self.session.query(SetPlanZoneRelation). \
-                filter(SetPlanZoneRelation.parent_plan_zone_id == plan_zone.plan_zone_id). \
-                filter(SetPlanZoneRelation.child_plan_zone_id == plan_zone_id).count()
-            if plan_zone_relation_count == 0:
-                message = plan_zone_message + value.project_ref.code + unicode(u' дугаартай ') + plan_type.short_name + \
-                          unicode(u'-ний ') + \
-                          '/' + plan_zone.code + '/' + unicode(plan_zone.name) + unicode(u' арга хэмжээтэй давхцаж байна.')
-                error_message = error_message + "\n" + message
-                valid = False
+                polygon_values = self.session.query(PlProjectParcel). \
+                    filter(func.ST_Centroid(parcel_geometry).ST_Overlaps(PlProjectParcel.polygon_geom)).\
+                    filter(PlProjectParcel.valid_till == None).all()
+                for value in polygon_values:
+                    plan_zone = value.plan_zone_ref
+                    project = value.project_ref
+                    if project:
+                        plan_type = project.plan_type_ref
+                        plan_zone_relation_count = self.session.query(SetPlanZoneRelation). \
+                            filter(SetPlanZoneRelation.parent_plan_zone_id == plan_zone.plan_zone_id).\
+                            filter(SetPlanZoneRelation.child_plan_zone_id == plan_zone_id).count()
+                        if plan_zone_relation_count == 0:
+                            message = plan_zone_message + value.project_ref.code + unicode(u' дугаартай ') + plan_type.short_name + \
+                                    unicode(u'-ний ') + \
+                                    '/'+plan_zone.code+'/' + unicode(plan_zone.name) + unicode(u' арга хэмжээтэй давхцаж байна.')
+                            error_message = error_message + "\n" + message
+                            valid = False
 
-        # base condition overlaps
-        values = self.session.query(PlBaseConditionParcel).\
-            filter(parcel_geometry.ST_Overlaps(PlBaseConditionParcel.geometry)).all()
+                point_values = self.session.query(PlProjectParcel). \
+                    filter(func.ST_Centroid(parcel_geometry).ST_Overlaps(PlProjectParcel.point_geom)). \
+                    filter(PlProjectParcel.valid_till == None).all()
+                for value in point_values:
+                    plan_zone = value.plan_zone_ref
+                    project = value.project_ref
+                    plan_type = project.plan_type_ref
+                    plan_zone_relation_count = self.session.query(SetPlanZoneRelation). \
+                        filter(SetPlanZoneRelation.parent_plan_zone_id == plan_zone.plan_zone_id). \
+                        filter(SetPlanZoneRelation.child_plan_zone_id == plan_zone_id).count()
+                    if plan_zone_relation_count == 0:
+                        message = plan_zone_message + value.project_ref.code + unicode(u' дугаартай ') + plan_type.short_name + \
+                                  unicode(u'-ний ') + \
+                                  '/' + plan_zone.code + '/' + unicode(plan_zone.name) + unicode(u' арга хэмжээтэй давхцаж байна.')
+                        error_message = error_message + "\n" + message
+                        valid = False
 
-        for value in values:
-            type = value.base_condition_type_ref
-            count = self.session.query(SetPlanZoneBaseConditionType).\
-                filter(SetPlanZoneBaseConditionType.plan_zone_id == plan_zone_id). \
-                filter(SetPlanZoneBaseConditionType.base_condition_type_id == type.base_condition_type_id).count()
-            if count == 1:
-                message = base_condition_message + type.short_name + unicode(u' -тэй давхцаж байна. ')
-                error_message = error_message + "\n" + message
-                valid = False
+                line_values = self.session.query(PlProjectParcel). \
+                    filter(func.ST_Centroid(parcel_geometry).ST_Overlaps(PlProjectParcel.line_geom)). \
+                    filter(PlProjectParcel.valid_till == None).all()
+                for value in line_values:
+                    plan_zone = value.plan_zone_ref
+                    project = value.project_ref
+                    plan_type = project.plan_type_ref
+                    plan_zone_relation_count = self.session.query(SetPlanZoneRelation). \
+                        filter(SetPlanZoneRelation.parent_plan_zone_id == plan_zone.plan_zone_id). \
+                        filter(SetPlanZoneRelation.child_plan_zone_id == plan_zone_id).count()
+                    if plan_zone_relation_count == 0:
+                        message = plan_zone_message + value.project_ref.code + unicode(u' дугаартай ') + plan_type.short_name + \
+                                  unicode(u'-ний ') + \
+                                  '/' + plan_zone.code + '/' + unicode(plan_zone.name) + unicode(u' арга хэмжээтэй давхцаж байна.')
+                        error_message = error_message + "\n" + message
+                        valid = False
+
+                # base condition overlaps
+                values = self.session.query(PlBaseConditionParcel).\
+                    filter(func.ST_Centroid(parcel_geometry).ST_Overlaps(PlBaseConditionParcel.geometry)).all()
+
+                for value in values:
+                    type = value.base_condition_type_ref
+                    count = self.session.query(SetPlanZoneBaseConditionType).\
+                        filter(SetPlanZoneBaseConditionType.plan_zone_id == plan_zone_id). \
+                        filter(SetPlanZoneBaseConditionType.base_condition_type_id == type.base_condition_type_id).count()
+                    if count == 1:
+                        message = base_condition_message + type.short_name + unicode(u' -тэй давхцаж байна. ')
+                        error_message = error_message + "\n" + message
+                        valid = False
 
         if not valid:
             self.error_dic[id] = error_message
@@ -1376,81 +1385,99 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
                         column_name_landname: "", column_name_khashaa: "", column_name_street: "",
                         column_name_comment: ""}
 
-        parcel_geometry = WKTElement(parcel_feature.geometry().exportToWkt(), srid=4326)
-
-        provider = layer.dataProvider()
-        for key, item in column_names.iteritems():
-            index = provider.fieldNameIndex(key)
-            if index != -1:
-                value = parcel_feature.attributes()[index]
-                column_names[key] = value
-
-        # try:
-        # if column_names[column_name_landuse] != None:
-        #     landuse = column_names[column_name_landuse]
-        #     if len(str(landuse).strip()) == 4:
-        #         count = self.session.query(ClLanduseType).filter(ClLanduseType.code == landuse).count()
-        #         if count == 0:
-        #             valid = False
-        #             message = unicode(u'Газрын нэгдмэл сангийн ангиллын дугаар буруу байна.')
-        #             error_message = error_message + "\n" + message
-        #             self.message_label.setText(error_message)
-        #     else:
-        #         valid = False
-        #         message = unicode(u'Газрын нэгдмэл сангийн ангиллын дугаар буруу байна.')
-        #         error_message = error_message + "\n" + message
-        #         self.message_label.setText(error_message)
-        # except SQLAlchemyError, e:
-        #     valid = False
-        #     message = unicode(u'Газрын нэгдмэл сангийн дугаар ангиллын буруу байна.')
-        #     error_message = error_message + "\n" + message
-        #     self.message_label.setText(error_message)
-
-        # try:
-        if not self.if_single_type_chbox.isChecked():
-            if column_names[column_name_plan_code]:
-                count = self.session.query(ClPlanZone).filter(ClPlanZone.code == column_names[column_name_plan_code]).count()
-                if count == 0:
-                    valid = False
-                    message = '*' + unicode(u' Үйл ажиллагааны ангиллын дугаар буруу байна.')
-                    error_message = error_message + "\n" + message
-                    self.message_label.setText(error_message)
-            else:
-                valid = False
-                message = '*' + unicode(u' Үйл ажиллагааны ангиллын дугаар буруу байна.')
-                error_message = error_message + "\n" + message
-                self.message_label.setText(error_message)
-        # except SQLAlchemyError, e:
-        #     valid = False
-        #     message = unicode(u'Үйл ажиллагааны ангиллын дугаар буруу байна.')
-        #     error_message = error_message + "\n" + message
-        #     self.message_label.setText(error_message)
-
-        is_out_parcel = False
-        au2_parcel_count = self.session.query(AuLevel2). \
-            filter(AuLevel2.code == working_soum_code). \
-            filter(parcel_geometry.ST_Within(AuLevel2.geometry)).count()
-        if au2_parcel_count == 0:
-            is_out_parcel = True
-
-        if is_out_parcel:
+        # geom = parcel_feature.GetGeometryRef()
+        # if not geom.IsValid():
+        #     parcel_feature.SetGeometry(geom.Buffer(0))  # <====== SetGeometry
+        #     layer.SetFeature(parcel_feature)  # <====== SetFeature
+        #     assert parcel_feature.GetGeometryRef().IsValid()  # Doesn't fail
+        if not parcel_feature.geometry():
             valid = False
-            message = '*' + unicode(u' Сумын хилийн гадна байна.')
+            message = '*' + unicode(u' Геометр алдаатай.')
             error_message = error_message + "\n" + message
             self.message_label.setText(error_message)
+        else:
+            g = parcel_feature.geometry()
+            if not g.isGeosValid():
+                valid = False
+                message = '*' + unicode(u' Геометр алдаатай.')
+                error_message = error_message + "\n" + message
+                self.message_label.setText(error_message)
+            else:
+                parcel_geometry = WKTElement(parcel_feature.geometry().exportToWkt(), srid=4326)
 
-        parcel_overlaps_count = self.session.query(PlProjectParcel).\
-            join(PlProject, PlProjectParcel.project_id == PlProject.project_id). \
-            filter(PlProjectParcel.project_id == self.plan.project_id).\
-            filter(parcel_geometry.ST_Covers(PlProjectParcel.polygon_geom)).count()
-        if parcel_overlaps_count > 0:
-            valid = False
-            message = '*' + unicode(u' Нэгж талбар давхардаж байна.')
+                provider = layer.dataProvider()
+                for key, item in column_names.iteritems():
+                    index = provider.fieldNameIndex(key)
+                    if index != -1:
+                        value = parcel_feature.attributes()[index]
+                        column_names[key] = value
 
-            error_message = error_message + "\n" + message
+                # try:
+                # if column_names[column_name_landuse] != None:
+                #     landuse = column_names[column_name_landuse]
+                #     if len(str(landuse).strip()) == 4:
+                #         count = self.session.query(ClLanduseType).filter(ClLanduseType.code == landuse).count()
+                #         if count == 0:
+                #             valid = False
+                #             message = unicode(u'Газрын нэгдмэл сангийн ангиллын дугаар буруу байна.')
+                #             error_message = error_message + "\n" + message
+                #             self.message_label.setText(error_message)
+                #     else:
+                #         valid = False
+                #         message = unicode(u'Газрын нэгдмэл сангийн ангиллын дугаар буруу байна.')
+                #         error_message = error_message + "\n" + message
+                #         self.message_label.setText(error_message)
+                # except SQLAlchemyError, e:
+                #     valid = False
+                #     message = unicode(u'Газрын нэгдмэл сангийн дугаар ангиллын буруу байна.')
+                #     error_message = error_message + "\n" + message
+                #     self.message_label.setText(error_message)
 
-        # if not valid:
-        #     self.error_dic[id] = error_message
+                # try:
+                if not self.if_single_type_chbox.isChecked():
+                    if column_names[column_name_plan_code]:
+                        count = self.session.query(ClPlanZone).filter(ClPlanZone.code == column_names[column_name_plan_code]).count()
+                        if count == 0:
+                            valid = False
+                            message = '*' + unicode(u' Үйл ажиллагааны ангиллын дугаар буруу байна.')
+                            error_message = error_message + "\n" + message
+                            self.message_label.setText(error_message)
+                    else:
+                        valid = False
+                        message = '*' + unicode(u' Үйл ажиллагааны ангиллын дугаар буруу байна.')
+                        error_message = error_message + "\n" + message
+                        self.message_label.setText(error_message)
+                # except SQLAlchemyError, e:
+                #     valid = False
+                #     message = unicode(u'Үйл ажиллагааны ангиллын дугаар буруу байна.')
+                #     error_message = error_message + "\n" + message
+                #     self.message_label.setText(error_message)
+
+                is_out_parcel = False
+                au2_parcel_count = self.session.query(AuLevel2). \
+                    filter(AuLevel2.code == working_soum_code). \
+                    filter(func.ST_Centroid(parcel_geometry).ST_Within(AuLevel2.geometry)).count()
+                if au2_parcel_count == 0:
+                    is_out_parcel = True
+
+                if is_out_parcel:
+                    valid = False
+                    message = '*' + unicode(u' Сумын хилийн гадна байна.')
+                    error_message = error_message + "\n" + message
+                    self.message_label.setText(error_message)
+
+                parcel_overlaps_count = self.session.query(PlProjectParcel).\
+                    join(PlProject, PlProjectParcel.project_id == PlProject.project_id). \
+                    filter(PlProjectParcel.project_id == self.plan.project_id).\
+                    filter(func.ST_Centroid(parcel_geometry).ST_Covers(PlProjectParcel.polygon_geom)).count()
+                if parcel_overlaps_count > 0:
+                    valid = False
+                    message = '*' + unicode(u' Нэгж талбар давхардаж байна.')
+
+                    error_message = error_message + "\n" + message
+
+                # if not valid:
+                #     self.error_dic[id] = error_message
 
         return valid, error_message
 

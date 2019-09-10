@@ -120,15 +120,15 @@ CO_OWNERSHIP_PERSON_ID = 1
 CO_OWNERSHIP_SURNAME = 2
 CO_OWNERSHIP_FIRST_NAME = 3
 
-
 class ApplicationsPastureDialog(QDialog, Ui_ApplicationsPastureDialog, DatabaseHelper):
 
-    def __init__(self, plugin,application, navigator, attribute_update=False, parent=None):
+    def __init__(self, plugin,application, zone_rigth_type, navigator, attribute_update=False, parent=None):
 
         super(ApplicationsPastureDialog, self).__init__(parent)
         DatabaseHelper.__init__(self)
         self.plugin = plugin
         self.navigator = navigator
+        self.zone_rigth_type = zone_rigth_type
         self.attribute_update = attribute_update
 
         self.session = SessionHandler().session_instance()
@@ -146,12 +146,29 @@ class ApplicationsPastureDialog(QDialog, Ui_ApplicationsPastureDialog, DatabaseH
         self.setupUi(self)
         self.close_button.clicked.connect(self.reject)
 
+        self.__setup_twidget()
         self.__setup_combo_boxes()
         self.__set_up_pasture_type_twidget()
         self.__setup_ui()
         self.__setup_permissions()
 
-    #public functions
+    def __setup_twidget(self):
+
+        self.result_group_parcel_twidget.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.result_group_parcel_twidget.setSelectionBehavior(QAbstractItemView.SelectRows)
+        # self.result_group_parcel_twidget.horizontalHeader().setResizeMode(0, QHeaderView.Stretch)
+        # self.result_group_parcel_twidget.horizontalHeader().setVisible(False)
+        self.result_group_parcel_twidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.result_group_parcel_twidget.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.result_group_parcel_twidget.setDragEnabled(True)
+
+        self.assigned_group_parcel_twidget.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.assigned_group_parcel_twidget.setSelectionBehavior(QAbstractItemView.SelectRows)
+        # self.assigned_group_parcel_twidget.horizontalHeader().setResizeMode(0, QHeaderView.Stretch)
+        # self.assigned_group_parcel_twidget.horizontalHeader().setVisible(False)
+        self.assigned_group_parcel_twidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.assigned_group_parcel_twidget.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.assigned_group_parcel_twidget.setDragEnabled(True)
 
     def __set_up_twidget(self, table_widget):
 
@@ -488,10 +505,14 @@ class ApplicationsPastureDialog(QDialog, Ui_ApplicationsPastureDialog, DatabaseH
 
         try:
             rigth_types = self.session.query(ClRightType).filter(ClRightType.code == 1).all()
-
-            application_types = self.session.query(ClApplicationType).\
-                filter(or_(ClApplicationType.code == ApplicationType.pasture_use, ClApplicationType.code == 27)).\
-                order_by(ClApplicationType.code).all()
+            if self.zone_rigth_type == 1:
+                application_types = self.session.query(ClApplicationType).\
+                    filter(ClApplicationType.code == ApplicationType.pasture_use).\
+                    order_by(ClApplicationType.code).all()
+            else:
+                application_types = self.session.query(ClApplicationType). \
+                    filter(ClApplicationType.code == 27). \
+                    order_by(ClApplicationType.code).all()
             statuses = self.session.query(ClApplicationStatus).order_by(ClApplicationStatus.code).all()
             # set_roles = self.session.query(SetRole). \
             #     filter(SetRole.user_name.startswith(user_start)).all()
@@ -2461,8 +2482,8 @@ class ApplicationsPastureDialog(QDialog, Ui_ApplicationsPastureDialog, DatabaseH
                 member_register = member.person_ref.person_register
                 member_name = member.person_ref.name
                 member_firstname = member.person_ref.first_name
-                member_info = ['', member_id, member_name, member_firstname]
-                member_item = QTreeWidgetItem(member_register)
+                member_info = ['', member_register, member_name, member_firstname]
+                member_item = QTreeWidgetItem(member_info)
                 member_item.setIcon(0, QIcon(QPixmap(":/plugins/lm2/person.png")))
                 member_item.setData(0, Qt.UserRole, member_id)
                 member_item.setData(0, Qt.UserRole+1, 1)
@@ -2770,8 +2791,13 @@ class ApplicationsPastureDialog(QDialog, Ui_ApplicationsPastureDialog, DatabaseH
             item.setData(Qt.UserRole, parcel.area_ga)
             self.result_group_parcel_twidget.setItem(count, 2, item)
 
+            item = QTableWidgetItem(unicode(parcel.pasture_type))
+            item.setData(Qt.UserRole, parcel.pasture_type)
+            self.result_group_parcel_twidget.setItem(count, 3, item)
+
             count += 1
 
+        self.result_group_parcel_twidget.resizeColumnsToContents()
         self.error_label.setText("")
 
     @pyqtSlot()
@@ -2822,6 +2848,8 @@ class ApplicationsPastureDialog(QDialog, Ui_ApplicationsPastureDialog, DatabaseH
         item = QTableWidgetItem('360')
         item.setData(Qt.UserRole, 360)
         self.assigned_group_parcel_twidget.setItem(count, 5, item)
+
+        self.assigned_group_parcel_twidget.resizeColumnsToContents()
 
         app_pug_parcel_count = self.session.query(CtApplicationPUGParcel).filter(
             CtApplicationPUGParcel.application == self.application.app_id). \
