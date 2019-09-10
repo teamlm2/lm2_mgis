@@ -211,8 +211,7 @@ class PersonDialog(QDialog, Ui_PersonDialog, DatabaseHelper):
         if person_type == PersonType.mongolian_state_org \
                 or person_type == PersonType.mongolian_buisness \
                 or person_type == PersonType.legal_entity_foreign \
-                or person_type == PersonType.foreign_citizen \
-                or person_type == PersonType.SUH:
+                or person_type == PersonType.foreign_citizen:
             new_text = self.__auto_correct_company_name(text)
 
             if new_text != text:
@@ -275,8 +274,7 @@ class PersonDialog(QDialog, Ui_PersonDialog, DatabaseHelper):
         if person_type == PersonType.mongolian_state_org \
                 or person_type == PersonType.mongolian_buisness \
                 or person_type == PersonType.legal_entity_foreign \
-                or person_type == PersonType.foreign_citizen\
-                or person_type == PersonType.SUH:
+                or person_type == PersonType.foreign_citizen:
             new_text = self.__auto_correct_company_name(text)
 
             if new_text != text:
@@ -578,8 +576,7 @@ class PersonDialog(QDialog, Ui_PersonDialog, DatabaseHelper):
 
         if person_type == PersonType.mongolian_buisness \
                 or person_type == PersonType.mongolian_state_org \
-                or person_type == PersonType.legal_entity_foreign\
-                or person_type == PersonType.SUH:
+                or person_type == PersonType.legal_entity_foreign:
 
             self.person.name = self.surname_company_edit.text()
             self.person.contact_surname = self.contact_surname_edit.text()
@@ -587,6 +584,7 @@ class PersonDialog(QDialog, Ui_PersonDialog, DatabaseHelper):
             self.person.contact_position = self.contact_position_edit.text()
         else:
             self.person.name = self.surname_company_edit.text()
+            self.person.first_name = self.first_name_edit.text()
             self.person.middle_name = self.middle_name_edit.text()
             self.person.date_of_birth = DatabaseUtils.convert_date(self.date_of_birth_date.date())
 
@@ -793,7 +791,7 @@ class PersonDialog(QDialog, Ui_PersonDialog, DatabaseHelper):
         text = self.surname_company_edit.text()
 
         if person_type == PersonType.mongolian_buisness or person_type == PersonType.mongolian_state_org \
-                or person_type == PersonType.legal_entity_foreign:
+                or person_type == PersonType.legal_entity_foreign or person_type == PersonType.SUH:
 
             if not self.__validate_company_name(text):
                 self.surname_company_edit.setStyleSheet(Constants.ERROR_LINEEDIT_STYLESHEET)
