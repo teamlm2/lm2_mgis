@@ -1349,7 +1349,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
                 value = parcel_feature.attributes()[index]
                 column_names[key] = value
 
-        plan_code = column_names[column_name_plan_code]
+        plan_code = str(column_names[column_name_plan_code])
         landuse_code = column_names[column_name_landuse]
 
         process_type = None
@@ -1436,7 +1436,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
                 # try:
                 if not self.if_single_type_chbox.isChecked():
                     if column_names[column_name_plan_code]:
-                        count = self.session.query(ClPlanZone).filter(ClPlanZone.code == column_names[column_name_plan_code]).count()
+                        count = self.session.query(ClPlanZone).filter(ClPlanZone.code == str(column_names[column_name_plan_code])).count()
                         if count == 0:
                             valid = False
                             message = '*' + unicode(u' Үйл ажиллагааны ангиллын дугаар буруу байна.')
@@ -1514,7 +1514,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         if column_names[column_name_parcel_id] != None:
             id = column_names[column_name_parcel_id]
         if column_names[column_name_plan_code] != None:
-            plan_code = column_names[column_name_plan_code]
+            plan_code = str(column_names[column_name_plan_code])
         if column_names[column_name_landuse] != None:
             landuse = column_names[column_name_landuse]
         if column_names[column_name_landname] != None:

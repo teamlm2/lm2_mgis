@@ -24,6 +24,8 @@ from ..model.ClPlanType import *
 from ..model.PlProjectStatusHistory import *
 from ..model.CaParcel import *
 from ..model.CmParcelBasePrice import *
+from ..model.CmValuationLevelStatus import *
+from ..model.CmValuationLevel import *
 from ..controller.PlanCaseDialog import *
 from ..controller.ManageParcelRecordsDialog import *
 from ..utils.DatabaseUtils import *
@@ -81,7 +83,6 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
         self.parcel_base_price_value = None
         self.parcel_calc_price_value = None
 
-        self.__setup_validators()
         self.au2 = DatabaseUtils.working_l2_code()
         self.__setup_combo_boxes()
         self.working_l1_cbox.currentIndexChanged.connect(self.__working_l1_changed)
@@ -90,7 +91,6 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
         self.water_quality_list = {1: 'I', 2: 'II', 3: 'III', 4: 'IV', 5: 'V'}
         self.is_yes_list = {1: u'Тйим', 0: u'Үгүй'}
 
-        self.__setup_cbox()
         self.__setup_analyze_cbox()
         self.cadastre_rbutton.isCheckable()
         self.__setup_twidget()
@@ -241,18 +241,6 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
         self.cadastre_current_twidget.horizontalHeader().resizeSection(1, 70)
         self.cadastre_current_twidget.horizontalHeader().resizeSection(2, 70)
 
-    def __setup_validators(self):
-
-        self.numbers_validator = QRegExpValidator(QRegExp("[1-9][0-9]+\\.[0-9]{3}"), None)
-        self.int_validator = QRegExpValidator(QRegExp("[0-9][0-9]"), None)
-
-        self.elevation_edit.setValidator(self.numbers_validator)
-        self.slopy_edit.setValidator(self.numbers_validator)
-        self.rain_replicate_edit.setValidator(self.numbers_validator)
-        self.earthquake_edit.setValidator(self.numbers_validator)
-        self.soil_quality_edit.setValidator(self.numbers_validator)
-        self.air_quality_edit.setValidator(self.numbers_validator)
-
     def set_parcel_data(self, parcel_no, feature, layer_type):
 
         if feature:
@@ -264,7 +252,6 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
 
     def __update_ui(self):
 
-        self.__all_clear()
         self.setWindowTitle(self.tr('Parcel ID: <{0}>. Select the decision.'.format(self.parcel_id)))
 
         count = self.session.query(CaParcel).filter(CaParcel.parcel_id == self.parcel_id).count()
@@ -298,18 +285,7 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
         self.parcel_base_price.setText(str(base_price_m2))
 
         self.parcel_all_base_price.setText(str(float(base_price_m2)*parcel.area_m2/1000000))
-        # self.parcel_base_price_value = float(base_price_m2)*parcel.area_m2/1000000
-
-    def __setup_cbox(self):
-
-        self.permafrost_cbox.addItem('*', -1)
-        self.water_quality_cbox.addItem('*', -1)
-
-        for key in self.water_quality_list:
-            self.water_quality_cbox.addItem(self.water_quality_list[key], key)
-
-        for key in self.is_yes_list:
-            self.permafrost_cbox.addItem(self.is_yes_list[key], key)
+        # self.parcel_base_price_value = float(base_price_m2)*parcel.area_m2/100000)
 
     def __setup_combo_boxes(self):
 
@@ -411,201 +387,6 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
             self.parcel_market_price.setEnabled(False)
 
     @pyqtSlot()
-    def on_price_calc_button_clicked(self):
-
-
-
-        p_price = float(self.parcel_all_base_price.text())
-        # self.parcel_calc_price_value = p_price
-        #
-        # if self.elevation_value_edit.text() and self.parcel_calc_price_value:
-        #     value = float(self.elevation_value_edit.text())
-        #     self.parcel_calc_price_value = self.parcel_calc_price_value * value
-        #
-        # if self.slopy_value_edit.text() and self.parcel_calc_price_value:
-        #     value = float(self.slopy_value_edit.text())
-        #     self.parcel_calc_price_value = self.parcel_calc_price_value * value
-        #
-        # if self.rain_replicate_value_edit.text() and self.parcel_calc_price_value:
-        #     value = float(self.rain_replicate_value_edit.text())
-        #     self.parcel_calc_price_value = self.parcel_calc_price_value * value
-        #
-        # if self.earthquake_value_edit.text() and self.parcel_calc_price_value:
-        #     value = float(self.earthquake_value_edit.text())
-        #     self.parcel_calc_price_value = self.parcel_calc_price_value * value
-        #
-        # if self.soil_quality_value_edit.text() and self.parcel_calc_price_value:
-        #     value = float(self.soil_quality_value_edit.text())
-        #     self.parcel_calc_price_value = self.parcel_calc_price_value * value
-        #
-        # if self.air_quality_value_edit.text() and self.parcel_calc_price_value:
-        #     value = float(self.air_quality_value_edit.text())
-        #     self.parcel_calc_price_value = self.parcel_calc_price_value * value
-        #
-        # if self.permafrost_value_edit.text() and self.parcel_calc_price_value:
-        #     value = float(self.permafrost_value_edit.text())
-        #     self.parcel_calc_price_value = self.parcel_calc_price_value * value
-        #
-        # if self.water_quality_value_edit.text() and self.parcel_calc_price_value:
-        #     value = float(self.water_quality_value_edit.text())
-        #     self.parcel_calc_price_value = self.parcel_calc_price_value * value
-        #
-        # #
-        # if self.shcool_value_edit.text() and self.parcel_calc_price_value:
-        #     value = float(self.shcool_value_edit.text())
-        #     self.parcel_calc_price_value = self.parcel_calc_price_value * value
-        #
-        # self.parcel_calc_base_price.setText(str(self.parcel_calc_price_value))
-
-    @pyqtSlot(str)
-    def on_elevation_edit_textChanged(self, text):
-
-        factor_id = 1
-        is_interval = True
-        if text == "":
-            self.elevation_edit.setStyleSheet(Constants.ERROR_LINEEDIT_STYLESHEET)
-            return
-        else:
-            self.elevation_edit.setStyleSheet(self.styleSheet())
-
-        if self.__get_factor_change_value(text, factor_id, is_interval):
-            value = self.__get_factor_change_value(text, factor_id, is_interval)
-            self.elevation_value_edit.setText(str(value))
-
-    @pyqtSlot(str)
-    def on_slopy_edit_textChanged(self, text):
-
-        factor_id = 2
-        is_interval = True
-        if text == "":
-            self.slopy_edit.setStyleSheet(Constants.ERROR_LINEEDIT_STYLESHEET)
-            return
-        else:
-            self.slopy_edit.setStyleSheet(self.styleSheet())
-
-        if self.__get_factor_change_value(text, factor_id, is_interval):
-            value = self.__get_factor_change_value(text, factor_id, is_interval)
-            self.slopy_value_edit.setText(str(value))
-
-    @pyqtSlot(str)
-    def on_earthquake_edit_textChanged(self, text):
-
-        factor_id = 3
-        is_interval = True
-        if text == "":
-            self.earthquake_edit.setStyleSheet(Constants.ERROR_LINEEDIT_STYLESHEET)
-            return
-        else:
-            self.earthquake_edit.setStyleSheet(self.styleSheet())
-
-        if self.__get_factor_change_value(text, factor_id, is_interval):
-            value = self.__get_factor_change_value(text, factor_id, is_interval)
-            self.earthquake_value_edit.setText(str(value))
-
-    @pyqtSlot(str)
-    def on_soil_quality_edit_textChanged(self, text):
-
-        factor_id = 8
-        is_interval = True
-        if text == "":
-            self.soil_quality_edit.setStyleSheet(Constants.ERROR_LINEEDIT_STYLESHEET)
-            return
-        else:
-            self.soil_quality_edit.setStyleSheet(self.styleSheet())
-
-        if self.__get_factor_change_value(text, factor_id, is_interval):
-            value = self.__get_factor_change_value(text, factor_id, is_interval)
-            self.soil_quality_value_edit.setText(str(value))
-
-    @pyqtSlot(str)
-    def on_air_quality_edit_textChanged(self, text):
-
-        factor_id = 6
-        is_interval = True
-        if text == "":
-            self.air_quality_edit.setStyleSheet(Constants.ERROR_LINEEDIT_STYLESHEET)
-            return
-        else:
-            self.air_quality_edit.setStyleSheet(self.styleSheet())
-
-        if self.__get_factor_change_value(text, factor_id, is_interval):
-            value = self.__get_factor_change_value(text, factor_id, is_interval)
-            self.air_quality_value_edit.setText(str(value))
-
-    @pyqtSlot(str)
-    def on_rain_replicate_edit_textChanged(self, text):
-
-        factor_id = 4
-        is_interval = False
-        if text == "":
-            self.rain_replicate_edit.setStyleSheet(Constants.ERROR_LINEEDIT_STYLESHEET)
-            return
-        else:
-            self.rain_replicate_edit.setStyleSheet(self.styleSheet())
-
-        if self.__get_factor_change_value(text, factor_id, is_interval):
-            value = self.__get_factor_change_value(text, factor_id, is_interval)
-            self.rain_replicate_value_edit.setText(str(value))
-
-    @pyqtSlot(int)
-    def on_permafrost_cbox_currentIndexChanged(self, index):
-
-        factor_id = 5
-        is_interval = False
-        id = self.permafrost_cbox.itemData(index)
-        if id == -1:
-            self.permafrost_value_edit.clear()
-        else:
-            if self.__get_factor_change_value(id, factor_id, is_interval):
-                value = self.__get_factor_change_value(id, factor_id, is_interval)
-                self.permafrost_value_edit.setText(str(value))
-
-    @pyqtSlot(int)
-    def on_water_quality_cbox_currentIndexChanged(self, index):
-
-        factor_id = 7
-        is_interval = False
-        id = self.water_quality_cbox.itemData(index)
-        if id == -1:
-            self.water_quality_value_edit.clear()
-        else:
-            if self.__get_factor_change_value(id, factor_id, is_interval):
-                value = self.__get_factor_change_value(id, factor_id, is_interval)
-                self.water_quality_value_edit.setText(str(value))
-
-    def __get_factor_change_value(self, text, factor_id, is_interval):
-
-        ch_value = float(text)
-
-        values = self.session.query(CmFactorAuValue). \
-            filter(CmFactorAuValue.au2 == self.au2). \
-            filter(CmFactorAuValue.factor_id == factor_id). \
-            filter(CmFactorAuValue.is_interval == is_interval).all()
-
-        is_ok = False
-        conf_value = 1
-
-        for value in values:
-            if not is_ok:
-                if is_interval:
-                    if value.first_value <= ch_value and value.last_value >= ch_value:
-                        is_ok = True
-                        factor_value = self.session.query(CmFactorValue).filter(
-                            CmFactorValue.code == value.factor_value_id).one()
-                        conf_value = factor_value.value
-                else:
-                    if value.first_value == ch_value:
-                        is_ok = True
-                        factor_value = self.session.query(CmFactorValue).filter(
-                            CmFactorValue.code == value.factor_value_id).one()
-                        conf_value = factor_value.value
-
-        if is_ok:
-            return conf_value
-        else:
-            return None
-
-    @pyqtSlot()
     def on_layer_button_clicked(self):
 
         root = QgsProject.instance().layerTreeRoot()
@@ -646,121 +427,21 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
             mygroup.addLayer(vlayer)
 
     @pyqtSlot()
-    def on_distinct_calc_button_clicked(self):
-
-        parcel_id = self.parcel_id_edit.text()
-        cama_landuse = 210401
-        if self.__calculate_parcel_distance(parcel_id, cama_landuse):
-            distance_value = self.__calculate_parcel_distance(parcel_id, cama_landuse)
-            self.shcool_edit.setText(str(distance_value))
-
-    def __calculate_parcel_distance(self, parcel_id, cama_landuse):
-
-        sql = "select parcel.parcel_id, " \
-              "min(ST_Distance(ST_Transform(parcel.geometry, base.find_utm_srid(St_Centroid(parcel.geometry))), ST_Transform(cm_parcel.geometry, base.find_utm_srid(St_Centroid(cm_parcel.geometry))))) " \
-              "from data_soums_union.ca_parcel_tbl parcel, data_cama.cm_parcel_tbl cm_parcel " \
-              "where parcel.parcel_id = :parcel_id and cm_parcel.cama_landuse = :cama_landuse group by parcel.parcel_id"
-
-        result = self.session.execute(sql, {'parcel_id': parcel_id, 'cama_landuse': cama_landuse})
-
-        distance_value = None
-        for item_row in result:
-            distance_value = item_row[1]/1000
-
-        return distance_value
-
-    @pyqtSlot(str)
-    def on_shcool_edit_textChanged(self, text):
-
-        factor_id = 15
-        is_interval = True
-        if text == "":
-            self.shcool_edit.setStyleSheet(Constants.ERROR_LINEEDIT_STYLESHEET)
-            return
-        else:
-            self.shcool_edit.setStyleSheet(self.styleSheet())
-        if self.__get_factor_change_value(text, factor_id, is_interval):
-            value = self.__get_factor_change_value(text, factor_id, is_interval)
-            self.shcool_value_edit.setText(str(value))
-
-    def __all_clear(self):
-
-        # parcel info
-        self.parcel_id_edit.clear()
-        self.parcel_area_edit.clear()
-        self.parcel_area_ha_edit.clear()
-        self.parcel_base_price.clear()
-        self.parcel_all_base_price.clear()
-        self.parcel_calc_base_price.clear()
-        self.parcel_market_price.clear()
-        self.parcel_all_market_price.clear()
-        self.parcel_calc_market_price.clear()
-        self.parcel_address_edit.clear()
-
-        # factor
-        self.elevation_edit.clear()
-        self.elevation_value_edit.clear()
-        self.slopy_edit.clear()
-        self.slopy_value_edit.clear()
-        self.rain_replicate_edit.clear()
-        self.rain_replicate_value_edit.clear()
-        self.permafrost_value_edit.clear()
-        self.water_quality_value_edit.clear()
-        self.earthquake_edit.clear()
-        self.earthquake_value_edit.clear()
-        self.soil_quality_edit.clear()
-        self.soil_quality_value_edit.clear()
-        self.air_quality_edit.clear()
-        self.air_quality_value_edit.clear()
-
-        # enginering
-        self.heat_line_edit.clear()
-        self.heat_line_value_edit.clear()
-        self.water_line_edit.clear()
-        self.water_line_value_edit.clear()
-        self.disinfect_line_edit.clear()
-        self.disinfect_line_value_edit.clear()
-        self.power_line_edit.clear()
-        self.power_line_value_edit.clear()
-        self.route_edit.clear()
-        self.route_value_edit.clear()
-        self.parking_edit.clear()
-        self.parking_value_edit.clear()
-
-        # infrastructure
-        self.shcool_edit.clear()
-        self.shcool_value_edit.clear()
-        self.kindergarten_edit.clear()
-        self.kindergarten_value_edit.clear()
-        self.medical_edit.clear()
-        self.medical_value_edit.clear()
-        self.admin_edit.clear()
-        self.admin_value_edit.clear()
-        self.house_service_edit.clear()
-        self.house_service_value_edit.clear()
-
-        # service
-        self.shop_center_edit.clear()
-        self.shop_center_value_edit.clear()
-        self.service_center_edit.clear()
-        self.service_center_value_edit.clear()
-
-    @pyqtSlot()
     def on_load_button_clicked(self):
 
         au2 = DatabaseUtils.working_l2_code()
 
-        parcel_base_price = self.session.query(CmParcelBasePrice.au2 == au2)
-
-
+        parcel_base_price = self.session.query(CmParcelBasePrice).filter(CmParcelBasePrice.au2 == au2)
         count = parcel_base_price.count()
+
         self.parcel_count_edit.setText(str(count))
 
-        min_price = self.session.query(func.min(CmParcelBasePrice.base_price_m2)).one()
-        max_price = self.session.query(func.max(CmParcelBasePrice.base_price_m2)).one()
-        self.min_price_edit.setText(str(min_price[0]))
-        self.max_price_edit.setText(str(max_price[0]))
-
+        min_price = self.session.query(func.min(CmParcelBasePrice.base_price_m2)).filter(CmParcelBasePrice.au2 == au2).one()
+        max_price = self.session.query(func.max(CmParcelBasePrice.base_price_m2)).filter(CmParcelBasePrice.au2 == au2).one()
+        if min_price[0]:
+            self.min_price_edit.setText(str(min_price[0]))
+        if max_price[0]:
+            self.max_price_edit.setText(str(max_price[0]))
 
     @pyqtSlot()
     def on_calculate_button_clicked(self):
@@ -771,6 +452,7 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
         begin_interval = 0
         end_interval = 0
         level_no = 1
+
         if self.min_price_edit.text():
             min_price = float(self.min_price_edit.text())
         if self.max_price_edit.text():
@@ -818,8 +500,24 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
 
         sql = ""
         sql_zone = ""
-        rows = self.price_interval_twidget.rowCount()
 
+        au2 = DatabaseUtils.working_l2_code()
+
+        au2_valuation_level_count = self.session.query(CmValuationLevel).filter(CmValuationLevel.au2 == au2).count()
+
+        if au2_valuation_level_count > 0:
+            message_box = QMessageBox()
+            message_box.setText(u'Энэ сум/дүүрэгт үнэлгээний бүсчлэлийг тооцоолсан байна. Устгаад дахин тооцоолох уу?')
+            delete_button = message_box.addButton(self.tr("Yes"), QMessageBox.ActionRole)
+            message_box.addButton(self.tr("No"), QMessageBox.ActionRole)
+            message_box.exec_()
+
+            if not message_box.clickedButton() == delete_button:
+                return
+            else:
+                self.session.query(CmValuationLevel).filter(CmValuationLevel.au2 == au2).delete()
+
+        rows = self.price_interval_twidget.rowCount()
         for row in range(rows):
             zone_no = str(self.price_interval_twidget.cellWidget(row, 1).value())
             begin_value = str(self.price_interval_twidget.cellWidget(row, 2).value())
@@ -842,45 +540,56 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
             sql = sql + select
             sql_zone = sql_zone + select_zone
 
-        sql = "(" + sql + ")"
+        status = self.valuation_level_status_cbox.itemData(self.valuation_level_status_cbox.currentIndex())
+        result = self.session.execute(sql_zone)
+        for item_row in result:
+            zone_no = item_row[0]
+            geometry = item_row[1]
+            geom = 'ST_Multi(' +  "'" + geometry +  "'" + ')'
+            values = str(zone_no) + ", " + geom + ", " + "'" + "" + "'" + ", " + "'" + "" + "'" + ", " + "true" + ", " + "'" + au2 + "'" + ", " + str(status)
+            sql = "insert into data_cama.cm_valuation_level (level_no, geometry, name, location, in_active, au2, status) values ("+ values +")"
+            self.session.execute(sql)
 
-        root = QgsProject.instance().layerTreeRoot()
-        mygroup = root.findGroup(u"CAMA")
-        layer_name = 'Parcel Zone Classify'
-        layer_list = []
-        layers = QgsMapLayerRegistry.instance().mapLayers()
-
-        for id, layer in layers.iteritems():
-            if layer.type() == QgsMapLayer.VectorLayer:
-                if layer.name() == layer_name:
-                    layer_list.append(id)
-
-        vlayer_parcel = LayerUtils.layer_by_data_source("", sql)
-        if vlayer_parcel:
-            QgsMapLayerRegistry.instance().removeMapLayers(layer_list)
-        vlayer_parcel = LayerUtils.load_temp_table(sql, layer_name)
-
-        myalayer = root.findLayer(vlayer_parcel.id())
-        if myalayer is None:
-            mygroup.addLayer(vlayer_parcel)
-
-        layer_name = 'Test Zone Classify'
-        for id, layer in layers.iteritems():
-            if layer.type() == QgsMapLayer.VectorLayer:
-                if layer.name() == layer_name:
-                    layer_list.append(id)
-
-        sql_zone = "select row_number() over() as gid, * from ( " + sql_zone + " )xxx"
-        sql_zone = "(" + sql_zone + ")"
-
-        vlayer_parcel = LayerUtils.layer_by_data_source("", sql_zone)
-        if vlayer_parcel:
-            QgsMapLayerRegistry.instance().removeMapLayers(layer_list)
-        vlayer_parcel = LayerUtils.load_temp_table(sql_zone, layer_name)
-
-        myalayer = root.findLayer(vlayer_parcel.id())
-        if myalayer is None:
-            mygroup.addLayer(vlayer_parcel)
+        self.session.commit()
+        # sql = "(" + sql + ")"
+        #
+        # root = QgsProject.instance().layerTreeRoot()
+        # mygroup = root.findGroup(u"CAMA")
+        # layer_name = 'Parcel Zone Classify'
+        # layer_list = []
+        # layers = QgsMapLayerRegistry.instance().mapLayers()
+        #
+        # for id, layer in layers.iteritems():
+        #     if layer.type() == QgsMapLayer.VectorLayer:
+        #         if layer.name() == layer_name:
+        #             layer_list.append(id)
+        #
+        # vlayer_parcel = LayerUtils.layer_by_data_source("", sql)
+        # if vlayer_parcel:
+        #     QgsMapLayerRegistry.instance().removeMapLayers(layer_list)
+        # vlayer_parcel = LayerUtils.load_temp_table(sql, layer_name)
+        #
+        # myalayer = root.findLayer(vlayer_parcel.id())
+        # if myalayer is None:
+        #     mygroup.addLayer(vlayer_parcel)
+        #
+        # layer_name = 'Test Zone Classify'
+        # for id, layer in layers.iteritems():
+        #     if layer.type() == QgsMapLayer.VectorLayer:
+        #         if layer.name() == layer_name:
+        #             layer_list.append(id)
+        #
+        # sql_zone = "select row_number() over() as gid, * from ( " + sql_zone + " )xxx"
+        # sql_zone = "(" + sql_zone + ")"
+        #
+        # vlayer_parcel = LayerUtils.layer_by_data_source("", sql_zone)
+        # if vlayer_parcel:
+        #     QgsMapLayerRegistry.instance().removeMapLayers(layer_list)
+        # vlayer_parcel = LayerUtils.load_temp_table(sql_zone, layer_name)
+        #
+        # myalayer = root.findLayer(vlayer_parcel.id())
+        # if myalayer is None:
+        #     mygroup.addLayer(vlayer_parcel)
 
     @pyqtSlot()
     def on_valuation_button_clicked(self):
@@ -910,6 +619,12 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
             for landuse in cl_landusetype:
                 if len(str(landuse.code)) == 4:
                     self.land_use_type_cbox.addItem(str(landuse.code) + ':' + landuse.description, landuse.code)
+
+        valuation_status = self.session.query(CmValuationLevelStatus).order_by(CmValuationLevelStatus.code).all()
+        if valuation_status is not None:
+            for value in valuation_status:
+                if len(str(landuse.code)) == 4:
+                    self.valuation_level_status_cbox.addItem(str(value.code) + ':' + value.description, value.code)
 
     @pyqtSlot()
     def on_parcel_find_button_clicked(self):
