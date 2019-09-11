@@ -2455,14 +2455,17 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         person_surname = ''
         person_firstname = ''
         contact_position = ''
+        person_full_name = ''
         if person.type == 10 or person.type == 20 or person.type == 50:
             person_surname = person.name
             person_firstname = person.first_name
+            person_full_name = person_surname + u' овогтой ' + person_firstname
         elif person.type == 30 or person.type == 40 or person.type == 60 or person.type == 70:
             company_name = person.name
             contact_position = person.contact_position
             person_surname = person.contact_surname
             person_firstname = person.contact_first_name
+            person_full_name = person.name
         area_m2 = self.calculated_area_edit.text()
 
         area_m2 = area_m2 + u" м2" + u', '+ str(float(area_m2) / 10000) + u" га"
@@ -2584,8 +2587,9 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             'o_position': o_position,
             'company_name': company_name,
             'contact_position': contact_position,
-            'person_surname': person_surname,
-            'person_firstname': person_firstname,
+            'person_full_name': person_full_name,
+            # 'person_surname': person_surname,
+            # 'person_firstname': person_firstname,
             'area_m2': area_m2,
             'landuse': landuse,
             'base_fee': base_fee,
