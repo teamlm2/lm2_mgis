@@ -548,7 +548,7 @@ class SpaParcelWidget(QDockWidget, Ui_SpaParcelWidget, DatabaseHelper):
 
         self.parcel_id_edit.clear()
         self.personal_parcel_edit.clear()
-        self.pasture_app_no_edit.clear()
+        self.parcel_app_num_edit.clear()
         self.parcel_right_holder_name_edit.clear()
         self.parcel_contract_num_edit.clear()
         self.app_date_edit.setDate(QDate.currentDate())
@@ -569,100 +569,6 @@ class SpaParcelWidget(QDockWidget, Ui_SpaParcelWidget, DatabaseHelper):
     def on_pasture_find_button_clicked(self):
 
         self.__pasture_applications()
-
-    def __pasture_applications(self):
-
-        # try:
-        applications = self.session.query(ApplicationPastureSearch)
-        filter_is_set = False
-
-        applications = applications.filter(or_(ApplicationPastureSearch.app_type == ApplicationType.right_land,
-                   ApplicationPastureSearch.app_type == ApplicationType.pasture_use))
-        if self.spa_type_cbox.currentIndex() != -1:
-            if not self.spa_type_cbox.itemData(self.spa_type_cbox.currentIndex()) == -1:
-                filter_is_set = True
-                group_no = self.spa_type_cbox.itemData(self.spa_type_cbox.currentIndex())
-
-                applications = applications.filter(ApplicationPastureSearch.group_no == group_no)
-
-        if self.pasture_app_no_edit.text():
-            filter_is_set = True
-            app_no = "%" + self.pasture_app_no_edit.text() + "%"
-            applications = applications.filter(ApplicationPastureSearch.app_no.ilike(app_no))
-
-        if self.parcel_right_holder_name_edit.text():
-            filter_is_set = True
-            right_holder = self.parcel_right_holder_name_edit.text()
-            if "," in right_holder:
-                right_holder_strings = right_holder.split(",")
-                surname = "%" + right_holder_strings[0].strip() + "%"
-                first_name = "%" + right_holder_strings[1].strip() + "%"
-                applications = applications.filter(and_(func.lower(ApplicationPastureSearch.name).ilike(func.lower(surname)), func.lower(ApplicationPastureSearch.first_name).ilike(func.lower(first_name))))
-            else:
-                right_holder = "%" + self.parcel_right_holder_name_edit.text() + "%"
-                applications = applications.filter(or_(func.lower(ApplicationPastureSearch.name).ilike(func.lower(right_holder)), func.lower(ApplicationPastureSearch.first_name).ilike(func.lower(right_holder)), func.lower(ApplicationPastureSearch.middle_name).ilike(func.lower(right_holder))))
-
-        if self.parcel_id_edit.text():
-            filter_is_set = True
-            parcel_no = "%" + self.parcel_id_edit.text() + "%"
-
-            applications = applications.filter(ApplicationPastureSearch.parcel_id.ilike(parcel_no))
-
-        if self.personal_parcel_edit.text():
-            filter_is_set = True
-            register_no = "%" + self.personal_parcel_edit.text() + "%"
-            applications = applications.filter(ApplicationPastureSearch.person_register.ilike(register_no))
-
-        if self.parcel_contract_num_edit.text():
-            filter_is_set = True
-            contract_num = "%" + self.parcel_contract_num_edit.text() + "%"
-            applications = applications.filter(or_(ApplicationPastureSearch.contract_no.ilike(contract_num), ApplicationPastureSearch.record_no.ilike(contract_num)))
-
-
-        if self.app_date_cbox.isChecked():
-            filter_is_set = True
-            qt_date = self.app_date_edit.date().toString(Constants.DATABASE_DATE_FORMAT)
-            python_date = datetime.strptime(str(qt_date), Constants.PYTHON_DATE_FORMAT)
-
-            applications = applications.filter(ApplicationPastureSearch.app_timestamp >= python_date)
-
-        count = 0
-
-        self.__remove_pasture_items()
-
-        # if applications.distinct(ApplicationPastureSearch.app_no).count() == 0:
-        #     self.error_label.setText(self.tr("No applications found for this search filter."))
-        #     return
-
-        if filter_is_set is False:
-            self.error_label.setText(self.tr("Please specify a search filter."))
-            return
-
-        for application in applications.distinct(ApplicationPastureSearch.app_no, ApplicationPastureSearch.app_id, ApplicationPastureSearch.status).all():
-
-            app_type = "" if not application.app_type_ref else application.app_type_ref.description
-            item = QTableWidgetItem(str(application.app_no) + " ( " + unicode(app_type) + " )")
-            if application.status == 9:
-                item.setBackground(QtGui.QColor(133, 193, 233 ))
-            elif application.status == 7:
-                item.setBackground(QtGui.QColor(88, 214, 141))
-            elif application.status == 6:
-                item.setBackground(QtGui.QColor(213, 219, 219))
-            else:
-                item.setBackground(QtGui.QColor(249, 231, 159))
-            item.setIcon(QIcon(QPixmap(":/plugins/lm2/application.png")))
-            item.setData(Qt.UserRole, application.app_no)
-            item.setData(Qt.UserRole+1, application.app_id)
-            self.parcel_results_twidget.insertRow(count)
-            self.parcel_results_twidget.setItem(count, 0, item)
-            count += 1
-
-        self.error_label.setText("")
-        self.results_label.setText(self.tr("Results: ") + str(count))
-
-        # except SQLAlchemyError, e:
-        #     PluginUtils.show_message(self, self.tr("LM2", "Sql Error"), e.message)
-        #     return
 
     @pyqtSlot(QTableWidgetItem)
     def on_parcel_results_twidget_itemDoubleClicked(self, item):
@@ -733,7 +639,7 @@ class SpaParcelWidget(QDockWidget, Ui_SpaParcelWidget, DatabaseHelper):
         self.working_l2_cbox.setCurrentIndex(self.working_l2_cbox.findData(soum_code))
         try:
             app_result = self.session.query(ApplicationPastureSearch).filter(ApplicationPastureSearch.app_no == id).one()
-            self.pasture_app_no_edit.setText(app_result.app_no)
+            self.parcel_app_num_edit.setText(app_result.app_no)
             self.parcel_right_holder_name_edit.setText(app_result.first_name)
             self.parcel_id_edit.setText(app_result.person_register)
             self.personal_parcel_edit.setText(app_result.person_register)

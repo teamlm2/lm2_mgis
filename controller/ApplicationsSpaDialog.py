@@ -40,6 +40,7 @@ from ..model.ClPastureDocument import *
 from ..model.SetPastureDocument import *
 from ..model.SetPersonTypeApplicationType import *
 from ..model.SetApplicationTypeLanduseType import *
+from ..model.CaSpaParcelTbl import *
 from ..model.SetValidation import *
 from ..model.DatabaseHelper import *
 from ..model.AuLevel3 import *
@@ -48,7 +49,9 @@ from ..model import ConstantsPasture
 from ..model.AuLevel1 import *
 from ..model.AuLevel2 import *
 from ..model.MaintenanceSearch import *
+from ..model.ClPersonType import *
 from ..model.EnumerationsPasture import ApplicationType, UserRight
+from ..model.Enumerations import PersonType
 from ..model.CtPersonGroup import *
 from ..model.CtApplicationPUG import *
 from ..model.CtApplicationPUGParcel import *
@@ -57,6 +60,9 @@ from ..model.CtGroupMember import *
 from ..model.CtAppGroupBoundary import *
 from ..model.SetApplicationTypeDocumentRole import *
 from ..model.ClRightType import *
+from ..model.ClParcelType import *
+from ..model.SetApplicationTypeParcelType import *
+from ..model.CtApplicationParcel import *
 from .qt_classes.PastureApplicationDocumentDelegate import PastureApplicationDocumentDelegate
 from .qt_classes.DocumentsTableWidget import DocumentsTableWidget
 from .qt_classes.DragTableWidget import DragTableWidget
@@ -148,11 +154,16 @@ class ApplicationsSpaDialog(QDialog, Ui_ApplicationsSpaDialog, DatabaseHelper):
         self.setupUi(self)
         self.close_button.clicked.connect(self.reject)
 
+        self.__setup_validators()
         self.__setup_combo_boxes()
         self.__setup_ui()
         self.__setup_permissions()
 
     #public functions
+
+    def __setup_validators(self):
+
+        self.int_validator = QRegExpValidator(QRegExp("[0-9]+"), None)
 
     def __set_up_twidget(self, table_widget):
 
@@ -353,7 +364,7 @@ class ApplicationsSpaDialog(QDialog, Ui_ApplicationsSpaDialog, DatabaseHelper):
             rigth_types = self.session.query(ClRightType).all()
 
             application_types = self.session.query(ClApplicationType).\
-                filter(or_(ClApplicationType.code == ApplicationType.spa_parcel)).\
+                filter(or_(ClApplicationType.code == ApplicationType.spa_parcel, ClApplicationType.code == ApplicationType.state_parcel)).\
                 order_by(ClApplicationType.code).all()
             statuses = self.session.query(ClApplicationStatus).order_by(ClApplicationStatus.code).all()
             # set_roles = self.session.query(SetRole). \
@@ -386,6 +397,11 @@ class ApplicationsSpaDialog(QDialog, Ui_ApplicationsSpaDialog, DatabaseHelper):
                     firstname = sd_user.firstname
                     self.next_officer_in_charge_cbox.addItem(lastname + ", " + firstname, sd_user.user_id)
 
+        persontype_list = self.session.query(ClPersonType).all()
+
+        for personType in persontype_list:
+            self.person_type_cbox.addItem(personType.description, personType.code)
+        self.person_type_cbox.setCurrentIndex(self.person_type_cbox.findData(40))
         # for item in landuse_types:
         #     self.approved_land_use_type_cbox.addItem(str(item.code) + ": " + item.description, item.code)
 
@@ -613,56 +629,73 @@ class ApplicationsSpaDialog(QDialog, Ui_ApplicationsSpaDialog, DatabaseHelper):
 
         parcel_id = self.search_parcel_num_edit.text()
 
-        try:
-            parcel_count = self.session.query(CaTmpParcel.parcel_id).filter_by(parcel_id=parcel_id).count()
-            if parcel_count == 0:
-                parcel_count = self.session.query(CaParcel.parcel_id).filter_by(parcel_id=parcel_id).count()
-                if parcel_count == 0:
-                    PluginUtils.show_error(self, self.tr("No Parcel found"),
-                                    self.tr("The parcel number {0} could not be found within the current working soum.")
-                                    .format(parcel_id))
-                    return
-                else:
-                    parcel = self.session.query(CaParcel.parcel_id).filter_by(parcel_id=parcel_id).one()
-                    status_count = self.session.query(CtApplicationStatus).\
-                        join(CtApplication, CtApplicationStatus.application == CtApplication.app_no).\
-                        filter(CtApplicationStatus.status > 6).\
-                        filter(CtApplication.parcel == parcel_id).count()
-                    if status_count == 0:
-                        PluginUtils.show_message(self, self.tr('delete please'), self.tr('Delete please the parcel. This parcel is not referenced to any applications.'))
-                        return
-                    else:
-                        contract_count = self.session.query(CtContract).\
-                            join(CtContractApplicationRole, CtContract.contract_no == CtContractApplicationRole.contract).\
-                            join(CtApplication, CtContractApplicationRole.application == CtApplication.app_no).\
-                            filter(CtApplication.parcel == parcel_id).count()
-                        own_count = self.session.query(CtOwnershipRecord).\
-                            join(CtRecordApplicationRole, CtOwnershipRecord.record_no == CtRecordApplicationRole.record).\
-                            join(CtApplication, CtRecordApplicationRole.application == CtApplication.app_no).\
-                            filter(CtApplication.parcel == parcel_id).count()
+        current_parcel_type = self.parcel_type_cbox.itemData(self.parcel_type_cbox.currentIndex())
 
-                        if contract_count == 0 and own_count == 0:
-                            PluginUtils.show_message(self, self.tr("contract"), self.tr("Decision is approved but contract/ownership record is not yet created!"))
-                            return
+        parcel_type = self.session.query(ClParcelType).filter(ClParcelType.code == current_parcel_type).one()
 
-            else:
-                self.is_tmp_parcel = True
+        parcel_table_name = str(parcel_type.table_name)
 
-            if self.is_tmp_parcel:
-                parcel = self.session.query(CaTmpParcel).filter(CaTmpParcel.parcel_id == parcel_id).one()
-                case_id = parcel.maintenance_case
-                maintenance_case = self.session.query(CaMaintenanceCase).filter(CaMaintenanceCase.id == case_id).one()
-                if maintenance_case.completion_date is None:
-                    PluginUtils.show_message(self, self.tr("Maintenance Error"), self.tr("Cadastre update must be complete"))
-                    return
-            else:
-                parcel = self.session.query(CaParcel.parcel_id).filter_by(parcel_id=parcel_id).one()
+        sql = "select count(*) from " +  parcel_table_name + " where parcel_id = " + "'" + parcel_id + "'"
+        values = self.session.execute(sql).fetchall()
+        count = 0
+        for row in values:
+            count = row[0]
 
-        except SQLAlchemyError, e:
-            PluginUtils.show_error(self, self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+        if count == 0:
+            PluginUtils.show_error(self, self.tr("No Parcel found"),
+                            self.tr("The parcel number {0} could not be found within the current working soum.")
+                            .format(parcel_id))
+            return
+        else:
+            sql = "select parcel_id from " + parcel_table_name + " where parcel_id = " + "'" + parcel_id + "'"
+            values = self.session.execute(sql).fetchall()
+            for row in values:
+                parcel_id = row[0]
+                self.found_parcel_number_edit.setText(parcel_id)
+
+    @pyqtSlot()
+    def on_accept_parcel_number_button_clicked(self):
+
+        current_parcel_type = self.parcel_type_cbox.itemData(self.parcel_type_cbox.currentIndex())
+        parcel_type = self.session.query(ClParcelType).filter(ClParcelType.code == current_parcel_type).one()
+        parcel_table_name = str(parcel_type.table_name)
+
+        parcel_id = self.found_parcel_number_edit.text()
+        app_id = self.application.app_id
+
+        if parcel_id == "":
             return
 
-        self.found_parcel_number_edit.setText(parcel.parcel_id)
+        count = self.session.query(CtApplicationParcel).filter(CtApplicationParcel.app_id == app_id).count()
+        if count > 0:
+            PluginUtils.show_error(self, u'Анхааруулга',
+                                   u'Энэ өргөдөл нэгж талбартай холбогдсон байна!')
+            return
+        else:
+            app_parcel = CtApplicationParcel()
+            app_parcel.app_id = app_id
+            app_parcel.parcel_id = parcel_id
+            app_parcel.parcel_type = current_parcel_type
+            self.session.add(app_parcel)
+
+            sql = "select parcel_id, area_m2 from " + parcel_table_name + " where parcel_id = " + "'" + parcel_id + "'"
+            values = self.session.execute(sql).fetchall()
+            for row in values:
+                parcel_id = row[0]
+                area_m2 = str(row[1])
+                self.parcel_edit.setText(parcel_id)
+                self.parcel_area_edit.setText(area_m2)
+
+    @pyqtSlot()
+    def on_unassign_button_clicked(self):
+
+        app_id = self.application.app_id
+        self.session.query(CtApplicationParcel).filter(CtApplicationParcel.app_id == app_id).delete()
+
+        self.parcel_edit.setText("")
+        self.parcel_area_edit.setText("")
+        self.accept_parcel_number_button.setEnabled(True)
+
 
     @pyqtSlot(int)
     def on_applicant_documents_cbox_currentIndexChanged(self, index):
@@ -965,6 +998,18 @@ class ApplicationsSpaDialog(QDialog, Ui_ApplicationsSpaDialog, DatabaseHelper):
     def on_application_type_cbox_currentIndexChanged(self, index):
 
         app_type = self.application_type_cbox.itemData(self.application_type_cbox.currentIndex())
+
+        parcel_types = self.session.query(SetApplicationTypeParcelType). \
+            filter(SetApplicationTypeParcelType.app_type == app_type).all()
+
+        for value in parcel_types:
+            parcel_type = value.parcel_type_ref
+            self.parcel_type_cbox.addItem(parcel_type.description, parcel_type.code)
+
+        if app_type == ApplicationType.spa_parcel:
+            self.spa_gbox.show()
+        else:
+            self.spa_gbox.hide()
 
         self.__generate_application_number()
 
@@ -2025,13 +2070,38 @@ class ApplicationsSpaDialog(QDialog, Ui_ApplicationsSpaDialog, DatabaseHelper):
             elif self.application_tab_widget.currentIndex() == 5:
                 os.system("hh.exe "+ str(os.path.dirname(os.path.realpath(__file__))[:-10]) +"help\output\help_lm2.chm::/html/application_print.htm")
 
+    def __validate_entity_id(self, text):
+
+        valid = self.int_validator.regExp().exactMatch(text)
+
+        if not valid:
+            self.error_label.setText(self.tr("Company id should be with numbers only."))
+            return False
+        if len(text) > 7:
+            cut = text[:7]
+            self.personal_id_edit.setText(cut)
+
+        return True
+
+    @pyqtSlot(str)
+    def on_personal_id_edit_textChanged(self, text):
+
+        self.personal_id_edit.setStyleSheet(self.styleSheet())
+        person_type = self.person_type_cbox.itemData(self.person_type_cbox.currentIndex())
+
+        if person_type == PersonType.mongolian_buisness or person_type == PersonType.mongolian_state_org:
+
+            if not self.__validate_entity_id(text):
+                self.personal_id_edit.setStyleSheet(Constants.ERROR_LINEEDIT_STYLESHEET)
+
     @pyqtSlot()
     def on_search_person_button_clicked(self):
 
-        if self.search_person_edit.text() == "":
+        if self.personal_id_edit.text() == "":
             return
 
-        person_register = self.search_person_edit.text()
+        person_type = self.person_type_cbox.itemData(self.person_type_cbox.currentIndex())
+        person_register = self.personal_id_edit.text()
 
         person_count = self.session.query(BsPerson).filter(BsPerson.person_register == person_register).count()
         if person_count == 1:
@@ -2046,10 +2116,10 @@ class ApplicationsSpaDialog(QDialog, Ui_ApplicationsSpaDialog, DatabaseHelper):
     @pyqtSlot()
     def on_accept_person_button_clicked(self):
 
-        if self.search_person_edit.text() == "":
+        if self.personal_id_edit.text() == "":
             return
 
-        person_register = self.search_person_edit.text()
+        person_register = self.personal_id_edit.text()
 
         person_count = self.session.query(BsPerson).filter(BsPerson.person_register == person_register).count()
         if person_count == 1:

@@ -66,6 +66,7 @@ class ApplicationType:
     your_request = 28
     court_decision = 29
     spa_parcel = 31
+    state_parcel = 32
 
 class PersonType:
 
