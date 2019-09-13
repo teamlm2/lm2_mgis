@@ -13516,7 +13516,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         # spa parcel
         vlayer = LayerUtils.layer_by_data_source("data_soums_union", "ca_spa_parcel")
         if vlayer is None:
-            vlayer = LayerUtils.load_layer_base_layer("ca_spa_parcel", "parcel_id", "data_soums_union")
+            vlayer = LayerUtils.load_layer_base_layer("ca_spa_parcel", "id", "data_soums_union")
         vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/ca_spa_parcel.qml")
         vlayer.setLayerName(self.tr("SPA Parcel"))
         myalayer = root.findLayer(vlayer.id())

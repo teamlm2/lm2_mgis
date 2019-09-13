@@ -36,6 +36,7 @@ from ..model.CaPastureParcel import *
 from ..model.CaPUGBoundary import *
 from ..model.CtDecision import *
 from ..model.CtDecisionApplication import *
+from ..model.SetRightTypeApplicationType import *
 from ..model.ClPastureDocument import *
 from ..model.SetPastureDocument import *
 from ..model.SetPersonTypeApplicationType import *
@@ -147,6 +148,14 @@ class ApplicationsSpaDialog(QDialog, Ui_ApplicationsSpaDialog, DatabaseHelper):
         self.last_tab = -1
         self.updating = False
 
+        self.person_name_model = None
+        self.person_name_proxy_model = None
+        self.person_name_completer = None
+
+        self.person_register_model = None
+        self.person_register_proxy_model = None
+        self.person_register_completer = None
+
         self.applicant_twidget = None
         self.documents_twidget = None
         self.person = None
@@ -173,36 +182,6 @@ class ApplicationsSpaDialog(QDialog, Ui_ApplicationsSpaDialog, DatabaseHelper):
 
         header = table_widget.horizontalHeader()
         header.setResizeMode(QHeaderView.Stretch)
-
-    @pyqtSlot(int, int)
-    def on_pasture_type_twidget_cellChanged(self, row, column):
-
-        days = 0
-        if column == 1:
-            if self.pasture_type_twidget.item(row, column+1):
-                begin_month = self.pasture_type_twidget.item(row, column).text()
-                end_month = self.pasture_type_twidget.item(row, 2).text()
-                if int(end_month) - int(begin_month) < 0:
-                    days = (int(end_month)+(12-int(begin_month)))*30
-                else:
-                    days = (int(end_month) - int(begin_month))*30
-
-                days_item = self.pasture_type_twidget.item(row, 3)
-                days_item.setText(str(days))
-                days_item.setData(Qt.UserRole, days)
-        elif column == 2:
-            if self.pasture_type_twidget.item(row, 3):
-                begin_month = self.pasture_type_twidget.item(row, 1).text()
-                end_month = self.pasture_type_twidget.item(row, column).text()
-
-                if int(end_month) - int(begin_month) < 0:
-                    days = (int(end_month)+(12-int(begin_month)))*30
-                else:
-                    days = (int(end_month) - int(begin_month))*30
-
-                days_item = self.pasture_type_twidget.item(row, 3)
-                days_item.setText(str(days))
-                days_item.setData(Qt.UserRole, days)
 
     def current_document_applicant(self):
 
@@ -242,6 +221,7 @@ class ApplicationsSpaDialog(QDialog, Ui_ApplicationsSpaDialog, DatabaseHelper):
             self.__setup_status_widget()
             self.__setup_documents_twidget()
             self.__setup_applicant_twidget()
+            self.__setup_parcel()
 
         except LM2Exception, e:
             PluginUtils.show_error(self, self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
@@ -289,6 +269,26 @@ class ApplicationsSpaDialog(QDialog, Ui_ApplicationsSpaDialog, DatabaseHelper):
         self.application_num_middle_edit.setText(parts_app_no[2])
         self.application_num_last_edit.setText(parts_app_no[3])
 
+    def __setup_parcel(self):
+
+        app_parcel_count = self.session.query(CtApplicationParcel).filter(CtApplicationParcel.app_id == self.application.app_id).count()
+        if app_parcel_count == 1:
+            app_parcel = self.session.query(CtApplicationParcel).filter(
+                CtApplicationParcel.app_id == self.application.app_id).one()
+            if app_parcel.parcel_type:
+                current_parcel_type = app_parcel.parcel_type
+                parcel_type = self.session.query(ClParcelType).filter(ClParcelType.code == current_parcel_type).one()
+                parcel_table_name = str(parcel_type.table_name)
+                if app_parcel.parcel_id:
+                    parcel_id = app_parcel.parcel_id
+                    sql = "select parcel_id, area_m2 from " + parcel_table_name + " where parcel_id = " + "'" + parcel_id + "'"
+                    values = self.session.execute(sql).fetchall()
+                    for row in values:
+                        parcel_id = row[0]
+                        area_m2 = str(row[1])
+                        self.parcel_edit.setText(parcel_id)
+                        self.parcel_area_edit.setText(area_m2)
+
     def __setup_permissions(self):
 
         user_name = QSettings().value(SettingsConstants.USER)
@@ -308,7 +308,7 @@ class ApplicationsSpaDialog(QDialog, Ui_ApplicationsSpaDialog, DatabaseHelper):
 
     def __setup_applicant_twidget(self):
 
-        self.applicant_twidget = DragTableWidget("person", 20, 120, 720, 180, self.applicants_group_box)
+        self.applicant_twidget = DragTableWidget("person", 20, 150, 720, 180, self.applicants_group_box)
 
         header = [self.tr("Main Applicant"),
                   self.tr("Share [0.0 - 1.0]"),
@@ -378,9 +378,10 @@ class ApplicationsSpaDialog(QDialog, Ui_ApplicationsSpaDialog, DatabaseHelper):
 
         for item in rigth_types:
             self.rigth_type_cbox.addItem(item.description, item.code)
+        self.rigth_type_cbox.setCurrentIndex(self.rigth_type_cbox.findData(4))
 
-        for item in application_types:
-            self.application_type_cbox.addItem(item.description, item.code)
+        # for item in application_types:
+        #     self.application_type_cbox.addItem(item.description, item.code)
 
         for status in statuses:
             self.status_cbox.addItem(status.description, status.code)
@@ -626,7 +627,7 @@ class ApplicationsSpaDialog(QDialog, Ui_ApplicationsSpaDialog, DatabaseHelper):
 
         if self.search_parcel_num_edit.text() == "":
             return
-
+        soum_code = DatabaseUtils.working_l2_code()
         parcel_id = self.search_parcel_num_edit.text()
 
         current_parcel_type = self.parcel_type_cbox.itemData(self.parcel_type_cbox.currentIndex())
@@ -635,7 +636,10 @@ class ApplicationsSpaDialog(QDialog, Ui_ApplicationsSpaDialog, DatabaseHelper):
 
         parcel_table_name = str(parcel_type.table_name)
 
-        sql = "select count(*) from " +  parcel_table_name + " where parcel_id = " + "'" + parcel_id + "'"
+        sql = "select count(*) from " +  parcel_table_name + " parcel " \
+              "join admin_units.au_level2 au2 on public.st_intersects(parcel.geometry, au2.geometry) " \
+              "where parcel.parcel_id = " + "'" + parcel_id + "' and au2.code = " + "'" + soum_code + "'"
+
         values = self.session.execute(sql).fetchall()
         count = 0
         for row in values:
@@ -695,7 +699,6 @@ class ApplicationsSpaDialog(QDialog, Ui_ApplicationsSpaDialog, DatabaseHelper):
         self.parcel_edit.setText("")
         self.parcel_area_edit.setText("")
         self.accept_parcel_number_button.setEnabled(True)
-
 
     @pyqtSlot(int)
     def on_applicant_documents_cbox_currentIndexChanged(self, index):
@@ -877,23 +880,75 @@ class ApplicationsSpaDialog(QDialog, Ui_ApplicationsSpaDialog, DatabaseHelper):
     @pyqtSlot()
     def on_appliciants_remove_button_clicked(self):
 
-        person_id = ''
-        root = self.applicant_twidget.invisibleRootItem()
-        for item in self.applicant_twidget.selectedItems():
-            (item.parent() or root).removeChild(item)
-            person_id = item.data(0, Qt.UserRole)
-            group_no = item.data(0, Qt.UserRole+2)
+        app_type = self.application_type_cbox.itemData(self.application_type_cbox.currentIndex())
+
+        new_role = Constants.NEW_RIGHT_HOLDER_CODE
+        old_role = Constants.OLD_RIGHT_HOLDER_CODE
+        if app_type == 15 or app_type == 2:
+            new_role = Constants.REMAINING_OWNER_CODE
+            old_role = Constants.GIVING_UP_OWNER_CODE
+
+        current_row = self.applicant_twidget.currentRow()
+        person_item = self.applicant_twidget.item(current_row, 0)
+        person_id = person_item.data(Qt.UserRole)
+
         try:
             applicant_roles = self.application.stakeholders.filter(CtApplicationPersonRole.person == person_id) \
-                .filter(CtApplicationPersonRole.role == ConstantsPasture.APPLICANT_ROLE_CODE).one()
+                .filter(CtApplicationPersonRole.role == Constants.APPLICANT_ROLE_CODE).one()
 
+            # in case of ApplicationType.giving_up_ownership
+            # or in case of a Transfer (possession or ownership):
+            # Remove the applicants also from the co-ownership widget
+
+            app_type = self.application_type_cbox.itemData(self.application_type_cbox.currentIndex())
             self.application.stakeholders.remove(applicant_roles)
+            self.applicant_twidget.removeRow(current_row)
 
-            if group_no:
-                self.session.query(CtApplicationPUG).filter(CtApplicationPUG.application == self.application.app_id).\
-                    filter(CtApplicationPUG.group_no == group_no).delete()
+            if app_type == ApplicationType.giving_up_ownership:
+
+                giving_count = self.application.stakeholders.filter(CtApplicationPersonRole.person == person_id) \
+                    .filter(CtApplicationPersonRole.role == Constants.GIVING_UP_OWNER_CODE).count()
+                remaining_count = self.application.stakeholders.filter(CtApplicationPersonRole.person == person_id) \
+                    .filter(CtApplicationPersonRole.role == new_role).count()
+
+                if giving_count > 0:
+                    ownership_giving_roles = self.application.stakeholders \
+                        .filter(CtApplicationPersonRole.person == person_id) \
+                        .filter(CtApplicationPersonRole.role == Constants.GIVING_UP_OWNER_CODE) \
+                        .one()
+
+                    self.application.stakeholders.remove(ownership_giving_roles)
+                    self.__remove_person_from_co_ownership_twidgets(person_id, Constants.GIVING_UP_OWNER_CODE)
+
+                if remaining_count > 0:
+                    ownership_remain_roles = self.application.stakeholders \
+                        .filter(CtApplicationPersonRole.person == person_id) \
+                        .filter(CtApplicationPersonRole.role == new_role) \
+                        .one()
+
+                    self.application.stakeholders.remove(ownership_remain_roles)
+                    self.__remove_person_from_co_ownership_twidgets(person_id, new_role)
+
+            elif app_type == ApplicationType.transfer_possession_right or app_type == ApplicationType.change_ownership \
+                    or app_type == ApplicationType.possess_split or app_type == ApplicationType.encroachment \
+                    or app_type == ApplicationType.possession_right_use_right:
+
+                old_count = self.application.stakeholders.filter(CtApplicationPersonRole.person == person_id) \
+                    .filter(CtApplicationPersonRole.role == old_role).count()
+
+                if old_count > 0:
+                    old_right_holders = self.application.stakeholders \
+                        .filter(CtApplicationPersonRole.person == person_id) \
+                        .filter(CtApplicationPersonRole.role == old_role) \
+                        .all()
+
+                    for applicant in old_right_holders:
+                        self.application.stakeholders.remove(applicant)
+                        self.__remove_old_right_holder(applicant.person)
+
         except SQLAlchemyError, e:
-            PluginUtils.show_error(self, self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+            PluginUtils.show_error(self, self.tr("File Error"),
+                                   self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
             return
 
         if self.application.stakeholders.count() > 0:
@@ -1225,6 +1280,20 @@ class ApplicationsSpaDialog(QDialog, Ui_ApplicationsSpaDialog, DatabaseHelper):
             self.requested_land_use_type_cbox.setEnabled(False)
         self.__add_application_status_item(new_status)
 
+    @pyqtSlot(int)
+    def on_rigth_type_cbox_currentIndexChanged(self, index):
+
+        self.application_type_cbox.clear()
+        rigth_code = self.rigth_type_cbox.itemData(self.rigth_type_cbox.currentIndex())
+
+        application_types = self.session.query(ClApplicationType). \
+            join(SetRightTypeApplicationType, ClApplicationType.code == SetRightTypeApplicationType.application_type). \
+            filter(SetRightTypeApplicationType.right_type == rigth_code). \
+            order_by(SetRightTypeApplicationType.application_type).all()
+
+        for item in application_types:
+            self.application_type_cbox.addItem(item.description, item.code)
+
     @pyqtSlot()
     def on_apply_button_clicked(self):
 
@@ -1254,7 +1323,6 @@ class ApplicationsSpaDialog(QDialog, Ui_ApplicationsSpaDialog, DatabaseHelper):
             self.__save_application_details()
 
             self.__save_applicants()
-            self.__save_parcels()
 
             self.commit()
 
@@ -1304,6 +1372,9 @@ class ApplicationsSpaDialog(QDialog, Ui_ApplicationsSpaDialog, DatabaseHelper):
             rigth_type = self.rigth_type_cbox.itemData(self.rigth_type_cbox.currentIndex())
             self.application.right_type = rigth_type
 
+            app_type = self.application_type_cbox.itemData(self.application_type_cbox.currentIndex())
+            self.application.app_type = app_type
+
             status = self.session.query(func.max(CtApplicationStatus.status)).\
                 filter(CtApplicationStatus.application == self.application.app_id).one()
             max_status = str(status).split(",")[0][1:]
@@ -1313,79 +1384,88 @@ class ApplicationsSpaDialog(QDialog, Ui_ApplicationsSpaDialog, DatabaseHelper):
             self.rollback_to_savepoint()
             raise LM2Exception(self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
 
-    def __save_parcels(self):
-
-        try:
-            for row in range(self.pasture_type_twidget.rowCount()):
-                pasture_code = self.pasture_type_twidget.item(row, 0).data(Qt.UserRole)
-                parcel_id = self.pasture_type_twidget.item(row, 0).data(Qt.UserRole+1)
-                begin_month = self.pasture_type_twidget.item(row, 1).text()
-                end_month = self.pasture_type_twidget.item(row, 2).text()
-                days = self.pasture_type_twidget.item(row, 3).text()
-
-                pug_parcel_pasture = self.session.query(CtApplicationParcelPasture). \
-                    filter(CtApplicationParcelPasture.application == self.application.app_id). \
-                    filter(CtApplicationParcelPasture.parcel == parcel_id). \
-                    filter(CtApplicationParcelPasture.pasture == pasture_code).one()
-
-                pug_parcel_pasture.begin_month = int(begin_month)
-                pug_parcel_pasture.end_month = int(end_month)
-                pug_parcel_pasture.days = int(days)
-
-
-            for row in range(self.assigned_parcel_twidget.rowCount()):
-                parcel_id = self.assigned_parcel_twidget.item(row, 0).data(Qt.UserRole)
-
-                pasture_type_list = ''
-                parcel_pastures = self.session.query(CtApplicationParcelPasture).\
-                    filter(CtApplicationParcelPasture.application == self.application.app_id).\
-                    filter(CtApplicationParcelPasture.parcel == parcel_id).all()
-                for pastures in parcel_pastures:
-                    pasture = self.session.query(ClPastureType).filter(ClPastureType.code == pastures.pasture).one()
-                    pasture_text = pasture.description
-                    if pasture_type_list == '':
-                        pasture_type_list = pasture_text
-                    else:
-                        if pasture_type_list != pasture_text:
-                            pasture_type_list = pasture_type_list+'-'+pasture_text
-
-                parcel_pasture = self.session.query(CaPastureParcel).filter(CaPastureParcel.parcel_id == parcel_id).one()
-
-                parcel_pasture.pasture_type = pasture_type_list
-
-        except SQLAlchemyError, e:
-            self.rollback_to_savepoint()
-            raise LM2Exception(self.tr("File Error"),
-                               self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
-
     def __save_applicants(self):
 
         self.create_savepoint()
 
-        root = self.applicant_twidget.invisibleRootItem()
-        child_count = root.childCount()
-        for i in range(child_count):
-            item = root.child(i)
-            person_id = item.data(0, Qt.UserRole)
-            share = 0
-            main = True
-            if item.checkState(0) == Qt.Checked:
-                main = True
-                share = 1
-            else:
-                main = False
-                share = 0
+        for row in range(self.applicant_twidget.rowCount()):
+            item = self.applicant_twidget.item(row, APPLICANT_MAIN)
+            person_id = item.data(Qt.UserRole)
+            main = True if item.checkState() == Qt.Checked else False
+
             try:
-                applicant = self.application.stakeholders.filter(
-                    CtApplicationPersonRole.role == ConstantsPasture.APPLICANT_ROLE_CODE) \
-                    .filter(CtApplicationPersonRole.person == person_id).one()
+                person = self.session.query(BsPerson).filter(BsPerson.person_id == person_id).one()
+                applicant_count = self.application.stakeholders.filter(
+                    CtApplicationPersonRole.role == Constants.APPLICANT_ROLE_CODE) \
+                    .filter(CtApplicationPersonRole.person == person_id).count()
+                if applicant_count == 1:
+                    applicant = self.application.stakeholders.filter(
+                        CtApplicationPersonRole.role == Constants.APPLICANT_ROLE_CODE) \
+                        .filter(CtApplicationPersonRole.person == person_id).one()
 
-                applicant.main_applicant = main
-                applicant.share = share
-
+                    applicant.main_applicant = main
+                    share_item = self.applicant_twidget.item(row, APPLICANT_SHARE)
+                    if person.type == 20:
+                        applicant.share = 0
+                    else:
+                        applicant.share = Decimal(share_item.text())
             except SQLAlchemyError, e:
                 self.rollback_to_savepoint()
                 raise LM2Exception(self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+        # self.__save_remaining_ownership()
+
+    def __save_remaining_ownership(self):
+
+        app_type = self.application_type_cbox.itemData(self.application_type_cbox.currentIndex())
+        new_role = Constants.NEW_RIGHT_HOLDER_CODE
+        old_role = Constants.OLD_RIGHT_HOLDER_CODE
+        if app_type == 15 or app_type == 2:
+            new_role = Constants.REMAINING_OWNER_CODE
+            old_role = Constants.GIVING_UP_OWNER_CODE
+
+        self.create_savepoint()
+
+        for row in range(self.owners_remaining_twidget.rowCount()):
+            item = self.owners_remaining_twidget.item(row, 0)
+            person_id = item.data(Qt.UserRole)
+            if item.checkState() == Qt.Checked:
+                main = True
+                try:
+                    count = self.application.stakeholders.filter(
+                        CtApplicationPersonRole.role == new_role) \
+                        .filter(CtApplicationPersonRole.person == person_id).count()
+                    if count == 1:
+                        applicant = self.application.stakeholders.filter(
+                            CtApplicationPersonRole.role == new_role) \
+                            .filter(CtApplicationPersonRole.person == person_id).one()
+
+                        applicant.main_applicant = main
+                        share_item = self.applicant_twidget.item(row, APPLICANT_SHARE)
+                        if share_item:
+                            applicant.share = Decimal(share_item.text())
+
+                except SQLAlchemyError, e:
+                    self.rollback_to_savepoint()
+                    raise LM2Exception(self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+            else:
+                main = False
+                # try:
+                count = self.application.stakeholders.filter(
+                    CtApplicationPersonRole.role == new_role) \
+                    .filter(CtApplicationPersonRole.person == person_id).count()
+                if count == 1:
+                    applicant = self.application.stakeholders.filter(
+                        CtApplicationPersonRole.role == new_role) \
+                        .filter(CtApplicationPersonRole.person == person_id).one()
+
+                    applicant.main_applicant = main
+                    share_item = self.applicant_twidget.item(row, APPLICANT_SHARE)
+                    if share_item:
+                        applicant.share = Decimal(share_item.text())
+
+                # except SQLAlchemyError, e:
+                #     self.rollback_to_savepoint()
+                #     raise LM2Exception(self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
 
     def __landuse_per_application_type(self, app_type):
 
@@ -1876,6 +1956,21 @@ class ApplicationsSpaDialog(QDialog, Ui_ApplicationsSpaDialog, DatabaseHelper):
             self.applicant_twidget.setItem(inserted_row, APPLICANT_SURNAME, surname_item)
             self.applicant_twidget.setItem(inserted_row, APPLICANT_FIRST_NAME, first_name_item)
 
+            role = Constants.APPLICANT_ROLE_CODE
+            role_ref = self.session.query(ClPersonRole).filter_by(
+                code=role).one()
+
+            app_person_role = CtApplicationPersonRole()
+            app_person_role.application = self.application.app_id
+            app_person_role.share = Decimal(1.0)
+            app_person_role.role = role
+            app_person_role.role_ref = role_ref
+            app_person_role.person = person.person_id
+            app_person_role.person_ref = person
+            app_person_role.main_applicant = False
+
+            self.application.stakeholders.append(app_person_role)
+
     def __add_application_status_item(self, status):
 
         item_status = QTableWidgetItem(status.status_ref.description)
@@ -2083,16 +2178,120 @@ class ApplicationsSpaDialog(QDialog, Ui_ApplicationsSpaDialog, DatabaseHelper):
 
         return True
 
+    @pyqtSlot(int)
+    def on_is_find_applicant_chbox_stateChanged(self, state):
+
+        if state == Qt.Checked:
+            person_type = self.person_type_cbox.itemData(self.person_type_cbox.currentIndex())
+            person_registers = []
+            person_names = []
+            # register_like = "%" + text+ "%"
+            for value in self.session.query(BsPerson.person_register, BsPerson.name).distinct().filter(
+                            BsPerson.type == person_type):
+                if value[0]:
+                    register_value = value[0] + ':' + value[1]
+                    person_registers.append(register_value)
+
+                if value[1]:
+                    name_value = value[1] + ':' + value[0]
+                    person_names.append(name_value)
+
+            self.person_register_model = QStringListModel(person_registers)
+
+            self.person_register_proxy_model = QSortFilterProxyModel()
+            self.person_register_proxy_model.setSourceModel(self.person_register_model)
+
+            self.person_register_completer = QCompleter(self.person_register_proxy_model, self,
+                                                        activated=self.on_person_register_completer_activated)
+            self.person_register_completer.setCompletionMode(QCompleter.PopupCompletion)
+
+            self.personal_id_edit.setCompleter(self.person_register_completer)
+            self.personal_id_edit.textEdited.connect(self.person_register_proxy_model.setFilterFixedString)
+            ###
+            self.person_name_model = QStringListModel(person_names)
+
+            self.person_name_proxy_model = QSortFilterProxyModel()
+            self.person_name_proxy_model.setSourceModel(self.person_name_model)
+
+            self.person_name_completer = QCompleter(self.person_name_proxy_model, self,
+                                                    activated=self.on_person_name_completer_activated)
+            self.person_name_completer.setCompletionMode(QCompleter.PopupCompletion)
+
+            self.personal_name_edit.setCompleter(self.person_name_completer)
+            self.personal_name_edit.textEdited.connect(self.person_name_proxy_model.setFilterFixedString)
+
+    @pyqtSlot(int)
+    def on_person_type_cbox_currentIndexChanged(self, index):
+
+        person_type = self.person_type_cbox.itemData(self.person_type_cbox.currentIndex())
+        person_registers = []
+        person_names = []
+        # register_like = "%" + text+ "%"
+        # for value in self.session.query(BsPerson.person_register, BsPerson.name).distinct().filter(
+        #                 BsPerson.type == person_type):
+        #     if value[0]:
+        #         register_value = value[0] + ':' + value[1]
+        #         person_registers.append(register_value)
+        #
+        #     if value[1]:
+        #         name_value = value[1] + ':' + value[0]
+        #         person_names.append(name_value)
+        #
+        # self.person_register_model = QStringListModel(person_registers)
+        #
+        # self.person_register_proxy_model = QSortFilterProxyModel()
+        # self.person_register_proxy_model.setSourceModel(self.person_register_model)
+        #
+        # self.person_register_completer = QCompleter(self.person_register_proxy_model, self,
+        #                                    activated=self.on_person_register_completer_activated)
+        # self.person_register_completer.setCompletionMode(QCompleter.PopupCompletion)
+        #
+        # self.personal_id_edit.setCompleter(self.person_register_completer)
+        # self.personal_id_edit.textEdited.connect(self.person_register_proxy_model.setFilterFixedString)
+        # ###
+        # self.person_name_model = QStringListModel(person_names)
+        #
+        # self.person_name_proxy_model = QSortFilterProxyModel()
+        # self.person_name_proxy_model.setSourceModel(self.person_name_model)
+        #
+        # self.person_name_completer = QCompleter(self.person_name_proxy_model, self,
+        #                                             activated=self.on_person_name_completer_activated)
+        # self.person_name_completer.setCompletionMode(QCompleter.PopupCompletion)
+        #
+        # self.personal_name_edit.setCompleter(self.person_name_completer)
+        # self.personal_name_edit.textEdited.connect(self.person_name_proxy_model.setFilterFixedString)
+
+    @pyqtSlot(str)
+    def on_person_register_completer_activated(self, text):
+
+        if not text:
+            return
+        value = text.split(':')
+        self.person_register_completer.activated[str].emit(value[0])
+        self.personal_name_edit.setText(text)
+
+    @pyqtSlot(str)
+    def on_person_name_completer_activated(self, text):
+
+        if not text:
+            return
+
+        self.person_name_completer.activated[str].emit(text)
+
+    @pyqtSlot(str)
+    def on_personal_name_edit_textChanged(self, text):
+
+        if len(text.split(":")) > 1:
+            register = text.split(":")[1]
+            self.personal_id_edit.setText(register)
+
     @pyqtSlot(str)
     def on_personal_id_edit_textChanged(self, text):
 
         self.personal_id_edit.setStyleSheet(self.styleSheet())
-        person_type = self.person_type_cbox.itemData(self.person_type_cbox.currentIndex())
 
-        if person_type == PersonType.mongolian_buisness or person_type == PersonType.mongolian_state_org:
-
-            if not self.__validate_entity_id(text):
-                self.personal_id_edit.setStyleSheet(Constants.ERROR_LINEEDIT_STYLESHEET)
+        value = text.split(':')
+        self.personal_id_edit.setText(value[0])
 
     @pyqtSlot()
     def on_search_person_button_clicked(self):

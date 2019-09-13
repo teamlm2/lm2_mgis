@@ -104,59 +104,61 @@ class MemberGroupDialog(QDialog, Ui_MemberGroupDialog, DatabaseHelper):
 
         if self.group_id != -1:
             group_id = self.group_id
-            pug = self.session.query(CtPersonGroup).filter(CtPersonGroup.group_no == group_id).one()
-            group_name = pug.group_name
-            self.group_id_edit.setText(str(group_id))
-            self.group_name_edit.setText(group_name)
+            count = self.session.query(CtPersonGroup).filter(CtPersonGroup.group_no == group_id).count()
+            if count == 1:
+                pug = self.session.query(CtPersonGroup).filter(CtPersonGroup.group_no == group_id).one()
+                group_name = pug.group_name
+                self.group_id_edit.setText(str(group_id))
+                self.group_name_edit.setText(group_name)
 
-            bags = pug.bags
-            count = 0
-            self.bag_twidget.setRowCount(0)
-            for au3 in bags:
-                code = au3.code
-                name = au3.name
-                item = QTableWidgetItem((name))
-                item.setIcon(QIcon(QPixmap(":/plugins/lm2_pasture/bag.png")))
-                item.setData(Qt.UserRole, code)
-                self.bag_twidget.insertRow(count)
-                self.bag_twidget.setItem(count, 0, item)
-                count += 1
+                bags = pug.bags
+                count = 0
+                self.bag_twidget.setRowCount(0)
+                for au3 in bags:
+                    code = au3.code
+                    name = au3.name
+                    item = QTableWidgetItem((name))
+                    item.setIcon(QIcon(QPixmap(":/plugins/lm2_pasture/bag.png")))
+                    item.setData(Qt.UserRole, code)
+                    self.bag_twidget.insertRow(count)
+                    self.bag_twidget.setItem(count, 0, item)
+                    count += 1
 
-                self.bag_cbox.removeItem(self.bag_cbox.findData(code))
+                    self.bag_cbox.removeItem(self.bag_cbox.findData(code))
 
-        pug_member = self.session.query(CtGroupMember).filter(CtGroupMember.group_no == group_id).all()
+                pug_member = self.session.query(CtGroupMember).filter(CtGroupMember.group_no == group_id).all()
 
-        self.member_twidget.setRowCount(0)
-        count = 0
-        for member in pug_member:
-            # person = member.person_ref
-            person_count = self.session.query(BsPerson).filter(BsPerson.person_id == member.person).count()
-            if person_count == 0:
-                return
-            person = self.session.query(BsPerson).filter(BsPerson.person_id == member.person).one()
-            if not person.person_register:
-                person_register = self.tr(" (Id: n.a. )")
-            else:
-                person_register = self.tr(" (Id: ") + person.person_register + ")"
+                self.member_twidget.setRowCount(0)
+                count = 0
+                for member in pug_member:
+                    # person = member.person_ref
+                    person_count = self.session.query(BsPerson).filter(BsPerson.person_id == member.person).count()
+                    if person_count == 0:
+                        return
+                    person = self.session.query(BsPerson).filter(BsPerson.person_id == member.person).one()
+                    if not person.person_register:
+                        person_register = self.tr(" (Id: n.a. )")
+                    else:
+                        person_register = self.tr(" (Id: ") + person.person_register + ")"
 
-            first_name = self.tr(" n.a. ") if not person.first_name else person.first_name
+                    first_name = self.tr(" n.a. ") if not person.first_name else person.first_name
 
-            item = QTableWidgetItem(person.name + ", " + first_name + person_register)
-            if member.role == 10:
-                item.setCheckState(Qt.Checked)
-            else:
-                item.setCheckState(Qt.Unchecked)
-            item.setIcon(QIcon(QPixmap(":/plugins/lm2/person.png")))
-            item.setData(Qt.UserRole, person.person_id)
-            self.member_twidget.insertRow(count)
+                    item = QTableWidgetItem(person.name + ", " + first_name + person_register)
+                    if member.role == 10:
+                        item.setCheckState(Qt.Checked)
+                    else:
+                        item.setCheckState(Qt.Unchecked)
+                    item.setIcon(QIcon(QPixmap(":/plugins/lm2/person.png")))
+                    item.setData(Qt.UserRole, person.person_id)
+                    self.member_twidget.insertRow(count)
 
-            self.member_twidget.setItem(count, 0, item)
+                    self.member_twidget.setItem(count, 0, item)
 
-            group_item = QTableWidgetItem(group_name)
-            group_item.setData(Qt.UserRole, group_id)
-            self.member_twidget.setItem(count, 1, group_item)
+                    group_item = QTableWidgetItem(group_name)
+                    group_item.setData(Qt.UserRole, group_id)
+                    self.member_twidget.setItem(count, 1, group_item)
 
-            count += 1
+                    count += 1
 
     def __setup_new_member(self):
 

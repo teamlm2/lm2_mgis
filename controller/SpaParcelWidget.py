@@ -32,9 +32,11 @@ from ..model.PsPastureBoundary import *
 from ..model.PsAvgDaats import *
 from ..model.AuReserveZone import *
 from ..model.PsParcel import *
+from ..model.ClParcelType import *
 from ..model.BsPerson import *
 from ..model.PClReserveDaatsLevel import *
 from ..model.PsAvgReserveDaats import *
+from ..model.CtApplicationParcel import *
 from ..utils.LayerUtils import LayerUtils
 from ..utils.SessionHandler import SessionHandler
 from ..model.Enumerations import ApplicationType
@@ -118,60 +120,53 @@ class SpaParcelWidget(QDockWidget, Ui_SpaParcelWidget, DatabaseHelper):
     def on_zoom_to_parcel_action_clicked(self):
 
         app = self.__selected_application()
-        app_type = app.app_type
-        app_parcels = self.session.query(CtApplicationPUGParcel).\
-            filter(CtApplicationPUGParcel.application == app.app_id).all()
 
         if app is None:
             return
 
         parcels = []
 
-        for app_parcel in app_parcels:
-            if app_parcel.parcel is not None:
-                parcels.append(app_parcel.parcel)
+        app_parcel_count = self.session.query(CtApplicationParcel).filter(
+            CtApplicationParcel.app_id == app.app_id).count()
+        if app_parcel_count > 0:
+            app_parcels = self.session.query(CtApplicationParcel).filter(
+                CtApplicationParcel.app_id == app.app_id).all()
 
-        self.__zoom_to_parcel_ids(parcels, app_type)
+            for app_parcel in app_parcels:
+                if app_parcel.parcel_id is not None:
+                    parcels.append(app_parcel.parcel_id)
+                    current_parcel_type = app_parcel.parcel_type
+                    parcel_type = self.session.query(ClParcelType).filter(
+                        ClParcelType.code == current_parcel_type).one()
+                    parcel_table_name = str(parcel_type.table_name)
 
-    def __zoom_to_parcel_ids(self, parcel_ids, app_type, layer_name = None):
+                    parcel_table_name = str(parcel_type.table_name)
+                    schema_name = parcel_table_name.split(".")[0]
+                    table_name = parcel_table_name.split(".")[1]
 
-        LayerUtils.deselect_all()
-        if layer_name is None:
-            for parcel_id in parcel_ids:
-                if len(parcel_id) == 10:
-                    if app_type == 26:
-                        layer_name = "ca_pasture_parcel"
-                    else:
-                        layer_name = "ca_person_group_parcel"
+                    self.__zoom_to_parcels(parcels, schema_name, table_name)
 
-        layer = LayerUtils.layer_by_data_source("data_soums_union", layer_name)
+    def __zoom_to_parcels(self, parcels, schema_name, layer_name):
 
-        restrictions = DatabaseUtils.working_l2_code()
+        id = "parcel_id"
+        layer = LayerUtils.layer_by_data_source(schema_name, layer_name)
         if layer is None:
-            layer = LayerUtils.load_layer_by_name(layer_name, "parcel_id", restrictions)
+            layer = LayerUtils.load_layer_by_name_admin_units(layer_name, id, schema_name)
+        for parcel in parcels:
+            if parcel:
+                expression = " parcel_id = \'" + parcel + "\'"
+                request = QgsFeatureRequest()
+                request.setFilterExpression(expression)
+                feature_ids = []
+                iterator = layer.getFeatures(request)
 
-        exp_string = ""
+                for feature in iterator:
+                    feature_ids.append(feature.id())
+                if len(feature_ids) == 0:
+                    self.error_label.setText(self.tr("No parcel assigned"))
 
-        for parcel_id in parcel_ids:
-            if exp_string == "":
-                exp_string = "parcel_id = \'" + parcel_id  + "\'"
-            else:
-                exp_string += " or parcel_id = \'" + parcel_id  + "\'"
-
-        request = QgsFeatureRequest()
-        request.setFilterExpression(exp_string)
-
-        feature_ids = []
-        iterator = layer.getFeatures(request)
-
-        for feature in iterator:
-            feature_ids.append(feature.id())
-
-        if len(feature_ids) == 0:
-            self.error_label.setText(self.tr("No parcel assigned"))
-
-        layer.setSelectedFeatures(feature_ids)
-        self.plugin.iface.mapCanvas().zoomToSelected(layer)
+                layer.setSelectedFeatures(feature_ids)
+                self.plugin.iface.mapCanvas().zoomToSelected(layer)
 
     @pyqtSlot()
     def on_copy_number_action_clicked(self):
@@ -568,7 +563,25 @@ class SpaParcelWidget(QDockWidget, Ui_SpaParcelWidget, DatabaseHelper):
     @pyqtSlot()
     def on_pasture_find_button_clicked(self):
 
-        self.__pasture_applications()
+        applications = self.session.query(CtApplication). \
+            filter(or_(CtApplication.app_type == 31, CtApplication.app_type == 32)). \
+            order_by(CtApplication.app_timestamp).all()
+
+        count = 0
+        for value in applications:
+            row_count = self.parcel_results_twidget.rowCount()
+            self.parcel_results_twidget.insertRow(row_count)
+
+            app_type = "" if not value.app_type_ref else value.app_type_ref.description
+            item = QTableWidgetItem(str(value.app_no) + " ( " + unicode(app_type) + " )")
+            item.setIcon(QIcon(QPixmap(":/plugins/lm2/application.png")))
+            item.setData(Qt.UserRole, value.app_no)
+            item.setData(Qt.UserRole + 1, value.app_id)
+            self.parcel_results_twidget.setItem(count, 0, item)
+            count += 1
+
+        self.error_label.setText("")
+        self.pasture_results_label.setText(self.tr("Results: ") + str(count))
 
     @pyqtSlot(QTableWidgetItem)
     def on_parcel_results_twidget_itemDoubleClicked(self, item):
@@ -637,25 +650,26 @@ class SpaParcelWidget(QDockWidget, Ui_SpaParcelWidget, DatabaseHelper):
         aimag_code = soum_code[:3]
         self.working_l1_cbox.setCurrentIndex(self.working_l1_cbox.findData(aimag_code))
         self.working_l2_cbox.setCurrentIndex(self.working_l2_cbox.findData(soum_code))
-        try:
-            app_result = self.session.query(ApplicationPastureSearch).filter(ApplicationPastureSearch.app_no == id).one()
-            self.parcel_app_num_edit.setText(app_result.app_no)
-            self.parcel_right_holder_name_edit.setText(app_result.first_name)
-            self.parcel_id_edit.setText(app_result.person_register)
-            self.personal_parcel_edit.setText(app_result.person_register)
-            if app_result.contract_no != None:
-                self.parcel_contract_num_edit.setText(app_result.contract_no)
-                self.parcel_contract_num_edit.setStyleSheet(self.styleSheet())
-            else:
-                self.parcel_contract_num_edit.setText(self.tr('No Contract'))
-                self.parcel_contract_num_edit.setStyleSheet("color: rgb(189, 21, 38)")
+        # try:
+        print id
+        app_result = self.session.query(CtApplication).filter(CtApplication.app_no == id).one()
+        self.parcel_app_num_edit.setText(app_result.app_no)
+            # self.parcel_right_holder_name_edit.setText(app_result.first_name)
+            # self.parcel_id_edit.setText(app_result.person_register)
+            # self.personal_parcel_edit.setText(app_result.person_register)
+            # if app_result.contract_no != None:
+            #     self.parcel_contract_num_edit.setText(app_result.contract_no)
+            #     self.parcel_contract_num_edit.setStyleSheet(self.styleSheet())
+            # else:
+            #     self.parcel_contract_num_edit.setText(self.tr('No Contract'))
+            #     self.parcel_contract_num_edit.setStyleSheet("color: rgb(189, 21, 38)")
 
-            self.spa_type_cbox.setCurrentIndex(self.spa_type_cbox.findData(app_result.group_no))
+            # self.spa_type_cbox.setCurrentIndex(self.spa_type_cbox.findData(app_result.group_no))
 
-        except SQLAlchemyError, e:
-            PluginUtils.show_error(self, self.tr("File Error"),
-                                   self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
-            return
+        # except SQLAlchemyError, e:
+        #     PluginUtils.show_error(self, self.tr("File Error"),
+        #                            self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+        #     return
 
     @pyqtSlot()
     def on_pasture_layer_view_button_clicked(self):
