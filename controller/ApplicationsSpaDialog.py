@@ -85,6 +85,8 @@ from ..model.SdEmployee import *
 from ..model.SdDepartment import *
 from ..model.CaPastureParcelTbl import *
 from ..model.ClPersonGroupType import *
+from ..model.ClSpaType import *
+from ..model.ClSpaMood import *
 from ..utils.SessionHandler import SessionHandler
 from ..utils.PluginUtils import PluginUtils
 from ..utils.DatabaseUtils import DatabaseUtils
@@ -271,6 +273,7 @@ class ApplicationsSpaDialog(QDialog, Ui_ApplicationsSpaDialog, DatabaseHelper):
 
     def __setup_parcel(self):
 
+        app_type = self.application_type_cbox.itemData(self.application_type_cbox.currentIndex())
         app_parcel_count = self.session.query(CtApplicationParcel).filter(CtApplicationParcel.app_id == self.application.app_id).count()
         if app_parcel_count == 1:
             app_parcel = self.session.query(CtApplicationParcel).filter(
@@ -288,6 +291,15 @@ class ApplicationsSpaDialog(QDialog, Ui_ApplicationsSpaDialog, DatabaseHelper):
                         area_m2 = str(row[1])
                         self.parcel_edit.setText(parcel_id)
                         self.parcel_area_edit.setText(area_m2)
+
+                    count = self.session.query(CaSpaParcelTbl).filter(CaSpaParcelTbl.parcel_id == parcel_id).count()
+                    if count == 1:
+                        spa_parcel = self.session.query(CaSpaParcelTbl).filter(
+                            CaSpaParcelTbl.parcel_id == parcel_id).one()
+                        if spa_parcel.spa_type:
+                            self.spa_type_cbox.setCurrentIndex(self.spa_type_cbox.findData(spa_parcel.spa_type))
+                        if spa_parcel.spa_mood:
+                            self.spa_mood_cbox.setCurrentIndex(self.spa_mood_cbox.findData(spa_parcel.spa_mood))
 
     def __setup_permissions(self):
 
@@ -405,6 +417,15 @@ class ApplicationsSpaDialog(QDialog, Ui_ApplicationsSpaDialog, DatabaseHelper):
         self.person_type_cbox.setCurrentIndex(self.person_type_cbox.findData(40))
         # for item in landuse_types:
         #     self.approved_land_use_type_cbox.addItem(str(item.code) + ": " + item.description, item.code)
+
+        spa_types = self.session.query(ClSpaType).all()
+        spa_moods = self.session.query(ClSpaMood).all()
+
+        for value in spa_types:
+            self.spa_type_cbox.addItem(value.description, value.code)
+
+        for value in spa_moods:
+            self.spa_mood_cbox.addItem(value.description, value.code)
 
     def __validity_of_application(self):
 
@@ -660,6 +681,7 @@ class ApplicationsSpaDialog(QDialog, Ui_ApplicationsSpaDialog, DatabaseHelper):
     @pyqtSlot()
     def on_accept_parcel_number_button_clicked(self):
 
+        app_type = self.application_type_cbox.itemData(self.application_type_cbox.currentIndex())
         current_parcel_type = self.parcel_type_cbox.itemData(self.parcel_type_cbox.currentIndex())
         parcel_type = self.session.query(ClParcelType).filter(ClParcelType.code == current_parcel_type).one()
         parcel_table_name = str(parcel_type.table_name)
@@ -681,6 +703,15 @@ class ApplicationsSpaDialog(QDialog, Ui_ApplicationsSpaDialog, DatabaseHelper):
             app_parcel.parcel_id = parcel_id
             app_parcel.parcel_type = current_parcel_type
             self.session.add(app_parcel)
+            self.session.flush()
+            if app_type == ApplicationType.spa_parcel:
+                spa_mood = self.spa_mood_cbox.itemData(self.spa_mood_cbox.currentIndex())
+                spa_type = self.spa_mood_cbox.itemData(self.spa_type_cbox.currentIndex())
+                count = self.session.query(CaSpaParcelTbl).filter(CaSpaParcelTbl.parcel_id == parcel_id).count()
+                if count == 1:
+                    spa_parcel = self.session.query(CaSpaParcelTbl).filter(CaSpaParcelTbl.parcel_id == parcel_id).one()
+                    spa_parcel.spa_mood = spa_mood
+                    spa_parcel.spa_type = spa_type
 
             sql = "select parcel_id, area_m2 from " + parcel_table_name + " where parcel_id = " + "'" + parcel_id + "'"
             values = self.session.execute(sql).fetchall()
@@ -689,6 +720,23 @@ class ApplicationsSpaDialog(QDialog, Ui_ApplicationsSpaDialog, DatabaseHelper):
                 area_m2 = str(row[1])
                 self.parcel_edit.setText(parcel_id)
                 self.parcel_area_edit.setText(area_m2)
+
+    def __save_parcel(self):
+
+        app_type = self.application_type_cbox.itemData(self.application_type_cbox.currentIndex())
+        parcel_id = self.parcel_edit.text()
+
+        if parcel_id == "":
+            return
+
+        if app_type == ApplicationType.spa_parcel:
+            spa_mood = self.spa_mood_cbox.itemData(self.spa_mood_cbox.currentIndex())
+            spa_type = self.spa_mood_cbox.itemData(self.spa_type_cbox.currentIndex())
+            count = self.session.query(CaSpaParcelTbl).filter(CaSpaParcelTbl.parcel_id == parcel_id).count()
+            if count == 1:
+                spa_parcel = self.session.query(CaSpaParcelTbl).filter(CaSpaParcelTbl.parcel_id == parcel_id).one()
+                spa_parcel.spa_mood = spa_mood
+                spa_parcel.spa_type = spa_type
 
     @pyqtSlot()
     def on_unassign_button_clicked(self):
@@ -1052,6 +1100,7 @@ class ApplicationsSpaDialog(QDialog, Ui_ApplicationsSpaDialog, DatabaseHelper):
     @pyqtSlot(int)
     def on_application_type_cbox_currentIndexChanged(self, index):
 
+        self.parcel_type_cbox.clear()
         app_type = self.application_type_cbox.itemData(self.application_type_cbox.currentIndex())
 
         parcel_types = self.session.query(SetApplicationTypeParcelType). \
@@ -1323,6 +1372,8 @@ class ApplicationsSpaDialog(QDialog, Ui_ApplicationsSpaDialog, DatabaseHelper):
             self.__save_application_details()
 
             self.__save_applicants()
+
+            self.__save_parcel()
 
             self.commit()
 

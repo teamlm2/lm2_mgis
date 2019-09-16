@@ -12,7 +12,8 @@ class CaSpaParcelTbl(Base):
 
     __tablename__ = 'ca_spa_parcel_tbl'
 
-    parcel_id = Column(String, primary_key=True)
+    id = Column(Integer, primary_key=True)
+    parcel_id = Column(String)
     spa_land_name = Column(String)
     area_m2 = Column(Float)
     spa_law = Column(String)

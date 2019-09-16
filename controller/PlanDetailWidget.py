@@ -26,6 +26,8 @@ from ..model.ClPlanZone import *
 from ..model.ClZoneSub import *
 from ..model.ClPlanZone import *
 from ..model.ClPlanZoneType import *
+from ..model.PlPlan import *
+from ..model.PlPlanDecision import *
 from ..utils.DatabaseUtils import *
 from ..utils.PluginUtils import *
 from ..model.DatabaseHelper import *
@@ -427,6 +429,40 @@ class PlanDetailWidget(QDockWidget, Ui_PlanDetailWidget, DatabaseHelper):
 
         self.__remove_parcel_items()
         # self.__clear_parcel()
+
+    @pyqtSlot()
+    def on_delete_parcel_button_clicked(self):
+
+        parcel_list = self.parcels
+
+        if DialogInspector().dialog_visible():
+            return
+
+        if not parcel_list:
+            PluginUtils.show_message(self, u'Анхааруулга',
+                                     u'Жагсаалтаас сонгоно уу!')
+            return
+
+        count = self.session.query(PlPlan). \
+            filter(PlPlan.project_id == self.plan.project_id).count()
+
+        if count > 0:
+            PluginUtils.show_message(self, u'Анхааруулга', u'Батлагдсан төлөвлөгөөний нэгж талбар устгах боломжгүй')
+            return
+
+        message_box = QMessageBox()
+        message_box.setText(u'Сонгогдсон нэгж талбаруудыг устгах уу?')
+        delete_button = message_box.addButton(self.tr("Yes"), QMessageBox.ActionRole)
+        message_box.addButton(self.tr("No"), QMessageBox.ActionRole)
+        message_box.exec_()
+
+        if not message_box.clickedButton() == delete_button:
+            return
+        else:
+            for parcel_id in self.parcels:
+                self.session.query(PlProjectParcel).filter(PlProjectParcel.parcel_id == parcel_id).delete()
+
+        self.session.commit()
 
     @pyqtSlot()
     def on_get_data_layer_button_clicked(self):

@@ -328,6 +328,19 @@ font: 75 14pt &quot;Helvetica&quot;;</string>
         <string>Clear</string>
        </property>
       </widget>
+      <widget class="QPushButton" name="delete_parcel_button">
+       <property name="geometry">
+        <rect>
+         <x>192</x>
+         <y>170</y>
+         <width>75</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Delete</string>
+       </property>
+      </widget>
      </widget>
      <widget class="QPushButton" name="home_button">
       <property name="geometry">

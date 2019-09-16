@@ -951,17 +951,19 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
 
             description = ''
             plan_type = "" if not value.plan_type_ref else value.plan_type_ref.short_name
-            au_type = ''
-
-            if value.plan_type_ref.admin_unit_type == 2:
-                if value.au1_ref:
-                    au_type = ' /' + unicode(value.au1_ref.name) + '/'
-            elif value.plan_type_ref.admin_unit_type == 3:
-                if value.au2_ref:
-                    au_type = ' /' + unicode(value.au2_ref.name) + '/'
-            else:
-                au_type = ''
-            description = str(value.code) + au_type + " (" + unicode(plan_type) + ")"
+            # au_type = ''
+            # au2 = self.session.query(PlProjectAuLevel2). \
+            #     filter(PlProjectAuLevel2.project_id == value.project_id).first()
+            # if au2:
+            #     if value.plan_type_ref.admin_unit_type == 2:
+            #         if value.au1_ref:
+            #             au_type = ' /' + unicode(value.au1_ref.name) + '/'
+            #     elif value.plan_type_ref.admin_unit_type == 3:
+            #         if value.au2_ref:
+            #             au_type = ' /' + unicode(value.au2_ref.name) + '/'
+            #     else:
+            #         au_type = ''
+            description = str(value.code) + unicode(value.name) + " (" + unicode(plan_type) + ")"
             item = QTableWidgetItem(description)
             item.setIcon(QIcon(QPixmap(":/plugins/lm2/land_plan.png")))
             item.setData(Qt.UserRole, value.project_id)
