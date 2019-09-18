@@ -53,6 +53,7 @@ from ..model.SdConfiguration import *
 from ..model.SdPosition import *
 from ..model.SetApplicationTypePersonRole import *
 from ..model.CtContractFee import *
+from ..model.SdDepartmentAccount import *
 from ..utils.FileUtils import FileUtils
 from ..utils.PluginUtils import PluginUtils
 from ..utils.SessionHandler import SessionHandler
@@ -2498,6 +2499,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
         bank_name = ''
         account_no = ''
+        bank_value = ''
         department_name = ''
         department_phone = ''
         department_address = ''
@@ -2505,10 +2507,25 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         head_firstname = ''
 
         if self.officer.department_ref:
-            if self.officer.department_ref.bank_name:
-                bank_name = self.officer.department_ref.bank_name
-            if self.officer.department_ref.account_no:
-                account_no = self.officer.department_ref.account_no
+            department = self.officer.department_ref
+            department_id = department.department_id
+            print department_id
+            department_accounts = self.session.query(SdDepartmentAccount).filter(
+                SdDepartmentAccount.department_id == department_id).all()
+            for value in department_accounts:
+                account_no = value.account_no
+                bank = value.bank_ref
+                bank_name = bank.description
+                bank_full_value = bank_name + ' - ' + account_no
+                if bank_value == '':
+                    bank_value =  bank_full_value
+                else:
+                    bank_value = bank_value + ', ' + bank_full_value
+
+            # if self.officer.department_ref.bank_name:
+            #     bank_name = self.officer.department_ref.bank_name
+            # if self.officer.department_ref.account_no:
+            #     account_no = self.officer.department_ref.account_no
             if self.officer.department_ref.name:
                 department_name = self.officer.department_ref.name
             if self.officer.department_ref.phone:
@@ -2598,8 +2615,9 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             'quarterly2_fee': quarterly2_fee,
             'quarterly3_fee': quarterly3_fee,
             'quarterly4_fee': quarterly4_fee,
-            'bank_name': bank_name,
-            'account_no': account_no,
+            'bank_value': bank_value,
+            # 'bank_name': bank_name,
+            # 'account_no': account_no,
             'office_address': department_address,
             'office_name': department_name,
             'department_name': department_name,
@@ -4552,6 +4570,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                 person_id = item.data(Qt.UserRole)
                 if share > 0:
                     url = 'http://' + conf.value + '/api/payment/fee?parcel=' + parcel_id + '&person=' + str(person_id)
+                    print url
                     respons = urllib.request.urlopen(url)
                     data = json.loads(respons.read().decode(respons.info().get_param('charset') or 'utf-8'))
 

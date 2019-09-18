@@ -1108,9 +1108,7 @@ class LM2Plugin:
     def __start_cama_info_map(self):
 
         layer = LayerUtils.layer_by_data_source("data_soums_union", 'ca_parcel')
-        print'------'
-        print self.camaWidget.cadastre_rbutton.isCheckable()
-        print'------'
+
         if layer is None:
             QMessageBox.warning(self.iface.mainWindow(), QApplication.translate( "Plugin", "No <parcel> layer"),
                                 QApplication.translate( "Plugin", "Layer <parcel> must be added "
@@ -1367,6 +1365,27 @@ class LM2Plugin:
         if myalayer is None:
             mygroup.addLayer(vlayer)
             vlayer.setReadOnly(True)
+
+        ####
+        vlayer = LayerUtils.layer_by_data_source("data_soums_union", "ca_sub_parcel")
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer("ca_sub_parcel", "sub_parcel_id", "data_soums_union")
+        vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))) + "/template\style/ca_sub_parcel_tbl.qml")
+        vlayer.setLayerName(QApplication.translate("Plugin", "Sub Parcel"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            mygroup.addLayer(vlayer)
+
+        ####
+        vlayer = LayerUtils.layer_by_data_source("data_soums_union", "ca_parcel_line")
+        if vlayer is None:
+            vlayer = LayerUtils.load_line_layer_base_layer("ca_parcel_line", "parcel_id", "data_soums_union")
+        # vlayer.loadNamedStyle(
+        #     str(os.path.dirname(os.path.realpath(__file__))) + "/template\style/ca_sub_parcel_tbl.qml")
+        vlayer.setLayerName(QApplication.translate("Plugin", "Parcel Line"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            mygroup.addLayer(vlayer)
 
         self.iface.mapCanvas().refresh()
 
