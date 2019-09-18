@@ -17,11 +17,11 @@ from ..model.ClSpaMood import *
 from ..model.SdDepartment import *
 from ..controller.PastureMonitoringValueDialog import PastureMonitoringValueDialog
 from ..controller.MemberGroupDialog import *
+from ..controller.ContractSpaDialog import *
 from PastureSettings import PastureSettings
 from ApplicationsSpaDialog import ApplicationsSpaDialog
 from SentToGovernorPastureDialog import SentToGovernorPastureDialog
 from LandFeePaymentsDialog import *
-from ContractPastureDialog import *
 from ..model.DialogInspector import DialogInspector
 from ..model.ApplicationPastureSearch import *
 from ..model.PClPastureDaatsLevel import *
@@ -188,7 +188,7 @@ class SpaParcelWidget(QDockWidget, Ui_SpaParcelWidget, DatabaseHelper):
         if app_contract_count == 0:
             DatabaseUtils.set_working_schema()
             contract = PluginUtils.create_new_contract()
-            self.current_dialog = ContractPastureDialog(self.plugin, contract, self, False, self.plugin.iface.mainWindow())
+            self.current_dialog = ContractSpaDialog(self.plugin, contract, self, False, self.plugin.iface.mainWindow())
             self.current_dialog.rejected.connect(self.on_current_dialog_closed)
             DialogInspector().set_dialog_visible(True)
             self.current_dialog.setModal(False)
@@ -198,7 +198,7 @@ class SpaParcelWidget(QDockWidget, Ui_SpaParcelWidget, DatabaseHelper):
                 filter(CtContractApplicationRole.application == app_instance.app_id).one()
             contract = self.session.query(CtContract).filter_by(contract_id=app_contract.contract).one()
 
-            self.current_dialog = ContractPastureDialog(self.plugin, contract, self, True, self.plugin.iface.mainWindow())
+            self.current_dialog = ContractSpaDialog(self.plugin, contract, self, True, self.plugin.iface.mainWindow())
             self.current_dialog.rejected.connect(self.on_current_dialog_closed)
             DialogInspector().set_dialog_visible(True)
             self.current_dialog.setModal(False)
@@ -217,7 +217,7 @@ class SpaParcelWidget(QDockWidget, Ui_SpaParcelWidget, DatabaseHelper):
             DatabaseUtils.set_working_schema()
             contract = PluginUtils.create_new_contract()
 
-            self.current_dialog = ContractPastureDialog(self.plugin, contract, self, False, self.plugin.iface.mainWindow())
+            self.current_dialog = ContractSpaDialog(self.plugin, contract, self, False, self.plugin.iface.mainWindow())
             self.current_dialog.rejected.connect(self.on_current_dialog_closed)
             DialogInspector().set_dialog_visible(True)
             self.current_dialog.setModal(False)
@@ -227,7 +227,7 @@ class SpaParcelWidget(QDockWidget, Ui_SpaParcelWidget, DatabaseHelper):
                 filter(CtContractApplicationRole.application == app_instance.app_id).one()
             contract = self.session.query(CtContract).filter_by(contract_id=app_contract.contract).one()
 
-            self.current_dialog = ContractPastureDialog(self.plugin, contract, self, True, self.plugin.iface.mainWindow())
+            self.current_dialog = ContractSpaDialog(self.plugin, contract, self, True, self.plugin.iface.mainWindow())
             self.current_dialog.rejected.connect(self.on_current_dialog_closed)
             DialogInspector().set_dialog_visible(True)
             self.current_dialog.setModal(False)
