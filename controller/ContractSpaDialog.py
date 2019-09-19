@@ -59,6 +59,8 @@ from ..model.CtApplicationStatus import *
 from ..model.SetCertificate import *
 from ..model.CaPastureMonitoring import *
 from ..model.CaPastureParcelTbl import *
+from ..model.CtApplicationParcel import *
+from ..model.ClParcelType import *
 from ..utils.FileUtils import FileUtils
 from ..utils.PluginUtils import PluginUtils
 from ..utils.LayerUtils import LayerUtils
@@ -285,39 +287,13 @@ class ContractSpaDialog(QDialog, Ui_ContractSpaDialog, DatabaseHelper):
         contract_end = PluginUtils.convert_python_date_to_qt(self.contract.contract_end)
 
         if contract_begin is not None:
-            self.contract_begin_edit.setText(contract_begin.toString(Constants.DATABASE_DATE_FORMAT))
+            self.contract_begin_date.setDate(contract_begin)
 
         if contract_end is not None:
-            self.contract_end_edit.setText(contract_end.toString(Constants.DATABASE_DATE_FORMAT))
+            self.contract_end_date.setDate(contract_end)
             duration = contract_end.year() - contract_begin.year()
-            self.contract_duration_edit.setText(str(duration))
-        else:
-            application_role = self.contract.application_roles.filter_by(role=Constants.APPLICATION_ROLE_CREATES).one()
-            application = application_role.application_ref
-            # decision date
-            last_decision = self.session.query(CtDecision).join(CtApplication.decision_result) \
-                .join(CtDecisionApplication.decision_ref) \
-                .filter(CtApplication.app_no == application.app_no) \
-                .filter(CtDecisionApplication.decision_result == Constants.DECISION_RESULT_APPROVED) \
-                .one()
+            self.duration_sbox.setValue(duration)
 
-            qt_date = PluginUtils.convert_python_date_to_qt(last_decision.decision_date)
-
-            if qt_date is not None:
-                self.contract_begin_edit.setText(qt_date.toString(Constants.DATABASE_DATE_FORMAT))
-
-            if application.app_type in Constants.APPLICATION_TYPE_WITH_DURATION:
-                years_approved = application.approved_duration
-                if years_approved:
-                    qt_date = PluginUtils.convert_python_date_to_qt(last_decision.decision_date)
-
-                    if qt_date is not None:
-                        dec_year = qt_date.year()
-                        end_year = dec_year + int(years_approved)
-                        end_date = QDate(end_year, qt_date.month(), qt_date.day())
-
-                        self.contract_end_edit.setText(end_date.toString(Constants.DATABASE_DATE_FORMAT))
-                        self.contract_duration_edit.setText(str(years_approved))
         self.__load_application_information()
 
         self.__setup_status()
@@ -462,23 +438,23 @@ class ContractSpaDialog(QDialog, Ui_ContractSpaDialog, DatabaseHelper):
                                    self.tr("This applicaton already created contract."))
             return False
 
-        last_decision_count = self.session.query(CtDecision).join(CtApplication.decision_result).filter(
-            CtApplication.app_no == application.app_no) \
-            .order_by(CtDecision.decision_date.desc()).count()
-        if last_decision_count == 0:
-            PluginUtils.show_error(self, self.tr("Application Error"),
-                                   self.tr("It is not allowed to add an application without decision."))
-            return False
-
-        last_decision_count = self.session.query(CtDecision).join(CtApplication.decision_result) \
-            .join(CtDecisionApplication.decision_ref) \
-            .filter(CtApplication.app_no == application.app_no) \
-            .filter(CtDecisionApplication.decision_result == Constants.DECISION_RESULT_APPROVED).count()
-
-        if last_decision_count == 0:
-            PluginUtils.show_error(self, self.tr("Application Error"),
-                                   self.tr("There is no approved decision result for this application."))
-            return False
+        # last_decision_count = self.session.query(CtDecision).join(CtApplication.decision_result).filter(
+        #     CtApplication.app_no == application.app_no) \
+        #     .order_by(CtDecision.decision_date.desc()).count()
+        # if last_decision_count == 0:
+        #     PluginUtils.show_error(self, self.tr("Application Error"),
+        #                            self.tr("It is not allowed to add an application without decision."))
+        #     return False
+        #
+        # last_decision_count = self.session.query(CtDecision).join(CtApplication.decision_result) \
+        #     .join(CtDecisionApplication.decision_ref) \
+        #     .filter(CtApplication.app_no == application.app_no) \
+        #     .filter(CtDecisionApplication.decision_result == Constants.DECISION_RESULT_APPROVED).count()
+        #
+        # if last_decision_count == 0:
+        #     PluginUtils.show_error(self, self.tr("Application Error"),
+        #                            self.tr("There is no approved decision result for this application."))
+        #     return False
 
         #check that there is a parcel for this application
         ct_app_parcels_count = self.session.query(CtApplicationPUGParcel.application == application.app_id).count()
@@ -488,16 +464,16 @@ class ContractSpaDialog(QDialog, Ui_ContractSpaDialog, DatabaseHelper):
             return False
 
         #check that there is a duration, if there should be one
-        if application.app_type in ConstantsPasture.APPLICATION_TYPE_WITH_DURATION:
-            if application.approved_duration == 0 or application is None:
-                PluginUtils.show_error(self, self.tr("Application Error"),
-                                       self.tr("There is no approved duration for this application."))
-                return False
-
-        if application.app_type not in ConstantsPasture.CONTRACT_TYPES:
-            PluginUtils.show_error(self, self.tr("Application Error"),
-                                   self.tr("Its not allowed to create a contract based on this application type"))
-            return False
+        # if application.app_type in ConstantsPasture.APPLICATION_TYPE_WITH_DURATION:
+        #     if application.approved_duration == 0 or application is None:
+        #         PluginUtils.show_error(self, self.tr("Application Error"),
+        #                                self.tr("There is no approved duration for this application."))
+        #         return False
+        #
+        # if application.app_type not in ConstantsPasture.CONTRACT_TYPES:
+        #     PluginUtils.show_error(self, self.tr("Application Error"),
+        #                            self.tr("Its not allowed to create a contract based on this application type"))
+        #     return False
 
         return True
 
@@ -507,56 +483,59 @@ class ContractSpaDialog(QDialog, Ui_ContractSpaDialog, DatabaseHelper):
         application_role = self.contract.application_roles.filter_by(role=Constants.APPLICATION_ROLE_CREATES).one()
         application = application_role.application_ref
 
-        app_pug_parcels = self.session.query(CtApplicationPUGParcel). \
-            filter(CtApplicationPUGParcel.application == application.app_id).all()
-        for pug_parcel in app_pug_parcels:
-            parcel = self.session.query(CaPastureParcelTbl).filter(
-                CaPastureParcelTbl.parcel_id == pug_parcel.parcel).one()
+        app_parcel_count = self.session.query(CtApplicationParcel).filter(
+            CtApplicationParcel.app_id == application.app_id).count()
+        if app_parcel_count == 1:
+            app_parcel = self.session.query(CtApplicationParcel).filter(
+                CtApplicationParcel.app_id == application.app_id).one()
+            if app_parcel.parcel_type:
+                current_parcel_type = app_parcel.parcel_type
+                parcel_type = self.session.query(ClParcelType).filter(ClParcelType.code == current_parcel_type).one()
+                parcel_table_name = str(parcel_type.table_name)
+                if app_parcel.parcel_id:
+                    parcel_id = app_parcel.parcel_id
+                    sql = "select parcel_id, area_m2, landuse from " + parcel_table_name + " where parcel_id = " + "'" + parcel_id + "'"
+                    values = self.session.execute(sql).fetchall()
+                    for row in values:
+                        parcel_id = row[0]
+                        area_m2 = str(row[1])
+                        landuse_code = row[2]
 
-            item = QTableWidgetItem(parcel.parcel_id)
-            item.setIcon(QIcon(QPixmap(":/plugins/lm2/parcel.png")))
-            item.setData(Qt.UserRole, parcel.parcel_id)
+                        count = self.assigned_parcel_twidget.rowCount()
+                        self.assigned_parcel_twidget.insertRow(count)
 
-            count = self.assigned_parcel_twidget.rowCount()
-            self.assigned_parcel_twidget.insertRow(count)
+                        item = QTableWidgetItem(parcel_id)
+                        item.setIcon(QIcon(QPixmap(":/plugins/lm2/parcel.png")))
+                        item.setData(Qt.UserRole, parcel_id)
+                        self.assigned_parcel_twidget.setItem(count, 0, item)
 
-            self.assigned_parcel_twidget.setItem(count, 0, item)
+                        item = QTableWidgetItem(str(area_m2))
+                        item.setData(Qt.UserRole, area_m2)
+                        self.assigned_parcel_twidget.setItem(count, 1, item)
 
-            item = QTableWidgetItem(parcel.pasture_type)
-            item.setData(Qt.UserRole, parcel.pasture_type)
-            self.assigned_parcel_twidget.setItem(count, 1, item)
+                        landuse_count = self.session.query(ClLanduseType).filter(
+                            ClLanduseType.code == landuse_code).count()
+                        if landuse_count == 1:
+                            landuse = self.session.query(ClLanduseType).filter(
+                                ClLanduseType.code == landuse_code).one()
 
-            item = QTableWidgetItem(str(parcel.area_ga))
-            item.setData(Qt.UserRole, parcel.area_ga)
-            self.assigned_parcel_twidget.setItem(count, 2, item)
-            address_neighbourhood = ''
-            if parcel.address_neighbourhood:
-                address_neighbourhood = parcel.address_neighbourhood
+                            item = QTableWidgetItem(unicode(landuse.description))
+                            item.setData(Qt.UserRole, landuse.code)
+                            self.assigned_parcel_twidget.setItem(count, 2, item)
 
-        #decision date
-        last_decision = self.session.query(CtDecision).join(CtApplication.decision_result) \
-            .join(CtDecisionApplication.decision_ref) \
-            .filter(CtApplication.app_no == application.app_no) \
-            .filter(CtDecisionApplication.decision_result == Constants.DECISION_RESULT_APPROVED) \
-            .one()
+        #app date
+        qt_date = PluginUtils.convert_python_date_to_qt(application.app_timestamp)
+        self.contract_begin_date.setDate(qt_date)
 
-        qt_date = PluginUtils.convert_python_date_to_qt(last_decision.decision_date)
-        if qt_date is not None:
-            self.contract_begin_edit.setText(qt_date.toString(Constants.DATABASE_DATE_FORMAT))
+        self.duration_sbox.setValue(5)
 
-        if application.app_type in ConstantsPasture.APPLICATION_TYPE_WITH_DURATION:
-            years_approved = application.approved_duration
-            if years_approved:
-                qt_date = PluginUtils.convert_python_date_to_qt(last_decision.decision_date)
-                if qt_date is not None:
-                    dec_year = qt_date.year()
-                    end_year = dec_year + int(years_approved)
-                    end_date = QDate(end_year, qt_date.month(), qt_date.day())
-                    self.contract_end_edit.setText(end_date.toString(ConstantsPasture.DATABASE_DATE_FORMAT))
-                    self.contract_duration_edit.setText(str(years_approved))
-            else:
-                self.contract_end_edit.setText("")
-                self.contract_duration_edit.setText("")
+    @pyqtSlot(int)
+    def on_duration_sbox_valueChanged(self, value):
+
+        year = self.contract_begin_date.date().year()
+        month = self.contract_begin_date.date().month()
+        day = self.contract_begin_date.date().day()
+        self.contract_end_date.setDate(QDate(int(year) + value, month, day))
 
     def __contract_status(self):
 
@@ -840,11 +819,9 @@ class ContractSpaDialog(QDialog, Ui_ContractSpaDialog, DatabaseHelper):
                     self.other_reason_cbox.currentIndex())
 
 
-        self.contract.contract_begin = self.contract_begin_edit.text()
+        self.contract.contract_begin = self.contract_begin_date.date().toString(ConstantsPasture.DATABASE_DATE_FORMAT)
         self.contract.contract_date = self.contract_date.date().toString(ConstantsPasture.DATABASE_DATE_FORMAT)
-
-        if self.contract_end_edit.text():
-            self.contract.contract_end = self.contract_end_edit.text()
+        self.contract.contract_begin = self.contract_end_date.date().toString(ConstantsPasture.DATABASE_DATE_FORMAT)
 
         if not self.attribute_update:
             self.contract.certificate_no = 0

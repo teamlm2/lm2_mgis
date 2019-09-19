@@ -78,7 +78,7 @@
     </rect>
    </property>
    <property name="currentIndex">
-    <number>1</number>
+    <number>2</number>
    </property>
    <widget class="QWidget" name="tab">
     <attribute name="title">
@@ -293,12 +293,12 @@
       </column>
       <column>
        <property name="text">
-        <string>Pasture Type</string>
+        <string>Area</string>
        </property>
       </column>
       <column>
        <property name="text">
-        <string>Area(ga)</string>
+        <string>Land use type</string>
        </property>
       </column>
      </widget>
@@ -346,19 +346,6 @@
        <string>Contract Number</string>
       </property>
      </widget>
-     <widget class="QLineEdit" name="contract_begin_edit">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>50</x>
-        <y>100</y>
-        <width>181</width>
-        <height>20</height>
-       </rect>
-      </property>
-     </widget>
      <widget class="QLabel" name="label_16">
       <property name="geometry">
        <rect>
@@ -369,7 +356,7 @@
        </rect>
       </property>
       <property name="text">
-       <string>Contract Begin (= Decision Date)</string>
+       <string>Contract Begin</string>
       </property>
      </widget>
      <widget class="QLabel" name="label_19">
@@ -425,32 +412,6 @@
       </property>
       <property name="calendarPopup">
        <bool>true</bool>
-      </property>
-     </widget>
-     <widget class="QLineEdit" name="contract_duration_edit">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>300</x>
-        <y>100</y>
-        <width>161</width>
-        <height>20</height>
-       </rect>
-      </property>
-     </widget>
-     <widget class="QLineEdit" name="contract_end_edit">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>530</x>
-        <y>100</y>
-        <width>181</width>
-        <height>20</height>
-       </rect>
       </property>
      </widget>
      <widget class="QGroupBox" name="status_groupbox">
@@ -752,6 +713,36 @@
        <string/>
       </property>
      </widget>
+     <widget class="QDateEdit" name="contract_begin_date">
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>100</y>
+        <width>110</width>
+        <height>22</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QDateEdit" name="contract_end_date">
+      <property name="geometry">
+       <rect>
+        <x>530</x>
+        <y>100</y>
+        <width>110</width>
+        <height>22</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QSpinBox" name="duration_sbox">
+      <property name="geometry">
+       <rect>
+        <x>300</x>
+        <y>100</y>
+        <width>161</width>
+        <height>22</height>
+       </rect>
+      </property>
+     </widget>
     </widget>
    </widget>
    <widget class="QWidget" name="tab_13">
@@ -1034,9 +1025,6 @@
   <tabstop>close_button</tabstop>
   <tabstop>contract_num_edit</tabstop>
   <tabstop>contract_date</tabstop>
-  <tabstop>contract_begin_edit</tabstop>
-  <tabstop>contract_duration_edit</tabstop>
-  <tabstop>contract_end_edit</tabstop>
   <tabstop>draft_rbutton</tabstop>
   <tabstop>active_rbutton</tabstop>
   <tabstop>expired_rbutton</tabstop>

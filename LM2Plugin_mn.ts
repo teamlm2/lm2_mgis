@@ -14714,7 +14714,7 @@
     </message>
     <message>
         <location filename="controller/PastureWidget.py" line="846"/>
-        <source>TNCParcel</source>
+        <source>Reserve Parcel</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

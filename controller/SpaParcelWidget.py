@@ -690,12 +690,12 @@ class SpaParcelWidget(QDockWidget, Ui_SpaParcelWidget, DatabaseHelper):
         layers = self.plugin.iface.legendInterface().layers()
         vlayer_parcel = LayerUtils.load_union_layer_by_name("ca_person_group_parcel", "parcel_id")
         for layer in layers:
-            if layer.name() == u"Байгалын нөөцийн хил" or layer.name() == "TNCParcel":
+            if layer.name() == u"Байгалын нөөцийн хил" or layer.name() == "Reserve Parcel":
                 is_person_group_layer = True
         if not is_person_group_layer:
             mygroup.addLayer(vlayer_parcel)
 
-        vlayer_parcel.setLayerName(QApplication.translate("Plugin", "TNCParcel"))
+        vlayer_parcel.setLayerName(QApplication.translate("Plugin", "Reserve Parcel"))
         vlayer_parcel.loadNamedStyle(
             str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "template\style/tnc_boundary.qml")
 

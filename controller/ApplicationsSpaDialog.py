@@ -1100,7 +1100,7 @@ class ApplicationsSpaDialog(QDialog, Ui_ApplicationsSpaDialog, DatabaseHelper):
     @pyqtSlot(int)
     def on_application_type_cbox_currentIndexChanged(self, index):
 
-        self.parcel_type_cbox.clear()
+        self.self.parcel_type_cbox
         app_type = self.application_type_cbox.itemData(self.application_type_cbox.currentIndex())
 
         parcel_types = self.session.query(SetApplicationTypeParcelType). \
@@ -1557,7 +1557,6 @@ class ApplicationsSpaDialog(QDialog, Ui_ApplicationsSpaDialog, DatabaseHelper):
 
         to_be_accepted_num = self.contract_cancelled_num_edit.text()
         self.contract_to_be_cancelled_edit.setText(to_be_accepted_num)
-        self.contract_ca
 
     @pyqtSlot()
     def on_reg_receipt_print_button_clicked(self):

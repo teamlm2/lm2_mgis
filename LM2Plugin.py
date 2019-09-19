@@ -1199,7 +1199,7 @@ class LM2Plugin:
         layer = None
         if layer_name == u'Нэгж талбар' or layer_name == 'Parcel':
             layer = LayerUtils.layer_by_data_source("data_soums_union", 'ca_parcel')
-        elif layer_name == u'БН-н Нэгж талбар' or layer_name == 'TNCParcel':
+        elif layer_name == u'БН-н Нэгж талбар' or layer_name == 'Reserve Parcel':
             layer = LayerUtils.layer_by_data_source("data_soums_union", 'ca_person_group_parcel')
         elif layer_name == u'БАХ нэгж талбар' or layer_name == 'PUGParcel':
             layer = LayerUtils.layer_by_data_source("data_soums_union", 'ca_pasture_parcel')
@@ -1228,7 +1228,7 @@ class LM2Plugin:
         if layer_name == u'Нэгж талбар' or layer_name == 'Parcel':
             table_name = 'ca_parcel'
             mapTool = PrintCadastreExtractMapTool(self, table_name, False)
-        elif layer_name == u'БН-н Нэгж талбар' or layer_name == 'TNCParcel':
+        elif layer_name == u'БН-н Нэгж талбар' or layer_name == 'Reserve Parcel':
             table_name = 'ca_person_group_parcel'
             mapTool = PrintCadastreExtractMapTool(self, table_name, True)
         elif layer_name == u'БАХ нэгж талбар' or layer_name == 'PUGParcel':
@@ -1322,6 +1322,8 @@ class LM2Plugin:
                         self.__set_menu_visibility()
                         self.__refresh_layer()
                         break
+                    else:
+                        self.__disable_menu()
 
     def __set_menu_visibility(self):
 
@@ -1380,8 +1382,8 @@ class LM2Plugin:
         vlayer = LayerUtils.layer_by_data_source("data_soums_union", "ca_parcel_line")
         if vlayer is None:
             vlayer = LayerUtils.load_line_layer_base_layer("ca_parcel_line", "parcel_id", "data_soums_union")
-        # vlayer.loadNamedStyle(
-        #     str(os.path.dirname(os.path.realpath(__file__))) + "/template\style/ca_sub_parcel_tbl.qml")
+        vlayer.loadNamedStyle(
+            str(os.path.dirname(os.path.realpath(__file__))) + "/template\style/ca_parcel_line.qml")
         vlayer.setLayerName(QApplication.translate("Plugin", "Parcel Line"))
         myalayer = root.findLayer(vlayer.id())
         if myalayer is None:
