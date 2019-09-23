@@ -2,7 +2,7 @@
 
 VERSION = '0.9.6'
 
-SETUP_VERSION = 14
+SETUP_VERSION = 15
 
 #Admin Settings Dialog
 #Tab Report
