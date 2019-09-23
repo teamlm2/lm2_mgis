@@ -8,7 +8,7 @@ class SetUserPosition(Base):
 
     __tablename__ = 'set_user_position'
 
-    user_name_real = Column(Integer, ForeignKey("set_role.user_name_real"), primary_key=True)
+    user_name_real = Column(Integer, ForeignKey("set_role_user.user_name_real"), primary_key=True)
     user_name_real_ref = relationship("SetRole")
 
     position = Column(Integer, ForeignKey("cl_position_type.code"), primary_key=True)

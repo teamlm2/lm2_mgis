@@ -27,5 +27,5 @@ class CtDecision(Base):
     results = relationship("CtDecisionApplication", lazy='dynamic')
     documents = relationship("CtDecisionDocument", lazy="dynamic", cascade="all, delete-orphan")
 
-    imported_by = Column(String, ForeignKey('set_role.user_name_real'))
+    imported_by = Column(String, ForeignKey('set_role_user.user_name_real'))
     imported_by_ref = relationship("SetRole")

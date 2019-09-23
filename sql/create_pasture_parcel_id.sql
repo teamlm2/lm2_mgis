@@ -21,12 +21,12 @@ BEGIN
 		NEW.valid_from := now();
 	END IF;
 
-  SELECT pa_from INTO v_pa_from FROM settings.set_role where user_name = current_user;
-  SELECT pa_till INTO v_pa_till FROM settings.set_role where user_name = current_user;
-  SELECT organization INTO org_type FROM settings.set_role where user_name = current_user;
+  SELECT pa_from INTO v_pa_from FROM settings.set_role_user where user_name = current_user;
+  SELECT pa_till INTO v_pa_till FROM settings.set_role_user where user_name = current_user;
+  SELECT organization INTO org_type FROM settings.set_role_user where user_name = current_user;
 
-  UPDATE settings.set_role SET pa_from = '1800-01-01' where user_name = current_user;
-  UPDATE settings.set_role SET pa_till = 'infinity' where user_name = current_user;
+  UPDATE settings.set_role_user SET pa_from = '1800-01-01' where user_name = current_user;
+  UPDATE settings.set_role_user SET pa_till = 'infinity' where user_name = current_user;
   
  IF (NEW.geometry IS NOT NULL) THEN
 		
@@ -52,8 +52,8 @@ BEGIN
         NEW.org_type := org_type;	
 END IF;
 
-    UPDATE settings.set_role SET pa_from = v_pa_from where user_name = current_user;
-    UPDATE settings.set_role SET pa_till = v_pa_till where user_name = current_user;
+    UPDATE settings.set_role_user SET pa_from = v_pa_from where user_name = current_user;
+    UPDATE settings.set_role_user SET pa_till = v_pa_till where user_name = current_user;
 
     RETURN NEW;
 END;

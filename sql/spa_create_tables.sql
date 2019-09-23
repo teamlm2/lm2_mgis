@@ -128,8 +128,8 @@ CREATE OR REPLACE VIEW data_soums_union.ca_spa_parcel AS
   WHERE st_intersects(p.geometry, ( SELECT au_level2.geometry
            FROM admin_units.au_level2
           WHERE au_level2.code::text = (( SELECT set_role.working_au_level2::text AS au2
-                   FROM settings.set_role
-                  WHERE set_role.user_name::name = "current_user"() AND set_role.is_active = true))));
+                   FROM settings.set_role_user
+                  WHERE set_role_user.user_name::name = "current_user"() AND set_role.is_active = true))));
 
 ALTER TABLE data_soums_union.ca_spa_parcel
   OWNER TO geodb_admin;

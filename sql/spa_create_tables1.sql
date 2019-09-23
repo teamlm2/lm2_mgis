@@ -109,8 +109,8 @@ alter table data_soums_union.ca_spa_parcel_tbl add column person_register varcha
 
 create or replace view data_soums_union.ca_spa_parcel as select * from data_soums_union.ca_spa_parcel_tbl p
 where st_intersects(p.geometry, (select geometry from admin_units.au_level2 where code = (( SELECT set_role.working_au_level2::text AS au2
-           FROM settings.set_role
-          WHERE set_role.user_name::name = "current_user"() AND set_role.is_active = true))));
+           FROM settings.set_role_user
+          WHERE set_role_user.user_name::name = "current_user"() AND set_role.is_active = true))));
 
 GRANT SELECT, INSERT ON TABLE data_soums_union.ca_spa_parcel TO cadastre_view;
 GRANT SELECT ON TABLE data_soums_union.ca_spa_parcel TO reporting, application_view;
@@ -155,8 +155,8 @@ CREATE TRIGGER set_default_valid_time
 
 create or replace view data_soums_union.ca_state_parcel as select * from data_soums_union.ca_state_parcel_tbl p
 where st_intersects(p.geometry, (select geometry from admin_units.au_level2 where code = (( SELECT set_role.working_au_level2::text AS au2
-           FROM settings.set_role
-          WHERE set_role.user_name::name = "current_user"() AND set_role.is_active = true))));
+           FROM settings.set_role_user
+          WHERE set_role_user.user_name::name = "current_user"() AND set_role.is_active = true))));
 
 GRANT SELECT, INSERT ON TABLE data_soums_union.ca_state_parcel TO cadastre_view;
 GRANT SELECT ON TABLE data_soums_union.ca_state_parcel TO reporting, application_view;
@@ -319,12 +319,12 @@ CREATE OR REPLACE VIEW data_soums_union.ca_parcel_line AS
  SELECT *
    FROM data_soums_union.ca_parcel_line_tbl
   WHERE  ca_parcel_line_tbl.au2::text = (( SELECT set_role.working_au_level2::text AS au2
-           FROM settings.set_role
-          WHERE set_role.user_name::name = "current_user"() AND set_role.is_active = true)) AND "overlaps"(ca_parcel_line_tbl.valid_from::timestamp with time zone, ca_parcel_line_tbl.valid_till::timestamp with time zone, (( SELECT set_role.pa_from
-           FROM settings.set_role
-          WHERE set_role.user_name::name = "current_user"() AND set_role.is_active = true))::timestamp with time zone, (( SELECT set_role.pa_till
-           FROM settings.set_role
-          WHERE set_role.user_name::name = "current_user"() AND set_role.is_active = true))::timestamp with time zone);
+           FROM settings.set_role_user
+          WHERE set_role_user.user_name::name = "current_user"() AND set_role.is_active = true)) AND "overlaps"(ca_parcel_line_tbl.valid_from::timestamp with time zone, ca_parcel_line_tbl.valid_till::timestamp with time zone, (( SELECT set_role.pa_from
+           FROM settings.set_role_user
+          WHERE set_role_user.user_name::name = "current_user"() AND set_role.is_active = true))::timestamp with time zone, (( SELECT set_role.pa_till
+           FROM settings.set_role_user
+          WHERE set_role_user.user_name::name = "current_user"() AND set_role.is_active = true))::timestamp with time zone);
 
 ALTER TABLE data_soums_union.ca_parcel_line
   OWNER TO geodb_admin;
@@ -342,12 +342,12 @@ CREATE OR REPLACE VIEW data_soums_union.ca_sub_parcel AS
  SELECT *
    FROM data_soums_union.ca_sub_parcel_tbl
   WHERE  ca_sub_parcel_tbl.au2::text = (( SELECT set_role.working_au_level2::text AS au2
-           FROM settings.set_role
-          WHERE set_role.user_name::name = "current_user"() AND set_role.is_active = true)) AND "overlaps"(ca_sub_parcel_tbl.valid_from::timestamp with time zone, ca_sub_parcel_tbl.valid_till::timestamp with time zone, (( SELECT set_role.pa_from
-           FROM settings.set_role
-          WHERE set_role.user_name::name = "current_user"() AND set_role.is_active = true))::timestamp with time zone, (( SELECT set_role.pa_till
-           FROM settings.set_role
-          WHERE set_role.user_name::name = "current_user"() AND set_role.is_active = true))::timestamp with time zone);
+           FROM settings.set_role_user
+          WHERE set_role_user.user_name::name = "current_user"() AND set_role.is_active = true)) AND "overlaps"(ca_sub_parcel_tbl.valid_from::timestamp with time zone, ca_sub_parcel_tbl.valid_till::timestamp with time zone, (( SELECT set_role.pa_from
+           FROM settings.set_role_user
+          WHERE set_role_user.user_name::name = "current_user"() AND set_role.is_active = true))::timestamp with time zone, (( SELECT set_role.pa_till
+           FROM settings.set_role_user
+          WHERE set_role_user.user_name::name = "current_user"() AND set_role.is_active = true))::timestamp with time zone);
 
 ALTER TABLE data_soums_union.ca_sub_parcel
   OWNER TO geodb_admin;

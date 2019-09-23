@@ -9,7 +9,7 @@ from Base import *
 
 class SetRole(Base):
 
-    __tablename__ = 'set_role'
+    __tablename__ = 'set_role_user'
 
     user_name = Column(String)
     surname = Column(String)

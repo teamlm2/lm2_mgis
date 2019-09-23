@@ -872,7 +872,7 @@ class UserRoleManagementDialog(QDialog, Ui_UserRoleManagementDialog):
                         is_active_user = False
                         set_role = self.db_session.query(SetRole).filter(
                             SetRole.user_name == user_name).filter(SetRole.is_active == True).first()
-                        role = self.db_session.query(SetRole).filter(SetRole.user_name_real == set_role.user_name_real).one()
+                        role = self.db_session.query(SetRole).filter(SetRole.user_name_real == set_role_user.user_name_real).one()
                         role.surname = surname
                         role.first_name = first_name
                         role.phone = phone

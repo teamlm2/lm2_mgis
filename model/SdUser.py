@@ -26,5 +26,5 @@ class SdUser(Base):
     updated_by = Column(Integer)
     last_active = Column(Date)
 
-    gis_user_real = Column(Integer, ForeignKey('set_role.user_name_real'))
+    gis_user_real = Column(Integer, ForeignKey('set_role_user.user_name_real'))
     gis_user_real_ref = relationship("SetRole")

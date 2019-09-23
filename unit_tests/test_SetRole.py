@@ -33,7 +33,7 @@ class test_CtApplication(unittest.TestCase):
             set_role.filter_bbox = filter_bbox
             set_role.first_name = "Gary"
             set_role.surname = "Sherman"
-            set_role.user_name = "gary_the_sherman"
+            set_role_user.user_name = "gary_the_sherman"
             set_role.position = "Programmer"
             set_role.phone = "1234567"
             set_role.mac_addresses = "12.12.12.12.12"
