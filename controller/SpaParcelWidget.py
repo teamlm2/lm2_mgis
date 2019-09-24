@@ -477,19 +477,19 @@ class SpaParcelWidget(QDockWidget, Ui_SpaParcelWidget, DatabaseHelper):
         self.land_use_type_cbox.clear()
         self.department_cbox.clear()
 
-        try:
-            PluginUtils.populate_au_level1_cbox(self.working_l1_cbox, False)
-            au2 = DatabaseUtils.working_l2_code()
-            l1_code = self.working_l1_cbox.itemData(self.working_l1_cbox.currentIndex(), Qt.UserRole)
-            PluginUtils.populate_au_level2_cbox(self.working_l2_cbox, l1_code, False)
+        # try:
+        PluginUtils.populate_au_level1_cbox(self.working_l1_cbox, False)
+        au2 = DatabaseUtils.working_l2_code()
+        l1_code = self.working_l1_cbox.itemData(self.working_l1_cbox.currentIndex(), Qt.UserRole)
+        PluginUtils.populate_au_level2_cbox(self.working_l2_cbox, l1_code, False)
 
-            cl_landusetype = self.session.query(ClLanduseType).all()
-            cl_spa_type = self.session.query(ClSpaType).all()
-            cl_department = self.session.query(SdDepartment).all()
+        cl_landusetype = self.session.query(ClLanduseType).all()
+        cl_spa_type = self.session.query(ClSpaType).all()
+        cl_department = self.session.query(SdDepartment).all()
 
-        except SQLAlchemyError, e:
-            PluginUtils.show_message(self, self.tr("Sql Error"), e.message)
-            return
+        # except SQLAlchemyError, e:
+        #     PluginUtils.show_message(self, self.tr("Sql Error"), e.message)
+        #     return
 
 
         self.spa_type_cbox.addItem("*", -1)
@@ -621,11 +621,11 @@ class SpaParcelWidget(QDockWidget, Ui_SpaParcelWidget, DatabaseHelper):
 
         return application_instance
 
-    @pyqtSlot()
-    def on_draft_decision_button_clicked(self):
-
-        self.dlg = SentToGovernorPastureDialog(False, self.plugin.iface.mainWindow())
-        self.dlg.show()
+    # @pyqtSlot()
+    # def on_draft_decision_button_clicked(self):
+    #
+    #     self.dlg = SentToGovernorPastureDialog(False, self.plugin.iface.mainWindow())
+    #     self.dlg.show()
 
     @pyqtSlot()
     def on_pasture_app_view_button_clicked(self):

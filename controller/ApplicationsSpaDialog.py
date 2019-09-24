@@ -1100,7 +1100,6 @@ class ApplicationsSpaDialog(QDialog, Ui_ApplicationsSpaDialog, DatabaseHelper):
     @pyqtSlot(int)
     def on_application_type_cbox_currentIndexChanged(self, index):
 
-        self.self.parcel_type_cbox
         app_type = self.application_type_cbox.itemData(self.application_type_cbox.currentIndex())
 
         parcel_types = self.session.query(SetApplicationTypeParcelType). \

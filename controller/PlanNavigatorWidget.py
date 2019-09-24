@@ -963,7 +963,7 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
             #             au_type = ' /' + unicode(value.au2_ref.name) + '/'
             #     else:
             #         au_type = ''
-            description = str(value.code) + unicode(value.name) + " (" + unicode(plan_type) + ")"
+            description = str(value.code) + ': ' + unicode(value.name) + " (" + unicode(plan_type) + ")"
             item = QTableWidgetItem(description)
             item.setIcon(QIcon(QPixmap(":/plugins/lm2/land_plan.png")))
             item.setData(Qt.UserRole, value.project_id)
@@ -1333,7 +1333,7 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
     def __create_layer_group(self, root_group, group_name):
 
         if root_group.findGroup(group_name):
-            return group_name
+            return root_group.findGroup(group_name)
         else:
             return root_group.insertGroup(1, group_name)
 
@@ -1943,6 +1943,19 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
         LayerUtils.refresh_layer_plan()
         root_group = root.findGroup(u"Ажиллаж байгаа")
 
+        vlayer = LayerUtils.layer_by_data_source("data_plan", "pl_completion_parcel")
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer("pl_completion_parcel", "id", "data_plan")
+
+        vlayer.loadNamedStyle(
+            str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/pl_completion_parcel.qml")
+        vlayer.setLayerName(self.tr("Completion Parcel"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            root_group.addLayer(vlayer)
+
+        ###########
+
         schema_name = "data_plan"
         table_name = "pl_view_project_parcel"
         layer_list = []
@@ -1961,26 +1974,6 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
             QgsMapLayerRegistry.instance().removeMapLayers(layer_list)
 
         parent_group = self.__create_layer_group(root_group, unicode(group_name))
-        # parent_group.setExpanded(False)
-        #
-        # sql = "select base_code from ( " \
-        #       "select substring(zone.code, 1, 1) base_code from data_plan.pl_project_parcel parcel " \
-        #       "join data_plan.cl_plan_zone zone on parcel.plan_zone_id = zone.plan_zone_id " \
-        #       "where project_id = " + str(
-        #     project_id) + " group by zone.code order by zone.code )xxx group by base_code order by base_code "
-
-        # values = self.session.execute(sql).fetchall()
-        # parent_types = Constants.plan_process_type_parent
-        # for parent_type in parent_types:
-        #     for row in values:
-        #         base_code = str(row[0])
-        #         if base_code == str(parent_type):
-        #             name = parent_types[parent_type]
-        #             mygroup = self.__create_layer_group(parent_group, unicode(name))
-        #             mygroup.setExpanded(False)
-        #             self.__load_parcel_polygon_layer(root, mygroup)
-        #             self.__load_parcel_point_layer(root, mygroup)
-        #             self.__load_parcel_line_layer(root, mygroup)
         mygroup = parent_group
         self.__load_parcel_polygon_layer(root, mygroup)
         self.__load_parcel_point_layer(root, mygroup)

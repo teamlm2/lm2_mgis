@@ -496,7 +496,7 @@ font: 75 14pt &quot;Helvetica&quot;;</string>
        <widget class="QPushButton" name="pasture_app_add_button">
         <property name="geometry">
          <rect>
-          <x>141</x>
+          <x>260</x>
           <y>6</y>
           <width>111</width>
           <height>23</height>
@@ -504,19 +504,6 @@ font: 75 14pt &quot;Helvetica&quot;;</string>
         </property>
         <property name="text">
          <string>Application Add</string>
-        </property>
-       </widget>
-       <widget class="QPushButton" name="draft_decision_button">
-        <property name="geometry">
-         <rect>
-          <x>265</x>
-          <y>6</y>
-          <width>111</width>
-          <height>23</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Draft/ Decision</string>
         </property>
        </widget>
       </widget>
