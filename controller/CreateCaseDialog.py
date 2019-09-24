@@ -15,6 +15,8 @@ from ..model.ClLanduseType import *
 from ..model.DatabaseHelper import DatabaseHelper
 from ..model import Constants
 from ..model.CaParcelTbl import *
+from ..model.SetOrgTypeSpaTypeLanduse import *
+from ..model.CaSpaParcelTbl import *
 from .qt_classes.ApplicationCmbBoxDelegate import *
 from ..controller.ApplicationsDialog import *
 from ..model.ApplicationSearch import *
@@ -643,26 +645,39 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
         if not organization:
             return
 
-        if organization == 1:
-            # Тусгай хамгаалалтай болон чөлөөт бүсд нэгж талбар оруулж болохгүй
-            count = self.session.query(AuMpa.id) \
-                .filter(geometry.ST_Intersects(AuMpa.geometry)).count()
-            if count > 0:
+        count = self.session.query(CaSpaParcelTbl).filter(geometry.ST_Intersects(CaSpaParcelTbl.geometry)).count()
+        if count > 0:
+            spa_parcel = self.session.query(CaSpaParcelTbl).filter(geometry.ST_Intersects(CaSpaParcelTbl.geometry)).first()
+            check_count = self.session.query(SetOrgTypeSpaTypeLanduse). \
+                filter(SetOrgTypeSpaTypeLanduse.org_type == organization). \
+                filter(SetOrgTypeSpaTypeLanduse.landuse == spa_parcel.landuse). \
+                filter(SetOrgTypeSpaTypeLanduse.spa_type == spa_parcel.spa_type).count()
+            landuse = spa_parcel.landuse_ref
+            if check_count == 0:
                 valid = False
-                parcel_error = self.tr("Parcels mpa boundary overlap!!!")
+                parcel_error = '"' + landuse.description + '"' + u' -т бүртгэл хийх эрхгүй байна!'
                 error_message = error_message + "\n \n" + parcel_error
-        elif organization == 3:
-            # Тусгай хамгаалалтай газар нутгаас өөр газар нэгж талбар оруулж болохгүй
-            count = self.session.query(AuMpa.id) \
-                .filter(geometry.ST_Within(AuMpa.geometry)).count()
 
-            if count == 0:
-                valid = False
-                parcel_error = self.tr("Parcels out mpa boundary overlap!!!")
-                error_message = error_message + "\n \n" + parcel_error
-        elif organization == 5:
-            # Чөлөөт бүсээс өөр газар нэгж талбар оруулж болохгүй
-            print ''
+        # if organization == 1:
+        #     # Тусгай хамгаалалтай болон чөлөөт бүсд нэгж талбар оруулж болохгүй
+        #     count = self.session.query(AuMpa.id) \
+        #         .filter(geometry.ST_Intersects(AuMpa.geometry)).count()
+        #     if count > 0:
+        #         valid = False
+        #         parcel_error = self.tr("Parcels mpa boundary overlap!!!")
+        #         error_message = error_message + "\n \n" + parcel_error
+        # elif organization == 3:
+        #     # Тусгай хамгаалалтай газар нутгаас өөр газар нэгж талбар оруулж болохгүй
+        #     count = self.session.query(AuMpa.id) \
+        #         .filter(geometry.ST_Within(AuMpa.geometry)).count()
+        #
+        #     if count == 0:
+        #         valid = False
+        #         parcel_error = self.tr("Parcels out mpa boundary overlap!!!")
+        #         error_message = error_message + "\n \n" + parcel_error
+        # elif organization == 5:
+        #     # Чөлөөт бүсээс өөр газар нэгж талбар оруулж болохгүй
+        #     print ''
 
         return valid, error_message
 
