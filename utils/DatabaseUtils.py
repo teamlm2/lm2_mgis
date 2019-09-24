@@ -181,7 +181,7 @@ class DatabaseUtils():
                     return
                 else:
                     set_role = session.query(SetRole).filter(SetRole.user_name == user).filter(SetRole.is_active == True).one()
-                    sd_user = session.query(SdUser).filter(SdUser.gis_user_real == set_role_user.user_name_real).first()
+                    sd_user = session.query(SdUser).filter(SdUser.gis_user_real == set_role.user_name_real).first()
                     return sd_user
 
         except exc.SQLAlchemyError, e:
