@@ -13536,7 +13536,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
             order_by(CtApplicationStatus.app_status_id.desc()).first()
 
         max_status = str(max_status).split(",")[0][1:]
-        print max_status
+
         if max_status == '10':
             PluginUtils.show_message(self, self.tr("Information"),
                                      self.tr("Already send to UBEG."))

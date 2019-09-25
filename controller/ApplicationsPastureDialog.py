@@ -505,14 +505,17 @@ class ApplicationsPastureDialog(QDialog, Ui_ApplicationsPastureDialog, DatabaseH
 
         try:
             rigth_types = self.session.query(ClRightType).filter(ClRightType.code == 1).all()
-            if self.zone_rigth_type == 1:
-                application_types = self.session.query(ClApplicationType).\
-                    filter(ClApplicationType.code == ApplicationType.pasture_use).\
-                    order_by(ClApplicationType.code).all()
-            else:
-                application_types = self.session.query(ClApplicationType). \
-                    filter(ClApplicationType.code == 27). \
-                    order_by(ClApplicationType.code).all()
+            application_types = self.session.query(ClApplicationType). \
+                filter(ClApplicationType.code == ApplicationType.pasture_use). \
+                order_by(ClApplicationType.code).all()
+            # if self.zone_rigth_type == 1:
+            #     application_types = self.session.query(ClApplicationType).\
+            #         filter(ClApplicationType.code == ApplicationType.pasture_use).\
+            #         order_by(ClApplicationType.code).all()
+            # else:
+            #     application_types = self.session.query(ClApplicationType). \
+            #         filter(ClApplicationType.code == 27). \
+            #         order_by(ClApplicationType.code).all()
             statuses = self.session.query(ClApplicationStatus).order_by(ClApplicationStatus.code).all()
             # set_roles = self.session.query(SetRole). \
             #     filter(SetRole.user_name.startswith(user_start)).all()
