@@ -119,7 +119,7 @@
        </rect>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>3</number>
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
@@ -1059,6 +1059,74 @@ font: 75 14pt &quot;Helvetica&quot;;</string>
           <string>З/З-н үнийн мэдээ</string>
          </property>
         </widget>
+       </widget>
+      </widget>
+      <widget class="QWidget" name="tab_3">
+       <attribute name="title">
+        <string>Import from Cadastre</string>
+       </attribute>
+       <widget class="QComboBox" name="factor_cbox">
+        <property name="geometry">
+         <rect>
+          <x>40</x>
+          <y>30</y>
+          <width>371</width>
+          <height>22</height>
+         </rect>
+        </property>
+       </widget>
+       <widget class="QTableWidget" name="cadastre_current_twidget_2">
+        <property name="geometry">
+         <rect>
+          <x>6</x>
+          <y>190</y>
+          <width>464</width>
+          <height>361</height>
+         </rect>
+        </property>
+        <property name="sortingEnabled">
+         <bool>true</bool>
+        </property>
+        <attribute name="horizontalHeaderDefaultSectionSize">
+         <number>160</number>
+        </attribute>
+        <attribute name="horizontalHeaderMinimumSectionSize">
+         <number>35</number>
+        </attribute>
+        <attribute name="verticalHeaderDefaultSectionSize">
+         <number>30</number>
+        </attribute>
+        <attribute name="verticalHeaderMinimumSectionSize">
+         <number>19</number>
+        </attribute>
+        <column>
+         <property name="text">
+          <string>Cadastre Parcel Information</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Elevation</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Slope</string>
+         </property>
+        </column>
+       </widget>
+       <widget class="QPushButton" name="pushButton">
+        <property name="geometry">
+         <rect>
+          <x>396</x>
+          <y>160</y>
+          <width>75</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Load</string>
+        </property>
        </widget>
       </widget>
      </widget>

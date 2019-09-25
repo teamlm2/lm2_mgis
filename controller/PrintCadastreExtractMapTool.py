@@ -100,7 +100,7 @@ class PrintCadastreExtractMapTool(QgsMapTool):
             attribute_map = result_feature.attributes()
 
             parcel_no = attribute_map[idx_parcel_id]
-            print parcel_no
+
             tmp_old_parcel_no = attribute_map[idx_old_id]
 
             coordinate_system = layer.crs()

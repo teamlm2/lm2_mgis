@@ -147,44 +147,44 @@ class PrintDialog(QDialog, Ui_PrintDialog):
                     if contract_role.role == Constants.APPLICATION_ROLE_CREATES:
                         contract = contract_role.contract_ref
                         # if contract.cancellation_date is None:
-                        for stakeholder in application.stakeholders:
-                            person = stakeholder.person_ref
-                            if stakeholder.role == Constants.APPLICANT_ROLE_CODE or stakeholder.role == Constants.REMAINING_OWNER_CODE or stakeholder.role == Constants.NEW_RIGHT_HOLDER_CODE:
-                                # self.__add_contract_person(1,contract.status, contract.contract_no, contract.contract_date, application, person)
-                                if application.app_type == 2:
-                                    if stakeholder.role == Constants.REMAINING_OWNER_CODE:
-                                        person = stakeholder.person_ref
+                        app_persons = self.session.query(CtApplicationPersonRole).filter(CtApplicationPersonRole.application == application.app_id).all()
+                        for stakeholder in app_persons:
+                            # print stakeholder.person_ref
+                            # person = stakeholder.person_ref
+                            person_id = stakeholder.person
+                            if self.session.query(BsPerson).filter(BsPerson.person_id == person_id).count() == 1:
+                                person = self.session.query(BsPerson).filter(BsPerson.person_id == person_id).one()
+                                if stakeholder.role == Constants.APPLICANT_ROLE_CODE or stakeholder.role == Constants.REMAINING_OWNER_CODE or stakeholder.role == Constants.NEW_RIGHT_HOLDER_CODE:
+                                    # self.__add_contract_person(1,contract.status, contract.contract_no, contract.contract_date, application, person)
+                                    if application.app_type == 2:
+                                        if stakeholder.role == Constants.REMAINING_OWNER_CODE:
+                                            self.__add_contract_person(1, contract.status, contract.contract_no,
+                                                                       contract.contract_date, application, person)
+                                    elif (application.app_type == 7 or application.app_type == 14 or application.app_type == 15):
+                                        if stakeholder.role == Constants.NEW_RIGHT_HOLDER_CODE:
+                                            self.__add_contract_person(1, contract.status, contract.contract_no,
+                                                                       contract.contract_date, application, person)
+                                    else:
                                         self.__add_contract_person(1, contract.status, contract.contract_no,
                                                                    contract.contract_date, application, person)
-                                elif (
-                                            application.app_type == 7 or application.app_type == 14 or application.app_type == 15):
-                                    if stakeholder.role == Constants.NEW_RIGHT_HOLDER_CODE:
-                                        person = stakeholder.person_ref
-                                        self.__add_contract_person(1, contract.status, contract.contract_no,
-                                                                   contract.contract_date, application, person)
-                                else:
-                                    person = stakeholder.person_ref
-                                    self.__add_contract_person(1, contract.status, contract.contract_no,
-                                                               contract.contract_date, application, person)
             else:
                 for stakeholder in application.stakeholders:
-                    person = stakeholder.person_ref
+                    person_id = stakeholder.person
+                    if self.session.query(BsPerson).filter(BsPerson.person_id == person_id).count() == 1:
+                        person = self.session.query(BsPerson).filter(BsPerson.person_id == person_id).one()
 
-                    if stakeholder.role == Constants.APPLICANT_ROLE_CODE or stakeholder.role == Constants.REMAINING_OWNER_CODE or stakeholder.role == Constants.NEW_RIGHT_HOLDER_CODE:
-                        if application.app_type == 2:
-                            if stakeholder.role == Constants.REMAINING_OWNER_CODE:
-                                person = stakeholder.person_ref
+                        if stakeholder.role == Constants.APPLICANT_ROLE_CODE or stakeholder.role == Constants.REMAINING_OWNER_CODE or stakeholder.role == Constants.NEW_RIGHT_HOLDER_CODE:
+                            if application.app_type == 2:
+                                if stakeholder.role == Constants.REMAINING_OWNER_CODE:
+                                    self.__add_contract_person(1, None, None,
+                                                               None, application, person)
+                            elif (application.app_type == 7 or application.app_type == 14 or application.app_type == 15):
+                                if stakeholder.role == Constants.NEW_RIGHT_HOLDER_CODE:
+                                    self.__add_contract_person(1, None, None,
+                                                               None, application, person)
+                            else:
                                 self.__add_contract_person(1, None, None,
                                                            None, application, person)
-                        elif (application.app_type == 7 or application.app_type == 14 or application.app_type == 15):
-                            if stakeholder.role == Constants.NEW_RIGHT_HOLDER_CODE:
-                                person = stakeholder.person_ref
-                                self.__add_contract_person(1, None, None,
-                                                           None, application, person)
-                        else:
-                            person = stakeholder.person_ref
-                            self.__add_contract_person(1, None, None,
-                                                       None, application, person)
 
             for record_role in application.records:
                 if record_role.role == Constants.APPLICATION_ROLE_CREATES:
@@ -193,14 +193,16 @@ class PrintDialog(QDialog, Ui_PrintDialog):
                     # if record.status == 20:
                     for stakeholder in application.stakeholders:
                         if stakeholder.role == Constants.APPLICANT_ROLE_CODE or stakeholder.role == Constants.NEW_RIGHT_HOLDER_CODE or stakeholder.role == Constants.REMAINING_OWNER_CODE:
-                            person = stakeholder.person_ref
+                            person_id = stakeholder.person
+                            if self.session.query(BsPerson).filter(BsPerson.person_id == person_id).count() == 1:
+                                person = self.session.query(BsPerson).filter(BsPerson.person_id == person_id).one()
 
-                            if application.app_type == ApplicationType.change_ownership or application.app_type == ApplicationType.giving_up_ownership:
-                                if stakeholder.role == 40 or stakeholder.role == 70:
-                                    self.__add_contract_person(0, record.status, record.record_no,
-                                                               record.record_date, application, person)
-                            else:
-                                self.__add_contract_person(0, record.status, record.record_no, record.record_date,
+                                if application.app_type == ApplicationType.change_ownership or application.app_type == ApplicationType.giving_up_ownership:
+                                    if stakeholder.role == 40 or stakeholder.role == 70:
+                                        self.__add_contract_person(0, record.status, record.record_no,
+                                                                   record.record_date, application, person)
+                                else:
+                                    self.__add_contract_person(0, record.status, record.record_no, record.record_date,
                                                            application, person)
 
         self.right_holder_twidget.resizeColumnsToContents()

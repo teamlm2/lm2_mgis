@@ -17,7 +17,7 @@ class BsPerson(Base):
     contact_surname = Column(String)
     contact_first_name = Column(String)
     contact_position = Column(String)
-    person_id = Column(String, Sequence('ps_person_person_id_seq'), primary_key=True)
+    person_id = Column(Integer, Sequence('ps_person_person_id_seq'), primary_key=True)
     # person_id = Column(Integer, primary_key=True)
     person_register = Column(String)
     state_registration_no = Column(String)
