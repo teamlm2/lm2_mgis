@@ -596,26 +596,27 @@ class MemberGroupDialog(QDialog, Ui_MemberGroupDialog, DatabaseHelper):
             for row in range(self.group_twidget.rowCount()):
                 new_row = False
                 id = self.group_twidget.item(row, 0).data(Qt.UserRole)
-                group_type = self.group_twidget.item(row, 3).data(Qt.UserRole)
-                if id == -1:
-                    new_row = True
-                    pug_group = CtPersonGroup()
-                else:
-                    pug_group = self.session.query(CtPersonGroup).filter(CtPersonGroup.group_no == id).one()
+                if self.group_twidget.item(row, 3):
+                    group_type = self.group_twidget.item(row, 3).data(Qt.UserRole)
+                    if id == -1:
+                        new_row = True
+                        pug_group = CtPersonGroup()
+                    else:
+                        pug_group = self.session.query(CtPersonGroup).filter(CtPersonGroup.group_no == id).one()
 
-                pug_group.group_no = int(self.group_twidget.item(row, 0).text())
-                pug_group.group_name = self.group_twidget.item(row, 1).text()
-                pug_group.is_contract = self.group_twidget.item(row, 2).text()
-                created_date = PluginUtils.convert_qt_date_to_python(QDate().currentDate())
-                pug_group.created_date = created_date
-                pug_group.au2 = au2
-                pug_group.group_type = group_type
+                    pug_group.group_no = int(self.group_twidget.item(row, 0).text())
+                    pug_group.group_name = self.group_twidget.item(row, 1).text()
+                    pug_group.is_contract = self.group_twidget.item(row, 2).text()
+                    created_date = PluginUtils.convert_qt_date_to_python(QDate().currentDate())
+                    pug_group.created_date = created_date
+                    pug_group.au2 = au2
+                    pug_group.group_type = group_type
 
-                if new_row:
-                    self.session.add(pug_group)
+                    if new_row:
+                        self.session.add(pug_group)
 
-                item = self.group_twidget.item(row, 0)
-                item.setData(Qt.UserRole, int(self.group_twidget.item(row, 0).text()))
+                    item = self.group_twidget.item(row, 0)
+                    item.setData(Qt.UserRole, int(self.group_twidget.item(row, 0).text()))
 
         except exc.SQLAlchemyError, e:
             PluginUtils.show_error(self, self.tr("SQL Error"), e.message)
@@ -648,9 +649,10 @@ class MemberGroupDialog(QDialog, Ui_MemberGroupDialog, DatabaseHelper):
                 item  = QTableWidgetItem(group.is_contract)
                 self.group_twidget.setItem(row, 2, item)
 
-                item = QTableWidgetItem(group.group_type_ref.description)
-                item.setData(Qt.UserRole, group.group_type)
-                self.group_twidget.setItem(row, 3, item)
+                if group.group_type_ref:
+                    item = QTableWidgetItem(group.group_type_ref.description)
+                    item.setData(Qt.UserRole, group.group_type)
+                    self.group_twidget.setItem(row, 3, item)
 
                 row += 1
 

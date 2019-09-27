@@ -582,8 +582,8 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
             filter(CaParcel.geometry.ST_Transform(int(srid)).ST_Area() != CaTmpParcel.geometry.ST_Transform(int(srid)).ST_Area()). \
             filter(CaTmpParcel.parcel_id == tmp_parcel_id).all()
 
-        # for old_parcel in historical_parcels:
-        #     old_parcel.valid_till = date.today()
+        for old_parcel in historical_parcels:
+            old_parcel.valid_till = date.today()
 
         # Parcels to become historical: merged
         historical_parcels = self.session.query(CaParcel).join(CaMaintenanceCase.parcels). \
@@ -592,8 +592,8 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
             filter(CaParcel.geometry.ST_Transform(int(srid)).ST_Area() != CaTmpParcel.geometry.ST_Transform(int(srid)).ST_Area()). \
             filter(CaTmpParcel.parcel_id == tmp_parcel_id).all()
 
-        # for old_parcel in historical_parcels:
-        #     old_parcel.valid_till = date.today()
+        for old_parcel in historical_parcels:
+            old_parcel.valid_till = date.today()
 
         # Parcels to be inserted
         soum_code = DatabaseUtils.working_l2_code()

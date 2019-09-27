@@ -246,7 +246,7 @@ class FinalizeCaseDialog(QDialog, Ui_FinalizeCaseDialog, DatabaseHelper):
             idx = self.surveyor_cbox.currentIndex()
             self.maintenance_case.surveyed_by_surveyor = self.surveyor_cbox.itemData(idx)
 
-        # self.__write_changes()
+        self.__write_changes()
         self.commit()
         self.reject()
 
