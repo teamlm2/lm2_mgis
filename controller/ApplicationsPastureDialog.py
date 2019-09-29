@@ -961,30 +961,31 @@ class ApplicationsPastureDialog(QDialog, Ui_ApplicationsPastureDialog, DatabaseH
             item_provided = QTableWidgetItem()
             item_provided.setCheckState(Qt.Unchecked)
 
-            item_doc_type = QTableWidgetItem(docType.document_role_ref.description)
-            item_doc_type.setData(Qt.UserRole, docType.document_role_ref.code)
-            item_doc_type.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+            if docType.document_role_ref:
+                item_doc_type = QTableWidgetItem(docType.document_role_ref.description)
+                item_doc_type.setData(Qt.UserRole, docType.document_role_ref.code)
+                item_doc_type.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
 
-            item_name = QTableWidgetItem("")
-            item_name.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
-            if docType.document_role_ref.is_ubeg_required:
-                item_doc_type.setBackground(Qt.yellow)
-                item_doc_type.setBackground(Qt.yellow)
-                item_name.setBackground(Qt.yellow)
+                item_name = QTableWidgetItem("")
+                item_name.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+                if docType.document_role_ref.is_ubeg_required:
+                    item_doc_type.setBackground(Qt.yellow)
+                    item_doc_type.setBackground(Qt.yellow)
+                    item_name.setBackground(Qt.yellow)
 
-            item_open = QTableWidgetItem("")
-            item_remove = QTableWidgetItem("")
-            item_view = QTableWidgetItem("")
+                item_open = QTableWidgetItem("")
+                item_remove = QTableWidgetItem("")
+                item_view = QTableWidgetItem("")
 
-            row = self.documents_twidget.rowCount()
+                row = self.documents_twidget.rowCount()
 
-            self.documents_twidget.insertRow(row)
-            self.documents_twidget.setItem(row, DOC_PROVIDED_COLUMN, item_provided)
-            self.documents_twidget.setItem(row, DOC_FILE_TYPE_COLUMN, item_doc_type)
-            self.documents_twidget.setItem(row, DOC_FILE_NAME_COLUMN, item_name)
-            self.documents_twidget.setItem(row, DOC_OPEN_FILE_COLUMN, item_open)
-            self.documents_twidget.setItem(row, DOC_DELETE_COLUMN, item_remove)
-            self.documents_twidget.setItem(row, DOC_VIEW_COLUMN, item_view)
+                self.documents_twidget.insertRow(row)
+                self.documents_twidget.setItem(row, DOC_PROVIDED_COLUMN, item_provided)
+                self.documents_twidget.setItem(row, DOC_FILE_TYPE_COLUMN, item_doc_type)
+                self.documents_twidget.setItem(row, DOC_FILE_NAME_COLUMN, item_name)
+                self.documents_twidget.setItem(row, DOC_OPEN_FILE_COLUMN, item_open)
+                self.documents_twidget.setItem(row, DOC_DELETE_COLUMN, item_remove)
+                self.documents_twidget.setItem(row, DOC_VIEW_COLUMN, item_view)
         #
         self.__update_documents_file_twidget()
 
@@ -2743,12 +2744,18 @@ class ApplicationsPastureDialog(QDialog, Ui_ApplicationsPastureDialog, DatabaseH
     def __search_person_group_parcels(self):
 
         au2 = DatabaseUtils.working_l2_code()
+        # parcels = self.session.query(CaPastureParcelTbl.parcel_id, CaPastureParcelTbl.landuse, \
+        #                              CaPastureParcelTbl.pasture_type, CaPastureParcelTbl.area_ga,
+        #                              CaPastureParcelTbl.geometry) \
+        #     .filter(CaPastureParcelTbl.geometry.ST_Overlaps((AuLevel2.geometry))) \
+        #     .filter(AuLevel2.code == au2) \
+        #     .filter(CaPastureParcelTbl.group_type == 2)
+
         parcels = self.session.query(CaPastureParcelTbl.parcel_id, CaPastureParcelTbl.landuse, \
                                      CaPastureParcelTbl.pasture_type, CaPastureParcelTbl.area_ga,
                                      CaPastureParcelTbl.geometry) \
-            .filter(AuLevel2.geometry.ST_Contains(func.ST_Centroid(CaPastureParcelTbl.geometry))) \
-            .filter(AuLevel2.code == au2) \
-            .filter(CaPastureParcelTbl.group_type == 2)
+              .filter(CaPastureParcelTbl.au2 == au2) \
+              .filter(CaPastureParcelTbl.group_type == 2)
 
         if not self.bag_group_parcel_cbox.itemData(self.bag_group_parcel_cbox.currentIndex()) == -1:
             value = self.bag_group_parcel_cbox.itemData(self.bag_group_parcel_cbox.currentIndex())

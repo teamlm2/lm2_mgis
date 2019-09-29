@@ -6,7 +6,9 @@ from Base import *
 
 
 class SetApplicationTypeDocumentRole(Base):
+
     __tablename__ = 'set_application_type_document_role'
+
     application_type = Column(String, ForeignKey('cl_application_type.code'), primary_key=True)
     application_type_ref = relationship("ClApplicationType")
 

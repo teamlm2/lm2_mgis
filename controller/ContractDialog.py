@@ -1658,7 +1658,8 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                 fee.area = float(self.calculated_area_edit.text())
                 fee.fee_calculated = int(self.land_fee_twidget.item(row, CONTRACTOR_FEE_CALCULATED).text())
                 fee.fee_contract = int(self.land_fee_twidget.item(row, CONTRACTOR_FEE_CONTRACT).text())
-                fee.grace_period = int(self.land_fee_twidget.item(row, CONTRACTOR_GRACE_PERIOD).text())
+                if self.__is_number(self.land_fee_twidget.item(row, CONTRACTOR_GRACE_PERIOD).text()):
+                    fee.grace_period = int(self.land_fee_twidget.item(row, CONTRACTOR_GRACE_PERIOD).text())
                 fee.base_fee_per_m2 = float(self.base_fee_edit.text())
                 fee.subsidized_area = int(self.subsidized_area_edit.text())
                 fee.subsidized_fee_rate = float(self.subsidized_fee_rate_edit.text())
@@ -4519,9 +4520,14 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
         if self.contract.status == Constants.CONTRACT_STATUS_EXPIRED:
             if not state and self.cancelled_rbutton.isChecked() == False:
-                PluginUtils.show_message(self, self.tr('Expired contracts'), self.tr('Expired contracts!'))
-                self.expired_rbutton.setChecked(True)
-                return
+                duration = 0
+                if self.contract_duration_edit.text():
+                    duration = int(self.contract_duration_edit.text())
+
+                if duration == 0:
+                    PluginUtils.show_message(self, self.tr('Expired contracts'), self.tr('Expired contracts!'))
+                    self.expired_rbutton.setChecked(True)
+                    return
         if self.contract.status == Constants.CONTRACT_STATUS_ACTIVE:
             if state and self.cancelled_rbutton.isChecked() == False:
                 PluginUtils.show_message(self, self.tr('Activate contracts'), self.tr('Activate contracts!'))

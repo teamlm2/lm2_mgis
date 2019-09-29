@@ -617,7 +617,6 @@ class MemberGroupDialog(QDialog, Ui_MemberGroupDialog, DatabaseHelper):
 
                     item = self.group_twidget.item(row, 0)
                     item.setData(Qt.UserRole, int(self.group_twidget.item(row, 0).text()))
-
         except exc.SQLAlchemyError, e:
             PluginUtils.show_error(self, self.tr("SQL Error"), e.message)
             raise

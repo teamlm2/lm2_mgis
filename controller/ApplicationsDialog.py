@@ -242,21 +242,23 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
         if status_count > 0:
             self.requested_land_use_type_cbox.setEnabled(False)
 
-        status_count_7 = self.session.query(CtApplicationStatus) \
-            .filter(CtApplication.app_id == self.application.app_id) \
-            .filter(CtApplicationStatus.status >= 7).count()
-        if status_count_7 > 0:
-            self.status_cbox.removeItem(self.status_cbox.findData(8))
+        # status_count_7 = self.session.query(CtApplicationStatus) \
+        #     .filter(CtApplication.app_id == self.application.app_id) \
+        #     .filter(CtApplicationStatus.status >= 7).count()
+        # if status_count_7 > 0:
+        #     self.status_cbox.removeItem(self.status_cbox.findData(8))
 
         max_status = self.session.query(func.max(CtApplicationStatus.status)). \
             filter(CtApplicationStatus.application == self.application.app_id).one()
-        mas_status = int(str(max_status).split(",")[0][1:])
+        if max_status:
+            if str(max_status).split(",")[0][1:] != "None":
+                mas_status = int(str(max_status).split(",")[0][1:])
 
-        if mas_status > 6:
-            self.is_status_disable = True
-            self.add_button.setEnabled(False)
-            self.update_button.setEnabled(False)
-            self.delete_button.setEnabled(False)
+                if mas_status > 6:
+                    self.is_status_disable = True
+                    self.add_button.setEnabled(False)
+                    self.update_button.setEnabled(False)
+                    self.delete_button.setEnabled(False)
 
         # except SQLAlchemyError, e:
         #     self.rollback_to_savepoint()
@@ -621,11 +623,13 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
         app_status = self.session.query(CtApplicationStatus).\
             filter(CtApplicationStatus.application == self.application.app_id) .\
             order_by(CtApplicationStatus.app_status_id.desc()).first()
-        self.status_cbox.setCurrentIndex(self.status_cbox.findData(str(int(app_status.status) + 1)))
+        if app_status:
+            self.status_cbox.setCurrentIndex(self.status_cbox.findData(str(int(app_status.status) + 1)))
 
         app_statuses = self.session.query(CtApplicationStatus). \
             filter(CtApplicationStatus.application == self.application.app_id). \
             order_by(CtApplicationStatus.app_status_id.desc()).all()
+
         for status in app_statuses:
             self.__add_application_status_item(status)
 
@@ -2391,10 +2395,11 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
 
         self.create_savepoint()
         sd_user = self.session.query(SdUser).filter(SdUser.gis_user_real == self.__current_real_user().user_name_real).first()
-        if self.__max_status_object().next_officer_in_charge != sd_user.user_id:
-            PluginUtils.show_message(self, self.tr("Application Status"),
-                                     self.tr("Permission Status!!"))
-            return
+        if self.__max_status_object():
+            if self.__max_status_object().next_officer_in_charge != sd_user.user_id:
+                PluginUtils.show_message(self, self.tr("Application Status"),
+                                         self.tr("Permission Status!!"))
+                return
 
         for app_status in self.application.statuses:
             if app_status.status_ref.code == status_item.data(Qt.UserRole):
@@ -2419,10 +2424,11 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
         if selected_row is None:
             return
 
-        if self.__max_status_object().officer_in_charge != self.__current_sd_user().user_id:
-            PluginUtils.show_message(self, self.tr("Application Status"),
-                                     self.tr("Permission Status!!"))
-            return
+        if self.__max_status_object():
+            if self.__max_status_object().officer_in_charge != self.__current_sd_user().user_id:
+                PluginUtils.show_message(self, self.tr("Application Status"),
+                                         self.tr("Permission Status!!"))
+                return
 
         status_item = self.application_status_twidget.item(selected_row, 0)
         date_item = self.application_status_twidget.item(selected_row, 1)
@@ -2482,11 +2488,14 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
         next_officer_username = self.next_officer_in_charge_cbox.itemData(
             self.next_officer_in_charge_cbox.currentIndex(), Qt.UserRole)
         status_id = self.status_cbox.itemData(self.status_cbox.currentIndex(), Qt.UserRole)
+        if status_id != 8:
+            if self.__max_status_object():
+                if self.__max_status_object().next_officer_in_charge != self.__current_sd_user().user_id:
+                    PluginUtils.show_message(self, self.tr("Application Status"),
+                                             self.tr("Permission Status!!")
 
-        if self.__max_status_object().next_officer_in_charge != self.__current_sd_user().user_id:
-            PluginUtils.show_message(self, self.tr("Application Status"),
-                                     self.tr("Permission Status!!"))
-            return
+                                             )
+                    return
 
         if status_id == 5:
             if self.parcel_edit.text() == '':
@@ -2602,19 +2611,40 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
         sd_user = self.session.query(SdUser).filter(SdUser.gis_user_real == officer.user_name_real).first()
         return sd_user
 
+    def __is_number(self, s):
+
+        try:
+            float(s)  # for int, long and float
+        except ValueError:
+            try:
+                complex(s)  # for complex
+            except ValueError:
+                return False
+
+        return True
+
     def __max_application_status(self):
 
         status = self.session.query(func.max(CtApplicationStatus.app_status_id)). \
             filter(CtApplicationStatus.application == self.application.app_id).one()
         max_status = str(status).split(",")[0][1:]
-        return int(max_status)
+        if self.__is_number(str(max_status).split(",")[0][1:]):
+            if max_status:
+                if str(max_status).split(",")[0][1:] != "None":
+                    max_status = int(str(max_status).split(",")[0][1:])
+                    return int(max_status)
+        else:
+            return None
 
     def __max_status_object(self):
 
-        status = self.session.query(CtApplicationStatus).\
-            filter(CtApplicationStatus.application == self.application.app_id).\
-            filter(CtApplicationStatus.app_status_id == self.__max_application_status()).one()
-        return status
+        if self.__max_application_status():
+            status = self.session.query(CtApplicationStatus).\
+                filter(CtApplicationStatus.application == self.application.app_id).\
+                filter(CtApplicationStatus.app_status_id == self.__max_application_status()).one()
+            return status
+        else:
+            return None
 
     @pyqtSlot()
     def on_apply_button_clicked(self):
@@ -2697,7 +2727,6 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
         #check if the app_no is still valid, otherwise generate new one
         if not self.attribute_update:
             app_no_count = self.session.query(CtApplication).filter(CtApplication.app_no == app_no).count()
-            print app_no_count
             if app_no_count > 0:
 
                 self.__generate_application_number()
