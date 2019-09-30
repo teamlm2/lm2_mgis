@@ -2639,10 +2639,16 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
     def __max_status_object(self):
 
         if self.__max_application_status():
-            status = self.session.query(CtApplicationStatus).\
-                filter(CtApplicationStatus.application == self.application.app_id).\
-                filter(CtApplicationStatus.app_status_id == self.__max_application_status()).one()
-            return status
+            count = self.session.query(CtApplicationStatus). \
+                filter(CtApplicationStatus.application == self.application.app_id). \
+                filter(CtApplicationStatus.app_status_id == self.__max_application_status()).count()
+            if count > 0:
+                status = self.session.query(CtApplicationStatus).\
+                    filter(CtApplicationStatus.application == self.application.app_id).\
+                    filter(CtApplicationStatus.app_status_id == self.__max_application_status()).first()
+                return status
+            else:
+                return None
         else:
             return None
 

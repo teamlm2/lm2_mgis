@@ -756,7 +756,8 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
             parcel_subjects = self.session.query(UbGisSubject).filter(UbGisSubject.objectid == object_id).all()
             for parcel_subject in parcel_subjects:
                 if parcel_subject.oldpid:
-                    ub_parcel = self.session.query(CaUBParcel).filter(CaUBParcel.old_parcel_id == parcel_subject.oldpid).one()
+                    ub_parcel = self.session.query(CaUBParcelTbl).filter(CaUBParcelTbl.old_parcel_id == parcel_subject.oldpid).one()
+
                     self.parcel_id_edit.setText(ub_parcel.parcel_id)
                     self.edit_status_cbox.setCurrentIndex(self.edit_status_cbox.findData(ub_parcel.edit_status))
                 self.old_parcel_id_edit.setText(parcel_subject.oldpid)
@@ -1973,7 +1974,7 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
             subject.uhid = self.record_cert_edit.text()
 
         old_parcel_id = self.old_parcel_id_edit.text()
-        ub_parcel = self.session.query(CaUBParcel).filter(CaUBParcel.old_parcel_id == old_parcel_id).one()
+        ub_parcel = self.session.query(CaUBParcelTbl).filter(CaUBParcel.old_parcel_id == old_parcel_id).one()
         edit_status = self.edit_status_cbox.itemData(self.edit_status_cbox.currentIndex())
 
         if ub_parcel.edit_status != 10:
@@ -2339,7 +2340,7 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
         valid = True
         old_parcel_id = self.old_parcel_id_edit.text()
         error_message = self.tr("The parcel info can't be saved. The following errors have been found: ")
-        ub_parcel = self.session.query(CaUBParcel).filter(CaUBParcel.old_parcel_id == old_parcel_id).one()
+        ub_parcel = self.session.query(CaUBParcelTbl).filter(CaUBParcel.old_parcel_id == old_parcel_id).one()
         parcel_within_count = self.session.query(CaParcel).filter(
             ub_parcel.geometry.ST_Within(CaParcel.geometry)).count()
 
@@ -3012,7 +3013,7 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
         parcel_id = self.parcel_id_edit.text()
 
         old_parcel_id = self.old_parcel_id_edit.text()
-        ub_parcel = self.session.query(CaUBParcel).filter(CaUBParcel.old_parcel_id == old_parcel_id).one()
+        ub_parcel = self.session.query(CaUBParcelTbl).filter(CaUBParcel.old_parcel_id == old_parcel_id).one()
         landuse = self.parcel_landuse_cbox.itemData(self.parcel_landuse_cbox.currentIndex())
 
         self.create_savepoint()
