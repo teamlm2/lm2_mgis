@@ -1039,7 +1039,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
                             plan_zone_relation_count = self.session.query(SetPlanZoneRelation). \
                                 filter(SetPlanZoneRelation.parent_plan_zone_id == plan_zone.plan_zone_id).\
                                 filter(SetPlanZoneRelation.child_plan_zone_id == plan_zone_id).count()
-                            if plan_zone_relation_count == 0:
+                            if plan_zone_relation_count == 1:
                                 message = plan_zone_message + value.project_ref.code + unicode(u' дугаартай ') + plan_type.short_name + \
                                         unicode(u'-ний ') + \
                                         '/'+plan_zone.code+'/' + unicode(plan_zone.name) + unicode(u' арга хэмжээтэй давхцаж байна.')
@@ -1056,7 +1056,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
                         plan_zone_relation_count = self.session.query(SetPlanZoneRelation). \
                             filter(SetPlanZoneRelation.parent_plan_zone_id == plan_zone.plan_zone_id). \
                             filter(SetPlanZoneRelation.child_plan_zone_id == plan_zone_id).count()
-                        if plan_zone_relation_count == 0:
+                        if plan_zone_relation_count == 1:
                             message = plan_zone_message + value.project_ref.code + unicode(u' дугаартай ') + plan_type.short_name + \
                                       unicode(u'-ний ') + \
                                       '/' + plan_zone.code + '/' + unicode(plan_zone.name) + unicode(u' арга хэмжээтэй давхцаж байна.')
@@ -1073,7 +1073,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
                         plan_zone_relation_count = self.session.query(SetPlanZoneRelation). \
                             filter(SetPlanZoneRelation.parent_plan_zone_id == plan_zone.plan_zone_id). \
                             filter(SetPlanZoneRelation.child_plan_zone_id == plan_zone_id).count()
-                        if plan_zone_relation_count == 0:
+                        if plan_zone_relation_count == 1:
                             message = plan_zone_message + value.project_ref.code + unicode(u' дугаартай ') + plan_type.short_name + \
                                       unicode(u'-ний ') + \
                                       '/' + plan_zone.code + '/' + unicode(plan_zone.name) + unicode(u' арга хэмжээтэй давхцаж байна.')

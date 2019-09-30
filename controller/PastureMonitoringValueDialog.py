@@ -3385,13 +3385,13 @@ class PastureMonitoringValueDialog(QDialog, Ui_PastureMonitoringValueDialog, Dat
             worksheet.write(data_row, col + 13, '', format_null_data)
             worksheet.write(data_row, col + 14, '', format_null_data)
 
-        photo_count = self.__photo_count(point_detail_id)
-        if photo_count == 0:
-            worksheet.write(data_row, col + 15, str(self.__photo_count(point_detail_id)), format_null_data)
-        elif photo_count > 0 and photo_count < 10:
-            worksheet.write(data_row, col + 15, str(self.__photo_count(point_detail_id)), self.format_photo_yellow)
-        else:
-            worksheet.write(data_row, col + 15, str(self.__photo_count(point_detail_id)), self.format_photo)
+        # photo_count = self.__photo_count(point_detail_id)
+        # if photo_count == 0:
+        #     worksheet.write(data_row, col + 15, str(self.__photo_count(point_detail_id)), format_null_data)
+        # elif photo_count > 0 and photo_count < 10:
+        #     worksheet.write(data_row, col + 15, str(self.__photo_count(point_detail_id)), self.format_photo_yellow)
+        # else:
+        #     worksheet.write(data_row, col + 15, str(self.__photo_count(point_detail_id)), self.format_photo)
 
     def __load_zone_header(self, worksheet, pasture_plants, format, format_null_data):
 
