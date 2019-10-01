@@ -3018,7 +3018,7 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
 
         self.create_savepoint()
         # try:
-        parcel_count = self.session.query(CaParcelTbl).filter(CaParcelTbl.parcel_id == parcel_id).count()
+        parcel_count = self.session.query(CaParcelTbl.parcel_id).filter(CaParcelTbl.parcel_id == parcel_id).count()
         if parcel_count > 0:
             # parcel = self.session.query(CaParcel).filter(CaParcel.parcel_id == parcel_id).one()
             # parcel.parcel_id = None
