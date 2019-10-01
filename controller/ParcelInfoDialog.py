@@ -3017,13 +3017,30 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
         landuse = self.parcel_landuse_cbox.itemData(self.parcel_landuse_cbox.currentIndex())
 
         self.create_savepoint()
-        try:
-            parcel_count = self.session.query(CaParcelTbl).filter(CaParcelTbl.parcel_id == parcel_id).count()
-            if parcel_count > 0:
-                # parcel = self.session.query(CaParcel).filter(CaParcel.parcel_id == parcel_id).one()
-                # parcel.parcel_id = None
+        # try:
+        parcel_count = self.session.query(CaParcelTbl).filter(CaParcelTbl.parcel_id == parcel_id).count()
+        if parcel_count > 0:
+            # parcel = self.session.query(CaParcel).filter(CaParcel.parcel_id == parcel_id).one()
+            # parcel.parcel_id = None
+            message_box = QMessageBox()
+            message_box.setText(u'Нэгж талбарын дугаар давхардаж байна. Шинэ дугаар олгох бол үргэлжүүлнэ үү.')
+
+            no_button = message_box.addButton(self.tr("Yes"), QMessageBox.ActionRole)
+            message_box.addButton(self.tr("No"), QMessageBox.ActionRole)
+            message_box.exec_()
+
+            if not message_box.clickedButton() == no_button:
+                return
+            # PluginUtils.show_message(self, u'Анхааруулга',
+            #                          u'Нэгж талбарын дугаар давхардаж байна.')
+            # return
+        elif parcel_count == 0:
+            parcel = CaParcel()
+            if len(parcel_id) == 10:
+                parcel.parcel_id = parcel_id
+            else:
                 message_box = QMessageBox()
-                message_box.setText(u'Нэгж талбарын дугаар давхардаж байна. Шинэ дугаар олгох бол үргэлжүүлнэ үү.')
+                message_box.setText(u'Нэгж талбарын дугаар буруу байна. Шинэ дугаар олгох бол үргэлжүүлнэ үү.')
 
                 no_button = message_box.addButton(self.tr("Yes"), QMessageBox.ActionRole)
                 message_box.addButton(self.tr("No"), QMessageBox.ActionRole)
@@ -3031,89 +3048,72 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
 
                 if not message_box.clickedButton() == no_button:
                     return
+
                 # PluginUtils.show_message(self, u'Анхааруулга',
-                #                          u'Нэгж талбарын дугаар давхардаж байна.')
+                #                          u'Нэгж талбарын дугаар буруу байна./Жишээ нь: Дугаарын оронгийн урт таарахгүй/')
                 # return
-            elif parcel_count == 0:
-                parcel = CaParcel()
-                if len(parcel_id) == 10:
-                    parcel.parcel_id = parcel_id
-                else:
-                    message_box = QMessageBox()
-                    message_box.setText(u'Нэгж талбарын дугаар буруу байна. Шинэ дугаар олгох бол үргэлжүүлнэ үү.')
+            parcel.old_parcel_id = old_parcel_id
+            parcel.geo_id = old_parcel_id
+            parcel.landuse = landuse
+            parcel.address_khashaa = self.khashaa_edit.text()
+            parcel.address_streetname = self.streetname_edit.text()
+            parcel.address_neighbourhood = self.neighbourhood_edit.text()
+            valid_from = self.decision_date.date().toString(Constants.DATABASE_DATE_FORMAT)
+            parcel.valid_from = valid_from
+            parcel.geometry = ub_parcel.geometry
+            self.session.add(parcel)
+            self.session.flush()
 
-                    no_button = message_box.addButton(self.tr("Yes"), QMessageBox.ActionRole)
-                    message_box.addButton(self.tr("No"), QMessageBox.ActionRole)
-                    message_box.exec_()
+            app_time = self.decision_date.date().toString(Constants.DATABASE_DATE_FORMAT)
+            status_date = self.decision_date.date().toString(Constants.DATABASE_DATE_FORMAT)
+            app_no = self.__generate_application_number()
+            right_type = self.rigth_type_cbox.itemData(self.rigth_type_cbox.currentIndex())
 
-                    if not message_box.clickedButton() == no_button:
-                        return
+            app_type = self.application_type_cbox.itemData(self.application_type_cbox.currentIndex())
 
-                    # PluginUtils.show_message(self, u'Анхааруулга',
-                    #                          u'Нэгж талбарын дугаар буруу байна./Жишээ нь: Дугаарын оронгийн урт таарахгүй/')
-                    # return
-                parcel.old_parcel_id = old_parcel_id
-                parcel.geo_id = old_parcel_id
-                parcel.landuse = landuse
-                parcel.address_khashaa = self.khashaa_edit.text()
-                parcel.address_streetname = self.streetname_edit.text()
-                parcel.address_neighbourhood = self.neighbourhood_edit.text()
-                valid_from = self.decision_date.date().toString(Constants.DATABASE_DATE_FORMAT)
-                parcel.valid_from = valid_from
-                parcel.geometry = ub_parcel.geometry
-                self.session.add(parcel)
-                self.session.flush()
+            duration = self.duration_sbox.value()
+            landuse = self.parcel_landuse_cbox.itemData(self.parcel_landuse_cbox.currentIndex())
 
-                app_time = self.decision_date.date().toString(Constants.DATABASE_DATE_FORMAT)
-                status_date = self.decision_date.date().toString(Constants.DATABASE_DATE_FORMAT)
-                app_no = self.__generate_application_number()
-                right_type = self.rigth_type_cbox.itemData(self.rigth_type_cbox.currentIndex())
+            au_level1 = DatabaseUtils.working_l1_code()
+            au_level2 = DatabaseUtils.working_l2_code()
+            # try:
+            # check if the app_no is still valid, otherwise generate new one
+            self.application = CtApplication()
 
-                app_type = self.application_type_cbox.itemData(self.application_type_cbox.currentIndex())
+            application_status = CtApplicationStatus()
+            application_status.ct_application = self.application
+            status = self.session.query(ClApplicationStatus).filter_by(code='1').one()
+            application_status.status = 1
+            application_status.status_ref = status
+            application_status.status_date = status_date
+            self.application.app_no = app_no
+            self.application.app_type = app_type
+            self.application.requested_landuse = landuse
+            self.application.approved_landuse = landuse
+            self.application.app_timestamp = app_time
+            self.application.requested_duration = duration
+            self.application.approved_duration = duration
+            self.application.right_type = right_type
+            self.application.created_by = DatabaseUtils.current_sd_user().user_id
+            self.application.created_at = app_time
+            self.application.updated_at = app_time
+            self.application.au1 = au_level1
+            self.application.au2 = au_level2
+            self.application.remarks = ''
 
-                duration = self.duration_sbox.value()
-                landuse = self.parcel_landuse_cbox.itemData(self.parcel_landuse_cbox.currentIndex())
+            # current_user = QSettings().value(SettingsConstants.USER)
+            # officer = self.session.query(SetRole).filter_by(user_name=current_user).filter(SetRole.is_active == True).one()
+            application_status.next_officer_in_charge = DatabaseUtils.current_sd_user().user_id
+            application_status.next_officer_in_charge_ref = DatabaseUtils.current_sd_user()
+            application_status.officer_in_charge_ref = DatabaseUtils.current_sd_user()
+            application_status.officer_in_charge = DatabaseUtils.current_sd_user().user_id
+            self.application.statuses.append(application_status)
 
-                au_level1 = DatabaseUtils.working_l1_code()
-                au_level2 = DatabaseUtils.working_l2_code()
-                # try:
-                # check if the app_no is still valid, otherwise generate new one
-                self.application = CtApplication()
-
-                application_status = CtApplicationStatus()
-                application_status.ct_application = self.application
-                status = self.session.query(ClApplicationStatus).filter_by(code='1').one()
-                application_status.status = 1
-                application_status.status_ref = status
-                application_status.status_date = status_date
-                self.application.app_no = app_no
-                self.application.app_type = app_type
-                self.application.requested_landuse = landuse
-                self.application.approved_landuse = landuse
-                self.application.app_timestamp = app_time
-                self.application.requested_duration = duration
-                self.application.approved_duration = duration
-                self.application.right_type = right_type
-                self.application.created_by = DatabaseUtils.current_sd_user().user_id
-                self.application.created_at = app_time
-                self.application.updated_at = app_time
-                self.application.au1 = au_level1
-                self.application.au2 = au_level2
-                self.application.remarks = ''
-
-                # current_user = QSettings().value(SettingsConstants.USER)
-                # officer = self.session.query(SetRole).filter_by(user_name=current_user).filter(SetRole.is_active == True).one()
-                application_status.next_officer_in_charge = DatabaseUtils.current_sd_user().user_id
-                application_status.next_officer_in_charge_ref = DatabaseUtils.current_sd_user()
-                application_status.officer_in_charge_ref = DatabaseUtils.current_sd_user()
-                application_status.officer_in_charge = DatabaseUtils.current_sd_user().user_id
-                self.application.statuses.append(application_status)
-
-                self.application.parcel = parcel.parcel_id
-                self.session.add(self.application)
-        except SQLAlchemyError, e:
-            self.rollback_to_savepoint()
-            raise LM2Exception(self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+            self.application.parcel = parcel.parcel_id
+            self.session.add(self.application)
+        # except SQLAlchemyError, e:
+        #     self.rollback_to_savepoint()
+        #     raise LM2Exception(self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
 
         qt_date = self.decision_date.date()
         year = str(qt_date.toString("yy"))
