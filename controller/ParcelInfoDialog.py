@@ -3015,7 +3015,9 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
         old_parcel_id = self.old_parcel_id_edit.text()
         ub_parcel = self.session.query(CaUBParcelTbl).filter(CaUBParcelTbl.old_parcel_id == old_parcel_id).one()
         landuse = self.parcel_landuse_cbox.itemData(self.parcel_landuse_cbox.currentIndex())
-
+        app_type = self.application_type_cbox.itemData(self.application_type_cbox.currentIndex())
+        au_level1 = DatabaseUtils.working_l1_code()
+        au_level2 = DatabaseUtils.working_l2_code()
         self.create_savepoint()
         # try:
         parcel_count = self.session.query(CaParcelTbl.parcel_id).filter(CaParcelTbl.parcel_id == parcel_id).count()
@@ -3069,13 +3071,9 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
             app_no = self.__generate_application_number()
             right_type = self.rigth_type_cbox.itemData(self.rigth_type_cbox.currentIndex())
 
-            app_type = self.application_type_cbox.itemData(self.application_type_cbox.currentIndex())
-
             duration = self.duration_sbox.value()
             landuse = self.parcel_landuse_cbox.itemData(self.parcel_landuse_cbox.currentIndex())
 
-            au_level1 = DatabaseUtils.working_l1_code()
-            au_level2 = DatabaseUtils.working_l2_code()
             # try:
             # check if the app_no is still valid, otherwise generate new one
             self.application = CtApplication()
