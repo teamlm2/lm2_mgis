@@ -122,7 +122,6 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
 
         return is_true
 
-
     def __setup_mapping(self):
 
         if self.decision.decision_level == 70:

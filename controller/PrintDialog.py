@@ -418,8 +418,9 @@ class PrintDialog(QDialog, Ui_PrintDialog):
             self.__add_parcel_street_name(map_composition)
             # self.__add_khashaa_name(map_composition)
             self.__add_cadastre_block_code(map_composition)
+            self.__add_right_holder_information(map_composition)
         self.__add_stamp(map_composition)
-        self.__add_right_holder_information(map_composition)
+
         self.__addNorthArrow(map_composition)
 
         if self.table_name == TABLE_SPA_PARCEL:
@@ -435,6 +436,9 @@ class PrintDialog(QDialog, Ui_PrintDialog):
         QDesktopServices.openUrl(QUrl.fromLocalFile(file_path))
 
     def __add_spa_parcel_info(self, map_composition):
+
+        item = map_composition.getComposerItemById("parcel_id")
+        item.setText(self.__parcel_no)
 
         parcel = self.session.query(CaSpaParcelTbl).filter(
             CaSpaParcelTbl.parcel_id == str(self.__parcel_no)).one()
@@ -610,7 +614,6 @@ class PrintDialog(QDialog, Ui_PrintDialog):
             # item.setText(str((round(self.__geometry.area(), 2))))
             item.adjustSizeToText()
 
-        #print print date
         item = map_composition.getComposerItemById("print_date")
         item.setText(QDate.currentDate().toString(Constants.DATE_FORMAT))
         item.adjustSizeToText()
@@ -678,29 +681,30 @@ class PrintDialog(QDialog, Ui_PrintDialog):
         x_start_label = map_composition.getComposerItemById("building_x")
         y_start_label = map_composition.getComposerItemById("building_y")
 
-        # retreive every feature with its geometry and attributes
-        count = 0
-        for feature in point_layer.getFeatures():
-            count += 1
+        if x_start_label != None and y_start_label != None:
+            # retreive every feature with its geometry and attributes
+            count = 0
+            for feature in point_layer.getFeatures():
+                count += 1
 
-            # fetch geometry
-            geom = feature.geometry()
-            geom.transform(self.__coord_transform)
-            point = geom.asPoint()
+                # fetch geometry
+                geom = feature.geometry()
+                geom.transform(self.__coord_transform)
+                point = geom.asPoint()
 
-            attribute_map = feature.attributes()
-            point_no = attribute_map[0]
+                attribute_map = feature.attributes()
+                point_no = attribute_map[0]
 
-            x_formatted = locale.format('%.2f', round(point.x(), 2), True)
-            y_formatted = locale.format('%.2f', round(point.y(), 2), True)
+                x_formatted = locale.format('%.2f', round(point.x(), 2), True)
+                y_formatted = locale.format('%.2f', round(point.y(), 2), True)
 
-            no_start_label = self.__copy_label(no_start_label, point_no, map_composition)
-            x_start_label = self.__copy_label(x_start_label, x_formatted, map_composition)
-            y_start_label = self.__copy_label(y_start_label, y_formatted, map_composition)
+                no_start_label = self.__copy_label(no_start_label, point_no, map_composition)
+                x_start_label = self.__copy_label(x_start_label, x_formatted, map_composition)
+                y_start_label = self.__copy_label(y_start_label, y_formatted, map_composition)
 
-            #just one column for building coordinates
-            if count == 37:
-                break
+                #just one column for building coordinates
+                if count == 37:
+                    break
 
     def __create_parcel_coordinates_list(self, map_composition):
 
@@ -787,8 +791,8 @@ class PrintDialog(QDialog, Ui_PrintDialog):
                 break
 
             dist_formatted = "{0}".format(distance)
-
-            distance_start_label = self.__copy_label(distance_start_label, dist_formatted, map_composition)
+            if distance_start_label:
+                distance_start_label = self.__copy_label(distance_start_label, dist_formatted, map_composition)
 
     def __create_building_polygon_area_list(self, map_composition):
 
@@ -800,7 +804,8 @@ class PrintDialog(QDialog, Ui_PrintDialog):
             if building.building_no != None:
                 building_no = building.building_no
             building_no_area = building_no + '/ ' + str(int(building.area_m2))
-            area_start_label = self.__copy_label(area_start_label, building_no_area, map_composition)
+            if area_start_label:
+                area_start_label = self.__copy_label(area_start_label, building_no_area, map_composition)
 
     def __set_north_arrow_position(self, map_composition):
 
