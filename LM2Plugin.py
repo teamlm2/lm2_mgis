@@ -79,18 +79,18 @@ class LM2Plugin:
             QSettings().setValue(SettingsConstants.REPOSITORY_URL, Constants.REPOSITORY_URL)
             QSettings().setValue(SettingsConstants.REPOSITORY_ENABLED, True)
 
-        def __create_db_session(self, password):
+    def __create_db_session(self, password):
 
-            user = QSettings().value(SettingsConstants.USER)
-            db = QSettings().value(SettingsConstants.DATABASE_NAME)
-            host = QSettings().value(SettingsConstants.HOST)
-            port = QSettings().value(SettingsConstants.PORT, "5432")
+        user = QSettings().value(SettingsConstants.USER)
+        db = QSettings().value(SettingsConstants.DATABASE_NAME)
+        host = QSettings().value(SettingsConstants.HOST)
+        port = QSettings().value(SettingsConstants.PORT, "5432")
 
-            SessionHandler().create_session(user, password, host, port, db)
+        SessionHandler().create_session(user, password, host, port, db)
 
-        def __destroy_db_session(self):
+    def __destroy_db_session(self):
 
-            SessionHandler().destroy_session()
+        SessionHandler().destroy_session()
 
     def initGui(self):
 
