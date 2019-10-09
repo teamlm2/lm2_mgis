@@ -51,9 +51,9 @@ class UbDocumentViewDelegate(QStyledItemDelegate):
 
                 working_aimag = DatabaseUtils.working_l1_code()
                 working_soum = DatabaseUtils.working_l2_code()
-                archive_legaldocuments_path = FilePath.legaldocuments_file_path()
-                if not os.path.exists(archive_legaldocuments_path):
-                    os.makedirs(archive_legaldocuments_path)
+                # archive_legaldocuments_path = FilePath.legaldocuments_file_path()
+                # if not os.path.exists(archive_legaldocuments_path):
+                #     os.makedirs(archive_legaldocuments_path)
 
                 if event.button() == Qt.RightButton:
                     return False
