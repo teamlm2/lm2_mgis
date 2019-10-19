@@ -2120,6 +2120,17 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
     @pyqtSlot()
     def on_cad_add_button_clicked(self):
 
+        print 'fff'
+        parcelLayer = LayerUtils.layer_by_data_source("data_soums_union", "ca_parcel")
+        select_feature = parcelLayer.selectedFeatures()
+
+        for feature in select_feature:
+            attr = feature.attributes()
+            parcel_id = attr[0]
+            print parcel_id
+
+        ###########
+
         if not len(self.cadastre_twidget.selectedItems()):
             return
 
@@ -2138,7 +2149,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
             plan_zones.append(desc)
 
         item, ok = QInputDialog.getItem(self, "select input dialog",
-                                        "list of languages", plan_zones, 0, False)
+                                        "list of plan zones", plan_zones, 0, False)
 
         zone_code, zone_desc = item.split(':-')
 

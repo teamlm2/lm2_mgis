@@ -759,7 +759,7 @@ class PastureWidget(QDockWidget, Ui_PastureWidget, DatabaseHelper):
         app_instance = self.__selected_application()
 
         if app_instance is not None:
-            self.current_dialog = ApplicationsPastureDialog(self.plugin,app_instance, self, True, self.plugin.iface.mainWindow())
+            self.current_dialog = ApplicationsPastureDialog(self.plugin,app_instance, self.zone_rigth_type, self, True, self.plugin.iface.mainWindow())
             DialogInspector().set_dialog_visible(True)
             self.current_dialog.rejected.connect(self.on_current_dialog_closed)
             self.current_dialog.setModal(False)
@@ -803,7 +803,7 @@ class PastureWidget(QDockWidget, Ui_PastureWidget, DatabaseHelper):
         app_instance = self.__selected_application()
 
         if app_instance is not None:
-            self.current_dialog = ApplicationsPastureDialog(self.plugin, app_instance, self, True, self.plugin.iface.mainWindow())
+            self.current_dialog = ApplicationsPastureDialog(self.plugin, app_instance, self.zone_rigth_type, self, True, self.plugin.iface.mainWindow())
             DialogInspector().set_dialog_visible(True)
             self.current_dialog.rejected.connect(self.on_current_dialog_closed)
             self.current_dialog.setModal(False)

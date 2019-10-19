@@ -130,7 +130,6 @@ class ApplicationsPastureDialog(QDialog, Ui_ApplicationsPastureDialog, DatabaseH
         self.navigator = navigator
         self.zone_rigth_type = zone_rigth_type
         self.attribute_update = attribute_update
-
         self.session = SessionHandler().session_instance()
         self.application = application
 
