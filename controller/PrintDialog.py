@@ -76,7 +76,7 @@ class PrintDialog(QDialog, Ui_PrintDialog):
 
         self.dpi_edit.setValidator(QIntValidator(150, 1200, self.dpi_edit))
         self.buffer_edit.setValidator(QIntValidator(1, 500, self.buffer_edit))
-        self.grid_distance_edit.setValidator(QIntValidator(10, 1000, self.grid_distance_edit))
+        self.grid_distance_edit.setValidator(QIntValidator(10, 10000, self.grid_distance_edit))
         self.grid_offset_x_edit.setValidator(QIntValidator(0, 50, self.grid_offset_x_edit))
         self.grid_offset_y_edit.setValidator(QIntValidator(0, 50, self.grid_offset_y_edit))
 
@@ -392,15 +392,17 @@ class PrintDialog(QDialog, Ui_PrintDialog):
         overview_map.setKeepLayerSet(True)
         if boundary_points_count > 7 or building_points_count > 8:
             self.__add_parcel_h_numbers(map_composition)
-            self.__add_aimag_name_h(map_composition)
-            self.__add_admin_unit_l2_name_h(map_composition)
-            self.__add_admin_unit_l3_name_h(map_composition)
-
 
             if self.table_name == TABLE_PARCEL or self.table_name == TABLE_PASTURE_PARCEL or self.table_name == TABLE_NATURE_RESERVE_PARCEL:
                 self.__add_cadastre_block_code_h(map_composition)
                 # self.__add_khashaa_name_h(map_composition)
                 self.__add_parcel_street_name_h(map_composition)
+
+                self.__add_aimag_name_h(map_composition)
+                self.__add_admin_unit_l2_name_h(map_composition)
+                self.__add_admin_unit_l3_name_h(map_composition)
+            if self.table_name == TABLE_SPA_PARCEL:
+                self.__add_admin_units_h(map_composition)
         self.__adjust_map_center_and_scale(overview_map, 30, 30, scale_denominator)
         self.__set_north_arrow_position(map_composition)
         self.__add_labels(map_composition)
@@ -410,15 +412,18 @@ class PrintDialog(QDialog, Ui_PrintDialog):
         self.__create_building_distance_list(map_composition)
         self.__create_building_polygon_area_list(map_composition)
         self.__add_grid(composer_map)
-        self.__add_aimag_name(map_composition)
-        self.__add_admin_unit_l2_name(map_composition)
-        self.__add_admin_unit_l3_name(map_composition)
+
 
         if self.table_name == TABLE_PARCEL or self.table_name == TABLE_PASTURE_PARCEL or self.table_name == TABLE_NATURE_RESERVE_PARCEL:
             self.__add_parcel_street_name(map_composition)
             # self.__add_khashaa_name(map_composition)
             self.__add_cadastre_block_code(map_composition)
             self.__add_right_holder_information(map_composition)
+            self.__add_aimag_name(map_composition)
+            self.__add_admin_unit_l2_name(map_composition)
+            self.__add_admin_unit_l3_name(map_composition)
+        if self.table_name == TABLE_SPA_PARCEL:
+            self.__add_admin_units(map_composition)
         self.__add_stamp(map_composition)
 
         self.__addNorthArrow(map_composition)
@@ -925,53 +930,101 @@ class PrintDialog(QDialog, Ui_PrintDialog):
         item.setText(aimag_name[0])
         item.adjustSizeToText()
 
+    def __add_admin_units_h(self, map_composition):
+
+        admin_unit_lbl = ''
+        parcel_geometry = self.session.query(CaSpaParcelTbl.geometry).filter(
+            CaSpaParcelTbl.parcel_id == str(self.__parcel_no)).one()
+
+        au1 = self.session.query(AuLevel1).filter(
+            AuLevel1.geometry.ST_Overlaps(parcel_geometry[0])).all()
+
+        for au1_value in au1:
+            if admin_unit_lbl != '':
+                admin_unit_lbl = admin_unit_lbl + '; '
+            au2 = self.session.query(AuLevel2).\
+                filter(AuLevel2.geometry.ST_Overlaps(parcel_geometry[0])).\
+                filter(AuLevel2.au1_code == au1_value.code).all()
+            au2_lbl = ''
+            for au2_value in au2:
+                if au2_lbl != '':
+                    au2_lbl = au2_lbl + ', '
+                au2_lbl = au2_lbl + au2_value.name + u' сум'
+            admin_unit_lbl = admin_unit_lbl + au1_value.name + u' аймаг, ' + au2_lbl
+
+        item = map_composition.getComposerItemById("admin_units_h")
+        item.setText(admin_unit_lbl)
+        item.adjustSizeToText()
+
+    def __add_admin_units(self, map_composition):
+
+        admin_unit_lbl = ''
+        parcel_geometry = self.session.query(CaSpaParcelTbl.geometry).filter(
+            CaSpaParcelTbl.parcel_id == str(self.__parcel_no)).one()
+
+        au1 = self.session.query(AuLevel1).filter(
+            AuLevel1.geometry.ST_Overlaps(parcel_geometry[0])).all()
+
+        for au1_value in au1:
+            if admin_unit_lbl != '':
+                admin_unit_lbl = admin_unit_lbl + '; '
+            au2 = self.session.query(AuLevel2). \
+                filter(AuLevel2.geometry.ST_Overlaps(parcel_geometry[0])). \
+                filter(AuLevel2.au1_code == au1_value.code).all()
+            au2_lbl = ''
+            for au2_value in au2:
+                if au2_lbl != '':
+                    au2_lbl = au2_lbl + ', '
+                au2_lbl = au2_lbl + au2_value.name + u' сум'
+            admin_unit_lbl = admin_unit_lbl + au1_value.name + u' аймаг, ' + au2_lbl
+
+        item = map_composition.getComposerItemById("admin_units")
+        item.setText(admin_unit_lbl)
+        item.adjustSizeToText()
+
     def __add_admin_unit_l2_name_h(self, map_composition):
 
         # try:
+        admin_unit_l2_lbl = ''
         if self.table_name == TABLE_PARCEL:
             parcel_geometry = self.session.query(CaParcel.geometry).filter(CaParcel.parcel_id == str(self.__parcel_no)).one()
             admin_unit_l2_name = self.session.query(AuLevel2.name).filter(AuLevel2.geometry.ST_Intersects(func.ST_Centroid(parcel_geometry[0]))).first()
-        elif self.table_name == TABLE_PASTURE_PARCEL or self.table_name == TABLE_NATURE_RESERVE_PARCEL:
+            admin_unit_l2_lbl = admin_unit_l2_name[0]
+        if self.table_name == TABLE_PASTURE_PARCEL or self.table_name == TABLE_NATURE_RESERVE_PARCEL:
             parcel_geometry = self.session.query(CaPastureParcelTbl.geometry).filter(CaPastureParcelTbl.parcel_id == str(self.__parcel_no)).one()
             admin_unit_l2_name = self.session.query(AuLevel2.name).filter(
                 AuLevel2.geometry.ST_Intersects(func.ST_Centroid(parcel_geometry[0]))).first()
-        else:
-            parcel_geometry = self.session.query(CaSpaParcelTbl.geometry).filter(
-                CaSpaParcelTbl.parcel_id == str(self.__parcel_no)).one()
-            admin_unit_l2_name = self.session.query(AuLevel2.name).filter(
-                AuLevel2.geometry.ST_Intersects(func.ST_Centroid(parcel_geometry[0]))).first()
+            admin_unit_l2_lbl = admin_unit_l2_name[0]
+
         #
         # except SQLAlchemyError, e:
         #     raise LM2Exception(self.tr("Database Query Error"), self.tr("bCould not execute: {0}").format(e.message))
 
         item = map_composition.getComposerItemById("soum_name_h")
-        item.setText(admin_unit_l2_name[0])
+        item.setText(admin_unit_l2_lbl)
         item.adjustSizeToText()
 
     def __add_admin_unit_l2_name(self, map_composition):
 
+        admin_unit_l2_lbl = ''
         # try:
         if self.table_name == TABLE_PARCEL:
             parcel_geometry = self.session.query(CaParcel.geometry).filter(CaParcel.parcel_id == str(self.__parcel_no)).one()
             admin_unit_l2_name = self.session.query(AuLevel2.name).filter(AuLevel2.geometry.ST_Intersects(func.ST_Centroid(parcel_geometry[0]))).first()
+            admin_unit_l2_lbl = admin_unit_l2_name[0]
         elif self.table_name == TABLE_PASTURE_PARCEL or self.table_name == TABLE_NATURE_RESERVE_PARCEL:
             parcel_geometry = self.session.query(CaPastureParcelTbl.geometry).filter(CaPastureParcelTbl.parcel_id == str(self.__parcel_no)).one()
             admin_unit_l2_name = self.session.query(AuLevel2.name).filter(
                 AuLevel2.geometry.ST_Intersects(func.ST_Centroid(parcel_geometry[0]))).first()
-        else:
-            parcel_geometry = self.session.query(CaSpaParcelTbl.geometry).filter(
-                CaSpaParcelTbl.parcel_id == str(self.__parcel_no)).one()
-            admin_unit_l2_name = self.session.query(AuLevel2.name).filter(
-                AuLevel2.geometry.ST_Intersects(func.ST_Centroid(parcel_geometry[0]))).first()
-        # except SQLAlchemyError, e:
-        #     raise LM2Exception(self.tr("Database Query Error"), self.tr("bCould not execute: {0}").format(e.message))
+            admin_unit_l2_lbl = admin_unit_l2_name[0]
 
         item = map_composition.getComposerItemById("soum_name")
-        item.setText(admin_unit_l2_name[0])
+        item.setText(admin_unit_l2_lbl)
         item.adjustSizeToText()
 
     def __add_admin_unit_l3_name_h(self, map_composition):
 
+        admin_unit_l3_lbl = ''
         # try:
         if self.table_name == TABLE_PARCEL:
             parcel_geometry = self.session.query(CaParcel.geometry).filter(CaParcel.parcel_id == str(self.__parcel_no)).one()
@@ -995,25 +1048,24 @@ class PrintDialog(QDialog, Ui_PrintDialog):
 
     def __add_admin_unit_l3_name(self, map_composition):
 
+        admin_unit_l3_lbl = ''
         # try:
         if self.table_name == TABLE_PARCEL:
             parcel_geometry = self.session.query(CaParcel.geometry).filter(CaParcel.parcel_id == str(self.__parcel_no)).one()
             admin_unit_l3_name = self.session.query(AuLevel3.name).filter(AuLevel3.geometry.ST_Intersects(func.ST_Centroid(parcel_geometry[0]))).first()
+            admin_unit_l3_lbl = admin_unit_l3_name[0]
         elif self.table_name == TABLE_PASTURE_PARCEL or self.table_name == TABLE_NATURE_RESERVE_PARCEL:
             parcel_geometry = self.session.query(CaPastureParcelTbl.geometry).filter(CaPastureParcelTbl.parcel_id == str(self.__parcel_no)).one()
             admin_unit_l3_name = self.session.query(AuLevel3.name).filter(
                 AuLevel3.geometry.ST_Intersects(func.ST_Centroid(parcel_geometry[0]))).first()
-        else:
-            parcel_geometry = self.session.query(CaSpaParcelTbl.geometry).filter(
-                CaSpaParcelTbl.parcel_id == str(self.__parcel_no)).one()
-            admin_unit_l3_name = self.session.query(AuLevel3.name).filter(
-                AuLevel3.geometry.ST_Intersects(func.ST_Centroid(parcel_geometry[0]))).first()
+            admin_unit_l3_lbl = admin_unit_l3_name[0]
+
         # except SQLAlchemyError, e:
         #     PluginUtils.show_error(self, self.tr("Database Query Error"), self.tr("cCould not execute: {0}").format(e.message))
         #     return
 
         item = map_composition.getComposerItemById("bag_name")
-        item.setText(admin_unit_l3_name[0])
+        item.setText(admin_unit_l3_lbl)
         item.adjustSizeToText()
 
     def __add_cadastre_block_code_h(self, map_composition):

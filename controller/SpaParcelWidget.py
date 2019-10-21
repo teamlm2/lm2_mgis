@@ -675,10 +675,21 @@ class SpaParcelWidget(QDockWidget, Ui_SpaParcelWidget, DatabaseHelper):
     def on_pasture_layer_view_button_clicked(self):
 
         root = QgsProject.instance().layerTreeRoot()
+        mygroup = root.findGroup(u"Тусгай хэрэгцээний газар")
+        vlayer = LayerUtils.layer_by_data_source("data_soums_union", "ca_spa_parcel")
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer("ca_spa_parcel", "parcel_id", "data_soums_union")
+        vlayer.loadNamedStyle(
+            str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/ca_spa_parcel.qml")
+        vlayer.setLayerName(self.tr("SPA Parcel"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            mygroup.addLayer(vlayer)
+            # vlayer.setReadOnly(True)
 
-        self.__pug_group_layers(root)
-
-        self.__tnc_group_layers(root)
+        # self.__pug_group_layers(root)
+        #
+        # self.__tnc_group_layers(root)
 
     def __tnc_group_layers(self, root):
 
