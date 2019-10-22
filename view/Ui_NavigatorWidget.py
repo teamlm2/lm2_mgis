@@ -2,8 +2,7 @@
 
 # Form implementation generated from reading ui file '.\NavigatorWidget.ui'
 #
-# Created: Thu Aug 29 17:12:22 2019
-#      by: PyQt4 UI code generator 4.10
+# Created by: PyQt4 UI code generator 4.11.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -199,6 +198,9 @@ class Ui_NavigatorWidget(object):
         self.to_cancel_button = QtGui.QPushButton(self.groupBox_2)
         self.to_cancel_button.setGeometry(QtCore.QRect(16, 240, 161, 23))
         self.to_cancel_button.setObjectName(_fromUtf8("to_cancel_button"))
+        self.landuse_layer_button = QtGui.QPushButton(self.groupBox_2)
+        self.landuse_layer_button.setGeometry(QtCore.QRect(16, 265, 161, 23))
+        self.landuse_layer_button.setObjectName(_fromUtf8("landuse_layer_button"))
         self.groupBox_6 = QtGui.QGroupBox(self.st_tm_filter_tab)
         self.groupBox_6.setGeometry(QtCore.QRect(5, 430, 371, 82))
         self.groupBox_6.setObjectName(_fromUtf8("groupBox_6"))
@@ -1217,6 +1219,7 @@ class Ui_NavigatorWidget(object):
         self.free_zone_button.setText(_translate("NavigatorWidget", "Чөлөөт бүс", None))
         self.valuation_zone_button.setText(_translate("NavigatorWidget", "Үнэлгээний бүс", None))
         self.to_cancel_button.setText(_translate("NavigatorWidget", "Түр цугларах, Нүүлгэх", None))
+        self.landuse_layer_button.setText(_translate("NavigatorWidget", "Газрын нэгдмэл сан", None))
         self.groupBox_6.setTitle(_translate("NavigatorWidget", "Temporal Filter", None))
         self.from_date_edit.setDisplayFormat(_translate("NavigatorWidget", "yyyy-MM-dd", None))
         self.till_date_edit.setDisplayFormat(_translate("NavigatorWidget", "yyyy-MM-dd", None))

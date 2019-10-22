@@ -617,6 +617,19 @@
            <string>Түр цугларах, Нүүлгэх</string>
           </property>
          </widget>
+         <widget class="QPushButton" name="landuse_layer_button">
+          <property name="geometry">
+           <rect>
+            <x>16</x>
+            <y>265</y>
+            <width>161</width>
+            <height>23</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Газрын нэгдмэл сан</string>
+          </property>
+         </widget>
         </widget>
        </widget>
        <widget class="QGroupBox" name="groupBox_6">

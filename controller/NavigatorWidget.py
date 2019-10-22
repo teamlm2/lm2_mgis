@@ -13524,6 +13524,124 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
             mygroup.addLayer(vlayer)
             # vlayer.setReadOnly(True)
 
+    @pyqtSlot()
+    def on_landuse_layer_button_clicked(self):
+
+        column_name = 'landuse'
+        root = QgsProject.instance().layerTreeRoot()
+        mygroup = root.findGroup(u"ГНСТайлан")
+        table_name = "ca_landuse_type1"
+        vlayer = LayerUtils.layer_by_data_source("data_landuse", table_name)
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer(table_name, "parcel_id", "data_landuse")
+        # vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/gt1_report.qml")
+        vlayer.setLayerName(self.tr("Landuse Type 1"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            mygroup.addLayer(vlayer)
+        self.__load_layer_style(vlayer, column_name, table_name)
+
+        ##
+        table_name = "ca_landuse_type2"
+        vlayer = LayerUtils.layer_by_data_source("data_landuse", table_name)
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer(table_name, "parcel_id", "data_landuse")
+        vlayer.setLayerName(self.tr("Landuse Type 2"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            mygroup.addLayer(vlayer)
+        self.__load_layer_style(vlayer, column_name, table_name)
+
+        ##
+        table_name = "ca_landuse_type3"
+        vlayer = LayerUtils.layer_by_data_source("data_landuse", table_name)
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer(table_name, "parcel_id", "data_landuse")
+        vlayer.setLayerName(self.tr("Landuse Type 3"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            mygroup.addLayer(vlayer)
+        self.__load_layer_style(vlayer, column_name, table_name)
+
+        ##
+        table_name = "ca_landuse_type4"
+        vlayer = LayerUtils.layer_by_data_source("data_landuse", table_name)
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer(table_name, "parcel_id", "data_landuse")
+        vlayer.setLayerName(self.tr("Landuse Type 4"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            mygroup.addLayer(vlayer)
+        self.__load_layer_style(vlayer, column_name, table_name)
+
+        ##
+        table_name = "ca_landuse_type5"
+        vlayer = LayerUtils.layer_by_data_source("data_landuse", table_name)
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer(table_name, "parcel_id", "data_landuse")
+        vlayer.setLayerName(self.tr("Landuse Type 5"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            mygroup.addLayer(vlayer)
+        self.__load_layer_style(vlayer, column_name, table_name)
+
+        ##
+        table_name = "ca_landuse_type6"
+        vlayer = LayerUtils.layer_by_data_source("data_landuse", table_name)
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer(table_name, "parcel_id", "data_landuse")
+        vlayer.setLayerName(self.tr("Landuse Type 6"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            mygroup.addLayer(vlayer)
+        self.__load_layer_style(vlayer, column_name, table_name)
+
+    def __load_layer_style(self, vlayer, column_name, table_name):
+
+        sql = "select p.landuse, t.description, c.fill_color, t.boundary_color from data_landuse."+ table_name +" p " \
+              "join data_landuse.landuse_color c on p.landuse = c.landuse_code " \
+              "join codelists.cl_landuse_type t on p.landuse = t.code group by p.landuse, t.description, c.fill_color, t.boundary_color "
+
+        # sql = "select * from data_landuse.landuse_color c "
+        categories = []
+        values = self.session.execute(sql)
+        # print len(values)
+        for row in values:
+            code = row[0]
+            description = str(int(code)) + ': ' + row[1]
+            fill_color = row[2]
+            boundary_color = row[3]
+            self.__categorized_style(categories, vlayer, fill_color, boundary_color, 0.5, code,
+                                  description)
+        expression = column_name  # field name
+        renderer = QgsCategorizedSymbolRendererV2(expression, categories)
+        vlayer.setRendererV2(renderer)
+
+    def __categorized_style(self, categories, layer, fill_color, boundary_color, opacity, code, description):
+
+        symbol = QgsSymbolV2.defaultSymbol(layer.geometryType())
+        if symbol:
+            if fill_color:
+                fill_color = self.__hex_to_rgb(fill_color)
+                symbol.setColor(QColor(fill_color[0], fill_color[1], fill_color[2]))
+            if boundary_color:
+                boundary_color = self.__hex_to_rgb(boundary_color)
+                symbol.symbolLayer(0).setOutlineColor(QColor(boundary_color[0], boundary_color[1], boundary_color[2]))
+            symbol.setAlpha(opacity)
+
+            category = QgsRendererCategoryV2(code, symbol, description)
+            categories.append(category)
+
+    def __hex_to_rgb(self, value):
+        """Return (red, green, blue) for the color given as #rrggbb."""
+        value = value.lstrip('#')
+        lv = len(value)
+        return list(int(value[i:i + lv // 3], 16) for i in range(0, lv, lv // 3))
+
+    def __rgb_to_hex(self, red, green, blue):
+        """Return color as #rrggbb for the given color values."""
+        return '#%02x%02x%02x' % (red, green, blue)
+
     def __sent_to_ubeg(self):
 
         application = self.__selected_application()
