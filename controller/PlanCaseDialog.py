@@ -94,6 +94,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         self.polygon_rbutton.setChecked(True)
 
         self.message_label.setWordWrap(True)
+        self.message_label.setTextInteractionFlags(Qt.TextSelectableByMouse)
         # self.message_label.setStyleSheet("QLabel { background-color : red; color : blue; }");
         self.message_label.setStyleSheet("QLabel {color: rgb(255,0,0);}")
         self.__setup_data()
@@ -1027,10 +1028,9 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
                     #     valid = False
                     #     print parcel_geometry.IsValid()
                     # parcel overlap not approved plan zone
-
                     polygon_values = self.session.query(PlProjectParcel). \
-                        filter(func.ST_Centroid(parcel_geometry).ST_Overlaps(PlProjectParcel.polygon_geom)).\
-                        filter(PlProjectParcel.valid_till == None).all()
+                        filter((parcel_geometry).ST_Intersects(PlProjectParcel.polygon_geom)).\
+                        filter(or_(PlProjectParcel.valid_till == None, PlProjectParcel.valid_till == 'infinity')).all()
                     for value in polygon_values:
                         plan_zone = value.plan_zone_ref
                         project = value.project_ref
@@ -1384,6 +1384,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
     def __approved_parcel_check(self, parcel_feature, layer, id, error_message):
 
         working_soum_code = DatabaseUtils.working_l2_code()
+        working_aimag_code = DatabaseUtils.working_l1_code()
         valid = True
 
         column_name_parcel_id = "id"
@@ -1474,16 +1475,34 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
                     #     error_message = error_message + "\n" + message
                     #     self.message_label.setText(error_message)
 
-                    is_out_parcel = False
-                    au2_parcel_count = self.session.query(AuLevel2). \
-                        filter(AuLevel2.code == working_soum_code). \
-                        filter(func.ST_Centroid(parcel_geometry).ST_Within(AuLevel2.geometry)).count()
-                    if au2_parcel_count == 0:
-                        is_out_parcel = True
+                    is_au1_out_parcel = False
+                    is_au2_out_parcel = False
+                    plan_type = self.plan.plan_type_ref
+                    if plan_type.admin_unit_type == 1:
+                        print ''
+                    if plan_type.admin_unit_type == 2:
+                        au1_parcel_count = self.session.query(AuLevel1). \
+                            filter(AuLevel1.code == working_aimag_code). \
+                            filter(AuLevel1.geometry.ST_Covers(parcel_geometry)).count()
+                        if au1_parcel_count == 0:
+                            is_au1_out_parcel = True
 
-                    if is_out_parcel:
+                    if plan_type.admin_unit_type == 3:
+                        au2_parcel_count = self.session.query(AuLevel2). \
+                            filter(AuLevel2.code == working_soum_code). \
+                            filter(parcel_geometry.ST_Covers(AuLevel2.geometry)).count()
+                        if au2_parcel_count == 0:
+                            is_au2_out_parcel = True
+
+                    if is_au1_out_parcel:
                         valid = False
-                        message = '*' + unicode(u' Сумын хилийн гадна байна.')
+                        message = '*' + unicode(u' Аймгийн хилийн цэстэй зөрчилтэй байна.')
+                        error_message = error_message + "\n" + message
+                        self.message_label.setText(error_message)
+
+                    if is_au2_out_parcel:
+                        valid = False
+                        message = '*' + unicode(u' Сумын хилийн цэстэй зөрчилтэй байна.')
                         error_message = error_message + "\n" + message
                         self.message_label.setText(error_message)
 

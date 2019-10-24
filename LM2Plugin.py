@@ -94,6 +94,11 @@ class LM2Plugin:
 
     def initGui(self):
 
+        self.toolButton = QToolButton()
+        self.toolButton.setMenu(QMenu())
+        self.toolButton.setPopupMode(QToolButton.MenuButtonPopup)
+        # self.iface.addToolBarWidget(self.toolButton)
+
         # Create action that will start plugin configuration
         self.set_db_connection = QAction(QIcon(":/plugins/lm2/connection_to_main.png"), QApplication.translate("Plugin", "Set Connection To Main Database"), self.iface.mainWindow())
         self.user_role_management_action = QAction(QIcon(":/plugins/lm2/user_role_management.png"), QApplication.translate("Plugin", "User Role Management"), self.iface.mainWindow())
@@ -165,6 +170,10 @@ class LM2Plugin:
                                          self.iface.mainWindow())
         self.land_plan_navigator_action.setCheckable(True)
 
+        m = self.toolButton.menu()
+        m.addAction(self.land_plan_navigator_action)
+        self.toolButton.setDefaultAction(self.land_plan_navigator_action)
+
         # connect the action to the run method
         self.set_db_connection.triggered.connect(self.__show_connection_to_main_database_dialog)
         self.admin_settings_action.triggered.connect(self.__show_land_office_admin_settings_dialog)
@@ -200,7 +209,7 @@ class LM2Plugin:
 
         # Add toolbar button and menu item
         self.lm_toolbar = self.iface.addToolBar(QApplication.translate("Plugin", "LandManager 2"))
-
+        self.lm_toolbar.addWidget(self.toolButton)
         self.lm_toolbar.addSeparator()
         self.lm_toolbar.addAction(self.parcel_map_action)
         self.lm_toolbar.addAction(self.parcel_mpa_action)

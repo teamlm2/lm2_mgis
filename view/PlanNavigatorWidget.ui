@@ -93,7 +93,7 @@
        </size>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>3</number>
       </property>
       <property name="usesScrollButtons">
        <bool>true</bool>
@@ -537,12 +537,12 @@ font: 75 14pt &quot;Helvetica&quot;;</string>
          <rect>
           <x>10</x>
           <y>5</y>
-          <width>46</width>
-          <height>13</height>
+          <width>351</width>
+          <height>16</height>
          </rect>
         </property>
         <property name="text">
-         <string>TextLabel</string>
+         <string>Plan Type</string>
         </property>
        </widget>
        <widget class="QPushButton" name="load_attribute_button">
@@ -1078,6 +1078,37 @@ font: 75 14pt &quot;Helvetica&quot;;</string>
           </property>
          </widget>
         </widget>
+       </widget>
+      </widget>
+      <widget class="QWidget" name="tab_2">
+       <attribute name="title">
+        <string>Settings</string>
+       </attribute>
+       <widget class="QPushButton" name="pushButton">
+        <property name="geometry">
+         <rect>
+          <x>40</x>
+          <y>20</y>
+          <width>281</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>ГЗБТөлөвлөгөөний давхардал шалгах</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="settings_button">
+        <property name="geometry">
+         <rect>
+          <x>40</x>
+          <y>50</y>
+          <width>281</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Тохиргоо</string>
+        </property>
        </widget>
       </widget>
      </widget>
