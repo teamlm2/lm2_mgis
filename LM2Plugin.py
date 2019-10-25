@@ -14,6 +14,7 @@ from controller.ParcelInfoDialog import *
 from controller.ParcelMpaDialog import *
 from controller.ParcelInfoFeeDialog import *
 from controller.PlanNavigatorWidget import *
+from controller.PlanSettingsDialog import *
 from controller.CamaNavigatorWidget import *
 from controller.ApplicationsDialog import *
 from controller.ContractDialog import *
@@ -165,6 +166,10 @@ class LM2Plugin:
         self.parcel_spa_action.setCheckable(True)
 
         ### GZBT navigator
+        self.land_plan_settings_action = QAction(QIcon(":/plugins/lm2/land_office_admin.png"),
+                                                  QApplication.translate("Plugin", "Land plan settings"),
+                                                  self.iface.mainWindow())
+
         self.land_plan_navigator_action = QAction(QIcon(":/plugins/lm2/land_plan.png"),
                                          QApplication.translate("Plugin", "Land plan info"),
                                          self.iface.mainWindow())
@@ -172,6 +177,7 @@ class LM2Plugin:
 
         m = self.toolButton.menu()
         m.addAction(self.land_plan_navigator_action)
+        m.addAction(self.land_plan_settings_action)
         self.toolButton.setDefaultAction(self.land_plan_navigator_action)
 
         # connect the action to the run method
@@ -206,10 +212,11 @@ class LM2Plugin:
         self.parcel_spa_action.triggered.connect(self.__show_parcel_spa_navigator_widget)
         # self.reports_action.triggered.connect(self.__show_reports_dialog)
         self.land_plan_navigator_action.triggered.connect(self.__show_plan_navigator_widget)
+        self.land_plan_settings_action.triggered.connect(self.__show_plan_settings_dialog)
 
         # Add toolbar button and menu item
         self.lm_toolbar = self.iface.addToolBar(QApplication.translate("Plugin", "LandManager 2"))
-        self.lm_toolbar.addWidget(self.toolButton)
+
         self.lm_toolbar.addSeparator()
         self.lm_toolbar.addAction(self.parcel_map_action)
         self.lm_toolbar.addAction(self.parcel_mpa_action)
@@ -225,7 +232,8 @@ class LM2Plugin:
         self.lm_toolbar.addAction(self.nature_reserve_action)
         self.lm_toolbar.addSeparator()
         self.lm_toolbar.addSeparator()
-        self.lm_toolbar.addAction(self.land_plan_navigator_action)
+        # self.lm_toolbar.addAction(self.land_plan_navigator_action)
+        self.lm_toolbar.addWidget(self.toolButton)
         self.lm_toolbar.addSeparator()
         self.lm_toolbar.addSeparator()
         self.lm_toolbar.addAction(self.navigator_action)
@@ -346,6 +354,7 @@ class LM2Plugin:
         self.iface.removePluginMenu(QApplication.translate("Plugin", "&LM2"), self.parcel_spa_action)
         self.iface.removePluginMenu(QApplication.translate("Plugin", "&LM2"), self.print_point_map_action)
         self.iface.removePluginMenu(QApplication.translate("Plugin", "&LM2"), self.land_plan_navigator_action)
+        self.iface.removePluginMenu(QApplication.translate("Plugin", "&LM2"), self.land_plan_settings_action)
 
 
         del self.lm_toolbar
@@ -887,6 +896,11 @@ class LM2Plugin:
         else:
             self.__create_cama_navigator()
         self.__start_cama_info_map()
+
+    def __show_plan_settings_dialog(self):
+
+        dlg = PlanSettingsDialog()
+        dlg.exec_()
 
     def __show_plan_navigator_widget(self):
 
@@ -1604,6 +1618,8 @@ class LM2Plugin:
         # self.__create_mpa()
 
         # self.__create_parcel_info()
+        if UserRight.land_office_admin in user_rights:
+            self.land_plan_settings_action.setEnabled(True)
 
         if UserRight.cadastre_view in user_rights or UserRight.cadastre_update in user_rights:
             self.create_case_action.setEnabled(True)
@@ -1657,6 +1673,7 @@ class LM2Plugin:
         self.nature_reserve_action.setEnabled(False)
         self.parcel_spa_action.setEnabled(False)
         self.land_plan_navigator_action.setEnabled(False)
+        self.land_plan_settings_action.setEnabled(False)
 
     def transformPoint(self, point, layer_postgis_srid):
 

@@ -60,7 +60,7 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
         sql = "select fee_year, year_fee, m2_fee, subsidized_fee_rate, left_previous_year, surplus_previous_year, payable_year, offset_fee, control_1, " \
               "quarterly1_fee, quarterly2_fee, quarterly3_fee, quarterly4_fee, payment_year, fee.objectid " \
               "from ub_fee fee " \
-              "join s"+soum_code+".ub_fee_person person on fee.pid = person.pid::text " \
+              "join data_ub.ub_fee_person person on fee.pid = person.pid::text " \
               "where fee.pid::text like :pid and person.register like :person_id " \
               "group by fee_year, year_fee, m2_fee, subsidized_fee_rate, left_previous_year, surplus_previous_year, payable_year, offset_fee, control_1, " \
               "quarterly1_fee, quarterly2_fee, quarterly3_fee, quarterly4_fee, payment_year, fee.objectid "
@@ -165,7 +165,7 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
               "cancel_paid, cancel_other_paid, left_paid, surplus_paid, transfer_decision, decsription, " \
               "decision_date, decision_no, fee.pid, landuse_desc, landuse_code, area_m2 " \
               "from ub_fee fee " \
-              "join s"+soum_code+".ub_fee_person person on fee.pid = person.pid::text " \
+              "join data_ub.ub_fee_person person on fee.pid = person.pid::text " \
               "where fee.objectid = :object_id "
 
         result = self.session.execute(sql, {'object_id': object_id})
