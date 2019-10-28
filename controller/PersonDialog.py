@@ -637,7 +637,8 @@ class PersonDialog(QDialog, Ui_PersonDialog, DatabaseHelper):
         else:
             self.person.address_au_level3 = bag
 
-        self.session.add(self.person)
+        if self.session.query(BsPerson).filter(BsPerson.person_register == self.person.person_register).count() == 0:
+            self.session.add(self.person)
         self.commit()
 
         # except SQLAlchemyError, e:

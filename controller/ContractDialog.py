@@ -4606,6 +4606,8 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         base_price_m2 = None
         payment = 0
         area = None
+        landuse_area = None
+        zone_area = None
 
         base_fee_id = None
         subsidized_fee_rate = None
@@ -4674,6 +4676,16 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             except KeyError:
                 confidence_percent = None
 
+            try:
+                landuse_area = value['landuse_area']
+            except KeyError:
+                landuse_area = None
+
+            try:
+                zone_area = value['zone_area']
+            except KeyError:
+                zone_area = None
+
             # if zone_id and level_id:
             count = self.session.query(CtContractFee).\
                 filter(CtContractFee.contract_id == self.contract.contract_id).\
@@ -4690,6 +4702,8 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                 contract_fee.subsidized_fee_rate = subsidized_fee_rate
                 contract_fee.base_fee_per_m2 = base_fee_per_m2
                 contract_fee.area = area
+                contract_fee.landuse_area = landuse_area
+                contract_fee.zone_area = zone_area
                 contract_fee.amount = amount
                 contract_fee.created_by = DatabaseUtils.current_sd_user().user_id
                 date_time_string = QDateTime.currentDateTime().toString(Constants.DATABASE_DATETIME_FORMAT)
@@ -4706,6 +4720,8 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                 contract_fee.subsidized_fee_rate = subsidized_fee_rate
                 contract_fee.base_fee_per_m2 = base_fee_per_m2
                 contract_fee.area = area
+                contract_fee.landuse_area = landuse_area
+                contract_fee.zone_area = zone_area
                 contract_fee.amount = amount
 
             self.__calculate_landfee_level(base_fee_id, payment, parcel_id)

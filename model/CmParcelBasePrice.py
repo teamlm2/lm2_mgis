@@ -13,7 +13,7 @@ class CmParcelBasePrice(Base):
     id = Column(Integer, primary_key=True)
     base_price = Column(Float)
     base_price_m2 = Column(Float)
-    calculate_date = Column(Date)
+    calculate_year = Column(Integer)
     in_active = Column(Boolean)
     created_by = Column(Integer)
     updated_by = Column(Integer)

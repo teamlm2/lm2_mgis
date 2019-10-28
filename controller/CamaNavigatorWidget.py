@@ -481,6 +481,9 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
             delegate_double_max = QDoubleSpinBox()
             delegate_double_max.setMaximum(999999999999999)
             delegate_double_max.setValue(end_interval)
+            delegate_double_avg = QDoubleSpinBox()
+            delegate_double_avg.setMaximum(999999999999999)
+            delegate_double_avg.setValue((end_interval+begin_interval)/2)
             count = self.price_interval_twidget.rowCount()
             self.price_interval_twidget.insertRow(count)
 
@@ -491,6 +494,7 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
             self.price_interval_twidget.setCellWidget(count, 1, delegate_integer)
             self.price_interval_twidget.setCellWidget(count, 2, delegate_double_min)
             self.price_interval_twidget.setCellWidget(count, 3, delegate_double_max)
+            self.price_interval_twidget.setCellWidget(count, 4, delegate_double_avg)
 
             level_no = level_no + 1
 
@@ -522,32 +526,36 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
             zone_no = str(self.price_interval_twidget.cellWidget(row, 1).value())
             begin_value = str(self.price_interval_twidget.cellWidget(row, 2).value())
             end_value = str(self.price_interval_twidget.cellWidget(row, 3).value())
+            avg_value = str(self.price_interval_twidget.cellWidget(row, 4).value())
             if (row + 1) == rows:
                 end_value = " <= " + end_value
             else:
                 end_value = " < " + end_value
             if sql:
                 sql = sql + "UNION" + "\n"
-            select = "select parcel.parcel_id as gid, " + zone_no + " as zone_no, parcel_price.base_price_m2, parcel.geometry from data_cama.cm_parcel_base_price parcel_price " \
+            select = "select parcel.parcel_id as gid, " + zone_no + " as zone_no, " + avg_value + " as avg_base_price, parcel_price.base_price_m2, parcel.geometry from data_cama.cm_parcel_base_price parcel_price " \
                      "join data_soums_union.ca_parcel_tbl parcel on parcel_price.parcel_id = parcel.parcel_id " \
                      "where parcel.au2 = '01125' and (parcel_price.base_price_m2 >= " + begin_value + " and parcel_price.base_price_m2  "+ end_value +")"
 
             if sql_zone:
                 sql_zone = sql_zone + "UNION" + "\n"
-            select_zone = "select " + zone_no + " as zone_no, st_buffer(st_buffer((st_dump(st_union(st_buffer(parcel.geometry, 0.001)))).geom, -0.001), 0.0002) as geometry from data_cama.cm_parcel_base_price parcel_price " \
+            select_zone = "select " + zone_no + " as zone_no, " + avg_value + " as avg_base_price, st_buffer(st_buffer((st_dump(st_union(st_buffer(parcel.geometry, 0.001)))).geom, -0.001), 0.0002) as geometry from data_cama.cm_parcel_base_price parcel_price " \
                   "join data_soums_union.ca_parcel_tbl parcel on parcel_price.parcel_id = parcel.parcel_id where parcel.au2 = '01125' and (parcel_price.base_price_m2 >= " + begin_value + " and parcel_price.base_price_m2   "+ end_value +") "
 
             sql = sql + select
             sql_zone = sql_zone + select_zone
 
         status = self.valuation_level_status_cbox.itemData(self.valuation_level_status_cbox.currentIndex())
+
+        sql_zone = "select zone_no, avg_base_price, st_union(geometry) from (" + sql_zone + ")" + " as xxx group by zone_no, avg_base_price"
         result = self.session.execute(sql_zone)
         for item_row in result:
             zone_no = item_row[0]
-            geometry = item_row[1]
+            avg_base_price = item_row[1]
+            geometry = item_row[2]
             geom = 'ST_Multi(' +  "'" + geometry +  "'" + ')'
-            values = str(zone_no) + ", " + geom + ", " + "'" + "" + "'" + ", " + "'" + "" + "'" + ", " + "true" + ", " + "'" + au2 + "'" + ", " + str(status)
-            sql = "insert into data_cama.cm_valuation_level (level_no, geometry, name, location, in_active, au2, status) values ("+ values +")"
+            values = str(zone_no) + ", " + geom + ", " + "'" + "" + "'" + ", " + "'" + "" + "'" + ", " + "true" + ", " + "'" + au2 + "'" + ", " + str(status) + ", " + str(avg_base_price)
+            sql = "insert into data_cama.cm_valuation_level (level_no, geometry, name, location, in_active, au2, status, base_price) values ("+ values +")"
             self.session.execute(sql)
 
         self.session.commit()

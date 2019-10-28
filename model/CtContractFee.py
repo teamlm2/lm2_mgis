@@ -20,7 +20,9 @@ class CtContractFee(Base):
     subsidized_area = Column(Integer)
     subsidized_fee_rate = Column(Numeric)
     base_fee_per_m2 = Column(Numeric)
-    area = Column(Integer)
+    area = Column(Numeric)
+    landuse_area = Column(Numeric)
+    zone_area = Column(Numeric)
     amount = Column(Numeric)
 
     created_by = Column(Integer)

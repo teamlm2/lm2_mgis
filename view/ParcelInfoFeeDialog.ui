@@ -42,86 +42,6 @@
     <attribute name="title">
      <string>Fee</string>
     </attribute>
-    <widget class="QTableWidget" name="fee_info_twidget">
-     <property name="geometry">
-      <rect>
-       <x>15</x>
-       <y>98</y>
-       <width>631</width>
-       <height>101</height>
-      </rect>
-     </property>
-     <column>
-      <property name="text">
-       <string>year</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Year Fee</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Fee m2</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>subsidized fee rate</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>left previous year</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>surplus previous year</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>payable year</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>offset</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>control</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>quarterly1 fee</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>quarterly2 fee</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>quarterly3 fee</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>quarterly4 fee</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>payment year</string>
-      </property>
-     </column>
-    </widget>
     <widget class="QLineEdit" name="landuse_edit">
      <property name="enabled">
       <bool>false</bool>
@@ -147,520 +67,6 @@
      <property name="text">
       <string>Decision No</string>
      </property>
-    </widget>
-    <widget class="QGroupBox" name="groupBox">
-     <property name="geometry">
-      <rect>
-       <x>5</x>
-       <y>200</y>
-       <width>641</width>
-       <height>241</height>
-      </rect>
-     </property>
-     <property name="title">
-      <string>GroupBox</string>
-     </property>
-     <widget class="QGroupBox" name="groupBox_2">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>11</y>
-        <width>141</width>
-        <height>220</height>
-       </rect>
-      </property>
-      <property name="title">
-       <string>Season</string>
-      </property>
-      <widget class="QLineEdit" name="quarterly1_paid_edit">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>31</y>
-         <width>120</width>
-         <height>20</height>
-        </rect>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_7">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>11</y>
-         <width>120</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Quarterly1 paid</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_8">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>50</y>
-         <width>120</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Quarterly2 paid</string>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="quarterly2_paid_edit">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>70</y>
-         <width>120</width>
-         <height>20</height>
-        </rect>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_9">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>91</y>
-         <width>120</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Quarterly3 paid</string>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="quarterly4_paid_edit">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>150</y>
-         <width>120</width>
-         <height>20</height>
-        </rect>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="quarterly3_paid_edit">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>111</y>
-         <width>120</width>
-         <height>20</height>
-        </rect>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_10">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>130</y>
-         <width>120</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Quarterly4 paid</string>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="all_paid_edit">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>190</y>
-         <width>120</width>
-         <height>20</height>
-        </rect>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_11">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>170</y>
-         <width>120</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>all_paid</string>
-       </property>
-      </widget>
-     </widget>
-     <widget class="QGroupBox" name="groupBox_3">
-      <property name="geometry">
-       <rect>
-        <x>155</x>
-        <y>11</y>
-        <width>271</width>
-        <height>220</height>
-       </rect>
-      </property>
-      <property name="title">
-       <string>Paymend</string>
-      </property>
-      <widget class="QLineEdit" name="left_previous_year_paid_edit">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>31</y>
-         <width>120</width>
-         <height>20</height>
-        </rect>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_12">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>11</y>
-         <width>120</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>left previous year paid</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_13">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>50</y>
-         <width>120</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>payment year paid</string>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="payment_year_paid_edit">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>70</y>
-         <width>120</width>
-         <height>20</height>
-        </rect>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_14">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>91</y>
-         <width>120</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>offset paid</string>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="frequency_paid_edit">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>150</y>
-         <width>120</width>
-         <height>20</height>
-        </rect>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="offset_paid_edit">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>111</y>
-         <width>120</width>
-         <height>20</height>
-        </rect>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_15">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>130</y>
-         <width>120</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>frequency paid</string>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="fine_paid_edit">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>190</y>
-         <width>120</width>
-         <height>20</height>
-        </rect>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_16">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>170</y>
-         <width>120</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>fine paid</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_17">
-       <property name="geometry">
-        <rect>
-         <x>140</x>
-         <y>50</y>
-         <width>120</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>district all paid</string>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="district_all_paid_edit">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="geometry">
-        <rect>
-         <x>140</x>
-         <y>70</y>
-         <width>120</width>
-         <height>20</height>
-        </rect>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="city_all_paid_edit">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="geometry">
-        <rect>
-         <x>140</x>
-         <y>31</y>
-         <width>120</width>
-         <height>20</height>
-        </rect>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_18">
-       <property name="geometry">
-        <rect>
-         <x>140</x>
-         <y>11</y>
-         <width>120</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>city all paid</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_19">
-       <property name="geometry">
-        <rect>
-         <x>140</x>
-         <y>130</y>
-         <width>120</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>cancel other paid</string>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="cancel_paid_edit">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="geometry">
-        <rect>
-         <x>140</x>
-         <y>111</y>
-         <width>120</width>
-         <height>20</height>
-        </rect>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_20">
-       <property name="geometry">
-        <rect>
-         <x>140</x>
-         <y>91</y>
-         <width>120</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>cancel paid</string>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="cancel_other_paid_edit">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="geometry">
-        <rect>
-         <x>140</x>
-         <y>150</y>
-         <width>120</width>
-         <height>20</height>
-        </rect>
-       </property>
-      </widget>
-     </widget>
-     <widget class="QGroupBox" name="groupBox_5">
-      <property name="geometry">
-       <rect>
-        <x>430</x>
-        <y>12</y>
-        <width>141</width>
-        <height>101</height>
-       </rect>
-      </property>
-      <property name="title">
-       <string>left and Surplus</string>
-      </property>
-      <widget class="QLineEdit" name="left_paid_edit">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>31</y>
-         <width>120</width>
-         <height>20</height>
-        </rect>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_23">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>11</y>
-         <width>120</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>left_paid</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_24">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>50</y>
-         <width>120</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>surplus_paid</string>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="surplus_paid_edit">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>70</y>
-         <width>120</width>
-         <height>20</height>
-        </rect>
-       </property>
-      </widget>
-     </widget>
-     <widget class="QLabel" name="label_21">
-      <property name="geometry">
-       <rect>
-        <x>430</x>
-        <y>111</y>
-        <width>141</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>transfer decision</string>
-      </property>
-     </widget>
-     <widget class="QTextEdit" name="transfer_decision_txt">
-      <property name="geometry">
-       <rect>
-        <x>430</x>
-        <y>130</y>
-        <width>141</width>
-        <height>41</height>
-       </rect>
-      </property>
-     </widget>
-     <widget class="QTextEdit" name="decsription_txt">
-      <property name="geometry">
-       <rect>
-        <x>430</x>
-        <y>189</y>
-        <width>141</width>
-        <height>41</height>
-       </rect>
-      </property>
-     </widget>
-     <widget class="QLabel" name="label_22">
-      <property name="geometry">
-       <rect>
-        <x>430</x>
-        <y>170</y>
-        <width>141</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>decsription</string>
-      </property>
-     </widget>
     </widget>
     <widget class="QLabel" name="label_5">
      <property name="geometry">
@@ -709,8 +115,8 @@
       <rect>
        <x>5</x>
        <y>-1</y>
-       <width>431</width>
-       <height>54</height>
+       <width>844</width>
+       <height>46</height>
       </rect>
      </property>
      <property name="title">
@@ -719,8 +125,8 @@
      <widget class="QPushButton" name="find_button">
       <property name="geometry">
        <rect>
-        <x>340</x>
-        <y>26</y>
+        <x>530</x>
+        <y>16</y>
         <width>75</width>
         <height>23</height>
        </rect>
@@ -739,8 +145,8 @@
       </property>
       <property name="geometry">
        <rect>
-        <x>170</x>
-        <y>29</y>
+        <x>360</x>
+        <y>17</y>
         <width>151</width>
         <height>20</height>
        </rect>
@@ -752,8 +158,8 @@
       </property>
       <property name="geometry">
        <rect>
-        <x>10</x>
-        <y>29</y>
+        <x>90</x>
+        <y>17</y>
         <width>151</width>
         <height>20</height>
        </rect>
@@ -763,8 +169,8 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>9</y>
-        <width>151</width>
+        <y>19</y>
+        <width>81</width>
         <height>16</height>
        </rect>
       </property>
@@ -775,9 +181,9 @@
      <widget class="QLabel" name="label_4">
       <property name="geometry">
        <rect>
-        <x>170</x>
-        <y>9</y>
-        <width>151</width>
+        <x>250</x>
+        <y>19</y>
+        <width>101</width>
         <height>16</height>
        </rect>
       </property>
@@ -815,8 +221,8 @@
     <widget class="QPushButton" name="clear_button">
      <property name="geometry">
       <rect>
-       <x>445</x>
-       <y>25</y>
+       <x>650</x>
+       <y>15</y>
        <width>75</width>
        <height>23</height>
       </rect>
@@ -838,168 +244,145 @@
       <string>Landuse</string>
      </property>
     </widget>
+    <widget class="QComboBox" name="year_cbox">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>190</y>
+       <width>131</width>
+       <height>22</height>
+      </rect>
+     </property>
+    </widget>
     <widget class="QGroupBox" name="groupBox_4">
      <property name="geometry">
       <rect>
-       <x>650</x>
-       <y>10</y>
-       <width>201</width>
-       <height>431</height>
+       <x>280</x>
+       <y>220</y>
+       <width>281</width>
+       <height>221</height>
       </rect>
      </property>
-     <property name="mouseTracking">
-      <bool>false</bool>
-     </property>
-     <property name="autoFillBackground">
-      <bool>false</bool>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">QGroupBox {
-	
-	background-color: rgb(190, 204, 255);
-	border-color: rgb(79, 255, 30);
-	color: rgb(6, 22, 255);
-}</string>
-     </property>
      <property name="title">
-      <string>LM2 Fee and Payment</string>
+      <string>Ногдуулалт, төлбөл зохих төлбөр</string>
      </property>
+     <widget class="QDoubleSpinBox" name="payment_total_sbox">
+      <property name="geometry">
+       <rect>
+        <x>150</x>
+        <y>125</y>
+        <width>121</width>
+        <height>22</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color: rgb(0, 170, 255);</string>
+      </property>
+     </widget>
      <widget class="QLabel" name="label_25">
       <property name="geometry">
        <rect>
-        <x>10</x>
-        <y>249</y>
-        <width>180</width>
-        <height>23</height>
+        <x>150</x>
+        <y>105</y>
+        <width>121</width>
+        <height>16</height>
        </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color: rgb(0, 170, 255);</string>
       </property>
       <property name="text">
-       <string>Fee To Pay For Year [₮]</string>
-      </property>
-     </widget>
-     <widget class="QLineEdit" name="fee_per_year_edit">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>271</y>
-        <width>180</width>
-        <height>21</height>
-       </rect>
-      </property>
-      <property name="readOnly">
-       <bool>true</bool>
-      </property>
-     </widget>
-     <widget class="QLineEdit" name="fee_to_pay_edit">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>393</y>
-        <width>180</width>
-        <height>21</height>
-       </rect>
-      </property>
-      <property name="readOnly">
-       <bool>true</bool>
-      </property>
-     </widget>
-     <widget class="QLineEdit" name="fee_paid_edit">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>311</y>
-        <width>180</width>
-        <height>21</height>
-       </rect>
-      </property>
-      <property name="readOnly">
-       <bool>true</bool>
+       <string>Нийт төлбөр</string>
       </property>
      </widget>
      <widget class="QLabel" name="label_26">
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>329</y>
-        <width>181</width>
-        <height>26</height>
+        <y>15</y>
+        <width>97</width>
+        <height>13</height>
        </rect>
       </property>
       <property name="text">
-       <string>Surplus From Previous Year(s) [₮]</string>
+       <string>Гэрээ ногд. Төлбөр</string>
       </property>
      </widget>
-     <widget class="QLineEdit" name="surplus_from_last_years_edit">
+     <widget class="QDoubleSpinBox" name="payment_contract_sbox">
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>352</y>
-        <width>180</width>
-        <height>21</height>
+        <y>35</y>
+        <width>121</width>
+        <height>22</height>
        </rect>
-      </property>
-      <property name="readOnly">
-       <bool>true</bool>
       </property>
      </widget>
      <widget class="QLabel" name="label_27">
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>370</y>
-        <width>180</width>
-        <height>23</height>
+        <y>60</y>
+        <width>87</width>
+        <height>13</height>
        </rect>
       </property>
       <property name="text">
-       <string>Fee Left To Be Paid [₮]</string>
+       <string>Дутуу Төлөлт(+)</string>
+      </property>
+     </widget>
+     <widget class="QDoubleSpinBox" name="payment_before_less_sbox">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>80</y>
+        <width>121</width>
+        <height>22</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QDoubleSpinBox" name="payment_before_over_sbox">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>125</y>
+        <width>121</width>
+        <height>22</height>
+       </rect>
       </property>
      </widget>
      <widget class="QLabel" name="label_28">
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>290</y>
-        <width>180</width>
-        <height>23</height>
+        <y>105</y>
+        <width>74</width>
+        <height>13</height>
        </rect>
       </property>
       <property name="text">
-       <string>Fee Paid [₮]</string>
-      </property>
-     </widget>
-     <widget class="QLineEdit" name="parcel_area_edit">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>231</y>
-        <width>180</width>
-        <height>21</height>
-       </rect>
-      </property>
-      <property name="readOnly">
-       <bool>true</bool>
+       <string>Илүү Төлөлт(-)</string>
       </property>
      </widget>
      <widget class="QLabel" name="label_29">
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>209</y>
-        <width>180</width>
-        <height>23</height>
+        <y>150</y>
+        <width>128</width>
+        <height>13</height>
        </rect>
       </property>
       <property name="text">
-       <string>Parcel Area /m2/</string>
+       <string>Тухайн онд ногд. Төлбөр</string>
       </property>
      </widget>
-     <widget class="QComboBox" name="contract_cbox">
+     <widget class="QDoubleSpinBox" name="payment_year_sbox">
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>32</y>
-        <width>181</width>
+        <y>170</y>
+        <width>121</width>
         <height>22</height>
        </rect>
       </property>
@@ -1007,120 +390,429 @@
      <widget class="QLabel" name="label_30">
       <property name="geometry">
        <rect>
-        <x>10</x>
-        <y>14</y>
-        <width>181</width>
-        <height>16</height>
+        <x>150</x>
+        <y>60</y>
+        <width>97</width>
+        <height>13</height>
        </rect>
       </property>
       <property name="text">
-       <string>Contract / Person id</string>
+       <string>Алданги, торгууль</string>
       </property>
      </widget>
-     <widget class="QLineEdit" name="contract_status_edit">
+     <widget class="QDoubleSpinBox" name="payment_fund_sbox">
       <property name="geometry">
        <rect>
-        <x>10</x>
-        <y>73</y>
-        <width>181</width>
-        <height>20</height>
+        <x>150</x>
+        <y>35</y>
+        <width>121</width>
+        <height>22</height>
        </rect>
       </property>
-      <property name="readOnly">
-       <bool>true</bool>
+     </widget>
+     <widget class="QDoubleSpinBox" name="payment_loss_sbox">
+      <property name="geometry">
+       <rect>
+        <x>150</x>
+        <y>80</y>
+        <width>121</width>
+        <height>22</height>
+       </rect>
       </property>
      </widget>
      <widget class="QLabel" name="label_31">
       <property name="geometry">
        <rect>
+        <x>150</x>
+        <y>15</y>
+        <width>70</width>
+        <height>13</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Нөхөн төлбөр</string>
+      </property>
+     </widget>
+     <zorder>payment_total_sbox</zorder>
+     <zorder>label_16</zorder>
+     <zorder>label_25</zorder>
+     <zorder>label_26</zorder>
+     <zorder>payment_contract_sbox</zorder>
+     <zorder>label_27</zorder>
+     <zorder>payment_before_less_sbox</zorder>
+     <zorder>payment_before_over_sbox</zorder>
+     <zorder>label_28</zorder>
+     <zorder>label_29</zorder>
+     <zorder>payment_year_sbox</zorder>
+     <zorder>label_30</zorder>
+     <zorder>payment_fund_sbox</zorder>
+     <zorder>payment_loss_sbox</zorder>
+     <zorder>label_31</zorder>
+    </widget>
+    <widget class="QGroupBox" name="groupBox_5">
+     <property name="geometry">
+      <rect>
+       <x>570</x>
+       <y>220</y>
+       <width>281</width>
+       <height>221</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color: rgb(233, 247, 255);</string>
+     </property>
+     <property name="title">
+      <string>Төлөлт</string>
+     </property>
+     <widget class="QDoubleSpinBox" name="paid_less_sbox">
+      <property name="geometry">
+       <rect>
+        <x>150</x>
+        <y>125</y>
+        <width>121</width>
+        <height>22</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color: rgb(255, 170, 127);</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_39">
+      <property name="geometry">
+       <rect>
+        <x>150</x>
+        <y>105</y>
+        <width>121</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color: rgb(255, 170, 127);</string>
+      </property>
+      <property name="text">
+       <string>Дутуу төлөлт</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_40">
+      <property name="geometry">
+       <rect>
         <x>10</x>
-        <y>56</y>
-        <width>181</width>
+        <y>15</y>
+        <width>99</width>
+        <height>13</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Урд оны дутуугаас</string>
+      </property>
+     </widget>
+     <widget class="QDoubleSpinBox" name="paid_before_less_sbox">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>35</y>
+        <width>121</width>
+        <height>22</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_41">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>60</y>
+        <width>132</width>
+        <height>13</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Тайлангаар ногдуулснаас</string>
+      </property>
+     </widget>
+     <widget class="QDoubleSpinBox" name="paid_year_sbox">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>80</y>
+        <width>121</width>
+        <height>22</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QDoubleSpinBox" name="paid_fund_sbox">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>125</y>
+        <width>121</width>
+        <height>22</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_42">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>105</y>
+        <width>121</width>
         <height>16</height>
        </rect>
       </property>
       <property name="text">
-       <string>Contract Status</string>
+       <string>Хүү, торгууль, бусад</string>
       </property>
      </widget>
-     <widget class="QLabel" name="label_32">
+     <widget class="QLabel" name="label_43">
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>94</y>
-        <width>181</width>
+        <y>150</y>
+        <width>121</width>
         <height>16</height>
        </rect>
       </property>
       <property name="text">
-       <string>Name</string>
+       <string>Дүүрэгт төлсөн</string>
       </property>
      </widget>
-     <widget class="QLineEdit" name="name_edit">
+     <widget class="QDoubleSpinBox" name="paid_district_sbox">
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>111</y>
-        <width>181</width>
+        <y>170</y>
+        <width>121</width>
+        <height>22</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_44">
+      <property name="geometry">
+       <rect>
+        <x>150</x>
+        <y>60</y>
+        <width>104</width>
+        <height>13</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Хүчингүй болсон дүн</string>
+      </property>
+     </widget>
+     <widget class="QDoubleSpinBox" name="paid_city_sbox">
+      <property name="geometry">
+       <rect>
+        <x>150</x>
+        <y>35</y>
+        <width>121</width>
+        <height>22</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QDoubleSpinBox" name="paid_invalid_sbox">
+      <property name="geometry">
+       <rect>
+        <x>150</x>
+        <y>80</y>
+        <width>121</width>
+        <height>22</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_45">
+      <property name="geometry">
+       <rect>
+        <x>150</x>
+        <y>15</y>
+        <width>86</width>
+        <height>13</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Нийслэлд төлсөн</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_46">
+      <property name="geometry">
+       <rect>
+        <x>150</x>
+        <y>150</y>
+        <width>62</width>
+        <height>13</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Илүү төлөлт</string>
+      </property>
+     </widget>
+     <widget class="QDoubleSpinBox" name="paid_over_sbox">
+      <property name="geometry">
+       <rect>
+        <x>150</x>
+        <y>170</y>
+        <width>121</width>
+        <height>22</height>
+       </rect>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QGroupBox" name="groupBox">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>220</y>
+       <width>261</width>
+       <height>221</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>Мэдээлэл</string>
+     </property>
+     <widget class="QLabel" name="label_47">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>16</y>
+        <width>97</width>
+        <height>13</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Гэрээний дугаар</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="payment_contract_edit">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>36</y>
+        <width>131</width>
         <height>20</height>
        </rect>
       </property>
-      <property name="readOnly">
-       <bool>true</bool>
-      </property>
      </widget>
-     <widget class="QLabel" name="label_33">
+     <widget class="QLabel" name="label_22">
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>134</y>
-        <width>181</width>
+        <y>150</y>
+        <width>141</width>
         <height>16</height>
        </rect>
       </property>
       <property name="text">
-       <string>Parcel Land use type</string>
+       <string>Тайлбар</string>
       </property>
      </widget>
-     <widget class="QLineEdit" name="parcel_landuse_edit">
+     <widget class="QTextEdit" name="decsription_txt">
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>151</y>
-        <width>181</width>
-        <height>20</height>
+        <y>170</y>
+        <width>241</width>
+        <height>41</height>
        </rect>
       </property>
-      <property name="readOnly">
-       <bool>true</bool>
-      </property>
      </widget>
-     <widget class="QLabel" name="label_34">
+     <widget class="QLabel" name="label_48">
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>172</y>
-        <width>181</width>
-        <height>16</height>
+        <y>60</y>
+        <width>97</width>
+        <height>13</height>
        </rect>
       </property>
       <property name="text">
-       <string>Fee zone id</string>
+       <string>Зориулалт</string>
       </property>
      </widget>
-     <widget class="QLineEdit" name="parcel_zone_edit">
+     <widget class="QLineEdit" name="payment_zoriulalt_edit">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>189</y>
-        <width>181</width>
+        <y>80</y>
+        <width>241</width>
         <height>20</height>
        </rect>
       </property>
-      <property name="readOnly">
-       <bool>true</bool>
+     </widget>
+     <widget class="QLineEdit" name="payment_name_edit">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>126</y>
+        <width>241</width>
+        <height>20</height>
+       </rect>
       </property>
      </widget>
+     <widget class="QLabel" name="label_49">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>106</y>
+        <width>97</width>
+        <height>13</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Оноосон нэр</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_50">
+      <property name="geometry">
+       <rect>
+        <x>150</x>
+        <y>16</y>
+        <width>97</width>
+        <height>13</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Талайн хэмжээ /м2/</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="payment_area_edit">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>150</x>
+        <y>36</y>
+        <width>101</width>
+        <height>20</height>
+       </rect>
+      </property>
+     </widget>
+    </widget>
+    <widget class="Line" name="line">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>160</y>
+       <width>841</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true"/>
+     </property>
+     <property name="lineWidth">
+      <number>5</number>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
     </widget>
    </widget>
    <widget class="QWidget" name="tab_2">
