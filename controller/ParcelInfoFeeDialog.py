@@ -19,6 +19,9 @@ from ..model.ClContractStatus import *
 from ..model.ClLanduseType import *
 from ..model.SetFeeZone import *
 from ..model.UbFeeHistory import *
+from ..model.PaPaymentPaid import *
+from ..model.CtContractApplicationRole import *
+from ..model.SetApplicationTypePersonRole import *
 
 class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
 
@@ -29,7 +32,7 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
         self.session = SessionHandler().session_instance()
         self.old_parcel_id = old_parcel_id
         self.person_id = person_id
-
+        self.time_counter = None
         self.close_button.clicked.connect(self.reject)
 
         self.old_parcel_id_edit.setText(self.old_parcel_id)
@@ -52,7 +55,9 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
         self.paid_less_sbox.setMaximum(9999999999)
         self.paid_over_sbox.setMaximum(9999999999)
 
+        self.select_years = [2014, 2015, 2016, 2017, 2018]
         self.__setup_cbox()
+        self.selected_year = None
 
         # if is_find:
         #     self.__load_fee(self.person_id, self.old_parcel_id)
@@ -63,29 +68,41 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
 
     def __setup_cbox(self):
 
-        values = self.session.query(UbFeeHistory.current_year).filter(UbFeeHistory.pid == self.old_parcel_id).all()
-
-        for value in values:
-            self.year_cbox.addItem(str(value.current_year), value.current_year)
+        self.year_cbox.clear()
+        for value in self.select_years:
+            self.year_cbox.addItem(str(value), value)
 
     @pyqtSlot(int)
     def on_year_cbox_currentIndexChanged(self, index):
 
-        self.__clear_all()
+        self.object_cbox.clear()
         current_year = self.year_cbox.itemData(self.year_cbox.currentIndex())
-        self.__load_fee_history(current_year)
+        values = self.session.query(UbFeeHistory).\
+            filter(UbFeeHistory.pid == self.old_parcel_id).\
+            filter(UbFeeHistory.current_year == current_year).all()
 
-    def __load_fee_history(self, current_year):
+        for value in values:
+            self.object_cbox.addItem(value.pid + ': (' + value.person_register + ') ' + value.ner, value.id)
+
+    @pyqtSlot(int)
+    def on_object_cbox_currentIndexChanged(self, index):
+
+        self.__clear_all()
+        current_id = self.object_cbox.itemData(self.object_cbox.currentIndex())
+
+        self.__load_fee_history(current_id)
+
+    def __load_fee_history(self, current_id):
 
         value = self.session.query(UbFeeHistory).\
-            filter(UbFeeHistory.pid == self.old_parcel_id).\
-            filter(UbFeeHistory.current_year == current_year).first()
+            filter(UbFeeHistory.id == current_id).first()
 
-        print value.payment_year
+        if not value:
+            return
 
         self.payment_contract_edit.setText(value.contract_no if value.contract_no is not None else '')
         self.payment_area_edit.setText(str(value.document_area) if value.document_area is not None else '0')
-        self.payment_zoriulalt_edit.setText(str(value.zoriulalt) if value.zoriulalt is not None else '')
+        self.payment_zoriulalt_edit.setText(unicode(value.zoriulalt) if value.zoriulalt is not None else '')
         self.payment_name_edit.setText(value.ner if value.ner is not None else '')
         self.decsription_txt.setText(value.description if value.description is not None else '')
 
@@ -108,11 +125,11 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
 
     def __clear_all(self):
 
-        self.payment_contract_edit.clear()
-        self.payment_area_edit.clear()
-        self.payment_zoriulalt_edit.clear()
-        self.payment_name_edit.clear()
-        self.decsription_txt.clear()
+        # self.payment_contract_edit.clear()
+        # self.payment_area_edit.clear()
+        # self.payment_zoriulalt_edit.clear()
+        # self.payment_name_edit.clear()
+        # self.decsription_txt.clear()
 
         self.payment_contract_sbox.setValue(0)
         self.payment_before_less_sbox.setValue(0)
@@ -130,3 +147,196 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
         self.paid_invalid_sbox.setValue(0)
         self.paid_less_sbox.setValue(0)
         self.paid_over_sbox.setValue(0)
+
+    @pyqtSlot()
+    def on_save_button_clicked(self):
+
+        current_id = self.object_cbox.itemData(self.object_cbox.currentIndex())
+        self.selected_year = self.year_cbox.itemData(self.year_cbox.currentIndex())
+
+        if current_id:
+            object = self.session.query(UbFeeHistory).filter(UbFeeHistory.id == current_id).one()
+
+            object.contract_no = self.payment_contract_edit.text()
+            object.document_area = float(self.payment_area_edit.text())
+            object.zoriulalt = self.payment_zoriulalt_edit.text()
+            object.ner = self.payment_name_edit.text()
+            object.description = self.decsription_txt.toPlainText()
+
+            object.payment_contract = self.payment_contract_sbox.value()
+            object.payment_before_less = self.payment_before_less_sbox.value()
+            object.payment_before_over = self.payment_before_over_sbox.value()
+            object.payment_year = self.payment_year_sbox.value()
+            object.payment_fund = self.payment_fund_sbox.value()
+            object.payment_loss = self.payment_loss_sbox.value()
+            object.payment_total = self.payment_total_sbox.value()
+
+            object.paid_before_less = self.paid_before_less_sbox.value()
+            object.paid_year = self.paid_year_sbox.value()
+            object.paid_fund = self.paid_fund_sbox.value()
+            object.paid_city = self.paid_city_sbox.value()
+            object.paid_district = self.paid_district_sbox.value()
+            object.invalid_payment = self.paid_invalid_sbox.value()
+            object.paid_less = self.paid_less_sbox.value()
+            object.paid_over = self.paid_over_sbox.value()
+        else:
+            object = UbFeeHistory()
+
+            object.contract_no = self.payment_contract_edit.text()
+            object.document_area = float(self.payment_area_edit.text())
+            object.zoriulalt = self.payment_zoriulalt_edit.text()
+            object.ner = self.payment_name_edit.text()
+            object.description = self.decsription_txt.toPlainText()
+
+            object.payment_contract = self.payment_contract_sbox.value()
+            object.payment_before_less = self.payment_before_less_sbox.value()
+            object.payment_before_over = self.payment_before_over_sbox.value()
+            object.payment_year = self.payment_year_sbox.value()
+            object.payment_fund = self.payment_fund_sbox.value()
+            object.payment_loss = self.payment_loss_sbox.value()
+            object.payment_total = self.payment_total_sbox.value()
+
+            object.paid_before_less = self.paid_before_less_sbox.value()
+            object.paid_year = self.paid_year_sbox.value()
+            object.paid_fund = self.paid_fund_sbox.value()
+            object.paid_city = self.paid_city_sbox.value()
+            object.paid_district = self.paid_district_sbox.value()
+            object.invalid_payment = self.paid_invalid_sbox.value()
+            object.paid_less = self.paid_less_sbox.value()
+            object.paid_over = self.paid_over_sbox.value()
+
+            object.current_year = self.selected_year
+            object.pid = self.old_parcel_id
+            object.person_register = self.person_id
+
+            self.session.add(object)
+
+        self.session.commit()
+
+        self.__setup_cbox()
+        self.year_cbox.setCurrentIndex(self.year_cbox.findData(self.selected_year))
+        self.__start_fade_out_timer()
+
+    @pyqtSlot()
+    def on_finish_button_clicked(self):
+
+        current_year = self.year_cbox.itemData(self.year_cbox.currentIndex())
+        current_id = self.object_cbox.itemData(self.object_cbox.currentIndex())
+        parcel_id = None
+        person_id = None
+        contract_id = None
+        au2 = None
+
+        old_parcel = self.session.query(CaUBParcel).filter(CaUBParcel.old_parcel_id == self.old_parcel_id).one()
+
+        parcel_count = self.session.query(CaParcelTbl).\
+            filter(CaParcelTbl.geometry.ST_Equals(old_parcel.geometry)).count()
+        if parcel_count > 0:
+            parcel = self.session.query(CaParcelTbl). \
+                filter(CaParcelTbl.geometry.ST_Equals(old_parcel.geometry)).first()
+            parcel_id = parcel.parcel_id
+            au2 = parcel.au2
+
+        if not parcel_id:
+            PluginUtils.show_message(self, u'Анхааруулга', u'Нэгж талбар үндсэн мэдээллийн санд бүртгэгдээгүй байна.')
+            return
+
+        apps = self.session.query(CtApplication).\
+            filter(CtApplication.parcel == parcel_id).all()
+        for app in apps:
+            app_contracts = self.session.query(CtContractApplicationRole).\
+                filter(CtContractApplicationRole.application == app.app_id).\
+                filter(CtContractApplicationRole.role == 20).all()
+            for app_contract in app_contracts:
+                contract_id = app_contract.contract
+                contract = self.session.query(CtContract).filter(CtContract.contract_id == app_contract.contract).one()
+                if contract.status != 10 or contract.status != 20 or contract.status != 50 or contract.status != 60:
+                    contract_id = contract.contract_id
+                    app_type = app.app_type
+                    app_persons = self.session.query(CtApplicationPersonRole).filter(
+                        CtApplicationPersonRole.application == app.app_id).all()
+                    for app_person in app_persons:
+                        set_app_role = self.session.query(SetApplicationTypePersonRole).\
+                            filter(SetApplicationTypePersonRole.type == app_type).\
+                            filter(SetApplicationTypePersonRole.role == app_person.role).one()
+                        if set_app_role.is_owner:
+                            person_id = app_person.person
+
+        if not contract_id:
+            PluginUtils.show_message(self, u'Анхааруулга',
+                                     u'Үндсэн мэдээллийн санд гэрээний бүртгэл үүсээгүй байна.')
+            return
+
+        if not person_id:
+            PluginUtils.show_message(self, u'Анхааруулга', u'Үндсэн мэдээллийн санд хуулийн этгээдийн бүртгэл байхгүй байна.')
+            return
+
+        message_box = QMessageBox()
+        message_box.setText(self.tr("Do you want to import for base database?"))
+
+        yes_button = message_box.addButton(self.tr("Yes"), QMessageBox.ActionRole)
+        message_box.addButton(self.tr("No"), QMessageBox.ActionRole)
+        message_box.exec_()
+
+        if message_box.clickedButton() != yes_button:
+            return
+
+        values = self.session.query(UbFeeHistory).\
+            filter(UbFeeHistory.pid == self.old_parcel_id).all()
+
+        for value in values:
+            current_year = value.current_year
+            if self.one_select_chbox.isChecked():
+                current_year = self.year_cbox.itemData(self.year_cbox.currentIndex())
+            count = self.session.query(PaPaymentPaid).\
+                filter(PaPaymentPaid.contract_id == contract_id).\
+                filter(PaPaymentPaid.person_id == person_id).\
+                filter(PaPaymentPaid.paid_year == current_year).count()
+            if count == 0:
+                total_amount = 0
+                object = PaPaymentPaid()
+                object.person_id = person_id
+                object.contract_id = contract_id
+                object.parcel_id = parcel_id
+                object.au2 = au2
+                object.paid_year = current_year
+                object.type_id = 1
+
+
+                object.invalid_amount = value.invalid_payment
+                object.remainning_amount = value.paid_before_less
+                object.earning_amount = value.paid_fund
+                object.quarter_four = value.paid_year
+                if value.paid_less:
+                    object.year_amount = value.paid_less
+                else:
+                    object.year_amount = value.paid_over
+
+                object.imposition_year_amount = value.payment_year
+                object.imposition_total_amount = value.payment_year + value.payment_before_less - value.payment_before_over + value.payment_fund + value.payment_loss
+
+                object.contract_amount = value.payment_contract
+
+                object.total_amount = value.paid_before_less + value.paid_year + value.paid_fund
+
+                self.session.add(object)
+        self.session.commit()
+        self.__start_fade_out_timer()
+
+    def __start_fade_out_timer(self):
+
+        # self.error_label.setVisible(False)
+        self.status_label.setVisible(True)
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.__fade_status_message)
+        self.time_counter = 500
+        self.timer.start(10)
+
+    def __fade_status_message(self):
+
+        opacity = int(self.time_counter * 0.5)
+        self.status_label.setStyleSheet("QLabel {color: rgba(255,0,0," + str(opacity) + ");}")
+        self.status_label.setText(self.tr('Changes applied successfully.'))
+        if self.time_counter == 0:
+            self.timer.stop()
+        self.time_counter -= 1

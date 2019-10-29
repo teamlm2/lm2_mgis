@@ -41,43 +41,43 @@ class SessionHandler(QObject):
         if self.session is not None:
             self.session.close()
 
-        # try:
-        self.engine = create_engine("postgresql://{0}:{1}@{2}:{3}/{4}".format(user, password, host, port, database))
-        self.password = password
-        Session = sessionmaker(bind=self.engine)
-        self.session = Session()
-        self.session.autocommit = False
-        self.session.execute(set_search_path)
+        try:
+            self.engine = create_engine("postgresql://{0}:{1}@{2}:{3}/{4}".format(user, password, host, port, database))
+            self.password = password
+            Session = sessionmaker(bind=self.engine)
+            self.session = Session()
+            self.session.autocommit = False
+            self.session.execute(set_search_path)
 
-        set_role_count = self.session.query(SetRole).filter(SetRole.user_name == user).filter(SetRole.is_active == True).count()
-        if set_role_count == 0:
-            QMessageBox.information(None, self.tr("Connection Error"), self.tr("The user name {0} is not registered.").format(user))
+            set_role_count = self.session.query(SetRole).filter(SetRole.user_name == user).filter(SetRole.is_active == True).count()
+            if set_role_count == 0:
+                QMessageBox.information(None, self.tr("Connection Error"), self.tr("The user name {0} is not registered.").format(user))
+                self.session = None
+                self.engine = None
+                self.password = None
+                return False
+
+            setRole = self.session.query(SetRole).filter(SetRole.user_name == user).filter(SetRole.is_active == True).one()
+            auLevel2List = setRole.restriction_au_level2.split(",")
+            schemaList = []
+
+            for auLevel2 in auLevel2List:
+
+                auLevel2 = auLevel2.strip()
+                schemaList.append("s" + auLevel2)
+
+            schema_string = ",".join(schemaList)
+
+            self.session.execute(set_search_path)
+            self.session.commit()
+
+            return True
+
+        except SQLAlchemyError, e:
             self.session = None
             self.engine = None
             self.password = None
-            return False
-
-        setRole = self.session.query(SetRole).filter(SetRole.user_name == user).filter(SetRole.is_active == True).one()
-        auLevel2List = setRole.restriction_au_level2.split(",")
-        schemaList = []
-
-        for auLevel2 in auLevel2List:
-
-            auLevel2 = auLevel2.strip()
-            schemaList.append("s" + auLevel2)
-
-        schema_string = ",".join(schemaList)
-
-        self.session.execute(set_search_path)
-        self.session.commit()
-
-        return True
-
-        # except SQLAlchemyError, e:
-        #     self.session = None
-        #     self.engine = None
-        #     self.password = None
-        #     raise e
+            raise e
 
     def destroy_session(self):
 

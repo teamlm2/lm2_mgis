@@ -547,6 +547,11 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
 
         status = self.valuation_level_status_cbox.itemData(self.valuation_level_status_cbox.currentIndex())
 
+        aimag_name = self.working_l1_cbox.currentText()
+        soum_name = self.working_l2_cbox.currentText()
+
+        full_name = aimag_name + ', ' + soum_name
+
         sql_zone = "select zone_no, avg_base_price, st_union(geometry) from (" + sql_zone + ")" + " as xxx group by zone_no, avg_base_price"
         result = self.session.execute(sql_zone)
         for item_row in result:
@@ -554,8 +559,8 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
             avg_base_price = item_row[1]
             geometry = item_row[2]
             geom = 'ST_Multi(' +  "'" + geometry +  "'" + ')'
-            values = str(zone_no) + ", " + geom + ", " + "'" + "" + "'" + ", " + "'" + "" + "'" + ", " + "true" + ", " + "'" + au2 + "'" + ", " + str(status) + ", " + str(avg_base_price)
-            sql = "insert into data_cama.cm_valuation_level (level_no, geometry, name, location, in_active, au2, status, base_price) values ("+ values +")"
+            values = str(zone_no) + ", " + geom + ", " + "true" + ", " + "'" + au2 + "'" + ", " + str(status) + ", " + str(avg_base_price) + ", " + "'" + full_name + "'" + ", " + "'" + full_name + "'"
+            sql = "insert into data_cama.cm_valuation_level (level_no, geometry, in_active, au2, status, base_price, name, location) values ("+ values +")"
             self.session.execute(sql)
 
         self.session.commit()

@@ -114,7 +114,7 @@
      <property name="geometry">
       <rect>
        <x>5</x>
-       <y>-1</y>
+       <y>6</y>
        <width>844</width>
        <height>46</height>
       </rect>
@@ -221,8 +221,8 @@
     <widget class="QPushButton" name="clear_button">
      <property name="geometry">
       <rect>
-       <x>650</x>
-       <y>15</y>
+       <x>640</x>
+       <y>22</y>
        <width>75</width>
        <height>23</height>
       </rect>
@@ -682,7 +682,7 @@
      </widget>
      <widget class="QLineEdit" name="payment_contract_edit">
       <property name="enabled">
-       <bool>false</bool>
+       <bool>true</bool>
       </property>
       <property name="geometry">
        <rect>
@@ -731,7 +731,7 @@
      </widget>
      <widget class="QLineEdit" name="payment_zoriulalt_edit">
       <property name="enabled">
-       <bool>false</bool>
+       <bool>true</bool>
       </property>
       <property name="geometry">
        <rect>
@@ -744,7 +744,7 @@
      </widget>
      <widget class="QLineEdit" name="payment_name_edit">
       <property name="enabled">
-       <bool>false</bool>
+       <bool>true</bool>
       </property>
       <property name="geometry">
        <rect>
@@ -783,7 +783,7 @@
      </widget>
      <widget class="QLineEdit" name="payment_area_edit">
       <property name="enabled">
-       <bool>false</bool>
+       <bool>true</bool>
       </property>
       <property name="geometry">
        <rect>
@@ -814,17 +814,72 @@
       <enum>Qt::Horizontal</enum>
      </property>
     </widget>
+    <widget class="QComboBox" name="object_cbox">
+     <property name="geometry">
+      <rect>
+       <x>160</x>
+       <y>190</y>
+       <width>401</width>
+       <height>22</height>
+      </rect>
+     </property>
+    </widget>
    </widget>
-   <widget class="QWidget" name="tab_2">
-    <attribute name="title">
-     <string>LandUK</string>
-    </attribute>
-   </widget>
-   <widget class="QWidget" name="tab_3">
-    <attribute name="title">
-     <string>LPIS</string>
-    </attribute>
-   </widget>
+  </widget>
+  <widget class="QPushButton" name="save_button">
+   <property name="geometry">
+    <rect>
+     <x>690</x>
+     <y>475</y>
+     <width>75</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Save</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="finish_button">
+   <property name="geometry">
+    <rect>
+     <x>600</x>
+     <y>475</y>
+     <width>75</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Finish</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="one_select_chbox">
+   <property name="geometry">
+    <rect>
+     <x>390</x>
+     <y>475</y>
+     <width>211</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Зөвхөн сонгогдсон жилийг оруулах</string>
+   </property>
+   <property name="checked">
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QLabel" name="status_label">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>476</y>
+     <width>319</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
   </widget>
  </widget>
  <resources>
