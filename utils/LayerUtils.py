@@ -423,39 +423,20 @@ class LayerUtils(object):
     @staticmethod
     def refresh_layer_plan():
 
-        session = SessionHandler().session_instance()
-
         root = QgsProject.instance().layerTreeRoot()
         mygroup = root.findGroup(U"ГЗБТөлөвлгөө")
         if mygroup is None:
             plan = root.insertGroup(1, u"ГЗБТөлөвлгөө")
             current_root = plan.insertGroup(1, u"Ажиллаж байгаа")
             current_root.setExpanded(False)
-            # current_root.insertGroup(1, u"Parcel")
-            # current_root.insertGroup(2, u"Sub")
-            # current_root.insertGroup(3, u"Main")
 
-            other_root = plan.insertGroup(2, u"Бусад ГЗБТ")
-
-            # other_root.setExpanded(False)
-            # types = session.query(ClPlanType).order_by(ClPlanType.code.desc()).all()
-            # count = 1
-            # for type in types:
-            #     if type.is_point:
-            #         child_root = other_root.insertGroup(count, type.short_name)
-            #         child_root.insertGroup(1, u"Parcel")
-            #         child_root.insertGroup(2, u"Sub")
-            #         child_root.insertGroup(3, u"Main")
-            #         child_root.setExpanded(False)
-            #     else:
-            #         child_root = other_root.insertGroup(count, type.short_name)
-            #         child_root.insertGroup(1, u"Parcel")
-            #         child_root.setExpanded(False)
-            #     count += 1
         else:
             if not mygroup.findGroup(U"Ажиллаж байгаа"):
                 current_root = mygroup.insertGroup(1, u"Ажиллаж байгаа")
                 current_root.setExpanded(False)
             if not mygroup.findGroup(U"Бусад ГЗБТ"):
                 other_root = mygroup.insertGroup(2, u"Бусад ГЗБТ")
+                other_root.setExpanded(False)
+            if not mygroup.findGroup(U"Хилийн цэс"):
+                other_root = mygroup.insertGroup(3, u"Хилийн цэс")
                 other_root.setExpanded(False)

@@ -93,7 +93,7 @@
        </size>
       </property>
       <property name="currentIndex">
-       <number>3</number>
+       <number>0</number>
       </property>
       <property name="usesScrollButtons">
        <bool>true</bool>
@@ -938,26 +938,26 @@ font: 75 14pt &quot;Helvetica&quot;;</string>
           <property name="geometry">
            <rect>
             <x>16</x>
-            <y>55</y>
+            <y>70</y>
             <width>161</width>
             <height>23</height>
            </rect>
           </property>
           <property name="text">
-           <string>Сум/Дүүргийн хил</string>
+           <string>Сум/Дүүргийн хилийн цэс</string>
           </property>
          </widget>
          <widget class="QPushButton" name="au_level1_button">
           <property name="geometry">
            <rect>
             <x>16</x>
-            <y>30</y>
+            <y>45</y>
             <width>161</width>
             <height>23</height>
            </rect>
           </property>
           <property name="text">
-           <string>Аймаг/Нийслэлийн хил</string>
+           <string>Аймаг/Нийслэлийн хилийн цэс</string>
           </property>
          </widget>
          <widget class="QPushButton" name="layer_view_button_2">
@@ -976,19 +976,6 @@ font: 75 14pt &quot;Helvetica&quot;;</string>
            <string>layer view</string>
           </property>
          </widget>
-         <widget class="QPushButton" name="fee_tax_zone_button">
-          <property name="geometry">
-           <rect>
-            <x>16</x>
-            <y>105</y>
-            <width>161</width>
-            <height>23</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Төлбөр, Татварын бүс</string>
-          </property>
-         </widget>
          <widget class="QComboBox" name="type_cbox_2">
           <property name="geometry">
            <rect>
@@ -999,24 +986,11 @@ font: 75 14pt &quot;Helvetica&quot;;</string>
            </rect>
           </property>
          </widget>
-         <widget class="QPushButton" name="valuation_zone_button">
-          <property name="geometry">
-           <rect>
-            <x>190</x>
-            <y>105</y>
-            <width>161</width>
-            <height>23</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Үнэлгээний бүс</string>
-          </property>
-         </widget>
          <widget class="QPushButton" name="sec_zone_button">
           <property name="geometry">
            <rect>
-            <x>190</x>
-            <y>80</y>
+            <x>200</x>
+            <y>45</y>
             <width>161</width>
             <height>23</height>
            </rect>
@@ -1029,13 +1003,13 @@ font: 75 14pt &quot;Helvetica&quot;;</string>
           <property name="geometry">
            <rect>
             <x>16</x>
-            <y>80</y>
+            <y>95</y>
             <width>161</width>
             <height>23</height>
            </rect>
           </property>
           <property name="text">
-           <string>Баг/Хорооны хил</string>
+           <string>Баг/Хорооны хилийн зааг</string>
           </property>
          </widget>
          <widget class="QLabel" name="label_2">
@@ -1054,8 +1028,8 @@ font: 75 14pt &quot;Helvetica&quot;;</string>
          <widget class="QPushButton" name="mpa_zone_button">
           <property name="geometry">
            <rect>
-            <x>190</x>
-            <y>55</y>
+            <x>200</x>
+            <y>20</y>
             <width>161</width>
             <height>23</height>
            </rect>
@@ -1067,14 +1041,40 @@ font: 75 14pt &quot;Helvetica&quot;;</string>
          <widget class="QPushButton" name="free_zone_button">
           <property name="geometry">
            <rect>
-            <x>190</x>
-            <y>30</y>
+            <x>16</x>
+            <y>120</y>
             <width>161</width>
             <height>23</height>
            </rect>
           </property>
           <property name="text">
            <string>Чөлөөт бүс</string>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="au_level0_button">
+          <property name="geometry">
+           <rect>
+            <x>16</x>
+            <y>20</y>
+            <width>161</width>
+            <height>23</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Улсын хилийн цэс</string>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="feedback_button">
+          <property name="geometry">
+           <rect>
+            <x>200</x>
+            <y>70</y>
+            <width>161</width>
+            <height>23</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Олон нийтийн санал</string>
           </property>
          </widget>
         </widget>

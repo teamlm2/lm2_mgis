@@ -340,3 +340,8 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
         if self.time_counter == 0:
             self.timer.stop()
         self.time_counter -= 1
+
+    @pyqtSlot(int)
+    def on_year_sbox_valueChanged(self, sbox_value):
+
+        print ''

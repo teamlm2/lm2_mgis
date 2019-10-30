@@ -1697,29 +1697,6 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
             mygroup.addLayer(vlayer)
 
     @pyqtSlot()
-    def on_fee_tax_zone_button_clicked(self):
-
-        root = QgsProject.instance().layerTreeRoot()
-        mygroup = root.findGroup(u"Үнэлгээ, төлбөрийн бүс")
-        vlayer = LayerUtils.layer_by_data_source("settings", "set_view_fee_zone")
-        if vlayer is None:
-            vlayer = LayerUtils.load_layer_base_layer("set_view_fee_zone", "zone_id", "settings")
-        vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) +"/template\style/set_fee_zone.qml")
-        vlayer.setLayerName(self.tr("Fee Zone"))
-        myalayer = root.findLayer(vlayer.id())
-        if myalayer is None:
-            mygroup.addLayer(vlayer)
-
-        vlayer = LayerUtils.layer_by_data_source("settings", "set_view_tax_zone")
-        if vlayer is None:
-            vlayer = LayerUtils.load_layer_base_layer("set_view_tax_zone", "zone_id", "settings")
-        vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) +"/template\style/set_tax_and_price_zone.qml")
-        vlayer.setLayerName(self.tr("Tax Zone"))
-        myalayer = root.findLayer(vlayer.id())
-        if myalayer is None:
-            mygroup.addLayer(vlayer)
-
-    @pyqtSlot()
     def on_sec_zone_button_clicked(self):
 
         root = QgsProject.instance().layerTreeRoot()
@@ -1756,26 +1733,26 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
             mygroup.addLayer(vlayer)
 
     @pyqtSlot()
-    def on_valuation_zone_button_clicked(self):
+    def on_feedback_button_clicked(self):
 
+        LayerUtils.refresh_layer_plan()
         root = QgsProject.instance().layerTreeRoot()
-        mygroup = root.findGroup(u"Үнэлгээ, төлбөрийн бүс")
-        vlayer = LayerUtils.layer_by_data_source("data_estimate", "pa_valuation_level_view")
-        if vlayer is None:
-            vlayer = LayerUtils.load_layer_base_layer("pa_valuation_level_view", "id", "data_estimate")
-        vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/pa_valuation_level.qml")
-        vlayer.setLayerName(self.tr("Valuation level"))
-        mygroup.addLayer(vlayer)
 
-        root = QgsProject.instance().layerTreeRoot()
-        mygroup = root.findGroup(u"Үнэлгээ, төлбөрийн бүс")
-        vlayer = LayerUtils.layer_by_data_source("data_estimate", "pa_valuation_level_agriculture_view")
+        root_group = root.findGroup(u"Ажиллаж байгаа")
+        if not root_group is None:
+            root.removeChildNode(root_group)
+        LayerUtils.refresh_layer_plan()
+        root_group = root.findGroup(u"Ажиллаж байгаа")
+
+        vlayer = LayerUtils.layer_by_data_source("data_plan", "pl_view_project_parcel_feedback")
         if vlayer is None:
-            vlayer = LayerUtils.load_layer_base_layer("pa_valuation_level_agriculture_view", "id", "data_estimate")
-        vlayer.loadNamedStyle(
-            str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/pa_valuation_agriculture_level.qml")
-        vlayer.setLayerName(self.tr("Valuation Agrivulture level"))
-        mygroup.addLayer(vlayer)
+            vlayer = LayerUtils.load_plan_layer_base_layer("pl_view_project_parcel_feedback", "parcel_feedback_id", "data_plan", "polygon_geom")
+        # vlayer.loadNamedStyle(
+        #     str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/plan_base_condition_parcel.qml")
+        vlayer.setLayerName(self.tr("FeedBack Parcels"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            root_group.addLayer(vlayer)
 
     @pyqtSlot()
     def on_plan_edit_button_clicked(self):

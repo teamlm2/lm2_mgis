@@ -42,71 +42,6 @@
     <attribute name="title">
      <string>Fee</string>
     </attribute>
-    <widget class="QLineEdit" name="landuse_edit">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
-     <property name="geometry">
-      <rect>
-       <x>133</x>
-       <y>73</y>
-       <width>151</width>
-       <height>20</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label">
-     <property name="geometry">
-      <rect>
-       <x>293</x>
-       <y>53</y>
-       <width>151</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Decision No</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_5">
-     <property name="geometry">
-      <rect>
-       <x>15</x>
-       <y>53</y>
-       <width>151</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Area /m2/</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_2">
-     <property name="geometry">
-      <rect>
-       <x>453</x>
-       <y>53</y>
-       <width>151</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Decision Date</string>
-     </property>
-    </widget>
-    <widget class="QLineEdit" name="decision_no_edit">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
-     <property name="geometry">
-      <rect>
-       <x>293</x>
-       <y>73</y>
-       <width>151</width>
-       <height>20</height>
-      </rect>
-     </property>
-    </widget>
     <widget class="QGroupBox" name="find_gbox">
      <property name="enabled">
       <bool>false</bool>
@@ -114,7 +49,7 @@
      <property name="geometry">
       <rect>
        <x>5</x>
-       <y>6</y>
+       <y>0</y>
        <width>844</width>
        <height>46</height>
       </rect>
@@ -192,32 +127,6 @@
       </property>
      </widget>
     </widget>
-    <widget class="QLineEdit" name="decision_date_edit">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
-     <property name="geometry">
-      <rect>
-       <x>453</x>
-       <y>73</y>
-       <width>151</width>
-       <height>20</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QLineEdit" name="area_m2_edit">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
-     <property name="geometry">
-      <rect>
-       <x>15</x>
-       <y>73</y>
-       <width>111</width>
-       <height>20</height>
-      </rect>
-     </property>
-    </widget>
     <widget class="QPushButton" name="clear_button">
      <property name="geometry">
       <rect>
@@ -231,24 +140,11 @@
       <string>New</string>
      </property>
     </widget>
-    <widget class="QLabel" name="label_6">
-     <property name="geometry">
-      <rect>
-       <x>133</x>
-       <y>53</y>
-       <width>151</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Landuse</string>
-     </property>
-    </widget>
     <widget class="QComboBox" name="year_cbox">
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>190</y>
+       <y>196</y>
        <width>131</width>
        <height>22</height>
       </rect>
@@ -799,7 +695,7 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>160</y>
+       <y>170</y>
        <width>841</width>
        <height>31</height>
       </rect>
@@ -818,11 +714,79 @@
      <property name="geometry">
       <rect>
        <x>160</x>
-       <y>190</y>
+       <y>196</y>
        <width>401</width>
        <height>22</height>
       </rect>
      </property>
+    </widget>
+    <widget class="QTableWidget" name="tableWidget">
+     <property name="geometry">
+      <rect>
+       <x>5</x>
+       <y>50</y>
+       <width>845</width>
+       <height>125</height>
+      </rect>
+     </property>
+     <property name="sortingEnabled">
+      <bool>true</bool>
+     </property>
+     <column>
+      <property name="text">
+       <string>Жил</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Регистр</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Гэрээний дугаар</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Гэрээнд ногдуулсан дүн</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Тухайн онд ногдуулсан дүн</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Тухайн жил нийт</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Урд оны дутуу</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Урд оны дутуу төлөлтөөс</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Бүгд дүн</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Хүчингүйд тооцсон дүн</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Тайлан оны илүү, дутуу төлөлт </string>
+      </property>
+     </column>
     </widget>
    </widget>
   </widget>
