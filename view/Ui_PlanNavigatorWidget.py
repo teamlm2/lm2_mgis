@@ -349,7 +349,7 @@ class Ui_PlanNavigatorWidget(object):
         PlanNavigatorWidget.setWidget(self.dockWidgetContents)
 
         self.retranslateUi(PlanNavigatorWidget)
-        self.tabWidget.setCurrentIndex(0)
+        self.tabWidget.setCurrentIndex(2)
         self.tabWidget_2.setCurrentIndex(1)
         QtCore.QMetaObject.connectSlotsByName(PlanNavigatorWidget)
         PlanNavigatorWidget.setTabOrder(self.tabWidget, self.extent_rbutton)

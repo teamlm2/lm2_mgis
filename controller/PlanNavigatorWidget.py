@@ -1653,48 +1653,99 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
         self.before_date = datetime.strptime(self.before_date, "%Y-%m-%d").date()
 
     @pyqtSlot()
-    def on_au_level1_button_clicked(self):
+    def on_au_level0_button_clicked(self):
 
+        LayerUtils.refresh_layer_plan()
         root = QgsProject.instance().layerTreeRoot()
-        mygroup = root.findGroup(u"Хил")
-        vlayer = LayerUtils.layer_by_data_source("admin_units", "au_level1")
+        root_group = root.findGroup(u"Услын хилийн цэс")
+
+        vlayer = LayerUtils.layer_by_data_source("admin_units", "au_base_level0")
         if vlayer is None:
-            vlayer = LayerUtils.load_layer_base_layer("au_level1", "code","admin_units")
-        vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "template\style/au_level1.qml")
-        vlayer.setLayerName(self.tr("Admin Unit Level1"))
+            vlayer = LayerUtils.load_plan_layer_base_layer("au_base_level0", "id", "admin_units", "geometry")
+        # vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "template\style/au_level1.qml")
+        vlayer.setLayerName(self.tr("Polygon"))
         myalayer = root.findLayer(vlayer.id())
         if myalayer is None:
-            mygroup.addLayer(vlayer)
+            root_group.addLayer(vlayer)
+
+        vlayer = LayerUtils.layer_by_data_source("admin_units", "au_base_level0")
+        if vlayer is None:
+            vlayer = LayerUtils.load_plan_layer_base_layer("au_base_level0", "id", "admin_units", "line_geom")
+        # vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "template\style/au_level0.qml")
+        vlayer.setLayerName(self.tr("Line"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            root_group.addLayer(vlayer)
+
+    @pyqtSlot()
+    def on_au_level1_button_clicked(self):
+
+        LayerUtils.refresh_layer_plan()
+        root = QgsProject.instance().layerTreeRoot()
+        root_group = root.findGroup(u"Аймгийн хилийн цэс")
+
+        vlayer = LayerUtils.layer_by_data_source("admin_units", "au_base_level1")
+        if vlayer is None:
+            vlayer = LayerUtils.load_plan_layer_base_layer("au_base_level1", "id", "admin_units", "geometry")
+        # vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "template\style/au_level1.qml")
+        vlayer.setLayerName(self.tr("Polygon"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            root_group.addLayer(vlayer)
 
     @pyqtSlot()
     def on_au_level2_button_clicked(self):
 
+        LayerUtils.refresh_layer_plan()
         root = QgsProject.instance().layerTreeRoot()
-        mygroup = root.findGroup(u"Хил")
-        vlayer = LayerUtils.layer_by_data_source("admin_units", "au_level2")
-        if vlayer is None:
-        # if not self.is_au_level2:
-            vlayer = LayerUtils.load_layer_base_layer("au_level2", "code", "admin_units")
-        vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/au_level2.qml")
-        vlayer.setLayerName(self.tr("Admin Unit Level2"))
+        root_group = root.findGroup(u"Сумын хилийн цэс")
+
+        schema_name = "admin_units"
+        table_name = "au_base_level2"
+        layer_list = []
+        layers = QgsMapLayerRegistry.instance().mapLayers()
+
+        for id, layer in layers.iteritems():
+            if layer.type() == QgsMapLayer.VectorLayer:
+                uri_string = layer.dataProvider().dataSourceUri()
+                uri = QgsDataSourceURI(uri_string)
+                if uri.table() == table_name:
+                    if uri.schema() == schema_name:
+                        layer_list.append(id)
+
+        vlayer = LayerUtils.layer_by_data_source(schema_name, table_name)
+        if vlayer:
+            QgsMapLayerRegistry.instance().removeMapLayers(layer_list)
+
+        vlayer = LayerUtils.load_plan_layer_base_layer(table_name, "id", schema_name, "point_geom")
+        # vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "template\style/au_level2.qml")
+        vlayer.setLayerName(self.tr("Point"))
         myalayer = root.findLayer(vlayer.id())
         if myalayer is None:
-            mygroup.addLayer(vlayer)
-        self.is_au_level2 = True
+            root_group.addLayer(vlayer)
+
+        vlayer = LayerUtils.load_plan_layer_base_layer(table_name, "id", schema_name, "geometry")
+        # vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "template\style/au_level2.qml")
+        vlayer.setLayerName(self.tr("Polygon"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            root_group.addLayer(vlayer)
 
     @pyqtSlot()
     def on_au_level3_button_clicked(self):
 
+        LayerUtils.refresh_layer_plan()
         root = QgsProject.instance().layerTreeRoot()
-        mygroup = root.findGroup(u"Хил")
-        vlayer = LayerUtils.layer_by_data_source("admin_units", "au_level3")
+        root_group = root.findGroup(u"Багийн хилийн зааг")
+
+        vlayer = LayerUtils.layer_by_data_source("admin_units", "au_base_level3")
         if vlayer is None:
-            vlayer = LayerUtils.load_layer_base_layer("au_level3", "code", "admin_units")
-        vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/au_level3.qml")
-        vlayer.setLayerName(self.tr("Admin Unit Level3"))
+            vlayer = LayerUtils.load_plan_layer_base_layer("au_base_level3", "id", "admin_units", "geometry")
+        # vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "template\style/au_level2.qml")
+        vlayer.setLayerName(self.tr("Polygon"))
         myalayer = root.findLayer(vlayer.id())
         if myalayer is None:
-            mygroup.addLayer(vlayer)
+            root_group.addLayer(vlayer)
 
     @pyqtSlot()
     def on_sec_zone_button_clicked(self):
@@ -1747,9 +1798,9 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
         vlayer = LayerUtils.layer_by_data_source("data_plan", "pl_view_project_parcel_feedback")
         if vlayer is None:
             vlayer = LayerUtils.load_plan_layer_base_layer("pl_view_project_parcel_feedback", "parcel_feedback_id", "data_plan", "polygon_geom")
-        # vlayer.loadNamedStyle(
-        #     str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/plan_base_condition_parcel.qml")
-        vlayer.setLayerName(self.tr("FeedBack Parcels"))
+        vlayer.loadNamedStyle(
+            str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/pl_feedback_parcel.qml")
+        vlayer.setLayerName(self.tr("FeedBack Parcel"))
         myalayer = root.findLayer(vlayer.id())
         if myalayer is None:
             root_group.addLayer(vlayer)

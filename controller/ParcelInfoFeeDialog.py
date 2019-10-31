@@ -56,8 +56,10 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
         self.paid_over_sbox.setMaximum(9999999999)
 
         self.select_years = [2014, 2015, 2016, 2017, 2018]
+        self.__setup_table_widget()
         self.__setup_cbox()
         self.selected_year = None
+        self.__list_of_paid()
 
         # if is_find:
         #     self.__load_fee(self.person_id, self.old_parcel_id)
@@ -65,6 +67,80 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
         #     self.find_gbox.setEnabled(True)
         #     self.old_parcel_id_edit.setEnabled(True)
         #     self.person_id_edit.setEnabled(True)
+
+    def __setup_table_widget(self):
+
+        self.paid_twidget.setAlternatingRowColors(True)
+        self.paid_twidget.setEditTriggers(QTableWidget.NoEditTriggers)
+        self.paid_twidget.setSelectionBehavior(QTableWidget.SelectRows)
+        self.paid_twidget.setSelectionMode(QTableWidget.SingleSelection)
+
+    def __list_of_paid(self):
+
+        self.paid_twidget.setRowCount(0)
+        parcel_id = None
+        old_parcel = self.session.query(CaUBParcel).filter(CaUBParcel.old_parcel_id == self.old_parcel_id).one()
+
+        parcel_count = self.session.query(CaParcelTbl). \
+            filter(CaParcelTbl.geometry.ST_Equals(old_parcel.geometry)).count()
+        if parcel_count > 0:
+            parcel = self.session.query(CaParcelTbl). \
+                filter(CaParcelTbl.geometry.ST_Equals(old_parcel.geometry)).first()
+            parcel_id = parcel.parcel_id
+
+        if not parcel_id:
+            return
+
+        values = self.session.query(PaPaymentPaid). \
+            filter(PaPaymentPaid.parcel_id == parcel_id).all()
+
+        for value in values:
+            count = self.paid_twidget.rowCount()
+
+            self.paid_twidget.insertRow(count)
+            item = QTableWidgetItem(str(value.paid_year))
+            item.setData(Qt.UserRole, value.paid_year)
+            self.paid_twidget.setItem(count, 0, item)
+            if value.person_ref:
+                person = value.person_ref
+                item = QTableWidgetItem(unicode(person.person_register))
+                item.setData(Qt.UserRole, person.person_id)
+                self.paid_twidget.setItem(count, 1, item)
+            if value.contract_ref:
+                contract = value.contract_ref
+                item = QTableWidgetItem((contract.contract_no))
+                item.setData(Qt.UserRole, contract.contract_no)
+                self.paid_twidget.setItem(count, 2, item)
+            if value.contract_amount:
+                item = QTableWidgetItem(str(value.contract_amount))
+                item.setData(Qt.UserRole, value.contract_amount)
+                self.paid_twidget.setItem(count, 3, item)
+            if value.imposition_year_amount:
+                item = QTableWidgetItem(str(value.imposition_year_amount))
+                item.setData(Qt.UserRole, value.imposition_year_amount)
+                self.paid_twidget.setItem(count, 4, item)
+            if value.imposition_total_amount:
+                item = QTableWidgetItem(str(value.imposition_total_amount))
+                item.setData(Qt.UserRole, value.imposition_total_amount)
+                self.paid_twidget.setItem(count, 5, item)
+            if value.remainning_amount:
+                item = QTableWidgetItem(str(value.remainning_amount))
+                item.setData(Qt.UserRole, value.remainning_amount)
+                self.paid_twidget.setItem(count, 6, item)
+            if value.total_amount:
+                item = QTableWidgetItem(str(value.total_amount))
+                item.setData(Qt.UserRole, value.total_amount)
+                self.paid_twidget.setItem(count, 7, item)
+            if value.invalid_amount:
+                item = QTableWidgetItem(str(value.invalid_amount))
+                item.setData(Qt.UserRole, value.invalid_amount)
+                self.paid_twidget.setItem(count, 8, item)
+            if value.year_amount:
+                item = QTableWidgetItem(str(value.year_amount))
+                item.setData(Qt.UserRole, value.year_amount)
+                self.paid_twidget.setItem(count, 9, item)
+
+        self.paid_twidget.resizeColumnsToContents()
 
     def __setup_cbox(self):
 
@@ -322,6 +398,7 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
                 self.session.add(object)
         self.session.commit()
         self.__start_fade_out_timer()
+        self.__list_of_paid()
 
     def __start_fade_out_timer(self):
 

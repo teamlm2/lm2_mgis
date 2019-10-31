@@ -1084,11 +1084,12 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         for fee in fees:
 
             if fee.person:
-                person = self.session.query(BsPerson).filter(BsPerson.person_id == fee.person).one()
-                if person:
-                    self.__add_fee_row2(row, person, fee)
+                if self.session.query(BsPerson).filter(BsPerson.person_id == fee.person).count() == 1:
+                    person = self.session.query(BsPerson).filter(BsPerson.person_id == fee.person).one()
+                    if person:
+                        self.__add_fee_row2(row, person, fee)
 
-                    row += 1
+                        row += 1
 
         self.land_fee_twidget.resizeColumnToContents(0)
         self.land_fee_twidget.resizeColumnToContents(1)

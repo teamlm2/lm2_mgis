@@ -2140,6 +2140,7 @@ class ParcelMpaDialog(QDockWidget, Ui_ParcelMpaDialog, DatabaseHelper):
         if right_type == 1 or right_type == 2:
             contract_no = self.__generate_contract_number()
             self.contract = CtContract()
+            self.contract.type = 1
             self.contract.contract_no = contract_no
             self.contract.contract_begin = self.contract_date.date().toString(Constants.DATABASE_DATE_FORMAT)
             self.contract.contract_date = self.contract_date.date().toString(Constants.DATABASE_DATE_FORMAT)

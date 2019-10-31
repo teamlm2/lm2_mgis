@@ -47,5 +47,7 @@ class PaPaymentPaid(Base):
 
     parcel_id = Column(String, ForeignKey('ca_parcel_tbl.parcel_id'))
     contract_id = Column(Integer, ForeignKey('ct_contract.contract_id'))
+    contract_ref = relationship("CtContract")
     person_id = Column(Integer, ForeignKey('bs_person.person_id'))
+    person_ref = relationship("BsPerson")
     type_id = Column(Integer)

@@ -2732,6 +2732,7 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
             self.create_savepoint()
             try:
                 self.contract = CtContract()
+                self.contract.type = 1
                 self.contract.contract_no = contract_no
                 self.contract.contract_begin = self.contract_date.date().toString(Constants.DATABASE_DATE_FORMAT)
                 self.contract.contract_date = self.contract_date.date().toString(Constants.DATABASE_DATE_FORMAT)

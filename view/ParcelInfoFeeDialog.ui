@@ -130,8 +130,8 @@
     <widget class="QPushButton" name="clear_button">
      <property name="geometry">
       <rect>
-       <x>640</x>
-       <y>22</y>
+       <x>630</x>
+       <y>16</y>
        <width>75</width>
        <height>23</height>
       </rect>
@@ -720,7 +720,7 @@
       </rect>
      </property>
     </widget>
-    <widget class="QTableWidget" name="tableWidget">
+    <widget class="QTableWidget" name="paid_twidget">
      <property name="geometry">
       <rect>
        <x>5</x>
@@ -760,11 +760,6 @@
      <column>
       <property name="text">
        <string>Тухайн жил нийт</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Урд оны дутуу</string>
       </property>
      </column>
      <column>

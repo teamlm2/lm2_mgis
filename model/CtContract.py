@@ -18,6 +18,7 @@ class CtContract(Base):
     certificate_no = Column(Integer)
     cancellation_date = Column(Date)
     property_no = Column(String)
+    type = Column(Integer)
 
     created_by = Column(Integer)
     updated_by = Column(Integer)

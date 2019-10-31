@@ -79,6 +79,7 @@ class PluginUtils(object):
         contract = CtContract()
         contract.contract_no = QDateTime.currentDateTime().toString("yyMMddhhmmss")
         contract.au2 = DatabaseUtils.working_l2_code()
+        contract.type = 1
 
         session.add(contract)
 

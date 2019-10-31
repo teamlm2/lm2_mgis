@@ -439,4 +439,14 @@ class LayerUtils(object):
                 other_root.setExpanded(False)
             if not mygroup.findGroup(U"Хилийн цэс"):
                 other_root = mygroup.insertGroup(3, u"Хилийн цэс")
-                other_root.setExpanded(False)
+                current_root = other_root.insertGroup(1, u"Услын хилийн цэс")
+                current_root.setExpanded(False)
+                current_root = other_root.insertGroup(2, u"Аймгийн хилийн цэс")
+                current_root.setExpanded(False)
+                current_root = other_root.insertGroup(3, u"Сумын хилийн цэс")
+                current_root.setExpanded(False)
+                current_root = other_root.insertGroup(4, u"Багийн хилийн зааг")
+                current_root.setExpanded(False)
+
+
+
