@@ -1657,22 +1657,35 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
 
         LayerUtils.refresh_layer_plan()
         root = QgsProject.instance().layerTreeRoot()
-        root_group = root.findGroup(u"Услын хилийн цэс")
+        root_group = root.findGroup(u"Улсын хилийн цэс")
 
-        vlayer = LayerUtils.layer_by_data_source("admin_units", "au_base_level0")
-        if vlayer is None:
-            vlayer = LayerUtils.load_plan_layer_base_layer("au_base_level0", "id", "admin_units", "geometry")
-        # vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "template\style/au_level1.qml")
-        vlayer.setLayerName(self.tr("Polygon"))
+        schema_name = "admin_units"
+        table_name = "au_base_level0"
+        layer_list = []
+        layers = QgsMapLayerRegistry.instance().mapLayers()
+
+        for id, layer in layers.iteritems():
+            if layer.type() == QgsMapLayer.VectorLayer:
+                uri_string = layer.dataProvider().dataSourceUri()
+                uri = QgsDataSourceURI(uri_string)
+                if uri.table() == table_name:
+                    if uri.schema() == schema_name:
+                        layer_list.append(id)
+
+        vlayer = LayerUtils.layer_by_data_source(schema_name, table_name)
+        if vlayer:
+            QgsMapLayerRegistry.instance().removeMapLayers(layer_list)
+
+        vlayer = LayerUtils.load_plan_layer_base_layer(table_name, "id", schema_name, "line_geom")
+        vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "template\style/au_base_level0_line.qml")
+        vlayer.setLayerName(self.tr("Line"))
         myalayer = root.findLayer(vlayer.id())
         if myalayer is None:
             root_group.addLayer(vlayer)
 
-        vlayer = LayerUtils.layer_by_data_source("admin_units", "au_base_level0")
-        if vlayer is None:
-            vlayer = LayerUtils.load_plan_layer_base_layer("au_base_level0", "id", "admin_units", "line_geom")
-        # vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "template\style/au_level0.qml")
-        vlayer.setLayerName(self.tr("Line"))
+        vlayer = LayerUtils.load_plan_layer_base_layer(table_name, "id", schema_name, "geometry")
+        vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "template\style/au_base_level0_polygon.qml")
+        vlayer.setLayerName(self.tr("Polygon"))
         myalayer = root.findLayer(vlayer.id())
         if myalayer is None:
             root_group.addLayer(vlayer)
@@ -1684,10 +1697,32 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
         root = QgsProject.instance().layerTreeRoot()
         root_group = root.findGroup(u"Аймгийн хилийн цэс")
 
-        vlayer = LayerUtils.layer_by_data_source("admin_units", "au_base_level1")
-        if vlayer is None:
-            vlayer = LayerUtils.load_plan_layer_base_layer("au_base_level1", "id", "admin_units", "geometry")
-        # vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "template\style/au_level1.qml")
+        schema_name = "admin_units"
+        table_name = "au_base_level1"
+        layer_list = []
+        layers = QgsMapLayerRegistry.instance().mapLayers()
+
+        for id, layer in layers.iteritems():
+            if layer.type() == QgsMapLayer.VectorLayer:
+                uri_string = layer.dataProvider().dataSourceUri()
+                uri = QgsDataSourceURI(uri_string)
+                if uri.table() == table_name:
+                    if uri.schema() == schema_name:
+                        layer_list.append(id)
+
+        vlayer = LayerUtils.layer_by_data_source(schema_name, table_name)
+        if vlayer:
+            QgsMapLayerRegistry.instance().removeMapLayers(layer_list)
+
+        vlayer = LayerUtils.load_plan_layer_base_layer(table_name, "id", schema_name, "point_geom")
+        # vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "template\style/au_level2.qml")
+        vlayer.setLayerName(self.tr("Point"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            root_group.addLayer(vlayer)
+
+        vlayer = LayerUtils.load_plan_layer_base_layer(table_name, "id", schema_name, "geometry")
+        vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "template\style/au_level1.qml")
         vlayer.setLayerName(self.tr("Polygon"))
         myalayer = root.findLayer(vlayer.id())
         if myalayer is None:
@@ -1718,14 +1753,14 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
             QgsMapLayerRegistry.instance().removeMapLayers(layer_list)
 
         vlayer = LayerUtils.load_plan_layer_base_layer(table_name, "id", schema_name, "point_geom")
-        # vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "template\style/au_level2.qml")
+        vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "template\style/au_base_level2_point.qml")
         vlayer.setLayerName(self.tr("Point"))
         myalayer = root.findLayer(vlayer.id())
         if myalayer is None:
             root_group.addLayer(vlayer)
 
         vlayer = LayerUtils.load_plan_layer_base_layer(table_name, "id", schema_name, "geometry")
-        # vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "template\style/au_level2.qml")
+        vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "template\style/au_level2.qml")
         vlayer.setLayerName(self.tr("Polygon"))
         myalayer = root.findLayer(vlayer.id())
         if myalayer is None:
@@ -1738,10 +1773,25 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
         root = QgsProject.instance().layerTreeRoot()
         root_group = root.findGroup(u"Багийн хилийн зааг")
 
-        vlayer = LayerUtils.layer_by_data_source("admin_units", "au_base_level3")
-        if vlayer is None:
-            vlayer = LayerUtils.load_plan_layer_base_layer("au_base_level3", "id", "admin_units", "geometry")
-        # vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "template\style/au_level2.qml")
+        schema_name = "admin_units"
+        table_name = "au_base_level3"
+        layer_list = []
+        layers = QgsMapLayerRegistry.instance().mapLayers()
+
+        for id, layer in layers.iteritems():
+            if layer.type() == QgsMapLayer.VectorLayer:
+                uri_string = layer.dataProvider().dataSourceUri()
+                uri = QgsDataSourceURI(uri_string)
+                if uri.table() == table_name:
+                    if uri.schema() == schema_name:
+                        layer_list.append(id)
+
+        vlayer = LayerUtils.layer_by_data_source(schema_name, table_name)
+        if vlayer:
+            QgsMapLayerRegistry.instance().removeMapLayers(layer_list)
+
+        vlayer = LayerUtils.load_plan_layer_base_layer(table_name, "id", schema_name, "geometry")
+        vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "template\style/au_level3.qml")
         vlayer.setLayerName(self.tr("Polygon"))
         myalayer = root.findLayer(vlayer.id())
         if myalayer is None:

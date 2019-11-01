@@ -1,6 +1,6 @@
 __author__ = 'B.Ankhbold'
 
-from sqlalchemy import Column, Integer, String, Date, Sequence, ForeignKey, DateTime, Table, Float
+from sqlalchemy import Column, Integer, String, Date, Sequence, ForeignKey, DateTime, Table, Float, Boolean
 from sqlalchemy.orm import relationship, backref
 from geoalchemy2 import Geometry
 from CtApp1Ext import *

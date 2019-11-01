@@ -53,6 +53,7 @@ from ..model.ClBaseConditionType import *
 from ..model.SetPlanZoneBaseConditionType import *
 from ..model.SetPlanZonePlanType import *
 from ..model.PlProjectPlanZone import *
+from ..model.SetPlanZoneRightForm import *
 from ..view.Ui_PlanCaseDialog import *
 from .qt_classes.ApplicantDocumentDelegate import ApplicationDocumentDelegate
 from .qt_classes.DocumentsTableWidget import DocumentsTableWidget
@@ -147,11 +148,11 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
 
         self.approved_item = QTreeWidgetItem()
         self.approved_item.setExpanded(True)
-        self.approved_item.setText(0, self.tr("Approved"))
+        self.approved_item.setText(0, u"Зөрчилгүй")
 
         self.refused_item = QTreeWidgetItem()
         self.refused_item.setExpanded(True)
-        self.refused_item.setText(0, self.tr("Refused"))
+        self.refused_item.setText(0, u"Зөрчилтэй")
 
         self.result_twidget.addTopLevelItem(self.approved_item)
         self.result_twidget.addTopLevelItem(self.refused_item)
@@ -594,6 +595,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
             self.form_type_cbox.addItem(str(value.code) + ':' + value.description, value.right_form_id)
             self.form_type_change_cbox.addItem(str(value.code) + ':' + value.description, value.right_form_id)
             self.cadastre_form_type_change_cbox.addItem(str(value.code) + ':' + value.description, value.right_form_id)
+            self.shp_rigth_form_cbox.addItem(str(value.code) + ':' + value.description, value.right_form_id)
 
         #
         self.land_use_type_cbox.clear()
@@ -1276,6 +1278,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
                                    self.tr("The crs of the layer has to be 4326."))
             return
 
+        right_form = self.shp_rigth_form_cbox.itemData(self.shp_rigth_form_cbox.currentIndex())
         working_soum_code = DatabaseUtils.working_l2_code()
         iterator = parcel_shape_layer.getFeatures()
         count = 0
@@ -1309,7 +1312,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
                 new_parcel.valid_from = PluginUtils.convert_qt_date_to_python(QDateTime().currentDateTime())
                 new_parcel.au1 = self.au1
                 new_parcel.au2 = self.au2
-
+                new_parcel.right_form_id = right_form
                 if self.point_rbutton.isChecked():
                     new_parcel.point_geom = WKTElement(parcel.geometry().exportToWkt(), srid=4326)
                 elif self.line_rbutton.isChecked():
@@ -1490,7 +1493,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
                     if plan_type.admin_unit_type == 3:
                         au2_parcel_count = self.session.query(AuLevel2). \
                             filter(AuLevel2.code == working_soum_code). \
-                            filter(parcel_geometry.ST_Covers(AuLevel2.geometry)).count()
+                            filter(AuLevel2.geometry.ST_Covers(parcel_geometry)).count()
                         if au2_parcel_count == 0:
                             is_au2_out_parcel = True
 
@@ -1847,11 +1850,14 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
     @pyqtSlot(int)
     def on_if_single_type_chbox_stateChanged(self, state):
 
+        rigth_form_id = self.shp_rigth_form_cbox.itemData(self.shp_rigth_form_cbox.currentIndex())
         if state == Qt.Checked:
             self.shp_process_type_cbox.setEnabled(True)
             plan_type = self.plan.plan_type_ref
             values = self.session.query(ClPlanZone.plan_zone_id, ClPlanZone.code, ClPlanZone.name). \
                 join(SetPlanZonePlanType, ClPlanZone.plan_zone_id == SetPlanZonePlanType.plan_zone_id). \
+                join(SetPlanZoneRightForm, ClPlanZone.plan_zone_id == SetPlanZoneRightForm.plan_zone_id). \
+                filter(SetPlanZoneRightForm.right_form_id == rigth_form_id). \
                 filter(SetPlanZonePlanType.plan_type_id == plan_type.plan_type_id). \
                 group_by(ClPlanZone.plan_zone_id, ClPlanZone.code, ClPlanZone.name). \
                 order_by(ClPlanZone.code)
@@ -1869,14 +1875,17 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
     @pyqtSlot(int)
     def on_default_plan_zone_chbox_stateChanged(self, state):
 
+        rigth_form_id = self.shp_rigth_form_cbox.itemData(self.shp_rigth_form_cbox.currentIndex())
         self.shp_process_type_cbox.clear()
         if state == Qt.Checked:
             is_default = True
             plan_type = self.plan.plan_type_ref
             values = self.session.query(ClPlanZone.plan_zone_id, ClPlanZone.code, ClPlanZone.name). \
                 join(SetPlanZonePlanType, ClPlanZone.plan_zone_id == SetPlanZonePlanType.plan_zone_id). \
+                join(SetPlanZoneRightForm, ClPlanZone.plan_zone_id == SetPlanZoneRightForm.plan_zone_id). \
                 filter(SetPlanZonePlanType.plan_type_id == plan_type.plan_type_id). \
                 filter(SetPlanZonePlanType.is_default == is_default). \
+                filter(SetPlanZoneRightForm.right_form_id == rigth_form_id). \
                 group_by(ClPlanZone.plan_zone_id, ClPlanZone.code, ClPlanZone.name). \
                 order_by(ClPlanZone.code)
 
@@ -1890,7 +1899,9 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
             plan_type = self.plan.plan_type_ref
             values = self.session.query(ClPlanZone.plan_zone_id, ClPlanZone.code, ClPlanZone.name). \
                 join(SetPlanZonePlanType, ClPlanZone.plan_zone_id == SetPlanZonePlanType.plan_zone_id). \
+                join(SetPlanZoneRightForm, ClPlanZone.plan_zone_id == SetPlanZoneRightForm.plan_zone_id). \
                 filter(SetPlanZonePlanType.plan_type_id == plan_type.plan_type_id). \
+                filter(SetPlanZoneRightForm.right_form_id == rigth_form_id). \
                 group_by(ClPlanZone.plan_zone_id, ClPlanZone.code, ClPlanZone.name). \
                 order_by(ClPlanZone.code)
 
@@ -1900,6 +1911,29 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
             for index in range(self.shp_process_type_cbox.count()):
                 self.shp_process_type_cbox.setItemData(index, self.shp_process_type_cbox.itemText(index),
                                                        Qt.ToolTipRole)
+
+    @pyqtSlot(int)
+    def on_shp_process_type_cbox_currentIndexChanged(self, index):
+
+        self.shp_process_type_cbox.clear()
+        rigth_form_id = self.shp_rigth_form_cbox.itemData(self.shp_rigth_form_cbox.currentIndex())
+
+        self.shp_process_type_cbox.setEnabled(True)
+        plan_type = self.plan.plan_type_ref
+        values = self.session.query(ClPlanZone.plan_zone_id, ClPlanZone.code, ClPlanZone.name). \
+            join(SetPlanZonePlanType, ClPlanZone.plan_zone_id == SetPlanZonePlanType.plan_zone_id). \
+            join(SetPlanZoneRightForm, ClPlanZone.plan_zone_id == SetPlanZoneRightForm.plan_zone_id). \
+            filter(SetPlanZoneRightForm.right_form_id == rigth_form_id). \
+            filter(SetPlanZonePlanType.plan_type_id == plan_type.plan_type_id). \
+            group_by(ClPlanZone.plan_zone_id, ClPlanZone.code, ClPlanZone.name). \
+            order_by(ClPlanZone.code)
+
+        for value in values:
+            self.shp_process_type_cbox.addItem(str(value.code) + ':' + value.name, value.code)
+
+        for index in range(self.shp_process_type_cbox.count()):
+            self.shp_process_type_cbox.setItemData(index, self.shp_process_type_cbox.itemText(index), Qt.ToolTipRole)
+
 
     @pyqtSlot(int)
     def on_shp_process_type_cbox_currentIndexChanged(self, index):
