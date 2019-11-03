@@ -359,7 +359,7 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
 
         values = self.session.query(UbFeeHistory).\
             filter(UbFeeHistory.pid == self.old_parcel_id).all()
-
+        date_time_string = QDateTime.currentDateTime().toString(Constants.DATABASE_DATETIME_FORMAT)
         for value in values:
             current_year = value.current_year
             if self.one_select_chbox.isChecked():
@@ -394,6 +394,8 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
                 object.contract_amount = value.payment_contract
 
                 object.total_amount = value.paid_before_less + value.paid_year + value.paid_fund
+
+                object.created_at = datetime.strptime(date_time_string, Constants.PYTHON_DATETIME_FORMAT)
 
                 self.session.add(object)
         self.session.commit()

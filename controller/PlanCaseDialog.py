@@ -1279,6 +1279,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
             return
 
         right_form = self.shp_rigth_form_cbox.itemData(self.shp_rigth_form_cbox.currentIndex())
+        right_type_code = self.shp_right_type_change_cbox.itemData(self.shp_right_type_change_cbox.currentIndex())
         working_soum_code = DatabaseUtils.working_l2_code()
         iterator = parcel_shape_layer.getFeatures()
         count = 0
@@ -1313,6 +1314,8 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
                 new_parcel.au1 = self.au1
                 new_parcel.au2 = self.au2
                 new_parcel.right_form_id = right_form
+                new_parcel.right_type_code = right_type_code
+
                 if self.point_rbutton.isChecked():
                     new_parcel.point_geom = WKTElement(parcel.geometry().exportToWkt(), srid=4326)
                 elif self.line_rbutton.isChecked():
@@ -1421,7 +1424,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
                 self.message_label.setText(error_message)
             else:
                 g = parcel_feature.geometry()
-                print g.isMultipart()
+
                 if g.isMultipart():
                     valid = False
                     message = '*' + unicode(u' Геометр MultiPart байна.')
@@ -1654,16 +1657,17 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
     @pyqtSlot()
     def on_result_twidget_itemSelectionChanged(self):
 
-        current_item = self.result_twidget.selectedItems()[0]
-        object_type = current_item.data(0, Qt.UserRole + 1)
-        object_id = current_item.data(0, Qt.UserRole)
+        if len(self.result_twidget.selectedItems()) > 0:
+            current_item = self.result_twidget.selectedItems()[0]
+            object_type = current_item.data(0, Qt.UserRole + 1)
+            object_id = current_item.data(0, Qt.UserRole)
 
-        if object_type == REFUSED:
-            self.message_label.setStyleSheet("QLabel {color: rgb(255,0,0);}")
-            self.message_label.setText(self.error_dic[object_id])
-        else:
-            self.message_label.setStyleSheet("QLabel {color: rgb(0,71,31);}")
-            self.message_label.setText(current_item.text(0))
+            if object_type == REFUSED:
+                self.message_label.setStyleSheet("QLabel {color: rgb(255,0,0);}")
+                self.message_label.setText(self.error_dic[object_id])
+            else:
+                self.message_label.setStyleSheet("QLabel {color: rgb(0,71,31);}")
+                self.message_label.setText(current_item.text(0))
 
     @pyqtSlot()
     def on_add_button_clicked(self):
@@ -2038,6 +2042,25 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
             right_type = self.session.query(ClRightType).filter(ClRightType.code == value.right_type_code).one()
             self.cadastre_right_type_change_cbox.addItem(right_type.description, right_type.code)
 
+    @pyqtSlot(int)
+    def on_shp_rigth_form_cbox_currentIndexChanged(self, index):
+
+        self.shp_right_type_change_cbox.clear()
+        form_type = self.shp_rigth_form_cbox.itemData(self.shp_rigth_form_cbox.currentIndex())
+
+        form_right_types = self.session.query(PlSetRightFormRightType).filter(
+            PlSetRightFormRightType.right_form_id == form_type)
+
+        if form_right_types.count() > 0:
+            self.shp_right_type_change_cbox.setEnabled(True)
+        else:
+            self.shp_right_type_change_cbox.setEnabled(False)
+
+        for value in form_right_types.all():
+            right_type = self.session.query(ClRightType).filter(ClRightType.code == value.right_type_code).one()
+            self.shp_right_type_change_cbox.addItem(right_type.description, right_type.code)
+
+
     @pyqtSlot()
     def on_cadastre_find_button_clicked(self):
 
@@ -2173,14 +2196,12 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
     @pyqtSlot()
     def on_cad_add_button_clicked(self):
 
-        print 'fff'
         parcelLayer = LayerUtils.layer_by_data_source("data_soums_union", "ca_parcel")
         select_feature = parcelLayer.selectedFeatures()
 
         for feature in select_feature:
             attr = feature.attributes()
             parcel_id = attr[0]
-            print parcel_id
 
         ###########
 

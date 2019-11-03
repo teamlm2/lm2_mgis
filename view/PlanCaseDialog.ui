@@ -199,7 +199,7 @@
     </rect>
    </property>
    <property name="currentIndex">
-    <number>2</number>
+    <number>0</number>
    </property>
    <widget class="QWidget" name="tab_2">
     <attribute name="title">
@@ -987,7 +987,7 @@
        <string>Арга хэмжээний төрөл</string>
       </property>
      </widget>
-     <widget class="QComboBox" name="cadastre_right_type_change_cbox_2">
+     <widget class="QComboBox" name="shp_right_type_change_cbox">
       <property name="enabled">
        <bool>false</bool>
       </property>
@@ -1010,7 +1010,7 @@
        </rect>
       </property>
       <property name="text">
-       <string>Арга хэмжээний төрөл</string>
+       <string>Эрхийн төрөл</string>
       </property>
      </widget>
     </widget>

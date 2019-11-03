@@ -1845,9 +1845,24 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
         LayerUtils.refresh_layer_plan()
         root_group = root.findGroup(u"Ажиллаж байгаа")
 
-        vlayer = LayerUtils.layer_by_data_source("data_plan", "pl_view_project_parcel_feedback")
-        if vlayer is None:
-            vlayer = LayerUtils.load_plan_layer_base_layer("pl_view_project_parcel_feedback", "parcel_feedback_id", "data_plan", "polygon_geom")
+        schema_name = "data_plan"
+        table_name = "pl_view_project_parcel_feedback"
+        layer_list = []
+        layers = QgsMapLayerRegistry.instance().mapLayers()
+
+        for id, layer in layers.iteritems():
+            if layer.type() == QgsMapLayer.VectorLayer:
+                uri_string = layer.dataProvider().dataSourceUri()
+                uri = QgsDataSourceURI(uri_string)
+                if uri.table() == table_name:
+                    if uri.schema() == schema_name:
+                        layer_list.append(id)
+
+        vlayer = LayerUtils.layer_by_data_source(schema_name, table_name)
+        if vlayer:
+            QgsMapLayerRegistry.instance().removeMapLayers(layer_list)
+
+        vlayer = LayerUtils.load_plan_layer_base_layer(table_name, "parcel_feedback_id", schema_name, "polygon_geom")
         vlayer.loadNamedStyle(
             str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/pl_feedback_parcel.qml")
         vlayer.setLayerName(self.tr("FeedBack Parcel"))
@@ -2021,10 +2036,24 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
         LayerUtils.refresh_layer_plan()
         root_group = root.findGroup(u"Ажиллаж байгаа")
 
-        vlayer = LayerUtils.layer_by_data_source("data_plan", "pl_completion_parcel")
-        if vlayer is None:
-            vlayer = LayerUtils.load_layer_base_layer("pl_completion_parcel", "id", "data_plan")
+        schema_name = "data_plan"
+        table_name = "pl_completion_parcel"
+        layer_list = []
+        layers = QgsMapLayerRegistry.instance().mapLayers()
 
+        for id, layer in layers.iteritems():
+            if layer.type() == QgsMapLayer.VectorLayer:
+                uri_string = layer.dataProvider().dataSourceUri()
+                uri = QgsDataSourceURI(uri_string)
+                if uri.table() == table_name:
+                    if uri.schema() == schema_name:
+                        layer_list.append(id)
+
+        vlayer = LayerUtils.layer_by_data_source(schema_name, table_name)
+        if vlayer:
+            QgsMapLayerRegistry.instance().removeMapLayers(layer_list)
+
+        vlayer = LayerUtils.load_plan_layer_base_layer(table_name, "id", schema_name, "geometry")
         vlayer.loadNamedStyle(
             str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/pl_completion_parcel.qml")
         vlayer.setLayerName(self.tr("Completion Parcel"))
