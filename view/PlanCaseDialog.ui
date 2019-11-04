@@ -993,6 +993,12 @@
        <height>135</height>
       </rect>
      </property>
+     <attribute name="horizontalHeaderDefaultSectionSize">
+      <number>370</number>
+     </attribute>
+     <attribute name="horizontalHeaderMinimumSectionSize">
+      <number>35</number>
+     </attribute>
     </widget>
     <widget class="QPushButton" name="cadastre_find_button">
      <property name="geometry">
@@ -1047,8 +1053,21 @@
        <height>141</height>
       </rect>
      </property>
+     <attribute name="horizontalHeaderDefaultSectionSize">
+      <number>370</number>
+     </attribute>
+     <column>
+      <property name="text">
+       <string>Бэлчээрийн мэдээлэл</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Төлөв байдлын мэдээлэл</string>
+      </property>
+     </column>
     </widget>
-    <widget class="QPushButton" name="cad_remove_button_2">
+    <widget class="QPushButton" name="monitoring_remove_button">
      <property name="geometry">
       <rect>
        <x>49</x>
@@ -1065,7 +1084,7 @@
        <normaloff>:/plugins/lm2/up_button.png</normaloff>:/plugins/lm2/up_button.png</iconset>
      </property>
     </widget>
-    <widget class="QPushButton" name="cad_add_button_2">
+    <widget class="QPushButton" name="monitoring_add_button">
      <property name="geometry">
       <rect>
        <x>9</x>
@@ -1082,7 +1101,7 @@
        <normaloff>:/plugins/lm2/down_button.png</normaloff>:/plugins/lm2/down_button.png</iconset>
      </property>
     </widget>
-    <widget class="QComboBox" name="cadastre_right_type_change_cbox_2">
+    <widget class="QComboBox" name="monitoring_right_type_change_cbox">
      <property name="enabled">
       <bool>false</bool>
      </property>
@@ -1095,7 +1114,7 @@
       </rect>
      </property>
     </widget>
-    <widget class="QComboBox" name="cadastre_form_type_change_cbox_2">
+    <widget class="QComboBox" name="monitoring_form_type_change_cbox">
      <property name="enabled">
       <bool>false</bool>
      </property>
@@ -1108,7 +1127,7 @@
       </rect>
      </property>
     </widget>
-    <widget class="QCheckBox" name="cadastre_change_form_check_box_2">
+    <widget class="QCheckBox" name="monitoring_change_form_check_box">
      <property name="geometry">
       <rect>
        <x>90</x>
@@ -1121,7 +1140,7 @@
       <string>Change right form</string>
      </property>
     </widget>
-    <widget class="QComboBox" name="cad_process_type_cbox_2">
+    <widget class="QComboBox" name="monitoring_process_type_cbox">
      <property name="enabled">
       <bool>true</bool>
      </property>
@@ -1134,7 +1153,7 @@
       </rect>
      </property>
     </widget>
-    <widget class="QPushButton" name="cadastre_form_change_button_2">
+    <widget class="QPushButton" name="monitoring_form_change_button">
      <property name="enabled">
       <bool>false</bool>
      </property>
@@ -1150,7 +1169,7 @@
       <string>Change</string>
      </property>
     </widget>
-    <widget class="QTableWidget" name="cadastre_current_twidget_2">
+    <widget class="QTableWidget" name="monitoring_current_twidget">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -1198,9 +1217,9 @@
     <widget class="QComboBox" name="land_use_type_cbox_2">
      <property name="geometry">
       <rect>
-       <x>429</x>
+       <x>473</x>
        <y>3</y>
-       <width>251</width>
+       <width>141</width>
        <height>22</height>
       </rect>
      </property>
@@ -1208,7 +1227,7 @@
     <widget class="QLabel" name="label_15">
      <property name="geometry">
       <rect>
-       <x>7</x>
+       <x>110</x>
        <y>6</y>
        <width>80</width>
        <height>16</height>
@@ -1221,7 +1240,7 @@
     <widget class="QLabel" name="label_16">
      <property name="geometry">
       <rect>
-       <x>350</x>
+       <x>383</x>
        <y>6</y>
        <width>80</width>
        <height>16</height>
@@ -1234,9 +1253,9 @@
     <widget class="QComboBox" name="cadastre_right_type_cbox_2">
      <property name="geometry">
       <rect>
-       <x>90</x>
+       <x>193</x>
        <y>3</y>
-       <width>251</width>
+       <width>151</width>
        <height>22</height>
       </rect>
      </property>
@@ -1252,6 +1271,25 @@
      </property>
      <property name="text">
       <string>Find</string>
+     </property>
+    </widget>
+    <widget class="QSpinBox" name="monitoring_year_sbox">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>3</y>
+       <width>87</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="minimum">
+      <number>2003</number>
+     </property>
+     <property name="maximum">
+      <number>9999</number>
+     </property>
+     <property name="value">
+      <number>2019</number>
      </property>
     </widget>
    </widget>

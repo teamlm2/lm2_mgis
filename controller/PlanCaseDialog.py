@@ -55,6 +55,11 @@ from ..model.SetPlanZonePlanType import *
 from ..model.PlProjectPlanZone import *
 from ..model.SetPlanZoneRightForm import *
 from ..model.CaPastureParcelTbl import *
+from ..model.PsRcParcelValue import *
+from ..model.ClRcParcelType import *
+from ..model.PsRecoveryClass import *
+from ..model.PsAvgReserveDaats import *
+from ..model.PlProjectParcelRefPastureParcel import *
 from ..view.Ui_PlanCaseDialog import *
 from .qt_classes.ApplicantDocumentDelegate import ApplicationDocumentDelegate
 from .qt_classes.DocumentsTableWidget import DocumentsTableWidget
@@ -131,15 +136,6 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         self.cadastre_twidget.setContextMenuPolicy(Qt.CustomContextMenu)
         self.cadastre_twidget.customContextMenuRequested.connect(self.on_custom_context_menu_requested)
 
-        self.monitoring_twidget.setColumnCount(1)
-        self.monitoring_twidget.setDragEnabled(True)
-        self.monitoring_twidget.horizontalHeader().setResizeMode(0, QHeaderView.Stretch)
-        self.monitoring_twidget.horizontalHeader().setVisible(False)
-        self.monitoring_twidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
-        self.monitoring_twidget.setSelectionBehavior(QAbstractItemView.SelectRows)
-        self.monitoring_twidget.setContextMenuPolicy(Qt.CustomContextMenu)
-        self.monitoring_twidget.customContextMenuRequested.connect(self.on_custom_context_monitoring_menu_requested)
-
         # self.cadastre_current_twidget.setColumnCount(1)
         self.cadastre_current_twidget.setDragEnabled(True)
         self.cadastre_current_twidget.horizontalHeader().setResizeMode(0, QHeaderView.Stretch)
@@ -148,6 +144,24 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         self.cadastre_current_twidget.setSelectionBehavior(QAbstractItemView.SelectRows)
         # self.cadastre_current_twidget.setContextMenuPolicy(Qt.CustomContextMenu)
         # self.cadastre_current_twidget.customContextMenuRequested.connect(self.on_custom_context_menu_requested)
+
+        # self.monitoring_twidget.setColumnCount(1)
+        self.monitoring_twidget.setDragEnabled(True)
+        # self.monitoring_twidget.horizontalHeader().setResizeMode(0, QHeaderView.Stretch)
+        # self.monitoring_twidget.horizontalHeader().setVisible(False)
+        self.monitoring_twidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.monitoring_twidget.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.monitoring_twidget.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.monitoring_twidget.customContextMenuRequested.connect(self.on_custom_context_monitoring_menu_requested)
+
+        # self.monitoring_current_twidget.setColumnCount(1)
+        self.monitoring_current_twidget.setDragEnabled(True)
+        self.monitoring_current_twidget.horizontalHeader().setResizeMode(0, QHeaderView.Stretch)
+        # self.monitoring_current_twidget.horizontalHeader().setVisible(False)
+        self.monitoring_current_twidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.monitoring_current_twidget.setSelectionBehavior(QAbstractItemView.SelectRows)
+        # self.monitoring_current_twidget.setContextMenuPolicy(Qt.CustomContextMenu)
+        # self.monitoring_current_twidget.customContextMenuRequested.connect(self.on_custom_context_menu_requested)
 
     def __result_twidget_setup(self):
 
@@ -678,6 +692,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
             self.form_type_cbox.addItem(str(value.code) + ':' + value.description, value.right_form_id)
             self.form_type_change_cbox.addItem(str(value.code) + ':' + value.description, value.right_form_id)
             self.cadastre_form_type_change_cbox.addItem(str(value.code) + ':' + value.description, value.right_form_id)
+            self.monitoring_form_type_change_cbox.addItem(str(value.code) + ':' + value.description, value.right_form_id)
             self.shp_rigth_form_cbox.addItem(str(value.code) + ':' + value.description, value.right_form_id)
 
         #
@@ -1922,6 +1937,21 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
             # self.form_type_change_cbox.clear()
 
     @pyqtSlot(int)
+    def on_monitoring_change_form_check_box_stateChanged(self, state):
+
+        if state == Qt.Checked:
+            self.monitoring_form_type_change_cbox.setEnabled(True)
+            self.monitoring_right_type_change_cbox.setEnabled(True)
+            self.monitoring_process_type_cbox.setEnabled(True)
+            self.monitoring_form_change_button.setEnabled(True)
+        else:
+            self.monitoring_form_type_change_cbox.setEnabled(False)
+            self.monitoring_right_type_change_cbox.setEnabled(False)
+            self.monitoring_process_type_cbox.setEnabled(False)
+            self.monitoring_form_change_button.setEnabled(False)
+            # self.cadastre_form_type_change_cbox.clear()
+
+    @pyqtSlot(int)
     def on_cadastre_change_form_check_box_stateChanged(self, state):
 
         if state == Qt.Checked:
@@ -1932,7 +1962,6 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
             self.cadastre_form_type_change_cbox.setEnabled(False)
             self.cadastre_right_type_change_cbox.setEnabled(False)
             self.cadastre_form_change_button.setEnabled(False)
-            # self.cadastre_form_type_change_cbox.clear()
 
     @pyqtSlot(int)
     def on_if_single_type_chbox_stateChanged(self, state):
@@ -2124,6 +2153,24 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         for value in form_right_types.all():
             right_type = self.session.query(ClRightType).filter(ClRightType.code == value.right_type_code).one()
             self.cadastre_right_type_change_cbox.addItem(right_type.description, right_type.code)
+
+    @pyqtSlot(int)
+    def on_monitoring_form_type_change_cbox_currentIndexChanged(self, index):
+
+        self.monitoring_right_type_change_cbox.clear()
+        form_type = self.monitoring_form_type_change_cbox.itemData(self.monitoring_form_type_change_cbox.currentIndex())
+
+        form_right_types = self.session.query(PlSetRightFormRightType).filter(
+            PlSetRightFormRightType.right_form_id == form_type)
+
+        if form_right_types.count() > 0:
+            self.monitoring_right_type_change_cbox.setEnabled(True)
+        else:
+            self.monitoring_right_type_change_cbox.setEnabled(False)
+
+        for value in form_right_types.all():
+            right_type = self.session.query(ClRightType).filter(ClRightType.code == value.right_type_code).one()
+            self.monitoring_right_type_change_cbox.addItem(right_type.description, right_type.code)
 
     @pyqtSlot(int)
     def on_shp_rigth_form_cbox_currentIndexChanged(self, index):
@@ -2352,6 +2399,22 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
 
         self.__plan_cadastre_find()
 
+    @pyqtSlot()
+    def on_monitoring_remove_button_clicked(self):
+
+        if not len(self.monitoring_current_twidget.selectedItems()):
+            return
+
+        items = self.monitoring_current_twidget.selectedItems()
+        for item in items:
+            if item.checkState() == Qt.Checked:
+                parcel_id = item.data(Qt.UserRole + 1)
+                self.session.query(PlProjectParcelRefPastureParcel).filter(
+                    PlProjectParcelRefPastureParcel.parcel_id == parcel_id).delete()
+                self.session.query(PlProjectParcel).filter(PlProjectParcel.parcel_id == parcel_id).delete()
+
+        self.__plan_monitoring_find()
+
     def __add_cad_parcel_ref(self, parcel, plan_zone):
 
         new_parcel = PlProjectParcel()
@@ -2380,6 +2443,34 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
 
         return new_parcel
 
+    def __add_pasture_parcel_ref(self, parcel, plan_zone):
+
+        new_parcel = PlProjectParcel()
+
+        new_parcel.project_id = self.plan.project_id
+        new_parcel.project_ref = self.plan
+        new_parcel.plan_zone_id = plan_zone.plan_zone_id
+        new_parcel.badedturl = plan_zone.code
+        new_parcel.plan_zone_ref = plan_zone
+        new_parcel.landuse = parcel.landuse
+        new_parcel.gazner = parcel.address_neighbourhood
+        new_parcel.valid_from = PluginUtils.convert_qt_date_to_python(QDateTime().currentDateTime())
+        new_parcel.au1 = self.au1
+        new_parcel.au2 = self.au2
+        new_parcel.polygon_geom = parcel.geometry
+
+        self.session.add(new_parcel)
+        self.session.flush()
+
+        parcel_ref = PlProjectParcelRefPastureParcel()
+        parcel_ref.parcel_id = new_parcel.parcel_id
+        parcel_ref.ref_parcel_id = None
+        parcel_ref.pasture_parcel_id = parcel.parcel_id
+        parcel_ref.is_cadastre = True
+        self.session.add(parcel_ref)
+
+        return new_parcel
+
     def __cad_parcel_duplicate_check(self, parcel):
 
         is_true = True
@@ -2387,6 +2478,20 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
             join(PlProjectParcel, PlProjectParcelRefParcel.parcel_id == PlProjectParcel.parcel_id). \
             filter(PlProjectParcel.project_id == self.plan.project_id). \
             filter(PlProjectParcelRefParcel.cad_parcel_id == parcel.parcel_id).count()
+
+        if count > 0:
+            is_true = False
+            self.error_label.setText(u"{0} нэгж талбар бүртгэгдсэн байна.".format(parcel.parcel_id))
+
+        return is_true
+
+    def __cad_pasture_parcel_duplicate_check(self, parcel):
+
+        is_true = True
+        count = self.session.query(PlProjectParcelRefPastureParcel). \
+            join(PlProjectParcel, PlProjectParcelRefPastureParcel.parcel_id == PlProjectParcel.parcel_id). \
+            filter(PlProjectParcel.project_id == self.plan.project_id). \
+            filter(PlProjectParcelRefPastureParcel.pasture_parcel_id == parcel.parcel_id).count()
 
         if count > 0:
             is_true = False
@@ -2460,12 +2565,102 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
                         parcel.right_type_code = right_type_code
 
     @pyqtSlot()
+    def on_monitoring_form_change_button_clicked(self):
+
+        plan_zone_id = self.monitoring_process_type_cbox.itemData(self.monitoring_process_type_cbox.currentIndex())
+        form_type_code = self.monitoring_form_type_change_cbox.itemData(
+            self.monitoring_form_type_change_cbox.currentIndex())
+        form_type_text = self.monitoring_form_type_change_cbox.currentText()
+        right_type_code = self.monitoring_right_type_change_cbox.itemData(
+            self.monitoring_right_type_change_cbox.currentIndex())
+        right_type_text = self.monitoring_right_type_change_cbox.currentText()
+
+        row_count = self.monitoring_current_twidget.rowCount()
+
+        for row in range(row_count):
+            item = self.monitoring_current_twidget.item(row, 0)
+            parcel_id = item.data(Qt.UserRole + 1)
+            if item.checkState() == Qt.Checked:
+                item = self.monitoring_current_twidget.item(row, 2)
+                if item:
+                    item.setText(form_type_text)
+                    item.setData(Qt.UserRole, form_type_code)
+                else:
+                    item = QTableWidgetItem(form_type_text)
+                    item.setData(Qt.UserRole, form_type_code)
+                    self.monitoring_current_twidget.setItem(row, 2, item)
+                item = self.monitoring_current_twidget.item(row, 3)
+                if item:
+                    item.setText(right_type_text)
+                    item.setData(Qt.UserRole, right_type_code)
+                else:
+                    item = QTableWidgetItem(right_type_text)
+                    item.setData(Qt.UserRole, right_type_code)
+                    self.monitoring_current_twidget.setItem(row, 3, item)
+
+                count = self.session.query(PlProjectParcel). \
+                    filter(PlProjectParcel.parcel_id == parcel_id).count()
+                if count == 1:
+                    parcel = self.session.query(PlProjectParcel). \
+                        filter(PlProjectParcel.parcel_id == parcel_id).one()
+
+                    if form_type_code:
+                        parcel.right_form_id = form_type_code
+                    if right_type_code:
+                        parcel.right_type_code = right_type_code
+
+    @pyqtSlot()
     def on_monitoring_find_button_clicked(self):
 
+        self.__pasture_parcel_find()
         self.__plan_monitoring_find()
 
     def __plan_monitoring_find(self):
 
+        parcels = self.session.query(CaPastureParcelTbl, PlProjectParcelRefPastureParcel, PlProjectParcel). \
+            join(PlProjectParcelRefPastureParcel, CaPastureParcelTbl.parcel_id == PlProjectParcelRefPastureParcel.pasture_parcel_id). \
+            join(PlProjectParcel, PlProjectParcel.parcel_id == PlProjectParcelRefPastureParcel.parcel_id). \
+            filter(PlProjectParcel.project_id == self.plan.project_id). \
+            filter(PlProjectParcelRefPastureParcel.is_cadastre == True)
+
+        count = 0
+        self.monitoring_current_twidget.setRowCount(0)
+        for parcel, parcel_ref, project_parcel in parcels.distinct(CaPastureParcelTbl.parcel_id).all():
+            plan_zone = project_parcel.plan_zone_ref
+            form_type = project_parcel.right_form_ref
+            right_type = project_parcel.right_type_ref
+            # geo_id = self.tr("n.a.") if not parcel.geo_id else parcel.geo_id
+            self.monitoring_current_twidget.insertRow(count)
+            address_neighbourhood = ''
+            if parcel.address_neighbourhood:
+                address_neighbourhood = " (" + parcel.address_neighbourhood + ")"
+            pasture_type = ''
+            if parcel.pasture_type:
+                pasture_type = parcel.pasture_type
+            item = QTableWidgetItem(parcel.parcel_id + ": " + pasture_type + address_neighbourhood)
+            item.setCheckState(Qt.Unchecked)
+            item.setIcon(QIcon(QPixmap(":/plugins/lm2/parcel_red.png")))
+            item.setData(Qt.UserRole, parcel.parcel_id)
+            item.setData(Qt.UserRole + 1, parcel_ref.parcel_id)
+            self.monitoring_current_twidget.setItem(count, 0, item)
+            if plan_zone:
+                item = QTableWidgetItem(plan_zone.code + ':' + plan_zone.name)
+                item.setData(Qt.UserRole, plan_zone.plan_zone_id)
+                self.monitoring_current_twidget.setItem(count, 1, item)
+            if form_type:
+                item = QTableWidgetItem(form_type.code + ':' + form_type.description)
+                item.setData(Qt.UserRole, form_type.right_form_id)
+                self.monitoring_current_twidget.setItem(count, 2, item)
+            if right_type:
+                item = QTableWidgetItem(right_type.description)
+                item.setData(Qt.UserRole, right_type.code)
+                self.monitoring_current_twidget.setItem(count, 3, item)
+            count += 1
+        self.error_label.setText("")
+
+    def __pasture_parcel_find(self):
+
+        monitoring_year = self.monitoring_year_sbox.value()
         working_au2 = DatabaseUtils.working_l2_code()
         au2 = self.session.query(AuLevel2).filter(AuLevel2.code == working_au2).one()
 
@@ -2474,21 +2669,87 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         self.monitoring_twidget.setRowCount(0)
 
         for value in parcels:
-            address_neighbourhood = ''
-            if value.address_neighbourhood:
-                address_neighbourhood = " (" + value.address_neighbourhood + ")"
+            count = self.session.query(PsRcParcelValue). \
+                filter(PsRcParcelValue.parcel_type == 1). \
+                filter(PsRcParcelValue.gid == value.parcel_id). \
+                filter(PsRcParcelValue.monitoring_year == monitoring_year).count()
+            if count == 1:
+                object = self.session.query(PsRcParcelValue). \
+                    filter(PsRcParcelValue.parcel_type == 1). \
+                    filter(PsRcParcelValue.gid == value.parcel_id). \
+                    filter(PsRcParcelValue.monitoring_year == monitoring_year).one()
 
-            pasture_type = ''
-            if value.pasture_type:
-                pasture_type = value.pasture_type
+                address_neighbourhood = ''
+                if value.address_neighbourhood:
+                    address_neighbourhood = " (" + value.address_neighbourhood + ")"
 
-            row_count = self.monitoring_twidget.rowCount()
-            self.monitoring_twidget.insertRow(row_count)
+                pasture_type = ''
+                if value.pasture_type:
+                    pasture_type = value.pasture_type
 
-            item = QTableWidgetItem(value.parcel_id + ": " + pasture_type + address_neighbourhood)
-            item.setCheckState(Qt.Unchecked)
-            item.setIcon(QIcon(QPixmap(":/plugins/lm2/parcel_red.png")))
-            item.setData(Qt.UserRole, value.parcel_id)
-            self.monitoring_twidget.setItem(row_count, 0, item)
+                rc = object.rc_ref
+                row_count = self.monitoring_twidget.rowCount()
+                self.monitoring_twidget.insertRow(row_count)
+
+                item = QTableWidgetItem(value.parcel_id + ": " + pasture_type + address_neighbourhood + '---' + rc.rc_code)
+                item.setCheckState(Qt.Unchecked)
+                item.setIcon(QIcon(QPixmap(":/plugins/lm2/parcel.png")))
+                item.setData(Qt.UserRole, value.parcel_id)
+                self.monitoring_twidget.setItem(row_count, 0, item)
+
+                item = QTableWidgetItem(rc.rc_code + ": " + rc.description)
+                item.setCheckState(Qt.Unchecked)
+                item.setData(Qt.UserRole, value.parcel_id)
+                self.monitoring_twidget.setItem(row_count, 1, item)
 
         self.error_label.setText("")
+
+    @pyqtSlot()
+    def on_monitoring_add_button_clicked(self):
+
+        if not len(self.monitoring_twidget.selectedItems()):
+            return
+
+        filter_value1 = '10104%'
+        filter_value2 = '10105%'
+        values = self.session.query(ClPlanZone.plan_zone_id, ClPlanZone.code, ClPlanZone.name). \
+            filter(or_(ClPlanZone.code.like(filter_value1), ClPlanZone.code.like(filter_value2))). \
+            group_by(ClPlanZone.plan_zone_id, ClPlanZone.code, ClPlanZone.name). \
+            order_by(ClPlanZone.code)
+
+        plan_zones = []
+        for value in values:
+            desc = str(value.code) + ':-' + value.name
+            plan_zones.append(desc)
+
+        item, ok = QInputDialog.getItem(self, "select input dialog",
+                                        "list of plan zones", plan_zones, 0, False)
+
+        zone_code, zone_desc = item.split(':-')
+
+        plan_zone = self.session.query(ClPlanZone).filter(ClPlanZone.code == zone_code).one()
+
+        if ok:
+            items = self.monitoring_twidget.selectedItems()
+
+            for item in items:
+                parcel_id = item.data(Qt.UserRole)
+                parcel_text = item.text()
+
+                parcel = self.session.query(CaPastureParcelTbl).filter(CaPastureParcelTbl.parcel_id == parcel_id).one()
+                if self.__cad_pasture_parcel_duplicate_check(parcel):
+                    new_parcel = self.__add_pasture_parcel_ref(parcel, plan_zone)
+
+                    row_count = self.monitoring_current_twidget.rowCount()
+                    self.monitoring_current_twidget.insertRow(row_count)
+
+                    item = QTableWidgetItem(parcel_text)
+                    item.setCheckState(Qt.Checked)
+                    item.setIcon(QIcon(QPixmap(":/plugins/lm2/parcel_red.png")))
+                    item.setData(Qt.UserRole, parcel_id)
+                    item.setData(Qt.UserRole + 1, new_parcel.parcel_id)
+                    self.monitoring_current_twidget.setItem(row_count, 0, item)
+
+                    item = QTableWidgetItem(plan_zone.code + ':' + plan_zone.name)
+                    item.setData(Qt.UserRole, plan_zone.plan_zone_id)
+                    self.monitoring_current_twidget.setItem(row_count, 1, item)
