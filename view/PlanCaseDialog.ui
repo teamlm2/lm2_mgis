@@ -199,8 +199,251 @@
     </rect>
    </property>
    <property name="currentIndex">
-    <number>0</number>
+    <number>3</number>
    </property>
+   <widget class="QWidget" name="tab">
+    <attribute name="title">
+     <string>New Parcel Import</string>
+    </attribute>
+    <widget class="QTreeWidget" name="result_twidget">
+     <property name="geometry">
+      <rect>
+       <x>401</x>
+       <y>6</y>
+       <width>361</width>
+       <height>397</height>
+      </rect>
+     </property>
+     <property name="verticalScrollBarPolicy">
+      <enum>Qt::ScrollBarAlwaysOn</enum>
+     </property>
+     <attribute name="headerDefaultSectionSize">
+      <number>100</number>
+     </attribute>
+     <column>
+      <property name="text">
+       <string>Maintenance Case Objects</string>
+      </property>
+     </column>
+    </widget>
+    <widget class="QGroupBox" name="import_groupbox">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>11</x>
+       <y>0</y>
+       <width>381</width>
+       <height>241</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>Import</string>
+     </property>
+     <widget class="QLineEdit" name="parcel_shape_edit">
+      <property name="geometry">
+       <rect>
+        <x>9</x>
+        <y>212</y>
+        <width>311</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="readOnly">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>193</y>
+        <width>311</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Parcel Shapefile</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="open_parcel_file_button">
+      <property name="geometry">
+       <rect>
+        <x>330</x>
+        <y>210</y>
+        <width>42</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="icon">
+       <iconset resource="resources.qrc">
+        <normaloff>:/plugins/lm2/open.png</normaloff>:/plugins/lm2/open.png</iconset>
+      </property>
+     </widget>
+     <widget class="QRadioButton" name="point_rbutton">
+      <property name="geometry">
+       <rect>
+        <x>150</x>
+        <y>173</y>
+        <width>82</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Point</string>
+      </property>
+     </widget>
+     <widget class="QRadioButton" name="line_rbutton">
+      <property name="geometry">
+       <rect>
+        <x>280</x>
+        <y>173</y>
+        <width>91</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Line</string>
+      </property>
+     </widget>
+     <widget class="QRadioButton" name="polygon_rbutton">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>173</y>
+        <width>82</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Polygon</string>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="shp_process_type_cbox">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>145</y>
+        <width>361</width>
+        <height>22</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string/>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="if_single_type_chbox">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>105</y>
+        <width>361</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Зөвхөн нэг арга хэмжээгээр оруулах</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="default_plan_zone_chbox">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>124</y>
+        <width>361</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Үндсэн тохиргооноос авах</string>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="shp_rigth_form_cbox">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>34</y>
+        <width>361</width>
+        <height>22</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string/>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_6">
+      <property name="geometry">
+       <rect>
+        <x>11</x>
+        <y>17</y>
+        <width>361</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Арга хэмжээний төрөл</string>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="shp_right_type_change_cbox">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>80</y>
+        <width>361</width>
+        <height>22</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_7">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>60</y>
+        <width>361</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Эрхийн төрөл</string>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QLabel" name="message_label">
+     <property name="geometry">
+      <rect>
+       <x>12</x>
+       <y>250</y>
+       <width>377</width>
+       <height>151</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>Message Information</string>
+     </property>
+    </widget>
+   </widget>
    <widget class="QWidget" name="tab_2">
     <attribute name="title">
      <string>Other Plan Import</string>
@@ -791,253 +1034,226 @@
      </property>
     </widget>
    </widget>
-   <widget class="QWidget" name="tab">
+   <widget class="QWidget" name="tab_4">
     <attribute name="title">
-     <string>New Parcel Import</string>
+     <string>Import From Monitoring</string>
     </attribute>
-    <widget class="QTreeWidget" name="result_twidget">
+    <widget class="QTableWidget" name="monitoring_twidget">
      <property name="geometry">
       <rect>
-       <x>401</x>
-       <y>6</y>
-       <width>361</width>
-       <height>397</height>
+       <x>10</x>
+       <y>30</y>
+       <width>751</width>
+       <height>141</height>
       </rect>
      </property>
-     <property name="verticalScrollBarPolicy">
-      <enum>Qt::ScrollBarAlwaysOn</enum>
-     </property>
-     <attribute name="headerDefaultSectionSize">
-      <number>100</number>
-     </attribute>
-     <column>
-      <property name="text">
-       <string>Maintenance Case Objects</string>
-      </property>
-     </column>
     </widget>
-    <widget class="QGroupBox" name="import_groupbox">
+    <widget class="QPushButton" name="cad_remove_button_2">
+     <property name="geometry">
+      <rect>
+       <x>49</x>
+       <y>174</y>
+       <width>30</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="resources.qrc">
+       <normaloff>:/plugins/lm2/up_button.png</normaloff>:/plugins/lm2/up_button.png</iconset>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="cad_add_button_2">
+     <property name="geometry">
+      <rect>
+       <x>9</x>
+       <y>174</y>
+       <width>30</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="resources.qrc">
+       <normaloff>:/plugins/lm2/down_button.png</normaloff>:/plugins/lm2/down_button.png</iconset>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="cadastre_right_type_change_cbox_2">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>479</x>
+       <y>176</y>
+       <width>200</width>
+       <height>22</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="cadastre_form_type_change_cbox_2">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>205</x>
+       <y>176</y>
+       <width>261</width>
+       <height>22</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="cadastre_change_form_check_box_2">
+     <property name="geometry">
+      <rect>
+       <x>90</x>
+       <y>178</y>
+       <width>110</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Change right form</string>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="cad_process_type_cbox_2">
      <property name="enabled">
       <bool>true</bool>
      </property>
      <property name="geometry">
       <rect>
-       <x>11</x>
-       <y>0</y>
-       <width>381</width>
-       <height>241</height>
+       <x>205</x>
+       <y>201</y>
+       <width>474</width>
+       <height>22</height>
       </rect>
      </property>
-     <property name="title">
-      <string>Import</string>
-     </property>
-     <widget class="QLineEdit" name="parcel_shape_edit">
-      <property name="geometry">
-       <rect>
-        <x>9</x>
-        <y>212</y>
-        <width>311</width>
-        <height>21</height>
-       </rect>
-      </property>
-      <property name="readOnly">
-       <bool>true</bool>
-      </property>
-     </widget>
-     <widget class="QLabel" name="label">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>193</y>
-        <width>311</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Parcel Shapefile</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="open_parcel_file_button">
-      <property name="geometry">
-       <rect>
-        <x>330</x>
-        <y>210</y>
-        <width>42</width>
-        <height>25</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string/>
-      </property>
-      <property name="icon">
-       <iconset resource="resources.qrc">
-        <normaloff>:/plugins/lm2/open.png</normaloff>:/plugins/lm2/open.png</iconset>
-      </property>
-     </widget>
-     <widget class="QRadioButton" name="point_rbutton">
-      <property name="geometry">
-       <rect>
-        <x>150</x>
-        <y>173</y>
-        <width>82</width>
-        <height>17</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Point</string>
-      </property>
-     </widget>
-     <widget class="QRadioButton" name="line_rbutton">
-      <property name="geometry">
-       <rect>
-        <x>280</x>
-        <y>173</y>
-        <width>91</width>
-        <height>17</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Line</string>
-      </property>
-     </widget>
-     <widget class="QRadioButton" name="polygon_rbutton">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>173</y>
-        <width>82</width>
-        <height>17</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Polygon</string>
-      </property>
-     </widget>
-     <widget class="QComboBox" name="shp_process_type_cbox">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>145</y>
-        <width>361</width>
-        <height>22</height>
-       </rect>
-      </property>
-      <property name="toolTip">
-       <string/>
-      </property>
-     </widget>
-     <widget class="QCheckBox" name="if_single_type_chbox">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>105</y>
-        <width>361</width>
-        <height>17</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Зөвхөн нэг арга хэмжээгээр оруулах</string>
-      </property>
-     </widget>
-     <widget class="QCheckBox" name="default_plan_zone_chbox">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>124</y>
-        <width>361</width>
-        <height>17</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Үндсэн тохиргооноос авах</string>
-      </property>
-     </widget>
-     <widget class="QComboBox" name="shp_rigth_form_cbox">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>34</y>
-        <width>361</width>
-        <height>22</height>
-       </rect>
-      </property>
-      <property name="toolTip">
-       <string/>
-      </property>
-     </widget>
-     <widget class="QLabel" name="label_6">
-      <property name="geometry">
-       <rect>
-        <x>11</x>
-        <y>17</y>
-        <width>361</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Арга хэмжээний төрөл</string>
-      </property>
-     </widget>
-     <widget class="QComboBox" name="shp_right_type_change_cbox">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>80</y>
-        <width>361</width>
-        <height>22</height>
-       </rect>
-      </property>
-     </widget>
-     <widget class="QLabel" name="label_7">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>60</y>
-        <width>361</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Эрхийн төрөл</string>
-      </property>
-     </widget>
     </widget>
-    <widget class="QLabel" name="message_label">
+    <widget class="QPushButton" name="cadastre_form_change_button_2">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="geometry">
       <rect>
-       <x>12</x>
-       <y>250</y>
-       <width>377</width>
-       <height>151</height>
+       <x>685</x>
+       <y>200</y>
+       <width>75</width>
+       <height>23</height>
       </rect>
      </property>
-     <property name="font">
-      <font>
-       <weight>75</weight>
-       <bold>true</bold>
-      </font>
-     </property>
      <property name="text">
-      <string>Message Information</string>
+      <string>Change</string>
      </property>
     </widget>
-   </widget>
-   <widget class="QWidget" name="tab_4">
-    <attribute name="title">
-     <string>Import From Monitoring</string>
-    </attribute>
+    <widget class="QTableWidget" name="cadastre_current_twidget_2">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>230</y>
+       <width>751</width>
+       <height>140</height>
+      </rect>
+     </property>
+     <property name="sortingEnabled">
+      <bool>true</bool>
+     </property>
+     <attribute name="horizontalHeaderDefaultSectionSize">
+      <number>200</number>
+     </attribute>
+     <attribute name="horizontalHeaderMinimumSectionSize">
+      <number>35</number>
+     </attribute>
+     <attribute name="verticalHeaderDefaultSectionSize">
+      <number>30</number>
+     </attribute>
+     <attribute name="verticalHeaderMinimumSectionSize">
+      <number>19</number>
+     </attribute>
+     <column>
+      <property name="text">
+       <string>Cadastre Parcel Information</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Zone Type</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Form Type</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Right Type</string>
+      </property>
+     </column>
+    </widget>
+    <widget class="QComboBox" name="land_use_type_cbox_2">
+     <property name="geometry">
+      <rect>
+       <x>429</x>
+       <y>3</y>
+       <width>251</width>
+       <height>22</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_15">
+     <property name="geometry">
+      <rect>
+       <x>7</x>
+       <y>6</y>
+       <width>80</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Баг</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_16">
+     <property name="geometry">
+      <rect>
+       <x>350</x>
+       <y>6</y>
+       <width>80</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Улирал</string>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="cadastre_right_type_cbox_2">
+     <property name="geometry">
+      <rect>
+       <x>90</x>
+       <y>3</y>
+       <width>251</width>
+       <height>22</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="monitoring_find_button">
+     <property name="geometry">
+      <rect>
+       <x>690</x>
+       <y>2</y>
+       <width>75</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Find</string>
+     </property>
+    </widget>
    </widget>
   </widget>
   <widget class="QLabel" name="status_label">

@@ -2392,9 +2392,8 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         if data:
             if data['status']:
                 for value in data['data']:
-                    payment = value['payment']
+                    payment = payment + value['payment']
                     base_fee = round(float(value['base_fee_per_m2']))
-
         local_name = " "
         address_street_name = ""
         address_khaskhaa = ""
@@ -2511,7 +2510,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         if self.officer.department_ref:
             department = self.officer.department_ref
             department_id = department.department_id
-            print department_id
+
             department_accounts = self.session.query(SdDepartmentAccount).filter(
                 SdDepartmentAccount.department_id == department_id).all()
             for value in department_accounts:
@@ -4577,7 +4576,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                 person_id = item.data(Qt.UserRole)
                 if share > 0:
                     url = 'http://' + conf.value + '/api/payment/fee?parcel=' + parcel_id + '&person=' + str(person_id)
-                    print url
+
                     respons = urllib.request.urlopen(url)
                     data = json.loads(respons.read().decode(respons.info().get_param('charset') or 'utf-8'))
 
@@ -4605,7 +4604,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
         base_fee_per_m2 = None
         base_price_m2 = None
-        payment = 0
+        # payment = 0
         area = None
         landuse_area = None
         zone_area = None
@@ -4622,8 +4621,8 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         confidence_percent = None
 
         for value in data['data']:
-            amount = value['payment']
-            payment = payment + amount
+            # amount = value['payment']
+            payment = value['payment']
             base_fee_per_m2 = value['base_fee_per_m2']
             base_price_m2 = value['base_price_m2']
             area = value['area']

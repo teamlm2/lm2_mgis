@@ -54,6 +54,7 @@ from ..model.SetPlanZoneBaseConditionType import *
 from ..model.SetPlanZonePlanType import *
 from ..model.PlProjectPlanZone import *
 from ..model.SetPlanZoneRightForm import *
+from ..model.CaPastureParcelTbl import *
 from ..view.Ui_PlanCaseDialog import *
 from .qt_classes.ApplicantDocumentDelegate import ApplicationDocumentDelegate
 from .qt_classes.DocumentsTableWidget import DocumentsTableWidget
@@ -130,6 +131,15 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         self.cadastre_twidget.setContextMenuPolicy(Qt.CustomContextMenu)
         self.cadastre_twidget.customContextMenuRequested.connect(self.on_custom_context_menu_requested)
 
+        self.monitoring_twidget.setColumnCount(1)
+        self.monitoring_twidget.setDragEnabled(True)
+        self.monitoring_twidget.horizontalHeader().setResizeMode(0, QHeaderView.Stretch)
+        self.monitoring_twidget.horizontalHeader().setVisible(False)
+        self.monitoring_twidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.monitoring_twidget.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.monitoring_twidget.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.monitoring_twidget.customContextMenuRequested.connect(self.on_custom_context_monitoring_menu_requested)
+
         # self.cadastre_current_twidget.setColumnCount(1)
         self.cadastre_current_twidget.setDragEnabled(True)
         self.cadastre_current_twidget.horizontalHeader().setResizeMode(0, QHeaderView.Stretch)
@@ -163,6 +173,13 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         item = self.cadastre_twidget.itemAt(point)
         if item is None: return
         self.context_menu.exec_(self.cadastre_twidget.mapToGlobal(point))
+
+    @pyqtSlot(QPoint)
+    def on_custom_context_monitoring_menu_requested(self, point):
+
+        item = self.monitoring_twidget.itemAt(point)
+        if item is None: return
+        self.context_monitoring_menu.exec_(self.monitoring_twidget.mapToGlobal(point))
 
     def __itemMainParcelCheckChanged(self, item, column):
 
@@ -200,6 +217,15 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         self.zoom_to_parcel_action.triggered.connect(self.on_zoom_to_parcel_action_clicked)
         self.copy_number_action.triggered.connect(self.on_copy_number_action_clicked)
 
+        self.context_monitoring_menu = QMenu()
+        self.zoom_to_monitoring_parcel_action = QAction(QIcon(":/plugins/lm2/parcel.png"), self.tr("Zoom to parcel"), self)
+        self.copy_number_action = QAction(QIcon(":/plugins/lm2/copy.png"), self.tr("Copy number"), self)
+        self.context_monitoring_menu.addAction(self.zoom_to_monitoring_parcel_action)
+        self.context_monitoring_menu.addSeparator()
+        self.context_monitoring_menu.addAction(self.copy_number_action)
+        self.zoom_to_monitoring_parcel_action.triggered.connect(self.on_zoom_to_monitoring_parcel_action_clicked)
+        self.copy_number_action.triggered.connect(self.on_copy_number_action_clicked)
+
     @pyqtSlot()
     def on_copy_number_action_clicked(self):
 
@@ -211,6 +237,13 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
 
         parcel_id = self.__selected_parcel_id()
         self.__zoom_to_parcel_ids(parcel_id)
+
+    @pyqtSlot(QTableWidgetItem)
+    def on_zoom_to_monitoring_parcel_action_clicked(self):
+
+        parcel_id = self.__selected_monitoring_parcel_id()
+        print parcel_id
+        self.__zoom_to_monitoring_parcel_ids(parcel_id)
 
     def __selected_parcel_id(self):
 
@@ -228,6 +261,56 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         # selected_item = selected_items[0]
         # parcel_no = selected_item.data(Qt.UserRole)
         return parcels
+
+    def __selected_monitoring_parcel_id(self):
+
+        parcels = []
+        selected_items = self.monitoring_twidget.selectedItems()
+
+        for item in selected_items:
+            parcel_no = item.data(Qt.UserRole)
+            parcels.append(parcel_no)
+
+        # if len(selected_items) != 1:
+        #     self.error_label.setText(self.tr("Only single selection allowed."))
+        #     return None
+
+        # selected_item = selected_items[0]
+        # parcel_no = selected_item.data(Qt.UserRole)
+        return parcels
+
+    def __zoom_to_monitoring_parcel_ids(self, parcel_ids, layer_name = None):
+
+        LayerUtils.deselect_all()
+
+        layer_name = "ca_pasture_parcel"
+
+        vlayer = LayerUtils.layer_by_data_source("data_soums_union", layer_name)
+
+        exp_string = ""
+
+        for parcel_id in parcel_ids:
+
+            if exp_string == "":
+                exp_string = "parcel_id = \'" + parcel_id  + "\'"
+            else:
+                exp_string += " or parcel_id = \'" + parcel_id  + "\'"
+
+        request = QgsFeatureRequest()
+        request.setFilterExpression(exp_string)
+
+        feature_ids = []
+        if vlayer:
+            iterator = vlayer.getFeatures(request)
+
+            for feature in iterator:
+                feature_ids.append(feature.id())
+
+            if len(feature_ids) == 0:
+                self.error_label.setText(self.tr("No parcel assigned"))
+
+            vlayer.setSelectedFeatures(feature_ids)
+            self.plugin.iface.mapCanvas().zoomToSelected(vlayer)
 
     def __zoom_to_parcel_ids(self, parcel_ids, layer_name = None):
 
@@ -2375,3 +2458,37 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
                         parcel.right_form_id = form_type_code
                     if right_type_code:
                         parcel.right_type_code = right_type_code
+
+    @pyqtSlot()
+    def on_monitoring_find_button_clicked(self):
+
+        self.__plan_monitoring_find()
+
+    def __plan_monitoring_find(self):
+
+        working_au2 = DatabaseUtils.working_l2_code()
+        au2 = self.session.query(AuLevel2).filter(AuLevel2.code == working_au2).one()
+
+        parcels = self.session.query(CaPastureParcelTbl).filter(au2.geometry.ST_Intersects(func.ST_Centroid(CaPastureParcelTbl.geometry))).all()
+
+        self.monitoring_twidget.setRowCount(0)
+
+        for value in parcels:
+            address_neighbourhood = ''
+            if value.address_neighbourhood:
+                address_neighbourhood = " (" + value.address_neighbourhood + ")"
+
+            pasture_type = ''
+            if value.pasture_type:
+                pasture_type = value.pasture_type
+
+            row_count = self.monitoring_twidget.rowCount()
+            self.monitoring_twidget.insertRow(row_count)
+
+            item = QTableWidgetItem(value.parcel_id + ": " + pasture_type + address_neighbourhood)
+            item.setCheckState(Qt.Unchecked)
+            item.setIcon(QIcon(QPixmap(":/plugins/lm2/parcel_red.png")))
+            item.setData(Qt.UserRole, value.parcel_id)
+            self.monitoring_twidget.setItem(row_count, 0, item)
+
+        self.error_label.setText("")
