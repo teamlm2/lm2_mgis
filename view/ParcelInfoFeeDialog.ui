@@ -29,8 +29,8 @@
   <widget class="QTabWidget" name="tabWidget">
    <property name="geometry">
     <rect>
-     <x>0</x>
-     <y>0</y>
+     <x>4</x>
+     <y>2</y>
      <width>861</width>
      <height>471</height>
     </rect>
@@ -51,7 +51,7 @@
        <x>5</x>
        <y>0</y>
        <width>844</width>
-       <height>46</height>
+       <height>39</height>
       </rect>
      </property>
      <property name="title">
@@ -61,7 +61,7 @@
       <property name="geometry">
        <rect>
         <x>530</x>
-        <y>16</y>
+        <y>10</y>
         <width>75</width>
         <height>23</height>
        </rect>
@@ -81,7 +81,7 @@
       <property name="geometry">
        <rect>
         <x>360</x>
-        <y>17</y>
+        <y>11</y>
         <width>151</width>
         <height>20</height>
        </rect>
@@ -94,7 +94,7 @@
       <property name="geometry">
        <rect>
         <x>90</x>
-        <y>17</y>
+        <y>11</y>
         <width>151</width>
         <height>20</height>
        </rect>
@@ -104,7 +104,7 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>19</y>
+        <y>13</y>
         <width>81</width>
         <height>16</height>
        </rect>
@@ -117,7 +117,7 @@
       <property name="geometry">
        <rect>
         <x>250</x>
-        <y>19</y>
+        <y>13</y>
         <width>101</width>
         <height>16</height>
        </rect>
@@ -131,23 +131,13 @@
      <property name="geometry">
       <rect>
        <x>630</x>
-       <y>16</y>
+       <y>10</y>
        <width>75</width>
        <height>23</height>
       </rect>
      </property>
      <property name="text">
       <string>New</string>
-     </property>
-    </widget>
-    <widget class="QComboBox" name="year_cbox">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>196</y>
-       <width>131</width>
-       <height>22</height>
-      </rect>
      </property>
     </widget>
     <widget class="QGroupBox" name="groupBox_4">
@@ -329,21 +319,6 @@
        <string>Нөхөн төлбөр</string>
       </property>
      </widget>
-     <zorder>payment_total_sbox</zorder>
-     <zorder>label_16</zorder>
-     <zorder>label_25</zorder>
-     <zorder>label_26</zorder>
-     <zorder>payment_contract_sbox</zorder>
-     <zorder>label_27</zorder>
-     <zorder>payment_before_less_sbox</zorder>
-     <zorder>payment_before_over_sbox</zorder>
-     <zorder>label_28</zorder>
-     <zorder>label_29</zorder>
-     <zorder>payment_year_sbox</zorder>
-     <zorder>label_30</zorder>
-     <zorder>payment_fund_sbox</zorder>
-     <zorder>payment_loss_sbox</zorder>
-     <zorder>label_31</zorder>
     </widget>
     <widget class="QGroupBox" name="groupBox_5">
      <property name="geometry">
@@ -695,9 +670,9 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>170</y>
+       <y>204</y>
        <width>841</width>
-       <height>31</height>
+       <height>21</height>
       </rect>
      </property>
      <property name="styleSheet">
@@ -710,78 +685,184 @@
       <enum>Qt::Horizontal</enum>
      </property>
     </widget>
+    <widget class="QTabWidget" name="tabWidget_2">
+     <property name="geometry">
+      <rect>
+       <x>5</x>
+       <y>68</y>
+       <width>851</width>
+       <height>141</height>
+      </rect>
+     </property>
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="tab_3">
+      <attribute name="title">
+       <string>Төлбөрийн мэдээлэл</string>
+      </attribute>
+      <widget class="QTableWidget" name="paid_twidget_2">
+       <property name="geometry">
+        <rect>
+         <x>4</x>
+         <y>3</y>
+         <width>838</width>
+         <height>110</height>
+        </rect>
+       </property>
+       <property name="sortingEnabled">
+        <bool>true</bool>
+       </property>
+       <column>
+        <property name="text">
+         <string>Жил</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Регистр</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Гэрээний дугаар</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Гэрээнд ногдуулсан дүн</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Тухайн онд ногдуулсан дүн</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Тухайн жил нийт</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Урд оны дутуу төлөлтөөс</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Бүгд дүн</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Хүчингүйд тооцсон дүн</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Тайлан оны илүү, дутуу төлөлт </string>
+        </property>
+       </column>
+      </widget>
+     </widget>
+     <widget class="QWidget" name="tab_2">
+      <attribute name="title">
+       <string>ЛМ-н төлбөр төлөлтийн мэдээлэл</string>
+      </attribute>
+      <widget class="QTableWidget" name="paid_twidget">
+       <property name="geometry">
+        <rect>
+         <x>4</x>
+         <y>3</y>
+         <width>838</width>
+         <height>110</height>
+        </rect>
+       </property>
+       <property name="sortingEnabled">
+        <bool>true</bool>
+       </property>
+       <column>
+        <property name="text">
+         <string>Жил</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Регистр</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Гэрээний дугаар</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Гэрээнд ногдуулсан дүн</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Тухайн онд ногдуулсан дүн</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Тухайн жил нийт</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Урд оны дутуу төлөлтөөс</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Бүгд дүн</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Хүчингүйд тооцсон дүн</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Тайлан оны илүү, дутуу төлөлт </string>
+        </property>
+       </column>
+      </widget>
+     </widget>
+    </widget>
     <widget class="QComboBox" name="object_cbox">
      <property name="geometry">
       <rect>
-       <x>160</x>
-       <y>196</y>
+       <x>326</x>
+       <y>43</y>
        <width>401</width>
        <height>22</height>
       </rect>
      </property>
     </widget>
-    <widget class="QTableWidget" name="paid_twidget">
+    <widget class="QComboBox" name="year_cbox">
      <property name="geometry">
       <rect>
-       <x>5</x>
-       <y>50</y>
-       <width>845</width>
-       <height>125</height>
+       <x>176</x>
+       <y>43</y>
+       <width>131</width>
+       <height>22</height>
       </rect>
      </property>
-     <property name="sortingEnabled">
-      <bool>true</bool>
+    </widget>
+    <widget class="QComboBox" name="comboBox">
+     <property name="geometry">
+      <rect>
+       <x>6</x>
+       <y>43</y>
+       <width>156</width>
+       <height>22</height>
+      </rect>
      </property>
-     <column>
-      <property name="text">
-       <string>Жил</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Регистр</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Гэрээний дугаар</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Гэрээнд ногдуулсан дүн</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Тухайн онд ногдуулсан дүн</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Тухайн жил нийт</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Урд оны дутуу төлөлтөөс</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Бүгд дүн</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Хүчингүйд тооцсон дүн</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Тайлан оны илүү, дутуу төлөлт </string>
-      </property>
-     </column>
     </widget>
    </widget>
   </widget>

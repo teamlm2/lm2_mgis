@@ -4722,7 +4722,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                 contract_fee.area = area
                 contract_fee.landuse_area = landuse_area
                 contract_fee.zone_area = zone_area
-                contract_fee.amount = amount
+                contract_fee.amount = payment
 
             self.__calculate_landfee_level(base_fee_id, payment, parcel_id)
 
