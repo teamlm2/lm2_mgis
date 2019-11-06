@@ -188,6 +188,22 @@ class PlanSettingsDialog(QDialog, Ui_PlanSettingsDialog):
 
                         self.session.add(object)
 
+        if self.plan_type_rbutton.isChecked():
+            for row in row_count:
+                item = self.settings_twidget.item(row, 0)
+                if item.checkState() == QtCore.Qt.Checked:
+                    id = item.data(Qt.UserRole)
+
+                    count = self.session.query(SetPlanZonePlanType). \
+                        filter(SetPlanZonePlanType.plan_type_id == id). \
+                        filter(SetPlanZonePlanType.plan_zone_id == plan_zone_id).count()
+                    if count == 0:
+                        object = SetPlanZonePlanType()
+                        object.plan_zone_id = plan_zone_id
+                        object.plan_type_id = id
+
+                        self.session.add(object)
+
     def __settings_remove_delete(self, plan_zone_id):
 
         row_count = range(self.settings_twidget.rowCount())
@@ -203,6 +219,19 @@ class PlanSettingsDialog(QDialog, Ui_PlanSettingsDialog):
                         self.session.query(SetPlanZoneRightForm). \
                             filter(SetPlanZoneRightForm.right_form_id == id). \
                             filter(SetPlanZoneRightForm.plan_zone_id == plan_zone_id).delete()
+
+        if self.plan_type_rbutton.isChecked():
+            for row in row_count:
+                item = self.settings_twidget.item(row, 0)
+                if item.checkState() == QtCore.Qt.Checked:
+                    id = item.data(Qt.UserRole)
+                    count = self.session.query(SetPlanZonePlanType). \
+                        filter(SetPlanZonePlanType.plan_type_id == id). \
+                        filter(SetPlanZonePlanType.plan_zone_id == plan_zone_id).count()
+                    if count == 1:
+                        self.session.query(SetPlanZonePlanType). \
+                            filter(SetPlanZonePlanType.plan_type_id == id). \
+                            filter(SetPlanZonePlanType.plan_zone_id == plan_zone_id).delete()
 
     @pyqtSlot()
     def on_apply_button_clicked(self):

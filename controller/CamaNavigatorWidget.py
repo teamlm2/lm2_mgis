@@ -526,7 +526,8 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
             if not message_box.clickedButton() == delete_button:
                 return
             else:
-                self.session.query(CmValuationLevel).filter(CmValuationLevel.au2 == au2).delete()
+                print ""
+                # self.session.query(CmValuationLevel).filter(CmValuationLevel.au2 == au2).delete()
 
         rows = self.price_interval_twidget.rowCount()
         for row in range(rows):
@@ -540,14 +541,14 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
                 end_value = " < " + end_value
             if sql:
                 sql = sql + "UNION" + "\n"
-            select = "select parcel.parcel_id as gid, " + zone_no + " as zone_no, " + avg_value + " as avg_base_price, parcel_price.base_price_m2, parcel.geometry from data_cama.cm_parcel_base_price parcel_price " \
+            select = "select parcel.parcel_id as gid, " + zone_no + " as zone_no, " + avg_value + " as avg_base_price, parcel_price.mass_price_m2, parcel.geometry from data_cama.cm_parcel_mass_price parcel_price " \
                      "join data_soums_union.ca_parcel_tbl parcel on parcel_price.parcel_id = parcel.parcel_id " \
-                     "where parcel.au2 = '01125' and (parcel_price.base_price_m2 >= " + begin_value + " and parcel_price.base_price_m2  "+ end_value +")"
+                     "where parcel.au2 = " + "'" + au2 + "'" + " and (parcel_price.mass_price_m2 >= " + begin_value + " and parcel_price.mass_price_m2  "+ end_value +")"
 
             if sql_zone:
                 sql_zone = sql_zone + "UNION" + "\n"
-            select_zone = "select " + zone_no + " as zone_no, " + avg_value + " as avg_base_price, st_buffer(st_buffer((st_dump(st_union(st_buffer(parcel.geometry, 0.001)))).geom, -0.001), 0.0002) as geometry from data_cama.cm_parcel_base_price parcel_price " \
-                  "join data_soums_union.ca_parcel_tbl parcel on parcel_price.parcel_id = parcel.parcel_id where parcel.au2 = '01125' and (parcel_price.base_price_m2 >= " + begin_value + " and parcel_price.base_price_m2   "+ end_value +") "
+            select_zone = "select " + zone_no + " as zone_no, " + avg_value + " as avg_base_price, st_buffer(st_buffer((st_dump(st_union(st_buffer(parcel.geometry, 0.001)))).geom, -0.001), 0.0002) as geometry from data_cama.cm_parcel_mass_price parcel_price " \
+                  "join data_soums_union.ca_parcel_tbl parcel on parcel_price.parcel_id = parcel.parcel_id where parcel.au2 = " + "'" + au2 + "'" + " and (parcel_price.mass_price_m2 >= " + begin_value + " and parcel_price.mass_price_m2   "+ end_value +") "
 
             sql = sql + select
             sql_zone = sql_zone + select_zone
@@ -560,6 +561,7 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
         full_name = aimag_name + ', ' + soum_name
 
         sql_zone = "select zone_no, avg_base_price, st_union(geometry) from (" + sql_zone + ")" + " as xxx group by zone_no, avg_base_price"
+
         result = self.session.execute(sql_zone)
         for item_row in result:
             zone_no = item_row[0]
@@ -568,6 +570,7 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
             geom = 'ST_Multi(' +  "'" + geometry +  "'" + ')'
             values = str(zone_no) + ", " + geom + ", " + "true" + ", " + "'" + au2 + "'" + ", " + str(status) + ", " + str(avg_base_price) + ", " + "'" + full_name + "'" + ", " + "'" + full_name + "'"
             sql = "insert into data_cama.cm_valuation_level (level_no, geometry, in_active, au2, status, base_price, name, location) values ("+ values +")"
+
             self.session.execute(sql)
 
         self.session.commit()

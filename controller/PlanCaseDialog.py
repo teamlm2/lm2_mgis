@@ -719,6 +719,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
             order_by(ClPlanZone.code)
         for value in values:
             self.cad_process_type_cbox.addItem(str(value.code) + ':' + value.name, value.plan_zone_id)
+            self.current_process_type_cbox.addItem(str(value.code) + ':' + value.name, value.plan_zone_id)
 
     @pyqtSlot(int)
     def on_plan_cbox_currentIndexChanged(self, index):
@@ -835,8 +836,8 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
                     item.setText(1, form_type_desc)
                     item.setData(1, Qt.UserRole, form_type_id)
 
-                    item.setText(2, description)
-                    item.setData(2, Qt.UserRole, plan.project_id)
+                    item.setText(3, description)
+                    item.setData(3, Qt.UserRole, plan.project_id)
 
                     item.setCheckState(0, Qt.Checked)
                     item.setCheckState(0, Qt.Unchecked)
@@ -885,8 +886,8 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
                     item.setText(1, form_type_desc)
                     item.setData(1, Qt.UserRole, form_type_id)
 
-                    item.setText(2, description)
-                    item.setData(2, Qt.UserRole, plan.project_id)
+                    item.setText(3, description)
+                    item.setData(3, Qt.UserRole, plan.project_id)
 
                     item.setCheckState(0, Qt.Checked)
                     item.setCheckState(0, Qt.Unchecked)
@@ -935,8 +936,8 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
                     item.setText(1, form_type_desc)
                     item.setData(1, Qt.UserRole, form_type_id)
 
-                    item.setText(2, description)
-                    item.setData(2, Qt.UserRole, plan.project_id)
+                    item.setText(3, description)
+                    item.setData(3, Qt.UserRole, plan.project_id)
 
                     item.setCheckState(0, Qt.Checked)
                     item.setCheckState(0, Qt.Unchecked)
@@ -1147,8 +1148,8 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
                                 valid = False
 
                     point_values = self.session.query(PlProjectParcel). \
-                        filter(func.ST_Centroid(parcel_geometry).ST_Overlaps(PlProjectParcel.point_geom)). \
-                        filter(PlProjectParcel.valid_till == None).all()
+                        filter((parcel_geometry).ST_Intersects(PlProjectParcel.point_geom)). \
+                        filter(or_(PlProjectParcel.valid_till == None, PlProjectParcel.valid_till == 'infinity')).all()
                     for value in point_values:
                         plan_zone = value.plan_zone_ref
                         project = value.project_ref
@@ -1164,8 +1165,8 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
                             valid = False
 
                     line_values = self.session.query(PlProjectParcel). \
-                        filter(func.ST_Centroid(parcel_geometry).ST_Overlaps(PlProjectParcel.line_geom)). \
-                        filter(PlProjectParcel.valid_till == None).all()
+                        filter((parcel_geometry).ST_Intersects(PlProjectParcel.line_geom)). \
+                        filter(or_(PlProjectParcel.valid_till == None, PlProjectParcel.valid_till == 'infinity')).all()
                     for value in line_values:
                         plan_zone = value.plan_zone_ref
                         project = value.project_ref
@@ -1173,6 +1174,8 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
                         plan_zone_relation_count = self.session.query(SetPlanZoneRelation). \
                             filter(SetPlanZoneRelation.parent_plan_zone_id == plan_zone.plan_zone_id). \
                             filter(SetPlanZoneRelation.child_plan_zone_id == plan_zone_id).count()
+                        print plan_zone_relation_count
+                        print value.parcel_id
                         if plan_zone_relation_count == 1:
                             message = plan_zone_message + value.project_ref.code + unicode(u' дугаартай ') + plan_type.short_name + \
                                       unicode(u'-ний ') + \
@@ -1182,7 +1185,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
 
                     # base condition overlaps
                     values = self.session.query(PlBaseConditionParcel).\
-                        filter(func.ST_Centroid(parcel_geometry).ST_Overlaps(PlBaseConditionParcel.geometry)).all()
+                        filter(func.ST_Centroid(parcel_geometry).ST_Intersects(PlBaseConditionParcel.geometry)).all()
 
                     for value in values:
                         type = value.base_condition_type_ref
@@ -1814,8 +1817,8 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
                     item.setText(1, form_type_desc)
                     item.setData(1, Qt.UserRole, form_type_id)
 
-                    item.setText(2, description)
-                    item.setData(2, Qt.UserRole, plan.project_id)
+                    item.setText(3, description)
+                    item.setData(3, Qt.UserRole, plan.project_id)
 
                     item.setCheckState(0, Qt.Checked)
 
@@ -2092,6 +2095,13 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
 
         form_type_txt = self.form_type_change_cbox.currentText()
         form_type_code = self.form_type_change_cbox.itemData(self.form_type_change_cbox.currentIndex())
+
+        zone_type_txt = self.current_process_type_cbox.currentText()
+        zone_type_code = self.current_process_type_cbox.itemData(self.current_process_type_cbox.currentIndex())
+
+        right_type_txt = self.right_type_change_cbox.currentText()
+        right_type_code = self.right_type_change_cbox.itemData(self.right_type_change_cbox.currentIndex())
+
         root = self.current_tree_widget.invisibleRootItem()
 
         self.current_tree_widget.topLevelItemCount()
@@ -2105,6 +2115,12 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
 
                     child_item.setText(1, form_type_txt)
                     child_item.setData(1, Qt.UserRole, form_type_code)
+
+                    child_item.setText(0, zone_type_txt)
+                    child_item.setData(0, Qt.UserRole, zone_type_code)
+
+                    child_item.setText(2, right_type_txt)
+                    child_item.setData(2, Qt.UserRole, right_type_code)
 
                     count = self.session.query(PlProjectParcel). \
                         filter(PlProjectParcel.parcel_id == parcel_id).count()
@@ -2691,7 +2707,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
                 row_count = self.monitoring_twidget.rowCount()
                 self.monitoring_twidget.insertRow(row_count)
 
-                item = QTableWidgetItem(value.parcel_id + ": " + pasture_type + address_neighbourhood + '---' + rc.rc_code)
+                item = QTableWidgetItem(value.parcel_id + ": " + pasture_type + address_neighbourhood)
                 item.setCheckState(Qt.Unchecked)
                 item.setIcon(QIcon(QPixmap(":/plugins/lm2/parcel.png")))
                 item.setData(Qt.UserRole, value.parcel_id)
