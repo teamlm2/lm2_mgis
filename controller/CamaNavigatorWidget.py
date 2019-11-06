@@ -445,10 +445,16 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
         max_price = self.session.query(func.max(CmParcelMassPrice.mass_price_m2)).\
             join(CaParcelTbl, CmParcelMassPrice.parcel_id == CaParcelTbl.parcel_id).\
             filter(CaParcelTbl.au2 == au2).one()
+        min_value = 0
+        max_value = 0
         if min_price[0]:
-            self.min_price_edit.setText(str(min_price[0]))
+            if min_price[0] > 0:
+                min_value = min_price[0]
+            self.min_price_edit.setText(str(min_value))
         if max_price[0]:
-            self.max_price_edit.setText(str(max_price[0]))
+            if max_price[0] > 0:
+                max_value = max_price[0]
+            self.max_price_edit.setText(str(max_value))
 
     @pyqtSlot()
     def on_calculate_button_clicked(self):
@@ -509,6 +515,7 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
     @pyqtSlot()
     def on_view_layer_button_clicked(self):
 
+        status = self.valuation_level_status_cbox.itemData(self.valuation_level_status_cbox.currentIndex())
         sql = ""
         sql_zone = ""
 
@@ -527,7 +534,9 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
                 return
             else:
                 print ""
-                # self.session.query(CmValuationLevel).filter(CmValuationLevel.au2 == au2).delete()
+                self.session.query(CmValuationLevel).\
+                    filter(CmValuationLevel.status == status). \
+                    filter(CmValuationLevel.au2 == au2).delete()
 
         rows = self.price_interval_twidget.rowCount()
         for row in range(rows):
@@ -553,7 +562,7 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
             sql = sql + select
             sql_zone = sql_zone + select_zone
 
-        status = self.valuation_level_status_cbox.itemData(self.valuation_level_status_cbox.currentIndex())
+
 
         aimag_name = self.working_l1_cbox.currentText()
         soum_name = self.working_l2_cbox.currentText()
