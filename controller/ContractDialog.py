@@ -4621,7 +4621,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         confidence_percent = None
 
         for value in data['data']:
-            # amount = value['payment']
+            amount = value['payment']
             payment = value['payment']
             base_fee_per_m2 = value['base_fee_per_m2']
             base_price_m2 = value['base_price_m2']

@@ -6,13 +6,13 @@ from geoalchemy2 import Geometry
 from ClLanduseType import *
 
 
-class CmParcelBasePrice(Base):
+class CmParcelMassPrice(Base):
 
-    __tablename__ = 'cm_parcel_base_price'
+    __tablename__ = 'cm_parcel_mass_price'
 
     id = Column(Integer, primary_key=True)
-    base_price = Column(Float)
-    base_price_m2 = Column(Float)
+    mass_price = Column(Float)
+    mass_price_m2 = Column(Float)
     calculate_year = Column(Integer)
     in_active = Column(Boolean)
     created_by = Column(Integer)

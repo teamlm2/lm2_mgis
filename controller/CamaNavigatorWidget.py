@@ -24,6 +24,7 @@ from ..model.ClPlanType import *
 from ..model.PlProjectStatusHistory import *
 from ..model.CaParcel import *
 from ..model.CmParcelBasePrice import *
+from ..model.CmParcelMassPrice import *
 from ..model.CmValuationLevelStatus import *
 from ..model.CmValuationLevel import *
 from ..controller.PlanCaseDialog import *
@@ -431,13 +432,19 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
 
         au2 = DatabaseUtils.working_l2_code()
 
-        parcel_base_price = self.session.query(CmParcelBasePrice).filter(CmParcelBasePrice.au2 == au2)
+        parcel_base_price = self.session.query(CmParcelMassPrice).\
+            join(CaParcelTbl, CmParcelMassPrice.parcel_id == CaParcelTbl.parcel_id).\
+            filter(CaParcelTbl.au2 == au2)
         count = parcel_base_price.count()
 
         self.parcel_count_edit.setText(str(count))
 
-        min_price = self.session.query(func.min(CmParcelBasePrice.base_price_m2)).filter(CmParcelBasePrice.au2 == au2).one()
-        max_price = self.session.query(func.max(CmParcelBasePrice.base_price_m2)).filter(CmParcelBasePrice.au2 == au2).one()
+        min_price = self.session.query(func.min(CmParcelMassPrice.mass_price_m2)).\
+            join(CaParcelTbl, CmParcelMassPrice.parcel_id == CaParcelTbl.parcel_id).\
+            filter(CaParcelTbl.au2 == au2).one()
+        max_price = self.session.query(func.max(CmParcelMassPrice.mass_price_m2)).\
+            join(CaParcelTbl, CmParcelMassPrice.parcel_id == CaParcelTbl.parcel_id).\
+            filter(CaParcelTbl.au2 == au2).one()
         if min_price[0]:
             self.min_price_edit.setText(str(min_price[0]))
         if max_price[0]:
