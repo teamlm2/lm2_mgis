@@ -160,6 +160,9 @@ class PlanSettingsDialog(QDialog, Ui_PlanSettingsDialog):
         selected_row = self.settings_twidget.currentRow()
         id_item = self.settings_twidget.item(selected_row, 0)
         if id_item:
+            for row in range(self.settings_twidget.rowCount()):
+                item_dec = self.settings_twidget.item(row, 0)
+                item_dec.setCheckState(Qt.Unchecked)
             id_item.setCheckState(Qt.Checked)
         if self.zone_type_rbutton.isChecked():
             id = self.settings_twidget.item(selected_row, 0).data(Qt.UserRole)
@@ -178,31 +181,34 @@ class PlanSettingsDialog(QDialog, Ui_PlanSettingsDialog):
                 if item.checkState() == QtCore.Qt.Checked:
                     id = item.data(Qt.UserRole)
 
-                    count = self.session.query(SetPlanZoneRightForm). \
-                        filter(SetPlanZoneRightForm.right_form_id == id). \
-                        filter(SetPlanZoneRightForm.plan_zone_id == plan_zone_id).count()
-                    if count == 0:
-                        object = SetPlanZoneRightForm()
-                        object.plan_zone_id = plan_zone_id
-                        object.right_form_id = id
+                    zone_count = self.session.query(ClPlanZone).filter(ClPlanZone.plan_zone_id == plan_zone_id).count()
+                    if zone_count == 1:
+                        count = self.session.query(SetPlanZoneRightForm). \
+                            filter(SetPlanZoneRightForm.right_form_id == id). \
+                            filter(SetPlanZoneRightForm.plan_zone_id == plan_zone_id).count()
+                        if count == 0:
+                            object = SetPlanZoneRightForm()
+                            object.plan_zone_id = plan_zone_id
+                            object.right_form_id = id
 
-                        self.session.add(object)
+                            self.session.add(object)
 
         if self.plan_type_rbutton.isChecked():
             for row in row_count:
                 item = self.settings_twidget.item(row, 0)
                 if item.checkState() == QtCore.Qt.Checked:
                     id = item.data(Qt.UserRole)
+                    zone_count = self.session.query(ClPlanZone).filter(ClPlanZone.plan_zone_id == plan_zone_id).count()
+                    if zone_count == 1:
+                        count = self.session.query(SetPlanZonePlanType). \
+                            filter(SetPlanZonePlanType.plan_type_id == id). \
+                            filter(SetPlanZonePlanType.plan_zone_id == plan_zone_id).count()
+                        if count == 0:
+                            object = SetPlanZonePlanType()
+                            object.plan_zone_id = plan_zone_id
+                            object.plan_type_id = id
 
-                    count = self.session.query(SetPlanZonePlanType). \
-                        filter(SetPlanZonePlanType.plan_type_id == id). \
-                        filter(SetPlanZonePlanType.plan_zone_id == plan_zone_id).count()
-                    if count == 0:
-                        object = SetPlanZonePlanType()
-                        object.plan_zone_id = plan_zone_id
-                        object.plan_type_id = id
-
-                        self.session.add(object)
+                            self.session.add(object)
 
     def __settings_remove_delete(self, plan_zone_id):
 
