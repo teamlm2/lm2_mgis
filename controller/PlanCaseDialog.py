@@ -91,6 +91,10 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         self.close_button.clicked.connect(self.reject)
         self.session = SessionHandler().session_instance()
         self.plan = plan
+
+        self.message_label.setWordWrap(True)
+        self.message_label.setTextInteractionFlags(Qt.TextSelectableByMouse)
+
         self.is_file_import = False
         self.approved_item = None
         self.refused_item = None
@@ -100,8 +104,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         self.error_dic = {}
         self.polygon_rbutton.setChecked(True)
 
-        self.message_label.setWordWrap(True)
-        self.message_label.setTextInteractionFlags(Qt.TextSelectableByMouse)
+
         # self.message_label.setStyleSheet("QLabel { background-color : red; color : blue; }");
         self.message_label.setStyleSheet("QLabel {color: rgb(255,0,0);}")
         self.__setup_data()
@@ -1095,12 +1098,13 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         valid = True
         plan_zone_message = unicode(u'* (ЗӨВШӨӨРӨГДӨХГҮЙ БҮС/АРГА ХЭМЖЭЭ/) ')
         base_condition_message = unicode(u'* (ЗӨВШӨӨРӨГДӨХГҮЙ ХАМГААЛЛАЛТЫН БҮС/ЗУРВАС/) ')
-        error_message = u''
 
+        error_message = u'Гарсан зөрчил'
         check_value = self.__approved_parcel_check(parcel, parcel_shape_layer, id, error_message)
         if not check_value[0]:
             valid = False
-            error_message = error_message + "\n" + check_value[1]
+            error_message = check_value[1]
+            self.message_txt_edit.setPlainText(error_message)
         plan_zone_id = None
         if self.if_single_type_chbox.isChecked():
             code = self.shp_process_type_cbox.itemData(self.shp_process_type_cbox.currentIndex())
@@ -1174,8 +1178,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
                         plan_zone_relation_count = self.session.query(SetPlanZoneRelation). \
                             filter(SetPlanZoneRelation.parent_plan_zone_id == plan_zone.plan_zone_id). \
                             filter(SetPlanZoneRelation.child_plan_zone_id == plan_zone_id).count()
-                        print plan_zone_relation_count
-                        print value.parcel_id
+
                         if plan_zone_relation_count == 1:
                             message = plan_zone_message + value.project_ref.code + unicode(u' дугаартай ') + plan_type.short_name + \
                                       unicode(u'-ний ') + \
@@ -1365,88 +1368,6 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
 
             self.__import_template_data(file_path)
             # self.open_parcel_file_button.setEnabled(False)
-
-    def __import_new_parcels(self, file_path):
-
-        parcel_shape_layer = QgsVectorLayer(file_path, "tmp_parcel_shape", "ogr")
-
-        if not parcel_shape_layer.isValid():
-            PluginUtils.show_error(self,  self.tr("Error loading layer"), self.tr("The layer is invalid."))
-            return
-
-        if parcel_shape_layer.crs().postgisSrid() != 4326:
-            PluginUtils.show_error(self, self.tr("Error loading layer"),
-                                   self.tr("The crs of the layer has to be 4326."))
-            return
-
-        right_form = self.shp_rigth_form_cbox.itemData(self.shp_rigth_form_cbox.currentIndex())
-        right_type_code = self.shp_right_type_change_cbox.itemData(self.shp_right_type_change_cbox.currentIndex())
-        working_soum_code = DatabaseUtils.working_l2_code()
-        iterator = parcel_shape_layer.getFeatures()
-        count = 0
-        approved_count = 0
-        refused_count = 0
-        # try:
-        is_out_parcel = False
-        error_message = ''
-
-        for parcel in iterator:
-
-            count += 1
-            id = QDateTime().currentDateTime().toString("MMddhhmmss") + str(count)
-
-            header = str(count)
-            if self.__get_attribute(parcel, parcel_shape_layer)[0]:
-                process_type = self.__get_attribute(parcel, parcel_shape_layer)[0]
-                header = header + ':' + '(' + str(process_type.code) + ')' + unicode(process_type.name)
-            if self.__get_attribute(parcel, parcel_shape_layer)[1]:
-                landuse = self.__get_attribute(parcel, parcel_shape_layer)[1]
-            if self.__get_attribute(parcel, parcel_shape_layer)[2]:
-                landname = self.__get_attribute(parcel, parcel_shape_layer)[2]
-                header = header + '/' + unicode(landname) + '/'
-            if self.__approved_parcel_check(parcel, parcel_shape_layer, id, ''):
-
-                new_parcel = PlProjectParcel()
-
-                new_parcel.project_id = self.plan.project_id
-                new_parcel.project_ref = self.plan
-                # new_parcel.parcel_id = id
-                new_parcel.valid_from = PluginUtils.convert_qt_date_to_python(QDateTime().currentDateTime())
-                new_parcel.au1 = self.au1
-                new_parcel.au2 = self.au2
-                new_parcel.right_form_id = right_form
-                new_parcel.right_type_code = right_type_code
-
-                if self.point_rbutton.isChecked():
-                    new_parcel.point_geom = WKTElement(parcel.geometry().exportToWkt(), srid=4326)
-                elif self.line_rbutton.isChecked():
-                    new_parcel.line_geom = WKTElement(parcel.geometry().exportToWkt(), srid=4326)
-                elif self.polygon_rbutton.isChecked():
-                    new_parcel.polygon_geom = WKTElement(parcel.geometry().exportToWkt(), srid=4326)
-
-                self.__copy_parcel_attributes(parcel, new_parcel, parcel_shape_layer)
-
-                self.session.add(new_parcel)
-                self.session.flush()
-
-                main_parcel_item = QTreeWidgetItem()
-                main_parcel_item.setText(0, header)
-                main_parcel_item.setIcon(0, QIcon(QPixmap(":/plugins/lm2/parcel_red.png")))
-                main_parcel_item.setData(0, Qt.UserRole, id)
-                main_parcel_item.setData(0, Qt.UserRole + 1, APPROVED)
-                self.approved_item.addChild(main_parcel_item)
-                approved_count += 1
-            else:
-                main_parcel_item = QTreeWidgetItem()
-                main_parcel_item.setText(0, header)
-                main_parcel_item.setIcon(0, QIcon(QPixmap(":/plugins/lm2/parcel_red.png")))
-                main_parcel_item.setData(0, Qt.UserRole, id)
-                main_parcel_item.setData(0, Qt.UserRole + 1, REFUSED)
-                self.refused_item.addChild(main_parcel_item)
-                refused_count += 1
-
-        self.approved_item.setText(0, self.tr("Approved") + ' (' + str(approved_count) + ')')
-        self.refused_item.setText(0, self.tr("Refused") + ' (' + str(refused_count) + ')')
 
     def __get_attribute(self, parcel_feature, layer):
 
@@ -1713,26 +1634,10 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         parcel_shape_layer.select(feature_id)
         self.plugin.iface.mapCanvas().zoomToSelected(parcel_shape_layer)
 
-    def __save_new_parcel(self):
-
-        file_path = self.file_path
-        parcel_shape_layer = QgsVectorLayer(file_path, "tmp_parcel_shape", "ogr")
-        iterator = parcel_shape_layer.getFeatures()
-        provider = parcel_shape_layer.dataProvider()
-
-        for parcel in iterator:
-            feature_id = parcel.id()
-            validaty_result = self.__validaty_of_new_parcel(parcel, parcel_shape_layer, feature_id)
-            if validaty_result[0]:
-                new_parcel = self.__add_new_parcel(parcel, parcel_shape_layer)
-                self.__add_new_parcel_attributes(parcel, new_parcel, provider)
-
     @pyqtSlot()
     def on_apply_button_clicked(self):
 
         self.create_savepoint()
-
-        # self.__save_new_parcel()
 
         self.commit()
 
@@ -1766,9 +1671,11 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
             if object_type == REFUSED:
                 self.message_label.setStyleSheet("QLabel {color: rgb(255,0,0);}")
                 self.message_label.setText(self.error_dic[object_id])
+                self.message_txt_edit.setPlainText(self.error_dic[object_id])
             else:
                 self.message_label.setStyleSheet("QLabel {color: rgb(0,71,31);}")
                 self.message_label.setText(current_item.text(0))
+                self.message_txt_edit.setPlainText(current_item.text(0))
 
     @pyqtSlot()
     def on_add_button_clicked(self):

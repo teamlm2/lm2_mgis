@@ -143,12 +143,15 @@ class Ui_PlanCaseDialog(object):
         self.label_7.setGeometry(QtCore.QRect(10, 60, 361, 16))
         self.label_7.setObjectName(_fromUtf8("label_7"))
         self.message_label = QtGui.QLabel(self.tab)
-        self.message_label.setGeometry(QtCore.QRect(12, 250, 377, 151))
+        self.message_label.setGeometry(QtCore.QRect(13, 240, 377, 41))
         font = QtGui.QFont()
         font.setBold(True)
         font.setWeight(75)
         self.message_label.setFont(font)
         self.message_label.setObjectName(_fromUtf8("message_label"))
+        self.message_txt_edit = QtGui.QPlainTextEdit(self.tab)
+        self.message_txt_edit.setGeometry(QtCore.QRect(10, 280, 381, 121))
+        self.message_txt_edit.setObjectName(_fromUtf8("message_txt_edit"))
         self.tabWidget.addTab(self.tab, _fromUtf8(""))
         self.tab_2 = QtGui.QWidget()
         self.tab_2.setObjectName(_fromUtf8("tab_2"))
@@ -418,7 +421,7 @@ class Ui_PlanCaseDialog(object):
         self.error_label.setObjectName(_fromUtf8("error_label"))
 
         self.retranslateUi(PlanCaseDialog)
-        self.tabWidget.setCurrentIndex(1)
+        self.tabWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(PlanCaseDialog)
 
     def retranslateUi(self, PlanCaseDialog):

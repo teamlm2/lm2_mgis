@@ -11,6 +11,10 @@ from ..model.SetPlanZoneRelation import *
 from ..model.ClRightForm import *
 from ..model.ClPlanType import *
 from ..model.SetPlanZoneRightForm import *
+from ..model.ClRightType import *
+from ..model.SetPlanZoneBaseConditionType import *
+from ..model.ClBaseConditionType import *
+from ..model.SetPlanZoneRigthType import *
 
 class PlanSettingsDialog(QDialog, Ui_PlanSettingsDialog):
 
@@ -60,6 +64,7 @@ class PlanSettingsDialog(QDialog, Ui_PlanSettingsDialog):
         for parent_type in parent_types:
             parent = QTreeWidgetItem(tree)
             parent.setText(0, str(parent_type) + ': ' + parent_types[parent_type])
+            parent.setToolTip(0, str(parent_type) + ': ' + parent_types[parent_type])
             parent.setData(0, Qt.UserRole, parent_type)
             parent.setFlags(parent.flags() | Qt.ItemIsTristate | Qt.ItemIsUserCheckable)
             parent_type_value = str(parent_type) + '%'
@@ -75,6 +80,7 @@ class PlanSettingsDialog(QDialog, Ui_PlanSettingsDialog):
                 child = QTreeWidgetItem(parent)
                 child.setFlags(child.flags() | Qt.ItemIsUserCheckable)
                 child.setText(0, str(sub_type.code) + ': ' + sub_type.name)
+                child.setToolTip(0, str(sub_type.code) + ': ' + sub_type.name)
                 child.setData(0, Qt.UserRole, sub_type.plan_zone_id)
                 child.setFlags(child.flags() | Qt.ItemIsTristate | Qt.ItemIsUserCheckable)
 
@@ -87,6 +93,7 @@ class PlanSettingsDialog(QDialog, Ui_PlanSettingsDialog):
                     sub_child = QTreeWidgetItem(child)
                     sub_child.setFlags(child.flags() | Qt.ItemIsUserCheckable)
                     sub_child.setText(0, str(child_type.code) + ': ' + child_type.name)
+                    sub_child.setToolTip(0, str(child_type.code) + ': ' + child_type.name)
                     sub_child.setData(0, Qt.UserRole, child_type.plan_zone_id)
                     sub_child.setFlags(sub_child.flags() | Qt.ItemIsTristate | Qt.ItemIsUserCheckable)
 
@@ -102,6 +109,7 @@ class PlanSettingsDialog(QDialog, Ui_PlanSettingsDialog):
                         process_child = QTreeWidgetItem(sub_child)
                         process_child.setFlags(child.flags() | Qt.ItemIsUserCheckable)
                         process_child.setText(0, str(process_type.code) + ': ' + process_type.name)
+                        process_child.setToolTip(0, str(process_type.code) + ': ' + process_type.name)
                         process_child.setData(0, Qt.UserRole, process_type.plan_zone_id)
                         process_child.setCheckState(0, Qt.Unchecked)
                         if values:
@@ -133,10 +141,38 @@ class PlanSettingsDialog(QDialog, Ui_PlanSettingsDialog):
             return
 
         self.settings_twidget.setRowCount(0)
-        values = self.session.query(ClPlanType).all()
+        values = self.session.query(ClPlanType).order_by(ClPlanType.code).all()
 
         for value in values:
             id = value.plan_type_id
+            desc = value.description
+            self.__add_settings_twidget_row(id, desc)
+
+    @pyqtSlot(bool)
+    def on_right_type_rbutton_toggled(self, state):
+
+        if not state:
+            return
+
+        self.settings_twidget.setRowCount(0)
+        values = self.session.query(ClRightType).order_by(ClRightType.code).all()
+
+        for value in values:
+            id = value.code
+            desc = value.description
+            self.__add_settings_twidget_row(id, desc)
+
+    @pyqtSlot(bool)
+    def on_sec_zone_rbutton_toggled(self, state):
+
+        if not state:
+            return
+
+        self.settings_twidget.setRowCount(0)
+        values = self.session.query(ClBaseConditionType).order_by(ClBaseConditionType.code).all()
+
+        for value in values:
+            id = value.base_condition_type_id
             desc = value.description
             self.__add_settings_twidget_row(id, desc)
 
@@ -164,11 +200,36 @@ class PlanSettingsDialog(QDialog, Ui_PlanSettingsDialog):
                 item_dec = self.settings_twidget.item(row, 0)
                 item_dec.setCheckState(Qt.Unchecked)
             id_item.setCheckState(Qt.Checked)
+
         if self.zone_type_rbutton.isChecked():
             id = self.settings_twidget.item(selected_row, 0).data(Qt.UserRole)
             values = self.session.query(ClPlanZone).\
                 join(SetPlanZoneRightForm, ClPlanZone.plan_zone_id == SetPlanZoneRightForm.plan_zone_id). \
                 filter(SetPlanZoneRightForm.right_form_id == id).all()
+
+            self.__process_type_mapping(values)
+
+        if self.plan_type_rbutton.isChecked():
+            id = self.settings_twidget.item(selected_row, 0).data(Qt.UserRole)
+            values = self.session.query(ClPlanZone).\
+                join(SetPlanZonePlanType, ClPlanZone.plan_zone_id == SetPlanZonePlanType.plan_zone_id). \
+                filter(SetPlanZonePlanType.plan_type_id == id).all()
+
+            self.__process_type_mapping(values)
+
+        if self.right_type_rbutton.isChecked():
+            id = self.settings_twidget.item(selected_row, 0).data(Qt.UserRole)
+            values = self.session.query(ClPlanZone).\
+                join(SetPlanZoneRigthType, ClPlanZone.plan_zone_id == SetPlanZoneRigthType.plan_zone_id). \
+                filter(SetPlanZoneRigthType.right_type_code == id).all()
+
+            self.__process_type_mapping(values)
+
+        if self.sec_zone_rbutton.isChecked():
+            id = self.settings_twidget.item(selected_row, 0).data(Qt.UserRole)
+            values = self.session.query(ClPlanZone).\
+                join(SetPlanZoneBaseConditionType, ClPlanZone.plan_zone_id == SetPlanZoneBaseConditionType.plan_zone_id). \
+                filter(SetPlanZoneBaseConditionType.base_condition_type_id == id).all()
 
             self.__process_type_mapping(values)
 
@@ -210,6 +271,40 @@ class PlanSettingsDialog(QDialog, Ui_PlanSettingsDialog):
 
                             self.session.add(object)
 
+        if self.right_type_rbutton.isChecked():
+            for row in row_count:
+                item = self.settings_twidget.item(row, 0)
+                if item.checkState() == QtCore.Qt.Checked:
+                    id = item.data(Qt.UserRole)
+                    zone_count = self.session.query(ClPlanZone).filter(ClPlanZone.plan_zone_id == plan_zone_id).count()
+                    if zone_count == 1:
+                        count = self.session.query(SetPlanZoneRigthType). \
+                            filter(SetPlanZoneRigthType.right_type_code == id). \
+                            filter(SetPlanZoneRigthType.plan_zone_id == plan_zone_id).count()
+                        if count == 0:
+                            object = SetPlanZoneRigthType()
+                            object.plan_zone_id = plan_zone_id
+                            object.right_type_code = id
+
+                            self.session.add(object)
+
+        if self.sec_zone_rbutton.isChecked():
+            for row in row_count:
+                item = self.settings_twidget.item(row, 0)
+                if item.checkState() == QtCore.Qt.Checked:
+                    id = item.data(Qt.UserRole)
+                    zone_count = self.session.query(ClPlanZone).filter(ClPlanZone.plan_zone_id == plan_zone_id).count()
+                    if zone_count == 1:
+                        count = self.session.query(SetPlanZoneBaseConditionType). \
+                            filter(SetPlanZoneBaseConditionType.base_condition_type_id == id). \
+                            filter(SetPlanZoneBaseConditionType.plan_zone_id == plan_zone_id).count()
+                        if count == 0:
+                            object = SetPlanZoneBaseConditionType()
+                            object.plan_zone_id = plan_zone_id
+                            object.base_condition_type_id = id
+
+                            self.session.add(object)
+
     def __settings_remove_delete(self, plan_zone_id):
 
         row_count = range(self.settings_twidget.rowCount())
@@ -238,6 +333,32 @@ class PlanSettingsDialog(QDialog, Ui_PlanSettingsDialog):
                         self.session.query(SetPlanZonePlanType). \
                             filter(SetPlanZonePlanType.plan_type_id == id). \
                             filter(SetPlanZonePlanType.plan_zone_id == plan_zone_id).delete()
+
+        if self.sec_zone_rbutton.isChecked():
+            for row in row_count:
+                item = self.settings_twidget.item(row, 0)
+                if item.checkState() == QtCore.Qt.Checked:
+                    id = item.data(Qt.UserRole)
+                    count = self.session.query(SetPlanZoneBaseConditionType). \
+                        filter(SetPlanZoneBaseConditionType.base_condition_type_id == id). \
+                        filter(SetPlanZoneBaseConditionType.plan_zone_id == plan_zone_id).count()
+                    if count == 1:
+                        self.session.query(SetPlanZoneBaseConditionType). \
+                            filter(SetPlanZoneBaseConditionType.base_condition_type_id == id). \
+                            filter(SetPlanZoneBaseConditionType.plan_zone_id == plan_zone_id).delete()
+
+        if self.right_type_rbutton.isChecked():
+            for row in row_count:
+                item = self.settings_twidget.item(row, 0)
+                if item.checkState() == QtCore.Qt.Checked:
+                    id = item.data(Qt.UserRole)
+                    count = self.session.query(SetPlanZoneRigthType). \
+                        filter(SetPlanZoneRigthType.right_type_code == id). \
+                        filter(SetPlanZoneRigthType.plan_zone_id == plan_zone_id).count()
+                    if count == 1:
+                        self.session.query(SetPlanZoneRigthType). \
+                            filter(SetPlanZoneRigthType.right_type_code == id). \
+                            filter(SetPlanZoneRigthType.plan_zone_id == plan_zone_id).delete()
 
     @pyqtSlot()
     def on_apply_button_clicked(self):
