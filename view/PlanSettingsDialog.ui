@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
-  <widget class="QTabWidget" name="tabWidget">
+  <widget class="QTabWidget" name="settings_tab_widget">
    <property name="geometry">
     <rect>
      <x>5</x>
@@ -25,7 +25,7 @@
    <property name="currentIndex">
     <number>0</number>
    </property>
-   <widget class="QWidget" name="tab">
+   <widget class="QWidget" name="base_settings_tab">
     <attribute name="title">
      <string>Үндсэн тохиргоо</string>
     </attribute>
@@ -115,7 +115,7 @@
      </property>
     </widget>
    </widget>
-   <widget class="QWidget" name="tab_2">
+   <widget class="QWidget" name="relation_settings_tab">
     <attribute name="title">
      <string>Арга хэмжээний давхардлын тохиргоо</string>
     </attribute>
@@ -123,9 +123,9 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>2</y>
+       <y>39</y>
        <width>421</width>
-       <height>481</height>
+       <height>444</height>
       </rect>
      </property>
      <column>
@@ -133,6 +133,29 @@
        <string notr="true">1</string>
       </property>
      </column>
+    </widget>
+    <widget class="QLineEdit" name="zone_find_edit">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>10</y>
+       <width>331</width>
+       <height>20</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="zone_find_button">
+     <property name="geometry">
+      <rect>
+       <x>357</x>
+       <y>9</y>
+       <width>75</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Хайх</string>
+     </property>
     </widget>
    </widget>
   </widget>
@@ -212,7 +235,7 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>6</y>
+     <y>3</y>
      <width>451</width>
      <height>16</height>
     </rect>
@@ -241,8 +264,8 @@
    <property name="geometry">
     <rect>
      <x>460</x>
-     <y>27</y>
-     <width>151</width>
+     <y>30</y>
+     <width>331</width>
      <height>17</height>
     </rect>
    </property>
@@ -254,9 +277,9 @@
    <property name="geometry">
     <rect>
      <x>460</x>
-     <y>46</y>
+     <y>86</y>
      <width>421</width>
-     <height>491</height>
+     <height>451</height>
     </rect>
    </property>
    <column>
@@ -264,6 +287,45 @@
      <string notr="true">1</string>
     </property>
    </column>
+  </widget>
+  <widget class="QLineEdit" name="process_find_edit">
+   <property name="geometry">
+    <rect>
+     <x>460</x>
+     <y>58</y>
+     <width>331</width>
+     <height>20</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="process_find_button">
+   <property name="geometry">
+    <rect>
+     <x>807</x>
+     <y>57</y>
+     <width>75</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Хайх</string>
+   </property>
+  </widget>
+  <widget class="QProgressBar" name="main_load_pbar">
+   <property name="geometry">
+    <rect>
+     <x>453</x>
+     <y>5</y>
+     <width>436</width>
+     <height>14</height>
+    </rect>
+   </property>
+   <property name="value">
+    <number>0</number>
+   </property>
+   <property name="textDirection">
+    <enum>QProgressBar::TopToBottom</enum>
+   </property>
   </widget>
  </widget>
  <resources>
