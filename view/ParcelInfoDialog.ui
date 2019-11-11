@@ -87,7 +87,7 @@
      <property name="geometry">
       <rect>
        <x>0</x>
-       <y>0</y>
+       <y>-147</y>
        <width>600</width>
        <height>1000</height>
       </rect>
@@ -114,7 +114,7 @@
        </rect>
       </property>
       <property name="currentIndex">
-       <number>2</number>
+       <number>3</number>
       </property>
       <widget class="QWidget" name="parcel_person_tab">
        <attribute name="title">
@@ -1420,6 +1420,19 @@
         </property>
         <property name="text">
          <string>Old Parcel ID</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="fee_layer_view_button">
+        <property name="geometry">
+         <rect>
+          <x>100</x>
+          <y>310</y>
+          <width>141</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Fee Layer View</string>
         </property>
        </widget>
       </widget>

@@ -4804,21 +4804,20 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
         soum_filter = str(au2_code) + "-%"
 
         count = self.session.query(SetCadastrePage) \
-            .filter(SetCadastrePage.id.like("%-%")) \
-            .filter(SetCadastrePage.id.like(soum_filter)) \
-            .order_by(func.substr(SetCadastrePage.id, 7, 9).desc()).count()
+            .filter(SetCadastrePage.id_cold.like("%-%")) \
+            .filter(SetCadastrePage.id_cold.like(soum_filter)).count()
 
         if count > 0:
             try:
                 max_number_cpage = self.session.query(SetCadastrePage) \
-                    .filter(SetCadastrePage.id.like("%-%")) \
-                    .filter(SetCadastrePage.id.like(soum_filter)) \
-                    .order_by(func.substr(SetCadastrePage.id, 7, 9).desc()).first()
+                    .filter(SetCadastrePage.id_cold.like("%-%")) \
+                    .filter(SetCadastrePage.id_cold.like(soum_filter)) \
+                    .order_by(SetCadastrePage.id.desc()).first()
             except SQLAlchemyError, e:
                 PluginUtils.show_error(self, self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
                 return
 
-            cpage_numbers = max_number_cpage.id.split("-")
+            cpage_numbers = max_number_cpage.id_cold.split("-")
 
             cpage_id = au2_code +'-'+ (str(int(cpage_numbers[1]) + 1).zfill(3))
 
@@ -4868,7 +4867,7 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
 
         id = self.__cpage_newid()
         item = QTableWidgetItem(str(id))
-        item.setData(Qt.UserRole, id)
+        item.setData(Qt.UserRole+1, id)
         self.cpage_twidget.setItem(row, 0, item)
 
         item = QTableWidgetItem(self.cpage_register_date.text())
@@ -4902,7 +4901,7 @@ class LandOfficeAdministrativeSettingsDialog(QDialog, Ui_LandOfficeAdministrativ
         # database insert
 
         cpage = SetCadastrePage()
-        cpage.id = id
+        cpage.id_cold = id
         cpage.register_date = register_date_qt
         cpage.end_date = end_date_qt
         cpage.range_first_no = self.cpage_first_number_edit.value()

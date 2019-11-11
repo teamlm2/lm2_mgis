@@ -8,6 +8,7 @@ class SetCadastrePage(Base):
 
     __tablename__ = 'set_cadastre_page'
 
+    id_cold = Column(String)
     id = Column(Integer, primary_key=True)
     description = Column(String)
     range_first_no = Column(Integer)

@@ -3528,6 +3528,36 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
         dialog.exec_()
 
     @pyqtSlot()
+    def on_fee_layer_view_button_clicked(self):
+
+        root = QgsProject.instance().layerTreeRoot()
+
+        restrictions = DatabaseUtils.working_l2_code()
+        if not restrictions:
+            PluginUtils.show_message(self, self.tr("Connection Error"), self.tr("Please connect to database!!!"))
+            return
+
+        mygroup = root.findGroup("UbGIS")
+        if mygroup is None:
+            mygroup = root.insertGroup(8, "UbGIS")
+
+        is_pug_parcel = False
+
+        vlayer_parcel = LayerUtils.load_ub_data_layer_by_name("ca_ub_parcel_fee", "gid")
+
+        layers = self.plugin.iface.legendInterface().layers()
+
+        for layer in layers:
+            if layer.name() == "UbGISParcelPayment":
+                is_pug_parcel = True
+        if not is_pug_parcel:
+            mygroup.addLayer(vlayer_parcel)
+
+        vlayer_parcel.setLayerName(QApplication.translate("Plugin", "UbGISParcelPayment"))
+        vlayer_parcel.loadNamedStyle(
+            str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "template\style/ub_parcel_fee.qml")
+
+    @pyqtSlot()
     def on_layer_view_button_clicked(self):
 
         root = QgsProject.instance().layerTreeRoot()

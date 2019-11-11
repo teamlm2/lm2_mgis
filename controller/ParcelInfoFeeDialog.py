@@ -237,7 +237,16 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
             filter(UbFeeHistory.current_year == current_year).all()
 
         for value in values:
-            self.object_cbox.addItem(value.pid + ': (' + value.person_register + ') ' + value.ner, value.id)
+            name = ''
+            if value.pid:
+                name = value.pid
+
+            if value.person_register:
+                name = name + ': (' + value.person_register + ') '
+
+            if value.ner:
+                name = name + ' ' + value.ner
+            self.object_cbox.addItem(name, value.id)
 
     @pyqtSlot(int)
     def on_object_cbox_currentIndexChanged(self, index):
