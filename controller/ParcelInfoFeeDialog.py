@@ -60,6 +60,7 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
         self.__setup_cbox()
         self.selected_year = None
         self.__list_of_paid()
+        self.__list_of_payment()
 
         # if is_find:
         #     self.__load_fee(self.person_id, self.old_parcel_id)
@@ -74,6 +75,80 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
         self.paid_twidget.setEditTriggers(QTableWidget.NoEditTriggers)
         self.paid_twidget.setSelectionBehavior(QTableWidget.SelectRows)
         self.paid_twidget.setSelectionMode(QTableWidget.SingleSelection)
+
+        self.payment_twidget.setAlternatingRowColors(True)
+        self.payment_twidget.setEditTriggers(QTableWidget.NoEditTriggers)
+        self.payment_twidget.setSelectionBehavior(QTableWidget.SelectRows)
+        self.payment_twidget.setSelectionMode(QTableWidget.SingleSelection)
+
+    def __list_of_payment(self):
+
+        self.payment_twidget.setRowCount(0)
+
+        values = self.session.query(UbFeeHistory). \
+            filter(UbFeeHistory.pid == self.old_parcel_id).all()
+
+        for value in values:
+            count = self.payment_twidget.rowCount()
+            self.payment_twidget.insertRow(count)
+
+            city_type = u''
+            if value.city_type == 1:
+                city_type = u'Нийслэл'
+            if value.city_type == 2:
+                city_type = u'Дүүрэг'
+            item = QTableWidgetItem(city_type)
+            item.setData(Qt.UserRole, value.city_type)
+            item.setData(Qt.UserRole + 1, value.id)
+            self.payment_twidget.setItem(count, 0, item)
+
+            item = QTableWidgetItem(str(value.current_year))
+            item.setData(Qt.UserRole, value.current_year)
+            self.payment_twidget.setItem(count, 1, item)
+
+            item = QTableWidgetItem(value.person_register)
+            item.setData(Qt.UserRole, value.person_register)
+            self.payment_twidget.setItem(count, 2, item)
+
+            item = QTableWidgetItem(value.contract_no)
+            item.setData(Qt.UserRole, value.contract_no)
+            self.payment_twidget.setItem(count, 3, item)
+
+            item = QTableWidgetItem(str(value.payment_contract))
+            item.setData(Qt.UserRole, value.payment_contract)
+            self.payment_twidget.setItem(count, 4, item)
+
+            item = QTableWidgetItem(str(value.payment_year))
+            item.setData(Qt.UserRole, value.payment_year)
+            self.payment_twidget.setItem(count, 5, item)
+
+            item = QTableWidgetItem(str(value.payment_total))
+            item.setData(Qt.UserRole, value.city_type)
+            self.payment_twidget.setItem(count, 6, item)
+
+            item = QTableWidgetItem(str(value.payment_before_less))
+            item.setData(Qt.UserRole, value.payment_before_less)
+            self.payment_twidget.setItem(count, 7, item)
+
+            item = QTableWidgetItem(str(value.payment_before_over))
+            item.setData(Qt.UserRole, value.payment_before_over)
+            self.payment_twidget.setItem(count, 8, item)
+
+            item = QTableWidgetItem(str(value.paid_city))
+            item.setData(Qt.UserRole, value.paid_city)
+            self.payment_twidget.setItem(count, 9, item)
+
+            item = QTableWidgetItem(str(value.paid_district))
+            item.setData(Qt.UserRole, value.paid_district)
+            self.payment_twidget.setItem(count, 10, item)
+
+            item = QTableWidgetItem(str(value.invalid_payment))
+            item.setData(Qt.UserRole, value.invalid_payment)
+            self.payment_twidget.setItem(count, 11, item)
+
+            item = QTableWidgetItem(str(value.paid_before_less))
+            item.setData(Qt.UserRole, value.paid_before_less)
+            self.payment_twidget.setItem(count, 12, item)
 
     def __list_of_paid(self):
 
@@ -145,8 +220,12 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
     def __setup_cbox(self):
 
         self.year_cbox.clear()
+        self.city_type_cbox.clear()
         for value in self.select_years:
             self.year_cbox.addItem(str(value), value)
+
+        self.city_type_cbox.addItem(u'Нийслэл', 1)
+        self.city_type_cbox.addItem(u'Дүүрэг', 2)
 
     @pyqtSlot(int)
     def on_year_cbox_currentIndexChanged(self, index):
@@ -167,6 +246,28 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
         current_id = self.object_cbox.itemData(self.object_cbox.currentIndex())
 
         self.__load_fee_history(current_id)
+
+    @pyqtSlot(QTableWidgetItem)
+    def on_payment_twidget_itemClicked(self, item):
+
+        # self.__clear_all()
+
+        selected_row = self.payment_twidget.currentRow()
+        item = self.payment_twidget.item(selected_row, 0)
+        id = item.data(Qt.UserRole + 1)
+
+        value = self.session.query(UbFeeHistory). \
+            filter(UbFeeHistory.id == id).first()
+
+        if value.city_type:
+            self.city_type_cbox.setCurrentIndex(self.city_type_cbox.findData(value.city_type))
+
+        if value.current_year:
+            self.year_cbox.setCurrentIndex(self.year_cbox.findData(value.current_year))
+
+        if value.id:
+            self.object_cbox.setCurrentIndex(self.object_cbox.findData(value.id))
+        # self.__load_fee_history(id)
 
     def __load_fee_history(self, current_id):
 
@@ -229,6 +330,7 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
 
         current_id = self.object_cbox.itemData(self.object_cbox.currentIndex())
         self.selected_year = self.year_cbox.itemData(self.year_cbox.currentIndex())
+        city_type = self.city_type_cbox.itemData(self.city_type_cbox.currentIndex())
 
         if current_id:
             object = self.session.query(UbFeeHistory).filter(UbFeeHistory.id == current_id).one()
@@ -255,6 +357,7 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
             object.invalid_payment = self.paid_invalid_sbox.value()
             object.paid_less = self.paid_less_sbox.value()
             object.paid_over = self.paid_over_sbox.value()
+            object.city_type = city_type
         else:
             object = UbFeeHistory()
 
@@ -284,6 +387,7 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
             object.current_year = self.selected_year
             object.pid = self.old_parcel_id
             object.person_register = self.person_id
+            object.city_type = city_type
 
             self.session.add(object)
 
@@ -292,6 +396,7 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
         self.__setup_cbox()
         self.year_cbox.setCurrentIndex(self.year_cbox.findData(self.selected_year))
         self.__start_fade_out_timer()
+        self.__list_of_payment()
 
     @pyqtSlot()
     def on_finish_button_clicked(self):
@@ -401,6 +506,7 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
         self.session.commit()
         self.__start_fade_out_timer()
         self.__list_of_paid()
+        self.__list_of_payment()
 
     def __start_fade_out_timer(self):
 

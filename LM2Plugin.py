@@ -1620,6 +1620,7 @@ class LM2Plugin:
         # self.__create_parcel_info()
         if UserRight.land_office_admin in user_rights:
             self.land_plan_settings_action.setEnabled(True)
+            self.admin_settings_action.setEnabled(True)
 
         if UserRight.cadastre_view in user_rights or UserRight.cadastre_update in user_rights:
             self.create_case_action.setEnabled(True)
@@ -1674,6 +1675,7 @@ class LM2Plugin:
         self.parcel_spa_action.setEnabled(False)
         self.land_plan_navigator_action.setEnabled(False)
         self.land_plan_settings_action.setEnabled(False)
+        self.admin_settings_action.setEnabled(False)
 
     def transformPoint(self, point, layer_postgis_srid):
 

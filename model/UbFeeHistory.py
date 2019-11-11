@@ -37,3 +37,5 @@ class UbFeeHistory(Base):
     decision = Column(String)
     current_year = Column(Integer)
 
+    city_type = Column(Integer)
+

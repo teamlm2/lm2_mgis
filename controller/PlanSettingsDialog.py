@@ -370,7 +370,7 @@ class PlanSettingsDialog(QDialog, Ui_PlanSettingsDialog):
     def __settings_add_save(self, plan_zone_id):
 
         row_count = range(self.settings_twidget.rowCount())
-        self.main_load_pbar.setMaximum(row_count)
+        self.main_load_pbar.setMaximum(self.settings_twidget.rowCount())
         if self.zone_type_rbutton.isChecked():
             for row in row_count:
                 item = self.settings_twidget.item(row, 0)
@@ -455,7 +455,7 @@ class PlanSettingsDialog(QDialog, Ui_PlanSettingsDialog):
     def __settings_remove_delete(self, plan_zone_id):
 
         row_count = range(self.settings_twidget.rowCount())
-        self.main_load_pbar.setMaximum(row_count)
+        self.main_load_pbar.setMaximum(self.settings_twidget.rowCount())
         if self.zone_type_rbutton.isChecked():
             for row in row_count:
                 item = self.settings_twidget.item(row, 0)
