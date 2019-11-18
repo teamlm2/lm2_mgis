@@ -503,7 +503,13 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
                     object.year_amount = value.paid_over
 
                 object.imposition_year_amount = value.payment_year
-                object.imposition_total_amount = value.payment_year + value.payment_before_less - value.payment_before_over + value.payment_fund + value.payment_loss
+                object.imposition_total_amount = \
+                    value.payment_year if value.payment_year is not None else 0 + \
+                              value.payment_before_less if value.payment_before_less is not None else 0 - \
+                              value.payment_before_over if value.payment_before_over is not None else 0 + \
+                              value.payment_fund if value.payment_fund is not None else 0 + \
+                              value.payment_loss if value.payment_loss is not None else 0
+
 
                 object.contract_amount = value.payment_contract
 

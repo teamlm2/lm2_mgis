@@ -104,7 +104,6 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         self.error_dic = {}
         self.polygon_rbutton.setChecked(True)
 
-
         # self.message_label.setStyleSheet("QLabel { background-color : red; color : blue; }");
         self.message_label.setStyleSheet("QLabel {color: rgb(255,0,0);}")
         self.__setup_data()
