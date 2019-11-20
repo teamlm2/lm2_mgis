@@ -302,17 +302,17 @@ font: 75 14pt &quot;Helvetica&quot;;</string>
         <string>Load</string>
        </property>
       </widget>
-      <widget class="QPushButton" name="get_data_layer_button">
+      <widget class="QPushButton" name="get_selected_features_button">
        <property name="geometry">
         <rect>
-         <x>100</x>
+         <x>101</x>
          <y>170</y>
-         <width>81</width>
+         <width>115</width>
          <height>23</height>
         </rect>
        </property>
        <property name="text">
-        <string>Get Data layer</string>
+        <string>Get Selected Features</string>
        </property>
       </widget>
       <widget class="QPushButton" name="parcel_clear_button">
@@ -331,7 +331,7 @@ font: 75 14pt &quot;Helvetica&quot;;</string>
       <widget class="QPushButton" name="delete_parcel_button">
        <property name="geometry">
         <rect>
-         <x>192</x>
+         <x>230</x>
          <y>170</y>
          <width>75</width>
          <height>23</height>

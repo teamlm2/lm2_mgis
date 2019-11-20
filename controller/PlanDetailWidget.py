@@ -303,7 +303,7 @@ class PlanDetailWidget(QDockWidget, Ui_PlanDetailWidget, DatabaseHelper):
         if len(feature_ids) == 0:
             self.error_label.setText(self.tr("No parcel assigned"))
 
-        layer.setSelectedFeatures(feature_ids)
+        layer.select(feature_ids)
         self.plugin.iface.mapCanvas().zoomToSelected(layer)
 
     @pyqtSlot()
@@ -465,7 +465,7 @@ class PlanDetailWidget(QDockWidget, Ui_PlanDetailWidget, DatabaseHelper):
         self.session.commit()
 
     @pyqtSlot()
-    def on_get_data_layer_button_clicked(self):
+    def on_get_selected_features_button_clicked(self):
 
         print '---'
         print self.item_polygon_main.childCount()
