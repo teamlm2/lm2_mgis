@@ -508,8 +508,7 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
                               value.payment_before_less if value.payment_before_less is not None else 0 - \
                               value.payment_before_over if value.payment_before_over is not None else 0 + \
                               value.payment_fund if value.payment_fund is not None else 0 + \
-                              value.payment_loss if value.payment_loss is not None else 0
-
+                              value.payment_fund if value.payment_loss is not None else 0
 
                 object.contract_amount = value.payment_contract
 
