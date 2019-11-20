@@ -88,14 +88,31 @@ class PlanAttributeEditDialog(QDialog, Ui_PlanAttributeEditDialog, DatabaseHelpe
 
     def __setup_attribute_twidget(self):
 
-        self.attribute_twidget = DragTableWidget("Attribute", 10, 20, 431, 501, self.attribute_group_box)
-
+        self.default_attribute_twidget = DragTableWidget("Attribute", 10, 20, 431, 210, self.attribute_group_box)
+        self.attribute_twidget = DragTableWidget("Attribute", 10, 231, 431, 300, self.attribute_group_box)
+        #
         header = [self.tr("Attribute Name"),
                   self.tr("Attribute Value")]
+        self.default_attribute_twidget.setup_header(header)
         self.attribute_twidget.setup_header(header)
-
         # self.attribute_twidget.itemDropped.connect(self.on_application_twidget_itemDropped)
         # self.attribute_twidget.cellChanged.connect(self.on_application_twidget_cellChanged)
+
+        default_attribute_row = self.default_attribute_twidget.rowCount()
+        name_item = QTableWidgetItem('')
+        name_item.setData(Qt.UserRole, '')
+        name_item.setData(Qt.UserRole + 1, 0)
+        name_item.setData(Qt.UserRole + 2, 1)
+
+        value_item = QTableWidgetItem('')
+        value_item.setData(Qt.UserRole, '')
+        value_item.setData(Qt.UserRole + 1, 0)
+        value_item.setData(Qt.UserRole + 2, 1)
+
+        self.default_attribute_twidget.insertRow(default_attribute_row)
+        self.default_attribute_twidget.setItem(default_attribute_row, ATTRIBUTE_NAME, name_item)
+        self.default_attribute_twidget.setItem(default_attribute_row, ATTRIBUTE_VALUE, value_item)
+
         attributes = self.session.query(ClAttributeZone, SetPlanZoneAttribute).\
             join(SetPlanZoneAttribute, ClAttributeZone.attribute_id == SetPlanZoneAttribute.attribute_id).\
             filter(SetPlanZoneAttribute.plan_type_id == self.plan.plan_type_id).\
@@ -130,6 +147,7 @@ class PlanAttributeEditDialog(QDialog, Ui_PlanAttributeEditDialog, DatabaseHelpe
             value_item = QTableWidgetItem(attribute_value)
             value_item.setData(Qt.UserRole, attribute_value)
             value_item.setData(Qt.UserRole + 1, attribute_process_id)
+            value_item.setData(Qt.UserRole + 2, 1)
 
             self.attribute_twidget.insertRow(attribute_row)
             self.attribute_twidget.setItem(attribute_row, ATTRIBUTE_NAME, name_item)

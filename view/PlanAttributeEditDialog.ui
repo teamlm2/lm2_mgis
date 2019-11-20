@@ -101,10 +101,10 @@
   <widget class="QGroupBox" name="attribute_group_box">
    <property name="geometry">
     <rect>
-     <x>3</x>
-     <y>27</y>
+     <x>5</x>
+     <y>24</y>
      <width>451</width>
-     <height>531</height>
+     <height>539</height>
     </rect>
    </property>
    <property name="minimumSize">
@@ -116,7 +116,7 @@
    <property name="maximumSize">
     <size>
      <width>451</width>
-     <height>531</height>
+     <height>550</height>
     </size>
    </property>
    <property name="title">

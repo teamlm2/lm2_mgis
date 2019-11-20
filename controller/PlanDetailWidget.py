@@ -73,6 +73,7 @@ class PlanDetailWidget(QDockWidget, Ui_PlanDetailWidget, DatabaseHelper):
         self.__setup_context_menu()
         self.parcels = []
         self.process_types = []
+        self.process_list = []
         self.main_tree_widget.itemChanged.connect(self.__itemMainParcelsCheckChanged)
 
     def __setup_cbox(self):
@@ -111,26 +112,26 @@ class PlanDetailWidget(QDockWidget, Ui_PlanDetailWidget, DatabaseHelper):
 
     def __setup_main_tree_widget(self):
 
-        self.main_tree_widget.clear()
-        self.item_point_main = QTreeWidgetItem()
-        self.item_point_main.setText(0, self.tr("Point"))
-        self.item_point_main.setData(0, Qt.UserRole, Constants.GEOM_POINT)
-
-        self.item_line_main = QTreeWidgetItem()
-        self.item_line_main.setText(0, self.tr("Line"))
-        self.item_line_main.setData(0, Qt.UserRole, Constants.GEOM_LINE)
-
-        self.item_polygon_main = QTreeWidgetItem()
-        self.item_polygon_main.setText(0, self.tr("Polygon"))
-        self.item_polygon_main.setData(0, Qt.UserRole, GEOM_POlYGON)
+        # self.main_tree_widget.clear()
+        # self.item_point_main = QTreeWidgetItem()
+        # self.item_point_main.setText(0, self.tr("Point"))
+        # self.item_point_main.setData(0, Qt.UserRole, Constants.GEOM_POINT)
+        #
+        # self.item_line_main = QTreeWidgetItem()
+        # self.item_line_main.setText(0, self.tr("Line"))
+        # self.item_line_main.setData(0, Qt.UserRole, Constants.GEOM_LINE)
+        #
+        # self.item_polygon_main = QTreeWidgetItem()
+        # self.item_polygon_main.setText(0, self.tr("Polygon"))
+        # self.item_polygon_main.setData(0, Qt.UserRole, GEOM_POlYGON)
 
         self.main_tree_widget.setSelectionMode(QAbstractItemView.SingleSelection)
         self.main_tree_widget.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.main_tree_widget.setEditTriggers(QAbstractItemView.NoEditTriggers)
 
-        self.main_tree_widget.addTopLevelItem(self.item_point_main)
-        self.main_tree_widget.addTopLevelItem(self.item_line_main)
-        self.main_tree_widget.addTopLevelItem(self.item_polygon_main)
+        # self.main_tree_widget.addTopLevelItem(self.item_point_main)
+        # self.main_tree_widget.addTopLevelItem(self.item_line_main)
+        # self.main_tree_widget.addTopLevelItem(self.item_polygon_main)
         self.main_tree_widget.setContextMenuPolicy(Qt.CustomContextMenu)
 
     def __setup_context_menu(self):
@@ -170,111 +171,60 @@ class PlanDetailWidget(QDockWidget, Ui_PlanDetailWidget, DatabaseHelper):
         all_count = values.count()
         self.main_load_pbar.setMaximum(all_count)
 
-        points = self.session.query(PlProjectParcel). \
-            filter(PlProjectParcel.project_id == self.plan.project_id). \
-            filter(PlProjectParcel.polygon_geom == None). \
-            filter(PlProjectParcel.line_geom == None).order_by(PlProjectParcel.badedturl)
+        values = self.session.query(PlProjectParcel). \
+            filter(PlProjectParcel.project_id == self.plan.project_id).order_by(PlProjectParcel.badedturl)
 
-        lines = self.session.query(PlProjectParcel). \
-            filter(PlProjectParcel.project_id == self.plan.project_id). \
-            filter(PlProjectParcel.polygon_geom == None). \
-            filter(PlProjectParcel.point_geom == None).order_by(PlProjectParcel.badedturl)
-
-        polygons = self.session.query(PlProjectParcel). \
-            filter(PlProjectParcel.project_id == self.plan.project_id). \
-            filter(PlProjectParcel.line_geom == None). \
-            filter(PlProjectParcel.point_geom == None).order_by(PlProjectParcel.badedturl)
 
         if self.main_process_type_cbox.currentIndex() != -1:
             if not self.main_process_type_cbox.itemData(self.main_process_type_cbox.currentIndex()) == -1:
                 process_type = self.main_process_type_cbox.itemData(self.main_process_type_cbox.currentIndex())
 
-                points = points.filter(PlProjectParcel.plan_zone_id == process_type)
-                lines = lines.filter(PlProjectParcel.plan_zone_id == process_type)
-                polygons = polygons.filter(PlProjectParcel.plan_zone_id == process_type)
+                values = values.filter(PlProjectParcel.plan_zone_id == process_type)
 
         if self.main_process_edit.text():
             process_text = "%" + self.main_process_edit.text() + "%"
-            points = points.\
+            values = values.\
                 join(ClZoneSub, PlProjectParcel.plan_zone_id == ClZoneSub.plan_zone_id).\
-                filter(ClZoneSub.description.ilike(process_text))
-
-            lines = lines. \
-                join(ClZoneSub, PlProjectParcel.plan_zone_id == ClZoneSub.plan_zone_id). \
-                filter(ClZoneSub.description.ilike(process_text))
-
-            polygons = polygons. \
-                join(ClZoneSub, PlProjectParcel.plan_zone_id == ClZoneSub.plan_zone_id). \
                 filter(ClZoneSub.description.ilike(process_text))
 
         count = 0
         tree = self.main_tree_widget
-        for value in polygons:
-            name = ''
-            if value.gazner:
-                name = '(' + value.gazner + ')'
-            desc = ''
-            if value.plan_zone_ref:
-                if value.plan_zone_ref.name:
-                    desc = value.plan_zone_ref.name
-                    item = QTreeWidgetItem()
-                    item.setText(0, str(value.plan_zone_ref.code)+ ': ' + name + desc)
-                    item.setIcon(0, QIcon(QPixmap(":/plugins/lm2/parcel_red.png")))
-                    item.setData(0, Qt.UserRole, value.parcel_id)
-                    item.setData(0, Qt.UserRole + 1, "polygon")
-                    item.setData(0, Qt.UserRole + 2, value.plan_zone_id)
-                    item.setCheckState(0, Qt.Unchecked)
-                    self.item_polygon_main.addChild(item)
-                    value_p = self.main_load_pbar.value() + 1
-                    self.main_load_pbar.setValue(value_p)
+        parent_types = Constants.plan_process_type_parent
+        for parent_type in parent_types:
+            parent = QTreeWidgetItem(tree)
+            parent.setText(0, str(parent_type) + ': ' + parent_types[parent_type])
+            parent.setToolTip(0, str(parent_type) + ': ' + parent_types[parent_type])
+            parent.setData(0, Qt.UserRole, parent_type)
+            parent.setFlags(parent.flags() | Qt.ItemIsTristate | Qt.ItemIsUserCheckable)
+            parent_type_value = str(parent_type) + '%'
 
-                    count += 1
-                    self.parcel_results_label.setText(self.tr("Results: ") + str(all_count) + '/' + str(count))
+            zone_values = values.\
+                join(ClPlanZone, PlProjectParcel.plan_zone_id == ClPlanZone.plan_zone_id). \
+                filter(ClPlanZone.code.ilike(parent_type_value))
 
-        for value in points:
-            name = ''
-            if value.gazner:
-                name = '(' + value.gazner + ')'
-            desc = ''
-            if value.plan_zone_ref:
-                if value.plan_zone_ref.name:
-                    desc = value.plan_zone_ref.name
-                    item = QTreeWidgetItem()
-                    item.setText(0, str(value.plan_zone_ref.code)+ ': ' + name + desc)
-                    item.setIcon(0, QIcon(QPixmap(":/plugins/lm2/parcel_red.png")))
-                    item.setData(0, Qt.UserRole, value.parcel_id)
-                    item.setData(0, Qt.UserRole + 1, "point")
-                    item.setData(0, Qt.UserRole + 2, value.plan_zone_id)
-                    item.setCheckState(0, Qt.Unchecked)
-                    self.item_point_main.addChild(item)
-                    value_p = self.main_load_pbar.value() + 1
-                    self.main_load_pbar.setValue(value_p)
+            for value in zone_values:
+                name = ''
+                if value.gazner:
+                    name = '(' + value.gazner + ')'
+                desc = ''
+                if value.plan_zone_ref:
+                    if value.plan_zone_ref.name:
+                        desc = value.plan_zone_ref.name
+                        item = QTreeWidgetItem(parent)
+                        item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
+                        item.setText(0, str(value.plan_zone_ref.code)+ ': ' + name + desc)
+                        item.setIcon(0, QIcon(QPixmap(":/plugins/lm2/parcel_red.png")))
+                        item.setData(0, Qt.UserRole, value.parcel_id)
+                        item.setData(0, Qt.UserRole + 1, "polygon")
+                        item.setData(0, Qt.UserRole + 2, value.plan_zone_id)
+                        item.setCheckState(0, Qt.Unchecked)
+                        # self.item_polygon_main.addChild(item)
+                        value_p = self.main_load_pbar.value() + 1
+                        self.main_load_pbar.setValue(value_p)
 
-                    count += 1
-                    self.parcel_results_label.setText(self.tr("Results: ") + str(all_count) + '/' + str(count))
-
-        for value in lines:
-            name = ''
-            if value.gazner:
-                name = '(' + value.gazner + ')'
-            desc = ''
-            if value.plan_zone_ref:
-                if value.plan_zone_ref.name:
-                    desc = value.plan_zone_ref.name
-                    item = QTreeWidgetItem()
-                    item.setText(0, str(value.plan_zone_ref.code)+ ': ' + name + desc)
-                    item.setIcon(0, QIcon(QPixmap(":/plugins/lm2/parcel_red.png")))
-                    item.setData(0, Qt.UserRole, value.parcel_id)
-                    item.setData(0, Qt.UserRole + 1, "line")
-                    item.setData(0, Qt.UserRole + 2, value.plan_zone_id)
-                    item.setCheckState(0, Qt.Unchecked)
-                    self.item_line_main.addChild(item)
-                    value_p = self.main_load_pbar.value() + 1
-                    self.main_load_pbar.setValue(value_p)
-
-                    count += 1
-                    self.parcel_results_label.setText(self.tr("Results: ") + str(all_count) + '/' + str(count))
-
+                        count += 1
+                        self.parcel_results_label.setText(self.tr("Results: ") + str(all_count) + '/' + str(count))
+        tree.show()
         self.main_tree_widget.expandAll()
         self.main_load_pbar.setVisible(False)
 
@@ -287,7 +237,8 @@ class PlanDetailWidget(QDockWidget, Ui_PlanDetailWidget, DatabaseHelper):
 
         au2 = DatabaseUtils.working_l2_code()
         # if self.tabWidget.currentIndex() == 0:
-        self.__setup_main_tree_widget()
+        # self.__setup_main_tree_widget()
+        self.main_tree_widget.clear()
         self.__load_main_zone(au2)
 
     def __selected_feature(self, parcel_id, layer):
@@ -371,19 +322,20 @@ class PlanDetailWidget(QDockWidget, Ui_PlanDetailWidget, DatabaseHelper):
     def __itemMainParcelsCheckChanged(self, item, column):
 
         if item.checkState(column) == QtCore.Qt.Checked:
-            code = item.data(0, Qt.UserRole)
-            process_type = item.data(0, Qt.UserRole+2)
-            if code not in self.parcels:
-                self.parcels.append(code)
-            if process_type not in self.process_types:
-                self.process_types.append(process_type)
+            parcel_id = item.data(0, Qt.UserRole)
+            if parcel_id not in self.parcels:
+                self.parcels.append(parcel_id)
+            code = item.data(0, Qt.UserRole + 2)
+            if code not in self.process_types:
+                self.process_types.append(code)
         elif item.checkState(column) == QtCore.Qt.Unchecked:
-            code = item.data(0, Qt.UserRole)
-            process_type = item.data(0, Qt.UserRole + 2)
-            if code in self.parcels:
-                self.parcels.remove(code)
-            if process_type in self.process_types:
-                self.process_types.remove(process_type)
+            code = item.data(0, Qt.UserRole + 2)
+            if code in self.process_types:
+                self.process_types.remove(code)
+
+            parcel_id = item.data(0, Qt.UserRole)
+            if parcel_id in self.parcels:
+                self.parcels.remove(parcel_id)
 
     def __itemSubParcelsCheckChanged(self, item, column):
 
@@ -421,7 +373,7 @@ class PlanDetailWidget(QDockWidget, Ui_PlanDetailWidget, DatabaseHelper):
 
     def __remove_parcel_items(self):
 
-        self.__setup_main_tree_widget()
+        # self.__setup_main_tree_widget()
         self.parcel_results_label.setText("")
 
     @pyqtSlot()
@@ -467,9 +419,59 @@ class PlanDetailWidget(QDockWidget, Ui_PlanDetailWidget, DatabaseHelper):
     @pyqtSlot()
     def on_get_selected_features_button_clicked(self):
 
-        print '---'
-        print self.item_polygon_main.childCount()
-        print self.item_line_main.childCount()
-        print self.item_point_main.childCount()
+        self.main_tree_widget.clear()
+        schema_name = "data_plan"
+        table_name = "pl_view_project_parcel"
+        layers = QgsMapLayerRegistry.instance().mapLayers()
+        count = 0
+        tree = self.main_tree_widget
+        parent_types = Constants.plan_process_type_parent
+        for parent_type in parent_types:
+            parent = QTreeWidgetItem(tree)
+            parent.setText(0, str(parent_type) + ': ' + parent_types[parent_type])
+            parent.setToolTip(0, str(parent_type) + ': ' + parent_types[parent_type])
+            parent.setData(0, Qt.UserRole, parent_type)
+            parent.setFlags(parent.flags() | Qt.ItemIsTristate | Qt.ItemIsUserCheckable)
+            parent_type_value = str(parent_type) + '%'
+            for id, layer in layers.iteritems():
+                if layer.type() == QgsMapLayer.VectorLayer:
+                    uri_string = layer.dataProvider().dataSourceUri()
+                    uri = QgsDataSourceURI(uri_string)
+                    if uri.table() == table_name:
+                        if uri.schema() == schema_name:
+                            parcelLayer = layer
+                            layer_type = layer.wkbType()
 
+                            select_features = parcelLayer.selectedFeatures()
+                            for feature in select_features:
+                                attr = feature.attributes()
+                                parcel_id = attr[0]
+                                value = self.session.query(PlProjectParcel).filter(PlProjectParcel.parcel_id == parcel_id).one()
 
+                                name = ''
+                                if value.gazner:
+                                    name = '(' + value.gazner + ')'
+                                desc = ''
+                                if value.plan_zone_ref:
+                                    if value.plan_zone_ref.name:
+                                        plan_zone = value.plan_zone_ref
+                                        if str(parent_type) == plan_zone.code[:1]:
+                                            desc = value.plan_zone_ref.name
+                                            item = QTreeWidgetItem(parent)
+                                            item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
+                                            item.setText(0, str(value.plan_zone_ref.code) + ': ' + name + desc)
+                                            item.setIcon(0, QIcon(QPixmap(":/plugins/lm2/parcel_red.png")))
+                                            item.setData(0, Qt.UserRole, value.parcel_id)
+                                            item.setData(0, Qt.UserRole + 1, "polygon")
+                                            item.setData(0, Qt.UserRole + 2, value.plan_zone_id)
+                                            item.setCheckState(0, Qt.Checked)
+
+                                            value_p = self.main_load_pbar.value() + 1
+                                            self.main_load_pbar.setValue(value_p)
+
+                                            count += 1
+                                            # self.parcel_results_label.setText(
+                                            #     self.tr("Results: ") + str(all_count) + '/' + str(count))
+        tree.show()
+        self.main_tree_widget.expandAll()
+        self.main_load_pbar.setVisible(False)

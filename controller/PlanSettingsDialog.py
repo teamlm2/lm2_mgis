@@ -15,6 +15,7 @@ from ..model.ClRightType import *
 from ..model.SetPlanZoneBaseConditionType import *
 from ..model.ClBaseConditionType import *
 from ..model.SetPlanZoneRigthType import *
+from sqlalchemy import *
 
 class PlanSettingsDialog(QDialog, Ui_PlanSettingsDialog):
 
@@ -119,9 +120,6 @@ class PlanSettingsDialog(QDialog, Ui_PlanSettingsDialog):
 
     def __zone_relation_delete(self, plan_zone_id):
 
-        print self.zone_type_list
-        print '----'
-        print plan_zone_id
         self.main_load_pbar.setMaximum(len(self.zone_type_list))
         for id in self.zone_type_list:
             # count = self.session.query(SetPlanZoneRelation). \
@@ -132,18 +130,34 @@ class PlanSettingsDialog(QDialog, Ui_PlanSettingsDialog):
                 filter(SetPlanZoneRelation.parent_plan_zone_id == id). \
                 filter(SetPlanZoneRelation.child_plan_zone_id == plan_zone_id).delete()
 
+            self.session.query(SetPlanZoneRelation). \
+                filter(SetPlanZoneRelation.child_plan_zone_id == id). \
+                filter(SetPlanZoneRelation.parent_plan_zone_id == plan_zone_id).delete()
+
             value_p = self.main_load_pbar.value() + 1
             self.main_load_pbar.setValue(value_p)
 
     def __plan_zone_relation(self, plan_zone_id):
 
-        values = self.session.query(ClPlanZone). \
-            join(SetPlanZoneRelation, ClPlanZone.plan_zone_id == SetPlanZoneRelation.child_plan_zone_id). \
-            filter(SetPlanZoneRelation.parent_plan_zone_id == plan_zone_id).all()
+        zone_id_list = []
+        values1 = self.session.query(SetPlanZoneRelation.child_plan_zone_id.label("plan_zone_id")). \
+            filter(SetPlanZoneRelation.parent_plan_zone_id == plan_zone_id).\
+            group_by(SetPlanZoneRelation.child_plan_zone_id).all()
 
-        self.zone_values = values
+        for value in values1:
+            zone_id_list.append(value.plan_zone_id)
 
-        self.__process_type_mapping(values, None)
+        values2 = self.session.query(SetPlanZoneRelation.parent_plan_zone_id.label("plan_zone_id")). \
+            filter(SetPlanZoneRelation.child_plan_zone_id == plan_zone_id). \
+            group_by(SetPlanZoneRelation.parent_plan_zone_id).all()
+
+        for value in values2:
+            zone_id_list.append(value.plan_zone_id)
+
+
+        self.zone_values = zone_id_list
+
+        self.__process_type_mapping(zone_id_list, None)
         # self.__process_type_item_change(values)
 
     def __process_type_item_change(self, values):
@@ -215,6 +229,12 @@ class PlanSettingsDialog(QDialog, Ui_PlanSettingsDialog):
                 child_types = self.session.query(ClPlanZone). \
                     filter(ClPlanZone.plan_zone_type_id == 3). \
                     filter(ClPlanZone.code.ilike(parent_type_value)).all()
+
+                if values:
+                    for plan_zone_id in values:
+                        if plan_zone_id == sub_type.plan_zone_id:
+                            child.setCheckState(0, Qt.Checked)
+
                 for child_type in child_types:
                     sub_child = QTreeWidgetItem(child)
                     sub_child.setFlags(child.flags() | Qt.ItemIsUserCheckable)
@@ -231,6 +251,11 @@ class PlanSettingsDialog(QDialog, Ui_PlanSettingsDialog):
                         filter(ClPlanZone.plan_zone_type_id == 4). \
                         filter(ClPlanZone.code.ilike(parent_type_value)).all()
 
+                    if values:
+                        for plan_zone_id in values:
+                            if plan_zone_id == child_type.plan_zone_id:
+                                sub_child.setCheckState(0, Qt.Checked)
+
                     for process_type in process_types:
                         process_child = QTreeWidgetItem(sub_child)
                         process_child.setFlags(child.flags() | Qt.ItemIsUserCheckable)
@@ -239,8 +264,8 @@ class PlanSettingsDialog(QDialog, Ui_PlanSettingsDialog):
                         process_child.setData(0, Qt.UserRole, process_type.plan_zone_id)
                         process_child.setCheckState(0, Qt.Unchecked)
                         if values:
-                            for value in values:
-                                if value.plan_zone_id == process_type.plan_zone_id:
+                            for plan_zone_id in values:
+                                if plan_zone_id == process_type.plan_zone_id:
                                     process_child.setCheckState(0, Qt.Checked)
 
                         str_value = process_type.name
@@ -340,32 +365,49 @@ class PlanSettingsDialog(QDialog, Ui_PlanSettingsDialog):
             values = self.session.query(ClPlanZone).\
                 join(SetPlanZoneRightForm, ClPlanZone.plan_zone_id == SetPlanZoneRightForm.plan_zone_id). \
                 filter(SetPlanZoneRightForm.right_form_id == id).all()
-            self.zone_values = values
-            self.__process_type_mapping(values, None)
+
+            zone_id_list = []
+            for value in values:
+                zone_id_list.append(value.plan_zone_id)
+
+            self.zone_values = zone_id_list
+            self.__process_type_mapping(zone_id_list, None)
 
         if self.plan_type_rbutton.isChecked():
             id = self.settings_twidget.item(selected_row, 0).data(Qt.UserRole)
             values = self.session.query(ClPlanZone).\
                 join(SetPlanZonePlanType, ClPlanZone.plan_zone_id == SetPlanZonePlanType.plan_zone_id). \
                 filter(SetPlanZonePlanType.plan_type_id == id).all()
-            self.zone_values = values
-            self.__process_type_mapping(values, None)
+
+            zone_id_list = []
+            for value in values:
+                zone_id_list.append(value.plan_zone_id)
+            self.zone_values = zone_id_list
+            self.__process_type_mapping(zone_id_list, None)
 
         if self.right_type_rbutton.isChecked():
             id = self.settings_twidget.item(selected_row, 0).data(Qt.UserRole)
             values = self.session.query(ClPlanZone).\
                 join(SetPlanZoneRigthType, ClPlanZone.plan_zone_id == SetPlanZoneRigthType.plan_zone_id). \
                 filter(SetPlanZoneRigthType.right_type_code == id).all()
-            self.zone_values = values
-            self.__process_type_mapping(values, None)
+
+            zone_id_list = []
+            for value in values:
+                zone_id_list.append(value.plan_zone_id)
+            self.zone_values = zone_id_list
+            self.__process_type_mapping(zone_id_list, None)
 
         if self.sec_zone_rbutton.isChecked():
             id = self.settings_twidget.item(selected_row, 0).data(Qt.UserRole)
             values = self.session.query(ClPlanZone).\
                 join(SetPlanZoneBaseConditionType, ClPlanZone.plan_zone_id == SetPlanZoneBaseConditionType.plan_zone_id). \
                 filter(SetPlanZoneBaseConditionType.base_condition_type_id == id).all()
-            self.zone_values = values
-            self.__process_type_mapping(values, None)
+
+            zone_id_list = []
+            for value in values:
+                zone_id_list.append(value.plan_zone_id)
+            self.zone_values = zone_id_list
+            self.__process_type_mapping(zone_id_list, None)
 
     def __settings_add_save(self, plan_zone_id):
 

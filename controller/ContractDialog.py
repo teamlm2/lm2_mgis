@@ -2458,7 +2458,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         person_firstname = ''
         contact_position = ''
         person_full_name = ''
-        print person.type
+
         if person.type == 10 or person.type == 20 or person.type == 50:
             person_surname = person.name
             person_firstname = person.first_name

@@ -1911,6 +1911,7 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
         vlayer_parcel.setLayerName(self.tr("Polygon"))
 
         myalayer = root.findLayer(vlayer_parcel.id())
+
         if myalayer is None:
             mygroup.addLayer(vlayer_parcel)
             parcels = self.session.query(PlProjectParcel.plan_zone_id). \

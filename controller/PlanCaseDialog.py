@@ -104,6 +104,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         self.error_dic = {}
         self.polygon_rbutton.setChecked(True)
 
+
         # self.message_label.setStyleSheet("QLabel { background-color : red; color : blue; }");
         self.message_label.setStyleSheet("QLabel {color: rgb(255,0,0);}")
         self.__setup_data()
@@ -1116,6 +1117,12 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
             if process_type:
                 plan_zone_id = process_type.plan_zone_id
 
+        r_forms = self.session.query(ClRightForm).filter(ClRightForm.code == '4').all()
+        is_check_count = 0
+        for r_form in r_forms:
+            is_check_count = self.session.query(SetPlanZoneRightForm).\
+                filter(SetPlanZoneRightForm.plan_zone_id == plan_zone_id).\
+                filter(SetPlanZoneRightForm.right_form_id == r_form.right_form_id).count()
         if not parcel.geometry():
             valid = False
         else:
@@ -1123,81 +1130,82 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
             if not g.isGeosValid():
                 valid = False
             else:
-                g = parcel.geometry()
-                if g.isMultipart():
-                    valid = False
-                else:
-                    parcel_geometry = WKTElement(parcel.geometry().exportToWkt(), srid=4326)
-                    # if parcel_geometry.IsValid() == True:
-                    #     valid = False
-                    #     print parcel_geometry.IsValid()
-                    # parcel overlap not approved plan zone
-                    polygon_values = self.session.query(PlProjectParcel). \
-                        filter((parcel_geometry).ST_Intersects(PlProjectParcel.polygon_geom)).\
-                        filter(or_(PlProjectParcel.valid_till == None, PlProjectParcel.valid_till == 'infinity')).all()
-                    for value in polygon_values:
-                        plan_zone = value.plan_zone_ref
-                        project = value.project_ref
-                        if project:
+                if is_check_count == 0:
+                    g = parcel.geometry()
+                    if g.isMultipart():
+                        valid = False
+                    else:
+                        parcel_geometry = WKTElement(parcel.geometry().exportToWkt(), srid=4326)
+                        # if parcel_geometry.IsValid() == True:
+                        #     valid = False
+                        #     print parcel_geometry.IsValid()
+                        # parcel overlap not approved plan zone
+                        polygon_values = self.session.query(PlProjectParcel). \
+                            filter((parcel_geometry).ST_Intersects(PlProjectParcel.polygon_geom)).\
+                            filter(or_(PlProjectParcel.valid_till == None, PlProjectParcel.valid_till == 'infinity')).all()
+                        for value in polygon_values:
+                            plan_zone = value.plan_zone_ref
+                            project = value.project_ref
+                            if project:
+                                plan_type = project.plan_type_ref
+                                plan_zone_relation_count = self.session.query(SetPlanZoneRelation). \
+                                    filter(SetPlanZoneRelation.parent_plan_zone_id == plan_zone.plan_zone_id).\
+                                    filter(SetPlanZoneRelation.child_plan_zone_id == plan_zone_id).count()
+                                if plan_zone_relation_count == 1:
+                                    message = plan_zone_message + value.project_ref.code + unicode(u' дугаартай ') + plan_type.short_name + \
+                                            unicode(u'-ний ') + \
+                                            '/'+plan_zone.code+'/' + unicode(plan_zone.name) + unicode(u' арга хэмжээтэй давхцаж байна.')
+                                    error_message = error_message + "\n" + message
+                                    valid = False
+
+                        point_values = self.session.query(PlProjectParcel). \
+                            filter((parcel_geometry).ST_Intersects(PlProjectParcel.point_geom)). \
+                            filter(or_(PlProjectParcel.valid_till == None, PlProjectParcel.valid_till == 'infinity')).all()
+                        for value in point_values:
+                            plan_zone = value.plan_zone_ref
+                            project = value.project_ref
                             plan_type = project.plan_type_ref
                             plan_zone_relation_count = self.session.query(SetPlanZoneRelation). \
-                                filter(SetPlanZoneRelation.parent_plan_zone_id == plan_zone.plan_zone_id).\
+                                filter(SetPlanZoneRelation.parent_plan_zone_id == plan_zone.plan_zone_id). \
                                 filter(SetPlanZoneRelation.child_plan_zone_id == plan_zone_id).count()
                             if plan_zone_relation_count == 1:
                                 message = plan_zone_message + value.project_ref.code + unicode(u' дугаартай ') + plan_type.short_name + \
-                                        unicode(u'-ний ') + \
-                                        '/'+plan_zone.code+'/' + unicode(plan_zone.name) + unicode(u' арга хэмжээтэй давхцаж байна.')
+                                          unicode(u'-ний ') + \
+                                          '/' + plan_zone.code + '/' + unicode(plan_zone.name) + unicode(u' арга хэмжээтэй давхцаж байна.')
                                 error_message = error_message + "\n" + message
                                 valid = False
 
-                    point_values = self.session.query(PlProjectParcel). \
-                        filter((parcel_geometry).ST_Intersects(PlProjectParcel.point_geom)). \
-                        filter(or_(PlProjectParcel.valid_till == None, PlProjectParcel.valid_till == 'infinity')).all()
-                    for value in point_values:
-                        plan_zone = value.plan_zone_ref
-                        project = value.project_ref
-                        plan_type = project.plan_type_ref
-                        plan_zone_relation_count = self.session.query(SetPlanZoneRelation). \
-                            filter(SetPlanZoneRelation.parent_plan_zone_id == plan_zone.plan_zone_id). \
-                            filter(SetPlanZoneRelation.child_plan_zone_id == plan_zone_id).count()
-                        if plan_zone_relation_count == 1:
-                            message = plan_zone_message + value.project_ref.code + unicode(u' дугаартай ') + plan_type.short_name + \
-                                      unicode(u'-ний ') + \
-                                      '/' + plan_zone.code + '/' + unicode(plan_zone.name) + unicode(u' арга хэмжээтэй давхцаж байна.')
-                            error_message = error_message + "\n" + message
-                            valid = False
+                        line_values = self.session.query(PlProjectParcel). \
+                            filter((parcel_geometry).ST_Intersects(PlProjectParcel.line_geom)). \
+                            filter(or_(PlProjectParcel.valid_till == None, PlProjectParcel.valid_till == 'infinity')).all()
+                        for value in line_values:
+                            plan_zone = value.plan_zone_ref
+                            project = value.project_ref
+                            plan_type = project.plan_type_ref
+                            plan_zone_relation_count = self.session.query(SetPlanZoneRelation). \
+                                filter(SetPlanZoneRelation.parent_plan_zone_id == plan_zone.plan_zone_id). \
+                                filter(SetPlanZoneRelation.child_plan_zone_id == plan_zone_id).count()
 
-                    line_values = self.session.query(PlProjectParcel). \
-                        filter((parcel_geometry).ST_Intersects(PlProjectParcel.line_geom)). \
-                        filter(or_(PlProjectParcel.valid_till == None, PlProjectParcel.valid_till == 'infinity')).all()
-                    for value in line_values:
-                        plan_zone = value.plan_zone_ref
-                        project = value.project_ref
-                        plan_type = project.plan_type_ref
-                        plan_zone_relation_count = self.session.query(SetPlanZoneRelation). \
-                            filter(SetPlanZoneRelation.parent_plan_zone_id == plan_zone.plan_zone_id). \
-                            filter(SetPlanZoneRelation.child_plan_zone_id == plan_zone_id).count()
+                            if plan_zone_relation_count == 1:
+                                message = plan_zone_message + value.project_ref.code + unicode(u' дугаартай ') + plan_type.short_name + \
+                                          unicode(u'-ний ') + \
+                                          '/' + plan_zone.code + '/' + unicode(plan_zone.name) + unicode(u' арга хэмжээтэй давхцаж байна.')
+                                error_message = error_message + "\n" + message
+                                valid = False
 
-                        if plan_zone_relation_count == 1:
-                            message = plan_zone_message + value.project_ref.code + unicode(u' дугаартай ') + plan_type.short_name + \
-                                      unicode(u'-ний ') + \
-                                      '/' + plan_zone.code + '/' + unicode(plan_zone.name) + unicode(u' арга хэмжээтэй давхцаж байна.')
-                            error_message = error_message + "\n" + message
-                            valid = False
+                        # base condition overlaps
+                        values = self.session.query(PlBaseConditionParcel).\
+                            filter(func.ST_Centroid(parcel_geometry).ST_Intersects(PlBaseConditionParcel.geometry)).all()
 
-                    # base condition overlaps
-                    values = self.session.query(PlBaseConditionParcel).\
-                        filter(func.ST_Centroid(parcel_geometry).ST_Intersects(PlBaseConditionParcel.geometry)).all()
-
-                    for value in values:
-                        type = value.base_condition_type_ref
-                        count = self.session.query(SetPlanZoneBaseConditionType).\
-                            filter(SetPlanZoneBaseConditionType.plan_zone_id == plan_zone_id). \
-                            filter(SetPlanZoneBaseConditionType.base_condition_type_id == type.base_condition_type_id).count()
-                        if count == 1:
-                            message = base_condition_message + type.short_name + unicode(u' -тэй давхцаж байна. ')
-                            error_message = error_message + "\n" + message
-                            valid = False
+                        for value in values:
+                            type = value.base_condition_type_ref
+                            count = self.session.query(SetPlanZoneBaseConditionType).\
+                                filter(SetPlanZoneBaseConditionType.plan_zone_id == plan_zone_id). \
+                                filter(SetPlanZoneBaseConditionType.base_condition_type_id == type.base_condition_type_id).count()
+                            if count == 1:
+                                message = base_condition_message + type.short_name + unicode(u' -тэй давхцаж байна. ')
+                                error_message = error_message + "\n" + message
+                                valid = False
 
         if not valid:
             self.error_dic[id] = error_message
