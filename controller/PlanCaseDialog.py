@@ -60,6 +60,7 @@ from ..model.ClRcParcelType import *
 from ..model.PsRecoveryClass import *
 from ..model.PsAvgReserveDaats import *
 from ..model.PlProjectParcelRefPastureParcel import *
+from ..model.SetPlanZoneRigthType import *
 from ..view.Ui_PlanCaseDialog import *
 from .qt_classes.ApplicantDocumentDelegate import ApplicationDocumentDelegate
 from .qt_classes.DocumentsTableWidget import DocumentsTableWidget
@@ -2101,6 +2102,27 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         for value in form_right_types.all():
             right_type = self.session.query(ClRightType).filter(ClRightType.code == value.right_type_code).one()
             self.monitoring_right_type_change_cbox.addItem(right_type.description, right_type.code)
+
+    @pyqtSlot(int)
+    def on_shp_right_type_change_cbox_currentIndexChanged(self, index):
+
+        self.shp_process_type_cbox.clear()
+        rigth_type_id = self.shp_right_type_change_cbox.itemData(index)
+
+        # self.shp_process_type_cbox.setEnabled(True)
+
+        values = self.session.query(ClPlanZone.plan_zone_id, ClPlanZone.code, ClPlanZone.name). \
+            join(SetPlanZoneRigthType, ClPlanZone.plan_zone_id == SetPlanZoneRigthType.plan_zone_id). \
+            filter(SetPlanZoneRigthType.right_type_code == rigth_type_id). \
+            group_by(ClPlanZone.plan_zone_id, ClPlanZone.code, ClPlanZone.name). \
+            order_by(ClPlanZone.code)
+
+        for value in values:
+            self.shp_process_type_cbox.addItem(str(value.code) + ':' + value.name, value.code)
+
+        for index in range(self.shp_process_type_cbox.count()):
+            self.shp_process_type_cbox.setItemData(index, self.shp_process_type_cbox.itemText(index),
+                                                   Qt.ToolTipRole)
 
     @pyqtSlot(int)
     def on_shp_rigth_form_cbox_currentIndexChanged(self, index):
