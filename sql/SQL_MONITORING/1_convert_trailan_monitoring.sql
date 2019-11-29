@@ -1,8 +1,9 @@
 ﻿----main parcel
 
-insert into data_monitoring.mt_monitor_parcel(code, landuse_real, address_neighbourhood, is_active, monitor_parcel_type_id, geometry, monitor_type_id, monitor_zone_id, convert_id)
+insert into data_monitoring.mt_monitor_parcel(code, landuse_real, address_neighbourhood, is_active, monitor_parcel_type_id, geometry, monitor_type_id, convert_id)
 
-select par_num, 2, au1_name ||', '|| au2_name ||', '|| au3_name, true, 1, ((ST_DUMP(geom)).geom)::geometry(Polygon,4326), 2, convert_id from data_monitoring.aa_tarailan_polygon_2018
+select par_num, map.landuse_code, gaz_name, true, 2, ((ST_DUMP(geom)).geom)::geometry(Polygon,4326), 2, convert_id from data_monitoring.aa_tarailan_polygon_2018 p
+join data_monitoring.aa_tarialan_landuse_map map on p.l_code34::text = map.code
 
 ----sub_parcel
 

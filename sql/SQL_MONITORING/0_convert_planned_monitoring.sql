@@ -24,7 +24,7 @@ where data_monitoring.mt_monitor_parcel.monitor_parcel_id = s.monitor_parcel_id;
 
 insert into data_monitoring.mt_monitoring(code, name, monitor_type_id, workrule_status_id, au2, landuse_real)
 
-select '04410-'||'1-'||LPAD(row_number() over()::text, 5, '0'), au1_name ||', '|| au2_name ||', '|| au3_name || ' /төлөвлөгөөт хянан баталгаа/', 2, 56, '04410', 2 from data_monitoring.aa_main_par
+select '04410-'||'1-'||LPAD(row_number() over()::text, 5, '0'), au1_name ||', '|| au2_name ||', '|| au3_name || ' /төлөвлөгөөт хянан баталгаа/', 2, 56, '04410', 2 from data_monitoring.aa_sub_par
 
 ----monitoring main parcel map
 insert into data_monitoring.mt_monitoring_parcel_map(monitoring_id, monitor_parcel_id)
