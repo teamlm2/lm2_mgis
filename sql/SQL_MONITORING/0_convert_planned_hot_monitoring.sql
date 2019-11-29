@@ -1,15 +1,16 @@
 ﻿----main parcel
 
-insert into data_monitoring.mt_monitor_parcel(code, landuse_real, address_neighbourhood, is_active, monitor_parcel_type_id, geometry, monitor_type_id, convert_id)
+insert into data_monitoring.mt_monitor_parcel(code, landuse_real, address_neighbourhood, is_active, monitor_parcel_type_id, geometry, monitor_type_id)
 
-select par_num, map.landuse_code, gaz_name, true, 2, ((ST_DUMP(geom)).geom)::geometry(Polygon,4326), 2, convert_id from data_monitoring.aa_tarailan_polygon_2018 p
-join data_monitoring.aa_tarialan_landuse_map map on p.l_code34::text = map.code
+select au2.code||'-02-'||LPAD(row_number() over(partition by au2.code)::text, 5, '0')||'-19', 2, au1_name ||', '|| au2_name ||', '|| au3_name, true, 1, ((ST_DUMP(geom)).geom)::geometry(Polygon,4326), 2 from data_monitoring.aa_main_par p
+join admin_units.au_level2 au2 on st_within(st_centroid(p.geom), au2.geometry)
 
 ----sub_parcel
 
 insert into data_monitoring.mt_monitor_parcel(code, landuse_real, address_neighbourhood, is_active, monitor_parcel_type_id, geometry, monitor_type_id)
 
-select '04410-'||'2-'||LPAD(row_number() over()::text, 5, '0'), lcode2, gaz_name, true, 2, ((ST_DUMP(geom)).geom)::geometry(Polygon,4326), 2 from data_monitoring.aa_sub_par
+select au2.code||'-02-'||LPAD(row_number() over(partition by au2.code)::text, 5, '0')||'-19', lcode2, au1_name ||', '|| au2_name ||', '|| au3_name, true, 2, ((ST_DUMP(geom)).geom)::geometry(Polygon,4326), 2 from data_monitoring.aa_sub_par p
+join admin_units.au_level2 au2 on st_within(st_centroid(p.geom), au2.geometry)
 
 ----update main parcel id
 
@@ -25,7 +26,7 @@ where data_monitoring.mt_monitor_parcel.monitor_parcel_id = s.monitor_parcel_id;
 
 insert into data_monitoring.mt_monitoring(code, name, monitor_type_id, workrule_status_id, au2, landuse_real)
 
-select '04410-'||'1-'||LPAD(row_number() over()::text, 5, '0'), au1_name ||', '|| au2_name ||', '|| au3_name || ' /төлөвлөгөөт хянан баталгаа/', 2, 56, '04410', 2 from data_monitoring.aa_main_par
+select '04410-'||'1-'||LPAD(row_number() over()::text, 5, '0'), au1_name ||', '|| au2_name ||', '|| au3_name || ' /төлөвлөгөөт хянан баталгаа/', 2, 56, '04410', 2 from data_monitoring.aa_sub_par
 
 ----monitoring main parcel map
 insert into data_monitoring.mt_monitoring_parcel_map(monitoring_id, monitor_parcel_id)
@@ -77,4 +78,4 @@ group by p.monitor_point_id, parcel.monitor_parcel_id, m.monitoring_id
 
 
 
-select * from data_monitoring.aa_tarailan_polygon_2018
+select * from data_monitoring.aa_sub_par

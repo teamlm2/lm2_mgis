@@ -410,6 +410,7 @@ class MemberGroupDialog(QDialog, Ui_MemberGroupDialog, DatabaseHelper):
                 is_register = True
         group_count = self.session.query(CtPersonGroup). \
             filter(CtPersonGroup.group_no == int(self.group_id_edit.text())).count()
+
         if group_count > 0:
             PluginUtils.show_message(self, self.tr("Group Duplicate"), self.tr("This group already registered"))
             return
