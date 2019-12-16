@@ -722,7 +722,7 @@ class OwnRecordDialog(QDialog, Ui_OwnRecordDialog, DatabaseHelper):
             filter(CaParcelTbl.parcel_id == parcel_id). \
             filter(SetBaseTaxAndPrice.tax_zone == SetTaxAndPriceZone.zone_id). \
             filter(SetBaseTaxAndPrice.landuse == CaParcelTbl.landuse). \
-            one()
+            first()
 
         self.base_value_edit.setText('{0}'.format(base_tax_and_price.base_value_per_m2))
         self.base_tax_rate_edit.setText('{0}'.format(base_tax_and_price.base_tax_rate))
