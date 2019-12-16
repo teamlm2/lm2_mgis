@@ -718,8 +718,9 @@ class UserRoleManagementDialog(QDialog, Ui_UserRoleManagementDialog):
                     if not message_box.clickedButton() == yes_button:
                         return
             else:
-                if password != self.PW_PLACEHOLDER:
-                    self.db_session.execute(u"ALTER ROLE {0} PASSWORD '{1}'".format(user_name, password))
+                if self.password_edit.text():
+                    if password != self.PW_PLACEHOLDER:
+                        self.db_session.execute(u"ALTER ROLE {0} PASSWORD '{1}'".format(user_name, password))
 
                 active_role_count = self.db_session.query(SetRole).filter(SetRole.user_name == user_name).filter(
                     SetRole.is_active == True).count()
@@ -737,7 +738,8 @@ class UserRoleManagementDialog(QDialog, Ui_UserRoleManagementDialog):
                     sd_user = SdUser()
                     sd_user.username = role.user_name
                     sd_user.email = role.email
-                    sd_user.password = user_pass
+                    if self.password_edit.text():
+                        sd_user.password = user_pass
                     sd_user.firstname = role.first_name
                     sd_user.lastname = role.surname
                     sd_user.created_at = datetime.strptime(date_time_string, Constants.PYTHON_DATETIME_FORMAT)
@@ -747,8 +749,8 @@ class UserRoleManagementDialog(QDialog, Ui_UserRoleManagementDialog):
                 else:
                     sd_user = self.db_session.query(SdUser).filter(
                         SdUser.gis_user_real == role.user_name_real).first()
-
-                    sd_user.password = user_pass
+                    if self.password_edit.text():
+                        sd_user.password = user_pass
 
             groups = self.__groupsByUser(user_name)
             for group in groups:
@@ -920,7 +922,8 @@ class UserRoleManagementDialog(QDialog, Ui_UserRoleManagementDialog):
                 sd_user = SdUser()
                 sd_user.username = role.user_name
                 sd_user.email = role.email
-                sd_user.password = user_pass
+                if self.password_edit.text():
+                    sd_user.password = user_pass
                 sd_user.firstname = role.first_name
                 sd_user.lastname = role.surname
                 sd_user.created_at = datetime.strptime(date_time_string, Constants.PYTHON_DATETIME_FORMAT)
@@ -930,8 +933,8 @@ class UserRoleManagementDialog(QDialog, Ui_UserRoleManagementDialog):
             else:
                 sd_user = self.db_session.query(SdUser).filter(
                     SdUser.gis_user_real == role.user_name_real).first()
-
-                sd_user.password = user_pass
+                if self.password_edit.text():
+                    sd_user.password = user_pass
 
             # sd_employee_count = self.db_session.query(SdEmployee).\
             #     join(BsPerson, BsPerson.person_id == SdEmployee.person_id).\
@@ -977,8 +980,8 @@ class UserRoleManagementDialog(QDialog, Ui_UserRoleManagementDialog):
             return True
         else:
             if password != self.PW_PLACEHOLDER:
-
-                self.db_session.execute(u"ALTER ROLE {0} PASSWORD '{1}'".format(user_name, password))
+                if self.password_edit.text():
+                    self.db_session.execute(u"ALTER ROLE {0} PASSWORD '{1}'".format(user_name, password))
 
                 active_role_count = self.db_session.query(SetRole).filter(SetRole.user_name == user_name).filter(
                     SetRole.is_active == True).count()
@@ -991,7 +994,8 @@ class UserRoleManagementDialog(QDialog, Ui_UserRoleManagementDialog):
                 sd_user = self.db_session.query(SdUser).filter(
                     SdUser.gis_user_real == role.user_name_real).first()
                 user_pass = hashlib.md5(password).hexdigest()
-                sd_user.password = user_pass
+                if self.password_edit.text():
+                    sd_user.password = user_pass
 
             self.db_session.commit()
             self.__populate_user_role_lwidget()
@@ -1021,15 +1025,16 @@ class UserRoleManagementDialog(QDialog, Ui_UserRoleManagementDialog):
             PluginUtils.show_message(self, self.tr("No Username"), self.tr("Provide a valid username!"))
             return False
 
-        if len(self.password_edit.text().strip()) < 8:
-            PluginUtils.show_message(self, self.tr("Invalid Password"),
-                                    self.tr("Provide a valid password that consists of 8 characters or more!"))
-            return False
+        if mode == 'ADD':
+            if len(self.password_edit.text().strip()) < 8:
+                PluginUtils.show_message(self, self.tr("Invalid Password"),
+                                        self.tr("Provide a valid password that consists of 8 characters or more!"))
+                return False
 
-        if self.password_edit.text().strip() != self.retype_password_edit.text().strip():
-            PluginUtils.show_message(self, self.tr("Passwords Not Matching"),
-                                    self.tr("Password and retyped password are not identical!"))
-            return False
+            if self.password_edit.text().strip() != self.retype_password_edit.text().strip():
+                PluginUtils.show_message(self, self.tr("Passwords Not Matching"),
+                                        self.tr("Password and retyped password are not identical!"))
+                return False
 
         if len(self.surname_edit.text().strip()) == 0:
             PluginUtils.show_message(self, self.tr("No Surname"), self.tr("Provide a valid surname!"))
