@@ -13,7 +13,7 @@ from PyQt4.QtGui import *
 from PyQt4.QtXml import *
 from geoalchemy2.elements import WKTElement
 from qgis.core import *
-from sqlalchemy import func, or_, extract
+from sqlalchemy import *
 from sqlalchemy.sql.expression import cast
 from PyQt4.QtXml import *
 from qgis.core import *
@@ -618,15 +618,22 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         # if restrictions[3:] == '01':
         self.print_officer_cbox.setDisabled(False)
         # print_officers = self.session.query(SetRole).filter(or_(SetRole.position == 5,SetRole.position == 6,SetRole.position == 7,SetRole.position == 8, SetRole.position == currect_user)).all()
-        print_officers = self.session.query(SetRole).all()
-            # filter(or_(SetRole.position == 9, SetRole.position == currect_user)). \
-            # filter(SetRole.is_active == True). \
-            # filter(SetRole.user_name.startswith(user_start)).all()
+        print_officers_head = self.session.query(SetRole). \
+            join(SdPosition, SetRole.position == SdPosition.position_id). \
+            filter(SdPosition.name.ilike('%дарга%')).all()
+        print_officers = self.session.query(SetRole). \
+            join(SdPosition, SetRole.position == SdPosition.position_id). \
+            filter(not_(SdPosition.name.ilike('%дарга%'))).all()
         soum_code = DatabaseUtils.working_l2_code()
-        for officer in print_officers:
+        for officer in print_officers_head:
             l2_code_list = officer.restriction_au_level2.split(',')
             if soum_code in l2_code_list:
                 officer_name = officer.surname[:1]+'.'+officer.first_name
+                self.print_officer_cbox.addItem(officer_name, officer.user_name_real)
+        for officer in print_officers:
+            l2_code_list = officer.restriction_au_level2.split(',')
+            if soum_code in l2_code_list:
+                officer_name = officer.surname[:1] + '.' + officer.first_name
                 self.print_officer_cbox.addItem(officer_name, officer.user_name_real)
 
         # app_contract_count = self.session.query(CtContractApplicationRole).filter(CtContractApplicationRole.contract == self.contract.contract_id).count()
