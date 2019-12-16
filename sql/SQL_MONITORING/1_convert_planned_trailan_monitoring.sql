@@ -40,15 +40,12 @@ on conflict(monitoring_id) do nothing;
 
 
 -----------------------------------
-----monitoringiin tseg
-insert into data_monitoring.mt_monitor_point(code, is_active, monitor_point_type_id, geometry)
-
-select '04410-'||'003-'||LPAD(row_number() over()::text, 5, '0'), true, 3, ((ST_DUMP(geom)).geom)::geometry(Point,4326) from data_monitoring.aa_moni_pnt
 
 ----soil tseg
-insert into data_monitoring.mt_monitor_point(code, is_active, monitor_point_type_id, geometry)
+insert into data_monitoring.mt_monitor_point(code, is_active, monitor_point_type_id, geometry, convert_id)
 
-select '04410-'||'001-'||LPAD(row_number() over()::text, 5, '0'), true, 1, ((ST_DUMP(geom)).geom)::geometry(Point,4326) from data_monitoring.aa_soil_pnt
+select au2.code||'-001-'||LPAD(row_number() over()::text, 5, '0')||'-18', true, 1, ((ST_DUMP(geom)).geom)::geometry(Point,4326), convert_id from data_monitoring.aa_tarailan_point_2018 p
+join admin_units.au_level2 au2 on st_within(st_centroid(p.geom), au2.geometry)
 
 ----data_monitoring.mt_monitoring_point_map
 insert into data_monitoring.mt_monitoring_point_map(monitor_point_id, monitoring_id)
@@ -57,8 +54,10 @@ select p.monitor_point_id, m.monitoring_id from data_monitoring.mt_monitoring_pa
 join data_monitoring.mt_monitoring m on map.monitoring_id = m.monitoring_id
 join data_monitoring.mt_monitor_parcel parcel on parcel.monitor_parcel_id = map.monitor_parcel_id
 join data_monitoring.mt_monitor_point p on st_within(p.geometry, parcel.geometry)
-where m.au2 = '04410' and m.monitor_type_id = 2
+where m.convert_id is not null 
+--m.au2 = '04410' and m.monitor_type_id = 2
 group by p.monitor_point_id, m.monitoring_id
+on conflict(monitor_point_id, monitoring_id) do nothing;
 
 ----data_monitoring.mt_set_monitor_parcel_monitor_point
 insert into data_monitoring.mt_set_monitor_parcel_monitor_point(monitor_point_id, monitor_parcel_id)
@@ -67,8 +66,10 @@ select p.monitor_point_id, parcel.monitor_parcel_id from data_monitoring.mt_moni
 join data_monitoring.mt_monitoring m on map.monitoring_id = m.monitoring_id
 join data_monitoring.mt_monitor_parcel parcel on parcel.monitor_parcel_id = map.monitor_parcel_id
 join data_monitoring.mt_monitor_point p on st_within(p.geometry, parcel.geometry)
-where m.au2 = '04410' and m.monitor_type_id = 2
+where m.convert_id is not null  
+--m.au2 = '04410' and m.monitor_type_id = 2
 group by p.monitor_point_id, parcel.monitor_parcel_id, m.monitoring_id
+on conflict(monitor_point_id, monitor_parcel_id) do nothing;
 
 
 

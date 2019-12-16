@@ -101,7 +101,7 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
 
         self.__setup_validators()
         self.__setup_table_widget()
-
+        self.select_years = [2019, 2018, 2017, 2016, 2015, 2014]
         self.__setup_cbox()
 
         self.person_tabwidget.currentChanged.connect(self.__tab_widget_onChange)  # changed!
@@ -340,6 +340,10 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
         self.edit_status_cbox.addItem("*", -1)
         for item in edit_statuses:
             self.edit_status_cbox.addItem(str(item.code) + ": " + item.description, item.code)
+
+        self.fee_year_layer_cbox.clear()
+        for value in self.select_years:
+            self.fee_year_layer_cbox.addItem(str(value), value)
 
     def __setup_table_widget(self):
 
@@ -3541,19 +3545,70 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
         if mygroup is None:
             mygroup = root.insertGroup(8, "UbGIS")
 
-        is_pug_parcel = False
+        schema_name = "data_ub"
+        table_name = "ca_ub_parcel_fee"
+        layer_list = []
+        layers = QgsMapLayerRegistry.instance().mapLayers()
+
+        for id, layer in layers.iteritems():
+            if layer.type() == QgsMapLayer.VectorLayer:
+                uri_string = layer.dataProvider().dataSourceUri()
+                uri = QgsDataSourceURI(uri_string)
+                if uri.table() == table_name:
+                    if uri.schema() == schema_name:
+                        layer_list.append(id)
+
+        vlayer = LayerUtils.layer_by_data_source(schema_name, table_name)
+        if vlayer:
+            QgsMapLayerRegistry.instance().removeMapLayers(layer_list)
 
         vlayer_parcel = LayerUtils.load_ub_data_layer_by_name("ca_ub_parcel_fee", "gid")
 
-        layers = self.plugin.iface.legendInterface().layers()
+        employee = DatabaseUtils.current_employee()
+        department_id = employee.department_id
+        print department_id
+        city_type_name = u''
+        if department_id == 120:
+            city_type = 1
+            city_type_name = 'City'
+            expression = 'city_type = 1'
+            exp = QgsExpression(expression)
+            exp.prepare(vlayer_parcel.pendingFields())
+            request = QgsFeatureRequest().setFilterExpression(expression)
+            vlayer_parcel.getFeatures(request)
+        else:
+            city_type = 2
+            expression = 'city_type = 2'
+            city_type_name = 'District'
+            exp = QgsExpression(expression)
+            exp.prepare(vlayer_parcel.pendingFields())
+            request = QgsFeatureRequest().setFilterExpression(expression)
+            vlayer_parcel.getFeatures(request)
+        au2 = DatabaseUtils.working_l2_code()
+        selected_year = self.fee_year_layer_cbox.itemData(self.fee_year_layer_cbox.currentIndex())
+        sql_layer = "(SELECT row_number() OVER () AS gid, p.parcel_id, p.old_parcel_id, p.landuse, p.area_m2, h.document_area, h.current_year, " \
+                    "h.city_type, h.status, p.address_khashaa, p.address_streetname, p.address_neighbourhood, p.valid_from, p.valid_till, p.geometry, " \
+                    "p.edit_status, p.au2 FROM data_ub.ca_ub_parcel_tbl p " \
+                    "JOIN data_ub.ub_fee_history h ON p.old_parcel_id::text = h.pid::text " \
+                    "where p.au2 = " + "'" + au2 + "'" + " and h.current_year = " + str(selected_year) + " and city_type = " + str(city_type) + ")"
 
-        for layer in layers:
-            if layer.name() == "UbGISParcelPayment":
-                is_pug_parcel = True
-        if not is_pug_parcel:
-            mygroup.addLayer(vlayer_parcel)
+        layer_name = str(selected_year) + "_" + (city_type_name)
+        layers = QgsMapLayerRegistry.instance().mapLayers()
 
-        vlayer_parcel.setLayerName(QApplication.translate("Plugin", "UbGISParcelPayment"))
+        for id, layer in layers.iteritems():
+            if layer.type() == QgsMapLayer.VectorLayer:
+                if layer.name() == layer_name:
+                    layer_list.append(id)
+
+        vlayer_parcel = LayerUtils.layer_by_data_source("", sql_layer)
+        if vlayer_parcel:
+            QgsMapLayerRegistry.instance().removeMapLayers(layer_list)
+        vlayer_parcel = LayerUtils.load_temp_table(sql_layer, layer_name)
+
+        mygroup.addLayer(vlayer_parcel)
+
+        vlayer_parcel.setLayerName(QApplication.translate("Plugin", layer_name))
+
         vlayer_parcel.loadNamedStyle(
             str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "template\style/ub_parcel_fee.qml")
 

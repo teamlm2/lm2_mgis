@@ -1332,10 +1332,11 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
 
     def __create_layer_group(self, root_group, group_name):
 
-        if root_group.findGroup(group_name):
-            return root_group.findGroup(group_name)
-        else:
-            return root_group.insertGroup(1, group_name)
+        if root_group:
+            if root_group.findGroup(group_name):
+                return root_group.findGroup(group_name)
+            else:
+                return root_group.insertGroup(1, group_name)
 
     @pyqtSlot(QTableWidgetItem)
     def on_show_to_layer_action_clicked(self):
@@ -1349,7 +1350,8 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
 
         root_group = root.findGroup(u"Бусад ГЗБТ")
         parent_group = self.__create_layer_group(root_group, group_name)
-        parent_group.setExpanded(False)
+        if parent_group:
+            parent_group.setExpanded(False)
 
         sql = "select base_code from ( " \
                 "select substring(zone.code, 1, 1) base_code from data_plan.pl_project_parcel parcel " \

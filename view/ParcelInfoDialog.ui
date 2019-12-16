@@ -87,7 +87,7 @@
      <property name="geometry">
       <rect>
        <x>0</x>
-       <y>-147</y>
+       <y>0</y>
        <width>600</width>
        <height>1000</height>
       </rect>
@@ -1283,7 +1283,7 @@
          <rect>
           <x>5</x>
           <y>310</y>
-          <width>75</width>
+          <width>101</width>
           <height>23</height>
          </rect>
         </property>
@@ -1425,7 +1425,7 @@
        <widget class="QPushButton" name="fee_layer_view_button">
         <property name="geometry">
          <rect>
-          <x>100</x>
+          <x>400</x>
           <y>310</y>
           <width>141</width>
           <height>23</height>
@@ -1433,6 +1433,29 @@
         </property>
         <property name="text">
          <string>Fee Layer View</string>
+        </property>
+       </widget>
+       <widget class="QComboBox" name="fee_year_layer_cbox">
+        <property name="geometry">
+         <rect>
+          <x>300</x>
+          <y>310</y>
+          <width>91</width>
+          <height>22</height>
+         </rect>
+        </property>
+       </widget>
+       <widget class="QCheckBox" name="all_fee_chbox">
+        <property name="geometry">
+         <rect>
+          <x>190</x>
+          <y>312</y>
+          <width>111</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Бүгд</string>
         </property>
        </widget>
       </widget>

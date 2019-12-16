@@ -39,3 +39,5 @@ class UbFeeHistory(Base):
 
     city_type = Column(Integer)
 
+    status = Column(Integer)
+

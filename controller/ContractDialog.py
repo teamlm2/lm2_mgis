@@ -112,7 +112,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         self.updating = None
         self.app_id = None
         self.setupUi(self)
-
+        self.app_type_property_no_refresh = [13, 12, 11, 10, 9, 7]
         self.contract_date.setDate(QDate().currentDate())
         self.cancelation_date.setDate(QDate().currentDate())
 
@@ -2064,17 +2064,30 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             return
         # try:
         application = self.session.query(CtApplication).filter_by(app_no=current_app_no).one()
-        if not application.property_no:
-            if not application.parcel_ref.property_no:
+        app_type = application.app_type
+        if not app_type in self.app_type_property_no_refresh:
+            if not application.property_no:
+                if not application.parcel_ref.property_no:
 
-                PluginUtils.show_message(self, self.tr("Warning"),
-                                       self.tr("Not property number!"))
-                return
+                    PluginUtils.show_message(self, self.tr("Warning"),
+                                           self.tr("Not property number!"))
+                    return
 
         if not application.parcel_ref.property_no:
             self.property_num_edit.setText(application.property_no)
         else:
             self.property_num_edit.setText(application.parcel_ref.property_no)
+
+        if app_type in self.app_type_property_no_refresh:
+            parcel_id = self.id_main_edit.text().strip()
+            sql = "select p.parcel_id, t.parcel_id, p.property_no, t.property_no from data_soums_union.ca_parcel_tbl p , data_soums_union.ca_parcel_tbl t " \
+                  "where p.parcel_id = " + "'" + parcel_id + "'" + " and p.parcel_id != t.parcel_id and st_within(st_centroid(p.geometry), t.geometry)"
+
+            result = self.session.execute(sql)
+            for item_row in result:
+                if item_row[3]:
+                    property_no = item_row[3]
+                    self.property_num_edit.setText(property_no)
 
     @pyqtSlot()
     def on_accept_button_clicked(self):

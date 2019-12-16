@@ -16,14 +16,14 @@
   <widget class="QPushButton" name="close_button">
    <property name="geometry">
     <rect>
-     <x>779</x>
+     <x>789</x>
      <y>510</y>
      <width>75</width>
      <height>23</height>
     </rect>
    </property>
    <property name="text">
-    <string>Close</string>
+    <string>Хаах</string>
    </property>
   </widget>
   <widget class="QTabWidget" name="tabWidget">
@@ -44,7 +44,7 @@
     </attribute>
     <widget class="QGroupBox" name="find_gbox">
      <property name="enabled">
-      <bool>false</bool>
+      <bool>true</bool>
      </property>
      <property name="geometry">
       <rect>
@@ -60,7 +60,7 @@
      <widget class="QPushButton" name="find_button">
       <property name="geometry">
        <rect>
-        <x>530</x>
+        <x>670</x>
         <y>10</y>
         <width>75</width>
         <height>23</height>
@@ -76,26 +76,13 @@
      </widget>
      <widget class="QLineEdit" name="old_parcel_id_edit">
       <property name="enabled">
-       <bool>false</bool>
+       <bool>true</bool>
       </property>
       <property name="geometry">
        <rect>
-        <x>360</x>
+        <x>270</x>
         <y>11</y>
-        <width>151</width>
-        <height>20</height>
-       </rect>
-      </property>
-     </widget>
-     <widget class="QLineEdit" name="person_id_edit">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>90</x>
-        <y>11</y>
-        <width>151</width>
+        <width>131</width>
         <height>20</height>
        </rect>
       </property>
@@ -105,32 +92,71 @@
        <rect>
         <x>10</x>
         <y>13</y>
-        <width>81</width>
+        <width>51</width>
         <height>16</height>
        </rect>
       </property>
       <property name="text">
-       <string>Person ID</string>
+       <string>Регистр:</string>
       </property>
      </widget>
      <widget class="QLabel" name="label_4">
       <property name="geometry">
        <rect>
-        <x>250</x>
+        <x>165</x>
         <y>13</y>
         <width>101</width>
         <height>16</height>
        </rect>
       </property>
       <property name="text">
-       <string>Old Parcel ID</string>
+       <string>Хуучин НТ Дугаар:</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_5">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>405</x>
+        <y>12</y>
+        <width>101</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Гэрээний дугаар:</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="contract_no_edit">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>510</x>
+        <y>10</y>
+        <width>131</width>
+        <height>20</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="person_id_edit">
+      <property name="geometry">
+       <rect>
+        <x>60</x>
+        <y>10</y>
+        <width>91</width>
+        <height>20</height>
+       </rect>
       </property>
      </widget>
     </widget>
     <widget class="QPushButton" name="clear_button">
      <property name="geometry">
       <rect>
-       <x>630</x>
+       <x>770</x>
        <y>10</y>
        <width>75</width>
        <height>23</height>
@@ -720,6 +746,11 @@
        </column>
        <column>
         <property name="text">
+         <string>НТ-н дугаар</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
          <string>Жил</string>
         </property>
        </column>
@@ -879,68 +910,38 @@
       </rect>
      </property>
     </widget>
-    <widget class="QCheckBox" name="all_chbox">
-     <property name="geometry">
-      <rect>
-       <x>650</x>
-       <y>45</y>
-       <width>60</width>
-       <height>17</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Бүгд</string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="payment_find_button">
-     <property name="geometry">
-      <rect>
-       <x>720</x>
-       <y>42</y>
-       <width>75</width>
-       <height>23</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Хайх</string>
-     </property>
-     <property name="icon">
-      <iconset resource="resources.qrc">
-       <normaloff>:/plugins/lm2/zoom.png</normaloff>:/plugins/lm2/zoom.png</iconset>
-     </property>
-    </widget>
    </widget>
   </widget>
   <widget class="QPushButton" name="save_button">
    <property name="geometry">
     <rect>
-     <x>690</x>
+     <x>704</x>
      <y>510</y>
      <width>75</width>
      <height>23</height>
     </rect>
    </property>
    <property name="text">
-    <string>Save</string>
+    <string>Хадгалах</string>
    </property>
   </widget>
   <widget class="QPushButton" name="finish_button">
    <property name="geometry">
     <rect>
-     <x>600</x>
+     <x>620</x>
      <y>510</y>
      <width>75</width>
      <height>23</height>
     </rect>
    </property>
    <property name="text">
-    <string>Finish</string>
+    <string>Дуусгах</string>
    </property>
   </widget>
   <widget class="QCheckBox" name="one_select_chbox">
    <property name="geometry">
     <rect>
-     <x>390</x>
+     <x>320</x>
      <y>510</y>
      <width>211</width>
      <height>20</height>
@@ -958,12 +959,25 @@
     <rect>
      <x>10</x>
      <y>510</y>
-     <width>319</width>
+     <width>311</width>
      <height>20</height>
     </rect>
    </property>
    <property name="text">
     <string/>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="delete_button">
+   <property name="geometry">
+    <rect>
+     <x>530</x>
+     <y>510</y>
+     <width>75</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Устгах</string>
    </property>
   </widget>
  </widget>

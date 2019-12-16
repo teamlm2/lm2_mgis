@@ -34,6 +34,8 @@ from ..model.DatabaseHelper import *
 from ..model.Constants import *
 from ..controller.PlanNavigatorWidget import *
 from ..controller.PlanAttributeEditDialog import *
+from ..model.PlProjectParcelAttributeValue import *
+from ..model.PlProjectParcelRefParcel import *
 # from ..LM2Plugin import *
 from datetime import timedelta
 from xlsxwriter.utility import xl_rowcol_to_cell, xl_col_to_name
@@ -412,7 +414,17 @@ class PlanDetailWidget(QDockWidget, Ui_PlanDetailWidget, DatabaseHelper):
             return
         else:
             for parcel_id in self.parcels:
-                self.session.query(PlProjectParcel).filter(PlProjectParcel.parcel_id == parcel_id).delete()
+                cnt = self.session.query(PlProjectParcel).\
+                    filter(PlProjectParcel.project_id == self.plan.project_id). \
+                    filter(PlProjectParcel.parcel_id == parcel_id).count()
+                if cnt == 1:
+                    self.session.query(PlProjectParcelAttributeValue). \
+                        filter(PlProjectParcelAttributeValue.parcel_id == parcel_id).delete()
+                    self.session.query(PlProjectParcelRefParcel). \
+                        filter(PlProjectParcelRefParcel.parcel_id == parcel_id).delete()
+                    self.session.query(PlProjectParcel). \
+                        filter(PlProjectParcel.project_id == self.plan.project_id). \
+                        filter(PlProjectParcel.parcel_id == parcel_id).delete()
 
         self.session.commit()
 

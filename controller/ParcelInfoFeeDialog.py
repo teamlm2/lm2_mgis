@@ -55,7 +55,7 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
         self.paid_less_sbox.setMaximum(9999999999)
         self.paid_over_sbox.setMaximum(9999999999)
 
-        self.select_years = [2014, 2015, 2016, 2017, 2018]
+        self.select_years = [2019, 2018, 2017, 2016, 2015, 2014]
         self.__setup_table_widget()
         self.__setup_cbox()
         self.selected_year = None
@@ -80,6 +80,12 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
         self.payment_twidget.setEditTriggers(QTableWidget.NoEditTriggers)
         self.payment_twidget.setSelectionBehavior(QTableWidget.SelectRows)
         self.payment_twidget.setSelectionMode(QTableWidget.SingleSelection)
+        self.payment_twidget.setWordWrap(True)
+        self.payment_twidget.setDragEnabled(True)
+
+        # self.payment_twidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        # self.payment_twidget.setSelectionBehavior(QAbstractItemView.SingleSelection)
+        # self.payment_twidget.setDragEnabled(True)
 
     def __list_of_payment(self):
 
@@ -102,58 +108,65 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
             item.setData(Qt.UserRole + 1, value.id)
             self.payment_twidget.setItem(count, 0, item)
 
+            item = QTableWidgetItem(str(value.pid))
+            item.setData(Qt.UserRole, value.pid)
+            self.payment_twidget.setItem(count, 1, item)
+
             item = QTableWidgetItem(str(value.current_year))
             item.setData(Qt.UserRole, value.current_year)
-            self.payment_twidget.setItem(count, 1, item)
+            self.payment_twidget.setItem(count, 2, item)
 
             item = QTableWidgetItem(value.person_register)
             item.setData(Qt.UserRole, value.person_register)
-            self.payment_twidget.setItem(count, 2, item)
+            self.payment_twidget.setItem(count, 3, item)
 
             item = QTableWidgetItem(value.contract_no)
             item.setData(Qt.UserRole, value.contract_no)
-            self.payment_twidget.setItem(count, 3, item)
+            self.payment_twidget.setItem(count, 4, item)
 
             item = QTableWidgetItem(str(value.payment_contract))
             item.setData(Qt.UserRole, value.payment_contract)
-            self.payment_twidget.setItem(count, 4, item)
+            self.payment_twidget.setItem(count, 5, item)
 
             item = QTableWidgetItem(str(value.payment_year))
             item.setData(Qt.UserRole, value.payment_year)
-            self.payment_twidget.setItem(count, 5, item)
+            self.payment_twidget.setItem(count, 6, item)
 
             item = QTableWidgetItem(str(value.payment_total))
             item.setData(Qt.UserRole, value.city_type)
-            self.payment_twidget.setItem(count, 6, item)
+            self.payment_twidget.setItem(count, 7, item)
 
             item = QTableWidgetItem(str(value.payment_before_less))
             item.setData(Qt.UserRole, value.payment_before_less)
-            self.payment_twidget.setItem(count, 7, item)
+            self.payment_twidget.setItem(count, 8, item)
 
             item = QTableWidgetItem(str(value.payment_before_over))
             item.setData(Qt.UserRole, value.payment_before_over)
-            self.payment_twidget.setItem(count, 8, item)
+            self.payment_twidget.setItem(count, 9, item)
 
             item = QTableWidgetItem(str(value.paid_city))
             item.setData(Qt.UserRole, value.paid_city)
-            self.payment_twidget.setItem(count, 9, item)
+            self.payment_twidget.setItem(count, 10, item)
 
             item = QTableWidgetItem(str(value.paid_district))
             item.setData(Qt.UserRole, value.paid_district)
-            self.payment_twidget.setItem(count, 10, item)
+            self.payment_twidget.setItem(count, 11, item)
 
             item = QTableWidgetItem(str(value.invalid_payment))
             item.setData(Qt.UserRole, value.invalid_payment)
-            self.payment_twidget.setItem(count, 11, item)
+            self.payment_twidget.setItem(count, 12, item)
 
             item = QTableWidgetItem(str(value.paid_before_less))
             item.setData(Qt.UserRole, value.paid_before_less)
-            self.payment_twidget.setItem(count, 12, item)
+            self.payment_twidget.setItem(count, 13, item)
 
     def __list_of_paid(self):
 
         self.paid_twidget.setRowCount(0)
         parcel_id = None
+        count = self.session.query(CaUBParcel).filter(CaUBParcel.old_parcel_id == self.old_parcel_id).count()
+        if count == 0:
+            return
         old_parcel = self.session.query(CaUBParcel).filter(CaUBParcel.old_parcel_id == self.old_parcel_id).one()
 
         parcel_count = self.session.query(CaParcelTbl). \
@@ -248,13 +261,13 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
                 name = name + ' ' + value.ner
             self.object_cbox.addItem(name, value.id)
 
-    @pyqtSlot(int)
-    def on_object_cbox_currentIndexChanged(self, index):
-
-        self.__clear_all()
-        current_id = self.object_cbox.itemData(self.object_cbox.currentIndex())
-
-        self.__load_fee_history(current_id)
+    # @pyqtSlot(int)
+    # def on_object_cbox_currentIndexChanged(self, index):
+    #
+    #     self.__clear_all()
+    #     current_id = self.object_cbox.itemData(self.object_cbox.currentIndex())
+    #
+    #     self.__load_fee_history(current_id)
 
     @pyqtSlot(QTableWidgetItem)
     def on_payment_twidget_itemClicked(self, item):
@@ -268,6 +281,10 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
         value = self.session.query(UbFeeHistory). \
             filter(UbFeeHistory.id == id).first()
 
+        self.person_id_edit.setText(value.person_register)
+        self.contract_no_edit.setText(value.contract_no)
+        self.old_parcel_id_edit.setText(str(value.pid))
+
         if value.city_type:
             self.city_type_cbox.setCurrentIndex(self.city_type_cbox.findData(value.city_type))
 
@@ -276,7 +293,7 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
 
         if value.id:
             self.object_cbox.setCurrentIndex(self.object_cbox.findData(value.id))
-        # self.__load_fee_history(id)
+        self.__load_fee_history(id)
 
     def __load_fee_history(self, current_id):
 
@@ -333,6 +350,37 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
         self.paid_invalid_sbox.setValue(0)
         self.paid_less_sbox.setValue(0)
         self.paid_over_sbox.setValue(0)
+
+    @pyqtSlot()
+    def on_clear_button_clicked(self):
+
+        self.person_id_edit.clear()
+        self.contract_no_edit.clear()
+        self.old_parcel_id_edit.clear()
+
+    @pyqtSlot()
+    def on_delete_button_clicked(self):
+
+        selected_items = self.payment_twidget.selectedItems()
+
+        if len(selected_items) == 0:
+            self.status_label.setText(self.tr("Only single selection allowed."))
+            return None
+
+        selected_row = self.payment_twidget.currentRow()
+        item = self.payment_twidget.item(selected_row, 0)
+        id = item.data(Qt.UserRole + 1)
+
+        message_box = QMessageBox()
+        message_box.setText(u'Сонгогдсон төлбөрийн бүртгэлийг устгах уу?')
+        delete_button = message_box.addButton(self.tr("Yes"), QMessageBox.ActionRole)
+        message_box.addButton(self.tr("No"), QMessageBox.ActionRole)
+        message_box.exec_()
+
+        if not message_box.clickedButton() == delete_button:
+            return
+        else:
+            self.session.query(UbFeeHistory).filter(UbFeeHistory.id == id).delete()
 
     @pyqtSlot()
     def on_save_button_clicked(self):
@@ -411,7 +459,12 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
     def on_finish_button_clicked(self):
 
         current_year = self.year_cbox.itemData(self.year_cbox.currentIndex())
-        current_id = self.object_cbox.itemData(self.object_cbox.currentIndex())
+        # current_id = self.object_cbox.itemData(self.object_cbox.currentIndex())
+
+        selected_row = self.payment_twidget.currentRow()
+        item = self.payment_twidget.item(selected_row, 0)
+        current_id = item.data(Qt.UserRole + 1)
+
         parcel_id = None
         person_id = None
         contract_id = None
@@ -517,6 +570,12 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
                 object.created_at = datetime.strptime(date_time_string, Constants.PYTHON_DATETIME_FORMAT)
 
                 self.session.add(object)
+
+                value = self.session.query(UbFeeHistory). \
+                    filter(UbFeeHistory.id == current_id).first()
+
+                value.status = 2
+
         self.session.commit()
         self.__start_fade_out_timer()
         self.__list_of_paid()
@@ -544,3 +603,89 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
     def on_year_sbox_valueChanged(self, sbox_value):
 
         print ''
+
+    @pyqtSlot()
+    def on_find_button_clicked(self):
+
+        values = self.session.query(UbFeeHistory)
+
+        if self.old_parcel_id_edit.text():
+            old_parcel_id = self.old_parcel_id_edit.text()
+            old_parcel_id_like = '%' + old_parcel_id + '%'
+            values = values.filter(func.lower(UbFeeHistory.pid).like(func.lower(old_parcel_id_like)))
+        if self.contract_no_edit.text():
+            contract_no = self.contract_no_edit.text()
+            contract_no_like = '%' + contract_no + '%'
+            values = values.filter(func.lower(UbFeeHistory.contract_no).like(func.lower(contract_no_like)))
+        if self.person_id_edit.text():
+            person_register = self.person_id_edit.text()
+            person_register_like = '%' + person_register + '%'
+            values = values.filter(func.lower(UbFeeHistory.person_register).like(func.lower(person_register_like)))
+
+        self.payment_twidget.setRowCount(0)
+
+        for value in values:
+            count = self.payment_twidget.rowCount()
+            self.payment_twidget.insertRow(count)
+
+            city_type = u''
+            if value.city_type == 1:
+                city_type = u'Нийслэл'
+            if value.city_type == 2:
+                city_type = u'Дүүрэг'
+            item = QTableWidgetItem(city_type)
+            item.setData(Qt.UserRole, value.city_type)
+            item.setData(Qt.UserRole + 1, value.id)
+            self.payment_twidget.setItem(count, 0, item)
+
+            item = QTableWidgetItem(str(value.pid))
+            item.setData(Qt.UserRole, value.pid)
+            self.payment_twidget.setItem(count, 1, item)
+
+            item = QTableWidgetItem(str(value.current_year))
+            item.setData(Qt.UserRole, value.current_year)
+            self.payment_twidget.setItem(count, 2, item)
+
+            item = QTableWidgetItem(value.person_register)
+            item.setData(Qt.UserRole, value.person_register)
+            self.payment_twidget.setItem(count, 3, item)
+
+            item = QTableWidgetItem(value.contract_no)
+            item.setData(Qt.UserRole, value.contract_no)
+            self.payment_twidget.setItem(count, 4, item)
+
+            item = QTableWidgetItem(str(value.payment_contract))
+            item.setData(Qt.UserRole, value.payment_contract)
+            self.payment_twidget.setItem(count, 5, item)
+
+            item = QTableWidgetItem(str(value.payment_year))
+            item.setData(Qt.UserRole, value.payment_year)
+            self.payment_twidget.setItem(count, 6, item)
+
+            item = QTableWidgetItem(str(value.payment_total))
+            item.setData(Qt.UserRole, value.city_type)
+            self.payment_twidget.setItem(count, 7, item)
+
+            item = QTableWidgetItem(str(value.payment_before_less))
+            item.setData(Qt.UserRole, value.payment_before_less)
+            self.payment_twidget.setItem(count, 8, item)
+
+            item = QTableWidgetItem(str(value.payment_before_over))
+            item.setData(Qt.UserRole, value.payment_before_over)
+            self.payment_twidget.setItem(count, 9, item)
+
+            item = QTableWidgetItem(str(value.paid_city))
+            item.setData(Qt.UserRole, value.paid_city)
+            self.payment_twidget.setItem(count, 10, item)
+
+            item = QTableWidgetItem(str(value.paid_district))
+            item.setData(Qt.UserRole, value.paid_district)
+            self.payment_twidget.setItem(count, 11, item)
+
+            item = QTableWidgetItem(str(value.invalid_payment))
+            item.setData(Qt.UserRole, value.invalid_payment)
+            self.payment_twidget.setItem(count, 12, item)
+
+            item = QTableWidgetItem(str(value.paid_before_less))
+            item.setData(Qt.UserRole, value.paid_before_less)
+            self.payment_twidget.setItem(count, 13, item)

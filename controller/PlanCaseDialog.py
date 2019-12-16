@@ -1142,7 +1142,9 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
                         #     print parcel_geometry.IsValid()
                         # parcel overlap not approved plan zone
                         polygon_values = self.session.query(PlProjectParcel). \
-                            filter((parcel_geometry).ST_Intersects(PlProjectParcel.polygon_geom)).\
+                            join(PlProject, PlProjectParcel.project_id == PlProject.project_id). \
+                            filter(PlProject.is_active == True). \
+                            filter((parcel_geometry).ST_Overlaps(PlProjectParcel.polygon_geom)).\
                             filter(or_(PlProjectParcel.valid_till == None, PlProjectParcel.valid_till == 'infinity')).all()
                         for value in polygon_values:
                             plan_zone = value.plan_zone_ref
@@ -1160,7 +1162,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
                                     valid = False
 
                         point_values = self.session.query(PlProjectParcel). \
-                            filter((parcel_geometry).ST_Intersects(PlProjectParcel.point_geom)). \
+                            filter((parcel_geometry).ST_Overlaps(PlProjectParcel.point_geom)). \
                             filter(or_(PlProjectParcel.valid_till == None, PlProjectParcel.valid_till == 'infinity')).all()
                         for value in point_values:
                             plan_zone = value.plan_zone_ref
@@ -1177,7 +1179,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
                                 valid = False
 
                         line_values = self.session.query(PlProjectParcel). \
-                            filter((parcel_geometry).ST_Intersects(PlProjectParcel.line_geom)). \
+                            filter((parcel_geometry).ST_Overlaps(PlProjectParcel.line_geom)). \
                             filter(or_(PlProjectParcel.valid_till == None, PlProjectParcel.valid_till == 'infinity')).all()
                         for value in line_values:
                             plan_zone = value.plan_zone_ref
@@ -1196,14 +1198,14 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
 
                         # base condition overlaps
                         values = self.session.query(PlBaseConditionParcel).\
-                            filter(func.ST_Centroid(parcel_geometry).ST_Intersects(PlBaseConditionParcel.geometry)).all()
+                            filter(parcel_geometry.ST_Overlaps(PlBaseConditionParcel.geometry)).all()
 
                         for value in values:
                             type = value.base_condition_type_ref
                             count = self.session.query(SetPlanZoneBaseConditionType).\
                                 filter(SetPlanZoneBaseConditionType.plan_zone_id == plan_zone_id). \
                                 filter(SetPlanZoneBaseConditionType.base_condition_type_id == type.base_condition_type_id).count()
-                            if count == 1:
+                            if count > 0:
                                 message = base_condition_message + type.short_name + unicode(u' -тэй давхцаж байна. ')
                                 error_message = error_message + "\n" + message
                                 valid = False
@@ -1380,7 +1382,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
     def __get_attribute(self, parcel_feature, layer):
 
         column_name_parcel_id = "id"
-        column_name_plan_code = "badedturl"
+        column_name_plan_code = "plan_code"
         column_name_landuse = "landuse"
         column_name_landname = "gaz_add"
         column_name_khashaa = "address_kh"
@@ -1424,7 +1426,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         valid = True
 
         column_name_parcel_id = "id"
-        column_name_plan_code = "badedturl"
+        column_name_plan_code = "plan_code"
         column_name_landuse = "landuse"
         column_name_landname = "gaz_add"
         column_name_khashaa = "address_kh"
@@ -1560,7 +1562,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
     def __copy_parcel_attributes(self, parcel, new_parcel, parcel_shape_layer):
 
         column_name_parcel_id = "id"
-        column_name_plan_code = "badedturl"
+        column_name_plan_code = "plan_code"
         column_name_landuse = "landuse"
         column_name_landname = "gaz_add"
         column_name_khashaa = "address_kh"
