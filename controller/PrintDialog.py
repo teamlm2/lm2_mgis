@@ -1627,7 +1627,7 @@ class PrintDialog(QDialog, Ui_PrintDialog):
                                    SetCadastrePage.range_last_no,
                                    SetCadastrePage.id,
                                    SetCadastrePage.current_no) \
-            .filter(SetCadastrePage.department_id == department_id) \
+            .filter(SetCadastrePage.au_level2 == soum) \
             .order_by(SetCadastrePage.range_first_no.asc()).all()
 
         for set_cadastre_page in set_cadastre_pages:
