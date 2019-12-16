@@ -3528,7 +3528,7 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
         is_find = False
         if self.old_parcel_id_edit.text():
             is_find = True
-        dialog = ParcelInfoFeeDialog(old_parcel_id, person_id, is_find)
+        dialog = ParcelInfoFeeDialog(old_parcel_id, person_id, is_find, self.plugin)
         dialog.exec_()
 
     @pyqtSlot()

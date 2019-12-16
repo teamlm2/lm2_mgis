@@ -10,6 +10,24 @@
     <height>537</height>
    </rect>
   </property>
+  <property name="minimumSize">
+   <size>
+    <width>867</width>
+    <height>537</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>880</width>
+    <height>550</height>
+   </size>
+  </property>
+  <property name="baseSize">
+   <size>
+    <width>867</width>
+    <height>537</height>
+   </size>
+  </property>
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
@@ -981,6 +999,45 @@
    </property>
   </widget>
  </widget>
+ <tabstops>
+  <tabstop>old_parcel_id_edit</tabstop>
+  <tabstop>find_button</tabstop>
+  <tabstop>person_id_edit</tabstop>
+  <tabstop>one_select_chbox</tabstop>
+  <tabstop>delete_button</tabstop>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>payment_total_sbox</tabstop>
+  <tabstop>finish_button</tabstop>
+  <tabstop>save_button</tabstop>
+  <tabstop>clear_button</tabstop>
+  <tabstop>contract_no_edit</tabstop>
+  <tabstop>payment_contract_sbox</tabstop>
+  <tabstop>payment_before_less_sbox</tabstop>
+  <tabstop>payment_before_over_sbox</tabstop>
+  <tabstop>payment_year_sbox</tabstop>
+  <tabstop>payment_fund_sbox</tabstop>
+  <tabstop>payment_loss_sbox</tabstop>
+  <tabstop>paid_less_sbox</tabstop>
+  <tabstop>paid_before_less_sbox</tabstop>
+  <tabstop>paid_year_sbox</tabstop>
+  <tabstop>paid_fund_sbox</tabstop>
+  <tabstop>paid_district_sbox</tabstop>
+  <tabstop>paid_city_sbox</tabstop>
+  <tabstop>paid_invalid_sbox</tabstop>
+  <tabstop>paid_over_sbox</tabstop>
+  <tabstop>payment_contract_edit</tabstop>
+  <tabstop>decsription_txt</tabstop>
+  <tabstop>payment_zoriulalt_edit</tabstop>
+  <tabstop>payment_name_edit</tabstop>
+  <tabstop>payment_area_edit</tabstop>
+  <tabstop>tabWidget_2</tabstop>
+  <tabstop>payment_twidget</tabstop>
+  <tabstop>paid_twidget</tabstop>
+  <tabstop>object_cbox</tabstop>
+  <tabstop>year_cbox</tabstop>
+  <tabstop>city_type_cbox</tabstop>
+  <tabstop>close_button</tabstop>
+ </tabstops>
  <resources>
   <include location="resources.qrc"/>
  </resources>

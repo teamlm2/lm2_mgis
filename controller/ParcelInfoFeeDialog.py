@@ -5,7 +5,9 @@ __author__ = 'ankhbold'
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from sqlalchemy.exc import SQLAlchemyError
+from qgis.core import *
 from sqlalchemy import func, or_, extract
+from ..utils.LayerUtils import LayerUtils
 from ..view.Ui_ParcelInfoFeeDialog import *
 from ..utils.SessionHandler import SessionHandler
 from ..utils.PluginUtils import *
@@ -25,10 +27,11 @@ from ..model.SetApplicationTypePersonRole import *
 
 class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
 
-    def __init__(self, old_parcel_id, person_id, is_find, parent=None):
+    def __init__(self, old_parcel_id, person_id, is_find, plugin, parent=None):
 
         super(ParcelInfoFeeDialog, self).__init__(parent)
         self.setupUi(self)
+        self.plugin = plugin
         self.session = SessionHandler().session_instance()
         self.old_parcel_id = old_parcel_id
         self.person_id = person_id
@@ -91,6 +94,8 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
 
         self.payment_twidget.setRowCount(0)
 
+        if self.old_parcel_id == '':
+            return
         values = self.session.query(UbFeeHistory). \
             filter(UbFeeHistory.pid == self.old_parcel_id).all()
 
@@ -284,6 +289,7 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
         self.person_id_edit.setText(value.person_register)
         self.contract_no_edit.setText(value.contract_no)
         self.old_parcel_id_edit.setText(str(value.pid))
+        self.old_parcel_id = str(value.pid)
 
         if value.city_type:
             self.city_type_cbox.setCurrentIndex(self.city_type_cbox.findData(value.city_type))
@@ -294,6 +300,7 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
         if value.id:
             self.object_cbox.setCurrentIndex(self.object_cbox.findData(value.id))
         self.__load_fee_history(id)
+        self.__list_of_paid()
 
     def __load_fee_history(self, current_id):
 
@@ -463,6 +470,8 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
 
         selected_row = self.payment_twidget.currentRow()
         item = self.payment_twidget.item(selected_row, 0)
+        if not item:
+            return
         current_id = item.data(Qt.UserRole + 1)
 
         parcel_id = None
@@ -607,7 +616,16 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
     @pyqtSlot()
     def on_find_button_clicked(self):
 
-        values = self.session.query(UbFeeHistory)
+        employee = DatabaseUtils.current_employee()
+        department_id = employee.department_id
+        city_type = 2
+        if department_id == 120:
+            city_type = 1
+
+        au2 = DatabaseUtils.working_l2_code()
+        values = self.session.query(UbFeeHistory).\
+            filter(UbFeeHistory.au2 == au2).\
+            filter(UbFeeHistory.city_type == city_type)
 
         if self.old_parcel_id_edit.text():
             old_parcel_id = self.old_parcel_id_edit.text()
@@ -638,11 +656,11 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
             item.setData(Qt.UserRole + 1, value.id)
             self.payment_twidget.setItem(count, 0, item)
 
-            item = QTableWidgetItem(str(value.pid))
+            item = QTableWidgetItem(unicode(value.pid))
             item.setData(Qt.UserRole, value.pid)
             self.payment_twidget.setItem(count, 1, item)
 
-            item = QTableWidgetItem(str(value.current_year))
+            item = QTableWidgetItem(unicode(value.current_year))
             item.setData(Qt.UserRole, value.current_year)
             self.payment_twidget.setItem(count, 2, item)
 
@@ -654,7 +672,7 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
             item.setData(Qt.UserRole, value.contract_no)
             self.payment_twidget.setItem(count, 4, item)
 
-            item = QTableWidgetItem(str(value.payment_contract))
+            item = QTableWidgetItem(unicode(value.payment_contract))
             item.setData(Qt.UserRole, value.payment_contract)
             self.payment_twidget.setItem(count, 5, item)
 
@@ -689,3 +707,40 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
             item = QTableWidgetItem(str(value.paid_before_less))
             item.setData(Qt.UserRole, value.paid_before_less)
             self.payment_twidget.setItem(count, 13, item)
+
+    @pyqtSlot(QTableWidgetItem)
+    def on_payment_twidget_itemDoubleClicked(self, item):
+
+        soum = DatabaseUtils.working_l2_code()
+        if not soum:
+            PluginUtils.show_message(self, self.tr("Connection Error"), self.tr("Please connect to database!!!"))
+            return
+        layer = LayerUtils.layer_by_data_source("data_ub", 'ca_ub_parcel')
+
+        selected_row = self.payment_twidget.currentRow()
+        item = self.payment_twidget.item(selected_row, 0)
+        id = item.data(Qt.UserRole + 1)
+
+        value = self.session.query(UbFeeHistory). \
+            filter(UbFeeHistory.id == id).first()
+
+        old_parcel_id = str(value.pid)
+
+        self.__select_feature(old_parcel_id, layer)
+
+    def __select_feature(self, parcel_id, layer):
+
+        expression = " old_parcel_id = \'" + parcel_id + "\'"
+        request = QgsFeatureRequest()
+        request.setFilterExpression(expression)
+        feature_ids = []
+        if layer:
+            iterator = layer.getFeatures(request)
+
+            for feature in iterator:
+                feature_ids.append(feature.id())
+            if len(feature_ids) == 0:
+                self.status_label.setText(self.tr("No parcel assigned"))
+
+            layer.setSelectedFeatures(feature_ids)
+            self.plugin.iface.mapCanvas().zoomToSelected(layer)
