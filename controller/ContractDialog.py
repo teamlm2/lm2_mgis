@@ -537,9 +537,12 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         parcel = application.parcel_ref
         bag_name = ''
         bag_count = self.session.query(AuLevel3).filter(AuLevel3.geometry.ST_Within(func.ST_Centroid(parcel.geometry))).count()
+        bag_count = self.session.query(AuLevel3).filter(
+            func.ST_Centroid(parcel.geometry).ST_Within(AuLevel3.geometry)).count()
 
-        if bag_count == 1:
-            bag = self.session.query(AuLevel3).filter(AuLevel3.geometry.ST_Within(func.ST_Centroid(parcel.geometry))).first()
+        if bag_count > 0:
+            bag = self.session.query(AuLevel3).filter(
+                func.ST_Centroid(parcel.geometry).ST_Within(AuLevel3.geometry)).first()
             bag_name = bag.name
         # bag_areas = {}
         # bag_count = self.session.query(AuLevel3).filter(AuLevel3.geometry.ST_Within(func.ST_Centroid(parcel.geometry))).count()
@@ -562,6 +565,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         self.old_id_edit.setText(parcel.old_parcel_id)
         self.geo_id_edit.setText(parcel.geo_id)
         self.calculated_area_edit.setText(str(round(parcel.area_m2,1)))
+
         self.bag_edit.setText(bag_name)
         self.street_name_edit.setText(parcel.address_streetname)
         self.khashaa_edit.setText(parcel.address_khashaa)
@@ -862,7 +866,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
         self.khashaa_edit.setText(parcel.address_khashaa)
         self.street_name_edit.setText(parcel.address_streetname)
-        self.bag_edit.setText(parcel.address_neighbourhood)
+        # self.bag_edit.setText(parcel.address_neighbourhood)
 
         #decision date
         last_decision = self.session.query(CtDecision).join(CtApplication.decision_result) \
