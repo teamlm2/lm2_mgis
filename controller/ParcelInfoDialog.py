@@ -3098,8 +3098,8 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
             self.application.approved_duration = duration
             self.application.right_type = right_type
             self.application.created_by = DatabaseUtils.current_sd_user().user_id
-            self.application.created_at = app_time
-            self.application.updated_at = app_time
+            # self.application.created_at = app_time
+            # self.application.updated_at = app_time
             self.application.au1 = au_level1
             self.application.au2 = au_level2
             self.application.remarks = ''
@@ -3157,8 +3157,8 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
         self.application.approved_duration = duration
         self.application.right_type = right_type
         self.application.created_by = DatabaseUtils.current_sd_user().user_id
-        self.application.created_at = app_time
-        self.application.updated_at = app_time
+        # self.application.created_at = app_time
+        # self.application.updated_at = app_time
         self.application.au1 = au_level1
         self.application.au2 = au_level2
         self.application.remarks = ''

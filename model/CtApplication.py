@@ -25,8 +25,8 @@ class CtApplication(Base):
     approved_duration = Column(Integer)
     remarks = Column(String)
     created_by = Column(Integer)
-    created_at = Column(DateTime)
-    updated_at = Column(DateTime)
+    # created_at = Column(DateTime)
+    # updated_at = Column(DateTime)
     property_no = Column(String)
     status_id = Column(Integer)
 
