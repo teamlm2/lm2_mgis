@@ -487,7 +487,7 @@ class PrintDialog(QDialog, Ui_PrintDialog):
 
                 item = map_composition.getComposerItemById("rigth_holder_name")
                 if item:
-                    item.setText(u'Хуулийн этгээдийн нэр: ' + person.name)
+                    item.setText(u'Иргэн/Хуулийн этгээдийн нэр: ' + person.name)
                     item.adjustSizeToText()
 
     def __print_pdf(self, map_composition, file_path):

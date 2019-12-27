@@ -2456,6 +2456,9 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                 tpl = DocxTemplate(path+'geree_ezemshix_DX.docx')
             elif person.type == 50 or person.type == 60 or person.type == 70:
                 tpl = DocxTemplate(path+'geree_ashigluulah_DX.docx')
+            elif person.type == 80:
+                tpl = DocxTemplate(path + 'geree_ashigluulah_SUH.docx')
+
 
         if not officer:
             PluginUtils.show_message(self, self.tr(" Employee"), self.tr("Employee not found"))
@@ -2589,12 +2592,12 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             person_firstname = ''
 
         if person.type == 10 or person.type == 20 or person.type == 50:
-            company_name = person_surname + u' овогтой ' + person_firstname
-        elif person.type == 30 or person.type == 40 or person.type == 60 or person.type == 70:
+            company_name = person_surname[:-1] + u' . ' + person_firstname
+        elif person.type == 30 or person.type == 40 or person.type == 60 or person.type == 70 or person.type == 80:
             company_name = company_name + u'-н ' + contact_position + u' ' + person_surname + u' овогтой ' + person_firstname
 
         if self.is_sign_checkbox.isChecked():
-            darga_signature = self.print_officer_cbox.currentText() + u'/.............................../'
+            darga_signature = self.print_officer_cbox.currentText() + u'/.............................../ тамга/'
             darga_position = self.position_lbl.text()
         else:
             darga_signature = ''
