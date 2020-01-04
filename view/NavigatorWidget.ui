@@ -93,7 +93,7 @@
        </size>
       </property>
       <property name="currentIndex">
-       <number>8</number>
+       <number>6</number>
       </property>
       <property name="usesScrollButtons">
        <bool>true</bool>
@@ -2577,7 +2577,7 @@
          <property name="geometry">
           <rect>
            <x>10</x>
-           <y>40</y>
+           <y>30</y>
            <width>170</width>
            <height>20</height>
           </rect>
@@ -2587,7 +2587,7 @@
          <property name="geometry">
           <rect>
            <x>10</x>
-           <y>140</y>
+           <y>145</y>
            <width>170</width>
            <height>20</height>
           </rect>
@@ -2597,7 +2597,7 @@
          <property name="geometry">
           <rect>
            <x>190</x>
-           <y>40</y>
+           <y>30</y>
            <width>170</width>
            <height>20</height>
           </rect>
@@ -2607,7 +2607,7 @@
          <property name="geometry">
           <rect>
            <x>190</x>
-           <y>140</y>
+           <y>145</y>
            <width>170</width>
            <height>20</height>
           </rect>
@@ -2617,7 +2617,7 @@
          <property name="geometry">
           <rect>
            <x>190</x>
-           <y>90</y>
+           <y>105</y>
            <width>170</width>
            <height>20</height>
           </rect>
@@ -2627,7 +2627,7 @@
          <property name="geometry">
           <rect>
            <x>10</x>
-           <y>25</y>
+           <y>15</y>
            <width>170</width>
            <height>16</height>
           </rect>
@@ -2640,7 +2640,7 @@
          <property name="geometry">
           <rect>
            <x>10</x>
-           <y>75</y>
+           <y>90</y>
            <width>170</width>
            <height>17</height>
           </rect>
@@ -2653,7 +2653,7 @@
          <property name="geometry">
           <rect>
            <x>10</x>
-           <y>125</y>
+           <y>130</y>
            <width>170</width>
            <height>17</height>
           </rect>
@@ -2666,7 +2666,7 @@
          <property name="geometry">
           <rect>
            <x>190</x>
-           <y>25</y>
+           <y>15</y>
            <width>170</width>
            <height>17</height>
           </rect>
@@ -2679,7 +2679,7 @@
          <property name="geometry">
           <rect>
            <x>190</x>
-           <y>75</y>
+           <y>90</y>
            <width>170</width>
            <height>17</height>
           </rect>
@@ -2692,7 +2692,7 @@
          <property name="geometry">
           <rect>
            <x>190</x>
-           <y>125</y>
+           <y>130</y>
            <width>170</width>
            <height>17</height>
           </rect>
@@ -2705,7 +2705,7 @@
          <property name="geometry">
           <rect>
            <x>39</x>
-           <y>90</y>
+           <y>105</y>
            <width>141</width>
            <height>21</height>
           </rect>
@@ -2763,7 +2763,7 @@ QPushButton:disabled {
          <property name="geometry">
           <rect>
            <x>10</x>
-           <y>90</y>
+           <y>105</y>
            <width>21</width>
            <height>20</height>
           </rect>
@@ -2840,6 +2840,52 @@ QPushButton:disabled {
          </property>
          <property name="text">
           <string>Contract Status</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_86">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>53</y>
+           <width>170</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Certificate No</string>
+         </property>
+        </widget>
+        <widget class="QLineEdit" name="contract_cert_num_edit">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>68</y>
+           <width>170</width>
+           <height>20</height>
+          </rect>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_87">
+         <property name="geometry">
+          <rect>
+           <x>190</x>
+           <y>53</y>
+           <width>170</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Property No</string>
+         </property>
+        </widget>
+        <widget class="QLineEdit" name="contract_property_num_edit">
+         <property name="geometry">
+          <rect>
+           <x>190</x>
+           <y>68</y>
+           <width>170</width>
+           <height>20</height>
+          </rect>
          </property>
         </widget>
        </widget>

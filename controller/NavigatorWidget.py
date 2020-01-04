@@ -1073,8 +1073,8 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
 
         select = "SELECT contract.contract_id, contract.contract_no, contract.certificate_no, contract.status ,app_pers.role as person_role,"\
                  "contract.contract_date, person.person_id, person.person_register, person.name, person.middle_name, person.first_name, "\
-                 "parcel.parcel_id, application.app_no, application.app_id, decision.decision_no, au2.code as au2_code, application.app_type " \
-                 "FROM data_soums_union.ct_contract contract " \
+                 "parcel.parcel_id, application.app_no, application.app_id, decision.decision_no, au2.code as au2_code, application.app_type, " \
+                 "contract.property_no FROM data_soums_union.ct_contract contract " \
                  "LEFT JOIN data_soums_union.ct_contract_application_role con_app on con_app.contract = contract.contract_id "\
                  "LEFT JOIN data_soums_union.ct_application application ON application.app_id = con_app.application " \
                  "LEFT JOIN data_soums_union.ct_application_person_role app_pers on application.app_id = app_pers.application "\
@@ -1809,6 +1809,16 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
             filter(and_(ContractSearch.app_type != ApplicationType.right_land, ContractSearch.app_type != ApplicationType.pasture_use))
 
         filter_is_set = False
+
+        if self.contract_cert_num_edit.text():
+            filter_is_set = True
+            cert_no = "%" + self.contract_cert_num_edit.text() + "%"
+            contracts = contracts.filter(ContractSearch.certificate_no.ilike(cert_no))
+
+        if self.contract_property_num_edit.text():
+            filter_is_set = True
+            property_no = "%" + self.contract_property_num_edit.text() + "%"
+            contracts = contracts.filter(ContractSearch.property_no.ilike(property_no))
 
         if self.contract_num_edit.text():
             filter_is_set = True

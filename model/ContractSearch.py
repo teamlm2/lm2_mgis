@@ -29,3 +29,4 @@ class ContractSearch(Base):
     decision_no = Column(String)
     au2_code = Column(String)
     app_type = Column(Integer)
+    property_no = Column(String)

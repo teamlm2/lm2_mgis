@@ -20,6 +20,7 @@ class CaParcelTbl(Base):
     address_neighbourhood = Column(String)
     valid_from = Column(Date)
     valid_till = Column(Date)
+    property_no = Column(String)
     geometry = Column(Geometry('POLYGON', 4326))
 
     # foreign keys:

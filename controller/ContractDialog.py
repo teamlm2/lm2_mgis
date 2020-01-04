@@ -2099,6 +2099,12 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                 if item_row[3]:
                     property_no = item_row[3]
                     self.property_num_edit.setText(property_no)
+            if self.property_num_edit.text():
+                parcel_object = self.session.query(CaParcelTbl).filter(CaParcelTbl.parcel_id == parcel_id).one()
+                parcel_object.property_no = self.property_num_edit.text()
+
+                application.property_no = self.property_num_edit.text()
+                self.contract.property_no = self.property_num_edit.text()
 
     @pyqtSlot()
     def on_accept_button_clicked(self):
