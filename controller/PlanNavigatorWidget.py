@@ -1317,11 +1317,13 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
             if count == 1:
                 style = self.session.query(SetZoneColor).filter(
                     SetZoneColor.code == badedturl).one()
+
+                base_zone = self.session.query(ClPlanZone).filter(ClPlanZone.code == badedturl).first()
                 fill_color = style.fill_color
                 boundary_color = style.boundary_color
                 opacity = 0.5
                 code = str(int(style.code))
-                description = str(int(style.code)) + ': ' + style.description
+                description = str(int(base_zone.code)) + ': ' + base_zone.name
 
                 self.__categorized_style(categories, vlayer_parcel, fill_color, boundary_color, opacity, code,
                                          description)

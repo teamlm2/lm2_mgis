@@ -64,3 +64,54 @@ insert into data_plan.set_plan_zone_attribute(attribute_id, plan_zone_id, is_req
 select 602, plan_zone_id, false, 1 as plan_type from data_plan.cl_plan_zone
 ON CONFLICT (attribute_id, plan_zone_id, plan_type_id) 
 DO NOTHING;
+
+----------default set attribute
+insert into data_plan.set_plan_zone_attribute(attribute_id, plan_zone_id, is_required, plan_type_id)
+
+select (select attribute_id from data_plan.cl_attribute_zone where attribute_name = 'gaz_add' limit 1), plan_zone_id, false, 1 as plan_type from data_plan.cl_plan_zone
+ON CONFLICT (attribute_id, plan_zone_id, plan_type_id) 
+DO NOTHING;
+
+insert into data_plan.set_plan_zone_attribute(attribute_id, plan_zone_id, is_required, plan_type_id)
+
+select (select attribute_id from data_plan.cl_attribute_zone where attribute_name = 'GFID' limit 1), plan_zone_id, false, 1 as plan_type from data_plan.cl_plan_zone
+ON CONFLICT (attribute_id, plan_zone_id, plan_type_id) 
+DO NOTHING;
+
+insert into data_plan.set_plan_zone_attribute(attribute_id, plan_zone_id, is_required, plan_type_id)
+
+select (select attribute_id from data_plan.cl_attribute_zone where attribute_name = 'hariuc_hun' limit 1), plan_zone_id, false, 1 as plan_type from data_plan.cl_plan_zone
+ON CONFLICT (attribute_id, plan_zone_id, plan_type_id) 
+DO NOTHING;
+
+insert into data_plan.set_plan_zone_attribute(attribute_id, plan_zone_id, is_required, plan_type_id)
+
+select (select attribute_id from data_plan.cl_attribute_zone where attribute_name = 'shaltgaan' limit 1), plan_zone_id, false, 1 as plan_type from data_plan.cl_plan_zone
+ON CONFLICT (attribute_id, plan_zone_id, plan_type_id) 
+DO NOTHING;
+
+insert into data_plan.set_plan_zone_attribute(attribute_id, plan_zone_id, is_required, plan_type_id)
+
+select (select attribute_id from data_plan.cl_attribute_zone where attribute_name = 'TXT' limit 1), plan_zone_id, false, 1 as plan_type from data_plan.cl_plan_zone
+ON CONFLICT (attribute_id, plan_zone_id, plan_type_id) 
+DO NOTHING;
+
+insert into data_plan.set_plan_zone_attribute(attribute_id, plan_zone_id, is_required, plan_type_id)
+
+select (select attribute_id from data_plan.cl_attribute_zone where attribute_name = 'HuchChadl' limit 1), plan_zone_id, false, 1 as plan_type from data_plan.cl_plan_zone
+ON CONFLICT (attribute_id, plan_zone_id, plan_type_id) 
+DO NOTHING;
+
+insert into data_plan.set_plan_zone_attribute(attribute_id, plan_zone_id, is_required, plan_type_id)
+
+select (select attribute_id from data_plan.cl_attribute_zone where attribute_name = 'chiglel' limit 1), plan_zone_id, false, 1 as plan_type from data_plan.cl_plan_zone
+where code like '30%'
+ON CONFLICT (attribute_id, plan_zone_id, plan_type_id) 
+DO NOTHING;
+
+insert into data_plan.set_plan_zone_attribute(attribute_id, plan_zone_id, is_required, plan_type_id)
+
+select (select attribute_id from data_plan.cl_attribute_zone where attribute_name = 'urt' limit 1), plan_zone_id, false, 1 as plan_type from data_plan.cl_plan_zone
+where code like '30%'
+ON CONFLICT (attribute_id, plan_zone_id, plan_type_id) 
+DO NOTHING;

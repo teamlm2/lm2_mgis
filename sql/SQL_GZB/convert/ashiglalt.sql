@@ -17,10 +17,24 @@ where bb.project_id = 1
 ON CONFLICT (attribute_id, parcel_id) 
 DO NOTHING;
 
+--------------
+insert into data_plan.pl_project_parcel_attribute_value(attribute_id, parcel_id, attribute_value)
+
+select (select attribute_id from data_plan.cl_attribute_zone where attribute_name = 'hugatsaa_ash'), bb.parcel_id, date_part('year', exp_date)  from data_plan.aa_ashiglalt aa
+join data_plan.pl_project_parcel bb on st_equals(aa.geom, bb.polygon_geom)
+where bb.project_id = 1
+ON CONFLICT (attribute_id, parcel_id) 
+DO NOTHING;
+
+----------
+
 select plan_zone_id from data_plan.cl_plan_zone where code = '21502003'
 select plan_zone_id from data_plan.cl_plan_zone where code = '21502001'
 
-select attribute_id from data_plan.cl_attribute_zone where attribute_name = 'GFID'
+select attribute_id from data_plan.cl_attribute_zone where attribute_name = 'hugatsaa_ash'
+
+select * from data_plan.cl_attribute_zone where description = 'Гэрээгээр ашиглах хугацаа'
+
 
 select * from data_plan.aa_ashiglalt
 
