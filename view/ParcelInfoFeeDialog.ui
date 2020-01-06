@@ -759,6 +759,11 @@
        </property>
        <column>
         <property name="text">
+         <string>Төлөв</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
          <string>Төрөл</string>
         </property>
        </column>
