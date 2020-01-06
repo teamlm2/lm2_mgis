@@ -2251,6 +2251,8 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         self.contract_parcel_num_edit.clear()
         self.contract_decision_num_edit.clear()
         self.contract_application_num_edit.clear()
+        self.contract_cert_num_edit.clear()
+        self.contract_property_num_edit.clear()
 
     def __clear_record(self):
 
@@ -7905,7 +7907,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
                 vlayer.setLayerName(self.tr("Land users list"))
                 mygroup.addLayer(vlayer)
         elif code == '08':
-            tmp_parcel_layer = LayerUtils.layer_by_data_source("data_soums_union", "view_land_possessors_list")
+            tmp_parcel_layer = LayerUtils.layer_by_data_source("data_soums_union", "view_land_possessors_list1")
             if tmp_parcel_layer is None:
                 mygroup = root.findGroup(u"Тайлан")
                 vlayer = LayerUtils.load_union_layer_by_name("view_land_possessors_list", "parcel_id")
