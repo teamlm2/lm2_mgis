@@ -61,9 +61,7 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
 
         self.select_years = [2019, 2018, 2017, 2016, 2015, 2014]
         self.__setup_table_widget()
-        self.status_list = [u'Засагдаагүй', u'Засагдсан']
-        delegate = ComboBoxDelegate(11, self.status_list, self.payment_twidget)
-        self.payment_twidget.setItemDelegateForColumn(11, delegate)
+
         self.__setup_cbox()
         self.selected_year = None
         self.__list_of_paid()
@@ -90,10 +88,13 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
         # self.payment_twidget.setWordWrap(True)
         # self.payment_twidget.setDragEnabled(True)
 
-        self.payment_twidget.setSelectionMode(QAbstractItemView.SingleSelection)
-        self.payment_twidget.setSelectionBehavior(QAbstractItemView.SelectRows)
-        self.payment_twidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
-        self.payment_twidget.setSortingEnabled(True)
+        self.payment_twidget.setAlternatingRowColors(True)
+        self.payment_twidget.setSelectionBehavior(QTableWidget.SelectRows)
+        self.payment_twidget.setSelectionMode(QTableWidget.SingleSelection)
+
+        self.status_list = [u'Засагдаагүй', u'Засагдсан']
+        delegate = ComboBoxDelegate(0, self.status_list, self.payment_twidget)
+        self.payment_twidget.setItemDelegateForColumn(0, delegate)
 
     def __list_of_payment(self):
 
@@ -107,6 +108,15 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
         for value in values:
             count = self.payment_twidget.rowCount()
             self.payment_twidget.insertRow(count)
+
+            status_desc = u'Засагдаагүй'
+            status_code = 1
+            if value.status == 2:
+                status_desc = u'Засагдсан'
+                status_code = 2
+            item = QTableWidgetItem(unicode(status_desc))
+            item.setData(Qt.UserRole, status_code)
+            self.payment_twidget.setItem(count, 0, item)
 
             city_type = u''
             if value.city_type == 1:
@@ -397,9 +407,27 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
     @pyqtSlot()
     def on_save_button_clicked(self):
 
-        current_id = self.object_cbox.itemData(self.object_cbox.currentIndex())
-        self.selected_year = self.year_cbox.itemData(self.year_cbox.currentIndex())
-        city_type = self.city_type_cbox.itemData(self.city_type_cbox.currentIndex())
+        # current_id = self.object_cbox.itemData(self.object_cbox.currentIndex())
+
+        selected_row = self.payment_twidget.currentRow()
+        item = self.payment_twidget.item(selected_row, 1)
+        if not item:
+            return
+        current_id = item.data(Qt.UserRole + 1)
+
+        item_year = self.payment_twidget.item(selected_row, 3)
+        self.selected_year = item_year.data(Qt.UserRole)
+
+        item_city = self.payment_twidget.item(selected_row, 1)
+        city_type = item_city.data(Qt.UserRole)
+
+        item_status = self.payment_twidget.item(selected_row, 0)
+        status = 1
+        if item_status.text() == u'Засагдсан':
+            status = 2
+
+        # self.selected_year = self.year_cbox.itemData(self.year_cbox.currentIndex())
+        # city_type = self.city_type_cbox.itemData(self.city_type_cbox.currentIndex())
 
         if current_id:
             object = self.session.query(UbFeeHistory).filter(UbFeeHistory.id == current_id).one()
@@ -426,6 +454,7 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
             object.invalid_payment = self.paid_invalid_sbox.value()
             object.paid_less = self.paid_less_sbox.value()
             object.paid_over = self.paid_over_sbox.value()
+            object.status = status
             object.city_type = city_type
         else:
             object = UbFeeHistory()
@@ -457,6 +486,7 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
             object.pid = self.old_parcel_id
             object.person_register = self.person_id
             object.city_type = city_type
+            object.status = status
 
             self.session.add(object)
 
@@ -658,7 +688,7 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
                 status_code = 2
             item = QTableWidgetItem(unicode(status_desc))
             item.setData(Qt.UserRole, status_code)
-            self.payment_twidget.setItem(count, 11, item)
+            self.payment_twidget.setItem(count, 0, item)
 
             city_type = u''
             if value.city_type == 1:
