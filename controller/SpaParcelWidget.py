@@ -550,6 +550,7 @@ class SpaParcelWidget(QDockWidget, Ui_SpaParcelWidget, DatabaseHelper):
         self.app_date_edit.setEnabled(False)
         self.app_date_cbox.setChecked(False)
         self.spa_type_cbox.setCurrentIndex(self.spa_type_cbox.findData(-1))
+        self.department_cbox.setCurrentIndex(self.department_cbox.findData(-1))
         self.land_use_type_cbox.setCurrentIndex(self.land_use_type_cbox.findData(-1))
 
     @pyqtSlot(int)
@@ -581,7 +582,7 @@ class SpaParcelWidget(QDockWidget, Ui_SpaParcelWidget, DatabaseHelper):
             count += 1
 
         self.error_label.setText("")
-        self.pasture_results_label.setText(self.tr("Results: ") + str(count))
+        self.results_label.setText(self.tr("Results: ") + str(count))
 
     @pyqtSlot(QTableWidgetItem)
     def on_parcel_results_twidget_itemDoubleClicked(self, item):
