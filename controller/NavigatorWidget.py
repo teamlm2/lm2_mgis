@@ -7899,26 +7899,26 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
                 vlayer.setLayerName(self.tr("Parcel end of this year list"))
                 mygroup.addLayer(vlayer)
         elif code == '07':
-            tmp_parcel_layer = LayerUtils.layer_by_data_source("data_soums_union", "view_land_users_list")
+            tmp_parcel_layer = LayerUtils.layer_by_data_source("data_soums_union", "view_land_user_register_layer")
             if tmp_parcel_layer is None:
                 mygroup = root.findGroup(u"Тайлан")
-                vlayer = LayerUtils.load_union_layer_by_name("view_land_users_list", "parcel_id")
+                vlayer = LayerUtils.load_union_layer_by_name("view_land_user_register_layer", "parcel_id")
                 vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) +"template\style/view_land_users.qml")
                 vlayer.setLayerName(self.tr("Land users list"))
                 mygroup.addLayer(vlayer)
         elif code == '08':
-            tmp_parcel_layer = LayerUtils.layer_by_data_source("data_soums_union", "view_land_possessors_list1")
+            tmp_parcel_layer = LayerUtils.layer_by_data_source("data_soums_union", "view_possessions_register_layer")
             if tmp_parcel_layer is None:
                 mygroup = root.findGroup(u"Тайлан")
-                vlayer = LayerUtils.load_union_layer_by_name("view_land_possessors_list", "parcel_id")
+                vlayer = LayerUtils.load_union_layer_by_name("view_possessions_register_layer", "gid")
                 vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) +"template\style/view_possessors.qml")
                 vlayer.setLayerName(self.tr("Land possessors list"))
                 mygroup.addLayer(vlayer)
         elif code == '09':
-            tmp_parcel_layer = LayerUtils.layer_by_data_source("data_soums_union", "view_land_ownerships_list")
+            tmp_parcel_layer = LayerUtils.layer_by_data_source("data_soums_union", "view_ownership_register_layer")
             if tmp_parcel_layer is None:
                 mygroup = root.findGroup(u"Тайлан")
-                vlayer = LayerUtils.load_union_layer_by_name("view_land_ownerships_list", "parcel_id")
+                vlayer = LayerUtils.load_union_layer_by_name("view_ownership_register_layer", "gid")
                 vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) +"template\style/view_land_ownership.qml")
                 vlayer.setLayerName(self.tr("Land ownerships list"))
                 mygroup.addLayer(vlayer)
