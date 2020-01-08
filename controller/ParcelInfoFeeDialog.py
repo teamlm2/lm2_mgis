@@ -59,6 +59,12 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
         self.paid_less_sbox.setMaximum(9999999999)
         self.paid_over_sbox.setMaximum(9999999999)
 
+        employee = DatabaseUtils.current_employee()
+        department_id = employee.department_id
+        self.city_type = 2
+        if department_id == 120:
+            self.city_type = 1
+
         self.select_years = [2019, 2018, 2017, 2016, 2015, 2014]
         self.__setup_table_widget()
 
@@ -404,6 +410,8 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
         else:
             self.session.query(UbFeeHistory).filter(UbFeeHistory.id == id).delete()
 
+            self.__list_of_payment()
+
     @pyqtSlot()
     def on_save_button_clicked(self):
 
@@ -411,31 +419,36 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
 
         selected_row = self.payment_twidget.currentRow()
         item = self.payment_twidget.item(selected_row, 1)
-        if not item:
-            return
-        current_id = item.data(Qt.UserRole + 1)
-
-        item_year = self.payment_twidget.item(selected_row, 3)
-        self.selected_year = item_year.data(Qt.UserRole)
-
-        item_city = self.payment_twidget.item(selected_row, 1)
-        city_type = item_city.data(Qt.UserRole)
-
-        item_status = self.payment_twidget.item(selected_row, 0)
-        status = 1
-        if item_status.text() == u'Засагдсан':
-            status = 2
+        # if not item:
+        #     return
+        # current_id = item.data(Qt.UserRole + 1)
 
         c_year = self.year_cbox.itemData(self.year_cbox.currentIndex())
         # city_type = self.city_type_cbox.itemData(self.city_type_cbox.currentIndex())
+
         is_count = self.session.query(UbFeeHistory).\
-            filter(UbFeeHistory.pid == self.old_parcel_id_edit).\
+            filter(UbFeeHistory.pid == self.old_parcel_id_edit.text()).\
             filter(UbFeeHistory.current_year == c_year).count()
-        if current_id:
+        doc_area = 0
+        if self.payment_area_edit.text():
+            doc_area = float(self.payment_area_edit.text())
+        if item:
+            current_id = item.data(Qt.UserRole + 1)
+            item_year = self.payment_twidget.item(selected_row, 3)
+            self.selected_year = item_year.data(Qt.UserRole)
+
+            item_city = self.payment_twidget.item(selected_row, 1)
+            city_type = item_city.data(Qt.UserRole)
+
+            item_status = self.payment_twidget.item(selected_row, 0)
+            status = 1
+            if item_status.text() == u'Засагдсан':
+                status = 2
+
             object = self.session.query(UbFeeHistory).filter(UbFeeHistory.id == current_id).one()
 
             object.contract_no = self.payment_contract_edit.text()
-            object.document_area = float(self.payment_area_edit.text())
+            object.document_area = doc_area
             object.zoriulalt = self.payment_zoriulalt_edit.text()
             object.ner = self.payment_name_edit.text()
             object.description = self.decsription_txt.toPlainText()
@@ -462,7 +475,7 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
             object = UbFeeHistory()
 
             object.contract_no = self.payment_contract_edit.text()
-            object.document_area = float(self.payment_area_edit.text())
+            object.document_area = doc_area
             object.zoriulalt = self.payment_zoriulalt_edit.text()
             object.ner = self.payment_name_edit.text()
             object.description = self.decsription_txt.toPlainText()
@@ -487,8 +500,8 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
             object.current_year = c_year
             object.pid = self.old_parcel_id
             object.person_register = self.person_id
-            object.city_type = city_type
-            object.status = status
+            object.city_type = self.city_type
+            object.status = 2
 
             self.session.add(object)
 
