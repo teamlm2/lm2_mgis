@@ -1610,6 +1610,11 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
             if plan_zone_count == 1:
                 plan_zone = self.session.query(ClPlanZone).filter(ClPlanZone.code == code).one()
                 plan_zone_id = plan_zone.plan_zone_id
+
+                right_form_id = self.shp_rigth_form_cbox.itemData(self.shp_rigth_form_cbox.currentIndex())
+                right_type_code = self.shp_right_type_change_cbox.itemData(self.shp_right_type_change_cbox.currentIndex())
+                new_parcel.right_form_id = right_form_id
+                new_parcel.right_type_code = right_type_code
         else:
             zone_type_count = self.session.query(ClPlanZone).filter(ClPlanZone.code == plan_code).count()
             if zone_type_count == 0:
