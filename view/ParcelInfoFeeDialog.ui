@@ -739,7 +739,7 @@
       </rect>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="tab_3">
       <attribute name="title">
@@ -844,7 +844,7 @@
          <x>4</x>
          <y>3</y>
          <width>838</width>
-         <height>110</height>
+         <height>141</height>
         </rect>
        </property>
        <property name="sortingEnabled">
@@ -971,7 +971,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Зөвхөн сонгогдсон жилийг оруулах</string>
+    <string>Бүх жилийн төлөлт оруулах</string>
    </property>
    <property name="checked">
     <bool>false</bool>

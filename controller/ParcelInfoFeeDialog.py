@@ -426,9 +426,11 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
         if item_status.text() == u'Засагдсан':
             status = 2
 
-        # self.selected_year = self.year_cbox.itemData(self.year_cbox.currentIndex())
+        c_year = self.year_cbox.itemData(self.year_cbox.currentIndex())
         # city_type = self.city_type_cbox.itemData(self.city_type_cbox.currentIndex())
-
+        is_count = self.session.query(UbFeeHistory).\
+            filter(UbFeeHistory.pid == self.old_parcel_id_edit).\
+            filter(UbFeeHistory.current_year == c_year).count()
         if current_id:
             object = self.session.query(UbFeeHistory).filter(UbFeeHistory.id == current_id).one()
 
@@ -456,7 +458,7 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
             object.paid_over = self.paid_over_sbox.value()
             object.status = status
             object.city_type = city_type
-        else:
+        if is_count == 0:
             object = UbFeeHistory()
 
             object.contract_no = self.payment_contract_edit.text()
@@ -482,7 +484,7 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
             object.paid_less = self.paid_less_sbox.value()
             object.paid_over = self.paid_over_sbox.value()
 
-            object.current_year = self.selected_year
+            object.current_year = c_year
             object.pid = self.old_parcel_id
             object.person_register = self.person_id
             object.city_type = city_type
@@ -571,13 +573,21 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
         values = self.session.query(UbFeeHistory).\
             filter(UbFeeHistory.pid == self.old_parcel_id).all()
         date_time_string = QDateTime.currentDateTime().toString(Constants.DATABASE_DATETIME_FORMAT)
-        for value in values:
-            current_year = value.current_year
-            if self.one_select_chbox.isChecked():
-                current_year = self.year_cbox.itemData(self.year_cbox.currentIndex())
-            count = self.session.query(PaPaymentPaid).\
-                filter(PaPaymentPaid.contract_id == contract_id).\
-                filter(PaPaymentPaid.person_id == person_id).\
+        is_one = False
+
+        if not self.one_select_chbox.isChecked():
+
+            item_year = self.payment_twidget.item(selected_row, 3)
+            current_year = item_year.data(Qt.UserRole)
+            value = self.session.query(UbFeeHistory).filter(UbFeeHistory.id == current_id).one()
+            if value.status == 1:
+                PluginUtils.show_error(self, u'Анхааруулга',
+                                   u'{0} оны мэдээлэл засагдаагүй тул үндсэн төлөлт болж оруулах боломжгүй. Зөвхөн засагдсан оны мэдээлэл орохыг анхаарна уу!'
+                                   .format(current_year))
+                return
+            count = self.session.query(PaPaymentPaid). \
+                filter(PaPaymentPaid.contract_id == contract_id). \
+                filter(PaPaymentPaid.person_id == person_id). \
                 filter(PaPaymentPaid.paid_year == current_year).count()
             if count == 0:
                 total_amount = 0
@@ -588,7 +598,6 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
                 object.au2 = au2
                 object.paid_year = current_year
                 object.type_id = 1
-
 
                 object.invalid_amount = value.invalid_payment
                 object.remainning_amount = value.paid_before_less
@@ -602,10 +611,10 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
                 object.imposition_year_amount = value.payment_year
                 object.imposition_total_amount = \
                     value.payment_year if value.payment_year is not None else 0 + \
-                              value.payment_before_less if value.payment_before_less is not None else 0 - \
-                              value.payment_before_over if value.payment_before_over is not None else 0 + \
-                              value.payment_fund if value.payment_fund is not None else 0 + \
-                              value.payment_fund if value.payment_loss is not None else 0
+                                                                              value.payment_before_less if value.payment_before_less is not None else 0 - \
+                                                                                                                                                      value.payment_before_over if value.payment_before_over is not None else 0 + \
+                                                                                                                                                                                                                              value.payment_fund if value.payment_fund is not None else 0 + \
+                                                                                                                                                                                                                                                                                        value.payment_fund if value.payment_loss is not None else 0
 
                 object.contract_amount = value.payment_contract
 
@@ -615,10 +624,56 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
 
                 self.session.add(object)
 
-                value = self.session.query(UbFeeHistory). \
-                    filter(UbFeeHistory.id == current_id).first()
+        else:
+            for value in values:
+                if is_one:
+                    break
+                current_year = value.current_year
 
-                value.status = 2
+                if value.status == 1:
+                    PluginUtils.show_error(self, u'Анхааруулга',
+                                           u'{0} оны мэдээлэл засагдаагүй тул үндсэн төлөлт болж оруулах боломжгүй. Зөвхөн засагдсан оны мэдээлэл орохыг анхаарна уу!'
+                                           .format(current_year))
+                else:
+                    count = self.session.query(PaPaymentPaid).\
+                        filter(PaPaymentPaid.contract_id == contract_id).\
+                        filter(PaPaymentPaid.person_id == person_id).\
+                        filter(PaPaymentPaid.paid_year == current_year).count()
+                    if count == 0:
+                        total_amount = 0
+                        object = PaPaymentPaid()
+                        object.person_id = person_id
+                        object.contract_id = contract_id
+                        object.parcel_id = parcel_id
+                        object.au2 = au2
+                        object.paid_year = current_year
+                        object.type_id = 1
+
+
+                        object.invalid_amount = value.invalid_payment
+                        object.remainning_amount = value.paid_before_less
+                        object.earning_amount = value.paid_fund
+                        object.quarter_four = value.paid_year
+                        if value.paid_less:
+                            object.year_amount = value.paid_less
+                        else:
+                            object.year_amount = value.paid_over
+
+                        object.imposition_year_amount = value.payment_year
+                        object.imposition_total_amount = \
+                            value.payment_year if value.payment_year is not None else 0 + \
+                                      value.payment_before_less if value.payment_before_less is not None else 0 - \
+                                      value.payment_before_over if value.payment_before_over is not None else 0 + \
+                                      value.payment_fund if value.payment_fund is not None else 0 + \
+                                      value.payment_fund if value.payment_loss is not None else 0
+
+                        object.contract_amount = value.payment_contract
+
+                        object.total_amount = value.paid_before_less + value.paid_year + value.paid_fund
+
+                        object.created_at = datetime.strptime(date_time_string, Constants.PYTHON_DATETIME_FORMAT)
+
+                        self.session.add(object)
 
         self.session.commit()
         self.__start_fade_out_timer()

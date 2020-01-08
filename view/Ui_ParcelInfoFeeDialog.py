@@ -260,7 +260,7 @@ class Ui_ParcelInfoFeeDialog(object):
         self.tab_2 = QtGui.QWidget()
         self.tab_2.setObjectName(_fromUtf8("tab_2"))
         self.paid_twidget = QtGui.QTableWidget(self.tab_2)
-        self.paid_twidget.setGeometry(QtCore.QRect(4, 3, 838, 110))
+        self.paid_twidget.setGeometry(QtCore.QRect(4, 3, 838, 141))
         self.paid_twidget.setObjectName(_fromUtf8("paid_twidget"))
         self.paid_twidget.setColumnCount(10)
         self.paid_twidget.setRowCount(0)
@@ -315,7 +315,7 @@ class Ui_ParcelInfoFeeDialog(object):
 
         self.retranslateUi(ParcelInfoFeeDialog)
         self.tabWidget.setCurrentIndex(0)
-        self.tabWidget_2.setCurrentIndex(0)
+        self.tabWidget_2.setCurrentIndex(1)
         QtCore.QMetaObject.connectSlotsByName(ParcelInfoFeeDialog)
         ParcelInfoFeeDialog.setTabOrder(self.old_parcel_id_edit, self.find_button)
         ParcelInfoFeeDialog.setTabOrder(self.find_button, self.person_id_edit)
@@ -443,7 +443,7 @@ class Ui_ParcelInfoFeeDialog(object):
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("ParcelInfoFeeDialog", "Fee", None))
         self.save_button.setText(_translate("ParcelInfoFeeDialog", "Хадгалах", None))
         self.finish_button.setText(_translate("ParcelInfoFeeDialog", "Дуусгах", None))
-        self.one_select_chbox.setText(_translate("ParcelInfoFeeDialog", "Зөвхөн сонгогдсон жилийг оруулах", None))
+        self.one_select_chbox.setText(_translate("ParcelInfoFeeDialog", "Бүх жилийн төлөлт оруулах", None))
         self.delete_button.setText(_translate("ParcelInfoFeeDialog", "Устгах", None))
 
 import resources_rc
