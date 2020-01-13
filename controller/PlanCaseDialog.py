@@ -1544,13 +1544,23 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
                         error_message = error_message + "\n" + message
                         self.message_label.setText(error_message)
 
+                    rigth_form_id = self.shp_rigth_form_cbox.itemData(self.shp_rigth_form_cbox.currentIndex())
+                    rigth_form = self.session.query(ClRightForm).filter_by(right_form_id = rigth_form_id).one()
+                    if rigth_form.is_cadastre_check == 1:
+                        ca_parcel_overlaps_count = self.session.query(CaParcelTbl).\
+                            filter(parcel_geometry.ST_Overlaps(CaParcelTbl.geometry)).count()
+                        if ca_parcel_overlaps_count > 0:
+                            valid = False
+                            message = '*' + unicode(u' Кадастрын нэгж талбар давхардаж байна.')
+                            error_message = error_message + "\n" + message
+
                     parcel_overlaps_count = self.session.query(PlProjectParcel).\
                         join(PlProject, PlProjectParcel.project_id == PlProject.project_id). \
                         filter(PlProjectParcel.project_id == self.plan.project_id).\
                         filter(func.ST_Centroid(parcel_geometry).ST_Covers(PlProjectParcel.polygon_geom)).count()
                     if parcel_overlaps_count > 0:
                         valid = False
-                        message = '*' + unicode(u' Нэгж талбар давхардаж байна.')
+                        message = '*' + unicode(u' Төлөвлөгдсөн нэгж талбар давхардаж байна.')
 
                         error_message = error_message + "\n" + message
 

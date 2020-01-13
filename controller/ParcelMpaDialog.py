@@ -2287,54 +2287,54 @@ class ParcelMpaDialog(QDockWidget, Ui_ParcelMpaDialog, DatabaseHelper):
     def __save_person(self):
 
         person_id = self.personal_id_edit.text()
-
+        person_id = person_id.upper()
         person_count = self.session.query(BsPerson).filter(BsPerson.person_register == person_id).count()
         if person_count > 0:
             bs_person = self.session.query(BsPerson).filter(BsPerson.person_register == person_id).one()
         else:
             bs_person = BsPerson()
 
-        person_type = self.person_type_cbox.itemData(self.person_type_cbox.currentIndex())
-        bs_person.person_register = person_id
-        bs_person.type = person_type
-        if person_type == 10 or person_type == 20 or person_type == 50:
-            bs_person.name = self.first_name_edit.text()
-            bs_person.first_name = self.name_edit.text()
-            bs_person.middle_name = self.middle_name_edit.text()
-        else:
-            bs_person.name = self.name_edit.text()
-            bs_person.contact_surname = self.middle_name_edit.text()
-            bs_person.contact_first_name = self.first_name_edit.text()
+            person_type = self.person_type_cbox.itemData(self.person_type_cbox.currentIndex())
+            bs_person.person_register = person_id
+            bs_person.type = person_type
+            if person_type == 10 or person_type == 20 or person_type == 50:
+                bs_person.name = self.first_name_edit.text()
+                bs_person.first_name = self.name_edit.text()
+                bs_person.middle_name = self.middle_name_edit.text()
+            else:
+                bs_person.name = self.name_edit.text()
+                bs_person.contact_surname = self.middle_name_edit.text()
+                bs_person.contact_first_name = self.first_name_edit.text()
 
-        bs_person.date_of_birth = DatabaseUtils.convert_date(self.date_of_birth_date.date())
-        bs_person.mobile_phone = self.phone_edit.text()
-        bs_person.address_building_no = self.building_edit.text()
-        bs_person.address_apartment_no = self.apartment_edit.text()
-        bs_person.address_street_name = self.person_street_name_edit.text()
-        bs_person.address_khaskhaa = self.person_khashaa_edit.text()
+            bs_person.date_of_birth = DatabaseUtils.convert_date(self.date_of_birth_date.date())
+            bs_person.mobile_phone = self.phone_edit.text()
+            bs_person.address_building_no = self.building_edit.text()
+            bs_person.address_apartment_no = self.apartment_edit.text()
+            bs_person.address_street_name = self.person_street_name_edit.text()
+            bs_person.address_khaskhaa = self.person_khashaa_edit.text()
 
-        aimag = self.aimag_cbox.itemData(self.aimag_cbox.currentIndex())
-        if aimag == -1:
-            bs_person.au_level1_ref = None
-        else:
-            bs_person.address_au_level1 = aimag
+            aimag = self.aimag_cbox.itemData(self.aimag_cbox.currentIndex())
+            if aimag == -1:
+                bs_person.au_level1_ref = None
+            else:
+                bs_person.address_au_level1 = aimag
 
-        soum = self.soum_cbox.itemData(self.soum_cbox.currentIndex())
-        if soum == -1:
-            bs_person.address_au_level2 = None
-        else:
-            bs_person.address_au_level2 = soum
+            soum = self.soum_cbox.itemData(self.soum_cbox.currentIndex())
+            if soum == -1:
+                bs_person.address_au_level2 = None
+            else:
+                bs_person.address_au_level2 = soum
 
-        bag = self.bag_cbox.itemData(self.bag_cbox.currentIndex())
-        if bag == -1:
-            bs_person.address_au_level3 = None
-        else:
-            bs_person.address_au_level3 = bag
-        if person_count == 0:
-            self.session.add(bs_person)
-        # self.session.flush()
+            bag = self.bag_cbox.itemData(self.bag_cbox.currentIndex())
+            if bag == -1:
+                bs_person.address_au_level3 = None
+            else:
+                bs_person.address_au_level3 = bag
+            if person_count == 0:
+                self.session.add(bs_person)
+            # self.session.flush()
 
-        # self.__multi_owner_save(person_id)
+            # self.__multi_owner_save(person_id)
 
     def __save_parcel(self):
 

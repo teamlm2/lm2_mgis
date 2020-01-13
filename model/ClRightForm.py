@@ -11,3 +11,4 @@ class ClRightForm(Base):
     code = Column(String)
     description = Column(String)
     description_en = Column(String)
+    is_cadastre_check = Column(Integer)
