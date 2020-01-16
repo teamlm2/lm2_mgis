@@ -1144,7 +1144,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
                         polygon_values = self.session.query(PlProjectParcel). \
                             join(PlProject, PlProjectParcel.project_id == PlProject.project_id). \
                             filter(PlProject.is_active == True). \
-                            filter((parcel_geometry).ST_Overlaps(PlProjectParcel.polygon_geom)).\
+                            filter(or_((parcel_geometry).ST_Covers(PlProjectParcel.polygon_geom), (parcel_geometry).ST_Overlaps(PlProjectParcel.polygon_geom))). \
                             filter(or_(PlProjectParcel.valid_till == None, PlProjectParcel.valid_till == 'infinity')).all()
                         for value in polygon_values:
                             plan_zone = value.plan_zone_ref
