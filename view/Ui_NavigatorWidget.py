@@ -2,7 +2,8 @@
 
 # Form implementation generated from reading ui file '.\NavigatorWidget.ui'
 #
-# Created by: PyQt4 UI code generator 4.11.4
+# Created: Sun Jan 19 17:48:36 2020
+#      by: PyQt4 UI code generator 4.10
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -976,6 +977,8 @@ class Ui_NavigatorWidget(object):
         self.listWidget.addItem(item)
         item = QtGui.QListWidgetItem()
         self.listWidget.addItem(item)
+        item = QtGui.QListWidgetItem()
+        self.listWidget.addItem(item)
         self.groupBox = QtGui.QGroupBox(self.tab)
         self.groupBox.setGeometry(QtCore.QRect(5, 110, 371, 209))
         self.groupBox.setObjectName(_fromUtf8("groupBox"))
@@ -1202,7 +1205,7 @@ class Ui_NavigatorWidget(object):
         NavigatorWidget.setWidget(self.dockWidgetContents)
 
         self.retranslateUi(NavigatorWidget)
-        self.tabWidget.setCurrentIndex(6)
+        self.tabWidget.setCurrentIndex(8)
         QtCore.QMetaObject.connectSlotsByName(NavigatorWidget)
 
     def retranslateUi(self, NavigatorWidget):
@@ -1406,6 +1409,8 @@ class Ui_NavigatorWidget(object):
         item.setText(_translate("NavigatorWidget", "14.Mortgage", None))
         item = self.listWidget.item(14)
         item.setText(_translate("NavigatorWidget", "15.Court", None))
+        item = self.listWidget.item(15)
+        item.setText(_translate("NavigatorWidget", "16.Not active parcel", None))
         self.listWidget.setSortingEnabled(__sortingEnabled)
         self.groupBox.setTitle(_translate("NavigatorWidget", "Criteria", None))
         self.label_3.setText(_translate("NavigatorWidget", "Application Type", None))

@@ -7970,7 +7970,15 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
                     str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "template\style/view_court_parcel.qml")
                 vlayer.setLayerName(self.tr("Court"))
                 mygroup.addLayer(vlayer)
-
+        elif code == '16':
+            tmp_parcel_layer = LayerUtils.layer_by_data_source("data_soums_union", "ca_parcel_valid_till")
+            if tmp_parcel_layer is None:
+                mygroup = root.findGroup(u"Тайлан")
+                vlayer = LayerUtils.load_union_layer_by_name("ca_parcel_valid_till", "parcel_id")
+                vlayer.loadNamedStyle(
+                    str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "template\style/not_active_parcel.qml")
+                vlayer.setLayerName(self.tr("NA_parcel"))
+                mygroup.addLayer(vlayer)
     @pyqtSlot(QTableWidgetItem)
     def on_person_results_twidget_itemClicked(self, item):
 
