@@ -54,6 +54,8 @@ from ..model.SdPosition import *
 from ..model.SetApplicationTypePersonRole import *
 from ..model.CtContractFee import *
 from ..model.SdDepartmentAccount import *
+from ..model.CaParcelAddress import *
+from ..model.CaBuildingAddress import *
 from ..utils.FileUtils import FileUtils
 from ..utils.PluginUtils import PluginUtils
 from ..utils.SessionHandler import SessionHandler
@@ -1490,23 +1492,13 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
         # try:
         self.__save_contract()
-        self.__save_parcel()
+        self.__save_parcel_address()
         self.__save_fees()
         self.__save_conditions()
         return True
 
         # except LM2Exception, e:
         #     PluginUtils.show_error(self, self.tr("Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
-
-    def __save_parcel(self):
-
-        parcel_id = self.id_main_edit.text()
-        if parcel_id:
-            parcel_count = self.session.query(CaParcelTbl).filter(CaParcelTbl.parcel_id == parcel_id).count()
-            if parcel_count == 1:
-                parcel = self.session.query(CaParcelTbl).filter(CaParcelTbl.parcel_id == parcel_id).one()
-                parcel.address_streetname = self.street_name_edit.text()
-                parcel.address_khashaa = self.khashaa_edit.text()
 
     def __is_number(self, s):
 
@@ -4569,16 +4561,6 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                 return
 
     @pyqtSlot(int)
-    def on_edit_address_chbox_stateChanged(self, state):
-
-        if state == Qt.Checked:
-            self.street_name_edit.setEnabled(True)
-            self.khashaa_edit.setEnabled(True)
-        else:
-            self.street_name_edit.setEnabled(False)
-            self.khashaa_edit.setEnabled(False)
-
-    @pyqtSlot(int)
     def on_fee_zone_cbox_currentIndexChanged(self, current_index):
 
         if self.attribute_update:
@@ -4900,3 +4882,76 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                         type = fee_zone.zone_ref
 
                         return type
+
+    @pyqtSlot(int)
+    def on_edit_address_chbox_stateChanged(self, state):
+
+        self.__set_up_twidget(self.parcel_address_twidget)
+        self.__list_parcel_address(self.id_main_edit.text())
+
+        if state == Qt.Checked:
+            self.street_name_edit.setEnabled(True)
+            self.khashaa_edit.setEnabled(True)
+        else:
+            self.street_name_edit.setEnabled(False)
+            self.khashaa_edit.setEnabled(False)
+
+    def __set_up_twidget(self, table_widget):
+
+        table_widget.setAlternatingRowColors(True)
+        table_widget.setSelectionBehavior(QTableWidget.SelectRows)
+        table_widget.setSelectionMode(QTableWidget.SingleSelection)
+        table_widget.setColumnWidth(0, 300)
+
+    def __save_parcel_address(self):
+
+        parcel_id = self.id_main_edit.text()
+        if parcel_id:
+            parcel_count = self.session.query(CaParcelTbl).filter(CaParcelTbl.parcel_id == parcel_id).count()
+            if parcel_count == 1:
+                parcel = self.session.query(CaParcelTbl).filter(CaParcelTbl.parcel_id == parcel_id).one()
+                parcel.address_streetname = self.street_name_edit.text()
+                parcel.address_khashaa = self.khashaa_edit.text()
+
+    def __add_parcel_address_row(self, row, id, address_parcel_no, address_streetname, address_source):
+
+        item = QTableWidgetItem(u'{0}'.format(address_parcel_no))
+        item.setData(Qt.UserRole, id)
+        self.parcel_address_twidget.setItem(row, 0, item)
+        item = QTableWidgetItem(u'{0}'.format(address_streetname))
+        self.parcel_address_twidget.setItem(row, 1, item)
+
+        if address_source:
+            item = QTableWidgetItem(u'{0}'.format(address_source.description))
+            self.parcel_address_twidget.setItem(row, 2, item)
+
+    def __list_parcel_address(self, parcel_id):
+
+        self.parcel_address_twidget.clearContents()
+        self.parcel_address_twidget.setRowCount(0)
+
+        values = self.session.query(CaParcelAddress).filter(CaParcelAddress.parcel_id == parcel_id).all()
+
+        self.parcel_address_twidget.setRowCount(len(values))
+        row = 0
+        for value in values:
+            address_source = value.in_source_ref
+            self.__add_parcel_address_row(row, value.id, value.address_parcel_no, value.address_streetname, address_source)
+            row += 1
+
+        self.parcel_address_twidget.horizontalHeader().setResizeMode(1, QHeaderView.Stretch)
+
+        if self.parcel_address_twidget.rowCount() > 0:
+            self.parcel_address_twidget.setCurrentCell(0, 0)
+
+    def __list_building_address(self, parcel_id):
+
+        building_id = None
+        values = self.session.query(CaBuildingAddress).filter(CaBuildingAddress.building_id == building_id).all()
+
+    @pyqtSlot()
+    def on_add_building_address_button_clicked(self):
+
+        row = self.parcel_address_twidget.rowCount()
+        self.parcel_address_twidget.insertRow(row)
+        self.__add_parcel_address_row(row, -1, self.tr('Review entry!'), self.tr('Review entry!'))
