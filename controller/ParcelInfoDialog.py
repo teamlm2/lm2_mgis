@@ -2937,7 +2937,7 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
         try:
             person_count = self.session.query(BsPerson).filter(BsPerson.person_register == person_id).count()
             if person_count > 0:
-                bs_person = self.session.query(BsPerson).filter(BsPerson.person_register == person_id).one()
+                bs_person = self.session.query(BsPerson).filter(BsPerson.person_register == person_id).first()
             else:
                 bs_person = BsPerson()
 
