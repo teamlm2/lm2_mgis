@@ -613,7 +613,7 @@
         </column>
         <column>
          <property name="text">
-          <string>Source</string>
+          <string>Address Source</string>
          </property>
         </column>
        </widget>
@@ -685,7 +685,12 @@
         </column>
         <column>
          <property name="text">
-          <string>Source</string>
+          <string>Building No</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Address Source</string>
          </property>
         </column>
        </widget>

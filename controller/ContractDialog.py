@@ -56,9 +56,11 @@ from ..model.CtContractFee import *
 from ..model.SdDepartmentAccount import *
 from ..model.CaParcelAddress import *
 from ..model.CaBuildingAddress import *
+from ..model.CaBuildingTbl import *
 from ..utils.FileUtils import FileUtils
 from ..utils.PluginUtils import PluginUtils
 from ..utils.SessionHandler import SessionHandler
+from ..utils.LayerUtils import LayerUtils
 from ..utils.DatabaseUtils import DatabaseUtils
 from ..utils.FilePath import *
 from .qt_classes.ComboBoxDelegate import *
@@ -4887,7 +4889,9 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
     def on_edit_address_chbox_stateChanged(self, state):
 
         self.__set_up_twidget(self.parcel_address_twidget)
+        self.__set_up_twidget(self.building_address_twidget)
         self.__list_parcel_address(self.id_main_edit.text())
+        self.__buildings_within_parcel()
 
         if state == Qt.Checked:
             self.street_name_edit.setEnabled(True)
@@ -4896,12 +4900,52 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             self.street_name_edit.setEnabled(False)
             self.khashaa_edit.setEnabled(False)
 
+    def __buildings_within_parcel(self):
+
+        parcel = self.session.query(CaParcelTbl).filter(CaParcelTbl.parcel_id == self.id_main_edit.text()).one()
+        if self.session.query(CaBuildingTbl).filter(parcel.geometry.ST_Contains(CaBuildingTbl.geometry)).count() != 0:
+            building = self.session.query(CaBuildingTbl).filter(parcel.geometry.ST_Contains(CaBuildingTbl.geometry)).all()
+            for build in building:
+                # build_no = build.building_id[-3:]
+                self.building_no_cbox.addItem(build.building_id, build.building_id)
+
+    @pyqtSlot(int)
+    def on_building_no_cbox_currentIndexChanged(self, index):
+
+        building_id = self.building_no_cbox.itemData(self.building_no_cbox.currentIndex())
+        self.__list_building_address(building_id)
+        self.__selected_building(building_id)
+
+    def __selected_building(self, building_id):
+
+        layer = LayerUtils.layer_by_data_source("data_soums_union", 'ca_building')
+
+        expression = " building_id = \'" + building_id + "\'"
+        request = QgsFeatureRequest()
+        request.setFilterExpression(expression)
+        feature_ids = []
+        if layer:
+            iterator = layer.getFeatures(request)
+
+            for feature in iterator:
+                feature_ids.append(feature.id())
+            if len(feature_ids) == 0:
+                self.error_label.setText(self.tr("No parcel assigned"))
+
+            layer.setSelectedFeatures(feature_ids)
+
+            # map_canvas = QgsMapCanvas()
+            # map_canvas.zoomToSelected(layer)
+            # self.plugin.iface.mapCanvas().zoomToSelected(layer)
+
     def __set_up_twidget(self, table_widget):
 
         table_widget.setAlternatingRowColors(True)
         table_widget.setSelectionBehavior(QTableWidget.SelectRows)
         table_widget.setSelectionMode(QTableWidget.SingleSelection)
-        table_widget.setColumnWidth(0, 300)
+        # table_widget.setColumnWidth(0, 300)
+        header = table_widget.horizontalHeader()
+        header.setResizeMode(QHeaderView.Stretch)
 
     def __save_parcel_address(self):
 
@@ -4915,15 +4959,31 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
     def __add_parcel_address_row(self, row, id, address_parcel_no, address_streetname, address_source):
 
-        item = QTableWidgetItem(u'{0}'.format(address_parcel_no))
+        item = QTableWidgetItem(u'{0}'.format(address_streetname))
         item.setData(Qt.UserRole, id)
         self.parcel_address_twidget.setItem(row, 0, item)
-        item = QTableWidgetItem(u'{0}'.format(address_streetname))
+        item = QTableWidgetItem(u'{0}'.format(address_parcel_no))
         self.parcel_address_twidget.setItem(row, 1, item)
 
         if address_source:
             item = QTableWidgetItem(u'{0}'.format(address_source.description))
             self.parcel_address_twidget.setItem(row, 2, item)
+
+    def __add_building_address_row(self, row, id, address_parcel_no, address_streetname, address_building_no, address_source):
+
+        item = QTableWidgetItem(u'{0}'.format(address_streetname))
+        item.setData(Qt.UserRole, id)
+        self.building_address_twidget.setItem(row, 0, item)
+
+        item = QTableWidgetItem(u'{0}'.format(address_parcel_no))
+        self.building_address_twidget.setItem(row, 1, item)
+
+        item = QTableWidgetItem(u'{0}'.format(address_building_no))
+        self.building_address_twidget.setItem(row, 2, item)
+
+        if address_source:
+            item = QTableWidgetItem(u'{0}'.format(address_source.description))
+            self.building_address_twidget.setItem(row, 3, item)
 
     def __list_parcel_address(self, parcel_id):
 
@@ -4944,10 +5004,24 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         if self.parcel_address_twidget.rowCount() > 0:
             self.parcel_address_twidget.setCurrentCell(0, 0)
 
-    def __list_building_address(self, parcel_id):
+    def __list_building_address(self, building_id):
 
-        building_id = None
+        self.building_address_twidget.clearContents()
+        self.building_address_twidget.setRowCount(0)
+
         values = self.session.query(CaBuildingAddress).filter(CaBuildingAddress.building_id == building_id).all()
+        self.building_address_twidget.setRowCount(len(values))
+        row = 0
+        for value in values:
+            address_source = value.in_source_ref
+            self.__add_building_address_row(row, value.id, value.address_parcel_no, value.address_streetname, value.address_building_no,
+                                          address_source)
+            row += 1
+
+        self.building_address_twidget.horizontalHeader().setResizeMode(1, QHeaderView.Stretch)
+
+        if self.building_address_twidget.rowCount() > 0:
+            self.building_address_twidget.setCurrentCell(0, 0)
 
     @pyqtSlot()
     def on_add_building_address_button_clicked(self):
