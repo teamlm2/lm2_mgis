@@ -20,6 +20,7 @@ class CaBuildingAddress(Base):
     address_streetname = Column(String)
     address_building_no = Column(String)
     sort_value = Column(Integer)
+    description = Column(String)
 
     created_by = Column(Integer)
     updated_by = Column(Integer)

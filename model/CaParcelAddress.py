@@ -21,6 +21,7 @@ class CaParcelAddress(Base):
     address_neighbourhood = Column(String)
     geographic_name = Column(String)
     sort_value = Column(Integer)
+    description = Column(String)
 
     created_by = Column(Integer)
     updated_by = Column(Integer)

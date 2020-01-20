@@ -4890,6 +4890,9 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
         self.__set_up_twidget(self.parcel_address_twidget)
         self.__set_up_twidget(self.building_address_twidget)
+        self.parcel_address_twidget.cellChanged.connect(self.on_parcel_address_twidget_cellChanged)
+        self.building_address_twidget.cellChanged.connect(self.on_building_address_twidget_cellChanged)
+
         self.__list_parcel_address(self.id_main_edit.text())
         self.__buildings_within_parcel()
 
@@ -4957,33 +4960,53 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                 parcel.address_streetname = self.street_name_edit.text()
                 parcel.address_khashaa = self.khashaa_edit.text()
 
-    def __add_parcel_address_row(self, row, id, address_parcel_no, address_streetname, address_source):
+    def __add_parcel_address_row(self, row, value):
 
-        item = QTableWidgetItem(u'{0}'.format(address_streetname))
-        item.setData(Qt.UserRole, id)
+        address_source = value.in_source_ref
+
+        item = QTableWidgetItem(u'{0}'.format(value.address_streetname))
+        if value.is_active:
+            item.setCheckState(Qt.Checked)
+        else:
+            item.setCheckState(Qt.Unchecked)
+        item.setData(Qt.UserRole, value.id)
         self.parcel_address_twidget.setItem(row, 0, item)
-        item = QTableWidgetItem(u'{0}'.format(address_parcel_no))
+        item = QTableWidgetItem(u'{0}'.format(value.address_parcel_no))
         self.parcel_address_twidget.setItem(row, 1, item)
+        item = QTableWidgetItem(u'{0}'.format(value.address_neighbourhood))
+        self.parcel_address_twidget.setItem(row, 2, item)
 
         if address_source:
             item = QTableWidgetItem(u'{0}'.format(address_source.description))
-            self.parcel_address_twidget.setItem(row, 2, item)
+            self.parcel_address_twidget.setItem(row, 3, item)
 
-    def __add_building_address_row(self, row, id, address_parcel_no, address_streetname, address_building_no, address_source):
+        item = QTableWidgetItem(u'{0}'.format(value.description))
+        self.parcel_address_twidget.setItem(row, 4, item)
 
-        item = QTableWidgetItem(u'{0}'.format(address_streetname))
-        item.setData(Qt.UserRole, id)
+    def __add_building_address_row(self, row, value):
+
+        address_source = value.in_source_ref
+
+        item = QTableWidgetItem(u'{0}'.format(value.address_streetname))
+        if value.is_active:
+            item.setCheckState(Qt.Checked)
+        else:
+            item.setCheckState(Qt.Unchecked)
+        item.setData(Qt.UserRole, value.id)
         self.building_address_twidget.setItem(row, 0, item)
 
-        item = QTableWidgetItem(u'{0}'.format(address_parcel_no))
+        item = QTableWidgetItem(u'{0}'.format(value.address_parcel_no))
         self.building_address_twidget.setItem(row, 1, item)
 
-        item = QTableWidgetItem(u'{0}'.format(address_building_no))
+        item = QTableWidgetItem(u'{0}'.format(value.address_building_no))
         self.building_address_twidget.setItem(row, 2, item)
 
         if address_source:
             item = QTableWidgetItem(u'{0}'.format(address_source.description))
             self.building_address_twidget.setItem(row, 3, item)
+
+        item = QTableWidgetItem(u'{0}'.format(value.description))
+        self.parcel_address_twidget.setItem(row, 4, item)
 
     def __list_parcel_address(self, parcel_id):
 
@@ -4995,8 +5018,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         self.parcel_address_twidget.setRowCount(len(values))
         row = 0
         for value in values:
-            address_source = value.in_source_ref
-            self.__add_parcel_address_row(row, value.id, value.address_parcel_no, value.address_streetname, address_source)
+            self.__add_parcel_address_row(row, value)
             row += 1
 
         self.parcel_address_twidget.horizontalHeader().setResizeMode(1, QHeaderView.Stretch)
@@ -5013,15 +5035,39 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         self.building_address_twidget.setRowCount(len(values))
         row = 0
         for value in values:
-            address_source = value.in_source_ref
-            self.__add_building_address_row(row, value.id, value.address_parcel_no, value.address_streetname, value.address_building_no,
-                                          address_source)
+            self.__add_building_address_row(row, value)
             row += 1
 
         self.building_address_twidget.horizontalHeader().setResizeMode(1, QHeaderView.Stretch)
 
         if self.building_address_twidget.rowCount() > 0:
             self.building_address_twidget.setCurrentCell(0, 0)
+
+    @pyqtSlot(int, int)
+    def on_parcel_address_twidget_cellChanged(self, row, column):
+
+        if column == 0:
+            changed_item = self.parcel_address_twidget.item(row, column)
+            if changed_item.checkState() == Qt.Checked:
+
+                for cu_row in range(self.parcel_address_twidget.rowCount()):
+                    item = self.parcel_address_twidget.item(cu_row, column)
+                    if item:
+                        if item.checkState() == Qt.Checked and row != cu_row:
+                            item.setCheckState(Qt.Unchecked)
+
+    @pyqtSlot(int, int)
+    def on_building_address_twidget_cellChanged(self, row, column):
+
+        if column == 0:
+            changed_item = self.building_address_twidget.item(row, column)
+            if changed_item.checkState() == Qt.Checked:
+
+                for cu_row in range(self.building_address_twidget.rowCount()):
+                    item = self.building_address_twidget.item(cu_row, column)
+                    if item:
+                        if item.checkState() == Qt.Checked and row != cu_row:
+                            item.setCheckState(Qt.Unchecked)
 
     @pyqtSlot()
     def on_add_building_address_button_clicked(self):
