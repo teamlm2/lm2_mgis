@@ -521,11 +521,11 @@
        </rect>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tab_4">
        <attribute name="title">
-        <string>Parcel</string>
+        <string>Нэгж талбар</string>
        </attribute>
        <widget class="QLineEdit" name="khashaa_edit">
         <property name="enabled">
@@ -603,17 +603,27 @@
         </property>
         <column>
          <property name="text">
-          <string>Street Name</string>
+          <string>Гудамж/Газарзүйн нэр</string>
          </property>
         </column>
         <column>
          <property name="text">
-          <string>Khashaa No</string>
+          <string>Хашааны дугаар</string>
          </property>
         </column>
         <column>
          <property name="text">
-          <string>Address Source</string>
+          <string>Нутгийн нэршил</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Хаягын эх сурвалж</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Тайлбар</string>
          </property>
         </column>
        </widget>
@@ -652,7 +662,7 @@
       </widget>
       <widget class="QWidget" name="tab_7">
        <attribute name="title">
-        <string>Building</string>
+        <string>Барилга</string>
        </attribute>
        <widget class="QComboBox" name="building_no_cbox">
         <property name="geometry">
@@ -675,22 +685,27 @@
         </property>
         <column>
          <property name="text">
-          <string>Street Name</string>
+          <string>Гудамж/Газарзүйн нэр</string>
          </property>
         </column>
         <column>
          <property name="text">
-          <string>Khashaa No</string>
+          <string>Хашааны дугаар</string>
          </property>
         </column>
         <column>
          <property name="text">
-          <string>Building No</string>
+          <string>Барилгын дугаар</string>
          </property>
         </column>
         <column>
          <property name="text">
-          <string>Address Source</string>
+          <string>Хаягын эх сурвалж</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Тайлбар</string>
          </property>
         </column>
        </widget>
