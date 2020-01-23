@@ -1,4 +1,4 @@
---CREATE ROLE address_view;
+﻿--CREATE ROLE address_view;
 --CREATE ROLE address_update;
 --CREATE ROLE address_admin;
 
@@ -107,7 +107,8 @@ CREATE TABLE st_street
 	in_source int references data_address.cl_address_source on update cascade on delete restrict,
 	street_type_id int references data_address.cl_street_type on update cascade on delete restrict,
 	valid_from date DEFAULT ('now'::text)::date,
-    valid_till date DEFAULT 'infinity'::date,
+	valid_till date DEFAULT 'infinity'::date,
+	area_m2 numeric(13,2),
 	geometry geometry(POLYGON, 4326),
 	line_geom geometry(MultiLineString,4326),
 	created_by integer,
