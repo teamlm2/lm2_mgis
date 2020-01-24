@@ -30,6 +30,10 @@ from ..model.CaParcelTbl import *
 from ..model.AuLevel1 import *
 from ..model.AuLevel2 import *
 from ..model.AuLevel3 import *
+from ..model.AuKhoroolol import *
+from ..model.AuZipCodeArea import *
+from ..model.StStreet import *
+from ..model.ClAddressSource import *
 from ..model.SetFeeZone import *
 from ..model import SettingsConstants
 from ..model.DatabaseHelper import *
@@ -69,6 +73,7 @@ from .qt_classes.IntegerSpinBoxDelegate import *
 from .qt_classes.ObjectAppDocumentDelegate import ObjectAppDocumentDelegate
 from .qt_classes.ContractDocumentDelegate import ContractDocumentDelegate
 from .qt_classes.DoubleSpinBoxDelegate import DoubleSpinBoxDelegate
+from .qt_classes.LandUseComboBoxDelegate import LandUseComboBoxDelegate
 from docxtpl import DocxTemplate, RichText
 import urllib
 import urllib2
@@ -4890,15 +4895,25 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
         self.__set_up_twidget(self.parcel_address_twidget)
         self.__set_up_twidget(self.building_address_twidget)
+
+        address_source_list = list()
+        for code, description in self.session.query(ClAddressSource.code, ClAddressSource.description).all():
+            address_source_list.append(u'{0}:{1}'.format(code, description))
+        delegate = ComboBoxDelegate(3, address_source_list, self.parcel_address_twidget)
+        self.parcel_address_twidget.setItemDelegateForColumn(3, delegate)
+
+        delegate = ComboBoxDelegate(3, address_source_list, self.building_address_twidget)
+        self.building_address_twidget.setItemDelegateForColumn(3, delegate)
+
         self.parcel_address_twidget.cellChanged.connect(self.on_parcel_address_twidget_cellChanged)
         self.building_address_twidget.cellChanged.connect(self.on_building_address_twidget_cellChanged)
-
-        self.__list_parcel_address(self.id_main_edit.text())
-        self.__buildings_within_parcel()
 
         if state == Qt.Checked:
             self.street_name_edit.setEnabled(True)
             self.khashaa_edit.setEnabled(True)
+
+            self.__list_parcel_address(self.id_main_edit.text())
+            self.__buildings_within_parcel()
         else:
             self.street_name_edit.setEnabled(False)
             self.khashaa_edit.setEnabled(False)
@@ -4950,63 +4965,81 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         header = table_widget.horizontalHeader()
         header.setResizeMode(QHeaderView.Stretch)
 
-    def __save_parcel_address(self):
-
-        parcel_id = self.id_main_edit.text()
-        if parcel_id:
-            parcel_count = self.session.query(CaParcelTbl).filter(CaParcelTbl.parcel_id == parcel_id).count()
-            if parcel_count == 1:
-                parcel = self.session.query(CaParcelTbl).filter(CaParcelTbl.parcel_id == parcel_id).one()
-                parcel.address_streetname = self.street_name_edit.text()
-                parcel.address_khashaa = self.khashaa_edit.text()
-
     def __add_parcel_address_row(self, row, value):
 
-        address_source = value.in_source_ref
-
-        item = QTableWidgetItem(u'{0}'.format(value.address_streetname))
-        if value.is_active:
+        id = -1
+        address_streetname = self.tr('Review entry!')
+        address_parcel_no = self.tr('Review entry!')
+        address_neighbourhood = self.tr('Review entry!')
+        description = self.tr('Review entry!')
+        source_description = self.tr('Review entry!')
+        is_active = False
+        if value:
+            is_active = True
+            id = value.id
+            address_streetname = value.address_streetname
+            address_parcel_no = value.address_parcel_no
+            address_neighbourhood = value.address_neighbourhood
+            address_source = value.in_source_ref
+            description = value.description
+            if address_source:
+                source_description = str(value.in_source) + ':' + address_source.description
+        item = QTableWidgetItem(u'{0}'.format(address_streetname))
+        if is_active:
             item.setCheckState(Qt.Checked)
         else:
             item.setCheckState(Qt.Unchecked)
-        item.setData(Qt.UserRole, value.id)
+        item.setData(Qt.UserRole, id)
         self.parcel_address_twidget.setItem(row, 0, item)
-        item = QTableWidgetItem(u'{0}'.format(value.address_parcel_no))
+        item = QTableWidgetItem(u'{0}'.format(address_parcel_no))
         self.parcel_address_twidget.setItem(row, 1, item)
-        item = QTableWidgetItem(u'{0}'.format(value.address_neighbourhood))
+        item = QTableWidgetItem(u'{0}'.format(address_neighbourhood))
         self.parcel_address_twidget.setItem(row, 2, item)
 
-        if address_source:
-            item = QTableWidgetItem(u'{0}'.format(address_source.description))
-            self.parcel_address_twidget.setItem(row, 3, item)
+        item = QTableWidgetItem(u'{0}'.format(source_description))
+        self.parcel_address_twidget.setItem(row, 3, item)
 
-        item = QTableWidgetItem(u'{0}'.format(value.description))
+        item = QTableWidgetItem(u'{0}'.format(description))
         self.parcel_address_twidget.setItem(row, 4, item)
 
     def __add_building_address_row(self, row, value):
 
-        address_source = value.in_source_ref
-
-        item = QTableWidgetItem(u'{0}'.format(value.address_streetname))
-        if value.is_active:
+        id = -1
+        address_streetname = self.tr('Review entry!')
+        address_parcel_no = self.tr('Review entry!')
+        address_building_no = self.tr('Review entry!')
+        description = self.tr('Review entry!')
+        source_description = self.tr('Review entry!')
+        is_active = False
+        if value:
+            is_active = True
+            id = value.id
+            address_streetname = value.address_streetname
+            address_parcel_no = value.address_parcel_no
+            address_building_no = value.address_building_no
+            address_source = value.in_source_ref
+            description = value.description
+            if address_source:
+                source_description = str(value.in_source) + ':' + address_source.description
+        item = QTableWidgetItem(u'{0}'.format(address_streetname))
+        if is_active:
             item.setCheckState(Qt.Checked)
         else:
             item.setCheckState(Qt.Unchecked)
-        item.setData(Qt.UserRole, value.id)
+        item.setData(Qt.UserRole, id)
         self.building_address_twidget.setItem(row, 0, item)
 
-        item = QTableWidgetItem(u'{0}'.format(value.address_parcel_no))
+        item = QTableWidgetItem(u'{0}'.format(address_parcel_no))
         self.building_address_twidget.setItem(row, 1, item)
 
-        item = QTableWidgetItem(u'{0}'.format(value.address_building_no))
+        item = QTableWidgetItem(u'{0}'.format(address_building_no))
         self.building_address_twidget.setItem(row, 2, item)
 
-        if address_source:
-            item = QTableWidgetItem(u'{0}'.format(address_source.description))
-            self.building_address_twidget.setItem(row, 3, item)
+        item = QTableWidgetItem(u'{0}'.format(source_description))
+        self.building_address_twidget.setItem(row, 3, item)
 
-        item = QTableWidgetItem(u'{0}'.format(value.description))
-        self.parcel_address_twidget.setItem(row, 4, item)
+        item = QTableWidgetItem(u'{0}'.format(description))
+        self.building_address_twidget.setItem(row, 4, item)
 
     def __list_parcel_address(self, parcel_id):
 
@@ -5070,8 +5103,294 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                             item.setCheckState(Qt.Unchecked)
 
     @pyqtSlot()
-    def on_add_building_address_button_clicked(self):
+    def on_add_parcel_address_button_clicked(self):
 
         row = self.parcel_address_twidget.rowCount()
         self.parcel_address_twidget.insertRow(row)
-        self.__add_parcel_address_row(row, -1, self.tr('Review entry!'), self.tr('Review entry!'))
+        self.__add_parcel_address_row(row, None)
+
+    @pyqtSlot()
+    def on_delete_parcel_address_button_clicked(self):
+
+        row = self.parcel_address_twidget.currentRow()
+        if row == -1:
+            return
+
+        id = self.parcel_address_twidget.item(row, 0).data(Qt.UserRole)
+        if id != -1:  # already has a row in the database
+            fee = self.session.query(CaParcelAddress).filter(CaParcelAddress.id == id).one()
+            self.session.delete(fee)
+
+        self.parcel_address_twidget.removeRow(row)
+
+    @pyqtSlot()
+    def on_add_building_address_button_clicked(self):
+
+        row = self.building_address_twidget.rowCount()
+        self.building_address_twidget.insertRow(row)
+        self.__add_building_address_row(row, None)
+
+    @pyqtSlot()
+    def on_delete_building_address_button_clicked(self):
+
+        row = self.building_address_twidget.currentRow()
+        if row == -1:
+            return
+
+        id = self.building_address_twidget.item(row, 0).data(Qt.UserRole)
+        if id != -1:  # already has a row in the database
+            fee = self.session.query(CaBuildingAddress).filter(CaBuildingAddress.id == id).one()
+            self.session.delete(fee)
+
+        self.building_address_twidget.removeRow(row)
+
+    @pyqtSlot(QTableWidgetItem)
+    def on_building_address_twidget_itemClicked(self, item):
+
+        selected_row = self.building_address_twidget.currentRow()
+        item = self.building_address_twidget.item(selected_row, 0)
+        if item:
+            for row in range(self.building_address_twidget.rowCount()):
+                item_dec = self.building_address_twidget.item(row, 0)
+                item_dec.setCheckState(Qt.Unchecked)
+            item.setCheckState(Qt.Checked)
+
+    @pyqtSlot(QTableWidgetItem)
+    def on_parcel_address_twidget_itemClicked(self, item):
+
+        selected_row = self.parcel_address_twidget.currentRow()
+        item = self.parcel_address_twidget.item(selected_row, 0)
+        if item:
+            for row in range(self.parcel_address_twidget.rowCount()):
+                item_dec = self.parcel_address_twidget.item(row, 0)
+                item_dec.setCheckState(Qt.Unchecked)
+            item.setCheckState(Qt.Checked)
+
+            self.street_name_edit.setText(item.text())
+
+        item = self.parcel_address_twidget.item(selected_row, 1)
+        self.khashaa_edit.setText(item.text())
+
+    def __save_parcel_address(self):
+
+        parcel_id = self.id_main_edit.text()
+        if parcel_id:
+            parcel_count = self.session.query(CaParcelTbl).filter(CaParcelTbl.parcel_id == parcel_id).count()
+            if parcel_count == 1:
+                parcel = self.session.query(CaParcelTbl).filter(CaParcelTbl.parcel_id == parcel_id).one()
+                parcel.address_streetname = self.street_name_edit.text()
+                parcel.address_khashaa = self.khashaa_edit.text()
+
+            self.__save_parcel_address_list(parcel_id)
+
+        building_id = self.building_no_cbox.itemData(self.building_no_cbox.currentIndex())
+        self.__save_building_address_list(building_id)
+
+    def __save_parcel_address_list(self, parcel_id):
+
+        parcel = self.session.query(CaParcelTbl).filter(CaParcelTbl.parcel_id == parcel_id).one()
+
+        au3_code = None
+        khoroolol_fid = None
+        au3_count = self.session.query(AuLevel3).filter(func.ST_Centroid(parcel.geometry).ST_Within(AuLevel3.geometry)).count()
+
+        if au3_count == 1:
+            bag = self.session.query(AuLevel3).filter(func.ST_Centroid(parcel.geometry).ST_Within(AuLevel3.geometry)).one()
+            au3_code = bag.code
+        khoroolol_count = self.session.query(AuKhoroolol).filter(
+            func.ST_Centroid(parcel.geometry).ST_Within(AuKhoroolol.geometry)).count()
+        if khoroolol_count == 1:
+            khoroolol = self.session.query(AuKhoroolol).filter(func.ST_Centroid(parcel.geometry).ST_Within(AuKhoroolol.geometry)).one()
+            khoroolol_fid = khoroolol.fid
+
+        zipcode_id = None
+        zip_area_count = self.session.query(AuZipCodeArea).filter(
+            func.ST_Centroid(parcel.geometry).ST_Within(AuZipCodeArea.geometry)).count()
+        if zip_area_count == 1:
+            zip_area = self.session.query(AuZipCodeArea).filter(
+                func.ST_Centroid(parcel.geometry).ST_Within(AuZipCodeArea.geometry)).one()
+            zipcode_id = zip_area.id
+
+        street_id = None
+        street_count = self.session.query(StStreet).filter(
+            func.ST_Centroid(parcel.geometry).ST_Within(StStreet.geometry)).count()
+        if street_count == 1:
+            street = self.session.query(StStreet).filter(
+                func.ST_Centroid(parcel.geometry).ST_Within(StStreet.geometry)).one()
+            street_id = street.id
+
+        for row in range(self.parcel_address_twidget.rowCount()):
+            new_row = False
+            item_id = self.parcel_address_twidget.item(row, 0)
+            id = self.parcel_address_twidget.item(row, 0).data(Qt.UserRole)
+
+            is_active = False
+            if id == -1:
+                new_row = True
+                object = CaParcelAddress()
+                p_count = self.session.query(CaParcelAddress).filter(CaParcelAddress.parcel_id == parcel_id).count()
+                if p_count > 0:
+                    sort_value = self.session.query(CaParcelAddress.sort_value).\
+                        filter(CaParcelAddress.parcel_id == parcel_id).\
+                        order_by(CaParcelAddress.sort_value.desc()).first()
+
+                    sort_value_num = int(str(sort_value).split(",")[0][1:]) + 1
+                    object.sort_value = sort_value_num
+
+                    item = self.parcel_address_twidget.item(row, 3)
+
+                    in_source_code = item.text()[0:1]
+                    if self.__is_number(in_source_code):
+                        in_source_count = self.session.query(ClAddressSource).\
+                            filter(ClAddressSource.code == int(in_source_code)).count()
+                        if in_source_count == 1:
+                            object.in_source = item.text()[0:1]
+            else:
+                object = self.session.query(CaParcelAddress).filter(CaParcelAddress.id == id).one()
+
+            if item_id.checkState() == QtCore.Qt.Checked:
+                is_active = True
+
+                parcel = self.session.query(CaParcelTbl).filter(CaParcelTbl.parcel_id == parcel_id).one()
+
+                item = self.parcel_address_twidget.item(row, 0)
+                parcel.address_streetname = item.text()
+
+                item = self.parcel_address_twidget.item(row, 1)
+                parcel.address_khashaa = item.text()
+
+            object.parcel_id = parcel_id
+            object.is_active = is_active
+
+            item = self.parcel_address_twidget.item(row, 0)
+            object.address_streetname = item.text()
+
+            item = self.parcel_address_twidget.item(row, 1)
+            object.address_parcel_no = item.text()
+
+            item = self.parcel_address_twidget.item(row, 2)
+            object.address_neighbourhood = item.text()
+
+            item = self.parcel_address_twidget.item(row, 4)
+            object.description = item.text()
+
+            object.street_id = street_id
+            object.au1 = DatabaseUtils.working_l1_code()
+            object.au2 = DatabaseUtils.working_l2_code()
+            object.au3 = au3_code
+            object.khoroolol_id = khoroolol_fid
+            object.zipcode_id = zipcode_id
+
+            date_time_string = QDateTime.currentDateTime().toString(Constants.DATABASE_DATETIME_FORMAT)
+            object.created_at = datetime.strptime(date_time_string, Constants.PYTHON_DATETIME_FORMAT)
+            object.updated_at = datetime.strptime(date_time_string, Constants.PYTHON_DATETIME_FORMAT)
+
+            object.created_by = DatabaseUtils.current_sd_user().user_id
+
+            if new_row:
+                self.session.add(object)
+
+    def __save_building_address_list(self, building_id):
+
+        building = self.session.query(CaBuildingTbl).filter(CaBuildingTbl.building_id == building_id).one()
+        parcel_id = self.id_main_edit.text()
+        au3_code = None
+        khoroolol_fid = None
+        au3_count = self.session.query(AuLevel3).filter(func.ST_Centroid(building.geometry).ST_Within(AuLevel3.geometry)).count()
+
+        if au3_count == 1:
+            bag = self.session.query(AuLevel3).filter(func.ST_Centroid(building.geometry).ST_Within(AuLevel3.geometry)).one()
+            au3_code = bag.code
+        khoroolol_count = self.session.query(AuKhoroolol).filter(
+            func.ST_Centroid(building.geometry).ST_Within(AuKhoroolol.geometry)).count()
+        if khoroolol_count == 1:
+            khoroolol = self.session.query(AuKhoroolol).filter(func.ST_Centroid(building.geometry).ST_Within(AuKhoroolol.geometry)).one()
+            khoroolol_fid = khoroolol.fid
+
+        zipcode_id = None
+        zip_area_count = self.session.query(AuZipCodeArea).filter(
+            func.ST_Centroid(building.geometry).ST_Within(AuZipCodeArea.geometry)).count()
+        if zip_area_count == 1:
+            zip_area = self.session.query(AuZipCodeArea).filter(
+                func.ST_Centroid(building.geometry).ST_Within(AuZipCodeArea.geometry)).one()
+            zipcode_id = zip_area.id
+
+        street_id = None
+        street_count = self.session.query(StStreet).filter(
+            func.ST_Centroid(building.geometry).ST_Within(StStreet.geometry)).count()
+        if street_count == 1:
+            street = self.session.query(StStreet).filter(
+                func.ST_Centroid(building.geometry).ST_Within(StStreet.geometry)).one()
+            street_id = street.id
+
+        for row in range(self.building_address_twidget.rowCount()):
+            new_row = False
+            item_id = self.building_address_twidget.item(row, 0)
+            id = self.building_address_twidget.item(row, 0).data(Qt.UserRole)
+
+            is_active = False
+            if id == -1:
+                new_row = True
+                object = CaBuildingAddress()
+                p_count = self.session.query(CaBuildingAddress).filter(CaBuildingAddress.building_id == building_id).count()
+                if p_count > 0:
+                    sort_value = self.session.query(CaBuildingAddress.sort_value).\
+                        filter(CaBuildingAddress.building_id == building_id).\
+                        order_by(CaBuildingAddress.sort_value.desc()).first()
+
+                    sort_value_num = int(str(sort_value).split(",")[0][1:]) + 1
+                    object.sort_value = sort_value_num
+
+                    item = self.building_address_twidget.item(row, 3)
+
+                    in_source_code = item.text()[0:1]
+                    if self.__is_number(in_source_code):
+                        in_source_count = self.session.query(ClAddressSource).\
+                            filter(ClAddressSource.code == int(in_source_code)).count()
+                        if in_source_count == 1:
+                            object.in_source = item.text()[0:1]
+            else:
+                object = self.session.query(CaBuildingAddress).filter(CaBuildingAddress.id == id).one()
+
+            if item_id.checkState() == QtCore.Qt.Checked:
+                is_active = True
+
+                building = self.session.query(CaBuildingTbl).filter(CaBuildingTbl.building_id == building_id).one()
+
+                item = self.building_address_twidget.item(row, 0)
+                building.address_streetname = item.text()
+
+                item = self.building_address_twidget.item(row, 1)
+                building.address_khashaa = item.text()
+
+            object.parcel_id = parcel_id
+            object.building_id = building_id
+            object.is_active = is_active
+
+            item = self.building_address_twidget.item(row, 0)
+            object.address_streetname = item.text()
+
+            item = self.building_address_twidget.item(row, 1)
+            object.address_parcel_no = item.text()
+
+            item = self.building_address_twidget.item(row, 2)
+            object.address_building_no = item.text()
+
+            item = self.building_address_twidget.item(row, 4)
+            object.description = item.text()
+
+            object.street_id = street_id
+            object.au1 = DatabaseUtils.working_l1_code()
+            object.au2 = DatabaseUtils.working_l2_code()
+            object.au3 = au3_code
+            object.khoroolol_id = khoroolol_fid
+            object.zipcode_id = zipcode_id
+
+            date_time_string = QDateTime.currentDateTime().toString(Constants.DATABASE_DATETIME_FORMAT)
+            object.created_at = datetime.strptime(date_time_string, Constants.PYTHON_DATETIME_FORMAT)
+            object.updated_at = datetime.strptime(date_time_string, Constants.PYTHON_DATETIME_FORMAT)
+
+            object.created_by = DatabaseUtils.current_sd_user().user_id
+
+            if new_row:
+                self.session.add(object)

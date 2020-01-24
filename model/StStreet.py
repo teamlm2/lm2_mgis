@@ -13,7 +13,7 @@ class StStreet(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String)
-    name_mn = Column(String)
+    name_en = Column(String)
     description = Column(String)
     is_active = Column(Boolean)
     valid_from = Column(Date)
