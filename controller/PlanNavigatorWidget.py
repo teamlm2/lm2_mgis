@@ -2232,6 +2232,7 @@ class PlanNavigatorWidget(QDockWidget, Ui_PlanNavigatorWidget, DatabaseHelper):
         pr = layer.dataProvider()
         fields = []
         fields.append(QgsField('badedturl', QVariant.String))
+        fields.append(QgsField('plan_code', QVariant.String))
         row_count = self.attribute_twidget.rowCount()
         for row in range(row_count):
             item = self.attribute_twidget.item(row, 0)

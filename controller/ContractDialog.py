@@ -179,6 +179,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             join(CtApplication, CtApplicationPersonRole.application == CtApplication.app_id).\
             join(SetApplicationTypePersonRole, CtApplication.app_type == SetApplicationTypePersonRole.type).\
             filter(CtApplication.app_no == app_no).\
+            filter(SetApplicationTypePersonRole.role == CtApplicationPersonRole.role).\
             filter(SetApplicationTypePersonRole.is_owner == True).all()
 
         for applicant in applicants:
@@ -2367,16 +2368,24 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         app_no = self.application_this_contract_based_edit.text()
 
         # try:
-        app_person = self.session.query(CtApplicationPersonRole).filter(
-            CtApplicationPersonRole.application == self.app_id).all()
-        app_person_new_count = self.session.query(CtApplicationPersonRole). \
-            filter(CtApplicationPersonRole.application == self.app_id). \
-            filter(CtApplicationPersonRole.role == 70).count()
-        if app_person_new_count > 0:
-            app_person = self.session.query(CtApplicationPersonRole). \
-                filter(CtApplicationPersonRole.application == self.app_id). \
-                filter(CtApplicationPersonRole.role == 70).all()
+        # app_person = self.session.query(CtApplicationPersonRole).filter(
+        #     CtApplicationPersonRole.application == self.app_id).all()
 
+        app_person = self.session.query(CtApplicationPersonRole). \
+            join(CtApplication, CtApplicationPersonRole.application == CtApplication.app_id). \
+            join(SetApplicationTypePersonRole, CtApplication.app_type == SetApplicationTypePersonRole.type). \
+            filter(CtApplication.app_id == self.app_id). \
+            filter(SetApplicationTypePersonRole.role == CtApplicationPersonRole.role). \
+            filter(SetApplicationTypePersonRole.is_owner == True).all()
+
+        # app_person_new_count = self.session.query(CtApplicationPersonRole). \
+        #     filter(CtApplicationPersonRole.application == self.app_id). \
+        #     filter(CtApplicationPersonRole.role == 70).count()
+        # if app_person_new_count > 0:
+        #     app_person = self.session.query(CtApplicationPersonRole). \
+        #         filter(CtApplicationPersonRole.application == self.app_id). \
+        #         filter(CtApplicationPersonRole.role == 70).all()
+        person = None
         for p in app_person:
             if p.main_applicant == True:
                 person = self.session.query(BsPerson).filter(BsPerson.person_id == p.person).one()
@@ -2429,6 +2438,8 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         address_building_no = ""
         address_entrance_no = ""
         address_apartment_no = ""
+
+        # if person:
         if person.address_street_name != None:
             address_street_name = person.address_street_name + u" гудамж, "
         if person.address_khaskhaa != None:
@@ -5184,7 +5195,8 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             self.__save_parcel_address_list(parcel_id)
 
         building_id = self.building_no_cbox.itemData(self.building_no_cbox.currentIndex())
-        self.__save_building_address_list(building_id)
+        if building_id:
+            self.__save_building_address_list(building_id)
 
     def __save_parcel_address_list(self, parcel_id):
 
