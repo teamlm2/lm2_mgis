@@ -29,7 +29,7 @@ class Ui_ContractDialog(object):
         ContractDialog.setMinimumSize(QtCore.QSize(800, 470))
         ContractDialog.setMaximumSize(QtCore.QSize(800, 470))
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(_fromUtf8("../../../.designer/backup/icons/contract.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(QtGui.QPixmap(_fromUtf8("C:/Users/.designer/backup/icons/contract.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         ContractDialog.setWindowIcon(icon)
         self.line = QtGui.QFrame(ContractDialog)
         self.line.setGeometry(QtCore.QRect(0, 20, 801, 16))
