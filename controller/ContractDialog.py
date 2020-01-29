@@ -4739,6 +4739,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                 contract_fee.landuse_area = landuse_area
                 contract_fee.zone_area = zone_area
                 contract_fee.amount = payment
+                contract_fee.base_fee_id = base_fee_id
                 contract_fee.created_by = DatabaseUtils.current_sd_user().user_id
                 date_time_string = QDateTime.currentDateTime().toString(Constants.DATABASE_DATETIME_FORMAT)
                 contract_fee.created_at = datetime.strptime(date_time_string, Constants.PYTHON_DATETIME_FORMAT)
@@ -4757,6 +4758,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                 contract_fee.landuse_area = landuse_area
                 contract_fee.zone_area = zone_area
                 contract_fee.amount = payment
+                contract_fee.base_fee_id = base_fee_id
 
             self.__calculate_landfee_level(base_fee_id, payment, parcel_id)
 

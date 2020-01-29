@@ -14,6 +14,8 @@ class ClPlanZone(Base):
     code = Column(String)
     name = Column(String)
 
+    is_cadastre = Column(Boolean)
+    is_feedback = Column(Boolean)
     is_active = Column(Boolean)
     created_at = Column(DateTime)
     created_by = Column(Integer)

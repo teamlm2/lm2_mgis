@@ -24,6 +24,7 @@ class CtContractFee(Base):
     landuse_area = Column(Numeric)
     zone_area = Column(Numeric)
     amount = Column(Numeric)
+    base_fee_id = Column(Integer)
 
     created_by = Column(Integer)
     created_at = Column(DateTime)
