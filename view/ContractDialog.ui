@@ -27,7 +27,7 @@
   </property>
   <property name="windowIcon">
    <iconset>
-    <normaloff>../../../.designer/backup/icons/contract.png</normaloff>../../../.designer/backup/icons/contract.png</iconset>
+    <normaloff>C:/Users/.designer/backup/icons/contract.png</normaloff>C:/Users/.designer/backup/icons/contract.png</iconset>
   </property>
   <widget class="Line" name="line">
    <property name="geometry">

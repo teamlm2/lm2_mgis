@@ -84,6 +84,7 @@ class PlanAttributeEditDialog(QDialog, Ui_PlanAttributeEditDialog, DatabaseHelpe
         self.user_id = self.user.user_id
         self.attribute_row = 0
         self.attribute_twidget = None
+        self.default_attribute_list = {1: u'Газрын нэр', 2: u'Тайлбар', 3: u'ГНСангийн ангилал'}
         self.__setup_attribute_twidget()
 
     def __setup_attribute_twidget(self):
@@ -98,20 +99,33 @@ class PlanAttributeEditDialog(QDialog, Ui_PlanAttributeEditDialog, DatabaseHelpe
         # self.attribute_twidget.itemDropped.connect(self.on_application_twidget_itemDropped)
         # self.attribute_twidget.cellChanged.connect(self.on_application_twidget_cellChanged)
 
-        default_attribute_row = self.default_attribute_twidget.rowCount()
-        name_item = QTableWidgetItem('')
-        name_item.setData(Qt.UserRole, '')
-        name_item.setData(Qt.UserRole + 1, 0)
-        name_item.setData(Qt.UserRole + 2, 1)
+        landuse_list = list()
+        for code, description in self.session.query(ClLanduseType.code, ClLanduseType.description).all():
+            landuse_list.append(u'{0}:{1}'.format(code, description))
 
-        value_item = QTableWidgetItem('')
-        value_item.setData(Qt.UserRole, '')
-        value_item.setData(Qt.UserRole + 1, 0)
-        value_item.setData(Qt.UserRole + 2, 1)
+        for i in self.default_attribute_list:
+            print i
+            print self.default_attribute_list[i]
 
-        self.default_attribute_twidget.insertRow(default_attribute_row)
-        self.default_attribute_twidget.setItem(default_attribute_row, ATTRIBUTE_NAME, name_item)
-        self.default_attribute_twidget.setItem(default_attribute_row, ATTRIBUTE_VALUE, value_item)
+            name_item = QTableWidgetItem(self.default_attribute_list[i])
+            name_item.setData(Qt.UserRole, i)
+
+            value_item = QTableWidgetItem('')
+            value_item.setData(Qt.UserRole, i)
+
+            if i == 3:
+                delegate = QComboBox()
+                for t in landuse_list:
+                    delegate.addItem(t)
+                self.default_attribute_twidget.setCellWidget(i, ATTRIBUTE_VALUE, delegate)
+                print 'ffff'
+            else:
+                delegate = QLineEdit()
+
+            default_attribute_row = self.default_attribute_twidget.rowCount()
+            self.default_attribute_twidget.insertRow(default_attribute_row)
+            self.default_attribute_twidget.setItem(default_attribute_row, ATTRIBUTE_NAME, name_item)
+            self.default_attribute_twidget.setItem(default_attribute_row, ATTRIBUTE_VALUE, value_item)
 
         attributes = self.session.query(ClAttributeZone, SetPlanZoneAttribute).\
             join(SetPlanZoneAttribute, ClAttributeZone.attribute_id == SetPlanZoneAttribute.attribute_id).\
@@ -125,7 +139,7 @@ class PlanAttributeEditDialog(QDialog, Ui_PlanAttributeEditDialog, DatabaseHelpe
 
             attribute_process = value.SetPlanZoneAttribute
 
-            name_item = QTableWidgetItem(unicode(attribute.attribute_name_mn))
+            name_item = QTableWidgetItem(attribute.description + '/' + unicode(attribute.attribute_name_mn) + '/')
             name_item.setData(Qt.UserRole, attribute.attribute_id)
             name_item.setData(Qt.UserRole + 1, attribute_type)
             name_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
