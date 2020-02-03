@@ -904,6 +904,11 @@ class LM2Plugin:
 
     def __show_plan_navigator_widget(self):
 
+        self.planWidget = None
+        if self.planWidget:
+            self.iface.removeDockWidget(self.planWidget)
+            del self.planWidget
+
         if self.planWidget:
             if self.planWidget.isVisible():
                 if self.planWidget:

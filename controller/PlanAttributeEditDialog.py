@@ -84,6 +84,7 @@ class PlanAttributeEditDialog(QDialog, Ui_PlanAttributeEditDialog, DatabaseHelpe
         self.user_id = self.user.user_id
         self.attribute_row = 0
         self.attribute_twidget = None
+        self.default_attribute_twidget = None
         self.default_attribute_list = {1: u'Газрын нэр', 2: u'Тайлбар', 3: u'ГНСангийн ангилал'}
         self.__setup_attribute_twidget()
 
@@ -104,8 +105,6 @@ class PlanAttributeEditDialog(QDialog, Ui_PlanAttributeEditDialog, DatabaseHelpe
             landuse_list.append(u'{0}:{1}'.format(code, description))
 
         for i in self.default_attribute_list:
-            print i
-            print self.default_attribute_list[i]
 
             name_item = QTableWidgetItem(self.default_attribute_list[i])
             name_item.setData(Qt.UserRole, i)
@@ -113,19 +112,20 @@ class PlanAttributeEditDialog(QDialog, Ui_PlanAttributeEditDialog, DatabaseHelpe
             value_item = QTableWidgetItem('')
             value_item.setData(Qt.UserRole, i)
 
+            default_attribute_row = self.default_attribute_twidget.rowCount()
+
+            self.default_attribute_twidget.insertRow(default_attribute_row)
+            self.default_attribute_twidget.setItem(default_attribute_row, ATTRIBUTE_NAME, name_item)
+            self.default_attribute_twidget.setItem(default_attribute_row, ATTRIBUTE_VALUE, value_item)
+
             if i == 3:
                 delegate = QComboBox()
                 for t in landuse_list:
                     delegate.addItem(t)
-                self.default_attribute_twidget.setCellWidget(i, ATTRIBUTE_VALUE, delegate)
-                print 'ffff'
+                self.default_attribute_twidget.setCellWidget(default_attribute_row, ATTRIBUTE_VALUE, delegate)
             else:
                 delegate = QLineEdit()
-
-            default_attribute_row = self.default_attribute_twidget.rowCount()
-            self.default_attribute_twidget.insertRow(default_attribute_row)
-            self.default_attribute_twidget.setItem(default_attribute_row, ATTRIBUTE_NAME, name_item)
-            self.default_attribute_twidget.setItem(default_attribute_row, ATTRIBUTE_VALUE, value_item)
+                self.default_attribute_twidget.setCellWidget(default_attribute_row, ATTRIBUTE_VALUE, delegate)
 
         attributes = self.session.query(ClAttributeZone, SetPlanZoneAttribute).\
             join(SetPlanZoneAttribute, ClAttributeZone.attribute_id == SetPlanZoneAttribute.attribute_id).\
