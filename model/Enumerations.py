@@ -12,6 +12,7 @@ class UserRight:
     reporting = "reporting"
     application_update = "application_update"
     application_view = "application_view"
+    ub_parcel = "ub_parcel"
 
 class UserRight_code:
 
@@ -30,6 +31,7 @@ class UserRight_code:
     contracting_update = 10
     ownership_update = 11
     person_update = 12
+    ub_parcel = 13
 
 class ApplicationType:
 
