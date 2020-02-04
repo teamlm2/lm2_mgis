@@ -59,6 +59,7 @@ import sys
 import datetime
 from ftplib import FTP, error_perm
 from contextlib import closing
+from difflib import SequenceMatcher
 
 class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
 
@@ -3889,7 +3890,9 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
 
         self.new_doc_twidget.setRowCount(0)
         is_find_doc = False
-        archive_path = 'mgis/ub_archive'
+
+        soum_code = DatabaseUtils.working_l2_code()
+        archive_path = 'geomaster_archive/'+soum_code
         if not self.parcel_id_edit.text():
             return
 
@@ -3916,8 +3919,8 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
             # FtpConnection.chdir(archive_ftp_path_role, ftp[0])
 
             try:
-                if str(base_parcel_id) in ftp.nlst():
-                    files = ftp.nlst(str(base_parcel_id))
+                if str(parcel_id) in ftp.nlst():
+                    files = ftp.nlst(str(parcel_id))
                 else:
                     is_find_doc = False
             except error_perm:
@@ -3929,9 +3932,19 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
             ch_path = None
             for f in files:
                 doc_decision = f.split('/')[-1]
-                doc_decision = doc_decision.decode('utf8')
+                # doc_decision = doc_decision.decode('utf8')
                 doc_decision_no = doc_decision.split('-')[-1]
-                if doc_decision_no == decision_no:
+
+                doc_decision_no = doc_decision_no.upper()
+                decision_no = decision_no.upper()
+
+                doc_decision_no = doc_decision_no.replace('A', '')
+                decision_no = decision_no.replace('A', '')
+
+                doc_decision_no = doc_decision_no.replace(u'A', '')
+                decision_no = decision_no.replace(u'A', '')
+
+                if self.__mysplit(decision_no)[1] == self.__mysplit(doc_decision_no)[1]:
                     ch_path = f
 
             if not ch_path:
@@ -3975,3 +3988,14 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
                         self.new_doc_twidget.setItem(row, 0, item_name)
                         self.new_doc_twidget.setItem(row, 1, item_description)
                         self.new_doc_twidget.setItem(row, 2, item_view)
+
+    def __similar(self, a, b):
+
+        return SequenceMatcher(None, a, b).ratio()
+
+    def __mysplit(self, s):
+
+        head = s.rstrip('0123456789')
+
+        tail = s[len(head):]
+        return head, tail

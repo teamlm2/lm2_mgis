@@ -645,21 +645,23 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
 
     def __setup_combo_boxes(self):
 
+        soum_code = DatabaseUtils.working_l2_code()
         user = QSettings().value(SettingsConstants.USER)[:8]
         # try:
 
         rigth_types = self.session.query(ClRightType).\
             join(SetOrganizationRightType, ClRightType.code == SetOrganizationRightType.right_type).\
             filter(SetOrganizationRightType.organization == self.current_user.organization).all()
-        application_types = self.session.query(ClApplicationType).\
-            join(SetOrganizationAppType, ClApplicationType.code == SetOrganizationAppType.application_type).\
-            filter(SetOrganizationAppType.organization == self.current_user.organization).\
-            filter(and_(ClApplicationType.code != ApplicationType.pasture_use, ClApplicationType.code != ApplicationType.right_land)).\
-            order_by(ClApplicationType.code).all()
+        # application_types = self.session.query(ClApplicationType).\
+        #     join(SetOrganizationAppType, ClApplicationType.code == SetOrganizationAppType.application_type).\
+        #     filter(SetOrganizationAppType.organization == self.current_user.organization).\
+        #     filter(and_(ClApplicationType.code != ApplicationType.pasture_use, ClApplicationType.code != ApplicationType.right_land)).\
+        #     order_by(ClApplicationType.code).all()
         statuses = self.session.query(ClApplicationStatus).filter(ClApplicationStatus.code < 10).order_by(ClApplicationStatus.code).all()
         transfer_type = self.session.query(ClTransferType).all()
 
         set_roles = self.session.query(SetRole). \
+            filter(SetRole.working_au_level2 == soum_code). \
             filter(SetRole.is_active == True).all()
         mortgage_list = self.session.query(ClMortgageType).all()
         landuse_types = self.session.query(ClLanduseType).all()
@@ -681,7 +683,6 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
         for item in transfer_type:
             self.type_of_transfer_cbox.addItem(item.description, item.code)
 
-        soum_code = DatabaseUtils.working_l2_code()
         for setRole in set_roles:
             l2_code_list = setRole.restriction_au_level2.split(',')
             if soum_code in l2_code_list:

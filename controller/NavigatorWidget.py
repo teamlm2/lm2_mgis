@@ -176,22 +176,22 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
                 # self.__create_person_view()
             if index == 2:
                 self.__setup_parcel_combo_boxes()
-                self.__setup_address_fill()
-                self.__create_tmp_parcel_view()
-            if index == 3:
-                self.__setup_app_combo_boxes()
-                self.__create_record_view()
+                # self.__setup_address_fill()
+                # self.__create_tmp_parcel_view()
+            # if index == 3:
+                # self.__setup_app_combo_boxes()
+                # self.__create_record_view()
         #         self.__create_application_view()
-                self.__create_maintenance_case_view()
-            if index == 4:
-                self.__create_decision_view()
+        #         self.__create_maintenance_case_view()
+        #     if index == 4:
+        #         self.__create_decision_view()
             if index == 5:
                 self.__setup_maintenance_combo_boxes()
-                self.__create_maintenance_case_view()
-            if index == 6:
-                self.__create_contract_view()
-            if index == 7:
-                self.__create_record_view()
+                # self.__create_maintenance_case_view()
+            # if index == 6:
+            #     self.__create_contract_view()
+            # if index == 7:
+            #     self.__create_record_view()
             if index == 8:
                 self.__report_setup()
 
@@ -320,10 +320,10 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         self.__create_person_view()
         self.__create_application_view()
         self.__create_parcel_view()
-        # self.__create_tmp_parcel_view()
+        self.__create_tmp_parcel_view()
         self.__create_contract_view()
-        # self.__create_decision_view()
-        # self.__create_record_view()
+        self.__create_decision_view()
+        self.__create_record_view()
         self.__create_maintenance_case_view()
         # self.__create_parcel_view_gts()
         # self.__create_fee_unifeid_view()
@@ -379,13 +379,15 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
 
     def __setup_app_combo_boxes(self):
 
+        soum_code = DatabaseUtils.working_l2_code()
         self.status_cbox.clear()
         self.office_in_charge_cbox.clear()
         self.next_officer_in_charge_cbox.clear()
         self.app_type_cbox.clear()
         try:
-            soum_code = DatabaseUtils.working_l2_code()
-            set_roles = self.session.query(SetRole).order_by(SetRole.user_name)
+            set_roles = self.session.query(SetRole).\
+                filter(SetRole.working_au_level2 == soum_code).\
+                order_by(SetRole.user_name)
             cl_app_type = self.session.query(ClApplicationType). \
                 filter(and_(ClApplicationType.code != ApplicationType.pasture_use,
                             ClApplicationType.code != ApplicationType.right_land)).all()
@@ -481,6 +483,8 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         if cl_record_status is not None:
             for status in cl_record_status:
                 self.record_status_cbox.addItem(status.description, status)
+
+        self.__setup_app_combo_boxes()
 
     @pyqtSlot(int)
     def on_aimag_cbox_currentIndexChanged(self, index):

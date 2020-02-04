@@ -773,6 +773,11 @@ class LM2Plugin:
     def __show_parcel_navigator_widget(self):
 
         # self.__create_parcel_info()
+        self.parcelInfoWidget = None
+        if self.parcelInfoWidget:
+            self.iface.removeDockWidget(self.parcelInfoWidget)
+            del self.parcelInfoWidget
+
         if self.parcelInfoWidget:
             if self.parcelInfoWidget.isVisible():
                 if self.parcelInfoWidget:
