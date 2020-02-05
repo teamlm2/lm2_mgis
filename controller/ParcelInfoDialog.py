@@ -2600,18 +2600,12 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
             self.create_savepoint()
             try:
                 self.__save_person()
-                print '1'
                 self.__save_parcel()
-                print '2'
                 # self.__save_application_details()
                 self.__save_applicant()
-                print '3'
                 self.__save_status()
-                print '4'
                 self.__save_decision()
-                print '5'
                 self.__save_contract_owner()
-                print '6'
 
                 selected_row = self.right_holder_twidget.currentRow()
                 objectid = self.right_holder_twidget.item(selected_row, 1).data(Qt.UserRole + 1)
@@ -2619,43 +2613,14 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
                 subject.is_finish = True
                 subject.finish_user = DatabaseUtils.current_user().user_name
                 subject.finish_date = PluginUtils.convert_qt_date_to_python(QDate.currentDate())
-                print '7'
             except LM2Exception, e:
                 self.rollback_to_savepoint()
                 PluginUtils.show_error(self, e.title(), e.message())
                 return
 
             self.commit()
-        print 'eee'
-        decision_no = self.decision_no_edit.text()
-        decision_no = decision_no.replace('/', '')
 
-        f = self.decision_num_cbox.itemData(self.decision_num_cbox.currentIndex())
-        if not f:
-            return
-        doc_decision = f.split('/')[-1]
-        # doc_decision = doc_decision.decode('utf8')
-        doc_decision_no = doc_decision.split('-')[-1]
-
-        doc_decision_no = doc_decision_no.upper()
-        decision_no = decision_no.upper()
-
-        doc_decision_no = doc_decision_no.replace('A', '')
-        decision_no = decision_no.replace('A', '')
-
-        doc_decision_no = doc_decision_no.replace(u'A', '')
-        decision_no = decision_no.replace(u'A', '')
-
-        if self.__mysplit(decision_no)[1] == self.__mysplit(doc_decision_no)[1]:
-            message_box = QMessageBox()
-            message_box.setText(u'Цахим архив оруулах уу?')
-
-            yes_button = message_box.addButton(u'Тийм', QMessageBox.ActionRole)
-            message_box.addButton(u'Үгүй', QMessageBox.ActionRole)
-            message_box.exec_()
-
-            if message_box.clickedButton() == yes_button:
-                print ''
+        self.__import_archive()
 
     def __multi_owner_save(self, person_id):
 
@@ -4039,6 +4004,46 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
                     self.new_doc_twidget.setItem(row, 0, item_name)
                     self.new_doc_twidget.setItem(row, 1, item_description)
                     self.new_doc_twidget.setItem(row, 2, item_view)
+
+    def __import_archive(self):
+
+        decision_no = self.decision_no_edit.text()
+        decision_no = decision_no.replace('/', '')
+
+        f = self.decision_num_cbox.itemData(self.decision_num_cbox.currentIndex())
+        if not f:
+            return
+        doc_decision = f.split('/')[-1]
+        # doc_decision = doc_decision.decode('utf8')
+        doc_decision_no = doc_decision.split('-')[-1]
+
+        doc_decision_no = doc_decision_no.upper()
+        decision_no = decision_no.upper()
+
+        doc_decision_no = doc_decision_no.replace('A', '')
+        decision_no = decision_no.replace('A', '')
+
+        doc_decision_no = doc_decision_no.replace(u'A', '')
+        decision_no = decision_no.replace(u'A', '')
+
+        if self.__mysplit(decision_no)[1] == self.__mysplit(doc_decision_no)[1]:
+            message_box = QMessageBox()
+            message_box.setText(u'Цахим архив оруулах уу?')
+
+            yes_button = message_box.addButton(u'Тийм', QMessageBox.ActionRole)
+            message_box.addButton(u'Үгүй', QMessageBox.ActionRole)
+            message_box.exec_()
+
+            if message_box.clickedButton() == yes_button:
+                if DatabaseUtils.ftp_connect():
+                    ftp = DatabaseUtils.ftp_connect()
+
+                    archive_ftp_path = FilePath.app_ftp_parent_path() + '/' + str(self.parent.current_application_no())
+                    role = self.widget.item(index.row(), FILE_TYPE_COLUMN).data(Qt.UserRole)
+
+                    archive_ftp_path_role = archive_ftp_path + '/' + str(role).zfill(2)
+                    FtpConnection.chdir(archive_ftp_path_role, ftp[0])
+                    FtpConnection.upload_app_ftp_file(selected_file, file_name, ftp[0])
 
     def __similar(self, a, b):
 

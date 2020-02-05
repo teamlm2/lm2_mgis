@@ -200,8 +200,7 @@ class ApplicationDocumentDelegate(QStyledItemDelegate):
                                             file_url = url_split
                                         else:
                                             file_url = file_url + '/' + url_split
-                                print file_url
-                                print doc.name
+
                                 try:
                                     ftp[0].cwd(file_url)
                                     ftp[0].delete(doc.name)
@@ -238,21 +237,3 @@ class ApplicationDocumentDelegate(QStyledItemDelegate):
                 else:
                     index.model().setData(index, 0, Qt.EditRole)
         return False
-
-    # def chdir(self, ftp_path, ftp_conn):
-    #     dirs = [d for d in ftp_path.split('/') if d != '']
-    #     for p in dirs:
-    #         self.check_dir(p, ftp_conn)
-    #
-    # def check_dir(self, dir, ftp_conn):
-    #     filelist = []
-    #     ftp_conn.retrlines('LIST', filelist.append)
-    #     found = False
-    #
-    #     for f in filelist:
-    #         if f.split()[-1] == dir and f.lower().startswith('d'):
-    #             found = True
-    #
-    #     if not found:
-    #         ftp_conn.mkd(dir)
-    #     ftp_conn.cwd(dir)
