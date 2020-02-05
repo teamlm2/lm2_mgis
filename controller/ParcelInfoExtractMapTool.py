@@ -64,6 +64,8 @@ class ParcelInfoExtractMapTool(QgsMapTool):
             return
 
         # we are interested only in left button clicking
+        if not Qt:
+            return
         if event.button() != Qt.LeftButton:
             return
         soum = DatabaseUtils.working_l2_code()

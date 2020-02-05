@@ -47,6 +47,7 @@ from ..model.CaUBParcelTbl import *
 from ..utils.SessionHandler import SessionHandler
 from ..utils.FilePath import *
 from ..utils.FtpConnection import *
+from ..model.SdConfiguration import *
 from .qt_classes.UbDocumentViewDelegate import UbDocumentViewDelegate
 from .qt_classes.UbNewDocumentViewDelegate import UbNewDocumentViewDelegate
 import math
@@ -2599,12 +2600,18 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
             self.create_savepoint()
             try:
                 self.__save_person()
+                print '1'
                 self.__save_parcel()
+                print '2'
                 # self.__save_application_details()
                 self.__save_applicant()
+                print '3'
                 self.__save_status()
+                print '4'
                 self.__save_decision()
+                print '5'
                 self.__save_contract_owner()
+                print '6'
 
                 selected_row = self.right_holder_twidget.currentRow()
                 objectid = self.right_holder_twidget.item(selected_row, 1).data(Qt.UserRole + 1)
@@ -2612,12 +2619,43 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
                 subject.is_finish = True
                 subject.finish_user = DatabaseUtils.current_user().user_name
                 subject.finish_date = PluginUtils.convert_qt_date_to_python(QDate.currentDate())
+                print '7'
             except LM2Exception, e:
                 self.rollback_to_savepoint()
                 PluginUtils.show_error(self, e.title(), e.message())
                 return
 
             self.commit()
+        print 'eee'
+        decision_no = self.decision_no_edit.text()
+        decision_no = decision_no.replace('/', '')
+
+        f = self.decision_num_cbox.itemData(self.decision_num_cbox.currentIndex())
+        if not f:
+            return
+        doc_decision = f.split('/')[-1]
+        # doc_decision = doc_decision.decode('utf8')
+        doc_decision_no = doc_decision.split('-')[-1]
+
+        doc_decision_no = doc_decision_no.upper()
+        decision_no = decision_no.upper()
+
+        doc_decision_no = doc_decision_no.replace('A', '')
+        decision_no = decision_no.replace('A', '')
+
+        doc_decision_no = doc_decision_no.replace(u'A', '')
+        decision_no = decision_no.replace(u'A', '')
+
+        if self.__mysplit(decision_no)[1] == self.__mysplit(doc_decision_no)[1]:
+            message_box = QMessageBox()
+            message_box.setText(u'Цахим архив оруулах уу?')
+
+            yes_button = message_box.addButton(u'Тийм', QMessageBox.ActionRole)
+            message_box.addButton(u'Үгүй', QMessageBox.ActionRole)
+            message_box.exec_()
+
+            if message_box.clickedButton() == yes_button:
+                print ''
 
     def __multi_owner_save(self, person_id):
 
@@ -2868,7 +2906,8 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
     def __save_applicant(self):
 
         person_id = self.personal_id_edit.text()
-        person = self.session.query(BsPerson).filter(BsPerson.person_register == person_id).one()
+        person = self.session.query(BsPerson).filter(BsPerson.person_register == person_id).\
+            order_by(BsPerson.parent_id.asc()).first()
         role_ref = self.session.query(ClPersonRole).filter_by(
             code=Constants.APPLICANT_ROLE_CODE).one()
 
@@ -3931,6 +3970,8 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
 
             ch_path = None
             for f in files:
+                print f
+                self.decision_num_cbox.addItem(f, f)
                 doc_decision = f.split('/')[-1]
                 # doc_decision = doc_decision.decode('utf8')
                 doc_decision_no = doc_decision.split('-')[-1]
@@ -3945,49 +3986,59 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
                 decision_no = decision_no.replace(u'A', '')
 
                 if self.__mysplit(decision_no)[1] == self.__mysplit(doc_decision_no)[1]:
-                    ch_path = f
+                    self.decision_num_cbox.setCurrentIndex(
+                        self.decision_num_cbox.findData(f))
 
-            if not ch_path:
-                return
+    @pyqtSlot(int)
+    def on_decision_num_cbox_currentIndexChanged(self, index):
 
-            ftp.cwd(ch_path)
+        self.new_doc_twidget.setRowCount(0)
+        ch_path = self.decision_num_cbox.itemData(self.decision_num_cbox.currentIndex())
+        soum_code = DatabaseUtils.working_l2_code()
+        archive_path = 'geomaster_archive/' + soum_code
+        if not DatabaseUtils.ftp_connect():
+            return
+        ftp = DatabaseUtils.ftp_connect()
+        ftp = ftp[0]
+        ftp.cwd(archive_path)
+        ftp.cwd(ch_path)
 
-            try:
-                files = ftp.nlst()
-            except error_perm:
-                is_find_doc = False
+        try:
+            files = ftp.nlst()
+        except error_perm:
+            is_find_doc = False
 
-            if not files:
-                return
+        if not files:
+            return
 
-            for f in files:
+        for f in files:
 
-                if self.__is_file(ftp, f):
-                    file_full_name = f
-                    file_name = f.split('.')[0]
-                    file_type = str(f.split('.')[-1])
-                    doc_no = file_name[-2:]
+            if self.__is_file(ftp, f):
+                file_full_name = f
+                file_name = f.split('.')[0]
+                file_type = str(f.split('.')[-1])
+                doc_no = file_name[-2:]
 
-                    if self.session.query(ClDocumentRole).filter(ClDocumentRole.code == doc_no).count() == 1:
-                        document = self.session.query(ClDocumentRole).filter(ClDocumentRole.code == doc_no).one()
+                if self.session.query(ClDocumentRole).filter(ClDocumentRole.code == doc_no).count() == 1:
+                    document = self.session.query(ClDocumentRole).filter(ClDocumentRole.code == doc_no).one()
 
-                        row = self.new_doc_twidget.rowCount()
-                        self.new_doc_twidget.insertRow(row)
+                    row = self.new_doc_twidget.rowCount()
+                    self.new_doc_twidget.insertRow(row)
 
-                        item_name = QTableWidgetItem()
-                        item_name.setText(str(file_name))
-                        item_name.setData(Qt.UserRole, ftp)
-                        item_name.setData(Qt.UserRole + 1, file_full_name)
-                        item_name.setData(Qt.UserRole + 2, file_type)
+                    item_name = QTableWidgetItem()
+                    item_name.setText(str(file_name))
+                    item_name.setData(Qt.UserRole, ftp)
+                    item_name.setData(Qt.UserRole + 1, file_full_name)
+                    item_name.setData(Qt.UserRole + 2, file_type)
 
-                        item_description = QTableWidgetItem()
-                        item_description.setText(document.description)
+                    item_description = QTableWidgetItem()
+                    item_description.setText(document.description)
 
-                        item_view = QTableWidgetItem()
+                    item_view = QTableWidgetItem()
 
-                        self.new_doc_twidget.setItem(row, 0, item_name)
-                        self.new_doc_twidget.setItem(row, 1, item_description)
-                        self.new_doc_twidget.setItem(row, 2, item_view)
+                    self.new_doc_twidget.setItem(row, 0, item_name)
+                    self.new_doc_twidget.setItem(row, 1, item_description)
+                    self.new_doc_twidget.setItem(row, 2, item_view)
 
     def __similar(self, a, b):
 

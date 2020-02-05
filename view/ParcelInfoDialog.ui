@@ -114,7 +114,7 @@
        </rect>
       </property>
       <property name="currentIndex">
-       <number>3</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="parcel_person_tab">
        <attribute name="title">
@@ -355,7 +355,7 @@
           </property>
           <property name="geometry">
            <rect>
-            <x>107</x>
+            <x>120</x>
             <y>80</y>
             <width>261</width>
             <height>20</height>
