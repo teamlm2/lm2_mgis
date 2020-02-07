@@ -449,12 +449,12 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
 
             #checks if the parcel is already in the tmp layer
             try:
-                count = self.session.query(CaTmpParcel).filter(CaTmpParcel.parcel_id == parcel_id).count()
+                count1 = self.session.query(CaTmpParcel).filter(CaTmpParcel.parcel_id == parcel_id).count()
 
             except SQLAlchemyError, e:
                 raise LM2Exception(self.tr("Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
 
-            if count > 0:
+            if count1 > 0:
                 PluginUtils.show_error(self, "Selection Error",
                                        self.tr("One of selected parcel is already in an active case. "
                                                "First finalize or revert from active case. Close dialog window"))

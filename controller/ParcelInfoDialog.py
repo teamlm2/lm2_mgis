@@ -2601,7 +2601,7 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
             try:
                 self.__save_person()
                 self.__save_parcel()
-                # self.__save_application_details()
+                self.__save_application_details()
                 self.__save_applicant()
                 self.__save_status()
                 self.__save_decision()
@@ -3935,7 +3935,7 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
 
             ch_path = None
             for f in files:
-                print f
+
                 self.decision_num_cbox.addItem(f, f)
                 doc_decision = f.split('/')[-1]
                 # doc_decision = doc_decision.decode('utf8')
@@ -3995,6 +3995,7 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
                     item_name.setData(Qt.UserRole, ftp)
                     item_name.setData(Qt.UserRole + 1, file_full_name)
                     item_name.setData(Qt.UserRole + 2, file_type)
+                    item_name.setData(Qt.UserRole + 3, doc_no)
 
                     item_description = QTableWidgetItem()
                     item_description.setText(document.description)
@@ -4036,14 +4037,73 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
 
             if message_box.clickedButton() == yes_button:
                 if DatabaseUtils.ftp_connect():
-                    ftp = DatabaseUtils.ftp_connect()
+                    ftp = None
+                    for row in range(self.new_doc_twidget.rowCount()):
 
-                    archive_ftp_path = FilePath.app_ftp_parent_path() + '/' + str(self.parent.current_application_no())
-                    role = self.widget.item(index.row(), FILE_TYPE_COLUMN).data(Qt.UserRole)
+                        # archive_ftp_path = FilePath.app_ftp_parent_path() + '/' + str(self.parent.current_application_no())
+                        ftp = self.new_doc_twidget.item(row, 0).data(Qt.UserRole)
+                        file_name = self.new_doc_twidget.item(row, 0).data(Qt.UserRole + 1)
+                        file_type = self.new_doc_twidget.item(row, 0).data(Qt.UserRole + 2)
+                        role = self.new_doc_twidget.item(row, 0).data(Qt.UserRole + 3)
 
-                    archive_ftp_path_role = archive_ftp_path + '/' + str(role).zfill(2)
-                    FtpConnection.chdir(archive_ftp_path_role, ftp[0])
-                    FtpConnection.upload_app_ftp_file(selected_file, file_name, ftp[0])
+                        view_pdf = open(FilePath.view_file_path(), 'wb')
+                        view_png = open(FilePath.view_file_png_path(), 'wb')
+
+                        file_url = None
+                        if file_type == 'png':
+                            ftp.retrbinary('RETR ' + file_name, view_png.write)
+                            file_url = FilePath.view_file_png_path()
+                        else:
+                            ftp.retrbinary('RETR ' + file_name, view_pdf.write)
+                            file_url = FilePath.view_file_path()
+                        view_pdf.close()
+                        view_png.close()
+                        if file_url:
+
+                            if DatabaseUtils.ftp_connect():
+                                ftp = DatabaseUtils.ftp_connect()
+                                file_info = QFileInfo(file_url)
+                                file_name = str(self.application.app_no) + "-" + str(role).zfill(
+                                    2) + "." + file_info.suffix()
+                                archive_ftp_path = FilePath.app_ftp_parent_path() + '/' + str(self.application.app_no)
+                                archive_ftp_path_role = archive_ftp_path + '/' + str(role).zfill(2)
+                                FtpConnection.chdir(archive_ftp_path_role, ftp[0])
+                                FtpConnection.upload_app_ftp_file(file_url, file_name,ftp[0])
+
+                    # if ftp:
+                    #     filelist = ftp.nlst()
+                    #     for file in filelist:
+                    #         file_info = QFileInfo(file)
+                    #         file_type = file_info.suffix()
+                    #         view_pdf = open(FilePath.view_file_path(), 'wb')
+                    #         view_png = open(FilePath.view_file_png_path(), 'wb')
+                    #         print file
+                    #         print file_type
+                    #         print ftp.nlst()
+                    #         file_url = None
+                    #         if file_type == 'png':
+                    #             ftp.retrbinary('RETR ' + file, view_png.write)
+                    #             file_url = FilePath.view_file_png_path()
+                    #         else:
+                    #             ftp.retrbinary('RETR ' + file, view_pdf.write)
+                    #             file_url = FilePath.view_file_path()
+                    #
+                    #         # ftp.retrbinary("RETR " + file, open(os.path.join(destination, file), "wb").write)
+                    #         if DatabaseUtils.ftp_connect():
+                    #             ftp1 = DatabaseUtils.ftp_connect()
+                    #             file_name = str(self.application.app_no) + "-" + str('ssaa').zfill(
+                    #                 2) + "." + file_info.suffix()
+                    #             archive_ftp_path = FilePath.app_ftp_parent_path() + '/' + str(self.application.app_no)
+                    #             archive_ftp_path_role = archive_ftp_path + '/' + str(role).zfill(2)
+                    #             FtpConnection.chdir(archive_ftp_path_role, ftp1[0])
+                    #             FtpConnection.upload_app_ftp_file(file_url, file_name,ftp1[0])
+                    #
+                    #         break
+
+                    conf = self.session.query(SdConfiguration).filter(SdConfiguration.code == 'ip_web_lm').one()
+                    urllib2.urlopen(
+                        'http://' + conf.value + '/api/application/document/move?app_id=' + str(
+                            self.application.app_id))
 
     def __similar(self, a, b):
 

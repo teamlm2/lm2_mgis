@@ -4628,11 +4628,11 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         user_rights = self.session.query(SetUserGroupRole).filter(
                         SetUserGroupRole.user_name_real == user_name_real).all()
         for user_right in user_rights:
+                # if user_right.group_role == UserRight_code.ub_parcel:
+                #     if user_right.r_view:
+                #         self.refresh_fee_button.enabled(True)
                 if user_right.group_role == UserRight_code.ub_parcel:
-                    if user_right.r_view:
-                        self.refresh_fee_button.enabled(true)
-                if user_right.group_role == UserRight_code.ub_parcel:
-                        self.refresh_fee_button.enabled(true)
+                        self.refresh_fee_button.enabled(True)
 
     @pyqtSlot()
     def on_refresh_fee_button_clicked(self):

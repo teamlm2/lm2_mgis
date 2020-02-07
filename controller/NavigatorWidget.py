@@ -627,7 +627,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         self.__zoom_to_soum(l2_code)
         # self.__load_role_settings()
 
-        self.__setup_change_combo_boxes()
+        # self.__setup_change_combo_boxes()
         self.__create_person_view()
         self.__create_application_view()
         self.__create_parcel_view()

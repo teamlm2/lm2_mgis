@@ -170,7 +170,6 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
         self.contract_court_end_date_edit.setDate(QDate.currentDate())
         self.record_court_end_date_edit.setDate(QDate.currentDate())
         self.is_status_disable = False
-        self.__setup_combo_boxes()
         self.__setup_ui()
         self.__setup_permissions()
 
@@ -217,6 +216,7 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
             self.__setup_mapping()
         else:
             self.date_time_date.setDateTime(QDateTime.currentDateTime())
+            self.__setup_combo_boxes()
 
         # try:
         self.__setup_status_widget()
@@ -664,13 +664,13 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
             filter(SetRole.working_au_level2 == soum_code). \
             filter(SetRole.is_active == True).all()
         mortgage_list = self.session.query(ClMortgageType).all()
-        landuse_types = self.session.query(ClLanduseType).all()
+        # landuse_types = self.session.query(ClLanduseType).all()
         mortgage_status = self.session.query(ClMortgageStatus).all()
         court_status = self.session.query(ClCourtStatus).all()
 
         # except SQLAlchemyError, e:
         #     PluginUtils.show_error(self, self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
-
+        self.rigth_type_cbox.addItem('*', -1)
         for item in rigth_types:
             self.rigth_type_cbox.addItem(item.description, item.code)
 
@@ -704,8 +704,8 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
         for item in mortgage_list:
             self.mortgage_type_cbox.addItem(item.description, item.code)
 
-        for item in landuse_types:
-            self.approved_land_use_type_cbox.addItem(str(item.code) + ": " + item.description, item.code)
+        # for item in landuse_types:
+        #     self.approved_land_use_type_cbox.addItem(str(item.code) + ": " + item.description, item.code)
 
         for item in mortgage_status:
             self.mortgage_status_cbox.addItem(item.description, item.code)
