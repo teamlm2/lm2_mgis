@@ -78,7 +78,7 @@
      <widget class="QPushButton" name="find_button">
       <property name="geometry">
        <rect>
-        <x>670</x>
+        <x>680</x>
         <y>10</y>
         <width>75</width>
         <height>23</height>
@@ -98,8 +98,8 @@
       </property>
       <property name="geometry">
        <rect>
-        <x>270</x>
-        <y>11</y>
+        <x>290</x>
+        <y>13</y>
         <width>131</width>
         <height>20</height>
        </rect>
@@ -109,9 +109,9 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>13</y>
-        <width>51</width>
-        <height>16</height>
+        <y>14</y>
+        <width>57</width>
+        <height>17</height>
        </rect>
       </property>
       <property name="text">
@@ -121,10 +121,10 @@
      <widget class="QLabel" name="label_4">
       <property name="geometry">
        <rect>
-        <x>165</x>
-        <y>13</y>
-        <width>101</width>
-        <height>16</height>
+        <x>164</x>
+        <y>15</y>
+        <width>124</width>
+        <height>17</height>
        </rect>
       </property>
       <property name="text">
@@ -137,10 +137,10 @@
       </property>
       <property name="geometry">
        <rect>
-        <x>405</x>
-        <y>12</y>
-        <width>101</width>
-        <height>16</height>
+        <x>424</x>
+        <y>15</y>
+        <width>113</width>
+        <height>17</height>
        </rect>
       </property>
       <property name="text">
@@ -153,8 +153,8 @@
       </property>
       <property name="geometry">
        <rect>
-        <x>510</x>
-        <y>10</y>
+        <x>540</x>
+        <y>13</y>
         <width>131</width>
         <height>20</height>
        </rect>
@@ -163,8 +163,8 @@
      <widget class="QLineEdit" name="person_id_edit">
       <property name="geometry">
        <rect>
-        <x>60</x>
-        <y>10</y>
+        <x>70</x>
+        <y>13</y>
         <width>91</width>
         <height>20</height>
        </rect>
@@ -906,7 +906,7 @@
     <widget class="QComboBox" name="object_cbox">
      <property name="geometry">
       <rect>
-       <x>240</x>
+       <x>430</x>
        <y>43</y>
        <width>401</width>
        <height>22</height>
@@ -916,9 +916,9 @@
     <widget class="QComboBox" name="year_cbox">
      <property name="geometry">
       <rect>
-       <x>140</x>
+       <x>296</x>
        <y>43</y>
-       <width>81</width>
+       <width>129</width>
        <height>22</height>
       </rect>
      </property>
@@ -926,11 +926,24 @@
     <widget class="QComboBox" name="city_type_cbox">
      <property name="geometry">
       <rect>
-       <x>6</x>
+       <x>168</x>
        <y>43</y>
-       <width>121</width>
+       <width>123</width>
        <height>22</height>
       </rect>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="all_status_chbox">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>43</y>
+       <width>151</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Бүх төлөв</string>
      </property>
     </widget>
    </widget>

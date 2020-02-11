@@ -32,6 +32,7 @@ from ..model.BsPerson import *
 from ..model.ClPersonRole import *
 from ..model.ClPositionType import *
 from ..model.ClRightType import *
+from ..model.ClMonetaryUnitType import *
 from ..model.CtApplication import *
 from ..model.CtContractApplicationRole import *
 from ..model.CtRecordApplicationRole import *
@@ -214,6 +215,7 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
 
         if self.attribute_update:
             self.__setup_mapping()
+            self.__setup_combo_boxes()
         else:
             self.date_time_date.setDateTime(QDateTime.currentDateTime())
             self.__setup_combo_boxes()
@@ -356,6 +358,8 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
 
                     if court_status:
                         self.record_court_status_cbox.setCurrentIndex(self.record_court_status_cbox.findData(court_status))
+                    if self.application.app29ext.court_decision_no:
+                        self.record_court_decision_no_edit.setText(self.application.app29ext.court_decision_no)
                 else:
                     self.contract_court_decision_label.setVisible(True)
                     self.contract_court_status_cbox.setVisible(True)
@@ -368,6 +372,8 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
                     self.contract_court_end_date_edit.setDate(end_period_qt)
                     if court_status:
                         self.contract_court_status_cbox.setCurrentIndex(self.contract_court_status_cbox.findData(court_status))
+                    if self.application.app29ext.court_decision_no:
+                        self.contract_court_decision_no_edit.setText(self.application.app29ext.court_decision_no)
 
         # App_no + Soum + Landuse
         app_no = self.application.app_no
@@ -509,7 +515,7 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
 
     def __setup_mortgage_twidget(self):
 
-        self.mortgage_twidget = DragTableWidget("person", 20, 120, 711, 192, self.mortgage_group_box)
+        self.mortgage_twidget = DragTableWidget("person", 10, 150, 751, 192, self.mortgage_group_box)
 
         header = [self.tr("Share (0.0-1.0)"),
                   self.tr("Person/Company ID"),
@@ -521,7 +527,7 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
 
         self.mortgage_twidget.setup_header(header)
         self.mortgage_twidget.itemDropped.connect(self.on_mortgage_twidget_itemDropped)
-
+        self.mortgage_twidget.itemClicked.connect(self.on_mortgage_twidget_itemClicked)
         try:
             stakeholders = self.application.stakeholders.filter(
                 CtApplicationPersonRole.role == Constants.MORTGAGEE_ROLE_CODE).all()
@@ -667,6 +673,7 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
         # landuse_types = self.session.query(ClLanduseType).all()
         mortgage_status = self.session.query(ClMortgageStatus).all()
         court_status = self.session.query(ClCourtStatus).all()
+        monetary_unit_types = self.session.query(ClMonetaryUnitType).order_by(ClMonetaryUnitType.code.asc()).all()
 
         # except SQLAlchemyError, e:
         #     PluginUtils.show_error(self, self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
@@ -706,6 +713,8 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
 
         # for item in landuse_types:
         #     self.approved_land_use_type_cbox.addItem(str(item.code) + ": " + item.description, item.code)
+        for item in monetary_unit_types:
+            self.mortgage_unit_type_cbox.addItem('/' + item.short_name + '/' + item.description, item.code)
 
         for item in mortgage_status:
             self.mortgage_status_cbox.addItem(item.description, item.code)
@@ -3048,6 +3057,8 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
                     Constants.DATABASE_DATE_FORMAT)
                 self.application.app29ext.court_status = self.contract_court_status_cbox.itemData(
                     self.contract_court_status_cbox.currentIndex())
+
+                self.application.app29ext.court_decision_no = self.contract_court_decision_no_edit.text()
             else:
                 self.application.app29ext.end_period = self.record_court_end_date_edit.date().toString(
                     Constants.DATABASE_DATE_FORMAT)
@@ -3056,6 +3067,8 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
                 self.application.app29ext.court_status = self.record_court_status_cbox.itemData(
                     self.record_court_status_cbox.currentIndex())
 
+                self.application.app29ext.court_decision_no = self.record_court_decision_no_edit.text()
+
 
         except SQLAlchemyError, e:
             self.rollback_to_savepoint()
@@ -3063,36 +3076,168 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
 
     def __save_mortgage_application(self):
 
-        self.create_savepoint()
+        selected_row = self.mortgage_twidget.currentRow()
+        if selected_row == -1:
+            return
+        item = self.mortgage_twidget.item(selected_row, MORTGAGE_SHARE)
+        person_id = item.data(Qt.UserRole)
 
+        count = self.session.query(CtApp8Ext).\
+            filter(CtApp8Ext.app_id == self.application.app_id).\
+            filter(CtApp8Ext.person_id == person_id).count()
+
+        if count == 0:
+            app8ext = CtApp8Ext()
+            app8ext.app_id = self.application.app_id
+            app8ext.person_id = person_id
+
+            app8ext.end_mortgage_period = self.mortgage_end_date_edit.date().toString(
+                Constants.DATABASE_DATE_FORMAT)
+            app8ext.start_mortgage_period = self.mortgage_start_date_edit.date().toString(
+                Constants.DATABASE_DATE_FORMAT)
+            app8ext.mortgage_type = self.mortgage_type_cbox.itemData(
+                self.mortgage_type_cbox.currentIndex())
+            app8ext.mortgage_status = self.mortgage_status_cbox.itemData(
+                self.mortgage_status_cbox.currentIndex())
+
+            app8ext.monetary_unit_type = self.mortgage_unit_type_cbox.itemData(
+                self.mortgage_unit_type_cbox.currentIndex())
+
+            app8ext.mortgage_contract_no = self.mortgage_contract_no_edit.text()
+            app8ext.loan_contract_no = self.loan_contract_no_edit.text()
+            app8ext.monetary_unit_value = self.mortgage_unit_value_sbox.value()
+            self.session.add(app8ext)
+        else:
+            app8ext = self.session.query(CtApp8Ext). \
+                filter(CtApp8Ext.app_id == self.application.app_id). \
+                filter(CtApp8Ext.person_id == person_id).first()
+
+            app8ext.end_mortgage_period = self.mortgage_end_date_edit.date().toString(
+                Constants.DATABASE_DATE_FORMAT)
+            app8ext.start_mortgage_period = self.mortgage_start_date_edit.date().toString(
+                Constants.DATABASE_DATE_FORMAT)
+            app8ext.mortgage_type = self.mortgage_type_cbox.itemData(
+                self.mortgage_type_cbox.currentIndex())
+            app8ext.mortgage_status = self.mortgage_status_cbox.itemData(
+                self.mortgage_status_cbox.currentIndex())
+
+            app8ext.monetary_unit_type = self.mortgage_unit_type_cbox.itemData(
+                self.mortgage_unit_type_cbox.currentIndex())
+
+            app8ext.mortgage_contract_no = self.mortgage_contract_no_edit.text()
+            app8ext.loan_contract_no = self.loan_contract_no_edit.text()
+            app8ext.monetary_unit_value = self.mortgage_unit_value_sbox.value()
+
+
+        # if self.application.app8ext is None:
+        #     self.application.app8ext = CtApp8Ext()
+        #
+        # self.application.app8ext.end_mortgage_period = self.mortgage_end_date_edit.date().toString(
+        #     Constants.DATABASE_DATE_FORMAT)
+        # self.application.app8ext.start_mortgage_period = self.mortgage_start_date_edit.date().toString(
+        #     Constants.DATABASE_DATE_FORMAT)
+        # self.application.app8ext.mortgage_type = self.mortgage_type_cbox.itemData(
+        #     self.mortgage_type_cbox.currentIndex())
+        # self.application.app8ext.mortgage_status = self.mortgage_status_cbox.itemData(
+        #     self.mortgage_status_cbox.currentIndex())
+        #
+        # self.application.app8ext.monetary_unit_type = self.mortgage_unit_type_cbox.itemData(
+        #     self.mortgage_unit_type_cbox.currentIndex())
+        #
+        #
+        #
+        # self.application.app8ext.person_id = person_id
+        # self.application.app8ext.mortgage_contract_no = self.mortgage_contract_no_edit.text()
+        # self.application.app8ext.loan_contract_no = self.loan_contract_no_edit.text()
+        # self.application.app8ext.monetary_unit_value = self.mortgage_unit_value_sbox.value()
+
+
+        mortgagee = self.application.stakeholders. \
+            filter(CtApplicationPersonRole.role == Constants.MORTGAGEE_ROLE_CODE). \
+            filter(CtApplicationPersonRole.person == item.data(Qt.UserRole)).one()
+
+        mortgagee.share = Decimal(item.text())
+
+        # self.create_savepoint()
+        #
         # try:
-
-        if self.application.app8ext is None:
-            self.application.app8ext = CtApp8Ext()
-
-        self.application.app8ext.end_mortgage_period = self.mortgage_end_date_edit.date().toString(
-            Constants.DATABASE_DATE_FORMAT)
-        self.application.app8ext.start_mortgage_period = self.mortgage_start_date_edit.date().toString(
-            Constants.DATABASE_DATE_FORMAT)
-        self.application.app8ext.mortgage_type = self.mortgage_type_cbox.itemData(
-            self.mortgage_type_cbox.currentIndex())
-        self.application.app8ext.mortgage_status = self.mortgage_status_cbox.itemData(
-            self.mortgage_status_cbox.currentIndex())
-
-        for row in range(self.mortgage_twidget.rowCount()):
-
-            item = self.mortgage_twidget.item(row, MORTGAGE_SHARE)
-            person_id = item.data(Qt.UserRole)
-
-            mortgagee = self.application.stakeholders.\
-                filter(CtApplicationPersonRole.role == Constants.MORTGAGEE_ROLE_CODE). \
-                filter(CtApplicationPersonRole.person == item.data(Qt.UserRole)).one()
-
-            mortgagee.share = Decimal(item.text())
-
+        #
+        #     if self.application.app8ext is None:
+        #         self.application.app8ext = CtApp8Ext()
+        #
+        #     self.application.app8ext.end_mortgage_period = self.mortgage_end_date_edit.date().toString(
+        #         Constants.DATABASE_DATE_FORMAT)
+        #     self.application.app8ext.start_mortgage_period = self.mortgage_start_date_edit.date().toString(
+        #         Constants.DATABASE_DATE_FORMAT)
+        #     self.application.app8ext.mortgage_type = self.mortgage_type_cbox.itemData(
+        #         self.mortgage_type_cbox.currentIndex())
+        #     self.application.app8ext.mortgage_status = self.mortgage_status_cbox.itemData(
+        #         self.mortgage_status_cbox.currentIndex())
+        #
+        #     for row in range(self.mortgage_twidget.rowCount()):
+        #
+        #         item = self.mortgage_twidget.item(row, MORTGAGE_SHARE)
+        #         person_id = item.data(Qt.UserRole)
+        #
+        #         mortgagee = self.application.stakeholders.\
+        #             filter(CtApplicationPersonRole.role == Constants.MORTGAGEE_ROLE_CODE). \
+        #             filter(CtApplicationPersonRole.person == item.data(Qt.UserRole)).one()
+        #
+        #         mortgagee.share = Decimal(item.text())
+        #
         # except SQLAlchemyError, e:
         #     self.rollback_to_savepoint()
         #     raise LM2Exception(self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+
+    @pyqtSlot()
+    def on_mortgage_twidget_itemClicked(self):
+
+        self.__clear_mortgage()
+
+        selected_row = self.mortgage_twidget.currentRow()
+        if selected_row == -1:
+            return
+        item = self.mortgage_twidget.item(selected_row, MORTGAGE_SHARE)
+        person_id = item.data(Qt.UserRole)
+
+        count = self.session.query(CtApp8Ext). \
+            filter(CtApp8Ext.app_id == self.application.app_id). \
+            filter(CtApp8Ext.person_id == person_id).count()
+        if count > 0:
+            app8ext = self.session.query(CtApp8Ext). \
+                filter(CtApp8Ext.app_id == self.application.app_id). \
+                filter(CtApp8Ext.person_id == person_id).first()
+
+            self.mortgage_contract_no_edit.setText(app8ext.mortgage_contract_no)
+            self.loan_contract_no_edit.setText(app8ext.loan_contract_no)
+            self.mortgage_unit_value_sbox.setValue(app8ext.monetary_unit_value)
+
+            mortgage_start = app8ext.start_mortgage_period
+            mortgage_start_qt = PluginUtils.convert_python_date_to_qt(mortgage_start)
+            self.mortgage_start_date_edit.setDate(mortgage_start_qt)
+
+            mortgage_end_date = app8ext.end_mortgage_period
+            mortgage_end_qt = PluginUtils.convert_python_date_to_qt(mortgage_end_date)
+            self.mortgage_end_date_edit.setDate(mortgage_end_qt)
+
+            mortgage_type = app8ext.mortgage_type
+            if mortgage_type:
+                self.mortgage_type_cbox.setCurrentIndex(
+                    self.mortgage_type_cbox.findData(mortgage_type))
+
+            mortgage_status = app8ext.mortgage_status
+            if mortgage_status:
+                self.mortgage_status_cbox.setCurrentIndex(self.mortgage_status_cbox.findData(mortgage_status))
+
+            monetary_unit_type = app8ext.monetary_unit_type
+            if monetary_unit_type:
+                self.mortgage_unit_type_cbox.setCurrentIndex(self.mortgage_unit_type_cbox.findData(monetary_unit_type))
+
+    def __clear_mortgage(self):
+
+        self.mortgage_contract_no_edit.clear()
+        self.loan_contract_no_edit.clear()
+        self.mortgage_unit_value_sbox.clear()
 
     def __landuse_per_application_type(self, app_type):
 

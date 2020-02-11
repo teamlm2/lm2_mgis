@@ -390,7 +390,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
                 order_by(SetRole.user_name)
             cl_app_type = self.session.query(ClApplicationType). \
                 filter(and_(ClApplicationType.code != ApplicationType.pasture_use,
-                            ClApplicationType.code != ApplicationType.right_land)).all()
+                            ClApplicationType.code != ApplicationType.right_land)).order_by(ClApplicationType.code.asc()).all()
             cl_applicationstatus = self.session.query(ClApplicationStatus).order_by(ClApplicationStatus.code).all()
         except SQLAlchemyError, e:
             PluginUtils.show_message(self, self.tr("Sql Error"), e.message)
@@ -3797,7 +3797,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         try:
             application_type = self.session.query(ClApplicationType). \
                 filter(and_(ClApplicationType.code != ApplicationType.pasture_use,
-                            ClApplicationType.code != ApplicationType.right_land)).all()
+                            ClApplicationType.code != ApplicationType.right_land)).order_by(ClApplicationType.code.asc()).all()
             application_status = self.session.query(ClApplicationStatus).all()
             land_use_type = self.session.query(ClLanduseType).all()
             person_type = self.session.query(ClPersonType).all()

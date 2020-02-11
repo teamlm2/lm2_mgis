@@ -92,7 +92,7 @@ class PersonDialog(QDialog, Ui_PersonDialog, DatabaseHelper):
             self.reject()
         #
         # self.aimag_cbox.addItem("*", -1)
-        # self.khoroolol_cbox.addItem("*", -1)
+        self.khoroolol_cbox.addItem("*", -1)
         # self.bank_cbox.addItem("*", -1)
         #
         for auLevel1 in aimag_list:
@@ -704,9 +704,9 @@ class PersonDialog(QDialog, Ui_PersonDialog, DatabaseHelper):
             PluginUtils.show_error(self, self.tr("Database Query Error"), self.tr("Could not execute: {0}").format(e.message))
             return
 
-        if not self.is_age_18 and person_type == PersonType.legally_capable_mongolian:
-            self.error_label.setText(self.tr("Person under the age of 18."))
-            return False
+        # if not self.is_age_18 and person_type == PersonType.legally_capable_mongolian:
+        #     self.error_label.setText(self.tr("Person under the age of 18."))
+        #     return False
 
         if count > 0:
             self.error_label.setText(self.tr("This person id is already registered."))

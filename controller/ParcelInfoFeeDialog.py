@@ -415,16 +415,11 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
     @pyqtSlot()
     def on_save_button_clicked(self):
 
-        # current_id = self.object_cbox.itemData(self.object_cbox.currentIndex())
 
         selected_row = self.payment_twidget.currentRow()
         item = self.payment_twidget.item(selected_row, 1)
-        # if not item:
-        #     return
-        # current_id = item.data(Qt.UserRole + 1)
 
         c_year = self.year_cbox.itemData(self.year_cbox.currentIndex())
-        # city_type = self.city_type_cbox.itemData(self.city_type_cbox.currentIndex())
 
         is_count = self.session.query(UbFeeHistory).\
             filter(UbFeeHistory.pid == self.old_parcel_id_edit.text()).\
@@ -432,7 +427,8 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
         doc_area = 0
         if self.payment_area_edit.text():
             doc_area = float(self.payment_area_edit.text())
-        if item:
+        for selected_row in range(self.payment_twidget.rowCount()):
+            item = self.payment_twidget.item(selected_row, 1)
             current_id = item.data(Qt.UserRole + 1)
             item_year = self.payment_twidget.item(selected_row, 3)
             self.selected_year = item_year.data(Qt.UserRole)
@@ -856,3 +852,21 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
 
             layer.setSelectedFeatures(feature_ids)
             self.plugin.iface.mapCanvas().zoomToSelected(layer)
+
+    @pyqtSlot(int)
+    def on_all_status_chbox_stateChanged(self, state):
+
+        if self.all_status_chbox.isChecked():
+            for row in range(self.payment_twidget.rowCount()):
+                status_desc = u'Засагдсан'
+                status_code = 2
+                item = self.payment_twidget.item(row, 0)
+                item.setText(status_desc)
+                item.setData(Qt.UserRole, status_code)
+        else:
+            for row in range(self.payment_twidget.rowCount()):
+                status_desc = u'Засагдаагүй'
+                status_code = 1
+                item = self.payment_twidget.item(row, 0)
+                item.setText(status_desc)
+                item.setData(Qt.UserRole, status_code)

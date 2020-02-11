@@ -12,6 +12,7 @@ class CtApp29Ext(Base):
     app_id = Column(String, ForeignKey('ct_application.app_id'), primary_key=True)
     start_period = Column(Date)
     end_period = Column(Date)
+    court_decision_no = Column(String)
 
     # other foreign keys:
     court_status = Column(Integer, ForeignKey('cl_court_status.code'))
