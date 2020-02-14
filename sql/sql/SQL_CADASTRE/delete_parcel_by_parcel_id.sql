@@ -1,12 +1,12 @@
 ﻿
 delete from data_soums_union.ct_application
-where parcel = '';
+where parcel = '1333103054';
 
 delete from data_plan.pl_project_parcel_ref_parcel
-where cad_parcel_id = '';
+where cad_parcel_id = '1333103054';
 
 delete from data_soums_union.ca_parcel_tbl
-where parcel_id = '';
+where parcel_id = '1333103054';
 
 -----------------
 

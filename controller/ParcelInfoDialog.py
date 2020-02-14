@@ -2598,29 +2598,34 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
 
         if message_box.clickedButton() == yes_button:
             self.create_savepoint()
-            try:
-                self.__save_person()
-                self.__save_parcel()
-                self.__save_application_details()
-                self.__save_applicant()
-                self.__save_status()
-                self.__save_decision()
-                self.__save_contract_owner()
+            # try:
+            self.__save_person()
+            self.__save_parcel()
 
-                selected_row = self.right_holder_twidget.currentRow()
-                objectid = self.right_holder_twidget.item(selected_row, 1).data(Qt.UserRole + 1)
-                subject = self.session.query(UbGisSubject).filter(UbGisSubject.objectid == objectid).one()
-                subject.is_finish = True
-                subject.finish_user = DatabaseUtils.current_user().user_name
-                subject.finish_date = PluginUtils.convert_qt_date_to_python(QDate.currentDate())
-            except LM2Exception, e:
-                self.rollback_to_savepoint()
-                PluginUtils.show_error(self, e.title(), e.message())
-                return
+            # self.__save_application_details()
+
+            self.__save_applicant()
+
+            self.__save_status()
+
+            self.__save_decision()
+
+            self.__save_contract_owner()
+
+            selected_row = self.right_holder_twidget.currentRow()
+            objectid = self.right_holder_twidget.item(selected_row, 1).data(Qt.UserRole + 1)
+            subject = self.session.query(UbGisSubject).filter(UbGisSubject.objectid == objectid).one()
+            subject.is_finish = True
+            subject.finish_user = DatabaseUtils.current_user().user_name
+            subject.finish_date = PluginUtils.convert_qt_date_to_python(QDate.currentDate())
+            # except LM2Exception, e:
+            #     self.rollback_to_savepoint()
+            #     PluginUtils.show_error(self, e.title(), e.message())
+            #     return
 
             self.commit()
 
-        self.__import_archive()
+        # self.__import_archive()
 
     def __multi_owner_save(self, person_id):
 
@@ -2876,22 +2881,23 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
         role_ref = self.session.query(ClPersonRole).filter_by(
             code=Constants.APPLICANT_ROLE_CODE).one()
 
-        self.create_savepoint()
-        try:
-            app_person_role = CtApplicationPersonRole()
-            app_person_role.application = self.application.app_id
-            app_person_role.share = Decimal(1.0)
-            app_person_role.role = Constants.APPLICANT_ROLE_CODE
-            app_person_role.role_ref = role_ref
-            app_person_role.person = person.person_id
-            app_person_role.person_ref = person
-            app_person_role.main_applicant = True
+        # self.create_savepoint()
+        # try:
+        app_person_role = CtApplicationPersonRole()
+        app_person_role.application = self.application.app_id
+        app_person_role.share = Decimal(1.0)
+        app_person_role.role = Constants.APPLICANT_ROLE_CODE
+        app_person_role.role_ref = role_ref
+        app_person_role.person = person.person_id
+        app_person_role.person_ref = person
+        app_person_role.main_applicant = True
 
-            self.application.stakeholders.append(app_person_role)
-        except SQLAlchemyError, e:
-            self.rollback_to_savepoint()
-            raise LM2Exception(self.tr("File Error"),
-                               self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+        self.application.stakeholders.append(app_person_role)
+
+        # except SQLAlchemyError, e:
+        #     self.rollback_to_savepoint()
+        #     raise LM2Exception(self.tr("File Error"),
+        #                        self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
 
         self.__multi_applicant_save(person_id, self.application)
 
@@ -3151,7 +3157,7 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
         au_level2 = DatabaseUtils.working_l2_code()
         # try:
         # check if the app_no is still valid, otherwise generate new one
-        self.application = CtApplication()
+        # self.application = CtApplication()
 
         application_status = CtApplicationStatus()
         application_status.ct_application = self.application
