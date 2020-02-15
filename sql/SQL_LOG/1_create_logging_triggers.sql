@@ -1,5 +1,13 @@
 ﻿set search_path to data_soums_union, base, public;
 
+DROP TRIGGER parcel_log ON data_soums_union.ca_parcel_tbl;
+DROP TRIGGER building_log ON data_soums_union.ca_building_tbl;
+DROP TRIGGER person_log ON base.bs_person;
+
+DROP TRIGGER fee_log ON data_soums_union.ct_fee;
+DROP TRIGGER tax_and_price_log ON data_soums_union.ct_tax_and_price;
+
+
 CREATE TRIGGER person_log
   AFTER INSERT OR UPDATE OR DELETE
   ON bs_person
@@ -41,6 +49,5 @@ CREATE TRIGGER decision_log
   ON ct_decision
   FOR EACH ROW
   EXECUTE PROCEDURE log_changes();
-
 
 
