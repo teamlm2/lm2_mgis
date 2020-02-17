@@ -1571,19 +1571,22 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
                     #             error_message = error_message + "\n" + message
 
                     if rigth_form.is_cadastre_check == 1:
-                        ca_parcel_covers_count = self.session.query(CaParcel).\
-                            filter(parcel_geometry.ST_Covers(CaParcel.geometry)).count()
+                        ca_parcel_covers_count = self.session.query(CaParcelTbl).\
+                            filter(or_(CaParcelTbl.valid_till ==  'infinity', CaParcelTbl.valid_till ==  None)).\
+                            filter(parcel_geometry.ST_Covers(CaParcelTbl.geometry)).count()
 
-                        ca_parcel_covers_count1 = self.session.query(CaParcel). \
-                            filter(CaParcel.geometry.ST_Covers(parcel_geometry)).count()
+                        ca_parcel_covers_count1 = self.session.query(CaParcelTbl). \
+                            filter(or_(CaParcelTbl.valid_till == 'infinity', CaParcelTbl.valid_till == None)). \
+                            filter(CaParcelTbl.geometry.ST_Covers(parcel_geometry)).count()
 
                         if ca_parcel_covers_count > 0 or ca_parcel_covers_count1 > 0:
                             valid = False
                             message = '*' + unicode(u' Кадастрын нэгж талбар давхардаж байна.')
                             error_message = error_message + "\n" + message
 
-                        ca_parcel_overlaps_count = self.session.query(CaParcel). \
-                            filter(parcel_geometry.ST_Overlaps(CaParcel.geometry)).count()
+                        ca_parcel_overlaps_count = self.session.query(CaParcelTbl). \
+                            filter(or_(CaParcelTbl.valid_till == 'infinity', CaParcelTbl.valid_till == None)). \
+                            filter(parcel_geometry.ST_Overlaps(CaParcelTbl.geometry)).count()
 
                         if ca_parcel_overlaps_count > 0:
                             valid = False
