@@ -186,6 +186,40 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
             item.setData(Qt.UserRole, value.paid_before_less)
             self.payment_twidget.setItem(count, 14, item)
 
+            # delegate_edit4 = QLineEdit()
+            # delegate_edit4.setText(value.person_register)
+            # self.payment_twidget.setCellWidget(count, 4, delegate_edit4)
+            # delegate_edit5 = QLineEdit()
+            # delegate_edit5.setText(value.contract_no)
+            # self.payment_twidget.setCellWidget(count, 5, delegate_edit5)
+            # delegate_doublespin6 = QDoubleSpinBox()
+            # delegate_doublespin6.setValue(value.payment_contract)
+            # self.payment_twidget.setCellWidget(count, 6, delegate_doublespin6)
+            # delegate_doublespin7 = QDoubleSpinBox()
+            # delegate_doublespin7.setValue(value.payment_year)
+            # self.payment_twidget.setCellWidget(count, 7, delegate_doublespin7)
+            # delegate_doublespin8 = QDoubleSpinBox()
+            # delegate_doublespin7.setValue(value.payment_year)
+            # self.payment_twidget.setCellWidget(count, 8, delegate_doublespin8)
+            # delegate_doublespin9 = QDoubleSpinBox()
+            # delegate_doublespin7.setValue(value.payment_year)
+            # self.payment_twidget.setCellWidget(count, 9, delegate_doublespin9)
+            # delegate_doublespin10 = QDoubleSpinBox()
+            # delegate_doublespin7.setValue(value.payment_year)
+            # self.payment_twidget.setCellWidget(count, 10, delegate_doublespin10)
+            # delegate_doublespin11 = QDoubleSpinBox()
+            # delegate_doublespin7.setValue(value.payment_year)
+            # self.payment_twidget.setCellWidget(count, 11, delegate_doublespin11)
+            # delegate_doublespin12 = QDoubleSpinBox()
+            # delegate_doublespin7.setValue(value.payment_year)
+            # self.payment_twidget.setCellWidget(count, 12, delegate_doublespin12)
+            # delegate_doublespin13 = QDoubleSpinBox()
+            # delegate_doublespin7.setValue(value.payment_year)
+            # self.payment_twidget.setCellWidget(count, 13, delegate_doublespin13)
+            # delegate_doublespin14 = QDoubleSpinBox()
+            # self.payment_twidget.setCellWidget(count, 14, delegate_doublespin14)
+        self.payment_twidget.horizontalHeader().setResizeMode(QHeaderView.ResizeToContents)
+
     def __list_of_paid(self):
 
         self.paid_twidget.setRowCount(0)
@@ -415,58 +449,62 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
     @pyqtSlot()
     def on_save_button_clicked(self):
 
+        c_year = self.year_cbox.itemData(self.year_cbox.currentIndex())
+
+        is_count = self.session.query(UbFeeHistory). \
+            filter(UbFeeHistory.pid == self.old_parcel_id_edit.text()). \
+            filter(UbFeeHistory.current_year == c_year).count()
 
         selected_row = self.payment_twidget.currentRow()
         item = self.payment_twidget.item(selected_row, 1)
-
-        c_year = self.year_cbox.itemData(self.year_cbox.currentIndex())
-
-        is_count = self.session.query(UbFeeHistory).\
-            filter(UbFeeHistory.pid == self.old_parcel_id_edit.text()).\
-            filter(UbFeeHistory.current_year == c_year).count()
-        doc_area = 0
-        if self.payment_area_edit.text():
-            doc_area = float(self.payment_area_edit.text())
-        for selected_row in range(self.payment_twidget.rowCount()):
-            item = self.payment_twidget.item(selected_row, 1)
+        if item:
             current_id = item.data(Qt.UserRole + 1)
-            item_year = self.payment_twidget.item(selected_row, 3)
-            self.selected_year = item_year.data(Qt.UserRole)
 
-            item_city = self.payment_twidget.item(selected_row, 1)
-            city_type = item_city.data(Qt.UserRole)
+            doc_area = 0
+            object_count = self.session.query(UbFeeHistory).filter(UbFeeHistory.id == current_id).count()
+            if self.payment_area_edit.text():
+                doc_area = float(self.payment_area_edit.text())
+            # for selected_row in range(self.payment_twidget.rowCount()):
+            if object_count == 1:
+                object = self.session.query(UbFeeHistory).filter(UbFeeHistory.id == current_id).one()
+                item = self.payment_twidget.item(selected_row, 1)
+                # current_id = item.data(Qt.UserRole + 1)
+                item_year = self.payment_twidget.item(selected_row, 3)
+                self.selected_year = item_year.data(Qt.UserRole)
 
-            item_status = self.payment_twidget.item(selected_row, 0)
-            status = 1
-            if item_status.text() == u'Засагдсан':
-                status = 2
+                item_city = self.payment_twidget.item(selected_row, 1)
+                city_type = item_city.data(Qt.UserRole)
 
-            object = self.session.query(UbFeeHistory).filter(UbFeeHistory.id == current_id).one()
+                item_status = self.payment_twidget.item(selected_row, 0)
+                status = 1
+                if item_status.text() == u'Засагдсан':
+                    status = 2
 
-            object.contract_no = self.payment_contract_edit.text()
-            object.document_area = doc_area
-            object.zoriulalt = self.payment_zoriulalt_edit.text()
-            object.ner = self.payment_name_edit.text()
-            object.description = self.decsription_txt.toPlainText()
+                object.contract_no = self.payment_contract_edit.text()
+                object.document_area = doc_area
+                object.zoriulalt = self.payment_zoriulalt_edit.text()
+                object.ner = self.payment_name_edit.text()
+                object.description = self.decsription_txt.toPlainText()
 
-            object.payment_contract = self.payment_contract_sbox.value()
-            object.payment_before_less = self.payment_before_less_sbox.value()
-            object.payment_before_over = self.payment_before_over_sbox.value()
-            object.payment_year = self.payment_year_sbox.value()
-            object.payment_fund = self.payment_fund_sbox.value()
-            object.payment_loss = self.payment_loss_sbox.value()
-            object.payment_total = self.payment_total_sbox.value()
+                object.payment_contract = self.payment_contract_sbox.value()
+                object.payment_before_less = self.payment_before_less_sbox.value()
+                object.payment_before_over = self.payment_before_over_sbox.value()
+                object.payment_year = self.payment_year_sbox.value()
+                object.payment_fund = self.payment_fund_sbox.value()
+                object.payment_loss = self.payment_loss_sbox.value()
+                object.payment_total = self.payment_total_sbox.value()
 
-            object.paid_before_less = self.paid_before_less_sbox.value()
-            object.paid_year = self.paid_year_sbox.value()
-            object.paid_fund = self.paid_fund_sbox.value()
-            object.paid_city = self.paid_city_sbox.value()
-            object.paid_district = self.paid_district_sbox.value()
-            object.invalid_payment = self.paid_invalid_sbox.value()
-            object.paid_less = self.paid_less_sbox.value()
-            object.paid_over = self.paid_over_sbox.value()
-            object.status = status
-            object.city_type = city_type
+                object.paid_before_less = self.paid_before_less_sbox.value()
+                object.paid_year = self.paid_year_sbox.value()
+                object.paid_fund = self.paid_fund_sbox.value()
+                object.paid_city = self.paid_city_sbox.value()
+                object.paid_district = self.paid_district_sbox.value()
+                object.invalid_payment = self.paid_invalid_sbox.value()
+                object.paid_less = self.paid_less_sbox.value()
+                object.paid_over = self.paid_over_sbox.value()
+                object.status = status
+                object.city_type = city_type
+
         if is_count == 0:
             object = UbFeeHistory()
 
@@ -500,7 +538,7 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
             object.status = 2
 
             self.session.add(object)
-
+        self.__save_status()
         self.session.commit()
 
         self.__setup_cbox()
@@ -508,17 +546,25 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
         self.__start_fade_out_timer()
         self.__list_of_payment()
 
+    def __save_status(self):
+
+        for selected_row in range(self.payment_twidget.rowCount()):
+            item = self.payment_twidget.item(selected_row, 1)
+            current_id = item.data(Qt.UserRole + 1)
+            item_status = self.payment_twidget.item(selected_row, 0)
+            status = 1
+            if item_status.text() == u'Засагдсан':
+                status = 2
+            count = self.session.query(UbFeeHistory).filter(UbFeeHistory.id == current_id).count()
+            if count == 1:
+                object = self.session.query(UbFeeHistory).filter(UbFeeHistory.id == current_id).one()
+                object.status = status
+
     @pyqtSlot()
     def on_finish_button_clicked(self):
 
         current_year = self.year_cbox.itemData(self.year_cbox.currentIndex())
         # current_id = self.object_cbox.itemData(self.object_cbox.currentIndex())
-
-        selected_row = self.payment_twidget.currentRow()
-        item = self.payment_twidget.item(selected_row, 1)
-        if not item:
-            return
-        current_id = item.data(Qt.UserRole + 1)
 
         parcel_id = None
         person_id = None
@@ -534,6 +580,14 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
                 filter(CaParcelTbl.geometry.ST_Equals(old_parcel.geometry)).first()
             parcel_id = parcel.parcel_id
             au2 = parcel.au2
+
+        if not self.one_select_chbox.isChecked():
+
+            selected_row = self.payment_twidget.currentRow()
+            item = self.payment_twidget.item(selected_row, 1)
+            if not item:
+                PluginUtils.show_message(self, u'Анхааруулга', u'Та оруулах мэдээллээ жагсаалтаас заавал/зөвхөн нэг/ сонгоно уу!')
+                return
 
         if not parcel_id:
             PluginUtils.show_message(self, u'Анхааруулга', u'Нэгж талбар үндсэн мэдээллийн санд бүртгэгдээгүй байна.')
@@ -585,6 +639,13 @@ class ParcelInfoFeeDialog(QDialog, Ui_ParcelInfoFeeDialog):
         is_one = False
 
         if not self.one_select_chbox.isChecked():
+
+            selected_row = self.payment_twidget.currentRow()
+            item = self.payment_twidget.item(selected_row, 1)
+            if not item:
+                # PluginUtils.show_message(self, u'Анхааруулга', u'Та оруулах мэдээллээ жагсаалтаас заавал/зөвхөн нэг/ сонгоно уу!')
+                return
+            current_id = item.data(Qt.UserRole + 1)
 
             item_year = self.payment_twidget.item(selected_row, 3)
             current_year = item_year.data(Qt.UserRole)
