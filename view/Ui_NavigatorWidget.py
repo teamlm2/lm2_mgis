@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\NavigatorWidget.ui'
 #
-# Created: Sun Jan 19 17:48:36 2020
+# Created: Thu Feb 20 16:40:59 2020
 #      by: PyQt4 UI code generator 4.10
 #
 # WARNING! All changes made in this file will be lost!
@@ -157,7 +157,7 @@ class Ui_NavigatorWidget(object):
         self.buffer_spinbox.setMaximum(5000)
         self.buffer_spinbox.setObjectName(_fromUtf8("buffer_spinbox"))
         self.groupBox_2 = QtGui.QGroupBox(self.spatial_groupbox)
-        self.groupBox_2.setGeometry(QtCore.QRect(174, 120, 192, 301))
+        self.groupBox_2.setGeometry(QtCore.QRect(170, 110, 192, 321))
         font = QtGui.QFont()
         font.setBold(False)
         font.setWeight(50)
@@ -202,8 +202,11 @@ class Ui_NavigatorWidget(object):
         self.landuse_layer_button = QtGui.QPushButton(self.groupBox_2)
         self.landuse_layer_button.setGeometry(QtCore.QRect(16, 265, 161, 23))
         self.landuse_layer_button.setObjectName(_fromUtf8("landuse_layer_button"))
+        self.public_parcel_button = QtGui.QPushButton(self.groupBox_2)
+        self.public_parcel_button.setGeometry(QtCore.QRect(16, 290, 161, 23))
+        self.public_parcel_button.setObjectName(_fromUtf8("public_parcel_button"))
         self.groupBox_6 = QtGui.QGroupBox(self.st_tm_filter_tab)
-        self.groupBox_6.setGeometry(QtCore.QRect(5, 430, 371, 82))
+        self.groupBox_6.setGeometry(QtCore.QRect(5, 450, 371, 82))
         self.groupBox_6.setObjectName(_fromUtf8("groupBox_6"))
         self.from_date_edit = QtGui.QDateEdit(self.groupBox_6)
         self.from_date_edit.setGeometry(QtCore.QRect(120, 14, 91, 22))
@@ -1205,7 +1208,7 @@ class Ui_NavigatorWidget(object):
         NavigatorWidget.setWidget(self.dockWidgetContents)
 
         self.retranslateUi(NavigatorWidget)
-        self.tabWidget.setCurrentIndex(8)
+        self.tabWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(NavigatorWidget)
 
     def retranslateUi(self, NavigatorWidget):
@@ -1235,6 +1238,7 @@ class Ui_NavigatorWidget(object):
         self.valuation_zone_button.setText(_translate("NavigatorWidget", "Үнэлгээний бүс", None))
         self.to_cancel_button.setText(_translate("NavigatorWidget", "Түр цугларах, Нүүлгэх", None))
         self.landuse_layer_button.setText(_translate("NavigatorWidget", "Газрын нэгдмэл сан", None))
+        self.public_parcel_button.setText(_translate("NavigatorWidget", "Нийтийн эзэмшил", None))
         self.groupBox_6.setTitle(_translate("NavigatorWidget", "Temporal Filter", None))
         self.from_date_edit.setDisplayFormat(_translate("NavigatorWidget", "yyyy-MM-dd", None))
         self.till_date_edit.setDisplayFormat(_translate("NavigatorWidget", "yyyy-MM-dd", None))

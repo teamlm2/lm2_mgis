@@ -46,6 +46,7 @@ from ..utils.DatabaseUtils import DatabaseUtils
 from ..utils.FilePath import *
 from ..utils.FileUtils import FileUtils
 from ..model.LM2Exception import LM2Exception
+from ..utils.LayerUtils import *
 import win32net
 import os
 
