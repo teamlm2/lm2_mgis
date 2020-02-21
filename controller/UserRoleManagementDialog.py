@@ -294,9 +294,9 @@ class UserRoleManagementDialog(QDialog, Ui_UserRoleManagementDialog):
 
         self.user_role_lwidget.clear()
         if self.has_privilege:
-            users = self.db_session.query(SetRole.user_name,SetRole.first_name).order_by(SetRole.user_name).group_by(SetRole.user_name,SetRole.first_name)
+            users = self.db_session.query(SetRole.user_name,SetRole.first_name).filter(SetRole.is_active == True).order_by(SetRole.user_name).group_by(SetRole.user_name,SetRole.first_name)
         else:
-            users = self.db_session.query(SetRole.user_name,SetRole.first_name).filter(SetRole.user_name == self.__username).group_by(SetRole.user_name,SetRole.first_name).all()
+            users = self.db_session.query(SetRole.user_name,SetRole.first_name).filter(SetRole.user_name == self.__username).filter(SetRole.is_active == True).group_by(SetRole.user_name,SetRole.first_name).all()
 
         try:
             for user in users:
