@@ -2608,7 +2608,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             person_firstname = ''
 
         if person.type == 10 or person.type == 20 or person.type == 50:
-            company_name = person_surname[:-1] + u' . ' + person_firstname
+            company_name = person_surname + u'овогтой' + person_firstname
         elif person.type == 30 or person.type == 40 or person.type == 60 or person.type == 70 or person.type == 80:
             company_name = company_name + u'-н ' + contact_position + u' ' + person_surname + u' овогтой ' + person_firstname
 
