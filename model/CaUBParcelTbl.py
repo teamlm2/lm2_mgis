@@ -31,3 +31,9 @@ class CaUBParcelTbl(Base):
 
     au2 = Column(String, ForeignKey('au_level2.code'))
     au2_ref = relationship("AuLevel2")
+
+    deleted_status_date = Column(Date)
+    deleted_status_decision_date = Column(Date)
+    deleted_status_decision_no = Column(String)
+    deleted_status_comment = Column(String)
+    deleted_status_user = Column(String)

@@ -62,6 +62,8 @@ from ftplib import FTP, error_perm
 from contextlib import closing
 from difflib import SequenceMatcher
 
+DELETE_STATUS = 40
+
 class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
 
     RIGTHTYPE, CODEIDCARD, NAME, FIRSTNAME, OLD_PARCEL_ID, PARCEL_ID, DECISION_NO, DECISION_DATE, CONTRACT_NO, CONTRACT_DATE = range(10)
@@ -251,10 +253,28 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
         self.finish_button.setVisible(False)
         if officer.position == 11:
             self.finish_button.setVisible(True)
+            self.edit_status_cbox.clear()
+            edit_statuses = self.session.query(ClUbEditStatus).all()
+            self.edit_status_cbox.addItem("*", -1)
+            for item in edit_statuses:
+                self.edit_status_cbox.addItem(str(item.code) + ": " + item.description, item.code)
+
         if officer.position == 12:
             self.finish_button.setVisible(True)
+            self.edit_status_cbox.clear()
+            edit_statuses = self.session.query(ClUbEditStatus).all()
+            self.edit_status_cbox.addItem("*", -1)
+            for item in edit_statuses:
+                self.edit_status_cbox.addItem(str(item.code) + ": " + item.description, item.code)
+
         if officer.position == 13:
             self.finish_button.setVisible(True)
+            self.edit_status_cbox.clear()
+            edit_statuses = self.session.query(ClUbEditStatus).all()
+            self.edit_status_cbox.addItem("*", -1)
+            for item in edit_statuses:
+                self.edit_status_cbox.addItem(str(item.code) + ": " + item.description, item.code)
+
         # else:
         #     self.finish_button.setVisible(False)
 
@@ -318,7 +338,7 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
         decision_levels = self.session.query(ClDecisionLevel).all()
         contract_statuses = self.session.query(ClContractStatus).all()
         right_types = self.session.query(ClRightType).all()
-        edit_statuses = self.session.query(ClUbEditStatus).all()
+        edit_statuses = self.session.query(ClUbEditStatus).filter(ClUbEditStatus.code != DELETE_STATUS).all()
 
         # except SQLAlchemyError, e:
         #     PluginUtils.show_error(self, self.tr("File Error"),
@@ -2006,6 +2026,9 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
         selected_row = self.right_holder_twidget.currentRow()
         object_id = self.right_holder_twidget.item(selected_row, 1).data(Qt.UserRole + 1)
         if object_id:
+            edit_status = self.edit_status_cbox.itemData(self.edit_status_cbox.currentIndex())
+            if edit_status == DELETE_STATUS:
+                self.__save_delete_parcel()
             self.__save_subject(object_id)
         self.session.commit()
         PluginUtils.show_message(self, self.tr("LM2", "Success"), self.tr("Success saved"))
@@ -4121,3 +4144,29 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
 
         tail = s[len(head):]
         return head, tail
+
+    @pyqtSlot(int)
+    def on_edit_status_cbox_currentIndexChanged(self, index):
+
+        self.delete_gbox.setVisible(False)
+        self.deleted_decision_date.setDate(QDate.currentDate())
+        code = self.edit_status_cbox.itemData(self.edit_status_cbox.currentIndex())
+        if code == DELETE_STATUS:
+            self.delete_gbox.setVisible(True)
+
+    def __save_delete_parcel(self):
+
+        if not self.delete_decision_no_edit.text():
+            PluginUtils.show_message(self, u'Анхааруулга', u'Нэгт талбарыг устгасан шийдвэрийн дугаарыг оруулна уу!')
+            return
+
+        old_parcel_id = self.old_parcel_id_edit.text()
+        ub_parcel = self.session.query(CaUBParcelTbl).filter(CaUBParcelTbl.old_parcel_id == old_parcel_id).one()
+        edit_status = self.edit_status_cbox.itemData(self.edit_status_cbox.currentIndex())
+
+        ub_parcel.edit_status = edit_status
+        ub_parcel.deleted_status_date = PluginUtils.convert_qt_date_to_python(QDate.currentDate())
+        ub_parcel.deleted_status_decision_date = PluginUtils.convert_qt_date_to_python(self.deleted_decision_date.date())
+        ub_parcel.deleted_status_decision_no = self.delete_decision_no_edit.text()
+        ub_parcel.deleted_status_comment = self.deleted_comment_edit.toPlainText()
+        ub_parcel.deleted_status_user = DatabaseUtils.current_user().user_name

@@ -87,7 +87,7 @@
      <property name="geometry">
       <rect>
        <x>0</x>
-       <y>0</y>
+       <y>-159</y>
        <width>600</width>
        <height>1000</height>
       </rect>
@@ -2877,6 +2877,88 @@ QPushButton:disabled {
        </property>
        <property name="text">
         <string>Owner Date</string>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QGroupBox" name="delete_gbox">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>710</y>
+        <width>541</width>
+        <height>89</height>
+       </rect>
+      </property>
+      <property name="title">
+       <string>Устгах шийдвэр</string>
+      </property>
+      <widget class="QDateEdit" name="deleted_decision_date">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>30</y>
+         <width>83</width>
+         <height>20</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="delete_decision_no_edit">
+       <property name="geometry">
+        <rect>
+         <x>120</x>
+         <y>30</y>
+         <width>141</width>
+         <height>20</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QTextEdit" name="deleted_comment_edit">
+       <property name="geometry">
+        <rect>
+         <x>280</x>
+         <y>30</y>
+         <width>251</width>
+         <height>51</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_4">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>14</y>
+         <width>81</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Огноо</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_37">
+       <property name="geometry">
+        <rect>
+         <x>120</x>
+         <y>11</y>
+         <width>111</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Дугаар</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_43">
+       <property name="geometry">
+        <rect>
+         <x>280</x>
+         <y>11</y>
+         <width>111</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Тайлбар</string>
        </property>
       </widget>
      </widget>

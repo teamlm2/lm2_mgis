@@ -1,5 +1,5 @@
 <!DOCTYPE qgis PUBLIC 'http://mrcc.com/qgis.dtd' 'SYSTEM'>
-<qgis version="2.18.16" simplifyAlgorithm="0" minimumScale="0" maximumScale="1e+08" simplifyDrawingHints="1" minLabelScale="0" maxLabelScale="1e+08" simplifyDrawingTol="1" readOnly="0" simplifyMaxScale="1" hasScaleBasedVisibilityFlag="0" simplifyLocal="1" scaleBasedLabelVisibilityFlag="0">
+<qgis version="2.18.2" simplifyAlgorithm="0" minimumScale="0" maximumScale="1e+08" simplifyDrawingHints="1" minLabelScale="0" maxLabelScale="1e+08" simplifyDrawingTol="1" simplifyMaxScale="1" hasScaleBasedVisibilityFlag="0" simplifyLocal="1" scaleBasedLabelVisibilityFlag="0">
   <edittypes>
     <edittype widgetv2type="TextEdit" name="parcel_id">
       <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
@@ -46,6 +46,7 @@
       <category render="true" symbol="0" value="30" label="Засвар хийгдээгүй"/>
       <category render="true" symbol="1" value="20" label="Засвар хийгдэж байгаа"/>
       <category render="true" symbol="2" value="10" label="Засвар дууссан"/>
+      <category render="true" symbol="3" value="40" label="Устгагдсан"/>
     </categories>
     <symbols>
       <symbol alpha="1" clip_to_extent="1" type="fill" name="0">
@@ -129,6 +130,21 @@
           <prop k="outline_color" v="12,141,5,255"/>
           <prop k="outline_style" v="solid"/>
           <prop k="outline_width" v="1.06"/>
+          <prop k="outline_width_unit" v="MM"/>
+          <prop k="style" v="solid"/>
+        </layer>
+      </symbol>
+      <symbol alpha="1" clip_to_extent="1" type="fill" name="3">
+        <layer pass="0" class="SimpleFill" locked="0">
+          <prop k="border_width_map_unit_scale" v="0,0,0,0,0,0"/>
+          <prop k="color" v="245,173,246,0"/>
+          <prop k="joinstyle" v="bevel"/>
+          <prop k="offset" v="0,0"/>
+          <prop k="offset_map_unit_scale" v="0,0,0,0,0,0"/>
+          <prop k="offset_unit" v="MM"/>
+          <prop k="outline_color" v="97,40,40,255"/>
+          <prop k="outline_style" v="solid"/>
+          <prop k="outline_width" v="0.66"/>
           <prop k="outline_width_unit" v="MM"/>
           <prop k="style" v="solid"/>
         </layer>
@@ -437,21 +453,5 @@ def my_form_open(dialog, layer, feature):
     <rowstyles/>
     <fieldstyles/>
   </conditionalstyles>
-  <defaults>
-    <default field="parcel_id" expression=""/>
-    <default field="old_parcel_id" expression=""/>
-    <default field="geo_id" expression=""/>
-    <default field="landuse" expression=""/>
-    <default field="area_m2" expression=""/>
-    <default field="documented_area_m2" expression=""/>
-    <default field="address_khashaa" expression=""/>
-    <default field="address_streetname" expression=""/>
-    <default field="address_neighbourhood" expression=""/>
-    <default field="valid_from" expression=""/>
-    <default field="valid_till" expression=""/>
-    <default field="edit_status" expression=""/>
-    <default field="au2" expression=""/>
-  </defaults>
-  <previewExpression></previewExpression>
   <layerGeometryType>2</layerGeometryType>
 </qgis>
