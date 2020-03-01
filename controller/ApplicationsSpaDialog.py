@@ -42,6 +42,7 @@ from ..model.SetPastureDocument import *
 from ..model.SetPersonTypeApplicationType import *
 from ..model.SetApplicationTypeLanduseType import *
 from ..model.CaSpaParcelTbl import *
+from ..model.CaStateParcelTbl import *
 from ..model.SetValidation import *
 from ..model.DatabaseHelper import *
 from ..model.AuLevel3 import *
@@ -698,6 +699,8 @@ class ApplicationsSpaDialog(QDialog, Ui_ApplicationsSpaDialog, DatabaseHelper):
                                    u'Энэ өргөдөл нэгж талбартай холбогдсон байна!')
             return
         else:
+            if not self.__insert_state_parcel(parcel_type, parcel_id):
+                return
             app_parcel = CtApplicationParcel()
             app_parcel.app_id = app_id
             app_parcel.parcel_id = parcel_id
@@ -720,6 +723,47 @@ class ApplicationsSpaDialog(QDialog, Ui_ApplicationsSpaDialog, DatabaseHelper):
                 area_m2 = str(row[1])
                 self.parcel_edit.setText(parcel_id)
                 self.parcel_area_edit.setText(area_m2)
+
+
+    def __insert_state_parcel(self, parcel_type, parcel_id):
+
+        is_true = True
+        if parcel_type.is_insert_state_parcel:
+            if parcel_type.code == 2:
+                count = self.session.query(CaTmpParcel).filter(CaTmpParcel.parcel_id == parcel_id).count()
+                if count == 0:
+                    PluginUtils.show_error(self, u'Анхааруулга',
+                                           (u'{0} Дугаартай нэгж талбар байхгүй байна!').format(parcel_id))
+                    is_true = False
+                    return
+                if count == 1:
+                    tmp_parcel = self.session.query(CaTmpParcel).filter(CaTmpParcel.parcel_id == parcel_id).one()
+
+                    overlaps_count = self.session.query(CaStateParcelTbl).\
+                        filter(CaStateParcelTbl.geometry.ST_Overlaps(CaTmpParcel.geometry)).count()
+                    covers_count = self.session.query(CaStateParcelTbl).\
+                        filter(CaStateParcelTbl.geometry.ST_Covers(CaTmpParcel.geometry)).count()
+
+                    if overlaps_count > 0:
+                        PluginUtils.show_error(self, u'Анхааруулга',
+                                               u'Төрийн өмчийн бүртгэлтэй бусад газартай давхардаж байна.')
+                        is_true = False
+                        return
+                    if covers_count > 0:
+                        PluginUtils.show_error(self, u'Анхааруулга',
+                                               u'Төрийн өмчийн бүртгэлтэй бусад газартай давхардаж байна.')
+                        is_true = False
+                        return
+
+                    state_parcel = CaStateParcelTbl()
+                    state_parcel.parcel_id = tmp_parcel.parcel_id
+                    state_parcel.address_neighbourhood = tmp_parcel.address_neighbourhood
+                    state_parcel.landuse = tmp_parcel.landuse
+                    state_parcel.au2 = tmp_parcel.au2
+                    state_parcel.geometry = tmp_parcel.geometry
+                    state_parcel.state_parcel_type = 1
+                    self.session.add(state_parcel)
+        return is_true
 
     def __save_parcel(self):
 
@@ -747,6 +791,13 @@ class ApplicationsSpaDialog(QDialog, Ui_ApplicationsSpaDialog, DatabaseHelper):
         self.parcel_edit.setText("")
         self.parcel_area_edit.setText("")
         self.accept_parcel_number_button.setEnabled(True)
+
+        current_parcel_type = self.parcel_type_cbox.itemData(self.parcel_type_cbox.currentIndex())
+        parcel_type = self.session.query(ClParcelType).filter(ClParcelType.code == current_parcel_type).one()
+        parcel_id = self.found_parcel_number_edit.text()
+        if parcel_type.is_insert_state_parcel:
+            if parcel_type.code == 2:
+                self.session.query(CaStateParcelTbl).filter(CaStateParcelTbl.parcel_id == parcel_id).delete()
 
     @pyqtSlot(int)
     def on_applicant_documents_cbox_currentIndexChanged(self, index):

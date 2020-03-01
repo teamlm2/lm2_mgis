@@ -23,7 +23,7 @@ class ApplicationType:
     right_land = 27
     spa_parcel = 31
     state_parcel = 32
-
+    state_fund_parcel = 33
     # pasture_use = 26  # r
     legitimate_rights = 27  # r
 

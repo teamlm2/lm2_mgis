@@ -1,11 +1,10 @@
 __author__ = 'ankhaa'
 
 from CaMaintenanceCase import *
-from sqlalchemy import Boolean, Float, Date, ForeignKey
+from sqlalchemy import Boolean, Float, Date, ForeignKey, Column, String, Integer
 from sqlalchemy.orm import relationship
 from geoalchemy2 import Geometry
 from ClLanduseType import *
-
 
 class CaTmpParcel(Base):
 

@@ -134,15 +134,15 @@
           <prop k="style" v="solid"/>
         </layer>
       </symbol>
-      <symbol alpha="1" clip_to_extent="1" type="fill" name="3">
+      <symbol alpha="0.494118" clip_to_extent="1" type="fill" name="3">
         <layer pass="0" class="SimpleFill" locked="0">
           <prop k="border_width_map_unit_scale" v="0,0,0,0,0,0"/>
-          <prop k="color" v="245,173,246,0"/>
+          <prop k="color" v="140,146,144,255"/>
           <prop k="joinstyle" v="bevel"/>
           <prop k="offset" v="0,0"/>
           <prop k="offset_map_unit_scale" v="0,0,0,0,0,0"/>
           <prop k="offset_unit" v="MM"/>
-          <prop k="outline_color" v="97,40,40,255"/>
+          <prop k="outline_color" v="227,26,28,255"/>
           <prop k="outline_style" v="solid"/>
           <prop k="outline_width" v="0.66"/>
           <prop k="outline_width_unit" v="MM"/>

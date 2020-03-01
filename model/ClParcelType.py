@@ -1,8 +1,7 @@
 __author__ = 'ankhbold'
 
-from sqlalchemy import Column, String, Integer
+from sqlalchemy import Column, String, Integer, Boolean
 from Base import *
-
 
 class ClParcelType(Base):
 
@@ -13,3 +12,4 @@ class ClParcelType(Base):
     table_name = Column(String)
     python_model_name = Column(String)
     php_model_name = Column(String)
+    is_insert_state_parcel = Column(Boolean)

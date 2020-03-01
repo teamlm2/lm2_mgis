@@ -565,7 +565,7 @@ class SpaParcelWidget(QDockWidget, Ui_SpaParcelWidget, DatabaseHelper):
     def on_pasture_find_button_clicked(self):
 
         applications = self.session.query(CtApplication). \
-            filter(or_(CtApplication.app_type == 31, CtApplication.app_type == 32)). \
+            filter(or_(CtApplication.app_type == 31, CtApplication.app_type == 32, CtApplication.app_type == 33)). \
             order_by(CtApplication.app_timestamp).all()
 
         count = 0
@@ -675,6 +675,8 @@ class SpaParcelWidget(QDockWidget, Ui_SpaParcelWidget, DatabaseHelper):
     @pyqtSlot()
     def on_pasture_layer_view_button_clicked(self):
 
+        LayerUtils.refresh_layer()
+
         root = QgsProject.instance().layerTreeRoot()
         mygroup = root.findGroup(u"Тусгай хэрэгцээний газар")
         vlayer = LayerUtils.layer_by_data_source("data_soums_union", "ca_spa_parcel")
@@ -683,6 +685,16 @@ class SpaParcelWidget(QDockWidget, Ui_SpaParcelWidget, DatabaseHelper):
         vlayer.loadNamedStyle(
             str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/ca_spa_parcel.qml")
         vlayer.setLayerName(self.tr("SPA Parcel"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            mygroup.addLayer(vlayer)
+
+        vlayer = LayerUtils.layer_by_data_source("data_soums_union", "ca_state_parcel")
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer("ca_state_parcel", "id", "data_soums_union")
+        vlayer.loadNamedStyle(
+            str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/ca_state_parcel.qml")
+        vlayer.setLayerName(self.tr("State Parcel"))
         myalayer = root.findLayer(vlayer.id())
         if myalayer is None:
             mygroup.addLayer(vlayer)

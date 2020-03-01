@@ -732,6 +732,11 @@ class LM2Plugin:
 
     def __show_parcel_spa_navigator_widget(self):
 
+        self.spaParcelWidget = None
+        if self.spaParcelWidget:
+            self.iface.removeDockWidget(self.spaParcelWidget)
+            del self.spaParcelWidget
+
         if self.spaParcelWidget:
             if self.spaParcelWidget.isVisible():
                 if self.spaParcelWidget:
@@ -820,6 +825,11 @@ class LM2Plugin:
     def __show_parcel_mpa_navigator_widget(self):
 
         # self.__create_parcel_info()
+        self.parcelMpaInfoWidget = None
+        if self.parcelMpaInfoWidget:
+            self.iface.removeDockWidget(self.parcelMpaInfoWidget)
+            del self.parcelMpaInfoWidget
+
         if self.parcelMpaInfoWidget:
             if self.parcelMpaInfoWidget.isVisible():
                 if self.parcelMpaInfoWidget:
@@ -862,6 +872,11 @@ class LM2Plugin:
         self.__start_parcel_mpa_map()
 
     def __show_cama_navigator_widget(self):
+
+        self.camaWidget = None
+        if self.camaWidget:
+            self.iface.removeDockWidget(self.camaWidget)
+            del self.camaWidget
 
         if self.camaWidget:
             if self.camaWidget.isVisible():
