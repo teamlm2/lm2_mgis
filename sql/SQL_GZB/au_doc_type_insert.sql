@@ -1,0 +1,4 @@
+﻿insert into data_plan.cl_document_type(code, description, is_required, type, is_active, is_multiple) values ('border', '1959 оны Аж ахуй хоорондын газар зохион байгуулалтын баримт материал', false ,'pdf', true, true);
+insert into data_plan.cl_document_type(code, description, is_required, type, is_active, is_multiple) values ('border', '1975 оны Аж ахуй хоорондын газар зохион байгуулалтын баримт материал', false ,'pdf', true, true);
+insert into data_plan.cl_document_type(code, description, is_required, type, is_active, is_multiple) values ('border', '1977 оны 75 дугаар зарлиг', false ,'pdf', true, true);
+insert into data_plan.cl_document_type(code, description, is_required, type, is_active, is_multiple) values ('border', 'Хилийн цэстэй холбоотой гарч байсан бусад зарлиг тогтоол', false ,'pdf', true, true);

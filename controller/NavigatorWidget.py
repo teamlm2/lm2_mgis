@@ -2429,6 +2429,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
             DatabaseUtils.set_working_schema(app_no_soum)
 
             self.session.query(CtApplicationPersonRole).filter(CtApplicationPersonRole.application == app_id).delete()
+            self.session.query(CtApp8Ext).filter(CtApp8Ext.app_id == app_id).delete()
             self.session.query(CtApplicationStatus).filter(CtApplicationStatus.application == app_id).delete()
             self.session.query(CtApplication).filter(CtApplication.app_id == app_id).delete()
 

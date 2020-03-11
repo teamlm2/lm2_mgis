@@ -3210,7 +3210,8 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
 
             self.mortgage_contract_no_edit.setText(app8ext.mortgage_contract_no)
             self.loan_contract_no_edit.setText(app8ext.loan_contract_no)
-            self.mortgage_unit_value_sbox.setValue(app8ext.monetary_unit_value)
+            if app8ext.monetary_unit_value:
+                self.mortgage_unit_value_sbox.setValue(app8ext.monetary_unit_value)
 
             mortgage_start = app8ext.start_mortgage_period
             mortgage_start_qt = PluginUtils.convert_python_date_to_qt(mortgage_start)
