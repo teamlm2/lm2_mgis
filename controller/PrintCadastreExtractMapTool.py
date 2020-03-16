@@ -524,7 +524,7 @@ class PrintCadastreExtractMapTool(QgsMapTool):
 
         # add fields
         building_polygon_layer.startEditing()
-        buildinfee_duureg_chingelteig_polygon_layer.addAttribute(QgsField("label", QVariant.String))
+        building_polygon_layer.addAttribute(QgsField("label", QVariant.String))
         building_polygon_layer.commitChanges()
         building_polygon_layer.setReadOnly(True)
 

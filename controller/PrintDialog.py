@@ -33,6 +33,8 @@ from ..model.SdPosition import *
 from ..model.CtApplicationPUGParcel import *
 from ..model.CaPastureParcelTbl import *
 from ..model.CaSpaParcelTbl import *
+from ..model.CaStateParcelTbl import *
+from ..model.CtApplicationParcel import *
 import math
 import locale
 import os
@@ -41,6 +43,7 @@ from docxtpl import DocxTemplate, RichText
 TABLE_PARCEL = 'ca_parcel'
 TABLE_PASTURE_PARCEL = 'ca_pasture_parcel'
 TABLE_SPA_PARCEL = 'ca_spa_parcel'
+TABLE_STATE_PARCEL = 'ca_state_parcel'
 TABLE_NATURE_RESERVE_PARCEL = 'ca_person_group_parcel'
 
 class PrintDialog(QDialog, Ui_PrintDialog):
@@ -97,12 +100,40 @@ class PrintDialog(QDialog, Ui_PrintDialog):
             self.__update_ui_ca_parcel()
         elif self.table_name == TABLE_PASTURE_PARCEL or self.table_name == TABLE_NATURE_RESERVE_PARCEL:
             self.__update_ui_ca_parcel_pasture()
+        elif self.table_name == TABLE_STATE_PARCEL:
+            self.__update_ui_ca_parcel_state()
         else:
             self.__update_ui_ca_spa_parcel()
 
     def __update_ui_ca_spa_parcel(self):
 
         print ''
+
+    def __update_ui_ca_parcel_state(self):
+
+        self.setWindowTitle(self.tr('Print map for parcel: <{0}>. Select the right holder.'.format(str(self.__parcel_no))))
+        self.right_holder_twidget.clearContents()
+        # self.session = SessionHandler().session_instance()
+
+        app_parcels = self.session.query(CtApplicationParcel).filter(CtApplicationParcel.parcel_id == str(self.__parcel_no).strip()).all()
+
+        # for application in ct_applications:
+        for app_parcel in app_parcels:
+            application = self.session.query(CtApplication).filter(CtApplication.app_id == app_parcel.app_id).one()
+            if application.contracts.count() > 0:
+                for contract_role in application.contracts:
+                    if contract_role.role == Constants.APPLICATION_ROLE_CREATES:
+                        contract = contract_role.contract_ref
+                        # if contract.cancellation_date is None:
+                        for stakeholder in application.stakeholders:
+                            person = stakeholder.person_ref
+                            self.__add_contract_person(1, contract.status, contract.contract_no,
+                                                       contract.contract_date, application, person)
+
+        self.right_holder_twidget.resizeColumnsToContents()
+
+        if self.right_holder_twidget.rowCount() > 0:
+            self.right_holder_twidget.selectRow(0)
 
     def __update_ui_ca_parcel_pasture(self):
 
@@ -149,7 +180,7 @@ class PrintDialog(QDialog, Ui_PrintDialog):
                         # if contract.cancellation_date is None:
                         app_persons = self.session.query(CtApplicationPersonRole).filter(CtApplicationPersonRole.application == application.app_id).all()
                         for stakeholder in app_persons:
-                            # print stakeholder.person_ref
+
                             # person = stakeholder.person_ref
                             person_id = stakeholder.person
                             if self.session.query(BsPerson).filter(BsPerson.person_id == person_id).count() == 1:
@@ -338,7 +369,7 @@ class PrintDialog(QDialog, Ui_PrintDialog):
         boundary_points_count = point_layer.featureCount()
         building_points_count = building_point_layer.featureCount()
 
-        if self.table_name == TABLE_SPA_PARCEL:
+        if self.table_name == TABLE_SPA_PARCEL or self.table_name == TABLE_STATE_PARCEL:
             if boundary_points_count > 7 or building_points_count > 8:
                 template = path + "spa_cadastre_extract_extented.qpt"
                 self.__second_page_enabled = True
@@ -401,7 +432,7 @@ class PrintDialog(QDialog, Ui_PrintDialog):
                 self.__add_aimag_name_h(map_composition)
                 self.__add_admin_unit_l2_name_h(map_composition)
                 self.__add_admin_unit_l3_name_h(map_composition)
-            if self.table_name == TABLE_SPA_PARCEL:
+            if self.table_name == TABLE_SPA_PARCEL or self.table_name == TABLE_STATE_PARCEL:
                 self.__add_admin_units_h(map_composition)
         self.__adjust_map_center_and_scale(overview_map, 30, 30, scale_denominator)
         self.__set_north_arrow_position(map_composition)
@@ -422,7 +453,7 @@ class PrintDialog(QDialog, Ui_PrintDialog):
             self.__add_aimag_name(map_composition)
             self.__add_admin_unit_l2_name(map_composition)
             self.__add_admin_unit_l3_name(map_composition)
-        if self.table_name == TABLE_SPA_PARCEL:
+        if self.table_name == TABLE_SPA_PARCEL or self.table_name == TABLE_STATE_PARCEL:
             self.__add_admin_units(map_composition)
         self.__add_stamp(map_composition)
 
@@ -430,6 +461,8 @@ class PrintDialog(QDialog, Ui_PrintDialog):
 
         if self.table_name == TABLE_SPA_PARCEL:
             self.__add_spa_parcel_info(map_composition)
+        if self.table_name == TABLE_STATE_PARCEL:
+            self.__add_state_parcel_info(map_composition)
 
         map_composition.exportAsPDF(file_path)
         QApplication.setOverrideCursor(QCursor(Qt.ArrowCursor))
@@ -439,6 +472,59 @@ class PrintDialog(QDialog, Ui_PrintDialog):
         map_canvas.setExtent(original_extent)
 
         QDesktopServices.openUrl(QUrl.fromLocalFile(file_path))
+
+    def __add_state_parcel_info(self, map_composition):
+
+        item = map_composition.getComposerItemById("parcel_id")
+        item.setText(self.__parcel_no)
+
+        parcel = self.session.query(CaStateParcelTbl).filter(
+            CaStateParcelTbl.parcel_id == str(self.__parcel_no)).one()
+
+        if parcel.land_name:
+            item = map_composition.getComposerItemById("spa_land_name")
+            if item:
+                item.setText(parcel.land_name)
+                item.adjustSizeToText()
+
+            item = map_composition.getComposerItemById("spa_land_name_h")
+            if item:
+                item.setText(parcel.land_name)
+                item.adjustSizeToText()
+
+        landuse_count = self.session.query(ClLanduseType).filter(ClLanduseType.code == parcel.landuse).count()
+        if landuse_count == 1:
+            landuse = self.session.query(ClLanduseType).filter(ClLanduseType.code == parcel.landuse).one()
+            item = map_composition.getComposerItemById("landuse")
+            if item:
+                item.setText(landuse.description)
+                item.adjustSizeToText()
+
+        spa_type_count = self.session.query(ClStateParcelType).filter(ClStateParcelType.code == parcel.state_parcel_type).count()
+        if spa_type_count == 1:
+            spa_type = self.session.query(ClStateParcelType).filter(ClStateParcelType.code == parcel.state_parcel_type).one()
+            item = map_composition.getComposerItemById("spa_type")
+            if item:
+                item.setText(spa_type.description)
+                item.adjustSizeToText()
+
+        # current_row = self.right_holder_twidget.currentRow()
+        # person_id = self.right_holder_twidget.item(current_row, 0).data(Qt.UserRole + 1)
+        # if person_id:
+        #     person_register = person_id
+        #     count = self.session.query(BsPerson).\
+        #         filter(BsPerson.person_id == person_id).\
+        #         filter(BsPerson.parent_id == None).count()
+        #
+        #     if count > 0:
+        #         person = self.session.query(BsPerson). \
+        #             filter(BsPerson.person_id == person_id). \
+        #             filter(BsPerson.parent_id == None).first()
+        #
+        #         item = map_composition.getComposerItemById("rigth_holder_name")
+        #         if item:
+        #             item.setText(u'Иргэн/Хуулийн этгээдийн нэр: ' + person.name)
+        #             item.adjustSizeToText()
 
     def __add_spa_parcel_info(self, map_composition):
 
@@ -610,6 +696,12 @@ class PrintDialog(QDialog, Ui_PrintDialog):
         elif self.table_name == TABLE_PASTURE_PARCEL or self.table_name == TABLE_NATURE_RESERVE_PARCEL:
             parcel = self.session.query(CaPastureParcelTbl).filter(CaPastureParcelTbl.parcel_id == self.__parcel_no).one()
             item.setText(str(int(parcel.area_ga)))
+            # item.setText(str((round(self.__geometry.area(), 2))))
+            item.adjustSizeToText()
+        elif self.table_name == TABLE_STATE_PARCEL:
+            parcel = self.session.query(CaStateParcelTbl).filter(
+                CaStateParcelTbl.parcel_id == self.__parcel_no).one()
+            item.setText(str(int(parcel.area_m2)))
             # item.setText(str((round(self.__geometry.area(), 2))))
             item.adjustSizeToText()
         else:
@@ -933,8 +1025,16 @@ class PrintDialog(QDialog, Ui_PrintDialog):
     def __add_admin_units_h(self, map_composition):
 
         admin_unit_lbl = ''
-        parcel_geometry = self.session.query(CaSpaParcelTbl.geometry).filter(
-            CaSpaParcelTbl.parcel_id == str(self.__parcel_no)).one()
+        parcel_geometry = None
+        if self.table_name == TABLE_SPA_PARCEL:
+            parcel_geometry = self.session.query(CaSpaParcelTbl.geometry).filter(
+                CaSpaParcelTbl.parcel_id == str(self.__parcel_no)).one()
+        if self.table_name == TABLE_STATE_PARCEL:
+            parcel_geometry = self.session.query(CaStateParcelTbl.geometry).filter(
+                CaStateParcelTbl.parcel_id == str(self.__parcel_no)).one()
+
+        if not parcel_geometry:
+            return
 
         au1 = self.session.query(AuLevel1).filter(
             AuLevel1.geometry.ST_Overlaps(parcel_geometry[0])).all()
@@ -959,8 +1059,16 @@ class PrintDialog(QDialog, Ui_PrintDialog):
     def __add_admin_units(self, map_composition):
 
         admin_unit_lbl = ''
-        parcel_geometry = self.session.query(CaSpaParcelTbl.geometry).filter(
-            CaSpaParcelTbl.parcel_id == str(self.__parcel_no)).one()
+        parcel_geometry = None
+        if self.table_name == TABLE_SPA_PARCEL:
+            parcel_geometry = self.session.query(CaSpaParcelTbl.geometry).filter(
+                CaSpaParcelTbl.parcel_id == str(self.__parcel_no)).one()
+        if self.table_name == TABLE_STATE_PARCEL:
+            parcel_geometry = self.session.query(CaStateParcelTbl.geometry).filter(
+                CaStateParcelTbl.parcel_id == str(self.__parcel_no)).one()
+
+        if not parcel_geometry:
+            return
 
         au1 = self.session.query(AuLevel1).filter(
             AuLevel1.geometry.ST_Overlaps(parcel_geometry[0])).all()

@@ -1,9 +1,6 @@
 <!DOCTYPE qgis PUBLIC 'http://mrcc.com/qgis.dtd' 'SYSTEM'>
 <qgis version="2.18.2" simplifyAlgorithm="0" minimumScale="0" maximumScale="1e+08" simplifyDrawingHints="1" minLabelScale="0" maxLabelScale="1e+08" simplifyDrawingTol="1" simplifyMaxScale="1" hasScaleBasedVisibilityFlag="0" simplifyLocal="1" scaleBasedLabelVisibilityFlag="0">
   <edittypes>
-    <edittype widgetv2type="TextEdit" name="id">
-      <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
-    </edittype>
     <edittype widgetv2type="TextEdit" name="parcel_id">
       <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
     </edittype>
@@ -56,6 +53,9 @@
       <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
     </edittype>
     <edittype widgetv2type="TextEdit" name="department_id">
+      <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
+    </edittype>
+    <edittype widgetv2type="TextEdit" name="person_register">
       <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
     </edittype>
   </edittypes>
@@ -252,6 +252,7 @@
   <SingleCategoryDiagramRenderer diagramType="Histogram" sizeLegend="0" attributeLegend="1">
     <DiagramCategory penColor="#000000" labelPlacementMethod="XHeight" penWidth="0" diagramOrientation="Up" sizeScale="0,0,0,0,0,0" minimumSize="0" barWidth="5" penAlpha="255" maxScaleDenominator="1e+08" backgroundColor="#ffffff" transparency="0" width="15" scaleDependency="Area" backgroundAlpha="255" angleOffset="1440" scaleBasedVisibility="0" enabled="0" height="15" lineSizeScale="0,0,0,0,0,0" sizeType="MM" lineSizeType="MM" minScaleDenominator="inf">
       <fontProperties description="MS Shell Dlg 2,8.25,-1,5,50,0,0,0,0,0" style=""/>
+      <attribute field="" color="#000000" label=""/>
     </DiagramCategory>
     <symbol alpha="1" clip_to_extent="1" type="marker" name="sizeSymbol">
       <layer pass="0" class="SimpleMarker" locked="0">
@@ -277,34 +278,33 @@
     </symbol>
   </SingleCategoryDiagramRenderer>
   <DiagramLayerSettings yPosColumn="-1" showColumn="-1" linePlacementFlags="10" placement="0" dist="0" xPosColumn="-1" priority="0" obstacle="0" zIndex="0" showAll="1"/>
-  <annotationform></annotationform>
+  <annotationform>.</annotationform>
   <aliases>
-    <alias field="id" index="0" name=""/>
-    <alias field="parcel_id" index="1" name=""/>
-    <alias field="spa_land_name" index="2" name=""/>
-    <alias field="area_m2" index="3" name=""/>
-    <alias field="spa_type" index="4" name=""/>
-    <alias field="spa_mood" index="5" name=""/>
-    <alias field="landuse" index="6" name=""/>
-    <alias field="spa_law" index="7" name=""/>
-    <alias field="decision_level" index="8" name=""/>
-    <alias field="decision_date" index="9" name=""/>
-    <alias field="decision_no" index="10" name=""/>
-    <alias field="contract_date" index="11" name=""/>
-    <alias field="contract_no" index="12" name=""/>
-    <alias field="certificate_date" index="13" name=""/>
-    <alias field="certificate_no" index="14" name=""/>
-    <alias field="valid_from" index="15" name=""/>
-    <alias field="valid_till" index="16" name=""/>
-    <alias field="au2" index="17" name=""/>
-    <alias field="department_id" index="18" name=""/>
+    <alias field="parcel_id" index="0" name=""/>
+    <alias field="spa_land_name" index="1" name=""/>
+    <alias field="area_m2" index="2" name=""/>
+    <alias field="spa_type" index="3" name=""/>
+    <alias field="spa_mood" index="4" name=""/>
+    <alias field="landuse" index="5" name=""/>
+    <alias field="spa_law" index="6" name=""/>
+    <alias field="decision_level" index="7" name=""/>
+    <alias field="decision_date" index="8" name=""/>
+    <alias field="decision_no" index="9" name=""/>
+    <alias field="contract_date" index="10" name=""/>
+    <alias field="contract_no" index="11" name=""/>
+    <alias field="certificate_date" index="12" name=""/>
+    <alias field="certificate_no" index="13" name=""/>
+    <alias field="valid_from" index="14" name=""/>
+    <alias field="valid_till" index="15" name=""/>
+    <alias field="au2" index="16" name=""/>
+    <alias field="department_id" index="17" name=""/>
+    <alias field="person_register" index="18" name=""/>
   </aliases>
   <excludeAttributesWMS/>
   <excludeAttributesWFS/>
   <attributeactions default="-1"/>
   <attributetableconfig actionWidgetStyle="dropDown" sortExpression="" sortOrder="6357104">
     <columns>
-      <column width="-1" hidden="0" type="field" name="id"/>
       <column width="-1" hidden="0" type="field" name="parcel_id"/>
       <column width="-1" hidden="0" type="field" name="spa_land_name"/>
       <column width="-1" hidden="0" type="field" name="area_m2"/>
@@ -324,12 +324,13 @@
       <column width="-1" hidden="0" type="field" name="au2"/>
       <column width="-1" hidden="0" type="field" name="department_id"/>
       <column width="-1" hidden="1" type="actions"/>
+      <column width="-1" hidden="0" type="field" name="person_register"/>
     </columns>
   </attributetableconfig>
-  <editform></editform>
+  <editform>.</editform>
   <editforminit/>
   <editforminitcodesource>0</editforminitcodesource>
-  <editforminitfilepath></editforminitfilepath>
+  <editforminitfilepath>.</editforminitfilepath>
   <editforminitcode><![CDATA[# -*- coding: utf-8 -*-
 """
 QGIS forms can have a Python function that is called when the form is

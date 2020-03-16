@@ -4,6 +4,7 @@ __author__ = 'B.Ankhbold'
 import os
 import re
 import math
+import time
 import locale
 import win32api
 import win32net
@@ -61,6 +62,10 @@ from ..model.CaPastureMonitoring import *
 from ..model.CaPastureParcelTbl import *
 from ..model.CtApplicationParcel import *
 from ..model.ClParcelType import *
+from ..model.SetApplicationTypePersonRole import *
+from ..model.CtApplicationParcel import *
+from ..model.CaStateParcelTbl import *
+from ..model.SdDepartmentAccount import *
 from ..utils.FileUtils import FileUtils
 from ..utils.PluginUtils import PluginUtils
 from ..utils.LayerUtils import LayerUtils
@@ -112,6 +117,7 @@ class ContractSpaDialog(QDialog, Ui_ContractSpaDialog, DatabaseHelper):
         self.contract = contract
         self.item_model = None
         self.updating = None
+        self.app_id = None
         self.__coord_transform = None
         self.setupUi(self)
 
@@ -334,7 +340,7 @@ class ContractSpaDialog(QDialog, Ui_ContractSpaDialog, DatabaseHelper):
                                    self.tr("This contract has no valid application assigned."))
             self.reject()
             return
-
+        self.app_id = application.app_id
         self.application_this_contract_based_edit.setText(application.app_no)
         self.application_type_edit.setText(application.app_type_ref.description)
 
@@ -701,78 +707,9 @@ class ContractSpaDialog(QDialog, Ui_ContractSpaDialog, DatabaseHelper):
                         self.doc_twidget.setItem(i, DOC_VIEW_COLUMN, item_view)
                         self.doc_twidget.setItem(i, DOC_NAME_COLUMN, item_name)
 
-    def __add_fee_row(self, row, contractor, parcel_id, base_fee_per_m2, subsidized_area, subsidized_fee_rate):
-
-        # TODO: fix rounding issues
-        parcel_area = self.session.query(CaParcel.area_m2).filter(CaParcel.parcel_id == parcel_id).one()[0]
-        parcel_area = round(parcel_area)
-
-        item = QTableWidgetItem(u'{0}, {1}'.format(contractor.person_ref.name, contractor.person_ref.first_name))
-        item.setData(Qt.UserRole, contractor.person_ref.person_register)
-        self.land_fee_twidget.setItem(row, CONTRACTOR_NAME, item)
-        item = QTableWidgetItem(u'{0}'.format(contractor.person_ref.person_register))
-        self.__lock_item(item)
-        self.land_fee_twidget.setItem(row, CONTRACTOR_ID, item)
-        item = QTableWidgetItem('{0}'.format(contractor.share))
-        self.__lock_item(item)
-        self.land_fee_twidget.setItem(row, CONTRACTOR_SHARE, item)
-        contractor_area = int(round(float(contractor.share) * parcel_area))
-        item = QTableWidgetItem('{0}'.format(contractor_area))
-        self.__lock_item(item)
-        self.land_fee_twidget.setItem(row, CONTRACTOR_AREA, item)
-        contractor_subsidized_area = int(round(float(contractor.share) * subsidized_area))
-        fee_subsidized = (contractor_subsidized_area * float(base_fee_per_m2))-(contractor_subsidized_area * float(base_fee_per_m2) * (float(subsidized_fee_rate) / 100))
-        fee_standard = (contractor_area - contractor_subsidized_area) * float(base_fee_per_m2)
-        fee_base = contractor_area * float(base_fee_per_m2)*float((100-subsidized_fee_rate)/100)
-        fee_calculated = int(round(fee_base if fee_standard <= 0 else fee_subsidized + fee_standard))
-
-        # if parcel_area > subsidized_area:pg_cursors
-        #     fee_calculated = float(contractor.share) * ((parcel_area - subsidized_area) * base_fee_per_m2 + float(subsidized_area * base_fee_per_m2 * subsidized_fee_rate / 100))
-        # elif parcel_area <= subsidized_area:
-        #     fee_calculated = float(contractor.share) * (parcel_area * base_fee_per_m2 * subsidized_fee_rate / 100)
-
-        item = QTableWidgetItem('{0}'.format(fee_calculated))
-        self.__lock_item(item)
-        self.land_fee_twidget.setItem(row, CONTRACTOR_FEE_CALCULATED, item)
-        item = QTableWidgetItem('{0}'.format(fee_calculated))
-        self.land_fee_twidget.setItem(row, CONTRACTOR_FEE_CONTRACT, item)
-        item = QTableWidgetItem('{0}'.format(10))
-        self.land_fee_twidget.setItem(row, CONTRACTOR_GRACE_PERIOD, item)
-        payment_frequency = self.session.query(ClPaymentFrequency).get(10)
-        item = QTableWidgetItem(u'{0}'.format(payment_frequency.description))
-        self.land_fee_twidget.setItem(row, CONTRACTOR_PAYMENT_FREQUENCY, item)
-
     def __lock_item(self, item):
 
         item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
-
-    def __add_fee_row2(self, row, contractor, fee):
-
-        item = QTableWidgetItem(u'{0}, {1}'.format(contractor.person_ref.name, contractor.person_ref.first_name))
-        item.setData(Qt.UserRole, contractor.person_ref.person_register)
-        self.__lock_item(item)
-        self.land_fee_twidget.setItem(row, CONTRACTOR_NAME, item)
-        item = QTableWidgetItem(u'{0}'.format(contractor.person_ref.person_register))
-        self.__lock_item(item)
-        self.land_fee_twidget.setItem(row, CONTRACTOR_ID, item)
-        item = QTableWidgetItem('{0}'.format(fee.share))
-        self.__lock_item(item)
-        self.land_fee_twidget.setItem(row, CONTRACTOR_SHARE, item)
-        item = QTableWidgetItem('{0}'.format(fee.area))
-        self.__lock_item(item)
-        self.land_fee_twidget.setItem(row, CONTRACTOR_AREA, item)
-        item = QTableWidgetItem('{0}'.format(fee.fee_calculated))
-        self.__lock_item(item)
-        self.land_fee_twidget.setItem(row, CONTRACTOR_FEE_CALCULATED, item)
-        item = QTableWidgetItem('{0}'.format(fee.fee_contract))
-        self.__lock_item(item)
-        self.land_fee_twidget.setItem(row, CONTRACTOR_FEE_CONTRACT, item)
-        item = QTableWidgetItem('{0}'.format(fee.grace_period))
-        self.__lock_item(item)
-        self.land_fee_twidget.setItem(row, CONTRACTOR_GRACE_PERIOD, item)
-        payment_frequency = self.session.query(ClPaymentFrequency).get(fee.payment_frequency)
-        item = QTableWidgetItem(u'{0}'.format(payment_frequency.description))
-        self.land_fee_twidget.setItem(row, CONTRACTOR_PAYMENT_FREQUENCY, item)
 
     def __save_settings(self):
 
@@ -1227,7 +1164,7 @@ class ContractSpaDialog(QDialog, Ui_ContractSpaDialog, DatabaseHelper):
         count = self.session.query(CtApplication).filter(CtApplication.app_no == app_no).count()
         if count == 1:
             application = self.session.query(CtApplication).filter(CtApplication.app_no == app_no).one()
-
+            self.app_id = application.app_id
             if not self.__validate_application(application):
                 return
 
@@ -1273,183 +1210,275 @@ class ContractSpaDialog(QDialog, Ui_ContractSpaDialog, DatabaseHelper):
     def __contract_possess(self):
 
         aimag_code = self.application_this_contract_based_edit.text()[:3]
-        try:
-            aimag = self.session.query(AuLevel1).filter(AuLevel1.code == aimag_code).one()
-        except SQLAlchemyError, e:
-            raise LM2Exception(self.tr("Database Query Error"),
-                               self.tr("aCould not execute: {0}").format(e.message))
-        soum_code = self.application_this_contract_based_edit.text()[:5]
-        try:
-            soum = self.session.query(AuLevel2).filter(AuLevel2.code == soum_code).one()
-        except SQLAlchemyError, e:
-            raise LM2Exception(self.tr("Database Query Error"),
-                               self.tr("aCould not execute: {0}").format(e.message))
-
-        app_no = self.application_this_contract_based_edit.text()
         # try:
-        pp = ""
-        decision_date = ''
-        decision_level = ''
-        decision_no = ''
-
-        application = self.session.query(CtApplication).filter(CtApplication.app_no == app_no).one()
-        app_dec = self.session.query(CtDecisionApplication).filter(
-            CtDecisionApplication.application == application.app_id).all()
-        for p in app_dec:
-            pp = p.decision
-        decision_c = self.session.query(CtDecision).filter(CtDecision.decision_id == pp).count()
-        if decision_c != 0:
-            decision = self.session.query(CtDecision).filter(CtDecision.decision_id == pp).one()
-            decision_no = decision.decision_no[6:-5]
-            decision_date = str(decision.decision_date)
-            decision_level = decision.decision_level
-
+        aimag = self.session.query(AuLevel1).filter(AuLevel1.code == aimag_code).one()
         # except SQLAlchemyError, e:
         #     raise LM2Exception(self.tr("Database Query Error"),
         #                        self.tr("aCould not execute: {0}").format(e.message))
+        soum_code = self.application_this_contract_based_edit.text()[:5]
+        # try:
+        soum = self.session.query(AuLevel2).filter(AuLevel2.code == soum_code).one()
+        # except SQLAlchemyError, e:
+        #     raise LM2Exception(self.tr("Database Query Error"),
+        #                        self.tr("aCould not execute: {0}").format(e.message))
+
         app_no = self.application_this_contract_based_edit.text()
-        try:
-            app_status = self.session.query(CtApplicationStatus).filter(
-                CtApplicationStatus.application == application.app_id).all()
+
+        app_status = self.session.query(CtApplicationStatus).filter(
+            CtApplicationStatus.application == self.app_id).order_by(CtApplicationStatus.status.desc()).all()
+        for p in app_status:
+            if p.status == 9:
+                officer = DatabaseUtils.get_sd_employee(p.officer_in_charge);
+                break
+                # officer = self.session.query(SetRole).filter(SetRole.user_name_real == p.officer_in_charge).one()
+            else:
+                officer = DatabaseUtils.get_sd_employee(p.officer_in_charge);
+                # officer = self.session.query(SetRole).filter(SetRole.user_name_real == p.officer_in_charge).one()
+        # except SQLAlchemyError, e:
+        #     raise LM2Exception(self.tr("Database Query Error"),
+        #                        self.tr("aCould not execute: {0}").format(e.message))
+
+        if not officer:
+            officer = DatabaseUtils.current_employee()
+
+        if not officer:
             for p in app_status:
-                if p.status == 9:
-                    officer = DatabaseUtils.get_sd_employee(p.officer_in_charge);
+                officer = DatabaseUtils.get_sd_employee(p.officer_in_charge);
+                if officer:
                     break
-                    # officer = self.session.query(SetRole).filter(SetRole.user_name_real == p.officer_in_charge).one()
-                else:
-                    officer = DatabaseUtils.get_sd_employee(p.officer_in_charge);
-                    # officer = self.session.query(SetRole).filter(SetRole.user_name_real == p.officer_in_charge).one()
-        except SQLAlchemyError, e:
-            raise LM2Exception(self.tr("Database Query Error"),
-                               self.tr("aCould not execute: {0}").format(e.message))
 
+        self.officer = officer
         app_no = self.application_this_contract_based_edit.text()
 
-        try:
-            app_person = self.session.query(CtApplicationPersonRole).filter(
-                CtApplicationPersonRole.application == application.app_id).all()
+        # try:
+        # app_person = self.session.query(CtApplicationPersonRole).filter(
+        #     CtApplicationPersonRole.application == self.app_id).all()
 
-            for p in app_person:
-                if p.main_applicant == True:
-                    person = self.session.query(BsPerson).filter(BsPerson.person_id == p.person).one()
+        app_person = self.session.query(CtApplicationPersonRole). \
+            join(CtApplication, CtApplicationPersonRole.application == CtApplication.app_id). \
+            join(SetApplicationTypePersonRole, CtApplication.app_type == SetApplicationTypePersonRole.type). \
+            filter(CtApplication.app_id == self.app_id). \
+            filter(SetApplicationTypePersonRole.role == CtApplicationPersonRole.role). \
+            filter(SetApplicationTypePersonRole.is_owner == True).all()
 
-                    bank_count = self.session.query(ClBank).filter(ClBank.code == person.bank).count()
-                    person_bank_name = " "
-                    if bank_count != 0:
-                        bank = self.session.query(ClBank).filter(ClBank.code == person.bank).one()
-                        person_bank_name = bank.description
+        # app_person_new_count = self.session.query(CtApplicationPersonRole). \
+        #     filter(CtApplicationPersonRole.application == self.app_id). \
+        #     filter(CtApplicationPersonRole.role == 70).count()
+        # if app_person_new_count > 0:
+        #     app_person = self.session.query(CtApplicationPersonRole). \
+        #         filter(CtApplicationPersonRole.application == self.app_id). \
+        #         filter(CtApplicationPersonRole.role == 70).all()
+        person = None
+        for p in app_person:
+            if p.main_applicant == True:
+                person = self.session.query(BsPerson).filter(BsPerson.person_id == p.person).one()
 
-                    aimag_count = self.session.query(AuLevel1).filter(
-                        AuLevel1.code == person.address_au_level1).count()
-                    aimag_name = " "
-                    if aimag_count != 0:
-                        aimag = self.session.query(AuLevel1).filter(AuLevel1.code == person.address_au_level1).one()
-                        aimag_name = aimag.name
+                bank_count = self.session.query(ClBank).filter(ClBank.code == person.bank).count()
+                person_bank_name = " "
+                if bank_count != 0:
+                    bank = self.session.query(ClBank).filter(ClBank.code == person.bank).one()
+                    person_bank_name = bank.description
 
-                    soum_count = self.session.query(AuLevel2).filter(
-                        AuLevel2.code == person.address_au_level2).count()
-                    soum_name = " "
-                    if soum_count != 0:
-                        soum_person = self.session.query(AuLevel2).filter(AuLevel2.code == person.address_au_level2).one()
-                        soum_name = soum_person.name
+                aimag_count = self.session.query(AuLevel1).filter(
+                    AuLevel1.code == person.address_au_level1).count()
+                aimag_name = " "
+                if aimag_count != 0:
+                    aimag = self.session.query(AuLevel1).filter(AuLevel1.code == person.address_au_level1).one()
+                    aimag_name = aimag.name
 
-                    bag_count = self.session.query(AuLevel2).filter(
-                        AuLevel3.code == person.address_au_level3).count()
-                    bag_name = " "
-                    if bag_count != 0:
-                        bag = self.session.query(AuLevel3).filter(AuLevel3.code == person.address_au_level3).one()
-                        bag_name = bag.name
+                soum_count = self.session.query(AuLevel2).filter(
+                    AuLevel2.code == person.address_au_level2).count()
+                soum_name = " "
+                if soum_count != 0:
+                    soum_person = self.session.query(AuLevel2).filter(AuLevel2.code == person.address_au_level2).one()
+                    soum_name = soum_person.name
 
-        except SQLAlchemyError, e:
-            raise LM2Exception(self.tr("Database Query Error"),
-                               self.tr("aCould not execute: {0}").format(e.message))
+                bag_count = self.session.query(AuLevel2).filter(
+                    AuLevel3.code == person.address_au_level3).count()
+                bag_name = " "
+                if bag_count != 0:
+                    bag = self.session.query(AuLevel3).filter(AuLevel3.code == person.address_au_level3).one()
+                    bag_name = bag.name
+        #
+        # except SQLAlchemyError, e:
+        #     raise LM2Exception(self.tr("Database Query Error"),
+        #                        self.tr("aCould not execute: {0}").format(e.message))
 
-        # report_settings = self.__admin_settings("set_report_parameter")
-        # if len(report_settings) == 0:
-        #     return
+        base_fee = 0
+        payment = 0
+        contract_no = self.contract_num_edit.text()
 
+        # try:
+        # data = self.__fee_geoware()
+        # if data:
+        #     if data['status']:
+        #         for value in data['data']:
+        #             payment = payment + value['payment']
+        #             base_fee = round(float(value['base_fee_per_m2']))
         local_name = " "
         address_street_name = ""
         address_khaskhaa = ""
         address_building_no = ""
         address_entrance_no = ""
         address_apartment_no = ""
-        if person.address_street_name != None:
-            address_street_name = person.address_street_name + u" гудамж, "
-        if person.address_khaskhaa != None:
-            address_khaskhaa = person.address_khaskhaa
-        if person.address_building_no != None:
-            address_building_no = person.address_building_no + u" байр, "
-        if person.address_entrance_no != None:
-            address_entrance_no = person.address_entrance_no + ', '
-        if person.address_apartment_no != None:
-            address_apartment_no = person.address_apartment_no
-        if person.address_street_name != None or person.address_khaskhaa != None:
-            if person.address_town_or_local_name != None:
-                local_name = person.address_town_or_local_name + ', '
-            person_address = aimag_name + ", " + soum_name + ", " + bag_name + ", " + local_name + address_street_name + address_khaskhaa
-        elif person.address_building_no != None or person.address_entrance_no != None:
-            if person.address_town_or_local_name != None:
-                local_name = person.address_town_or_local_name + ', '
-            person_address = aimag_name + ", " + soum_name + ", " + bag_name + ", " + local_name + address_building_no + address_entrance_no + address_apartment_no
-        else:
-            if person.address_town_or_local_name != None:
-                local_name = person.address_town_or_local_name
-            person_address = aimag_name + ", " + soum_name + ", " + bag_name + ", " + local_name
+        person_address = ""
+        person_register = ""
+
+        if person:
+            if person.address_street_name != None:
+                address_street_name = person.address_street_name + u" гудамж, "
+            if person.address_khaskhaa != None:
+                address_khaskhaa = person.address_khaskhaa
+            if person.address_building_no != None:
+                address_building_no = person.address_building_no + u" байр, "
+            if person.address_entrance_no != None:
+                address_entrance_no = person.address_entrance_no + ', '
+            if person.address_apartment_no != None:
+                address_apartment_no = person.address_apartment_no
+            if person.address_street_name != None or person.address_khaskhaa != None:
+                if person.address_town_or_local_name != None:
+                    local_name = person.address_town_or_local_name + ', '
+                person_address = aimag_name + ", " + soum_name + ", " + bag_name + ", " + local_name + address_street_name + address_khaskhaa
+            elif person.address_building_no != None or person.address_entrance_no != None:
+                if person.address_town_or_local_name != None:
+                    local_name = person.address_town_or_local_name + ', '
+                person_address = aimag_name + ", " + soum_name + ", " + bag_name + ", " + local_name + address_building_no + address_entrance_no + address_apartment_no
+            else:
+                if person.address_town_or_local_name != None:
+                    local_name = person.address_town_or_local_name
+                person_address = aimag_name + ", " + soum_name + ", " + bag_name + ", " + local_name
         app_type = self.application_type_edit.text()[:2]
         path = FileUtils.map_file_path()
-        contract_no = self.contract.contract_no
-        contract_path = contract_no.replace("/", "-")
-        default_path = r'D:/TM_LM2/Pasture/contracts'
-        default_path = default_path + '/' + contract_path
-        if not os.path.exists(default_path):
-            os.makedirs(default_path)
-        if app_type == str(ApplicationType.pasture_use):
-            tpl = DocxTemplate(path+'pasture/contract_pasture.docx')
-        elif app_type == str(ApplicationType.legitimate_rights):
-            # tpl = DocxTemplate(path + 'pasture/contract_rights.docx')
-            tpl = DocxTemplate(path + 'pasture/contract_tnc.docx')
+        default_path = r'D:/TM_LM2/contracts'
+
+        tpl = DocxTemplate(path+'geree_niitiin_ezemshil_DX.docx')
+
+        if not officer:
+            PluginUtils.show_message(self, self.tr(" Employee"), self.tr("Employee not found"))
+            return
+
+        o_position = ''
         aimag_name = aimag.name
         soum_name = soum.name
         contract_no = self.contract_num_edit.text()
+        cerificate_no = ''
         contract_date = self.contract_date.text()
         contract_date_year = contract_date[0:-6]
         contract_date_month = contract_date[5:-3]
         contract_date_day = contract_date[-2:]
-        dec_year = decision_date[:4]
-        dec_month = decision_date[5:-3]
-        dec_day = decision_date[-2:]
+        dec_year = ''
+        dec_month = ''
+        dec_day = ''
         o_firstname = officer.firstname
         o_surname = officer.lastname
+        if officer.position_ref:
+            o_position = officer.position_ref.name
         company_name = ''
         person_surname = ''
         person_firstname = ''
         contact_position = ''
-        if person.type == 10 or person.type == 20 or person.type == 50:
-            person_surname = person.name
-            person_firstname = person.first_name
-        elif person.type == 30 or person.type == 40 or person.type == 60:
-            company_name = person.name
-            contact_position = person.contact_position
-            person_surname = person.contact_surname
-            person_firstname = person.contact_first_name
+        person_full_name = ''
+        if person:
+            person_register = person.person_register
+            if person.type == 10 or person.type == 20 or person.type == 50:
+                person_surname = person.name
+                person_firstname = person.first_name
+                person_full_name = person_surname + u' овогтой ' + person_firstname
+            elif person.type == 30 or person.type == 40 or person.type == 60 or person.type == 70:
+                company_name = person.name
+                contact_position = person.contact_position
+                person_surname = person.contact_surname
+                person_firstname = person.contact_first_name
+                person_full_name = person.name
+
+        base_fee = str(base_fee)
+
+        quarterly1_fee = str(payment / 4)
+        quarterly2_fee = str(payment / 4)
+        quarterly3_fee = str(payment / 4)
+        quarterly4_fee = str(payment / 4)
+        payment = str(payment)
+        # bank_name = report_settings[Constants.REPORT_BANK]
+        # account_no = report_settings[Constants.REPORT_BANK_ACCOUNT]
+        # office_address = report_settings[Constants.REPORT_ADDRESS]
+
+        aimag_name = ''
+        soum_name = ''
+        bag_name = ''
+        street_name = ''
+        khashaa_name = ''
+
+        fee_area = ''
+        fee_rate = ''
 
         bank_name = ''
         account_no = ''
-        office_address = ''
+        bank_value = ''
+        department_name = ''
+        department_phone = ''
+        department_address = ''
+        head_surname = ''
+        head_firstname = ''
         person_bank_name = ''
-        person_account = person.bank_account_no
-        person_phone = person.phone
-        person_email = person.email_address
-        office_phone = ''
+        person_account = ''
+        person_phone = ''
+        person_email = ''
+
+        if self.officer.department_ref:
+            department = self.officer.department_ref
+            department_id = department.department_id
+
+            department_accounts = self.session.query(SdDepartmentAccount).filter(
+                SdDepartmentAccount.department_id == department_id).all()
+            for value in department_accounts:
+                account_no = value.account_no
+                bank = value.bank_ref
+                bank_name = bank.description
+                bank_full_value = bank_name + ' - ' + account_no
+                if bank_value == '':
+                    bank_value =  bank_full_value
+                else:
+                    bank_value = bank_value + ', ' + bank_full_value
+
+            # if self.officer.department_ref.bank_name:
+            #     bank_name = self.officer.department_ref.bank_name
+            # if self.officer.department_ref.account_no:
+            #     account_no = self.officer.department_ref.account_no
+            if self.officer.department_ref.name:
+                department_name = self.officer.department_ref.name
+            if self.officer.department_ref.phone:
+                department_phone = self.officer.department_ref.phone
+            if self.officer.department_ref.address:
+                department_address = self.officer.department_ref.address
+            if self.officer.department_ref.head_surname:
+                head_surname = self.officer.department_ref.head_surname
+            if self.officer.department_ref.head_firstname:
+                head_firstname = self.officer.department_ref.head_firstname
+
+        if person:
+            person_bank_name = person.person_bank_name
+            person_account = person.bank_account_no
+            person_phone = person.phone
+            person_email = person.email_address
+
+        parcel_id = ''
+        area_m2 = 0
+        landuse = ''
+
+        if self.session.query(CtApplicationParcel).filter(CtApplicationParcel.app_id == self.app_id).count() > 0:
+            app_parcel = self.session.query(CtApplicationParcel).filter(CtApplicationParcel.app_id == self.app_id).first()
+            parcel_id = app_parcel.parcel_id
+            if self.session.query(CaStateParcelTbl).filter(CaStateParcelTbl.parcel_id == parcel_id) > 0:
+                parcel = self.session.query(CaStateParcelTbl).filter(CaStateParcelTbl.parcel_id == parcel_id).first()
+                area_m2 = parcel.area_m2
+                if parcel.landuse:
+                    landuse_type = self.session.query(ClLanduseType).filter(
+                        ClLanduseType.code == parcel.landuse).one()
+                    landuse = landuse_type.description
+
         sum_name_dec = ''
         sum_officer = ''
 
-        if decision_level == 20 or decision_level == 40:
-            sum_name_dec = soum.name + u' cум /дүүрэг/-ийн '
-            sum_officer = soum.name + u' cум /дүүрэг/-ийн газрын даамал '
-        elif decision_level == 10 or decision_level == 30:
-            sum_officer = u' ГХБХБГазрын газрын асуудал эрхэлсэн албан тушаалтан '
         if contact_position is None:
             contact_position = ''
         if company_name is None:
@@ -1458,107 +1487,96 @@ class ContractSpaDialog(QDialog, Ui_ContractSpaDialog, DatabaseHelper):
             person_surname = ''
         if person_firstname is None:
             person_firstname = ''
+        if person:
+            if person.type == 10 or person.type == 20 or person.type == 50:
+                company_name = person_surname + u'овогтой' + person_firstname
+            elif person.type == 30 or person.type == 40 or person.type == 60 or person.type == 70 or person.type == 80:
+                company_name = company_name + u'-н ' + contact_position + u' ' + person_surname + u' овогтой ' + person_firstname
 
-        if person.type == 10 or person.type == 20 or person.type == 50:
-            company_name = person_surname + u' овогтой ' + person_firstname
-        elif person.type == 30 or person.type == 40 or person.type == 60:
-            company_name = company_name + u'-н ' + contact_position + u' ' + person_surname + u' овогтой ' + person_firstname
-        all_area = 0
-        parcel_pastures_text = ''
-        if app_type == str(ApplicationType.pasture_use):
-            for row in range(self.assigned_parcel_twidget.rowCount()):
-                parcel_id = self.assigned_parcel_twidget.item(row, 0).data(Qt.UserRole)
-                area_ga = self.assigned_parcel_twidget.item(row, 2).text()
-                parcel_pastures = self.__parcel_pastures(parcel_id)
-                all_area = all_area + float(area_ga)
-                if parcel_pastures_text == '':
-                    parcel_pastures_text = '2.4.' + str(row+1) + '    ' + parcel_pastures + u' /' + str(area_ga) + u' га/'
-                else:
-                    if parcel_pastures_text != parcel_pastures:
-                        parcel_pastures_text = parcel_pastures_text +'<w:br/>'+ '2.4.' + str(
-                            row + 1) + '    ' + parcel_pastures + u' /' + str(area_ga) + u' га/'
-        elif app_type == str(ApplicationType.legitimate_rights):
-            for row in range(self.assigned_parcel_twidget.rowCount()):
-                parcel_id = self.assigned_parcel_twidget.item(row, 0).data(Qt.UserRole)
-                area_ga = self.assigned_parcel_twidget.item(row, 2).text()
-                parcel_pastures = self.__parcel_pastures(parcel_id)
-                all_area = all_area + float(area_ga)
-                if parcel_pastures_text == '':
-                    parcel_pastures_text = '2.2.' + str(row+1)+'. '+ parcel_pastures + u' /' + str(area_ga) + u' га/'
-                else:
-                    if parcel_pastures_text != parcel_pastures:
-                        parcel_pastures_text = parcel_pastures_text + '<w:br/>' +'            '+ '2.2.' + str(
-                            row + 1) + '. ' + parcel_pastures + u' /' + str(area_ga) + u' га/'
+        if self.is_sign_checkbox.isChecked():
+            darga_signature = self.print_officer_cbox.currentText() + u'/.............................../ тамга/'
+            darga_position = self.position_lbl.text()
+        else:
+            darga_signature = ''
+            darga_position = ''
 
-        group_name = self.__group_name()
-        bag_name = self.__bag_name()
+        duration_year = ''
+
+        au1 = DatabaseUtils.working_l1_code()
+        if au1 == '011':
+            local_aimag_name = aimag_name + u' Хот'
+        else:
+            local_aimag_name = aimag_name + u' Аймаг, ' + soum_name + u' сум'
 
         context = {
+            'local_aimag_name': local_aimag_name,
+            'property_no': '',
             'aimag_name': aimag_name,
             'contract_no': contract_no,
-            'c_year': contract_date_year,
-            'c_month': contract_date_month,
-            'c_day': contract_date_day,
+            'cert_no': cerificate_no,
+            'c_year': time.strftime("%Y"),
+            'c_month': time.strftime("%m"),
+            'c_day': time.strftime("%d"),
             'sum_name': soum_name,
             'sum_name_dec': sum_name_dec,
             'sum_officer': sum_officer,
             'dec_year': dec_year,
             'dec_month': dec_month,
             'dec_day': dec_day,
-            'dec_no': decision_no,
+            # 'dec_no': decision_no,
             'o_firstname': o_firstname,
             'o_surname': o_surname,
+            'o_position': o_position,
             'company_name': company_name,
             'contact_position': contact_position,
+            'person_full_name': person_full_name,
             'person_surname': person_surname,
             'person_firstname': person_firstname,
-            'bank_name': bank_name,
-            'account_no': account_no,
-            'office_address': office_address,
+            'area_m2': area_m2,
+            'landuse': landuse,
+            'base_fee': base_fee,
+            'payment': payment,
+            'quarterly1_fee': quarterly1_fee,
+            'quarterly2_fee': quarterly2_fee,
+            'quarterly3_fee': quarterly3_fee,
+            'quarterly4_fee': quarterly4_fee,
+            'bank_value': bank_value,
+            # 'bank_name': bank_name,
+            # 'account_no': account_no,
+            'office_address': department_address,
+            'office_name': department_name,
+            'department_name': department_name,
+            'office_phone': department_phone,
+            'aimag': aimag_name,
+            'soum': soum_name,
+            'bag': bag_name,
+            'street': street_name,
+            'khashaa': khashaa_name,
+            'fee_area': fee_area,
+            'fee_rate': fee_rate,
             'person_address': person_address,
             'person_bank_name': person_bank_name,
             'person_account': person_account,
             'person_phone': person_phone,
             'person_email': person_email,
-            'person_id': person.person_id,
-            'office_phone': office_phone,
-            # 'parcel_id': parcel_id
-            'parcel_pasture': parcel_pastures_text,
-            'all_area': all_area,
-            'group_name': group_name,
-            'bag_name': bag_name
+            'person_id': person_register,
+            'parcel_id': parcel_id,
+            'duration_year': duration_year,
+            'darga_position': darga_position,
+            'head_surname': head_surname,
+            'head_firstname': head_firstname,
+            'darga_signature': darga_signature
         }
 
         tpl.render(context)
 
-        try:
-            tpl.save(default_path + "/" + contract_no[:-6] + '-' + contract_no[-5:] + ".docx")
-            QDesktopServices.openUrl(
-                QUrl.fromLocalFile(default_path + "/" + contract_no[:-6] + '-' + contract_no[-5:] + ".docx"))
-        except IOError, e:
-            PluginUtils.show_error(self, self.tr("Out error"),
-                                   self.tr("This file is already opened. Please close re-run"))
-
-    def __bag_name(self):
-
-        app_no = self.application_this_contract_based_edit.text()
-        admin_unit_l3_names = ''
-        try:
-            for row in range(self.assigned_parcel_twidget.rowCount()):
-                parcel_id = self.assigned_parcel_twidget.item(row, 0).data(Qt.UserRole)
-                area_ga = self.assigned_parcel_twidget.item(row, 2).text()
-                parcel_geometry = self.session.query(CaPastureParcelTbl.geometry).filter(CaPastureParcelTbl.parcel_id == parcel_id).one()
-                admin_unit_l3_name = self.session.query(AuLevel3.name).filter(AuLevel3.geometry.ST_Intersects(parcel_geometry[0])).first()
-                if admin_unit_l3_names == '':
-                    admin_unit_l3_names = admin_unit_l3_name[0]
-                else:
-                    if admin_unit_l3_names != admin_unit_l3_name[0]:
-                        admin_unit_l3_names = admin_unit_l3_names +', '+ admin_unit_l3_name[0]
-        except SQLAlchemyError, e:
-            PluginUtils.show_error(self, self.tr("Database Query Error"), self.tr("cCould not execute: {0}").format(e.message))
-            return
-
-        return admin_unit_l3_names
+        # try:
+        tpl.save(default_path + "/" + contract_no[:-6] + '-' + contract_no[-5:] + ".docx")
+        QDesktopServices.openUrl(
+            QUrl.fromLocalFile(default_path + "/" + contract_no[:-6] + '-' + contract_no[-5:] + ".docx"))
+        # except IOError, e:
+        #     PluginUtils.show_error(self, self.tr("Out error"),
+        #                            self.tr("This file is already opened. Please close re-run"))
 
     def __group_name(self):
 
@@ -1590,31 +1608,10 @@ class ContractSpaDialog(QDialog, Ui_ContractSpaDialog, DatabaseHelper):
                 group_no = group.group_no
         return group_name
 
-    def __parcel_pastures(self, parcel_id):
-
-        app_no = self.application_this_contract_based_edit.text()
-        application_instance = self.session.query(CtApplication).filter(CtApplication.app_no == app_no).one()
-        app_id = application_instance.app_id
-        pasture_type_list = ''
-        parcel_pastures = self.session.query(CtApplicationParcelPasture). \
-            filter(CtApplicationParcelPasture.application == app_id). \
-            filter(CtApplicationParcelPasture.parcel == parcel_id).all()
-        for pastures in parcel_pastures:
-            pasture = self.session.query(ClPastureType).filter(ClPastureType.code == pastures.pasture).one()
-            pasture_text = pasture.description
-            if pasture_type_list == '':
-                pasture_type_list = pasture_text
-            else:
-                if pasture_type_list != pasture_text:
-                    pasture_type_list = pasture_type_list + '-' + pasture_text
-
-        return pasture_type_list
-
     @pyqtSlot()
     def on_print_contract_button_clicked(self):
 
-        if not self.pdf_checkbox.isChecked():
-            self.__contract_possess()
+        self.__contract_possess()
     #
     # def __admin_settings(self, table_name):
     #

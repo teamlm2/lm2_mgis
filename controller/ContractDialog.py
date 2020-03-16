@@ -130,6 +130,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         self.drop_label.itemDropped.connect(self.on_drop_label_itemDropped)
         self.close_button.clicked.connect(self.reject)
         self.contract_end_date.dateChanged.connect(self.__end_date_change)
+        self.gudamjid = list()
         self.is_first_app_connect = False
         self.__setup_combo_boxes()
         self.__set_up_land_fee_twidget()
@@ -4920,6 +4921,29 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
                         return type
 
+    @pyqtSlot()
+    def on_street_buffer_button_clicked(self):
+
+        self.__set_up_twidget(self.parcel_address_twidget)
+        self.__set_up_twidget(self.building_address_twidget)
+
+        parcel_id = self.id_main_edit.text()
+        street_distance_count = self.street_buffer_sbox.value()
+        sql = "select * from ( " \
+              "select p.parcel_id, s.gudamjid, s.gudamjner, ST_Distance(p.geometry, s.geometry) as distance, s.gid from data_address.geo_street_merge s, data_soums_union.ca_parcel_tbl p " \
+              "where p.parcel_id = " + "'" + parcel_id + "'" + ") as xxx order by distance asc limit " + str(street_distance_count) + ""
+
+        self.gudamjid = list()
+        result = self.session.execute(sql)
+        for item_row in result:
+            if item_row[1]:
+                gudamjid = item_row[1]
+                gudamjner = item_row[2]
+                self.gudamjid.append(u'{0}:{1}'.format(gudamjid, gudamjner))
+
+        delegate = ComboBoxDelegate(0, self.gudamjid, self.parcel_address_twidget)
+        self.parcel_address_twidget.setItemDelegateForColumn(0, delegate)
+
     @pyqtSlot(int)
     def on_edit_address_chbox_stateChanged(self, state):
 
@@ -4929,6 +4953,25 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         address_source_list = list()
         for code, description in self.session.query(ClAddressSource.code, ClAddressSource.description).all():
             address_source_list.append(u'{0}:{1}'.format(code, description))
+
+        parcel_id = self.id_main_edit.text()
+
+        street_distance_count = self.street_buffer_sbox.value()
+        sql = "select * from ( " \
+                "select p.parcel_id, s.gudamjid, s.gudamjner, ST_Distance(p.geometry, s.geometry) as distance, s.gid from data_address.geo_street_merge s, data_soums_union.ca_parcel_tbl p " \
+                "where p.parcel_id = " + "'" + parcel_id + "'" + ") as xxx order by distance asc limit " + str(street_distance_count) + ""
+
+        self.gudamjid = list()
+        result = self.session.execute(sql)
+        for item_row in result:
+            if item_row[1]:
+                gudamjid = item_row[1]
+                gudamjner = item_row[2]
+                self.gudamjid.append(u'{0}:{1}'.format(gudamjid, gudamjner))
+
+        delegate = ComboBoxDelegate(0, self.gudamjid, self.parcel_address_twidget)
+        self.parcel_address_twidget.setItemDelegateForColumn(0, delegate)
+
         delegate = ComboBoxDelegate(3, address_source_list, self.parcel_address_twidget)
         self.parcel_address_twidget.setItemDelegateForColumn(3, delegate)
 
@@ -4992,8 +5035,8 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         table_widget.setSelectionBehavior(QTableWidget.SelectRows)
         table_widget.setSelectionMode(QTableWidget.SingleSelection)
         # table_widget.setColumnWidth(0, 300)
-        header = table_widget.horizontalHeader()
-        header.setResizeMode(QHeaderView.Stretch)
+        # header = table_widget.horizontalHeader()
+        # header.setResizeMode(QHeaderView.Stretch)
 
     def __add_parcel_address_row(self, row, value):
 

@@ -1285,6 +1285,9 @@ class LM2Plugin:
         elif layer_name == u'ТХ нэгж талбар' or layer_name == 'SPA Parcel':
             table_name = 'ca_spa_parcel'
             mapTool = PrintCadastreExtractMapTool(self, table_name, True)
+        elif layer_name == u'ТХ нэгж талбар' or layer_name == 'State Parcel':
+            table_name = 'ca_state_parcel'
+            mapTool = PrintCadastreExtractMapTool(self, table_name, True)
         else:
             mapTool = PrintCadastreExtractMapTool(self)
 

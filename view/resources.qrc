@@ -40,5 +40,6 @@
     <file alias="spa_logo.png">icons/spa_logo.png</file>
     <file alias="land_plan.png">icons/land_plan.png</file>
     <file alias="nature_reserve.png">icons/nature_reserve.png</file>
+    <file alias="refresh.png">icons/refresh.png</file>
   </qresource>
 </RCC>
