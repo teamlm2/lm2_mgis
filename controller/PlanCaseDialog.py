@@ -1948,6 +1948,19 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
             self.cadastre_form_change_button.setEnabled(False)
 
     @pyqtSlot(int)
+    def on_cadastre_all_check_box_stateChanged(self, state):
+
+        if state == Qt.Checked:
+            for row in range(self.cadastre_current_twidget.rowCount()):
+                item = self.cadastre_current_twidget.item(row, 0)
+                item.setCheckState(Qt.Checked)
+        else:
+            for row in range(self.cadastre_current_twidget.rowCount()):
+                item = self.cadastre_current_twidget.item(row, 0)
+                item.setCheckState(Qt.Unchecked)
+
+
+    @pyqtSlot(int)
     def on_if_single_type_chbox_stateChanged(self, state):
 
         rigth_form_id = self.shp_rigth_form_cbox.itemData(self.shp_rigth_form_cbox.currentIndex())

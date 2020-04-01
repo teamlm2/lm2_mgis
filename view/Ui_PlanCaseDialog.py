@@ -326,6 +326,9 @@ class Ui_PlanCaseDialog(object):
         self.cad_process_type_cbox.setEnabled(True)
         self.cad_process_type_cbox.setGeometry(QtCore.QRect(206, 240, 474, 22))
         self.cad_process_type_cbox.setObjectName(_fromUtf8("cad_process_type_cbox"))
+        self.cadastre_all_check_box = QtGui.QCheckBox(self.tab_3)
+        self.cadastre_all_check_box.setGeometry(QtCore.QRect(12, 244, 110, 17))
+        self.cadastre_all_check_box.setObjectName(_fromUtf8("cadastre_all_check_box"))
         self.tabWidget.addTab(self.tab_3, _fromUtf8(""))
         self.tab_4 = QtGui.QWidget()
         self.tab_4.setObjectName(_fromUtf8("tab_4"))
@@ -422,7 +425,7 @@ class Ui_PlanCaseDialog(object):
         self.error_label.setObjectName(_fromUtf8("error_label"))
 
         self.retranslateUi(PlanCaseDialog)
-        self.tabWidget.setCurrentIndex(0)
+        self.tabWidget.setCurrentIndex(2)
         QtCore.QMetaObject.connectSlotsByName(PlanCaseDialog)
 
     def retranslateUi(self, PlanCaseDialog):
@@ -479,6 +482,7 @@ class Ui_PlanCaseDialog(object):
         item = self.cadastre_current_twidget.horizontalHeaderItem(3)
         item.setText(_translate("PlanCaseDialog", "Right Type", None))
         self.cadastre_find_button.setText(_translate("PlanCaseDialog", "Find", None))
+        self.cadastre_all_check_box.setText(_translate("PlanCaseDialog", "Бүгдийг сонгох", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_3), _translate("PlanCaseDialog", "Import Cadastre", None))
         item = self.monitoring_twidget.horizontalHeaderItem(0)
         item.setText(_translate("PlanCaseDialog", "Бэлчээрийн мэдээлэл", None))

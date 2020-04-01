@@ -96,6 +96,7 @@ class PastureWidget(QDockWidget, Ui_PastureWidget, DatabaseHelper):
         self.working_l2_cbox.currentIndexChanged.connect(self.__working_l2_changed)
 
         if self.zone_rigth_type == 1:
+            self.pug_register_button.setText(u'БАХ нэмэх/хасах')
             self.main_tab_widget.insertTab(self.main_tab_widget.count() - 1, self.app_tab,
                                            self.tr("Pasture(PUA)"))
             self.main_tab_widget.insertTab(self.main_tab_widget.count() - 1, self.monitoring_tab,
