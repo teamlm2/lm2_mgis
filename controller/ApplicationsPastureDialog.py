@@ -1497,115 +1497,115 @@ class ApplicationsPastureDialog(QDialog, Ui_ApplicationsPastureDialog, DatabaseH
 
     def __save_application(self):
 
-        try:
-            self.create_savepoint()
+        # try:
+        # self.create_savepoint()
 
-            self.__save_application_details()
+        self.__save_application_details()
 
-            self.__save_applicants()
-            self.__save_parcels()
+        self.__save_applicants()
+        self.__save_parcels()
 
-            self.commit()
+        self.commit()
 
-        except LM2Exception, e:
-            self.rollback_to_savepoint()
-            PluginUtils.show_error(self, e.title(), e.message())
-            return
+        # except LM2Exception, e:
+        #     self.rollback_to_savepoint()
+        #     PluginUtils.show_error(self, e.title(), e.message())
+        #     return
 
     def __save_application_details(self):
 
-        self.create_savepoint()
+        # self.create_savepoint()
 
-        try:
-            app_no = self.application_num_first_edit.text() + "-" + self.application_num_type_edit.text() + "-" \
-                     + self.application_num_middle_edit.text() + "-" + self.application_num_last_edit.text()
+        # try:
+        app_no = self.application_num_first_edit.text() + "-" + self.application_num_type_edit.text() + "-" \
+                 + self.application_num_middle_edit.text() + "-" + self.application_num_last_edit.text()
 
-            #check if the app_no is still valid, otherwise generate new one
-            if not self.attribute_update:
-                app_no_count = self.session.query(CtApplication).filter(CtApplication.app_no == app_no).count()
-                if app_no_count > 0:
+        #check if the app_no is still valid, otherwise generate new one
+        if not self.attribute_update:
+            app_no_count = self.session.query(CtApplication).filter(CtApplication.app_no == app_no).count()
+            if app_no_count > 0:
 
-                    self.__generate_application_number()
+                self.__generate_application_number()
 
-                    app_no = self.application_num_first_edit.text() + "-" + self.application_num_type_edit.text() + "-" \
-                     + self.application_num_middle_edit.text() + "-" + self.application_num_last_edit.text()
+                app_no = self.application_num_first_edit.text() + "-" + self.application_num_type_edit.text() + "-" \
+                 + self.application_num_middle_edit.text() + "-" + self.application_num_last_edit.text()
 
-                    PluginUtils.show_message(self, self.tr("Application Number"), self.tr("The application number was updated to the next available number."))
+                PluginUtils.show_message(self, self.tr("Application Number"), self.tr("The application number was updated to the next available number."))
 
-                soum_code = self.application_num_first_edit.text()
-                app_type = self.application_num_type_edit.text()
-                year = self.application_num_last_edit.text()
-                # year_filter = "%-" + str(year)
-                obj_type = 'application\Application'
-                PluginUtils.generate_auto_app_no(year, app_type, soum_code, obj_type, self.session)
+            soum_code = self.application_num_first_edit.text()
+            app_type = self.application_num_type_edit.text()
+            year = self.application_num_last_edit.text()
+            # year_filter = "%-" + str(year)
+            obj_type = 'application\Application'
+            PluginUtils.generate_auto_app_no(year, app_type, soum_code, obj_type, self.session)
 
-            self.application.app_no = app_no
-            self.application.requested_landuse = self.requested_land_use_type_cbox.itemData(self.requested_land_use_type_cbox.currentIndex())
-            #self.application.approved_landuse = self.requested_land_use_type_cbox.itemData(self.requested_land_use_type_cbox.currentIndex())
-            self.application.app_timestamp = self.date_time_date.dateTime().toString(Constants.DATABASE_DATETIME_FORMAT)
-            self.application.requested_duration = self.requested_year_spin_box.value()
-            #self.application.approved_duration = self.approved_year_spin_box.value()
-            self.application.remarks = self.remarks_text_edit.toPlainText()
+        self.application.app_no = app_no
+        self.application.requested_landuse = self.requested_land_use_type_cbox.itemData(self.requested_land_use_type_cbox.currentIndex())
+        #self.application.approved_landuse = self.requested_land_use_type_cbox.itemData(self.requested_land_use_type_cbox.currentIndex())
+        self.application.app_timestamp = self.date_time_date.dateTime().toString(Constants.DATABASE_DATETIME_FORMAT)
+        self.application.requested_duration = self.requested_year_spin_box.value()
+        #self.application.approved_duration = self.approved_year_spin_box.value()
+        self.application.remarks = self.remarks_text_edit.toPlainText()
 
-            self.application.au2 = DatabaseUtils.current_working_soum_schema()
-            self.application.au1 = DatabaseUtils.working_l1_code()
+        self.application.au2 = DatabaseUtils.current_working_soum_schema()
+        self.application.au1 = DatabaseUtils.working_l1_code()
 
-            rigth_type = self.rigth_type_cbox.itemData(self.rigth_type_cbox.currentIndex())
-            self.application.right_type = rigth_type
+        rigth_type = self.rigth_type_cbox.itemData(self.rigth_type_cbox.currentIndex())
+        self.application.right_type = rigth_type
 
-            status = self.session.query(func.max(CtApplicationStatus.status)).\
-                filter(CtApplicationStatus.application == self.application.app_id).one()
-            max_status = str(status).split(",")[0][1:]
+        status = self.session.query(func.max(CtApplicationStatus.status)).\
+            filter(CtApplicationStatus.application == self.application.app_id).one()
+        max_status = str(status).split(",")[0][1:]
 
 
-        except SQLAlchemyError, e:
-            self.rollback_to_savepoint()
-            raise LM2Exception(self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+        # except SQLAlchemyError, e:
+        #     self.rollback_to_savepoint()
+        #     raise LM2Exception(self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
 
     def __save_parcels(self):
 
-        try:
-            for row in range(self.pasture_type_twidget.rowCount()):
-                pasture_code = self.pasture_type_twidget.item(row, 0).data(Qt.UserRole)
-                parcel_id = self.pasture_type_twidget.item(row, 0).data(Qt.UserRole+1)
-                begin_month = self.pasture_type_twidget.item(row, 1).text()
-                end_month = self.pasture_type_twidget.item(row, 2).text()
-                days = self.pasture_type_twidget.item(row, 3).text()
+        # try:
+        for row in range(self.pasture_type_twidget.rowCount()):
+            pasture_code = self.pasture_type_twidget.item(row, 0).data(Qt.UserRole)
+            parcel_id = self.pasture_type_twidget.item(row, 0).data(Qt.UserRole+1)
+            begin_month = self.pasture_type_twidget.item(row, 1).text()
+            end_month = self.pasture_type_twidget.item(row, 2).text()
+            days = self.pasture_type_twidget.item(row, 3).text()
 
-                pug_parcel_pasture = self.session.query(CtApplicationParcelPasture). \
-                    filter(CtApplicationParcelPasture.application == self.application.app_id). \
-                    filter(CtApplicationParcelPasture.parcel == parcel_id). \
-                    filter(CtApplicationParcelPasture.pasture == pasture_code).one()
+            pug_parcel_pasture = self.session.query(CtApplicationParcelPasture). \
+                filter(CtApplicationParcelPasture.application == self.application.app_id). \
+                filter(CtApplicationParcelPasture.parcel == parcel_id). \
+                filter(CtApplicationParcelPasture.pasture == pasture_code).one()
 
-                pug_parcel_pasture.begin_month = int(begin_month)
-                pug_parcel_pasture.end_month = int(end_month)
-                pug_parcel_pasture.days = int(days)
+            pug_parcel_pasture.begin_month = int(begin_month)
+            pug_parcel_pasture.end_month = int(end_month)
+            pug_parcel_pasture.days = int(days)
 
 
-            for row in range(self.assigned_parcel_twidget.rowCount()):
-                parcel_id = self.assigned_parcel_twidget.item(row, 0).data(Qt.UserRole)
+        for row in range(self.assigned_parcel_twidget.rowCount()):
+            parcel_id = self.assigned_parcel_twidget.item(row, 0).data(Qt.UserRole)
 
-                pasture_type_list = ''
-                parcel_pastures = self.session.query(CtApplicationParcelPasture).\
-                    filter(CtApplicationParcelPasture.application == self.application.app_id).\
-                    filter(CtApplicationParcelPasture.parcel == parcel_id).all()
-                for pastures in parcel_pastures:
-                    pasture = self.session.query(ClPastureType).filter(ClPastureType.code == pastures.pasture).one()
-                    pasture_text = pasture.description
-                    if pasture_type_list == '':
-                        pasture_type_list = pasture_text
-                    else:
-                        if pasture_type_list != pasture_text:
-                            pasture_type_list = pasture_type_list+'-'+pasture_text
+            pasture_type_list = ''
+            parcel_pastures = self.session.query(CtApplicationParcelPasture).\
+                filter(CtApplicationParcelPasture.application == self.application.app_id).\
+                filter(CtApplicationParcelPasture.parcel == parcel_id).all()
+            for pastures in parcel_pastures:
+                pasture = self.session.query(ClPastureType).filter(ClPastureType.code == pastures.pasture).one()
+                pasture_text = pasture.description
+                if pasture_type_list == '':
+                    pasture_type_list = pasture_text
+                else:
+                    if pasture_type_list != pasture_text:
+                        pasture_type_list = pasture_type_list+'-'+pasture_text
 
-                parcel_pasture = self.session.query(CaPastureParcel).filter(CaPastureParcel.parcel_id == parcel_id).one()
+            parcel_pasture = self.session.query(CaPastureParcel).filter(CaPastureParcel.parcel_id == parcel_id).one()
 
-                parcel_pasture.pasture_type = pasture_type_list
+            parcel_pasture.pasture_type = pasture_type_list
 
-        except SQLAlchemyError, e:
-            self.rollback_to_savepoint()
-            raise LM2Exception(self.tr("File Error"),
-                               self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+        # except SQLAlchemyError, e:
+        #     self.rollback_to_savepoint()
+        #     raise LM2Exception(self.tr("File Error"),
+        #                        self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
 
     def __save_applicants(self):
 

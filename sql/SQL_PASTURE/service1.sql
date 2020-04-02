@@ -1,6 +1,5 @@
 ﻿
-
-select aaa.rc_id::text || '-' || bbb.rc_id::text,  * from
+select coalesce(aaa.rc_id, 0)::text || '-' || bbb.rc_id::text,  bbb.* from
 (
   select
       au1.code as au1_code, au1.name as au1_name, au2.code as au2_code, au2.name as au2_name,
@@ -18,8 +17,8 @@ JOIN pasture.ps_point_d_value t on d.point_detail_id = t.point_detail_id
 where au2.code = '08110' and t.monitoring_year = 2018 --and (LOWER(p.pasture_type) ilike '%өвөл%' or LOWER(p.pasture_type) ilike '%хавар%')
 GROUP BY au1.code, au1.name, au2.code, au2.name, pb.group_name, pb.area_ga, p.area_ga, p.parcel_id, p.pasture_type, d.point_detail_id, t.rc_id
 ORDER BY pb.group_name
-)aaa,
-  (
+)aaa
+full join (
     select
       au1.code as au1_code, au1.name as au1_name, au2.code as au2_code, au2.name as au2_name,
       pb.group_name, pb.area_ga as pug_area_ga, p.parcel_id, p.pasture_type, p.area_ga,
@@ -36,7 +35,7 @@ JOIN pasture.ps_point_d_value t on d.point_detail_id = t.point_detail_id
 where au2.code = '08110' and t.monitoring_year = 2019 --and (LOWER(p.pasture_type) ilike '%өвөл%' or LOWER(p.pasture_type) ilike '%хавар%')
 GROUP BY au1.code, au1.name, au2.code, au2.name, pb.group_name, pb.area_ga, p.area_ga, p.parcel_id, p.pasture_type, d.point_detail_id, t.rc_id
 ORDER BY pb.group_name
-    )bbb
+    )bbb on aaa.point_detail_id = bbb.point_detail_id
 
 select * from pasture.set_rc_change st
 join pasture.cl_rc_change rc on st.rc_change_id = rc.code
