@@ -1235,6 +1235,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         new_parcel.valid_from = PluginUtils.convert_qt_date_to_python(QDateTime().currentDateTime())
         new_parcel.au1 = self.au1
         new_parcel.au2 = self.au2
+        new_parcel.is_active = True
         new_parcel.created_at = DatabaseUtils.current_date_time()
         new_parcel.created_by = DatabaseUtils.current_sd_user().user_id
         if self.point_rbutton.isChecked():
@@ -1840,6 +1841,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         new_parcel.right_form_id = value.right_form_id
         new_parcel.right_form_ref = value.right_form_ref
         new_parcel.valid_from = PluginUtils.convert_qt_date_to_python(QDateTime().currentDateTime())
+        new_parcel.is_active = True
         new_parcel.au1 = self.au1
         new_parcel.au2 = self.au2
 
@@ -2458,6 +2460,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         new_parcel.landuse = parcel.landuse
         new_parcel.gazner = parcel.address_neighbourhood
         new_parcel.valid_from = PluginUtils.convert_qt_date_to_python(QDateTime().currentDateTime())
+        new_parcel.is_active = True
         new_parcel.au1 = self.au1
         new_parcel.au2 = self.au2
         new_parcel.polygon_geom = parcel.geometry
@@ -2486,6 +2489,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         new_parcel.landuse = parcel.landuse
         new_parcel.gazner = parcel.address_neighbourhood
         new_parcel.valid_from = PluginUtils.convert_qt_date_to_python(QDateTime().currentDateTime())
+        new_parcel.is_active = True
         new_parcel.au1 = self.au1
         new_parcel.au2 = self.au2
         new_parcel.polygon_geom = parcel.geometry
