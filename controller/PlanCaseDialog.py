@@ -2385,6 +2385,10 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
             desc = str(value.code) + ':-' + value.name
             plan_zones.append(desc)
 
+        if len(plan_zones) == 0:
+
+            PluginUtils.show_message(self, u'Анхааруулга', u'ГЗБТөлөвлөгөөний төслийн тохиргоо хийгдээгүй байна. Та веб системээр орж төслийн тохиргоогоо хийнэ үү!!!')
+            return
         item, ok = QInputDialog.getItem(self, "select input dialog",
                                         "list of plan zones", plan_zones, 0, False)
 
