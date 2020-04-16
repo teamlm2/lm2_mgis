@@ -25,6 +25,7 @@ class CtFee(Base):
     subsidized_fee_rate = Column(Numeric)
     contract_no = Column(String)
     person_register = Column(String)
+    resolution_id = Column(Integer)
 
     base_fee_id = Column(Integer, ForeignKey('set_base_fee.id'))
     base_fee_ref = relationship("SetBaseFee")
