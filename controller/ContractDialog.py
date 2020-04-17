@@ -139,6 +139,10 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         self.status_label.clear()
         self.is_certificate = False
         self.landfee_message_label1.setStyleSheet("QLabel {color : red;}")
+        # if DatabaseUtils.working_l1_code() == '011':
+        #     self.refresh_fee_button.setVisible(True)
+        # else:
+        #     self.refresh_fee_button.setVisible(False)
 
         self.__setup_permissions()
         self.__user_right_permissions()
@@ -1655,32 +1659,35 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                             fee_calculated = fee_calculated + int(self.land_fee_twidget.item(row, CONTRACTOR_FEE_CALCULATED).text())
                             fee_contract = fee_contract + int(self.land_fee_twidget.item(row, CONTRACTOR_FEE_CONTRACT).text())
                             grace_period = int(self.land_fee_twidget.item(row, CONTRACTOR_GRACE_PERIOD).text())
-            fee = CtFee()
-            fee.contract = self.contract.contract_id
-            fee.contract_no = self.contract.contract_no
-            fee.person = person_id1
-            fee.person_register = person_register1
-            fee.base_fee_id = base_fee_id
-            fee.share = share1
-            fee.area = float(self.calculated_area_edit.text())
-            fee.fee_calculated = fee_calculated
-            fee.fee_contract = fee_contract
-            fee.grace_period = grace_period
-            fee.base_fee_per_m2 = float(self.base_fee_edit.text())
-            fee.resolution_id = resolution_id
+            count = self.session.query(CtFee).filter(CtFee.contract == self.contract.contract_id). \
+                filter(CtFee.person == person_id1).count()
+            if count == 0:
+                fee = CtFee()
+                fee.contract = self.contract.contract_id
+                fee.contract_no = self.contract.contract_no
+                fee.person = person_id1
+                fee.person_register = person_register1
+                fee.base_fee_id = base_fee_id
+                fee.share = share1
+                fee.area = float(self.calculated_area_edit.text())
+                fee.fee_calculated = fee_calculated
+                fee.fee_contract = fee_contract
+                fee.grace_period = grace_period
+                fee.base_fee_per_m2 = float(self.base_fee_edit.text())
+                fee.resolution_id = resolution_id
 
-            if self.subsidized_area_edit.text() != '':
-                fee.subsidized_area = int(self.subsidized_area_edit.text())
-            if self.subsidized_fee_rate_edit.text() != '':
-                fee.subsidized_fee_rate = float(self.subsidized_fee_rate_edit.text())
-            payment_frequency_desc = self.land_fee_twidget.item(row, CONTRACTOR_PAYMENT_FREQUENCY).text()
-            payment_frequency = self.session.query(ClPaymentFrequency). \
-                filter(ClPaymentFrequency.description == payment_frequency_desc).one()
-            fee.payment_frequency = payment_frequency.code
-            fee.created_by = DatabaseUtils.current_sd_user().user_id
-            date_time_string = QDateTime.currentDateTime().toString(Constants.DATABASE_DATETIME_FORMAT)
-            fee.created_at = datetime.strptime(date_time_string, Constants.PYTHON_DATETIME_FORMAT)
-            self.session.add(fee)
+                if self.subsidized_area_edit.text() != '':
+                    fee.subsidized_area = int(self.subsidized_area_edit.text())
+                if self.subsidized_fee_rate_edit.text() != '':
+                    fee.subsidized_fee_rate = float(self.subsidized_fee_rate_edit.text())
+                payment_frequency_desc = self.land_fee_twidget.item(row, CONTRACTOR_PAYMENT_FREQUENCY).text()
+                payment_frequency = self.session.query(ClPaymentFrequency). \
+                    filter(ClPaymentFrequency.description == payment_frequency_desc).one()
+                fee.payment_frequency = payment_frequency.code
+                fee.created_by = DatabaseUtils.current_sd_user().user_id
+                date_time_string = QDateTime.currentDateTime().toString(Constants.DATABASE_DATETIME_FORMAT)
+                fee.created_at = datetime.strptime(date_time_string, Constants.PYTHON_DATETIME_FORMAT)
+                self.session.add(fee)
                 # elif count == 1:
                 #     fee = self.session.query(CtFee).filter(CtFee.contract == self.contract.contract_id). \
                 #         filter(CtFee.person == person_id). \
@@ -4657,6 +4664,9 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
     def on_refresh_fee_button_clicked(self):
 
         self.land_fee_twidget.setRowCount(0)
+
+        PluginUtils.show_message(self, u'Анхааруулга', u'Газрын төлбөрийг төлбөрийн мэргэжилтэнгээр ГКМС-ын веб систем дээр бодолтыг хийлгэн үү!!!')
+        return
 
         if not self.__check_share_sum(self.share_fee_twidget, 0):
             PluginUtils.show_message(self, u'Анхааруулга', u'Төлбөр тооцох хувийн нийлбэр 1-тэй тэнцүү байх ёстой')
