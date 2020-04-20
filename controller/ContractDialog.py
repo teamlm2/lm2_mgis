@@ -105,7 +105,6 @@ DOC_VIEW_COLUMN = 5
 
 
 class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
-
     def __init__(self, contract, navigator, attribute_update, parent=None):
 
         super(ContractDialog, self).__init__(parent)
@@ -180,11 +179,11 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         if app_no_count == 0:
             return
 
-        applicants = self.session.query(CtApplicationPersonRole).\
-            join(CtApplication, CtApplicationPersonRole.application == CtApplication.app_id).\
-            join(SetApplicationTypePersonRole, CtApplication.app_type == SetApplicationTypePersonRole.type).\
-            filter(CtApplication.app_no == app_no).\
-            filter(SetApplicationTypePersonRole.role == CtApplicationPersonRole.role).\
+        applicants = self.session.query(CtApplicationPersonRole). \
+            join(CtApplication, CtApplicationPersonRole.application == CtApplication.app_id). \
+            join(SetApplicationTypePersonRole, CtApplication.app_type == SetApplicationTypePersonRole.type). \
+            filter(CtApplication.app_no == app_no). \
+            filter(SetApplicationTypePersonRole.role == CtApplicationPersonRole.role). \
             filter(SetApplicationTypePersonRole.is_owner == True).all()
 
         for applicant in applicants:
@@ -230,17 +229,17 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         else:
             return True
 
-    def  __cert_range_cbox_setup(self):
+    def __cert_range_cbox_setup(self):
 
         self.cert_range_cbox.clear()
         au1 = DatabaseUtils.working_l1_code()
         au2 = DatabaseUtils.working_l2_code()
 
-        cert_au1 = self.session.query(SetCertificate).filter(SetCertificate.au2 == None).\
+        cert_au1 = self.session.query(SetCertificate).filter(SetCertificate.au2 == None). \
             filter(SetCertificate.au1 == au1).filter(SetCertificate.is_valid == True).all()
 
-        cert_au2 = self.session.query(SetCertificate).filter(SetCertificate.au2 == au2).\
-           filter(SetCertificate.is_valid == True).all()
+        cert_au2 = self.session.query(SetCertificate).filter(SetCertificate.au2 == au2). \
+            filter(SetCertificate.is_valid == True).all()
 
         for cert in cert_au2:
             au_name = ''
@@ -250,7 +249,8 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             if cert.description:
                 description = cert.description
 
-            self.cert_range_cbox.addItem(str(cert.id)+','+ au_name +','+str(cert.range_first_no)+'-'+str(cert.range_last_no)+','+description, cert.id)
+            self.cert_range_cbox.addItem(str(cert.id) + ',' + au_name + ',' + str(cert.range_first_no) + '-' + str(
+                cert.range_last_no) + ',' + description, cert.id)
 
         for cert in cert_au1:
             au_name = ''
@@ -259,17 +259,19 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                 au_name = cert.au1_ref.name
             if cert.description:
                 description = cert.description
-            self.cert_range_cbox.addItem(str(cert.id)+','+ au_name +','+str(cert.range_first_no)+'-'+str(cert.range_last_no)+','+description, cert.id)
+            self.cert_range_cbox.addItem(str(cert.id) + ',' + au_name + ',' + str(cert.range_first_no) + '-' + str(
+                cert.range_last_no) + ',' + description, cert.id)
 
     def __user_right_permissions(self):
 
         user_name = QSettings().value(SettingsConstants.USER)
-        user = self.session.query(SetRole).\
-            filter(SetRole.user_name == user_name).\
+        user = self.session.query(SetRole). \
+            filter(SetRole.user_name == user_name). \
             filter(SetRole.is_active == True).one()
         user_name_real = user.user_name_real
 
-        user_rights = self.session.query(SetUserGroupRole).filter(SetUserGroupRole.user_name_real == user_name_real).all()
+        user_rights = self.session.query(SetUserGroupRole).filter(
+            SetUserGroupRole.user_name_real == user_name_real).all()
         for user_right in user_rights:
             if user_right.group_role == UserRight_code.contracting_update:
                 if user_right.r_update:
@@ -303,10 +305,10 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         year = QDate().currentDate().toString("yyyy")
         # try:
         contract_number_filter = "%-{0}/%".format(str(QDate().currentDate().toString("yyyy")))
-      
+
         count = self.session.query(CtContract) \
             .filter(CtContract.contract_no.like("%-%")) \
-            .filter(CtContract.contract_no.like(soum+"-%")) \
+            .filter(CtContract.contract_no.like(soum + "-%")) \
             .filter(CtContract.contract_no.like(contract_number_filter)) \
             .filter(CtContract.au2 == soum) \
             .order_by(func.substr(CtContract.contract_no, 12, 16).desc()).count()
@@ -324,10 +326,10 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             minus_split_number = cu_max_number.split("-")
             slash_split_number = minus_split_number[1].split("/")
             cu_max_number = int(slash_split_number[1]) + 1
-        
+
         number = soum + "-" + year + "/" + str(cu_max_number).zfill(5)
         self.contract_num_edit.setText(number)
-   
+
         self.contract.contract_no = number
 
         # contract_number_filter = "%-{0}/%".format(str(year))
@@ -366,7 +368,8 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                 return certificate_type
 
         except SQLAlchemyError, e:
-            raise LM2Exception(self.tr("Database Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+            raise LM2Exception(self.tr("Database Query Error"),
+                               self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
 
     def __set_certificate_no(self):
 
@@ -408,12 +411,14 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         count = self.session.query(SetCertificate) \
             .filter(SetCertificate.certificate_type == certificate_type).count()
         if count == 1:
-            first_no, last_no, current_no = self.session.query(SetCertificate.range_first_no, SetCertificate.range_last_no, SetCertificate.current_no)\
+            first_no, last_no, current_no = self.session.query(SetCertificate.range_first_no,
+                                                               SetCertificate.range_last_no, SetCertificate.current_no) \
                 .filter(SetCertificate.certificate_type == certificate_type) \
-                .filter(SetCertificate.id == range_id).\
+                .filter(SetCertificate.id == range_id). \
                 order_by(SetCertificate.begin_date.desc()).limit(1).one()
 
-            return {Constants.CERTIFICATE_FIRST_NUMBER: first_no, Constants.CERTIFICATE_LAST_NUMBER: last_no, Constants.CERTIFICATE_CURRENT_NUMBER: current_no}
+            return {Constants.CERTIFICATE_FIRST_NUMBER: first_no, Constants.CERTIFICATE_LAST_NUMBER: last_no,
+                    Constants.CERTIFICATE_CURRENT_NUMBER: current_no}
         else:
             return None
 
@@ -511,11 +516,11 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                 self.other_reason_cbox.setCurrentIndex(
                     self.other_reason_cbox.findData(self.contract.cancellation_reason))
 
-            cancellation_application_c = self.contract.application_roles\
+            cancellation_application_c = self.contract.application_roles \
                 .filter_by(role=Constants.APP_ROLE_CANCEL).count()
             if cancellation_application_c == 1:
                 # self.application_based_rbutton.setChecked(True)
-                cancellation_application = self.contract.application_roles\
+                cancellation_application = self.contract.application_roles \
                     .filter_by(role=Constants.APP_ROLE_CANCEL).one()
 
                 if cancellation_application is None:
@@ -523,12 +528,13 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                                            self.tr("Could not load contract. Cancellation application not found"))
                     self.reject()
                     self.app_number_cbox.clear()
-                    app = self.session.query(CtApplication).filter(CtApplication.app_id == cancellation_application.application).one()
+                    app = self.session.query(CtApplication).filter(
+                        CtApplication.app_id == cancellation_application.application).one()
                     self.app_number_cbox.addItem(app.app_no, cancellation_application.application)
                     self.app_number_cbox.setCurrentIndex(self.app_number_cbox.findText(app.app_no))
                     self.type_edit.setText(cancellation_application.application_ref.app_type_ref.description)
 
-                    app_persons = self.session.query(CtApplicationPersonRole).\
+                    app_persons = self.session.query(CtApplicationPersonRole). \
                         filter(CtApplicationPersonRole.application == cancellation_application.application).all()
                     for app_person in app_persons:
                         if app_person.person_ref:
@@ -551,7 +557,8 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
         parcel = application.parcel_ref
         bag_name = ''
-        bag_count = self.session.query(AuLevel3).filter(AuLevel3.geometry.ST_Within(func.ST_Centroid(parcel.geometry))).count()
+        bag_count = self.session.query(AuLevel3).filter(
+            AuLevel3.geometry.ST_Within(func.ST_Centroid(parcel.geometry))).count()
         bag_count = self.session.query(AuLevel3).filter(
             func.ST_Centroid(parcel.geometry).ST_Within(AuLevel3.geometry)).count()
 
@@ -579,7 +586,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         self.id_main_edit.setText(parcel.parcel_id)
         self.old_id_edit.setText(parcel.old_parcel_id)
         self.geo_id_edit.setText(parcel.geo_id)
-        self.calculated_area_edit.setText(str(round(parcel.area_m2,1)))
+        self.calculated_area_edit.setText(str(round(parcel.area_m2, 1)))
 
         self.bag_edit.setText(bag_name)
         self.street_name_edit.setText(parcel.address_streetname)
@@ -647,7 +654,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         for officer in print_officers_head:
             l2_code_list = officer.restriction_au_level2.split(',')
             if soum_code in l2_code_list:
-                officer_name = officer.surname[:1]+'.'+officer.first_name
+                officer_name = officer.surname[:1] + '.' + officer.first_name
                 self.print_officer_cbox.addItem(officer_name, officer.user_name_real)
         for officer in print_officers:
             l2_code_list = officer.restriction_au_level2.split(',')
@@ -693,7 +700,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
         self.applicant_documents_cbox.clear()
         # try:
-        con_app_roles = self.contract.application_roles\
+        con_app_roles = self.contract.application_roles \
             .filter(CtContractApplicationRole.role == Constants.APPLICATION_ROLE_CREATES).all()
 
         # except SQLAlchemyError, e:
@@ -749,10 +756,10 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
     def __validate_application(self, application):
 
-        #checks that there is a decision for this application
-        #checks that the decision was "approved"
-        app_contract_count = self.session.query(CtContractApplicationRole).\
-            filter(CtContractApplicationRole.application == application.app_id).\
+        # checks that there is a decision for this application
+        # checks that the decision was "approved"
+        app_contract_count = self.session.query(CtContractApplicationRole). \
+            filter(CtContractApplicationRole.application == application.app_id). \
             filter(CtContractApplicationRole.role != 10).count()
         if app_contract_count > 0:
             PluginUtils.show_error(self, self.tr("Application Error"),
@@ -777,13 +784,13 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                                    self.tr("There is no approved decision result for this application."))
             return False
 
-        #check that there is a parcel for this application
+        # check that there is a parcel for this application
         if application.parcel is None:
             PluginUtils.show_error(self, self.tr("Application Error"),
                                    self.tr("It is not allowed to add applications without assigned parcel."))
             return False
 
-        #check that there is a duration, if there should be one
+        # check that there is a duration, if there should be one
         if application.app_type in Constants.APPLICATION_TYPE_WITH_DURATION:
             if application.approved_duration == 0 or application is None:
                 PluginUtils.show_error(self, self.tr("Application Error"),
@@ -803,7 +810,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             duration = int(self.contract_duration_edit.text())
             if not duration > 0:
                 PluginUtils.show_error(self, self.tr("End Date Error"),
-                                           self.tr("Its not allowed to contract date."))
+                                       self.tr("Its not allowed to contract date."))
                 return False
             return True
             # begin = self.contract.contract_begin
@@ -837,11 +844,12 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
     def __validate_settings(self):
 
         if self.contract_begin_edit.text() is None or self.contract_begin_edit.text() == '':
-            PluginUtils.show_error(self, self.tr("Land Fees"), u'Гэрээний эхлэх хугацаа ороогүй байна. Энэ нь анх компанийн хийсэн мэдээлэлд дутуу байсан гэсэн үг юм.')
+            PluginUtils.show_error(self, self.tr("Land Fees"),
+                                   u'Гэрээний эхлэх хугацаа ороогүй байна. Энэ нь анх компанийн хийсэн мэдээлэлд дутуу байсан гэсэн үг юм.')
             return False
-        if self.land_fee_twidget.rowCount() == 0:
-            PluginUtils.show_error(self, self.tr("Land Fees"), u'Газрын төлбөрийн бодолтийг хийнэ үү!!!')
-            return False
+            # if self.land_fee_twidget.rowCount() == 0:
+            #   PluginUtils.show_error(self, self.tr("Land Fees"), u'Газрын төлбөрийн бодолтыг хийнэ үү!!!')
+            #  return False
 
         if len(self.landfee_message_label1.text()) > 0:
             PluginUtils.show_error(self, self.tr("Land Fees"), self.landfee_message_label1.text())
@@ -883,7 +891,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         self.street_name_edit.setText(parcel.address_streetname)
         # self.bag_edit.setText(parcel.address_neighbourhood)
 
-        #decision date
+        # decision date
         last_decision = self.session.query(CtDecision).join(CtApplication.decision_result) \
             .join(CtDecisionApplication.decision_ref) \
             .filter(CtApplication.app_no == application.app_no) \
@@ -967,9 +975,9 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
         parcel_id = self.id_main_edit.text().strip()
 
-        if len(parcel_id) == 0:
-            self.landfee_message_label1.setText(self.tr('Without parcel no land fee information is available.'))
-            return
+        # if len(parcel_id) == 0:
+        #   self.landfee_message_label1.setText(self.tr('Without parcel no land fee information is available.'))
+        #  return
 
         base_fee = self.session.query(SetBaseFee).filter(
             SetFeeZone.geometry.ST_Contains(func.ST_Centroid(CaParcelTbl.geometry))). \
@@ -980,7 +988,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             one()
 
         base_fee_per_m2 = 0
-        if  base_fee.base_fee_per_m2:
+        if base_fee.base_fee_per_m2:
             base_fee_per_m2 = base_fee.base_fee_per_m2
         self.base_fee_edit.setText('{0}'.format(base_fee_per_m2))
         self.subsidized_area_edit.setText('{0}'.format(base_fee.subsidized_area))
@@ -1010,10 +1018,11 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                     #     row += 1
                     # else:
                     if fee_count > 0:
-                        fees = person.fees.filter(CtFee.contract == self.contract.contract_id).\
+                        fees = person.fees.filter(CtFee.contract == self.contract.contract_id). \
                             filter(CtFee.base_fee_id == base_fee_id).all()
                         for fee in fees:
-                            person = self.session.query(BsPerson).filter(BsPerson.person_id == contractor.person_ref.person_id).one()
+                            person = self.session.query(BsPerson).filter(
+                                BsPerson.person_id == contractor.person_ref.person_id).one()
                             self.__add_fee_row2(row, contractor, fee)
                             row += 1
 
@@ -1037,9 +1046,9 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
         parcel_id = self.id_main_edit.text().strip()
 
-        if len(parcel_id) == 0:
-            self.landfee_message_label1.setText(self.tr('Without parcel no land fee information is available.'))
-            return
+        # if len(parcel_id) == 0:
+        # self.landfee_message_label1.setText(self.tr('Without parcel no land fee information is available.'))
+        # return
 
         count = self.session.query(SetBaseFee).filter(
             SetFeeZone.geometry.ST_Contains(func.ST_Centroid(CaParcelTbl.geometry))). \
@@ -1054,13 +1063,12 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             filter(CaParcelTbl.parcel_id == parcel_id). \
             filter(SetBaseFee.fee_zone == SetFeeZone.zone_id). \
             filter(SetBaseFee.landuse == CaParcelTbl.landuse). \
-            filter(SetBaseFee.in_active == True) .\
+            filter(SetBaseFee.in_active == True). \
             all()
 
         self.fee_zone_cbox.clear()
 
         for fee_zone in fee_zones:
-
             self.fee_zone_cbox.addItem(fee_zone.fee_zone_ref.location, fee_zone.id)
 
     def __populate_landfee_tab(self):
@@ -1076,7 +1084,8 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             self.landfee_message_label1.setText(self.tr('Without parcel no land fee information is available.'))
             return
 
-        count = self.session.query(SetBaseFee).filter(SetFeeZone.geometry.ST_Contains(func.ST_Centroid(CaParcelTbl.geometry))). \
+        count = self.session.query(SetBaseFee).filter(
+            SetFeeZone.geometry.ST_Contains(func.ST_Centroid(CaParcelTbl.geometry))). \
             filter(CaParcelTbl.parcel_id == parcel_id). \
             filter(SetBaseFee.fee_zone == SetFeeZone.zone_id). \
             filter(SetBaseFee.landuse == CaParcelTbl.landuse). \
@@ -1086,7 +1095,8 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             self.landfee_message_label1.setText(self.tr('No fee zone or base fee found for the parcel.'))
             return
 
-        base_fees = self.session.query(SetBaseFee).filter(SetFeeZone.geometry.ST_Contains(func.ST_Centroid(CaParcelTbl.geometry))). \
+        base_fees = self.session.query(SetBaseFee).filter(
+            SetFeeZone.geometry.ST_Contains(func.ST_Centroid(CaParcelTbl.geometry))). \
             filter(CaParcelTbl.parcel_id == parcel_id). \
             filter(SetBaseFee.fee_zone == SetFeeZone.zone_id). \
             filter(SetBaseFee.landuse == CaParcelTbl.landuse). \
@@ -1184,7 +1194,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
         # try:
         self.__add_doc_types()
-            # self.__update_doc_twidget()
+        # self.__update_doc_twidget()
 
         # except SQLAlchemyError, e:
         #     PluginUtils.show_error(self, self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
@@ -1199,16 +1209,16 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
         self.__remove_document_items(self.app_doc_twidget)
         # try:
-        count = self.contract.application_roles\
-                    .filter(CtContractApplicationRole.role == Constants.APPLICATION_ROLE_CREATES).count()
+        count = self.contract.application_roles \
+            .filter(CtContractApplicationRole.role == Constants.APPLICATION_ROLE_CREATES).count()
         if count == 0: return
 
-        con_app_roles = self.contract.application_roles\
-                    .filter(CtContractApplicationRole.role == Constants.APPLICATION_ROLE_CREATES).one()
+        con_app_roles = self.contract.application_roles \
+            .filter(CtContractApplicationRole.role == Constants.APPLICATION_ROLE_CREATES).one()
 
         current_app_type = con_app_roles.application_ref.app_type
-        required_doc_types = self.session.query(SetApplicationTypeDocumentRole)\
-                                    .filter_by(application_type=current_app_type).all()
+        required_doc_types = self.session.query(SetApplicationTypeDocumentRole) \
+            .filter_by(application_type=current_app_type).all()
 
         for docType in required_doc_types:
             item_provided = QTableWidgetItem()
@@ -1231,7 +1241,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             self.app_doc_twidget.setItem(row, APP_DOC_VIEW_COLUMN, item_view)
 
         app_no = self.application_this_contract_based_edit.text()
-        file_path = FilePath.app_file_path()+'/'+ app_no
+        file_path = FilePath.app_file_path() + '/' + app_no
         if not os.path.exists(file_path):
             os.makedirs(file_path)
         for file in os.listdir(file_path):
@@ -1247,24 +1257,24 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                     doc_type_code = str(doc_type_item.data(Qt.UserRole))
 
                     if len(str(doc_type_item.data(Qt.UserRole))) == 1:
-                        doc_type_code = '0'+ str(doc_type_item.data(Qt.UserRole))
+                        doc_type_code = '0' + str(doc_type_item.data(Qt.UserRole))
                     if len(doc_type) == 1:
                         doc_type = '0' + doc_type
 
                     if doc_type == doc_type_code and self.application_this_contract_based_edit.text() == app_no:
-                            item_name = self.app_doc_twidget.item(i, APP_DOC_NAME_COLUMN)
-                            item_name.setData(Qt.UserRole, app_no)
-                            item_name.setText(file_name)
+                        item_name = self.app_doc_twidget.item(i, APP_DOC_NAME_COLUMN)
+                        item_name.setData(Qt.UserRole, app_no)
+                        item_name.setText(file_name)
 
-                            item_provided = self.app_doc_twidget.item(i, APP_DOC_PROVIDED_COLUMN)
-                            item_provided.setCheckState(Qt.Checked)
+                        item_provided = self.app_doc_twidget.item(i, APP_DOC_PROVIDED_COLUMN)
+                        item_provided.setCheckState(Qt.Checked)
 
-                            self.app_doc_twidget.setItem(i, 0, item_provided)
-                            self.app_doc_twidget.setItem(i, 2, item_name)
+                        self.app_doc_twidget.setItem(i, 0, item_provided)
+                        self.app_doc_twidget.setItem(i, 2, item_name)
 
-        # except SQLAlchemyError, e:
-        #     PluginUtils.show_error(self, self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
-        #     return
+                        # except SQLAlchemyError, e:
+                        #     PluginUtils.show_error(self, self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+                        #     return
 
     def __add_doc_types(self):
 
@@ -1322,7 +1332,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                 file_name = file
                 contract_no = file[:16]
 
-                contract_no = contract_no[:10] +'/'+ contract_no[-5:]
+                contract_no = contract_no[:10] + '/' + contract_no[-5:]
 
             for i in range(self.doc_twidget.rowCount()):
                 doc_type_item = self.doc_twidget.item(i, DOC_TYPE_COLUMN)
@@ -1330,7 +1340,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                 doc_type_code = str(doc_type_item.data(Qt.UserRole))
 
                 if len(str(doc_type_item.data(Qt.UserRole))) == 1:
-                    doc_type_code = '0'+ str(doc_type_item.data(Qt.UserRole))
+                    doc_type_code = '0' + str(doc_type_item.data(Qt.UserRole))
                 if len(doc_type) == 1:
                     doc_type = '0' + doc_type
 
@@ -1394,7 +1404,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
                 contractor_subsidized_area = int(round(float(contractor.share) * subsidized_area))
                 fee_subsidized = (contractor_subsidized_area * float(base_fee_per_m2)) - (
-                contractor_subsidized_area * float(base_fee_per_m2) * (float(subsidized_fee_rate) / 100))
+                    contractor_subsidized_area * float(base_fee_per_m2) * (float(subsidized_fee_rate) / 100))
                 fee_standard = (contractor_area - contractor_subsidized_area) * float(base_fee_per_m2)
                 fee_base = contractor_area * float(base_fee_per_m2) * float((100 - subsidized_fee_rate) / 100)
                 fee_calculated = int(round(fee_base if fee_standard <= 0 else fee_subsidized + fee_standard))
@@ -1414,7 +1424,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
             item = QTableWidgetItem(u'{0}, {1}'.format(contractor.person_ref.name, contractor.person_ref.first_name))
             item.setData(Qt.UserRole, contractor.person_ref.person_register)
-            item.setData(Qt.UserRole+1, contractor.person_ref.person_id)
+            item.setData(Qt.UserRole + 1, contractor.person_ref.person_id)
             self.land_fee_twidget.setItem(row, CONTRACTOR_NAME, item)
             item = QTableWidgetItem(u'{0}'.format(contractor.person_ref.person_register))
             self.__lock_item(item)
@@ -1424,7 +1434,6 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             item = QTableWidgetItem('{0}'.format(contractor.share))
             self.__lock_item(item)
             self.land_fee_twidget.setItem(row, CONTRACTOR_SHARE, item)
-
 
             self.land_fee_twidget.setItem(row, CONTRACTOR_FEE_CONTRACT, item)
             item = QTableWidgetItem('{0}'.format(10))
@@ -1456,7 +1465,6 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             zone_no = str(self.__get_zone_no_by_base_fee(base_fee).zone_no)
 
         if contractor:
-
             # self.land_fee_twidget.insertRow(row)
             row = self.land_fee_twidget.rowCount()
             self.land_fee_twidget.insertRow(row)
@@ -1506,7 +1514,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         # try:
         self.__save_contract()
         self.__save_parcel_address()
-        self.__save_fees()
+        # self.__save_fees()
         self.__save_conditions()
         return True
 
@@ -1532,8 +1540,10 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         if self.active_rbutton.isChecked():
             if self.contract.status == Constants.CONTRACT_STATUS_CANCELLED:
                 PluginUtils.show_error(self, self.tr("Error saving contract"),
-                                   self.tr("This contract cancelled. You create a new contract"))
-                return
+                                       self.tr("This contract cancelled. You create a new contract"))
+            if self.land_fee_twidget.rowCount() == 0:
+                PluginUtils.show_error(self, self.tr("Land Fees"), u'Газрын төлбөрийн бодолтыг хийнэ үү!!!')
+                return False
 
         if self.contract.application_roles.filter_by(role=Constants.APPLICATION_ROLE_CANCELS).count() != 0:
             PluginUtils.show_error(self, self.tr("Error saving contract"),
@@ -1567,7 +1577,6 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                 self.contract.cancellation_reason = self.other_reason_cbox.itemData(
                     self.other_reason_cbox.currentIndex())
 
-
         self.contract.contract_begin = self.contract_begin_edit.text()
         self.contract.contract_date = self.contract_date.date().toString(Constants.DATABASE_DATE_FORMAT)
 
@@ -1586,14 +1595,14 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             # certificate_type = self.__certificate_type()
             # certificate_settings = self.session.query(SetCertificate).get(certificate_type)
             # certificate_settings.current_no = int(self.calculated_num_edit.text())
-        # if self.is_certificate == False:
-        #     PluginUtils.show_error(self, self.tr("Error saving contract"),
-        #                            self.tr("It is not allowed to save a contract without an certificate no wrong!!!."))
-        #     return
+            # if self.is_certificate == False:
+            #     PluginUtils.show_error(self, self.tr("Error saving contract"),
+            #                            self.tr("It is not allowed to save a contract without an certificate no wrong!!!."))
+            #     return
 
-        # except SQLAlchemyError, e:
-        #     self.rollback_to_savepoint()
-        #     raise LM2Exception(self.tr("Database Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+            # except SQLAlchemyError, e:
+            #     self.rollback_to_savepoint()
+            #     raise LM2Exception(self.tr("Database Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
 
     def __start_fade_out_timer(self):
 
@@ -1617,7 +1626,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
         for row in range(self.land_fee_twidget.rowCount()):
             register = self.land_fee_twidget.item(row, CONTRACTOR_ID).text()
-            base_fee_id = self.land_fee_twidget.item(row, CONTRACTOR_NAME).data(Qt.UserRole+2)
+            base_fee_id = self.land_fee_twidget.item(row, CONTRACTOR_NAME).data(Qt.UserRole + 2)
             if register == person_register and base_fee == base_fee_id:
                 is_has = True
 
@@ -1632,7 +1641,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         base_fee_id = None
         grace_period = None
         resolution_id = None
-        for row1 in  range(self.share_fee_twidget.rowCount()):
+        for row1 in range(self.share_fee_twidget.rowCount()):
             item1 = self.share_fee_twidget.item(row1, 1)
             # person_register = item1.data(Qt.UserRole)
             person_id1 = item1.data(Qt.UserRole)
@@ -1651,13 +1660,15 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                 base_fee_id = self.land_fee_twidget.item(row, CONTRACTOR_NAME).data(Qt.UserRole + 2)
                 resolution_id = self.land_fee_twidget.item(row, CONTRACTOR_NAME).data(Qt.UserRole + 3)
 
-                count = self.session.query(CtFee).filter(CtFee.contract == self.contract.contract_id).\
+                count = self.session.query(CtFee).filter(CtFee.contract == self.contract.contract_id). \
                     filter(CtFee.person == person_id).count()
                 if count == 0:
                     if share > 0:
                         if person_id1 == person_id:
-                            fee_calculated = fee_calculated + int(self.land_fee_twidget.item(row, CONTRACTOR_FEE_CALCULATED).text())
-                            fee_contract = fee_contract + int(self.land_fee_twidget.item(row, CONTRACTOR_FEE_CONTRACT).text())
+                            fee_calculated = fee_calculated + int(
+                                self.land_fee_twidget.item(row, CONTRACTOR_FEE_CALCULATED).text())
+                            fee_contract = fee_contract + int(
+                                self.land_fee_twidget.item(row, CONTRACTOR_FEE_CONTRACT).text())
                             grace_period = int(self.land_fee_twidget.item(row, CONTRACTOR_GRACE_PERIOD).text())
             count = self.session.query(CtFee).filter(CtFee.contract == self.contract.contract_id). \
                 filter(CtFee.person == person_id1).count()
@@ -1767,7 +1778,8 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             self.contract.cancellation_reason = None
             if cancel_count > 0:
                 # update
-                cancellation_app = self.contract.application_roles.filter_by(role=Constants.APPLICATION_ROLE_CANCELS).one()
+                cancellation_app = self.contract.application_roles.filter_by(
+                    role=Constants.APPLICATION_ROLE_CANCELS).one()
                 cancellation_app.application = app_id
             else:
                 # insert
@@ -1801,8 +1813,8 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             code = item.data(Qt.UserRole)
             if code is None:
                 return
-            # if self.__condition_assigned(code):
-            #     item.setCheckState(Qt.Checked)
+                # if self.__condition_assigned(code):
+                #     item.setCheckState(Qt.Checked)
 
     def __condition_assigned(self, code):
 
@@ -1923,9 +1935,9 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                 condition.condition = code
                 contract.conditions.append(condition)
 
-        # except SQLAlchemyError, e:
-        #     self.rollback_to_savepoint()
-        #     raise LM2Exception(self.tr("Database Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+                # except SQLAlchemyError, e:
+                #     self.rollback_to_savepoint()
+                #     raise LM2Exception(self.tr("Database Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
 
     def __check_item(self, item, toggled_list):
 
@@ -2017,7 +2029,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         #     self.tab_widget.insertTab(self.tab_widget.count() - 5, self.contract_conditions_tab,
         #                               self.tr("Contract Conditions"))
         self.tab_widget.insertTab(self.tab_widget.count() - 5, self.contract_conditions_tab,
-                                       self.tr("Contract Conditions"))
+                                  self.tr("Contract Conditions"))
         self.item_model = self.__item_model(app.app_type)
         self.item_model.itemChanged.connect(self.__item_changed)
         self.conditions_tree.setModel(self.item_model)
@@ -2105,9 +2117,8 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         if not app_type in self.app_type_property_no_refresh:
             if not application.property_no:
                 if not application.parcel_ref.property_no:
-
                     PluginUtils.show_message(self, self.tr("Warning"),
-                                           self.tr("Not property number!"))
+                                             self.tr("Not property number!"))
                     return
 
         if not application.parcel_ref.property_no:
@@ -2292,8 +2303,8 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             PluginUtils.show_error(self, self.tr("Database Error"),
                                    self.tr("Found multiple applications for the number {0}.").format(app_no))
 
-        # except SQLAlchemyError, e:
-        #     PluginUtils.show_error(self, self.tr("Database Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+            # except SQLAlchemyError, e:
+            #     PluginUtils.show_error(self, self.tr("Database Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
 
     @pyqtSlot()
     def on_apply_button_clicked(self):
@@ -2309,8 +2320,8 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             .filter(SetRole.is_active == True).one()
 
         sd_user = self.session.query(SdUser).filter(SdUser.gis_user_real == current_employee.user_name_real).first()
-        app_status9_count = self.session.query(CtApplicationStatus)\
-            .filter(CtApplicationStatus.application == self.app_id)\
+        app_status9_count = self.session.query(CtApplicationStatus) \
+            .filter(CtApplicationStatus.application == self.app_id) \
             .filter(CtApplicationStatus.status == 9).count()
         if self.active_rbutton.isChecked() and app_status9_count == 0:
             new_status = CtApplicationStatus()
@@ -2492,15 +2503,14 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         path = FileUtils.map_file_path()
         default_path = r'D:/TM_LM2/contracts'
         if app_type == '22':
-            tpl = DocxTemplate(path+'geree_THGGA_DX.docx')
+            tpl = DocxTemplate(path + 'geree_THGGA_DX.docx')
         else:
             if person.type == 10 or person.type == 20 or person.type == 30 or person.type == 40:
-                tpl = DocxTemplate(path+'geree_ezemshix_DX.docx')
+                tpl = DocxTemplate(path + 'geree_ezemshix_DX.docx')
             elif person.type == 50 or person.type == 60 or person.type == 70:
-                tpl = DocxTemplate(path+'geree_ashigluulah_DX.docx')
+                tpl = DocxTemplate(path + 'geree_ashigluulah_DX.docx')
             elif person.type == 80:
                 tpl = DocxTemplate(path + 'geree_ashigluulah_SUH.docx')
-
 
         if not officer:
             PluginUtils.show_message(self, self.tr(" Employee"), self.tr("Employee not found"))
@@ -2540,7 +2550,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             person_full_name = person.name
         area_m2 = self.calculated_area_edit.text()
 
-        area_m2 = area_m2 + u" м2" + u', '+ str(float(area_m2) / 10000) + u" га"
+        area_m2 = area_m2 + u" м2" + u', ' + str(float(area_m2) / 10000) + u" га"
 
         # if float(area_m2) > 10000:
         #     area_m2 = str(float(area_m2) / 10000) + u" га"
@@ -2589,7 +2599,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                 bank_name = bank.description
                 bank_full_value = bank_name + ' - ' + account_no
                 if bank_value == '':
-                    bank_value =  bank_full_value
+                    bank_value = bank_full_value
                 else:
                     bank_value = bank_value + ', ' + bank_full_value
 
@@ -2607,7 +2617,6 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                 head_surname = self.officer.department_ref.head_surname
             if self.officer.department_ref.head_firstname:
                 head_firstname = self.officer.department_ref.head_firstname
-
 
         person_bank_name = person_bank_name
         person_account = person.bank_account_no
@@ -2851,7 +2860,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
     #
     #     return lookup
 
-    def __add_duration(self,map_composition):
+    def __add_duration(self, map_composition):
 
         duration_year = self.contract_duration_edit.text()
 
@@ -2859,11 +2868,12 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         item.setText(duration_year)
         item.adjustSizeToText()
 
-    def __add_officer_cert(self,map_composition):
+    def __add_officer_cert(self, map_composition):
 
         app_no = self.application_this_contract_based_edit.text()
         # try:
-        app_status = self.session.query(CtApplicationStatus).filter(CtApplicationStatus.application == self.app_id).all()
+        app_status = self.session.query(CtApplicationStatus).filter(
+            CtApplicationStatus.application == self.app_id).all()
         for p in app_status:
             if p.status == 9:
                 officer = self.session.query(SetRole).filter(SetRole.user_name_real == p.officer_in_charge).one()
@@ -2882,7 +2892,8 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
         app_no = self.application_this_contract_based_edit.text()
         # try:
-        app_status = self.session.query(CtApplicationStatus).filter(CtApplicationStatus.application == self.app_id).all()
+        app_status = self.session.query(CtApplicationStatus).filter(
+            CtApplicationStatus.application == self.app_id).all()
         for p in app_status:
             if p.status == 9:
                 officer = DatabaseUtils.get_sd_employee(p.officer_in_charge);
@@ -2896,7 +2907,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
         return officer_name
 
-    def __add_officer(self,map_composition):
+    def __add_officer(self, map_composition):
 
         # report_settings = self.__admin_settings("set_report_parameter")
         # if len(report_settings) == 0:
@@ -2917,7 +2928,8 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
         app_no = self.application_this_contract_based_edit.text()
         try:
-            app_status = self.session.query(CtApplicationStatus).filter(CtApplicationStatus.application == self.app_id).all()
+            app_status = self.session.query(CtApplicationStatus).filter(
+                CtApplicationStatus.application == self.app_id).all()
             for p in app_status:
                 if p.status == 9:
                     officer = DatabaseUtils.get_sd_employee(p.officer_in_charge);
@@ -2926,7 +2938,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             raise LM2Exception(self.tr("Database Query Error"), self.tr("aCould not execute: {0}").format(e.message))
 
         item = map_composition.getComposerItemById("officer_name")
-        item.setText(officer.first_name+ u",")
+        item.setText(officer.first_name + u",")
         item.adjustSizeToText()
 
         item = map_composition.getComposerItemById("officer_surname")
@@ -2937,7 +2949,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         item.setText(officer.surname)
         item.adjustSizeToText()
 
-    def __add_aimag_name_cert(self,map_composition):
+    def __add_aimag_name_cert(self, map_composition):
 
         aimag_code = self.application_this_contract_based_edit.text()[:3]
         # try:
@@ -2962,7 +2974,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
         return aimag
 
-    def __add_soum_name_cert(self,map_composition):
+    def __add_soum_name_cert(self, map_composition):
 
         soum_code = self.application_this_contract_based_edit.text()[:5]
         # try:
@@ -3008,7 +3020,8 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
         app_no = self.application_this_contract_based_edit.text()
         # try:
-        app_status = self.session.query(CtApplicationStatus).filter(CtApplicationStatus.application == self.app_id).all()
+        app_status = self.session.query(CtApplicationStatus).filter(
+            CtApplicationStatus.application == self.app_id).all()
         for p in app_status:
             if p.status == 9:
                 officer = DatabaseUtils.get_sd_employee(p.officer_in_charge);
@@ -3025,17 +3038,19 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             officer_head_count = self.session.query(SetRole).filter(SetRole.position == 9).count()
             if officer_head_count == 1:
                 officer_head = self.session.query(SetRole).filter(SetRole.position == 9).one()
-                officer_full_name = officer_head.surname[:1] + u'.' + officer_head.first_name +u'   ......................'
+                officer_full_name = officer_head.surname[
+                                    :1] + u'.' + officer_head.first_name + u'   ......................'
                 item = map_composition.getComposerItemById("head_name")
                 item.setText(officer_full_name)
                 item.adjustSizeToText()
 
-                officer_position = self.session.query(SdPosition).filter(SdPosition.position_id == officer_head.position).one()
+                officer_position = self.session.query(SdPosition).filter(
+                    SdPosition.position_id == officer_head.position).one()
                 item = map_composition.getComposerItemById("head_position")
                 item.setText(officer_position.description)
                 item.adjustSizeToText()
 
-    def __add_aimag_name(self,map_composition):
+    def __add_aimag_name(self, map_composition):
 
         aimag_code = self.application_this_contract_based_edit.text()[:3]
         # try:
@@ -3050,7 +3065,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         item.setText(aimag.name)
         item.adjustSizeToText()
 
-    def __add_soum_name(self,map_composition):
+    def __add_soum_name(self, map_composition):
 
         soum_code = self.application_this_contract_based_edit.text()[:5]
         # try:
@@ -3064,7 +3079,8 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         app_no = self.application_this_contract_based_edit.text()
         # try:
         pp = ""
-        app_dec = self.session.query(CtDecisionApplication).filter(CtDecisionApplication.application == self.app_id).all()
+        app_dec = self.session.query(CtDecisionApplication).filter(
+            CtDecisionApplication.application == self.app_id).all()
         for p in app_dec:
             pp = p.decision
         decision = self.session.query(CtDecision).filter(CtDecision.decision_id == pp).one()
@@ -3080,12 +3096,13 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         item.setText(soum.name)
         item.adjustSizeToText()
 
-    def __add_decision_cert(self,map_composition):
+    def __add_decision_cert(self, map_composition):
 
         app_no = self.application_this_contract_based_edit.text()
         # try:
         pp = ""
-        app_dec = self.session.query(CtDecisionApplication).filter(CtDecisionApplication.application == self.app_id).all()
+        app_dec = self.session.query(CtDecisionApplication).filter(
+            CtDecisionApplication.application == self.app_id).all()
         for p in app_dec:
             pp = p.decision
         decision = self.session.query(CtDecision).filter(CtDecision.decision_id == pp).one()
@@ -3094,7 +3111,10 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
         item = map_composition.getComposerItemById("decision")
         decision_date = str(decision.decision_date)
-        decision_date = " "+decision_date[1:-6]+u"           " + decision_date[5:-3]+u"              " + decision_date[-2:] + u"                  " + decision.decision_no[6:-5]
+        decision_date = " " + decision_date[1:-6] + u"           " + decision_date[
+                                                                     5:-3] + u"              " + decision_date[
+                                                                                                 -2:] + u"                  " + decision.decision_no[
+                                                                                                                                6:-5]
         item.setText(decision_date)
         item.adjustSizeToText()
 
@@ -3108,7 +3128,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         month = print_date.month()
         day = print_date.day()
 
-        contract_date = str(year)[-3:] + "           " + str(month) +"             " + str(day)
+        contract_date = str(year)[-3:] + "           " + str(month) + "             " + str(day)
         item = map_composition.getComposerItemById("contract_date")
         item.setText(contract_date)
         item.adjustSizeToText()
@@ -3118,7 +3138,8 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         app_no = self.application_this_contract_based_edit.text()
         try:
             pp = ""
-            app_dec = self.session.query(CtDecisionApplication).filter(CtDecisionApplication.application == self.app_id).all()
+            app_dec = self.session.query(CtDecisionApplication).filter(
+                CtDecisionApplication.application == self.app_id).all()
             for p in app_dec:
                 pp = p.decision
             decision = self.session.query(CtDecision).filter(CtDecision.decision_id == pp).one()
@@ -3128,7 +3149,10 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         # app = self.session.query(CtApplication).filter(CtApplication).one
         decision_date = str(decision.decision_date)
 
-        decision_date = " "+decision_date[2:-6]+u"           " + decision_date[5:-3]+u"            " + decision_date[-2:] + u"               " + decision.decision_no[6:-5]
+        decision_date = " " + decision_date[2:-6] + u"           " + decision_date[
+                                                                     5:-3] + u"            " + decision_date[
+                                                                                               -2:] + u"               " + decision.decision_no[
+                                                                                                                           6:-5]
 
         app_duration = self.contract_duration_edit.text()
 
@@ -3138,16 +3162,18 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         day = print_date.day()
         property_no = self.property_num_edit.text()
 
-        contract_date = str(year)[-2:] + "           " + str(month) +"              " + str(day)
-        decision_value = [decision.decision_no, decision_date, app_duration, contract_date, decision.decision_level_ref.description, property_no]
+        contract_date = str(year)[-2:] + "           " + str(month) + "              " + str(day)
+        decision_value = [decision.decision_no, decision_date, app_duration, contract_date,
+                          decision.decision_level_ref.description, property_no]
         return decision_value
 
-    def __add_decision(self,map_composition):
+    def __add_decision(self, map_composition):
 
         app_no = self.application_this_contract_based_edit.text()
         try:
             pp = ""
-            app_dec = self.session.query(CtDecisionApplication).filter(CtDecisionApplication.application == self.app_id).all()
+            app_dec = self.session.query(CtDecisionApplication).filter(
+                CtDecisionApplication.application == self.app_id).all()
             for p in app_dec:
                 pp = p.decision
             decision = self.session.query(CtDecision).filter(CtDecision.decision_id == pp).one()
@@ -3160,21 +3186,24 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
         item = map_composition.getComposerItemById("decision_date")
         decision_date = str(decision.decision_date)
-        decision_date = decision_date[:4]+u" оны " + decision_date[5:-3]+u" -р сарын " + decision_date[-2:] + u" -ны өдрийн "
+        decision_date = decision_date[:4] + u" оны " + decision_date[5:-3] + u" -р сарын " + decision_date[
+                                                                                             -2:] + u" -ны өдрийн "
         item.setText(decision_date)
         item.adjustSizeToText()
 
-    def __add_person_signature(self,map_composition):
+    def __add_person_signature(self, map_composition):
 
         contact_surname = ''
         contact_first_name = ''
         app_no = self.application_this_contract_based_edit.text()
         person_signature = map_composition.getComposerItemById("person_signature")
         # try:
-        app_person = self.session.query(CtApplicationPersonRole).filter(CtApplicationPersonRole.application == self.app_id).all()
+        app_person = self.session.query(CtApplicationPersonRole).filter(
+            CtApplicationPersonRole.application == self.app_id).all()
         if app_no[6:-9] == '07' or app_no[6:-9] == '14':
-            app_person = self.session.query(CtApplicationPersonRole).filter(CtApplicationPersonRole.application == self.app_id)\
-                                .filter(CtApplicationPersonRole.role == 70).all()
+            app_person = self.session.query(CtApplicationPersonRole).filter(
+                CtApplicationPersonRole.application == self.app_id) \
+                .filter(CtApplicationPersonRole.role == 70).all()
         for p in app_person:
             person = self.session.query(BsPerson).filter(BsPerson.person_id == p.person).one()
             if person.contact_surname != None:
@@ -3182,26 +3211,29 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             if person.contact_first_name != None:
                 contact_first_name = person.contact_first_name
             if person.type == 10 or person.type == 20 or person.type == 50:
-                name = "___________________"+person.name[:1]+"."+person.first_name + " /"+ person.person_register +"/"
-                person_signature = self.__copy_label(person_signature,name,map_composition)
+                name = "___________________" + person.name[
+                                               :1] + "." + person.first_name + " /" + person.person_register + "/"
+                person_signature = self.__copy_label(person_signature, name, map_composition)
             elif person.type == 30 or person.type == 40 or person.type == 60 or person.type == 70:
-                name = "___________________"+ contact_surname[:1]+"."+ contact_first_name + " /"+ person.person_register +"/"
-                person_signature = self.__copy_label(person_signature,name,map_composition)
+                name = "___________________" + contact_surname[
+                                               :1] + "." + contact_first_name + " /" + person.person_register + "/"
+                person_signature = self.__copy_label(person_signature, name, map_composition)
 
-        # except SQLAlchemyError, e:
-        #     raise LM2Exception(self.tr("Database Query Error"), self.tr("aCould not execute: {0}").format(e.message))
+                # except SQLAlchemyError, e:
+                #     raise LM2Exception(self.tr("Database Query Error"), self.tr("aCould not execute: {0}").format(e.message))
 
-    def __add_person_name_cert(self,map_composition):
+    def __add_person_name_cert(self, map_composition):
 
         app_no = self.application_this_contract_based_edit.text()
         try:
-            app_person = self.session.query(CtApplicationPersonRole).filter(CtApplicationPersonRole.application == self.app_id).all()
-            app_person_new_count = self.session.query(CtApplicationPersonRole).\
-                filter(CtApplicationPersonRole.application == self.app_id).\
+            app_person = self.session.query(CtApplicationPersonRole).filter(
+                CtApplicationPersonRole.application == self.app_id).all()
+            app_person_new_count = self.session.query(CtApplicationPersonRole). \
+                filter(CtApplicationPersonRole.application == self.app_id). \
                 filter(CtApplicationPersonRole.role == 70).count()
             if app_person_new_count > 0:
-                app_person = self.session.query(CtApplicationPersonRole).\
-                    filter(CtApplicationPersonRole.application == self.app_id).\
+                app_person = self.session.query(CtApplicationPersonRole). \
+                    filter(CtApplicationPersonRole.application == self.app_id). \
                     filter(CtApplicationPersonRole.role == 70).all()
 
             for p in app_person:
@@ -3251,12 +3283,11 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             state_reg = " "
             if person.state_registration_no != None:
                 state_reg = person.state_registration_no
-            person_id = state_reg +", "+person.person_register
+            person_id = state_reg + ", " + person.person_register
             item = map_composition.getComposerItemById("person_id")
             if item:
                 item.setText(person_id)
                 item.adjustSizeToText()
-
 
             item = map_composition.getComposerItemById("company_name")
             name = person.name
@@ -3266,20 +3297,20 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             state_reg = " "
             if person.state_registration_no != None:
                 state_reg = person.state_registration_no
-            person_id = state_reg +", "+person.person_register
+            person_id = state_reg + ", " + person.person_register
             item = map_composition.getComposerItemById("person_id")
             item.setText(person_id)
             item.adjustSizeToText()
 
             item = map_composition.getComposerItemById("company_name")
-            name = person.name +", "+ person.first_name
+            name = person.name + ", " + person.first_name
             item.setText(name)
             item.adjustSizeToText()
         elif person.type == 60:
             state_reg = " "
             if person.state_registration_no != None:
                 state_reg = person.state_registration_no
-            person_id = state_reg +", "+person.person_register
+            person_id = state_reg + ", " + person.person_register
             item = map_composition.getComposerItemById("company_id")
             item.setText(person_id)
             item.adjustSizeToText()
@@ -3292,7 +3323,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             state_reg = " "
             if person.state_registration_no != None:
                 state_reg = person.state_registration_no
-            person_id = state_reg +", "+person.person_register
+            person_id = state_reg + ", " + person.person_register
             item = map_composition.getComposerItemById("company_id")
             item.setText(person_id)
             item.adjustSizeToText()
@@ -3321,29 +3352,30 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             address_apartment_no = person.address_apartment_no
         if person.address_street_name != None or person.address_khaskhaa != None:
             if person.address_town_or_local_name != None:
-                local_name  = person.address_town_or_local_name + ', '
-            person_address = aimag_name +", "+ soum_name +", " +bag_name+", "+local_name + address_street_name + address_khaskhaa
+                local_name = person.address_town_or_local_name + ', '
+            person_address = aimag_name + ", " + soum_name + ", " + bag_name + ", " + local_name + address_street_name + address_khaskhaa
         elif person.address_building_no != None or person.address_entrance_no != None:
             if person.address_town_or_local_name != None:
-                local_name  = person.address_town_or_local_name + ', '
-            person_address = aimag_name +", "+ soum_name +", " +bag_name+", "+local_name + address_building_no + address_entrance_no + address_apartment_no
+                local_name = person.address_town_or_local_name + ', '
+            person_address = aimag_name + ", " + soum_name + ", " + bag_name + ", " + local_name + address_building_no + address_entrance_no + address_apartment_no
         else:
             if person.address_town_or_local_name != None:
-                local_name  = person.address_town_or_local_name
-            person_address = aimag_name +", "+ soum_name +", " +bag_name+", "+local_name
-        item.setText(self.__wrap(person_address,100))
+                local_name = person.address_town_or_local_name
+            person_address = aimag_name + ", " + soum_name + ", " + bag_name + ", " + local_name
+        item.setText(self.__wrap(person_address, 100))
 
     def __add_cert_person(self):
 
         app_no = self.application_this_contract_based_edit.text()
         try:
-            app_person = self.session.query(CtApplicationPersonRole).filter(CtApplicationPersonRole.application == self.app_id).all()
-            app_person_new_count = self.session.query(CtApplicationPersonRole).\
-                filter(CtApplicationPersonRole.application == self.app_id).\
+            app_person = self.session.query(CtApplicationPersonRole).filter(
+                CtApplicationPersonRole.application == self.app_id).all()
+            app_person_new_count = self.session.query(CtApplicationPersonRole). \
+                filter(CtApplicationPersonRole.application == self.app_id). \
                 filter(CtApplicationPersonRole.role == 70).count()
             if app_person_new_count > 0:
-                app_person = self.session.query(CtApplicationPersonRole).\
-                    filter(CtApplicationPersonRole.application == self.app_id).\
+                app_person = self.session.query(CtApplicationPersonRole). \
+                    filter(CtApplicationPersonRole.application == self.app_id). \
                     filter(CtApplicationPersonRole.role == 70).all()
 
             for p in app_person:
@@ -3385,25 +3417,25 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             state_reg = " "
             if person.state_registration_no != None:
                 state_reg = person.state_registration_no
-            person_id = state_reg +", "+person.person_register
+            person_id = state_reg + ", " + person.person_register
             company_name = person.name
         elif person.type == 50:
             state_reg = " "
             if person.state_registration_no != None:
                 state_reg = person.state_registration_no
-            person_id = state_reg +", "+person.person_register
-            company_name = person.name +", "+ person.first_name
+            person_id = state_reg + ", " + person.person_register
+            company_name = person.name + ", " + person.first_name
         elif person.type == 60:
             state_reg = " "
             if person.state_registration_no != None:
                 state_reg = person.state_registration_no
-                company_id = state_reg +", "+person.person_register
+                company_id = state_reg + ", " + person.person_register
             company_name = person.name
         elif person.type == 70:
             state_reg = " "
             if person.state_registration_no != None:
                 state_reg = person.state_registration_no
-                company_id = state_reg +", "+person.person_register
+                company_id = state_reg + ", " + person.person_register
             company_name = person.name
 
         local_name = ""
@@ -3424,38 +3456,40 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             address_apartment_no = person.address_apartment_no
         if person.address_street_name != None or person.address_khaskhaa != None:
             if person.address_town_or_local_name != None:
-                local_name  = person.address_town_or_local_name + ', '
-            person_address = aimag_name +", "+ soum_name +", " +bag_name+", "+local_name + address_street_name + address_khaskhaa
+                local_name = person.address_town_or_local_name + ', '
+            person_address = aimag_name + ", " + soum_name + ", " + bag_name + ", " + local_name + address_street_name + address_khaskhaa
         elif person.address_building_no != None or person.address_entrance_no != None:
             if person.address_town_or_local_name != None:
-                local_name  = person.address_town_or_local_name + ', '
-            person_address = aimag_name +", "+ soum_name +", " +bag_name+", "+local_name + address_building_no + address_entrance_no + address_apartment_no
+                local_name = person.address_town_or_local_name + ', '
+            person_address = aimag_name + ", " + soum_name + ", " + bag_name + ", " + local_name + address_building_no + address_entrance_no + address_apartment_no
         else:
             if person.address_town_or_local_name != None:
-                local_name  = person.address_town_or_local_name
-            person_address = aimag_name +", "+ soum_name +", " +bag_name+", "+local_name
+                local_name = person.address_town_or_local_name
+            person_address = aimag_name + ", " + soum_name + ", " + bag_name + ", " + local_name
 
         country_desc = ''
         if person.country_ref:
             country_desc = person.country_ref.description
 
-        value = [person.person_register, family_name, surname, first_name, company_name, company_id, person_address, country_desc]
+        value = [person.person_register, family_name, surname, first_name, company_name, company_id, person_address,
+                 country_desc]
         return value
 
-    def __add_person_name(self,map_composition):
+    def __add_person_name(self, map_composition):
 
         app_no = self.application_this_contract_based_edit.text()
 
         try:
             application = self.session.query(CtApplication).filter(CtApplication.app_no == app_no).one()
-            app_person = self.session.query(CtApplicationPersonRole).filter(CtApplicationPersonRole.application == self.app_id).all()
-            app_person_new_count = self.session.query(CtApplicationPersonRole).\
-                filter(CtApplicationPersonRole.application == self.app_id).\
+            app_person = self.session.query(CtApplicationPersonRole).filter(
+                CtApplicationPersonRole.application == self.app_id).all()
+            app_person_new_count = self.session.query(CtApplicationPersonRole). \
+                filter(CtApplicationPersonRole.application == self.app_id). \
                 filter(CtApplicationPersonRole.role == 70).count()
             if app_person_new_count > 0:
-                app_person = self.session.query(CtApplicationPersonRole).\
-                filter(CtApplicationPersonRole.application == self.app_id).\
-                filter(CtApplicationPersonRole.role == 70).all()
+                app_person = self.session.query(CtApplicationPersonRole). \
+                    filter(CtApplicationPersonRole.application == self.app_id). \
+                    filter(CtApplicationPersonRole.role == 70).all()
 
             for p in app_person:
                 if p.main_applicant == True:
@@ -3536,17 +3570,17 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             address_apartment_no = person.address_apartment_no
         if person.address_street_name != None or person.address_khaskhaa != None:
             if person.address_town_or_local_name != None:
-                local_name  = person.address_town_or_local_name + ', '
-            person_address = aimag_name +", "+ soum_name +", " +bag_name+", "+local_name + address_street_name + address_khaskhaa
+                local_name = person.address_town_or_local_name + ', '
+            person_address = aimag_name + ", " + soum_name + ", " + bag_name + ", " + local_name + address_street_name + address_khaskhaa
         elif person.address_building_no != None or person.address_entrance_no != None:
             if person.address_town_or_local_name != None:
-                local_name  = person.address_town_or_local_name + ', '
-            person_address = aimag_name +", "+ soum_name +", " +bag_name+", "+local_name + address_building_no + address_entrance_no + address_apartment_no
+                local_name = person.address_town_or_local_name + ', '
+            person_address = aimag_name + ", " + soum_name + ", " + bag_name + ", " + local_name + address_building_no + address_entrance_no + address_apartment_no
         else:
             if person.address_town_or_local_name != None:
-                local_name  = person.address_town_or_local_name
-            person_address = aimag_name +", "+ soum_name +", " +bag_name+", "+local_name
-        item.setText(self.__wrap(person_address,40))
+                local_name = person.address_town_or_local_name
+            person_address = aimag_name + ", " + soum_name + ", " + bag_name + ", " + local_name
+        item.setText(self.__wrap(person_address, 40))
         # item.adjustSizeToText()
 
     def __copy_label(self, label, text, map_composition):
@@ -3570,11 +3604,13 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         app_no = self.application_this_contract_based_edit.text()
 
         try:
-            app_person = self.session.query(CtApplicationPersonRole).filter(CtApplicationPersonRole.application == self.app_id).all()
+            app_person = self.session.query(CtApplicationPersonRole).filter(
+                CtApplicationPersonRole.application == self.app_id).all()
             for p in app_person:
                 if p.main_applicant == True:
                     person = self.session.query(BsPerson).filter(BsPerson.person_id == p.person).one()
-            contract_condition = self.session.query(CtContractCondition).filter(CtContractCondition.contract_id == self.contract.contract_id).all()
+            contract_condition = self.session.query(CtContractCondition).filter(
+                CtContractCondition.contract_id == self.contract.contract_id).all()
         except SQLAlchemyError, e:
             raise LM2Exception(self.tr("Database Query Error"), self.tr("aCould not execute: {0}").format(e.message))
         if person.type == 10 or person.type == 20 or person.type == 30 or person.type == 40:
@@ -3586,15 +3622,17 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             for c in contract_condition:
                 con_code = str(c.condition)
                 if con_code[1:-3] == "402":
-                    condition =  self.session.query(ClContractCondition).filter(ClContractCondition.code == c.condition).one()
+                    condition = self.session.query(ClContractCondition).filter(
+                        ClContractCondition.code == c.condition).one()
                     text_len = len(condition.description)
                     a = 0
                     b = len(condition.description)
                     i = 0
                     if text_len < 105:
-                        contract_condition_4_2 = self.__copy_label(contract_condition_4_2,'  - '+condition.description,map_composition)
+                        contract_condition_4_2 = self.__copy_label(contract_condition_4_2,
+                                                                   '  - ' + condition.description, map_composition)
                     else:
-                        while(text_len > 105):
+                        while (text_len > 105):
 
                             b = b - 105
                             t = condition.description[a:-b]
@@ -3609,24 +3647,30 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                             i = 20 - sp
                             b = b + i
 
-                            contract_condition_4_2 = self.__copy_label(contract_condition_4_2,'  - '+condition.description[a:-b],map_composition)
+                            contract_condition_4_2 = self.__copy_label(contract_condition_4_2,
+                                                                       '  - ' + condition.description[a:-b],
+                                                                       map_composition)
                             y = 105 - i
 
                             text_len = text_len - y
                             a = a + y
                             if text_len < 105:
-                                contract_condition_4_2 = self.__copy_label(contract_condition_4_2,'  - '+condition.description[-(text_len):],map_composition)
+                                contract_condition_4_2 = self.__copy_label(contract_condition_4_2,
+                                                                           '  - ' + condition.description[-(text_len):],
+                                                                           map_composition)
 
                 if con_code[1:-3] == "501":
-                    condition =  self.session.query(ClContractCondition).filter(ClContractCondition.code == c.condition).one()
+                    condition = self.session.query(ClContractCondition).filter(
+                        ClContractCondition.code == c.condition).one()
                     text_len = len(condition.description)
                     a = 0
                     b = len(condition.description)
                     i = 0
                     if text_len < 105:
-                        contract_condition_5_1 = self.__copy_label(contract_condition_5_1,'  - '+condition.description,map_composition)
+                        contract_condition_5_1 = self.__copy_label(contract_condition_5_1,
+                                                                   '  - ' + condition.description, map_composition)
                     else:
-                        while(text_len > 105):
+                        while (text_len > 105):
 
                             b = b - 105
                             t = condition.description[a:-b]
@@ -3641,24 +3685,30 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                             i = 20 - sp
                             b = b + i
 
-                            contract_condition_4_2 = self.__copy_label(contract_condition_5_1,'  - '+condition.description[a:-b],map_composition)
+                            contract_condition_4_2 = self.__copy_label(contract_condition_5_1,
+                                                                       '  - ' + condition.description[a:-b],
+                                                                       map_composition)
                             y = 105 - i
 
                             text_len = text_len - y
                             a = a + y
                             if text_len < 105:
-                                contract_condition_4_2 = self.__copy_label(contract_condition_5_1,'  - '+condition.description[-(text_len):],map_composition)
+                                contract_condition_4_2 = self.__copy_label(contract_condition_5_1,
+                                                                           '  - ' + condition.description[-(text_len):],
+                                                                           map_composition)
 
                 if con_code[1:-3] == "502":
-                    condition =  self.session.query(ClContractCondition).filter(ClContractCondition.code == c.condition).one()
+                    condition = self.session.query(ClContractCondition).filter(
+                        ClContractCondition.code == c.condition).one()
                     text_len = len(condition.description)
                     a = 0
                     b = len(condition.description)
                     i = 0
                     if text_len < 105:
-                        contract_condition_5_2 = self.__copy_label(contract_condition_5_2,'  - '+condition.description,map_composition)
+                        contract_condition_5_2 = self.__copy_label(contract_condition_5_2,
+                                                                   '  - ' + condition.description, map_composition)
                     else:
-                        while(text_len > 105):
+                        while (text_len > 105):
 
                             b = b - 105
                             t = condition.description[a:-b]
@@ -3673,24 +3723,30 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                             i = 20 - sp
                             b = b + i
 
-                            contract_condition_5_2 = self.__copy_label(contract_condition_5_2,'  - '+condition.description[a:-b],map_composition)
+                            contract_condition_5_2 = self.__copy_label(contract_condition_5_2,
+                                                                       '  - ' + condition.description[a:-b],
+                                                                       map_composition)
                             y = 105 - i
 
                             text_len = text_len - y
                             a = a + y
                             if text_len < 105:
-                                contract_condition_5_2 = self.__copy_label(contract_condition_5_2,'  - '+condition.description[-(text_len):],map_composition)
+                                contract_condition_5_2 = self.__copy_label(contract_condition_5_2,
+                                                                           '  - ' + condition.description[-(text_len):],
+                                                                           map_composition)
 
                 if con_code[1:-3] == "503":
-                    condition =  self.session.query(ClContractCondition).filter(ClContractCondition.code == c.condition).one()
+                    condition = self.session.query(ClContractCondition).filter(
+                        ClContractCondition.code == c.condition).one()
                     text_len = len(condition.description)
                     a = 0
                     b = len(condition.description)
                     i = 0
                     if text_len < 105:
-                        contract_condition_5_3 = self.__copy_label(contract_condition_5_3,'  - '+condition.description,map_composition)
+                        contract_condition_5_3 = self.__copy_label(contract_condition_5_3,
+                                                                   '  - ' + condition.description, map_composition)
                     else:
-                        while(text_len > 105):
+                        while (text_len > 105):
 
                             b = b - 105
                             t = condition.description[a:-b]
@@ -3705,24 +3761,30 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                             i = 20 - sp
                             b = b + i
 
-                            contract_condition_5_3 = self.__copy_label(contract_condition_5_3,'  - '+condition.description[a:-b],map_composition)
+                            contract_condition_5_3 = self.__copy_label(contract_condition_5_3,
+                                                                       '  - ' + condition.description[a:-b],
+                                                                       map_composition)
                             y = 105 - i
 
                             text_len = text_len - y
                             a = a + y
                             if text_len < 105:
-                                contract_condition_5_3 = self.__copy_label(contract_condition_5_3,'  - '+condition.description[-(text_len):],map_composition)
+                                contract_condition_5_3 = self.__copy_label(contract_condition_5_3,
+                                                                           '  - ' + condition.description[-(text_len):],
+                                                                           map_composition)
 
                 if con_code[1:-3] == "602":
-                    condition =  self.session.query(ClContractCondition).filter(ClContractCondition.code == c.condition).one()
+                    condition = self.session.query(ClContractCondition).filter(
+                        ClContractCondition.code == c.condition).one()
                     text_len = len(condition.description)
                     a = 0
                     b = len(condition.description)
                     i = 0
                     if text_len < 105:
-                        contract_condition_6_2 = self.__copy_label(contract_condition_6_2,'  - '+condition.description,map_composition)
+                        contract_condition_6_2 = self.__copy_label(contract_condition_6_2,
+                                                                   '  - ' + condition.description, map_composition)
                     else:
-                        while(text_len > 105):
+                        while (text_len > 105):
 
                             b = b - 105
                             t = condition.description[a:-b]
@@ -3737,13 +3799,17 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                             i = 20 - sp
                             b = b + i
 
-                            contract_condition_6_2 = self.__copy_label(contract_condition_6_2,'  - '+condition.description[a:-b],map_composition)
+                            contract_condition_6_2 = self.__copy_label(contract_condition_6_2,
+                                                                       '  - ' + condition.description[a:-b],
+                                                                       map_composition)
                             y = 105 - i
 
                             text_len = text_len - y
                             a = a + y
                             if text_len < 105:
-                                contract_condition_6_2 = self.__copy_label(contract_condition_6_2,'  - '+condition.description[-(text_len):],map_composition)
+                                contract_condition_6_2 = self.__copy_label(contract_condition_6_2,
+                                                                           '  - ' + condition.description[-(text_len):],
+                                                                           map_composition)
         elif person.type == 50 or person.type == 60 or person.type == 70:
             use_contract_condition_3_6 = map_composition.getComposerItemById("contract_condition_3_6")
             use_contract_condition_4_2 = map_composition.getComposerItemById("contract_condition_4_2")
@@ -3753,15 +3819,17 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             for c in contract_condition:
                 con_code = str(c.condition)
                 if con_code[1:-3] == "306":
-                    condition =  self.session.query(ClContractCondition).filter(ClContractCondition.code == c.condition).one()
+                    condition = self.session.query(ClContractCondition).filter(
+                        ClContractCondition.code == c.condition).one()
                     text_len = len(condition.description)
                     a = 0
                     b = len(condition.description)
                     i = 0
                     if text_len < 105:
-                        use_contract_condition_3_6 = self.__copy_label(use_contract_condition_3_6,'  - '+condition.description,map_composition)
+                        use_contract_condition_3_6 = self.__copy_label(use_contract_condition_3_6,
+                                                                       '  - ' + condition.description, map_composition)
                     else:
-                        while(text_len > 105):
+                        while (text_len > 105):
 
                             b = b - 105
                             t = condition.description[a:-b]
@@ -3776,24 +3844,30 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                             i = 20 - sp
                             b = b + i
 
-                            use_contract_condition_3_6 = self.__copy_label(use_contract_condition_3_6,'  - '+condition.description[a:-b],map_composition)
+                            use_contract_condition_3_6 = self.__copy_label(use_contract_condition_3_6,
+                                                                           '  - ' + condition.description[a:-b],
+                                                                           map_composition)
                             y = 105 - i
 
                             text_len = text_len - y
                             a = a + y
                             if text_len < 105:
-                                use_contract_condition_3_6 = self.__copy_label(use_contract_condition_3_6,'  - '+condition.description[-(text_len):],map_composition)
+                                use_contract_condition_3_6 = self.__copy_label(use_contract_condition_3_6,
+                                                                               '  - ' + condition.description[
+                                                                                        -(text_len):], map_composition)
 
                 if con_code[1:-3] == "402":
-                    condition =  self.session.query(ClContractCondition).filter(ClContractCondition.code == c.condition).one()
+                    condition = self.session.query(ClContractCondition).filter(
+                        ClContractCondition.code == c.condition).one()
                     text_len = len(condition.description)
                     a = 0
                     b = len(condition.description)
                     i = 0
                     if text_len < 105:
-                        use_contract_condition_4_2 = self.__copy_label(use_contract_condition_4_2,'  - '+condition.description,map_composition)
+                        use_contract_condition_4_2 = self.__copy_label(use_contract_condition_4_2,
+                                                                       '  - ' + condition.description, map_composition)
                     else:
-                        while(text_len > 105):
+                        while (text_len > 105):
 
                             b = b - 105
                             t = condition.description[a:-b]
@@ -3808,24 +3882,30 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                             i = 20 - sp
                             b = b + i
 
-                            use_contract_condition_4_2 = self.__copy_label(use_contract_condition_4_2,'  - '+condition.description[a:-b],map_composition)
+                            use_contract_condition_4_2 = self.__copy_label(use_contract_condition_4_2,
+                                                                           '  - ' + condition.description[a:-b],
+                                                                           map_composition)
                             y = 105 - i
 
                             text_len = text_len - y
                             a = a + y
                             if text_len < 105:
-                                use_contract_condition_4_2 = self.__copy_label(use_contract_condition_4_2,'  - '+condition.description[-(text_len):],map_composition)
+                                use_contract_condition_4_2 = self.__copy_label(use_contract_condition_4_2,
+                                                                               '  - ' + condition.description[
+                                                                                        -(text_len):], map_composition)
 
                 if con_code[1:-3] == "501":
-                    condition =  self.session.query(ClContractCondition).filter(ClContractCondition.code == c.condition).one()
+                    condition = self.session.query(ClContractCondition).filter(
+                        ClContractCondition.code == c.condition).one()
                     text_len = len(condition.description)
                     a = 0
                     b = len(condition.description)
                     i = 0
                     if text_len < 105:
-                        use_contract_condition_5_1 = self.__copy_label(use_contract_condition_5_1,'  - '+condition.description,map_composition)
+                        use_contract_condition_5_1 = self.__copy_label(use_contract_condition_5_1,
+                                                                       '  - ' + condition.description, map_composition)
                     else:
-                        while(text_len > 105):
+                        while (text_len > 105):
 
                             b = b - 105
                             t = condition.description[a:-b]
@@ -3840,24 +3920,30 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                             i = 20 - sp
                             b = b + i
 
-                            use_contract_condition_5_1 = self.__copy_label(use_contract_condition_5_1,'  - '+condition.description[a:-b],map_composition)
+                            use_contract_condition_5_1 = self.__copy_label(use_contract_condition_5_1,
+                                                                           '  - ' + condition.description[a:-b],
+                                                                           map_composition)
                             y = 105 - i
 
                             text_len = text_len - y
                             a = a + y
                             if text_len < 105:
-                                use_contract_condition_5_1 = self.__copy_label(use_contract_condition_5_1,'  - '+condition.description[-(text_len):],map_composition)
+                                use_contract_condition_5_1 = self.__copy_label(use_contract_condition_5_1,
+                                                                               '  - ' + condition.description[
+                                                                                        -(text_len):], map_composition)
 
                 if con_code[1:-3] == "502":
-                    condition =  self.session.query(ClContractCondition).filter(ClContractCondition.code == c.condition).one()
+                    condition = self.session.query(ClContractCondition).filter(
+                        ClContractCondition.code == c.condition).one()
                     text_len = len(condition.description)
                     a = 0
                     b = len(condition.description)
                     i = 0
                     if text_len < 105:
-                        use_contract_condition_5_2 = self.__copy_label(use_contract_condition_5_2,'  - '+condition.description,map_composition)
+                        use_contract_condition_5_2 = self.__copy_label(use_contract_condition_5_2,
+                                                                       '  - ' + condition.description, map_composition)
                     else:
-                        while(text_len > 105):
+                        while (text_len > 105):
 
                             b = b - 105
                             t = condition.description[a:-b]
@@ -3872,24 +3958,30 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                             i = 20 - sp
                             b = b + i
 
-                            use_contract_condition_5_2 = self.__copy_label(use_contract_condition_5_2,'  - '+condition.description[a:-b],map_composition)
+                            use_contract_condition_5_2 = self.__copy_label(use_contract_condition_5_2,
+                                                                           '  - ' + condition.description[a:-b],
+                                                                           map_composition)
                             y = 105 - i
 
                             text_len = text_len - y
                             a = a + y
                             if text_len < 105:
-                                use_contract_condition_5_2 = self.__copy_label(use_contract_condition_5_2,'  - '+condition.description[-(text_len):],map_composition)
+                                use_contract_condition_5_2 = self.__copy_label(use_contract_condition_5_2,
+                                                                               '  - ' + condition.description[
+                                                                                        -(text_len):], map_composition)
 
                 if con_code[1:-3] == "503":
-                    condition =  self.session.query(ClContractCondition).filter(ClContractCondition.code == c.condition).one()
+                    condition = self.session.query(ClContractCondition).filter(
+                        ClContractCondition.code == c.condition).one()
                     text_len = len(condition.description)
                     a = 0
                     b = len(condition.description)
                     i = 0
                     if text_len < 105:
-                        use_contract_condition_5_3 = self.__copy_label(use_contract_condition_5_3,'  - '+condition.description,map_composition)
+                        use_contract_condition_5_3 = self.__copy_label(use_contract_condition_5_3,
+                                                                       '  - ' + condition.description, map_composition)
                     else:
-                        while(text_len > 105):
+                        while (text_len > 105):
 
                             b = b - 105
                             t = condition.description[a:-b]
@@ -3904,15 +3996,19 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                             i = 20 - sp
                             b = b + i
 
-                            use_contract_condition_5_3 = self.__copy_label(use_contract_condition_5_3,'  - '+condition.description[a:-b],map_composition)
+                            use_contract_condition_5_3 = self.__copy_label(use_contract_condition_5_3,
+                                                                           '  - ' + condition.description[a:-b],
+                                                                           map_composition)
                             y = 105 - i
 
                             text_len = text_len - y
                             a = a + y
                             if text_len < 105:
-                                use_contract_condition_5_3 = self.__copy_label(use_contract_condition_5_3,'  - '+condition.description[-(text_len):],map_composition)
+                                use_contract_condition_5_3 = self.__copy_label(use_contract_condition_5_3,
+                                                                               '  - ' + condition.description[
+                                                                                        -(text_len):], map_composition)
 
-    def __add_fee(self,map_composition):
+    def __add_fee(self, map_composition):
 
         contract_no = self.contract_num_edit.text()
         app_no = self.application_this_contract_based_edit.text()
@@ -3935,19 +4031,19 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         for fee in fee:
             person = self.session.query(BsPerson).filter(BsPerson.person_id == fee.person).one()
             if person.type == 10 or person.type == 20:
-                sub_name = person.name[:1]+"."+person.first_name
+                sub_name = person.name[:1] + "." + person.first_name
             elif person.type == 30 or person.type == 40 or person.type == 60 or person.type == 70:
                 sub_name = person.name
             elif person.type == 50:
-                sub_name = person.name +" "+ person.first_name
-            person_name = self.__copy_label(person_name,self.__wrap(sub_name,50),map_composition)
-            share = self.__copy_label(share,str(fee.share),map_composition)
-            Quarterly1 = self.__copy_label(Quarterly1,str(fee.fee_contract/4),map_composition)
-            Quarterly2 = self.__copy_label(Quarterly2,str(fee.fee_contract/4),map_composition)
-            Quarterly3 = self.__copy_label(Quarterly3,str(fee.fee_contract/4),map_composition)
-            Quarterly4 = self.__copy_label(Quarterly4,str(fee.fee_contract/4),map_composition)
+                sub_name = person.name + " " + person.first_name
+            person_name = self.__copy_label(person_name, self.__wrap(sub_name, 50), map_composition)
+            share = self.__copy_label(share, str(fee.share), map_composition)
+            Quarterly1 = self.__copy_label(Quarterly1, str(fee.fee_contract / 4), map_composition)
+            Quarterly2 = self.__copy_label(Quarterly2, str(fee.fee_contract / 4), map_composition)
+            Quarterly3 = self.__copy_label(Quarterly3, str(fee.fee_contract / 4), map_composition)
+            Quarterly4 = self.__copy_label(Quarterly4, str(fee.fee_contract / 4), map_composition)
 
-    def __add_parcel_cert(self,map_composition):
+    def __add_parcel_cert(self, map_composition):
 
         app_no = self.application_this_contract_based_edit.text()
         contract_no = self.contract_num_edit.text()
@@ -3956,7 +4052,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
         landuse = self.land_use_type_edit.text()
         area_m2 = self.calculated_area_edit.text()
-        area_m2 = str((area_m2)) + " /"+str(float(area_m2)/10000)+"/"
+        area_m2 = str((area_m2)) + " /" + str(float(area_m2) / 10000) + "/"
 
         try:
             parcel = self.session.query(CaParcelTbl).filter(CaParcelTbl.parcel_id == self.id_main_edit.text()).one()
@@ -3974,13 +4070,13 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             address_neighbourhood = parcel.address_neighbourhood
 
         bag_name = self.bag_edit.text()
-        parcel_address = bag_name + u', ' + address_streetname +u" гудамж, "+ address_khashaa +", "+ address_neighbourhood
+        parcel_address = bag_name + u', ' + address_streetname + u" гудамж, " + address_khashaa + ", " + address_neighbourhood
         item = map_composition.getComposerItemById("parcel_address")
         item.setText(parcel_address)
         item.adjustSizeToText()
 
         item = map_composition.getComposerItemById("landuse_type")
-        item.setText(self.__wrap(landuse,25))
+        item.setText(self.__wrap(landuse, 25))
         # item.adjustSizeToText()
 
         item = map_composition.getComposerItemById("area_m2")
@@ -3999,7 +4095,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         parcel_id = self.id_main_edit.text()
         landuse = self.land_use_type_edit.text()
         area_m2 = self.calculated_area_edit.text()
-        area_m2 = str((area_m2)) + " /"+str(float(area_m2)/10000)+"/"
+        area_m2 = str((area_m2)) + " /" + str(float(area_m2) / 10000) + "/"
 
         try:
             parcel = self.session.query(CaParcelTbl).filter(CaParcelTbl.parcel_id == self.id_main_edit.text()).one()
@@ -4017,24 +4113,24 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             address_neighbourhood = parcel.address_neighbourhood
 
         bag_name = self.bag_edit.text()
-        parcel_address = bag_name + u', ' + address_streetname +u" гудамж, "+ address_khashaa +", "+ address_neighbourhood
+        parcel_address = bag_name + u', ' + address_streetname + u" гудамж, " + address_khashaa + ", " + address_neighbourhood
 
-        landuse = self.__wrap(landuse,25)
+        landuse = self.__wrap(landuse, 25)
 
         parcel_value = [parcel_id, landuse, area_m2, parcel_address]
         return parcel_value
 
-    def __add_parcel(self,map_composition):
+    def __add_parcel(self, map_composition):
 
         base_fee = 0
         payment = 0
         app_no = self.application_this_contract_based_edit.text()
         contract_no = self.contract_num_edit.text()
-        parcel_id  = self.id_main_edit.text()[1:-9] + self.id_main_edit.text()[4:]
+        parcel_id = self.id_main_edit.text()[1:-9] + self.id_main_edit.text()[4:]
         landuse = self.land_use_type_edit.text()
         area_m2 = self.calculated_area_edit.text()
         if float(area_m2) > 10000:
-            area_m2 = str(float(area_m2)/10000) + u" га"
+            area_m2 = str(float(area_m2) / 10000) + u" га"
         else:
             area_m2 = area_m2 + u" м2"
 
@@ -4042,7 +4138,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             fee = self.session.query(CtFee).filter(CtFee.contract == self.contract.contract_id).all()
 
             for fee in fee:
-                payment =payment + fee.fee_contract
+                payment = payment + fee.fee_contract
                 base_fee = fee.base_fee_per_m2
 
             item = map_composition.getComposerItemById("base_fee_per_m2")
@@ -4059,7 +4155,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             item.adjustSizeToText()
 
             item = map_composition.getComposerItemById("landuse_type")
-            item.setText(self.__wrap(landuse,25))
+            item.setText(self.__wrap(landuse, 25))
 
             item = map_composition.getComposerItemById("landuse_area")
             item.setText(area_m2)
@@ -4080,9 +4176,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         except SQLAlchemyError, e:
             raise LM2Exception(self.tr("Database Query Error"), self.tr("aCould not execute: {0}").format(e.message))
 
-
-
-    def __add_contract_no(self,map_composition):
+    def __add_contract_no(self, map_composition):
 
         contact_first_name = ''
         contact_surname = ''
@@ -4091,14 +4185,16 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         contract_no = self.contract_num_edit.text()
         cerificate_no = self.calculated_num_edit.text()
         try:
-            contract  = self.session.query(CtContract).filter(CtContract.contract_id == self.contract.contract_id).one()
+            contract = self.session.query(CtContract).filter(CtContract.contract_id == self.contract.contract_id).one()
         except SQLAlchemyError, e:
             raise LM2Exception(self.tr("Database Query Error"), self.tr("aCould not execute: {0}").format(e.message))
         try:
-            app_person = self.session.query(CtApplicationPersonRole).filter(CtApplicationPersonRole.application == self.app_id).all()
+            app_person = self.session.query(CtApplicationPersonRole).filter(
+                CtApplicationPersonRole.application == self.app_id).all()
             if app_no[6:-9] == '07' or app_no[6:-9] == '14':
-                app_person = self.session.query(CtApplicationPersonRole).filter(CtApplicationPersonRole.application == self.app_id)\
-                                        .filter(CtApplicationPersonRole.role == 70).all()
+                app_person = self.session.query(CtApplicationPersonRole).filter(
+                    CtApplicationPersonRole.application == self.app_id) \
+                    .filter(CtApplicationPersonRole.role == 70).all()
             for p in app_person:
                 person = self.session.query(BsPerson).filter(BsPerson.person_id == p.person).one()
                 if person.contact_first_name != None:
@@ -4111,11 +4207,11 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             raise LM2Exception(self.tr("Database Query Error"), self.tr("aCould not execute: {0}").format(e.message))
 
         header = "no text"
-        name  = "no text"
+        name = "no text"
         if person.type == 10 or person.type == 20:
             header = u"ИРГЭНД ГАЗАР ЭЗЭМШҮҮЛЭХ ГЭРЭЭ"
             name = u"                                                                                         " \
-                   + person.name +u" овогтой "+ person.first_name + u" нар энэхүү гэрээг байгуулав."
+                   + person.name + u" овогтой " + person.first_name + u" нар энэхүү гэрээг байгуулав."
         elif person.type == 30 or person.type == 40:
             header = u"ХУУЛИЙН ЭТГЭЭДЭД ГАЗАР ЭЗЭМШҮҮЛЭХ ГЭРЭЭ"
             name = u"                                                                                         " \
@@ -4124,16 +4220,16 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         elif person.type == 50:
             header = u"ГАДААДЫН ИРГЭНД ГАЗАР АШИГЛУУЛАХ ГЭРЭЭ"
             name = u"                                                                                         " \
-                   + person.name +u", "+ person.first_name + u" нар энэхүү гэрээг байгуулав."
+                   + person.name + u", " + person.first_name + u" нар энэхүү гэрээг байгуулав."
         elif person.type == 60:
             header = u"ГАДААДЫН ХУУЛИЙН ЭТГЭЭДЭД ГАЗАР АШИГЛУУЛАХ ГЭРЭЭ"
             name = u"                                                                                         " \
-                   + " ("+person.name+") " + contact_position + u"  ажилтай " + contact_surname + \
+                   + " (" + person.name + ") " + contact_position + u"  ажилтай " + contact_surname + \
                    u" овогтой " + contact_first_name + u" нар энэхүү гэрээг байгуулав."
         elif person.type == 70:
             header = u"ГАДААДЫН ХУУЛИЙН ЭТГЭЭДЭД ГАЗАР АШИГЛУУЛАХ ГЭРЭЭ"
             name = u"                                                                                         " \
-                   + " ("+person.name+") " + contact_position + u"  ажилтай " + contact_surname + \
+                   + " (" + person.name + ") " + contact_position + u"  ажилтай " + contact_surname + \
                    u" овогтой " + contact_first_name + u" нар энэхүү гэрээг байгуулав."
 
         item = map_composition.getComposerItemById("person_contract")
@@ -4154,7 +4250,8 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
         item = map_composition.getComposerItemById("contract_date")
         contract_date = str(contract.contract_date)
-        contract_date = contract_date[0:-6]+u" оны " + contract_date[5:-3]+u" сарын " + contract_date[-2:] + u" өдөр"
+        contract_date = contract_date[0:-6] + u" оны " + contract_date[5:-3] + u" сарын " + contract_date[
+                                                                                            -2:] + u" өдөр"
         item.setText(contract_date)
         item.adjustSizeToText()
 
@@ -4177,24 +4274,24 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             # self.contract_end_edit.setText(contract_end.toString(Constants.DATABASE_DATE_FORMAT))
             self.contract_end_date.setDate(contract_end)
             duration = contract_end.year() - contract_begin.year()
-        duration = '/'+str(duration)+'/'
+        duration = '/' + str(duration) + '/'
         item.setText(duration)
         item.adjustSizeToText()
 
-    def __wrap(self,text, width):
+    def __wrap(self, text, width):
         """
         A word-wrap function that preserves existing line breaks
         and most spaces in the text. Expects that existing line
         breaks are posix newlines (\n).
         """
         return reduce(lambda line, word, width=width: '%s%s%s' %
-                      (line,
-                       ' \n'[(len(line)-line.rfind('\n')-1
-                             + len(word.split('\n',1)[0]
-                                  ) >= width)],
-                       word),
+                                                      (line,
+                                                       ' \n'[(len(line) - line.rfind('\n') - 1
+                                                              + len(word.split('\n', 1)[0]
+                                                                    ) >= width)],
+                                                       word),
                       text.split(' ')
-                     )
+                      )
 
     @pyqtSlot()
     def on_print_certificate_button_clicked(self):
@@ -4218,13 +4315,15 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
         app_no = self.application_this_contract_based_edit.text()
         contract_no = self.contract_num_edit.text()
-        contract_count = self.session.query(CtContract).filter(CtContract.contract_id == self.contract.contract_id).count()
+        contract_count = self.session.query(CtContract).filter(
+            CtContract.contract_id == self.contract.contract_id).count()
         if contract_count == 0:
             PluginUtils.show_error(self, self.tr("contract error"), self.tr("not save"))
             return
 
         try:
-            app_person = self.session.query(CtApplicationPersonRole).filter(CtApplicationPersonRole.application == self.app_id).all()
+            app_person = self.session.query(CtApplicationPersonRole).filter(
+                CtApplicationPersonRole.application == self.app_id).all()
             for p in app_person:
                 if p.main_applicant == True:
                     person = self.session.query(BsPerson).filter(BsPerson.person_id == p.person).one()
@@ -4233,7 +4332,8 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
         ok = 0
         # try:
-        app_status = self.session.query(CtApplicationStatus).filter(CtApplicationStatus.application == self.app_id).all()
+        app_status = self.session.query(CtApplicationStatus).filter(
+            CtApplicationStatus.application == self.app_id).all()
         for p in app_status:
             if p.status == 9:
                 ok = 1
@@ -4299,7 +4399,6 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         #     QDesktopServices.openUrl(QUrl.fromLocalFile(path+"certificate.pdf"))
         # else:
         #     self.__cert_docx_print(person)
-
 
     def __cert_docx_print(self, person):
 
@@ -4401,23 +4500,32 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
     def on_help_button_clicked(self):
 
         if self.tab_widget.currentIndex() == 0:
-                os.system("hh.exe "+ str(os.path.dirname(os.path.realpath(__file__))[:-10]) +"help\output\help_lm2.chm::/html/contracts.htm")
+            os.system("hh.exe " + str(
+                os.path.dirname(os.path.realpath(__file__))[:-10]) + "help\output\help_lm2.chm::/html/contracts.htm")
         elif self.tab_widget.currentIndex() == 1:
-                os.system("hh.exe "+ str(os.path.dirname(os.path.realpath(__file__))[:-10]) +"help\output\help_lm2.chm::/html/contract_parcel.htm")
+            os.system("hh.exe " + str(os.path.dirname(os.path.realpath(__file__))[
+                                      :-10]) + "help\output\help_lm2.chm::/html/contract_parcel.htm")
         elif self.tab_widget.currentIndex() == 2:
-                os.system("hh.exe "+ str(os.path.dirname(os.path.realpath(__file__))[:-10]) +"help\output\help_lm2.chm::/html/contract_contract_details.htm")
+            os.system("hh.exe " + str(os.path.dirname(os.path.realpath(__file__))[
+                                      :-10]) + "help\output\help_lm2.chm::/html/contract_contract_details.htm")
         elif self.tab_widget.currentIndex() == 3:
-                os.system("hh.exe "+ str(os.path.dirname(os.path.realpath(__file__))[:-10]) +"help\output\help_lm2.chm::/html/contract_conditions.htm")
+            os.system("hh.exe " + str(os.path.dirname(os.path.realpath(__file__))[
+                                      :-10]) + "help\output\help_lm2.chm::/html/contract_conditions.htm")
         elif self.tab_widget.currentIndex() == 4:
-                os.system("hh.exe "+ str(os.path.dirname(os.path.realpath(__file__))[:-10]) +"help\output\help_lm2.chm::/html/contract_landfee.htm")
+            os.system("hh.exe " + str(os.path.dirname(os.path.realpath(__file__))[
+                                      :-10]) + "help\output\help_lm2.chm::/html/contract_landfee.htm")
         elif self.tab_widget.currentIndex() == 5:
-                os.system("hh.exe "+ str(os.path.dirname(os.path.realpath(__file__))[:-10]) +"help\output\help_lm2.chm::/html/contract_landfee_history.htm")
+            os.system("hh.exe " + str(os.path.dirname(os.path.realpath(__file__))[
+                                      :-10]) + "help\output\help_lm2.chm::/html/contract_landfee_history.htm")
         elif self.tab_widget.currentIndex() == 6:
-                os.system("hh.exe "+ str(os.path.dirname(os.path.realpath(__file__))[:-10]) +"help\output\help_lm2.chm::/html/contract_documents.htm")
+            os.system("hh.exe " + str(os.path.dirname(os.path.realpath(__file__))[
+                                      :-10]) + "help\output\help_lm2.chm::/html/contract_documents.htm")
         elif self.tab_widget.currentIndex() == 7:
-                os.system("hh.exe "+ str(os.path.dirname(os.path.realpath(__file__))[:-10]) +"help\output\help_lm2.chm::/html/contract_application_document.htm")
+            os.system("hh.exe " + str(os.path.dirname(os.path.realpath(__file__))[
+                                      :-10]) + "help\output\help_lm2.chm::/html/contract_application_document.htm")
         elif self.tab_widget.currentIndex() == 8:
-                os.system("hh.exe "+ str(os.path.dirname(os.path.realpath(__file__))[:-10]) +"help\output\help_lm2.chm::/html/contract_prints.htm")
+            os.system("hh.exe " + str(os.path.dirname(os.path.realpath(__file__))[
+                                      :-10]) + "help\output\help_lm2.chm::/html/contract_prints.htm")
 
     @pyqtSlot(int)
     def on_applicant_documents_cbox_currentIndexChanged(self, index):
@@ -4428,18 +4536,19 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         if self.updating:
             return
 
-        # self.__update_app_documents_twidget()
+            # self.__update_app_documents_twidget()
 
-    #public functions
+    # public functions
     def current_create_application(self):
 
         try:
-            con_app_roles = self.contract.application_roles\
-                    .filter(CtContractApplicationRole.role == Constants.APPLICATION_ROLE_CREATES).one()
+            con_app_roles = self.contract.application_roles \
+                .filter(CtContractApplicationRole.role == Constants.APPLICATION_ROLE_CREATES).one()
 
         except LM2Exception, e:
-                PluginUtils.show_error(self, e.title(), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
-                return
+            PluginUtils.show_error(self, e.title(),
+                                   self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+            return
 
         return con_app_roles.application_ref
 
@@ -4467,13 +4576,13 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             text = 0
         new_certificate_no = int(text)
         # try:
-        values = self.session.query(BsPerson.type, CtApplication.approved_landuse)\
-            .join(CtApplicationPersonRole, BsPerson.person_id == CtApplicationPersonRole.person)\
-            .join(CtApplication, CtApplicationPersonRole.application == CtApplication.app_id)\
+        values = self.session.query(BsPerson.type, CtApplication.approved_landuse) \
+            .join(CtApplicationPersonRole, BsPerson.person_id == CtApplicationPersonRole.person) \
+            .join(CtApplication, CtApplicationPersonRole.application == CtApplication.app_id) \
             .filter(CtApplicationPersonRole.application == self.app_id).all()
         for value in values:
             if (value.type == 10 or value.type == 20):
-                certificate_count = self.session.query(SetCertificate)\
+                certificate_count = self.session.query(SetCertificate) \
                     .filter(SetCertificate.certificate_type == 10) \
                     .filter(SetCertificate.id == range_id) \
                     .filter(SetCertificate.range_first_no <= new_certificate_no) \
@@ -4484,10 +4593,10 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                 else:
                     self.is_certificate = True
             elif (value.type == 30):
-                certificate_count = self.session.query(SetCertificate)\
+                certificate_count = self.session.query(SetCertificate) \
                     .filter(SetCertificate.certificate_type == 20) \
                     .filter(SetCertificate.id == range_id) \
-                    .filter(SetCertificate.range_first_no <= new_certificate_no)\
+                    .filter(SetCertificate.range_first_no <= new_certificate_no) \
                     .filter(SetCertificate.range_last_no >= new_certificate_no).count()
                 if certificate_count == 0:
                     self.calculated_num_edit.setStyleSheet(Constants.ERROR_LINEEDIT_STYLESHEET)
@@ -4495,10 +4604,10 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                 else:
                     self.is_certificate = True
             elif (value.type == 40):
-                certificate_count = self.session.query(SetCertificate)\
+                certificate_count = self.session.query(SetCertificate) \
                     .filter(SetCertificate.certificate_type == 40) \
                     .filter(SetCertificate.id == range_id) \
-                    .filter(SetCertificate.range_first_no <= new_certificate_no)\
+                    .filter(SetCertificate.range_first_no <= new_certificate_no) \
                     .filter(SetCertificate.range_last_no >= new_certificate_no).count()
                 if certificate_count == 0:
                     self.calculated_num_edit.setStyleSheet(Constants.ERROR_LINEEDIT_STYLESHEET)
@@ -4506,10 +4615,10 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                 else:
                     self.is_certificate = True
             elif (value.type == 50):
-                certificate_count = self.session.query(SetCertificate)\
+                certificate_count = self.session.query(SetCertificate) \
                     .filter(SetCertificate.certificate_type == 30) \
                     .filter(SetCertificate.id == range_id) \
-                    .filter(SetCertificate.range_first_no <= new_certificate_no)\
+                    .filter(SetCertificate.range_first_no <= new_certificate_no) \
                     .filter(SetCertificate.range_last_no >= new_certificate_no).count()
                 if certificate_count == 0:
                     self.calculated_num_edit.setStyleSheet(Constants.ERROR_LINEEDIT_STYLESHEET)
@@ -4527,9 +4636,9 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                     self.is_certificate = False
                 else:
                     self.is_certificate = True
-        # except SQLAlchemyError, e:
-        #     self.rollback_to_savepoint()
-        #     raise LM2Exception(self.tr("Database Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+                    # except SQLAlchemyError, e:
+                    #     self.rollback_to_savepoint()
+                    #     raise LM2Exception(self.tr("Database Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
 
     @pyqtSlot(str)
     def on_person_id_edit_textChanged(self, text):
@@ -4539,10 +4648,10 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         self.app_number_cbox.clear()
         value = "%" + text + "%"
 
-        application = self.session.query(CtApplication)\
-            .join(CtApplicationPersonRole, CtApplication.app_no == CtApplicationPersonRole.application)\
-            .join(BsPerson, CtApplicationPersonRole.person == BsPerson.person_id)\
-            .join(CtApplication.au2 == self.working_soum)\
+        application = self.session.query(CtApplication) \
+            .join(CtApplicationPersonRole, CtApplication.app_no == CtApplicationPersonRole.application) \
+            .join(BsPerson, CtApplicationPersonRole.person == BsPerson.person_id) \
+            .join(CtApplication.au2 == self.working_soum) \
             .filter(BsPerson.person_register.ilike(value)).all()
 
         for app in application:
@@ -4554,25 +4663,27 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
         if state:
             try:
-                contract_apps = self.session.query(CtContractApplicationRole).\
+                contract_apps = self.session.query(CtContractApplicationRole). \
                     filter(CtContractApplicationRole.contract == self.contract.contract_id).all()
                 for contract_app in contract_apps:
-                    mortgage_count = self.session.query(CtApp8Ext).\
+                    mortgage_count = self.session.query(CtApp8Ext). \
                         filter(CtApp8Ext.app_id == contract_app.application).count()
                     if mortgage_count > 0:
-                        mortgage = self.session.query(CtApp8Ext).\
-                        filter(CtApp8Ext.app_id == contract_app.application).one()
+                        mortgage = self.session.query(CtApp8Ext). \
+                            filter(CtApp8Ext.app_id == contract_app.application).one()
                         today = date.today()
                         mortgage_date = mortgage.end_mortgage_period
                         if today < mortgage_date:
                             self.apply_button.setEnabled(False)
 
-                            PluginUtils.show_message(self, self.tr("Mortgage"), self.tr("The Contract can not cancel. it is relating to the mortgage."))
+                            PluginUtils.show_message(self, self.tr("Mortgage"), self.tr(
+                                "The Contract can not cancel. it is relating to the mortgage."))
                             self.active_rbutton.setChecked(True)
                             return
 
             except SQLAlchemyError, e:
-                PluginUtils.show_error(self, self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+                PluginUtils.show_error(self, self.tr("File Error"),
+                                       self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
                 return
         else:
             self.apply_button.setEnabled(True)
@@ -4582,8 +4693,8 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
         if state:
             self.calculated_num_edit.setReadOnly(False)
-        else:
-            self.calculated_num_edit.setReadOnly(True)
+            # else:
+            # self.calculated_num_edit.setReadOnly(True)
 
     @pyqtSlot(bool)
     def on_expired_rbutton_toggled(self, state):
@@ -4643,29 +4754,30 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                     is_load_service = True
                     return data
 
-    # def __user_right_permissions(self):
-    #
-    #     user_name = QSettings().value(SettingsConstants.USER)
-    #     user = self.session.query(SetRole). \
-    #          filter(SetRole.user_name == user_name). \
-    #             filter(SetRole.is_active == True).one()
-    #     user_name_real = user.user_name_real
-    #
-    #     user_rights = self.session.query(SetUserGroupRole).filter(
-    #                     SetUserGroupRole.user_name_real == user_name_real).all()
-    #     for user_right in user_rights:
-                # if user_right.group_role == UserRight_code.ub_parcel:
-                #     if user_right.r_view:
-                #         self.refresh_fee_button.enabled(True)
-                #if user_right.group_role == UserRight_code.ub_parcel:
-                        #self.refresh_fee_button.enabled(True)
+                    # def __user_right_permissions(self):
+                    #
+                    #     user_name = QSettings().value(SettingsConstants.USER)
+                    #     user = self.session.query(SetRole). \
+                    #          filter(SetRole.user_name == user_name). \
+                    #             filter(SetRole.is_active == True).one()
+                    #     user_name_real = user.user_name_real
+                    #
+                    #     user_rights = self.session.query(SetUserGroupRole).filter(
+                    #                     SetUserGroupRole.user_name_real == user_name_real).all()
+                    #     for user_right in user_rights:
+                    # if user_right.group_role == UserRight_code.ub_parcel:
+                    #     if user_right.r_view:
+                    #         self.refresh_fee_button.enabled(True)
+                    # if user_right.group_role == UserRight_code.ub_parcel:
+                    # self.refresh_fee_button.enabled(True)
 
     @pyqtSlot()
     def on_refresh_fee_button_clicked(self):
 
         self.land_fee_twidget.setRowCount(0)
 
-        PluginUtils.show_message(self, u'Анхааруулга', u'Газрын төлбөрийг төлбөрийн мэргэжилтэнгээр ГКМС-ын веб систем дээр бодолтыг хийлгэн үү!!!')
+        PluginUtils.show_message(self, u'Анхааруулга',
+                                 u'Гэрээний төлбөрийн бодолтыг газрын кадастрын мэдээллийн сангийн веб системээр төлбөрийн мэргэжилтэнгээр бодолтыг хийлгэнэ үү!!!')
         return
 
         if not self.__check_share_sum(self.share_fee_twidget, 0):
@@ -4677,7 +4789,6 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
         status = data['status']
         msg = data['msg']
-
 
         if not status:
             PluginUtils.show_message(self, self.tr("Warning"), msg)
@@ -4697,8 +4808,8 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         zone_id = None
         zone_no = None
         level_id = None
-        level_name = None #description
-        zone_type = None #description
+        level_name = None  # description
+        zone_type = None  # description
         confidence_percent = None
         resolution_id = None
 
@@ -4774,9 +4885,9 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                 resolution_id = None
 
             # if zone_id and level_id:
-            count = self.session.query(CtContractFee).\
-                filter(CtContractFee.contract_id == self.contract.contract_id).\
-                filter(CtContractFee.zone_id == zone_id).\
+            count = self.session.query(CtContractFee). \
+                filter(CtContractFee.contract_id == self.contract.contract_id). \
+                filter(CtContractFee.zone_id == zone_id). \
                 filter(CtContractFee.level_id == level_id).count()
             if count == 0:
                 contract_fee = CtContractFee()
@@ -4839,30 +4950,30 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             self.__add_fee_row3(row, person_id, base_fee_id, payment, parcel_id, share, resolution_id)
             self.landfee_message_label1.clear()
 
-        # contractors = self.session.query(CtApplicationPersonRole). \
-        #     join(CtApplication, CtApplicationPersonRole.application == CtApplication.app_id). \
-        #     join(SetApplicationTypePersonRole, CtApplication.app_type == SetApplicationTypePersonRole.type). \
-        #     filter(CtApplication.app_no == app_no). \
-        #     filter(SetApplicationTypePersonRole.is_owner == True).all()
-        #
-        # row = 0
-        # for contractor in contractors:
-        #     if contractor:
-        #         person = contractor.person_ref
-        #         if person:
-        #             fee_count = person.fees.filter(CtFee.contract == self.contract.contract_id).\
-        #                 filter(CtFee.base_fee_id == base_fee_id).count()
+            # contractors = self.session.query(CtApplicationPersonRole). \
+            #     join(CtApplication, CtApplicationPersonRole.application == CtApplication.app_id). \
+            #     join(SetApplicationTypePersonRole, CtApplication.app_type == SetApplicationTypePersonRole.type). \
+            #     filter(CtApplication.app_no == app_no). \
+            #     filter(SetApplicationTypePersonRole.is_owner == True).all()
+            #
+            # row = 0
+            # for contractor in contractors:
+            #     if contractor:
+            #         person = contractor.person_ref
+            #         if person:
+            #             fee_count = person.fees.filter(CtFee.contract == self.contract.contract_id).\
+            #                 filter(CtFee.base_fee_id == base_fee_id).count()
 
-        #             if fee_count == 0:
-        #                 if not self.__is_fee_row(person.person_register, base_fee_id):
+            #             if fee_count == 0:
+            #                 if not self.__is_fee_row(person.person_register, base_fee_id):
 
-        #                     self.__add_fee_row3(row, contractor, base_fee_id, payment, parcel_id)
-        #             if fee_count == 1:
-        #                 fee = person.fees.filter(CtFee.contract == self.contract.contract_id). \
-        #                     filter(CtFee.base_fee_id == base_fee_id).one()
-        #                 if not self.__is_fee_row(person.person_register, base_fee_id):
-        #                     self.__add_fee_row2(row, contractor, fee)
-        #             row += 1
+            #                     self.__add_fee_row3(row, contractor, base_fee_id, payment, parcel_id)
+            #             if fee_count == 1:
+            #                 fee = person.fees.filter(CtFee.contract == self.contract.contract_id). \
+            #                     filter(CtFee.base_fee_id == base_fee_id).one()
+            #                 if not self.__is_fee_row(person.person_register, base_fee_id):
+            #                     self.__add_fee_row2(row, contractor, fee)
+            #             row += 1
 
     def __add_fee_row3(self, row, person_id, base_fee_id, payment, parcel_id, share, resolution_id):
 
@@ -4916,7 +5027,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         self.__lock_item(item)
         self.land_fee_twidget.setItem(row, CONTRACTOR_AREA, item)
 
-        fee_calculated = int(round(payment*float(share)))
+        fee_calculated = int(round(payment * float(share)))
 
         item = QTableWidgetItem('{0}'.format(fee_calculated))
         self.__lock_item(item)
@@ -4969,7 +5080,8 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         street_distance_count = self.street_buffer_sbox.value()
         sql = "select * from ( " \
               "select p.parcel_id, s.gudamjid, s.gudamjner, ST_Distance(p.geometry, s.geometry) as distance, s.gid from data_address.geo_street_merge s, data_soums_union.ca_parcel_tbl p " \
-              "where p.parcel_id = " + "'" + parcel_id + "'" + ") as xxx order by distance asc limit " + str(street_distance_count) + ""
+              "where p.parcel_id = " + "'" + parcel_id + "'" + ") as xxx order by distance asc limit " + str(
+            street_distance_count) + ""
 
         self.gudamjid = list()
         result = self.session.execute(sql)
@@ -4996,8 +5108,9 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
         street_distance_count = self.street_buffer_sbox.value()
         sql = "select * from ( " \
-                "select p.parcel_id, s.gudamjid, s.gudamjner, ST_Distance(p.geometry, s.geometry) as distance, s.gid from data_address.geo_street_merge s, data_soums_union.ca_parcel_tbl p " \
-                "where p.parcel_id = " + "'" + parcel_id + "'" + ") as xxx order by distance asc limit " + str(street_distance_count) + ""
+              "select p.parcel_id, s.gudamjid, s.gudamjner, ST_Distance(p.geometry, s.geometry) as distance, s.gid from data_address.geo_street_merge s, data_soums_union.ca_parcel_tbl p " \
+              "where p.parcel_id = " + "'" + parcel_id + "'" + ") as xxx order by distance asc limit " + str(
+            street_distance_count) + ""
 
         self.gudamjid = list()
         result = self.session.execute(sql)
@@ -5033,7 +5146,8 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
         parcel = self.session.query(CaParcelTbl).filter(CaParcelTbl.parcel_id == self.id_main_edit.text()).one()
         if self.session.query(CaBuildingTbl).filter(parcel.geometry.ST_Contains(CaBuildingTbl.geometry)).count() != 0:
-            building = self.session.query(CaBuildingTbl).filter(parcel.geometry.ST_Contains(CaBuildingTbl.geometry)).all()
+            building = self.session.query(CaBuildingTbl).filter(
+                parcel.geometry.ST_Contains(CaBuildingTbl.geometry)).all()
             for build in building:
                 # build_no = build.building_id[-3:]
                 self.building_no_cbox.addItem(build.building_id, build.building_id)
@@ -5304,15 +5418,18 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
         au3_code = None
         khoroolol_fid = None
-        au3_count = self.session.query(AuLevel3).filter(func.ST_Centroid(parcel.geometry).ST_Within(AuLevel3.geometry)).count()
+        au3_count = self.session.query(AuLevel3).filter(
+            func.ST_Centroid(parcel.geometry).ST_Within(AuLevel3.geometry)).count()
 
         if au3_count == 1:
-            bag = self.session.query(AuLevel3).filter(func.ST_Centroid(parcel.geometry).ST_Within(AuLevel3.geometry)).one()
+            bag = self.session.query(AuLevel3).filter(
+                func.ST_Centroid(parcel.geometry).ST_Within(AuLevel3.geometry)).one()
             au3_code = bag.code
         khoroolol_count = self.session.query(AuKhoroolol).filter(
             func.ST_Centroid(parcel.geometry).ST_Within(AuKhoroolol.geometry)).count()
         if khoroolol_count == 1:
-            khoroolol = self.session.query(AuKhoroolol).filter(func.ST_Centroid(parcel.geometry).ST_Within(AuKhoroolol.geometry)).one()
+            khoroolol = self.session.query(AuKhoroolol).filter(
+                func.ST_Centroid(parcel.geometry).ST_Within(AuKhoroolol.geometry)).one()
             khoroolol_fid = khoroolol.fid
 
         zipcode_id = None
@@ -5342,8 +5459,8 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
                 object = CaParcelAddress()
                 p_count = self.session.query(CaParcelAddress).filter(CaParcelAddress.parcel_id == parcel_id).count()
                 if p_count > 0:
-                    sort_value = self.session.query(CaParcelAddress.sort_value).\
-                        filter(CaParcelAddress.parcel_id == parcel_id).\
+                    sort_value = self.session.query(CaParcelAddress.sort_value). \
+                        filter(CaParcelAddress.parcel_id == parcel_id). \
                         order_by(CaParcelAddress.sort_value.desc()).first()
 
                     sort_value_num = int(str(sort_value).split(",")[0][1:]) + 1
@@ -5353,7 +5470,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
                     in_source_code = item.text()[0:1]
                     if self.__is_number(in_source_code):
-                        in_source_count = self.session.query(ClAddressSource).\
+                        in_source_count = self.session.query(ClAddressSource). \
                             filter(ClAddressSource.code == int(in_source_code)).count()
                         if in_source_count == 1:
                             object.in_source = item.text()[0:1]
@@ -5408,15 +5525,18 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         parcel_id = self.id_main_edit.text()
         au3_code = None
         khoroolol_fid = None
-        au3_count = self.session.query(AuLevel3).filter(func.ST_Centroid(building.geometry).ST_Within(AuLevel3.geometry)).count()
+        au3_count = self.session.query(AuLevel3).filter(
+            func.ST_Centroid(building.geometry).ST_Within(AuLevel3.geometry)).count()
 
         if au3_count == 1:
-            bag = self.session.query(AuLevel3).filter(func.ST_Centroid(building.geometry).ST_Within(AuLevel3.geometry)).one()
+            bag = self.session.query(AuLevel3).filter(
+                func.ST_Centroid(building.geometry).ST_Within(AuLevel3.geometry)).one()
             au3_code = bag.code
         khoroolol_count = self.session.query(AuKhoroolol).filter(
             func.ST_Centroid(building.geometry).ST_Within(AuKhoroolol.geometry)).count()
         if khoroolol_count == 1:
-            khoroolol = self.session.query(AuKhoroolol).filter(func.ST_Centroid(building.geometry).ST_Within(AuKhoroolol.geometry)).one()
+            khoroolol = self.session.query(AuKhoroolol).filter(
+                func.ST_Centroid(building.geometry).ST_Within(AuKhoroolol.geometry)).one()
             khoroolol_fid = khoroolol.fid
 
         zipcode_id = None
@@ -5444,10 +5564,11 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             if id == -1:
                 new_row = True
                 object = CaBuildingAddress()
-                p_count = self.session.query(CaBuildingAddress).filter(CaBuildingAddress.building_id == building_id).count()
+                p_count = self.session.query(CaBuildingAddress).filter(
+                    CaBuildingAddress.building_id == building_id).count()
                 if p_count > 0:
-                    sort_value = self.session.query(CaBuildingAddress.sort_value).\
-                        filter(CaBuildingAddress.building_id == building_id).\
+                    sort_value = self.session.query(CaBuildingAddress.sort_value). \
+                        filter(CaBuildingAddress.building_id == building_id). \
                         order_by(CaBuildingAddress.sort_value.desc()).first()
 
                     sort_value_num = int(str(sort_value).split(",")[0][1:]) + 1
@@ -5457,7 +5578,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
                     in_source_code = item.text()[0:1]
                     if self.__is_number(in_source_code):
-                        in_source_count = self.session.query(ClAddressSource).\
+                        in_source_count = self.session.query(ClAddressSource). \
                             filter(ClAddressSource.code == int(in_source_code)).count()
                         if in_source_count == 1:
                             object.in_source = item.text()[0:1]
