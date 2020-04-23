@@ -1151,11 +1151,14 @@ class OwnRecordDialog(QDialog, Ui_OwnRecordDialog, DatabaseHelper):
                 tax.share = float(self.land_tax_twidget.item(row, OWNER_SHARE).text())
                 tax.area = int(self.land_tax_twidget.item(row, OWNER_AREA).text())
                 tax.value_calculated = int(self.land_tax_twidget.item(row, OWNER_VALUE_CALCULATED).text())
-                tax.price_paid = int(self.land_tax_twidget.item(row, OWNER_PRICE_PAID).text())
+                # if self.land_tax_twidget.item(row, OWNER_PRICE_PAID).text():
+                #     tax.price_paid = int(self.land_tax_twidget.item(row, OWNER_PRICE_PAID).text())
                 tax.land_tax = float(self.land_tax_twidget.item(row, OWNER_TAX).text())
-                tax.grace_period = int(self.land_tax_twidget.item(row, OWNER_GRACE_PERIOD).text())
-                tax.base_value_per_m2 = int(self.base_value_edit.text())
-                tax.base_tax_rate = float(self.base_tax_rate_edit.text())
+                # tax.grace_period = int(self.land_tax_twidget.item(row, OWNER_GRACE_PERIOD).text())
+                # if self.base_value_edit.text():
+                #     tax.base_value_per_m2 = int(self.base_value_edit.text())
+                # if self.base_tax_rate_edit.text():
+                #     tax.base_tax_rate = float(self.base_tax_rate_edit.text())
                 tax.person = owner.person_id
                 tax.person_register = owner.person_register
                 tax.record_no = self.record.record_no
