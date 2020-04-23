@@ -1168,10 +1168,10 @@ class OwnRecordDialog(QDialog, Ui_OwnRecordDialog, DatabaseHelper):
                 else:
                     tax.subsidized_area = 0
                 tax.subsidized_tax_rate = float(self.subsidized_tax_rate_edit.text())
-                payment_frequency_desc = self.land_tax_twidget.item(row, OWNER_PAYMENT_FREQUENCY).text()
-                payment_frequency = self.session.query(ClPaymentFrequency). \
-                    filter(ClPaymentFrequency.description == payment_frequency_desc).one()
-                tax.payment_frequency = payment_frequency.code
+                # payment_frequency_desc = self.land_tax_twidget.item(row, OWNER_PAYMENT_FREQUENCY).text()
+                # payment_frequency = self.session.query(ClPaymentFrequency). \
+                #     filter(ClPaymentFrequency.description == payment_frequency_desc).one()
+                # tax.payment_frequency = payment_frequency.code
 
                 if new_row:
                     owner.taxes.append(tax)
