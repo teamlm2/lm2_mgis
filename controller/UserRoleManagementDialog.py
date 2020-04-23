@@ -402,6 +402,9 @@ class UserRoleManagementDialog(QDialog, Ui_UserRoleManagementDialog):
         QListWidgetItem("contracting_update", self.group_lwidget)
         QListWidgetItem("reporting", self.group_lwidget)
         QListWidgetItem("log_view", self.member_lwidget)
+        QListWidgetItem(self.GROUP_SEPARATOR, self.group_lwidget)
+        QListWidgetItem("top_cadastre_view", self.group_lwidget)
+        QListWidgetItem("top_cadastre_update", self.group_lwidget)
 
     def __populate_au_level1_cbox(self):
 

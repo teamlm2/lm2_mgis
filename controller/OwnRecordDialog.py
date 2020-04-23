@@ -878,9 +878,10 @@ class OwnRecordDialog(QDialog, Ui_OwnRecordDialog, DatabaseHelper):
             item = QTableWidgetItem('{0}'.format(tax.grace_period))
             self.__lock_item(item)
             self.land_tax_twidget.setItem(row, OWNER_GRACE_PERIOD, item)
-            payment_frequency = self.session.query(ClPaymentFrequency).get(tax.payment_frequency)
-            item = QTableWidgetItem(u'{0}'.format(payment_frequency.description))
-            self.land_tax_twidget.setItem(row, OWNER_PAYMENT_FREQUENCY, item)
+            if tax.payment_frequency:
+                payment_frequency = self.session.query(ClPaymentFrequency).get(tax.payment_frequency)
+                item = QTableWidgetItem(u'{0}'.format(payment_frequency.description))
+                self.land_tax_twidget.setItem(row, OWNER_PAYMENT_FREQUENCY, item)
 
     def __load_application_information(self):
 
