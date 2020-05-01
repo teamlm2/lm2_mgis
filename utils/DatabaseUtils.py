@@ -389,37 +389,37 @@ class DatabaseUtils():
         if first_code is None:
             first_code = DatabaseUtils.current_working_soum_schema()
 
-        try:
-            session.begin_nested()
-            l1_working_code = DatabaseUtils.working_l1_code()
+        # try:
+        session.begin_nested()
+        l1_working_code = DatabaseUtils.working_l1_code()
 
-            #in case of districts - sort after l1 code
-            if l1_working_code[:2] == "01":
-                search_path_array = DatabaseUtils.l2_restriction_array()
+        #in case of districts - sort after l1 code
+        if l1_working_code[:2] == "01":
+            search_path_array = DatabaseUtils.l2_restriction_array()
+        else:
+            search_path_array = DatabaseUtils.l2_restriction_array()
+
+        found_code = False
+        schema_list = []
+
+        for item in search_path_array:
+            au_level2 = item.strip()
+
+            if item == first_code:
+                found_code = True
             else:
-                search_path_array = DatabaseUtils.l2_restriction_array()
+                schema_list.append("s" + au_level2)
 
-            found_code = False
-            schema_list = []
+        if found_code:
+            schema_list.insert(0, "s" + first_code.strip())
 
-            for item in search_path_array:
-                au_level2 = item.strip()
+        session.execute(set_search_path)
+        session.commit()
 
-                if item == first_code:
-                    found_code = True
-                else:
-                    schema_list.append("s" + au_level2)
-
-            if found_code:
-                schema_list.insert(0, "s" + first_code.strip())
-
-            session.execute(set_search_path)
-            session.commit()
-
-        except DatabaseError, e:
-            session.rollback()
-            raise LM2Exception(QApplication.translate("LM2", "Database Query Error"),
-                               QApplication.translate("LM2", "Could not execute: {0}").format(e.message))
+        # except DatabaseError, e:
+        #     session.rollback()
+        #     raise LM2Exception(QApplication.translate("LM2", "Database Query Error"),
+        #                        QApplication.translate("LM2", "Could not execute: {0}").format(e.message))
 
     @staticmethod
     def file_data(file_path):

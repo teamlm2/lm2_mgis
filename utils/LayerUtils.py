@@ -419,6 +419,9 @@ class LayerUtils(object):
         mygroup = root.findGroup(U"CAMA")
         if mygroup is None:
             admin_units_group = root.insertGroup(8, u"CAMA")
+        mygroup = root.findGroup(U"Хаяг")
+        if mygroup is None:
+            admin_units_group = root.insertGroup(8, u"Хаяг")
 
     @staticmethod
     def refresh_layer_plan():

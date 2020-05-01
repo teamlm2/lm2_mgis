@@ -34,3 +34,6 @@ GRANT SELECT ON TABLE data_address.st_road TO cadastre_view;
 GRANT SELECT, UPDATE, INSERT, DELETE ON TABLE data_address.st_street TO cadastre_update;
 GRANT SELECT ON TABLE data_address.st_street TO cadastre_view;
 
+GRANT SELECT, UPDATE, INSERT, DELETE ON TABLE data_address.st_street TO cadastre_update;
+GRANT SELECT, UPDATE, INSERT, DELETE ON TABLE data_address.st_street_sub TO cadastre_update;
+

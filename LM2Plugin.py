@@ -1441,15 +1441,40 @@ class LM2Plugin:
             mygroup.addLayer(vlayer)
 
         ######
-        vlayer = LayerUtils.layer_by_data_source("data_soums_union", "ca_temporary_parcel")
+        addrs_group = root.findGroup(u"Хаяг")
+
+        vlayer = LayerUtils.layer_by_data_source("data_address", "st_street_sub")
         if vlayer is None:
-            vlayer = LayerUtils.load_layer_base_layer("ca_temporary_parcel", "parcel_id", "data_soums_union")
+            vlayer = LayerUtils.load_layer_base_layer("st_street_sub", "id", "data_address")
         vlayer.loadNamedStyle(
-            str(os.path.dirname(os.path.realpath(__file__))) + "/template\style/ca_temporary_parcel_tbl.qml")
-        vlayer.setLayerName(QApplication.translate("Plugin", "Parcel Temporary"))
+            str(os.path.dirname(os.path.realpath(__file__))) + "/template\style/st_street_sub.qml")
+        vlayer.setLayerName(QApplication.translate("Plugin", "Address Sub Street"))
         myalayer = root.findLayer(vlayer.id())
         if myalayer is None:
-            mygroup.addLayer(vlayer)
+            addrs_group.addLayer(vlayer)
+
+        ######
+        vlayer = LayerUtils.layer_by_data_source("data_address", "st_street")
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer("st_street", "id", "data_address")
+        vlayer.loadNamedStyle(
+            str(os.path.dirname(os.path.realpath(__file__))) + "/template\style/st_street.qml")
+        vlayer.setLayerName(QApplication.translate("Plugin", "Address Street"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            addrs_group.addLayer(vlayer)
+
+        self.iface.mapCanvas().refresh()
+
+        vlayer = LayerUtils.layer_by_data_source("data_address", "au_zipcode_area")
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer("au_zipcode_area", "id", "data_address")
+        vlayer.loadNamedStyle(
+            str(os.path.dirname(os.path.realpath(__file__))) + "/template\style/au_zipcode_area.qml")
+        vlayer.setLayerName(QApplication.translate("Plugin", "Address Post Zone"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            addrs_group.addLayer(vlayer)
 
         self.iface.mapCanvas().refresh()
 
