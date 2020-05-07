@@ -32,4 +32,4 @@ CREATE TRIGGER set_default_au2
   BEFORE INSERT OR UPDATE
   ON data_address.st_street_sub
   FOR EACH ROW
-  EXECUTE PROCEDURE base.set_default_au3();
+  EXECUTE PROCEDURE base.set_default_au2();
