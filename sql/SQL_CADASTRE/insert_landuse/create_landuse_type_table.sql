@@ -97,3 +97,21 @@ CREATE TRIGGER update_area
   ON data_landuse.ca_landuse_type_tbl
   FOR EACH ROW
   EXECUTE PROCEDURE base.update_area_or_length();
+
+CREATE TRIGGER set_default_au1
+  BEFORE INSERT OR UPDATE
+  ON data_landuse.ca_landuse_type_tbl
+  FOR EACH ROW
+  EXECUTE PROCEDURE base.set_default_au1();
+
+CREATE TRIGGER set_default_au2
+  BEFORE INSERT OR UPDATE
+  ON data_landuse.ca_landuse_type_tbl
+  FOR EACH ROW
+  EXECUTE PROCEDURE base.set_default_au2();
+
+CREATE TRIGGER set_default_au3
+  BEFORE INSERT OR UPDATE
+  ON data_landuse.ca_landuse_type_tbl
+  FOR EACH ROW
+  EXECUTE PROCEDURE base.set_default_au3();
