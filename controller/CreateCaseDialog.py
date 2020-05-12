@@ -25,6 +25,9 @@ from ..model.AuMpa import *
 from ..model.PlProjectParcel import *
 from ..model.PlProject import *
 from ..model.ClPlanType import *
+import urllib
+import urllib2
+import json
 
 class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
 
@@ -756,6 +759,24 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
             if au2_parcel_count == 0:
                 is_out_parcel = True
                 break
+
+            wkt_geom = WKTElement(parcel.geometry().exportToWkt(), srid=4326)
+
+            params = urllib.urlencode({'geom': wkt_geom})
+            f = urllib.urlopen("http://192.168.15.222/api/geo/parcel/check/by/geom/wkt", params)
+            data = json.load(f)
+
+            status = data['status']
+            result = data['result']
+
+            if not status:
+                PluginUtils.show_message(self, u'Амжилтгүй', u'Өгөгдөл буруу байна!!!')
+                return
+            else:
+                if result:
+                    PluginUtils.show_message(self, u'Амжилтгүй', u'Газар олгох боломжгүй байршил!!!')
+                    return
+
             count += 1
             new_parcel = CaTmpParcel()
             new_parcel.parcel_id = QDateTime().currentDateTime().toString("MMddhhmmss") + str(count)
