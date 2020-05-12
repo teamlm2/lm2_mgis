@@ -761,14 +761,11 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
                 break
 
             wkt_geom = WKTElement(parcel.geometry().exportToWkt(), srid=4326)
-
             params = urllib.urlencode({'geom': wkt_geom})
             f = urllib.urlopen("http://192.168.15.222/api/geo/parcel/check/by/geom/wkt", params)
             data = json.load(f)
-
             status = data['status']
             result = data['result']
-
             if not status:
                 PluginUtils.show_message(self, u'Амжилтгүй', u'Өгөгдөл буруу байна!!!')
                 return

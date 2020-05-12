@@ -1137,6 +1137,22 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
                         valid = False
                     else:
                         parcel_geometry = WKTElement(parcel.geometry().exportToWkt(), srid=4326)
+
+                        params = urllib.urlencode({'geom': parcel_geometry})
+                        f = urllib.urlopen("http://192.168.15.222/api/geo/parcel/check/by/geom/wkt", params)
+                        data = json.load(f)
+                        status = data['status']
+                        result = data['result']
+                        if not status:
+                            message = plan_zone_message +  u'Өгөгдөл буруу байна!!!'
+                            error_message = error_message + "\n" + message
+                            valid = False
+                        else:
+                            if result:
+                                message = plan_zone_message + u'Газар олгох боломжгүй байршил!!!!!!'
+                                error_message = error_message + "\n" + message
+                                valid = False
+
                         # if parcel_geometry.IsValid() == True:
                         #     valid = False
                         #     print parcel_geometry.IsValid()
