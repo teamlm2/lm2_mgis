@@ -23,7 +23,7 @@
     </rect>
    </property>
    <property name="currentIndex">
-    <number>3</number>
+    <number>5</number>
    </property>
    <widget class="QWidget" name="documents_tab">
     <attribute name="title">
@@ -958,6 +958,91 @@
        </property>
       </widget>
      </widget>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="tab_4">
+    <attribute name="title">
+     <string>Natural Zone Settings</string>
+    </attribute>
+    <widget class="QTableWidget" name="nz_pasture_type_twidget">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>60</y>
+       <width>761</width>
+       <height>371</height>
+      </rect>
+     </property>
+     <attribute name="horizontalHeaderDefaultSectionSize">
+      <number>120</number>
+     </attribute>
+     <attribute name="horizontalHeaderMinimumSectionSize">
+      <number>35</number>
+     </attribute>
+     <attribute name="verticalHeaderDefaultSectionSize">
+      <number>35</number>
+     </attribute>
+     <attribute name="verticalHeaderMinimumSectionSize">
+      <number>19</number>
+     </attribute>
+     <column>
+      <property name="text">
+       <string>Улирлын төрөл</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Ургац шилжүүлэлт</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Бэлчээр ашиглалт/%/</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Эхлэх хугацаа</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Дуусах хугацаа</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Үргэлжлэх хугацаа</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Хонин толгойн идэх өвс</string>
+      </property>
+     </column>
+    </widget>
+    <widget class="QLabel" name="label_15">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>10</y>
+       <width>341</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Natural Zone</string>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="natural_zone_set_cbox">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>30</y>
+       <width>381</width>
+       <height>22</height>
+      </rect>
+     </property>
     </widget>
    </widget>
   </widget>

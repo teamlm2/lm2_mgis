@@ -45,8 +45,12 @@ from ..model.ClPastureDocument import *
 from ..model.ClPastureValues import *
 from ..model.ClliveStock import *
 from ..model.PsLiveStockConvert import *
+from ..model.AuNaturalZone import *
+from ..model.SetNzPastureType import *
 from .qt_classes.DoubleSpinBoxDelegate import *
 from .qt_classes.IntegerSpinBoxDelegate import IntegerSpinBoxDelegate
+from .qt_classes.DateDelegate import DateDelegate
+from decimal import Decimal
 from inspect import currentframe
 from ..utils.FileUtils import FileUtils
 from ..utils.LayerUtils import LayerUtils
@@ -121,6 +125,33 @@ class PastureSettings(QDialog, Ui_PastureSettings, DatabaseHelper):
         delegate = IntegerSpinBoxDelegate(1, 10, 100, 1000, 10, self.recovery_class_twidget)
         self.recovery_class_twidget.setItemDelegateForColumn(1, delegate)
 
+        # self.nz_pasture_type_twidget.setAlternatingRowColors(True)
+        # self.nz_pasture_type_twidget.horizontalHeader().setResizeMode(1, QHeaderView.Stretch)
+        # self.nz_pasture_type_twidget.setSelectionBehavior(QAbstractItemView.SelectRows)
+        # self.nz_pasture_type_twidget.setSelectionMode(QTableWidget.SingleSelection)
+
+        self.nz_pasture_type_twidget.setAlternatingRowColors(True)
+        self.nz_pasture_type_twidget.setSelectionBehavior(QTableWidget.SelectRows)
+        self.nz_pasture_type_twidget.setSelectionMode(QTableWidget.SingleSelection)
+
+        delegate = DoubleSpinBoxDelegate(1, 0, 100, 50, 0.1, self.nz_pasture_type_twidget)
+        self.nz_pasture_type_twidget.setItemDelegateForColumn(1, delegate)
+
+        delegate = DoubleSpinBoxDelegate(2, 0, 100, 50, 0.1, self.nz_pasture_type_twidget)
+        self.nz_pasture_type_twidget.setItemDelegateForColumn(2, delegate)
+
+        delegate = DateDelegate(self.nz_pasture_type_twidget)
+        self.nz_pasture_type_twidget.setItemDelegateForColumn(3, delegate)
+
+        delegate = DateDelegate(self.nz_pasture_type_twidget)
+        self.nz_pasture_type_twidget.setItemDelegateForColumn(4, delegate)
+
+        delegate = IntegerSpinBoxDelegate(5, 0, 365, 50, 1, self.nz_pasture_type_twidget)
+        self.nz_pasture_type_twidget.setItemDelegateForColumn(5, delegate)
+
+        delegate = DoubleSpinBoxDelegate(6, 0, 10, 1.4, 0.1, self.nz_pasture_type_twidget)
+        self.nz_pasture_type_twidget.setItemDelegateForColumn(6, delegate)
+
     def __setup_combo_boxes(self):
 
         code_lists = self.__codelist_names()
@@ -130,6 +161,10 @@ class PastureSettings(QDialog, Ui_PastureSettings, DatabaseHelper):
         natural_zones = self.session.query(ClNaturalZone).all()
         for natural_zone in natural_zones:
             self.natural_zone_cbox.addItem(natural_zone.description, natural_zone.code)
+
+        natural_zones = self.session.query(AuNaturalZone).all()
+        for natural_zone in natural_zones:
+            self.natural_zone_set_cbox.addItem(natural_zone.name, natural_zone.code)
 
         formula_types = self.session.query(PClLessSymbol).all()
         for formula_type in formula_types:
@@ -144,6 +179,61 @@ class PastureSettings(QDialog, Ui_PastureSettings, DatabaseHelper):
         if soil_evaluations:
             for soil_evaluation in soil_evaluations:
                 self.soil_evaluation_cbox.addItem(str(soil_evaluation.ball)+':'+soil_evaluation.description, soil_evaluation.code)
+
+    @pyqtSlot(int)
+    def on_natural_zone_set_cbox_currentIndexChanged(self, index):
+
+        self.nz_pasture_type_twidget.clearContents()
+        self.nz_pasture_type_twidget.setRowCount(0)
+        nz_code = self.natural_zone_set_cbox.itemData(self.natural_zone_set_cbox.currentIndex())
+        values = self.session.query(ClPastureType).filter(ClPastureType.type == 2).all()
+
+        for value in values:
+            count = self.nz_pasture_type_twidget.rowCount()
+            self.nz_pasture_type_twidget.insertRow(count)
+
+            item = QTableWidgetItem(value.description)
+            item.setData(Qt.UserRole, value.code)
+            self.nz_pasture_type_twidget.setItem(count, 0, item)
+
+            set_nz_pasture_count = self.session.query(SetNzPastureType).\
+                filter(SetNzPastureType.pasture_type == value.code).\
+                filter(SetNzPastureType.natural_zone == nz_code).count()
+            if set_nz_pasture_count == 1:
+                set_nz_pasture = self.session.query(SetNzPastureType). \
+                    filter(SetNzPastureType.pasture_type == value.code). \
+                    filter(SetNzPastureType.natural_zone == nz_code).one()
+
+                if set_nz_pasture.current_value is not None:
+                    item = QTableWidgetItem(str(set_nz_pasture.current_value))
+                    item.setData(Qt.UserRole, set_nz_pasture.current_value)
+                    self.nz_pasture_type_twidget.setItem(count, 1, item)
+
+                if set_nz_pasture.percent_value is not None:
+                    item = QTableWidgetItem(str(set_nz_pasture.percent_value))
+                    item.setData(Qt.UserRole, set_nz_pasture.percent_value)
+                    self.nz_pasture_type_twidget.setItem(count, 2, item)
+
+                if set_nz_pasture.duration_begin:
+                    item = QTableWidgetItem(u'{0}'.format(set_nz_pasture.duration_begin))
+                    item.setData(Qt.UserRole, set_nz_pasture.duration_begin)
+                    self.nz_pasture_type_twidget.setItem(count, 3, item)
+
+                if set_nz_pasture.duration_end:
+                    item = QTableWidgetItem(u'{0}'.format(set_nz_pasture.duration_end))
+                    item.setData(Qt.UserRole, set_nz_pasture.duration_end)
+                    self.nz_pasture_type_twidget.setItem(count, 4, item)
+
+                if set_nz_pasture.duration_days is not None:
+                    item = QTableWidgetItem(str(set_nz_pasture.duration_days))
+                    item.setData(Qt.UserRole, set_nz_pasture.duration_days)
+                    self.nz_pasture_type_twidget.setItem(count, 5, item)
+
+                if set_nz_pasture.sheep_unit is not None:
+                    item = QTableWidgetItem(str(set_nz_pasture.sheep_unit))
+                    item.setData(Qt.UserRole, set_nz_pasture.sheep_unit)
+                    self.nz_pasture_type_twidget.setItem(count, 6, item)
+
 
     @pyqtSlot(int)
     def on_natural_zone_cbox_currentIndexChanged(self, index):
@@ -351,6 +441,94 @@ class PastureSettings(QDialog, Ui_PastureSettings, DatabaseHelper):
 
         self.__read_codelist_entries()
 
+    def __save_set_nz_pasture_type(self):
+
+        nz_code = self.natural_zone_set_cbox.itemData(self.natural_zone_set_cbox.currentIndex())
+        for row in range(self.nz_pasture_type_twidget.rowCount()):
+            pasture_type = self.nz_pasture_type_twidget.item(row, 0).data(Qt.UserRole)
+
+            current_value = None
+            percent_value = None
+            duration_begin = None
+            duration_end = None
+            duration_days = None
+            sheep_unit = None
+            is_save = True
+
+            if self.nz_pasture_type_twidget.item(row, 1):
+                current_value = Decimal(self.nz_pasture_type_twidget.item(row, 1).text())
+            else:
+                is_save = False
+            if self.nz_pasture_type_twidget.item(row, 2):
+                percent_value = Decimal(self.nz_pasture_type_twidget.item(row, 2).text())
+            else:
+                is_save = False
+            if self.nz_pasture_type_twidget.item(row, 3):
+                str_date = self.nz_pasture_type_twidget.item(row, 3).text()
+                if len(str_date) == 10:
+                    duration_begin = datetime.strptime(str_date, "%Y-%m-%d")
+                else:
+                    duration_begin = datetime.strptime(str_date[:10], "%Y-%m-%d")
+            else:
+                is_save = False
+            if self.nz_pasture_type_twidget.item(row, 4):
+                str_date = self.nz_pasture_type_twidget.item(row, 4).text()
+                if len(str_date) == 10:
+                    duration_end = datetime.strptime(str_date, "%Y-%m-%d")
+                else:
+                    duration_end = datetime.strptime(str_date[:10], "%Y-%m-%d")
+            else:
+                is_save = False
+            if self.nz_pasture_type_twidget.item(row, 5):
+                duration_days = Decimal(self.nz_pasture_type_twidget.item(row, 5).text())
+            else:
+                is_save = False
+            if self.nz_pasture_type_twidget.item(row, 6):
+                sheep_unit = Decimal(self.nz_pasture_type_twidget.item(row, 6).text())
+            else:
+                is_save = False
+
+            set_nz_pasture_count = self.session.query(SetNzPastureType). \
+                filter(SetNzPastureType.pasture_type == pasture_type). \
+                filter(SetNzPastureType.natural_zone == nz_code).count()
+            if set_nz_pasture_count == 1:
+                set_nz_pasture = self.session.query(SetNzPastureType). \
+                    filter(SetNzPastureType.pasture_type == pasture_type). \
+                    filter(SetNzPastureType.natural_zone == nz_code).one()
+
+                if current_value:
+                    set_nz_pasture.current_value = current_value
+                if percent_value:
+                    set_nz_pasture.percent_value = percent_value
+                if duration_begin:
+                    set_nz_pasture.duration_begin = duration_begin
+                if duration_end:
+                    set_nz_pasture.duration_end = duration_end
+                if duration_days:
+                    set_nz_pasture.duration_days = duration_days
+                if sheep_unit:
+                    set_nz_pasture.sheep_unit = sheep_unit
+            else:
+                set_nz_pasture = SetNzPastureType()
+                set_nz_pasture.natural_zone = nz_code
+                set_nz_pasture.pasture_type = pasture_type
+
+                if current_value is not None:
+                    set_nz_pasture.current_value = current_value
+                if percent_value is not None:
+                    set_nz_pasture.percent_value = percent_value
+                if duration_begin is not None:
+                    set_nz_pasture.duration_begin = duration_begin
+                if duration_end is not None:
+                    set_nz_pasture.duration_end = duration_end
+                if duration_days is not None:
+                    set_nz_pasture.duration_days = duration_days
+                if sheep_unit is not None:
+                    set_nz_pasture.sheep_unit = sheep_unit
+
+                if is_save:
+                    self.session.add(set_nz_pasture)
+
     @pyqtSlot()
     def on_add_button_clicked(self):
 
@@ -394,6 +572,7 @@ class PastureSettings(QDialog, Ui_PastureSettings, DatabaseHelper):
         self.__save_codelist_entries()
         self.__save_codelist_settings()
         self.__save_formula_evaluation()
+        self.__save_set_nz_pasture_type()
         return True
         # except exc.SQLAlchemyError,  e:
         #     PluginUtils.show_error(self, self.tr("SQL Error"), e.message)
