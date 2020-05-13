@@ -985,6 +985,12 @@
      <attribute name="verticalHeaderMinimumSectionSize">
       <number>19</number>
      </attribute>
+     <attribute name="verticalHeaderShowSortIndicator" stdset="0">
+      <bool>false</bool>
+     </attribute>
+     <attribute name="verticalHeaderStretchLastSection">
+      <bool>false</bool>
+     </attribute>
      <column>
       <property name="text">
        <string>Улирлын төрөл</string>

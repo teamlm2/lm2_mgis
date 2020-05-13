@@ -1,0 +1,6 @@
+1. restrore schemas base, codelists, admin_units, settings
+
+pg_dump -U postgres -h 192.168.15.6 -Fc -n admin_units -n base -n codelists -n settings lm_0003 > D:\work\DUMP_TEST\base_schemas.dump
+
+pg_restore -U postgres -h 192.168.15.212 -d lm_gns --disable-triggers D:\work\DUMP_TEST\base_schemas.dump
+
