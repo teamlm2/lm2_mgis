@@ -7,9 +7,9 @@ select code::int, code, area_m2_utm, geometry from khayag.zipcode_area
 
 insert into data_address.ca_parcel_address(parcel_id, is_active, in_source, zipcode_id, street_id, address_parcel_no, address_streetname, address_neighbourhood, geographic_name, au1, au2, au3, sort_value, created_at)
 
-select p.parcel_id, true, 1, z.id, null, address_khashaa, address_streetname, address_neighbourhood, null, substring(au2, 1, 3), au2, au3, 1, valid_from  from data_soums_union.ca_parcel_tbl p
-join data_address.au_zipcode_area z on st_within(st_centroid(p.geometry), z.geometry)
-where substring(p.au2, 1, 3) = '048'
+select p.parcel_id, true, 1, null, null, address_khashaa, address_streetname, address_neighbourhood, null, substring(au2, 1, 3), au2, au3, 1, valid_from  from data_soums_union.ca_parcel_tbl p
+--join data_address.au_zipcode_area z on st_within(st_centroid(p.geometry), z.geometry)
+where p.parcel_id not in ( select parcel_id from data_address.ca_parcel_address)--substring(p.au2, 1, 3) = '048'
 
 --------------------khayag parcel addres
 

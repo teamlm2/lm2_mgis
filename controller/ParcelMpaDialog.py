@@ -229,16 +229,16 @@ class ParcelMpaDialog(QDockWidget, Ui_ParcelMpaDialog, DatabaseHelper):
     #                     self.parcel_tab_widget.indexOf(self.legal_representative_tab))
     #
     #
-    # def __setup_permissions(self):
+    def __setup_permissions(self):
     #
-    #     user_name = QSettings().value(SettingsConstants.USER)
-    #     user_rights = DatabaseUtils.userright_by_name(user_name)
-    #     officer = self.session.query(SetRole) \
-    #         .filter(SetRole.user_name == QSettings().value(SettingsConstants.USER)) \
-    #         .filter(SetRole.is_active == True).one()
-    #
-    #     self.finish_button.setVisible(False)
-    #     if officer.position == 11:
+         user_name = QSettings().value(SettingsConstants.USER)
+         user_rights = DatabaseUtils.userright_by_name(user_name)
+         officer = self.session.query(SetRole) \
+             .filter(SetRole.user_name == QSettings().value(SettingsConstants.USER)) \
+             .filter(SetRole.is_active == True).one()
+
+         self.finish_button.setVisible(True)
+         if officer.position == 100:
     #         self.finish_button.setVisible(True)
     #     if officer.position == 12:
     #         self.finish_button.setVisible(True)
@@ -248,11 +248,11 @@ class ParcelMpaDialog(QDockWidget, Ui_ParcelMpaDialog, DatabaseHelper):
     #     #     print 'sdak'
     #     #     self.finish_button.setVisible(False)
     #
-    #     # self.__disable_all()
+          self.__disable_all()
     #     #
-    #     # if UserRight.cadastre_update in user_rights:
-    #     #
-    #     #     self.finish_button.setEnabled(True)
+          if UserRight.cadastre_update in user_rights:
+    #
+              self.finish_button.setEnabled(False)
     #
     def __disable_all(self):
 

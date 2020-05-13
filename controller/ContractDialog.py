@@ -2541,7 +2541,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         if person.type == 10 or person.type == 20 or person.type == 50:
             person_surname = person.name
             person_firstname = person.first_name
-            person_full_name = person_surname + u' овогтой ' + person_firstname
+            person_full_name = person_surname + u' ' + u'овогтой'+ u' ' + person_firstname
         elif person.type == 30 or person.type == 40 or person.type == 60 or person.type == 70:
             company_name = person.name
             contact_position = person.contact_position
@@ -2643,7 +2643,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             person_firstname = ''
 
         if person.type == 10 or person.type == 20 or person.type == 50:
-            company_name = person_surname + u'овогтой' + person_firstname
+            company_name = person_surname + u'  ' + u'овогтой'+ u' ' + person_firstname
         elif person.type == 30 or person.type == 40 or person.type == 60 or person.type == 70 or person.type == 80:
             company_name = company_name + u'-н ' + contact_position + u' ' + person_surname + u' овогтой ' + person_firstname
 
