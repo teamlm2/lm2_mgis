@@ -8,6 +8,24 @@ GRANT USAGE ON SCHEMA data_address TO public;
 SET SEARCH_PATH TO data_address, admin_units, public;
 
 -------------
+set search_path to data_address;
+DROP TABLE if exists  data_address.cl_address_status cascade;
+CREATE TABLE cl_address_status
+(
+  code integer NOT NULL primary key,
+  description character varying(75) NOT NULL UNIQUE,
+  description_en character varying(75)
+);
+grant select, insert, update, delete on cl_address_status to address_admin;
+grant select on cl_address_status to address_view;
+COMMENT ON TABLE cl_address_status
+  IS 'Хаягийн төлөв';
+
+insert into data_address.cl_address_status values (1, 'Урьдчилсан хаяг', null);
+insert into data_address.cl_address_status values (2, 'Баталгаажсан хаяг', null);
+
+------------
+
 DROP TABLE if exists  data_address.cl_address_source cascade;
 CREATE TABLE cl_address_source
 (

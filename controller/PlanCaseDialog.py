@@ -74,6 +74,9 @@ from ..utils.DatabaseUtils import DatabaseUtils
 from ..utils.FilePath import *
 from ..utils.LayerUtils import LayerUtils
 from ftplib import FTP, error_perm
+import urllib
+import urllib2
+import json
 
 APPROVED = 'approved'
 REFUSED = 'refused'
