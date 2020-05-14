@@ -5,6 +5,7 @@ from sqlalchemy.orm import relationship
 from geoalchemy2 import Geometry
 from ClLanduseType import *
 from ClAddressSource import *
+from ClAddressStatus import *
 from AuZipCodeArea import *
 from StStreet import *
 
@@ -28,6 +29,10 @@ class CaParcelAddress(Base):
     created_at = Column(DateTime)
     updated_at = Column(DateTime)
 
+    valid_from = Column(Date)
+    valid_till = Column(Date)
+    geometry = Column(Geometry('POLYGON', 4326))
+
     # foreign keys:
     in_source = Column(Integer, ForeignKey('cl_address_source.code'))
     in_source_ref = relationship("ClAddressSource")
@@ -49,3 +54,9 @@ class CaParcelAddress(Base):
 
     khoroolol_id = Column(String, ForeignKey('au_khoroolol.fid'))
     khoroolol_id_ref = relationship("AuKhoroolol")
+
+    parcel_type = Column(Integer, ForeignKey('cl_parcel_type.code'))
+    parcel_type_ref = relationship("ClParcelType")
+
+    status = Column(Integer, ForeignKey('cl_address_status.code'))
+    status_ref = relationship("ClAddressStatus")

@@ -1443,6 +1443,27 @@ class LM2Plugin:
         ######
         addrs_group = root.findGroup(u"Хаяг")
 
+        vlayer = LayerUtils.layer_by_data_source("data_address", "ca_building_address_view")
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer("ca_building_address_view", "building_id", "data_address")
+        vlayer.loadNamedStyle(
+            str(os.path.dirname(os.path.realpath(__file__))) + "/template\style/ca_building_address.qml")
+        vlayer.setLayerName(QApplication.translate("Plugin", "Address Building"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            addrs_group.addLayer(vlayer)
+            vlayer.setReadOnly(True)
+
+        vlayer = LayerUtils.layer_by_data_source("data_address", "ca_parcel_address_view")
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer("ca_parcel_address_view", "parcel_id", "data_address")
+        vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))) + "/template\style/ca_parcel_address.qml")
+        vlayer.setLayerName(QApplication.translate("Plugin", " Address Parcel"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            addrs_group.addLayer(vlayer)
+            vlayer.setReadOnly(True)
+
         vlayer = LayerUtils.layer_by_data_source("data_address", "st_street_sub")
         if vlayer is None:
             vlayer = LayerUtils.load_layer_base_layer("st_street_sub", "id", "data_address")

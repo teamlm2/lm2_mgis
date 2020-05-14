@@ -246,7 +246,7 @@ CREATE TABLE ca_building_address
     updated_at timestamp(0) without time zone NOT NULL DEFAULT now()
 );
 COMMENT ON TABLE ca_building_address
-  IS 'Нэгж талбарын хаяг';
+  IS 'Барилгын хаяг';
 grant select, insert, update, delete on ca_building_address to address_update;
 grant select on ca_building_address to address_view;
 

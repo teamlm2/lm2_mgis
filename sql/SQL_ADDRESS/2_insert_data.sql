@@ -5,9 +5,13 @@ select code::int, code, area_m2_utm, geometry from khayag.zipcode_area
 
 --------------------cadastre parcel addres
 
-insert into data_address.ca_parcel_address(parcel_id, is_active, in_source, zipcode_id, street_id, address_parcel_no, address_streetname, address_neighbourhood, geographic_name, au1, au2, au3, sort_value, created_at)
+--delete from data_address.ca_parcel_address;
 
-select p.parcel_id, true, 1, null, null, address_khashaa, address_streetname, address_neighbourhood, null, substring(au2, 1, 3), au2, au3, 1, valid_from  from data_soums_union.ca_parcel_tbl p
+
+insert into data_address.ca_parcel_address(parcel_id, is_active, in_source, zipcode_id, street_id, address_parcel_no, address_streetname, address_neighbourhood, geographic_name, au1, au2, au3, sort_value, 
+status, parcel_type, geometry, valid_from, valid_till)
+
+select p.parcel_id, true, 1, null, null, address_khashaa, address_streetname, address_neighbourhood, null, substring(au2, 1, 3), au2, au3, 1, 1, 1, geometry, valid_from, valid_till from data_soums_union.ca_parcel_tbl p
 --join data_address.au_zipcode_area z on st_within(st_centroid(p.geometry), z.geometry)
 where p.parcel_id not in ( select parcel_id from data_address.ca_parcel_address)--substring(p.au2, 1, 3) = '048'
 
@@ -22,13 +26,14 @@ and substring(p.au2, 1, 3) = '048'
 --------------------
 --------------------cadastre building addres
 
-insert into data_address.ca_building_address(building_id, parcel_id, is_active, in_source, zipcode_id, street_id, address_building_no, au1, au2, sort_value, created_at)
+delete from data_address.ca_building_address;
+insert into data_address.ca_building_address(building_id, parcel_id, is_active, in_source, zipcode_id, street_id, address_building_no, au1, au2, sort_value, created_at, status, parcel_type, geometry, valid_from, valid_till)
 
-select p.building_id, n.parcel_id, true, 1, z.id, null, p.address_khashaa, substring(p.au2, 1, 3), p.au2, 1, p.valid_from  
+select p.building_id, n.parcel_id, true, 1, z.id, null, p.address_khashaa, substring(p.au2, 1, 3), p.au2, 1, p.valid_from, 1, 8, p.geometry, p.valid_from, p.valid_till
 from data_soums_union.ca_building_tbl p
 join data_address.au_zipcode_area z on st_within(st_centroid(p.geometry), z.geometry)
 left join data_soums_union.ca_parcel_tbl n on st_within(st_centroid(p.geometry), n.geometry)
-where substring(p.au2, 1, 3) = '048'
+where p.au2 is not null
 
 --------------------khayag building addres
 
