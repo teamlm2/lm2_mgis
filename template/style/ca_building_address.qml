@@ -4,40 +4,49 @@
     <edittype widgetv2type="TextEdit" name="id">
       <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
     </edittype>
-    <edittype widgetv2type="TextEdit" name="code">
+    <edittype widgetv2type="TextEdit" name="parcel_id">
       <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
     </edittype>
-    <edittype widgetv2type="TextEdit" name="name">
-      <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
-    </edittype>
-    <edittype widgetv2type="TextEdit" name="name_en">
-      <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
-    </edittype>
-    <edittype widgetv2type="TextEdit" name="description">
+    <edittype widgetv2type="TextEdit" name="building_id">
       <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
     </edittype>
     <edittype widgetv2type="TextEdit" name="is_active">
       <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
     </edittype>
+    <edittype widgetv2type="TextEdit" name="building_name">
+      <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
+    </edittype>
     <edittype widgetv2type="TextEdit" name="in_source">
       <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
     </edittype>
-    <edittype widgetv2type="TextEdit" name="street_type_id">
+    <edittype widgetv2type="TextEdit" name="zipcode_id">
       <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
     </edittype>
     <edittype widgetv2type="TextEdit" name="street_id">
       <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
     </edittype>
-    <edittype widgetv2type="TextEdit" name="valid_from">
+    <edittype widgetv2type="TextEdit" name="address_parcel_no">
       <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
     </edittype>
-    <edittype widgetv2type="TextEdit" name="valid_till">
+    <edittype widgetv2type="TextEdit" name="address_streetname">
       <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
     </edittype>
-    <edittype widgetv2type="TextEdit" name="area_m2">
+    <edittype widgetv2type="TextEdit" name="address_building_no">
       <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
     </edittype>
-    <edittype widgetv2type="TextEdit" name="line_geom">
+    <edittype widgetv2type="TextEdit" name="au1">
+      <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
+    </edittype>
+    <edittype widgetv2type="TextEdit" name="au2">
+      <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
+    </edittype>
+    <edittype widgetv2type="TextEdit" name="au3">
+      <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
+    </edittype>
+    <edittype widgetv2type="TextEdit" name="khoroolol_id">
+      <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
+    </edittype>
+    <edittype widgetv2type="TextEdit" name="sort_value">
       <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
     </edittype>
     <edittype widgetv2type="TextEdit" name="created_by">
@@ -52,34 +61,99 @@
     <edittype widgetv2type="TextEdit" name="updated_at">
       <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
     </edittype>
-    <edittype widgetv2type="TextEdit" name="au1">
+    <edittype widgetv2type="TextEdit" name="description">
       <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
     </edittype>
-    <edittype widgetv2type="TextEdit" name="au2">
+    <edittype widgetv2type="TextEdit" name="status">
       <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
     </edittype>
-    <edittype widgetv2type="TextEdit" name="au3">
+    <edittype widgetv2type="TextEdit" name="parcel_type">
+      <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
+    </edittype>
+    <edittype widgetv2type="TextEdit" name="valid_from">
+      <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
+    </edittype>
+    <edittype widgetv2type="TextEdit" name="valid_till">
       <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
     </edittype>
   </edittypes>
-  <renderer-v2 forceraster="0" symbollevels="0" type="singleSymbol" enableorderby="0">
+  <renderer-v2 attr="parcel_type" forceraster="0" symbollevels="0" type="categorizedSymbol" enableorderby="0">
+    <categories>
+      <category render="true" symbol="0" value="8" label="Кадастрын үндсэн давхарга барилга"/>
+      <category render="true" symbol="1" value="9" label="Кадастрын ажлын давхарга барилга"/>
+      <category render="true" symbol="2" value="10" label="Байр зүйн зургийн давхарга барилга"/>
+    </categories>
     <symbols>
-      <symbol alpha="0.478431" clip_to_extent="1" type="fill" name="0">
+      <symbol alpha="1" clip_to_extent="1" type="fill" name="0">
         <layer pass="0" class="SimpleFill" locked="0">
           <prop k="border_width_map_unit_scale" v="0,0,0,0,0,0"/>
-          <prop k="color" v="166,206,227,0"/>
+          <prop k="color" v="166,206,227,255"/>
           <prop k="joinstyle" v="bevel"/>
           <prop k="offset" v="0,0"/>
           <prop k="offset_map_unit_scale" v="0,0,0,0,0,0"/>
           <prop k="offset_unit" v="MM"/>
-          <prop k="outline_color" v="0,0,123,255"/>
+          <prop k="outline_color" v="208,0,0,255"/>
           <prop k="outline_style" v="solid"/>
-          <prop k="outline_width" v="0.66"/>
+          <prop k="outline_width" v="0.26"/>
+          <prop k="outline_width_unit" v="MM"/>
+          <prop k="style" v="solid"/>
+        </layer>
+      </symbol>
+      <symbol alpha="1" clip_to_extent="1" type="fill" name="1">
+        <layer pass="0" class="SimpleFill" locked="0">
+          <prop k="border_width_map_unit_scale" v="0,0,0,0,0,0"/>
+          <prop k="color" v="166,206,227,255"/>
+          <prop k="joinstyle" v="bevel"/>
+          <prop k="offset" v="0,0"/>
+          <prop k="offset_map_unit_scale" v="0,0,0,0,0,0"/>
+          <prop k="offset_unit" v="MM"/>
+          <prop k="outline_color" v="81,0,0,255"/>
+          <prop k="outline_style" v="solid"/>
+          <prop k="outline_width" v="0.26"/>
+          <prop k="outline_width_unit" v="MM"/>
+          <prop k="style" v="solid"/>
+        </layer>
+      </symbol>
+      <symbol alpha="1" clip_to_extent="1" type="fill" name="2">
+        <layer pass="0" class="SimpleFill" locked="0">
+          <prop k="border_width_map_unit_scale" v="0,0,0,0,0,0"/>
+          <prop k="color" v="166,206,227,255"/>
+          <prop k="joinstyle" v="bevel"/>
+          <prop k="offset" v="0,0"/>
+          <prop k="offset_map_unit_scale" v="0,0,0,0,0,0"/>
+          <prop k="offset_unit" v="MM"/>
+          <prop k="outline_color" v="23,0,0,255"/>
+          <prop k="outline_style" v="solid"/>
+          <prop k="outline_width" v="0.26"/>
           <prop k="outline_width_unit" v="MM"/>
           <prop k="style" v="solid"/>
         </layer>
       </symbol>
     </symbols>
+    <source-symbol>
+      <symbol alpha="1" clip_to_extent="1" type="fill" name="0">
+        <layer pass="0" class="SimpleFill" locked="0">
+          <prop k="border_width_map_unit_scale" v="0,0,0,0,0,0"/>
+          <prop k="color" v="61,195,199,255"/>
+          <prop k="joinstyle" v="bevel"/>
+          <prop k="offset" v="0,0"/>
+          <prop k="offset_map_unit_scale" v="0,0,0,0,0,0"/>
+          <prop k="offset_unit" v="MM"/>
+          <prop k="outline_color" v="0,0,0,255"/>
+          <prop k="outline_style" v="solid"/>
+          <prop k="outline_width" v="0.26"/>
+          <prop k="outline_width_unit" v="MM"/>
+          <prop k="style" v="solid"/>
+        </layer>
+      </symbol>
+    </source-symbol>
+    <colorramp type="gradient" name="[source]">
+      <prop k="color1" v="247,251,255,255"/>
+      <prop k="color2" v="8,48,107,255"/>
+      <prop k="discrete" v="0"/>
+      <prop k="stops" v="0.13;222,235,247,255:0.26;198,219,239,255:0.39;158,202,225,255:0.52;107,174,214,255:0.65;66,146,198,255:0.78;33,113,181,255:0.9;8,81,156,255"/>
+    </colorramp>
+    <invertedcolorramp value="0"/>
     <rotation/>
     <sizescale scalemethod="diameter"/>
   </renderer-v2>
@@ -111,7 +185,7 @@
     <property key="labeling/distMapUnitScale" value="0,0,0,0,0,0"/>
     <property key="labeling/drawLabels" value="true"/>
     <property key="labeling/enabled" value="true"/>
-    <property key="labeling/fieldName" value="code"/>
+    <property key="labeling/fieldName" value="address_building_no"/>
     <property key="labeling/fitInPolygonOnly" value="false"/>
     <property key="labeling/fontCapitals" value="0"/>
     <property key="labeling/fontFamily" value="MS Shell Dlg 2"/>
@@ -120,12 +194,12 @@
     <property key="labeling/fontLimitPixelSize" value="false"/>
     <property key="labeling/fontMaxPixelSize" value="10000"/>
     <property key="labeling/fontMinPixelSize" value="3"/>
-    <property key="labeling/fontSize" value="11"/>
+    <property key="labeling/fontSize" value="8.25"/>
     <property key="labeling/fontSizeInMapUnits" value="false"/>
     <property key="labeling/fontSizeMapUnitScale" value="0,0,0,0,0,0"/>
     <property key="labeling/fontStrikeout" value="false"/>
-    <property key="labeling/fontUnderline" value="false"/>
-    <property key="labeling/fontWeight" value="75"/>
+    <property key="labeling/fontUnderline" value="true"/>
+    <property key="labeling/fontWeight" value="50"/>
     <property key="labeling/fontWordSpacing" value="0"/>
     <property key="labeling/formatNumbers" value="false"/>
     <property key="labeling/isExpression" value="false"/>
@@ -141,7 +215,7 @@
     <property key="labeling/minFeatureSize" value="0"/>
     <property key="labeling/multilineAlign" value="4294967295"/>
     <property key="labeling/multilineHeight" value="1"/>
-    <property key="labeling/namedStyle" value="Bold"/>
+    <property key="labeling/namedStyle" value="Normal"/>
     <property key="labeling/obstacle" value="true"/>
     <property key="labeling/obstacleFactor" value="1"/>
     <property key="labeling/obstacleType" value="0"/>
@@ -214,7 +288,7 @@
     <property key="labeling/shapeType" value="0"/>
     <property key="labeling/substitutions" value="&lt;substitutions/>"/>
     <property key="labeling/textColorA" value="255"/>
-    <property key="labeling/textColorB" value="123"/>
+    <property key="labeling/textColorB" value="0"/>
     <property key="labeling/textColorG" value="0"/>
     <property key="labeling/textColorR" value="0"/>
     <property key="labeling/textTransp" value="0"/>
@@ -229,11 +303,11 @@
   </customproperties>
   <blendMode>0</blendMode>
   <featureBlendMode>0</featureBlendMode>
-  <layerTransparency>0</layerTransparency>
-  <displayfield>name</displayfield>
+  <layerTransparency>10</layerTransparency>
+  <displayfield>building_name</displayfield>
   <label>0</label>
   <labelattributes>
-    <label fieldname="" text="Шошго"/>
+    <label fieldname="" text="Label"/>
     <family fieldname="" name="MS Shell Dlg 2"/>
     <size fieldname="" units="pt" value="12"/>
     <bold fieldname="" on="0"/>
@@ -255,7 +329,6 @@
   <SingleCategoryDiagramRenderer diagramType="Histogram" sizeLegend="0" attributeLegend="1">
     <DiagramCategory penColor="#000000" labelPlacementMethod="XHeight" penWidth="0" diagramOrientation="Up" sizeScale="0,0,0,0,0,0" minimumSize="0" barWidth="5" penAlpha="255" maxScaleDenominator="1e+08" backgroundColor="#ffffff" transparency="0" width="15" scaleDependency="Area" backgroundAlpha="255" angleOffset="1440" scaleBasedVisibility="0" enabled="0" height="15" lineSizeScale="0,0,0,0,0,0" sizeType="MM" lineSizeType="MM" minScaleDenominator="inf">
       <fontProperties description="MS Shell Dlg 2,8.25,-1,5,50,0,0,0,0,0" style=""/>
-      <attribute field="" color="#000000" label=""/>
     </DiagramCategory>
     <symbol alpha="1" clip_to_extent="1" type="marker" name="sizeSymbol">
       <layer pass="0" class="SimpleMarker" locked="0">
@@ -281,61 +354,71 @@
     </symbol>
   </SingleCategoryDiagramRenderer>
   <DiagramLayerSettings yPosColumn="-1" showColumn="-1" linePlacementFlags="10" placement="0" dist="0" xPosColumn="-1" priority="0" obstacle="0" zIndex="0" showAll="1"/>
-  <annotationform>.</annotationform>
+  <annotationform></annotationform>
   <aliases>
     <alias field="id" index="0" name=""/>
-    <alias field="code" index="1" name=""/>
-    <alias field="name" index="2" name=""/>
-    <alias field="name_en" index="3" name=""/>
-    <alias field="description" index="4" name=""/>
-    <alias field="is_active" index="5" name=""/>
-    <alias field="in_source" index="6" name=""/>
-    <alias field="street_type_id" index="7" name=""/>
-    <alias field="street_id" index="8" name=""/>
-    <alias field="valid_from" index="9" name=""/>
-    <alias field="valid_till" index="10" name=""/>
-    <alias field="area_m2" index="11" name=""/>
-    <alias field="line_geom" index="12" name=""/>
-    <alias field="created_by" index="13" name=""/>
-    <alias field="updated_by" index="14" name=""/>
-    <alias field="created_at" index="15" name=""/>
-    <alias field="updated_at" index="16" name=""/>
-    <alias field="au1" index="17" name=""/>
-    <alias field="au2" index="18" name=""/>
-    <alias field="au3" index="19" name=""/>
+    <alias field="parcel_id" index="1" name=""/>
+    <alias field="building_id" index="2" name=""/>
+    <alias field="is_active" index="3" name=""/>
+    <alias field="building_name" index="4" name=""/>
+    <alias field="in_source" index="5" name=""/>
+    <alias field="zipcode_id" index="6" name=""/>
+    <alias field="street_id" index="7" name=""/>
+    <alias field="address_parcel_no" index="8" name=""/>
+    <alias field="address_streetname" index="9" name=""/>
+    <alias field="address_building_no" index="10" name=""/>
+    <alias field="au1" index="11" name=""/>
+    <alias field="au2" index="12" name=""/>
+    <alias field="au3" index="13" name=""/>
+    <alias field="khoroolol_id" index="14" name=""/>
+    <alias field="sort_value" index="15" name=""/>
+    <alias field="created_by" index="16" name=""/>
+    <alias field="updated_by" index="17" name=""/>
+    <alias field="created_at" index="18" name=""/>
+    <alias field="updated_at" index="19" name=""/>
+    <alias field="description" index="20" name=""/>
+    <alias field="status" index="21" name=""/>
+    <alias field="parcel_type" index="22" name=""/>
+    <alias field="valid_from" index="23" name=""/>
+    <alias field="valid_till" index="24" name=""/>
   </aliases>
   <excludeAttributesWMS/>
   <excludeAttributesWFS/>
   <attributeactions default="-1"/>
-  <attributetableconfig actionWidgetStyle="dropDown" sortExpression="" sortOrder="1667196274">
+  <attributetableconfig actionWidgetStyle="dropDown" sortExpression="" sortOrder="0">
     <columns>
       <column width="-1" hidden="0" type="field" name="id"/>
-      <column width="-1" hidden="0" type="field" name="code"/>
-      <column width="-1" hidden="0" type="field" name="name"/>
-      <column width="-1" hidden="0" type="field" name="name_en"/>
-      <column width="-1" hidden="0" type="field" name="description"/>
+      <column width="-1" hidden="0" type="field" name="parcel_id"/>
+      <column width="-1" hidden="0" type="field" name="building_id"/>
       <column width="-1" hidden="0" type="field" name="is_active"/>
+      <column width="-1" hidden="0" type="field" name="building_name"/>
       <column width="-1" hidden="0" type="field" name="in_source"/>
-      <column width="-1" hidden="0" type="field" name="street_type_id"/>
+      <column width="-1" hidden="0" type="field" name="zipcode_id"/>
       <column width="-1" hidden="0" type="field" name="street_id"/>
-      <column width="-1" hidden="0" type="field" name="valid_from"/>
-      <column width="-1" hidden="0" type="field" name="valid_till"/>
-      <column width="-1" hidden="0" type="field" name="area_m2"/>
-      <column width="-1" hidden="0" type="field" name="line_geom"/>
+      <column width="-1" hidden="0" type="field" name="address_parcel_no"/>
+      <column width="-1" hidden="0" type="field" name="address_streetname"/>
+      <column width="-1" hidden="0" type="field" name="address_building_no"/>
+      <column width="-1" hidden="0" type="field" name="au1"/>
+      <column width="-1" hidden="0" type="field" name="au2"/>
+      <column width="-1" hidden="0" type="field" name="au3"/>
+      <column width="-1" hidden="0" type="field" name="khoroolol_id"/>
+      <column width="-1" hidden="0" type="field" name="sort_value"/>
       <column width="-1" hidden="0" type="field" name="created_by"/>
       <column width="-1" hidden="0" type="field" name="updated_by"/>
       <column width="-1" hidden="0" type="field" name="created_at"/>
       <column width="-1" hidden="0" type="field" name="updated_at"/>
-      <column width="-1" hidden="0" type="field" name="au1"/>
-      <column width="-1" hidden="0" type="field" name="au2"/>
-      <column width="-1" hidden="0" type="field" name="au3"/>
+      <column width="-1" hidden="0" type="field" name="description"/>
+      <column width="-1" hidden="0" type="field" name="status"/>
+      <column width="-1" hidden="0" type="field" name="parcel_type"/>
+      <column width="-1" hidden="0" type="field" name="valid_from"/>
+      <column width="-1" hidden="0" type="field" name="valid_till"/>
       <column width="-1" hidden="1" type="actions"/>
     </columns>
   </attributetableconfig>
-  <editform>.</editform>
+  <editform></editform>
   <editforminit/>
   <editforminitcodesource>0</editforminitcodesource>
-  <editforminitfilepath>.</editforminitfilepath>
+  <editforminitfilepath></editforminitfilepath>
   <editforminitcode><![CDATA[# -*- coding: utf-8 -*-
 """
 QGIS forms can have a Python function that is called when the form is

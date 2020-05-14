@@ -1,7 +1,7 @@
 ﻿DROP TABLE if exists data_landuse.ca_landuse_type_tbl;
 CREATE TABLE data_landuse.ca_landuse_type_tbl
 (
-  parcel_id serial NOT NULL,
+  parcel_id serial PRIMARY KEY,
   is_active boolean not null DEFAULT false,
   landuse int references codelists.cl_landuse_type on update cascade on delete restrict NOT NULL,
   landuse_level1 int references codelists.cl_landuse_type on update cascade on delete restrict NOT NULL,
@@ -19,8 +19,7 @@ CREATE TABLE data_landuse.ca_landuse_type_tbl
   created_by integer,
   updated_by integer,
   created_at timestamp(0) without time zone NOT NULL DEFAULT now(),
-  updated_at timestamp(0) without time zone NOT NULL DEFAULT now(),
-  CONSTRAINT ca_landuse_type_tbl_pkey PRIMARY KEY (parcel_id)
+  updated_at timestamp(0) without time zone NOT NULL DEFAULT now()
 )
 WITH (
   OIDS=FALSE
@@ -36,7 +35,7 @@ GRANT SELECT ON TABLE data_landuse.ca_landuse_type_tbl TO reporting;
 
 -- DROP INDEX data_landuse.idx_ca_landuse_type_landuse;
 
-CREATE INDEX idx_ca_landuse_type_landuse
+CREATE INDEX idx_ca_landuse_type_landuse1
   ON data_landuse.ca_landuse_type_tbl
   USING btree
   (landuse);
@@ -45,7 +44,7 @@ CREATE INDEX idx_ca_landuse_type_landuse
 
 -- DROP INDEX data_landuse.idx_ca_landuse_type_parcel_id;
 
-CREATE INDEX idx_ca_landuse_type_parcel_id
+CREATE INDEX idx_ca_landuse_type_parcel_id1
   ON data_landuse.ca_landuse_type_tbl
   USING btree
   (parcel_id);
@@ -54,7 +53,7 @@ CREATE INDEX idx_ca_landuse_type_parcel_id
 
 -- DROP INDEX data_landuse.idx_ca_landuse_type_valid_from;
 
-CREATE INDEX idx_ca_landuse_type_valid_from
+CREATE INDEX idx_ca_landuse_type_valid_from1
   ON data_landuse.ca_landuse_type_tbl
   USING btree
   (valid_from);
@@ -63,7 +62,7 @@ CREATE INDEX idx_ca_landuse_type_valid_from
 
 -- DROP INDEX data_landuse.idx_ca_landuse_type_valid_till;
 
-CREATE INDEX idx_ca_landuse_type_valid_till
+CREATE INDEX idx_ca_landuse_type_valid_till1
   ON data_landuse.ca_landuse_type_tbl
   USING btree
   (valid_till);
@@ -72,7 +71,7 @@ CREATE INDEX idx_ca_landuse_type_valid_till
 
 -- DROP INDEX data_landuse.st_idx_ca_landuse_type_tbl;
 
-CREATE INDEX st_idx_ca_landuse_type_tbl
+CREATE INDEX st_idx_ca_landuse_type_tbl1
   ON data_landuse.ca_landuse_type_tbl
   USING gist
   (geometry);
