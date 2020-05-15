@@ -39,3 +39,5 @@ postgres -D D:\work\pg_data
 pg_dumpall -h 127.0.0.1 -p 5432 -U postgres -v --globals-only > /home/administrator/useraccts.sql
 
 psql -h 192.168.15.206 -d postgres -U postgres -f "/home/administrator/useraccts.sql"
+
+pg_restore.exe --host "192.168.15.212" --port "5432" --username "postgres" --no-password --role "postgres" --dbname "lm_gns" --verbose "D:\\work\\DUMP_TEST\\ca_landuse_type_tbl.backup"
