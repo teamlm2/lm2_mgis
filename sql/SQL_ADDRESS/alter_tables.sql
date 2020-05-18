@@ -10,6 +10,10 @@ ALTER TABLE data_address.ca_building_address ADD COLUMN parcel_type int referenc
 
 ALTER TABLE data_address.ca_building_address ADD COLUMN geometry geometry(Polygon,4326);
 
+ALTER TABLE data_address.ca_building_address ADD COLUMN address_au_khoroolol_id int references admin_units.au_khoroolol on update cascade on delete restrict;
+ALTER TABLE data_address.ca_parcel_address ADD COLUMN address_au_khoroolol_id int references admin_units.au_khoroolol on update cascade on delete restrict;
+
+
 ALTER TABLE data_address.ca_parcel_address ADD COLUMN valid_from date DEFAULT ('now'::text)::date;
 ALTER TABLE data_address.ca_parcel_address ADD COLUMN valid_till date DEFAULT 'infinity'::date;
 ALTER TABLE data_address.ca_building_address ADD COLUMN valid_from date DEFAULT ('now'::text)::date;

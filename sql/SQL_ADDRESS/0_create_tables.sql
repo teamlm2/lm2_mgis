@@ -17,7 +17,7 @@ CREATE TABLE cl_address_status
   description_en character varying(75)
 );
 grant select, insert, update, delete on cl_address_status to address_admin;
-grant select on cl_address_status to address_view;
+grant select on cl_address_status to address_view, cadastre_view;
 COMMENT ON TABLE cl_address_status
   IS 'Хаягийн төлөв';
 
@@ -36,6 +36,7 @@ CREATE TABLE cl_address_source
 );
 grant select, insert, update, delete on cl_address_source to address_admin;
 grant select on cl_address_source to address_view;
+grant select on cl_address_status to address_view, cadastre_view;
 COMMENT ON TABLE cl_address_source
   IS 'Хаягийн мэдээллийн эх сурвалж';
 
@@ -60,6 +61,7 @@ CREATE TABLE cl_road_type
 );
 grant select, insert, update, delete on cl_road_type to address_admin;
 grant select on cl_road_type to address_view;
+grant select on cl_address_status to address_view, cadastre_view;
 COMMENT ON TABLE cl_road_type
   IS 'Замын төрөл';
   
@@ -81,6 +83,7 @@ CREATE TABLE cl_street_type
 );
 grant select, insert, update, delete on cl_street_type to address_admin;
 grant select on cl_street_type to address_view;
+grant select on cl_address_status to address_view, cadastre_view;
 COMMENT ON TABLE cl_street_type
   IS 'Гудамжны төрөл';
 
@@ -89,6 +92,25 @@ insert into data_address.cl_street_type values (2, 'Тойруу/тойрог', 
 insert into data_address.cl_street_type values (3, 'Гол гудамж', null);
 insert into data_address.cl_street_type values (4, 'Туслах гудамж', null);
 insert into data_address.cl_street_type values (5, 'Бусад', null);
+
+-------------
+
+DROP TABLE if exists  data_address.cl_entry_type cascade;
+CREATE TABLE data_address.cl_entry_type
+(
+  code integer NOT NULL primary key,
+  description character varying(75) NOT NULL UNIQUE,
+  description_en character varying(75)
+);
+grant select, insert, update, delete on data_address.cl_entry_type to address_admin;
+grant select on data_address.cl_entry_type to address_view;
+grant select on cl_address_status to address_view, cadastre_view;
+COMMENT ON TABLE data_address.cl_entry_type
+  IS 'Хаягийн орц, гарцын төрөл';
+
+insert into data_address.cl_entry_type values (1, 'орц, гарц', null);
+insert into data_address.cl_entry_type values (2, 'зөвхөн орц', null);
+insert into data_address.cl_entry_type values (3, 'зөвхөн гарц');
 
 -------------
 DROP TABLE if exists  data_address.st_road cascade;
@@ -272,3 +294,39 @@ CREATE TRIGGER update_area
   ON data_address.au_zipcode_area
   FOR EACH ROW
   EXECUTE PROCEDURE base.update_area_or_length();
+
+DROP TABLE if exists  data_address.st_entrance cascade;
+CREATE TABLE data_address.st_entrance
+(
+    entrance_id varchar(20) PRIMARY KEY,
+	code varchar(250),
+	name varchar(250),
+	type int references data_address.cl_entry_type on update cascade on delete restrict,
+address_entry_no character varying(10) not null,
+	description text,
+	is_active boolean not null DEFAULT true,
+	building_id int references data_address.ca_building_address on update cascade on delete restrict,
+	parcel_id int references data_address.ca_parcel_address on update cascade on delete restrict,
+	address_parcel_no character varying(64),
+    address_streetname character varying(250),
+    address_neighbourhood character varying(250),
+    geographic_name character varying(250),
+	
+	valid_from date DEFAULT ('now'::text)::date,
+    valid_till date DEFAULT 'infinity'::date,
+	geometry geometry(POINT, 4326),	
+	created_by integer,
+    updated_by integer,
+    created_at timestamp(0) without time zone NOT NULL DEFAULT now(),
+    updated_at timestamp(0) without time zone NOT NULL DEFAULT now(),
+	au1 varchar(3) references admin_units.au_level1 on update cascade on delete restrict,
+	au2 varchar(5) references admin_units.au_level2 on update cascade on delete restrict,
+	au3 varchar(8) references admin_units.au_level3 on update cascade on delete restrict
+);
+grant select, insert, update, delete on data_address.st_entrance to address_update;
+grant select on data_address.st_entrance to address_view;
+GRANT SELECT, UPDATE, INSERT, DELETE ON TABLE data_address.st_entrance TO cadastre_update;
+GRANT SELECT ON TABLE data_address.st_entrance TO cadastre_view;
+
+CREATE INDEX st_entrance_geometry_idx ON data_address.st_entrance USING GIST(geometry);
+CREATE INDEX st_entrance_road_type_id_idx ON data_address.st_entrance(entrance_id);
