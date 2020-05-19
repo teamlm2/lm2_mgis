@@ -61,6 +61,8 @@ from ..model.PsRecoveryClass import *
 from ..model.PsAvgReserveDaats import *
 from ..model.PlProjectParcelRefPastureParcel import *
 from ..model.SetPlanZoneRigthType import *
+from ..model.CaUBParcel import *
+from ..model.CaUBParcelTbl import *
 from ..view.Ui_PlanCaseDialog import *
 from .qt_classes.ApplicantDocumentDelegate import ApplicationDocumentDelegate
 from .qt_classes.DocumentsTableWidget import DocumentsTableWidget
@@ -1229,17 +1231,6 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
                                 error_message = error_message + "\n" + message
                                 valid = False
 
-                        # plan_zone = self.session.query(ClPlanZone).filter_by(plan_zone_id=plan_zone_id).one()
-                        #
-                        # if plan_zone.is_cadastre:
-                        #     ca_parcel_overlaps_count = self.session.query(CaParcelTbl). \
-                        #         filter(parcel_geometry.ST_Overlaps(CaParcelTbl.geometry)).count()
-                        #     if ca_parcel_overlaps_count > 0:
-                        #         valid = False
-                        #         message = '*' + unicode(u' Кадастрын нэгж талбар давхардаж байна.')
-                        #         error_message = error_message + "\n" + message
-
-
         if not valid:
             self.error_dic[id] = error_message
 
@@ -1578,18 +1569,6 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
                     rigth_form_id = self.shp_rigth_form_cbox.itemData(self.shp_rigth_form_cbox.currentIndex())
                     rigth_form = self.session.query(ClRightForm).filter_by(right_form_id = rigth_form_id).one()
 
-                    # plan_zone_id = self.shp_process_type_cbox.itemData(self.shp_process_type_cbox.currentIndex())
-                    # plan_zone = self.session.query(ClPlanZone).filter_by(plan_zone_id=plan_zone_id).one()
-
-                    # if self.if_single_type_chbox.isChecked():
-                    #     if plan_zone.is_cadastre:
-                    #         ca_parcel_overlaps_count = self.session.query(CaParcelTbl). \
-                    #             filter(parcel_geometry.ST_Overlaps(CaParcelTbl.geometry)).count()
-                    #         if ca_parcel_overlaps_count > 0:
-                    #             valid = False
-                    #             message = '*' + unicode(u' Кадастрын нэгж талбар давхардаж байна.')
-                    #             error_message = error_message + "\n" + message
-
                     if rigth_form.is_cadastre_check == 1:
                         ca_parcel_covers_count = self.session.query(CaParcelTbl).\
                             filter(or_(CaParcelTbl.valid_till ==  'infinity', CaParcelTbl.valid_till ==  None)).\
@@ -1612,6 +1591,31 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
                             valid = False
                             message = '*' + unicode(u' Кадастрын нэгж талбар давхардаж байна.')
                             error_message = error_message + "\n" + message
+
+                        ###########
+                        ca_ub_parcel_covers_count = self.session.query(CaUBParcelTbl). \
+                            filter(or_(CaUBParcelTbl.valid_till == 'infinity', CaUBParcelTbl.valid_till == None)). \
+                            filter(parcel_geometry.ST_Covers(CaUBParcelTbl.geometry)).count()
+
+                        ca_ub_parcel_covers_count1 = self.session.query(CaUBParcelTbl). \
+                            filter(or_(CaUBParcelTbl.valid_till == 'infinity', CaUBParcelTbl.valid_till == None)). \
+                            filter(CaUBParcelTbl.geometry.ST_Covers(parcel_geometry)).count()
+
+                        if ca_ub_parcel_covers_count > 0 or ca_ub_parcel_covers_count1 > 0:
+                            valid = False
+                            message = '*' + unicode(u' UbGIS-н нэгж талбар давхардаж байна.')
+                            error_message = error_message + "\n" + message
+
+                        ca_ub_parcel_overlaps_count = self.session.query(CaUBParcelTbl). \
+                            filter(or_(CaUBParcelTbl.valid_till == 'infinity', CaUBParcelTbl.valid_till == None)). \
+                            filter(parcel_geometry.ST_Overlaps(CaUBParcelTbl.geometry)).count()
+
+                        if ca_ub_parcel_overlaps_count > 0:
+                            valid = False
+                            message = '*' + unicode(u' UbGIS-н нэгж талбар давхардаж байна.')
+                            error_message = error_message + "\n" + message
+
+                        ###############
 
                     parcel_overlaps_count = self.session.query(PlProjectParcel).\
                         join(PlProject, PlProjectParcel.project_id == PlProject.project_id). \
