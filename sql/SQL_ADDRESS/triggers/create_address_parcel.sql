@@ -1,8 +1,8 @@
-﻿-- Function: base.create_address_entry_id()
+﻿-- Function: base.create_address_parcel()
 
--- DROP FUNCTION base.create_address_entry_id();
+-- DROP FUNCTION base.create_address_parcel();
 
-CREATE OR REPLACE FUNCTION base.create_address_entry_id()
+CREATE OR REPLACE FUNCTION base.create_address_parcel()
   RETURNS trigger AS
 $BODY$
 DECLARE
@@ -28,11 +28,11 @@ DECLARE
 BEGIN
 
 	NEW.geometry := st_force2d(NEW.geometry);
-
+	
 	IF (NEW.valid_from IS NULL) THEN
 		NEW.valid_from := now();
 	END IF;
-
+	
  IF (NEW.geometry IS NOT NULL) THEN
 	new_geometry := NEW.geometry;
 	execute 'SELECT max(entrance_id::int) FROM data_address.st_entrance' into v_counter;
@@ -47,33 +47,33 @@ BEGIN
 	entrance_id := v_counter;
 
 	SELECT id FROM data_address.ca_parcel_address INTO parcel_id WHERE ST_COVERS(geometry, NEW.geometry);
-	SELECT id FROM data_address.ca_building_address INTO building_id WHERE ST_COVERS(geometry, NEW.geometry);
-
+	SELECT id FROM data_address.ca_building_address INTO building_id WHERE ST_COVERS(geometry, NEW.geometry);	
+	
 	EXECUTE 'SELECT ST_ClosestPoint(ST_MakeLine(sp,ep), ST_GeomFromText(pp.new_geometry, 4326))::geometry(Point,4326) FROM
 	   (SELECT
 	      ST_PointN(geom, generate_series(1, ST_NPoints(geom)-1)) as sp,
 	      ST_PointN(geom, generate_series(2, ST_NPoints(geom)  )) as ep
 	    FROM
 	      (select st_makevalid((ST_Dump(ST_Boundary(geometry))).geom) as geom from (
-		select geometry from data_address.ca_parcel_address
+		select geometry from data_address.ca_parcel_address 
 		union all
-		select geometry from data_address.ca_building_address
+		select geometry from data_address.ca_building_address 
 		) parcel, (select '''||ST_AsText(new_geometry)||'''::text as new_geometry ) as b
 		where ST_DWithin(parcel.geometry, ST_GeomFromText(b.new_geometry, 4326)::geometry(Point,4326), 0.0006)
 	       ) AS linestrings
-	    ) AS segments, (select '''||ST_AsText(new_geometry)||'''::text as new_geometry ) as pp
+	    ) AS segments, (select '''||ST_AsText(new_geometry)||'''::text as new_geometry ) as pp			
 		group by pp.new_geometry, sp,ep
-		order by min(st_distance(ST_MakeLine(sp,ep), ST_GeomFromText(pp.new_geometry, 4326))) asc limit 1; ' INTO point_geometry;
+		order by min(st_distance(ST_MakeLine(sp,ep), ST_GeomFromText(pp.new_geometry, 4326))) asc limit 1; ' INTO point_geometry; 	
 
-	if parcel_id is null then
-		SELECT id FROM data_address.ca_parcel_address INTO parcel_id WHERE ST_COVERS(geometry, point_geometry);
+	if parcel_id is null then	
+		SELECT id FROM data_address.ca_parcel_address INTO parcel_id WHERE ST_COVERS(geometry, point_geometry);		
 	end if;
 	if building_id is null then
-		SELECT id FROM data_address.ca_building_address INTO building_id WHERE ST_COVERS(geometry, point_geometry);
+		SELECT id FROM data_address.ca_building_address INTO building_id WHERE ST_COVERS(geometry, point_geometry);		
 	end if;
-
-	--entry no generate
-	EXECUTE 'select type from
+	
+	--entry no generate 
+	EXECUTE 'select type from 
 			(
 			SELECT
 			      ST_PointN(geom, generate_series(1, ST_NPoints(geom)-1)) as sp,
@@ -86,15 +86,15 @@ BEGIN
 				) parcel, (select ST_GeomFromText('''||ST_AsText(point_geometry)||'''::text, 4326) as new_geometry) as b
 				--where ST_DWithin(parcel.geometry, b.new_geometry, 0.0006)
 			       ) AS linestrings
-			) as xxx
-			group by type limit 1;' INTO v_type;
+			) as xxx 
+			group by type limit 1;' INTO v_type;	
 
 	if v_type = 1 then
 		EXECUTE 'select max(address_entry_no::int) from data_address.st_entrance e, data_address.ca_parcel_address p
-				where type = '''|| NEW.type ||''' and ST_COVERS(p.geometry, ST_GeomFromText('''||ST_AsText(point_geometry)||'''::text, 4326));' INTO entry_no_counter;
+				where type = '''|| NEW.type ||''' and ST_COVERS(p.geometry, ST_GeomFromText('''||ST_AsText(point_geometry)||'''::text, 4326));' INTO entry_no_counter;	
 	elsif v_type = 2 then
 		EXECUTE 'select max(address_entry_no::int) from data_address.st_entrance e, data_address.ca_building_address p
-				where type = '''|| NEW.type ||''' and ST_COVERS(p.geometry, ST_GeomFromText('''||ST_AsText(point_geometry)||'''::text, 4326));' INTO entry_no_counter;
+				where type = '''|| NEW.type ||''' and ST_COVERS(p.geometry, ST_GeomFromText('''||ST_AsText(point_geometry)||'''::text, 4326));' INTO entry_no_counter;	
 	end if;
 	if entry_no_counter is null then
 		entry_no_counter := 0;
@@ -112,17 +112,17 @@ BEGIN
 	SELECT id FROM data_address.au_zipcode_area INTO v_au_post_zone_id WHERE ST_COVERS(geometry, point_geometry);
 	SELECT address_building_no FROM data_address.ca_building_address INTO v_address_building_no WHERE ST_COVERS(geometry, point_geometry);
 	SELECT address_parcel_no FROM data_address.ca_parcel_address INTO v_address_parcel_no WHERE ST_COVERS(geometry, point_geometry);
-
+	
 
 	IF (TG_OP = 'INSERT') THEN
-		NEW.entrance_id := entrance_id;
+		NEW.entrance_id := entrance_id;	
 		NEW.address_entry_no := entry_no;
 		NEW.created_at := now();
 		NEW.is_active := true;
 	END IF;
 	NEW.name := entry_name;
-	NEW.parcel_id := parcel_id;
-	NEW.building_id := building_id;
+	NEW.parcel_id := parcel_id;	
+	NEW.building_id := building_id;		
 	NEW.geometry := point_geometry;
 	NEW.au1 := v_admin_unit_l1_code;
 	NEW.au2 := v_admin_unit_l2_code;
@@ -134,7 +134,7 @@ BEGIN
 	NEW.address_parcel_no := v_address_parcel_no;
 	NEW.address_building_no := v_address_building_no;
 	NEW.updated_at := now();
-
+	
 END IF;
 
     RETURN NEW;
@@ -142,5 +142,5 @@ END;
 $BODY$
   LANGUAGE plpgsql VOLATILE
   COST 100;
-ALTER FUNCTION base.create_address_entry_id()
+ALTER FUNCTION base.create_address_parcel()
   OWNER TO geodb_admin;
