@@ -112,15 +112,17 @@ BEGIN
 	SELECT id FROM data_address.au_zipcode_area INTO v_au_post_zone_id WHERE ST_COVERS(geometry, point_geometry);
 	SELECT address_building_no FROM data_address.ca_building_address INTO v_address_building_no WHERE ST_COVERS(geometry, point_geometry);
 	SELECT address_parcel_no FROM data_address.ca_parcel_address INTO v_address_parcel_no WHERE ST_COVERS(geometry, point_geometry);
-
+	
+	IF NEW.name is null THEN
+		NEW.name := entry_name;
+	END IF;
 
 	IF (TG_OP = 'INSERT') THEN
 		NEW.entrance_id := entrance_id;
 		NEW.address_entry_no := entry_no;
 		NEW.created_at := now();
-		NEW.is_active := true;
-	END IF;
-	NEW.name := entry_name;
+		NEW.is_active := true;		
+	END IF;	
 	NEW.parcel_id := parcel_id;
 	NEW.building_id := building_id;
 	NEW.geometry := point_geometry;
@@ -144,3 +146,11 @@ $BODY$
   COST 100;
 ALTER FUNCTION base.create_address_entry_id()
   OWNER TO geodb_admin;
+
+DROP TRIGGER a_create_address_entry_id ON data_address.st_entrance;
+CREATE TRIGGER a_create_address_entry_id
+  BEFORE INSERT OR UPDATE
+  ON data_address.st_entrance
+  FOR EACH ROW
+  EXECUTE PROCEDURE base.create_address_entry_id();
+

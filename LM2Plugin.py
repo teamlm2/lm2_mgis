@@ -1443,6 +1443,17 @@ class LM2Plugin:
         ######
         addrs_group = root.findGroup(u"Хаяг")
 
+        vlayer = LayerUtils.layer_by_data_source("data_address", "st_entrance_view")
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer("st_entrance_view", "entrance_id", "data_address")
+        vlayer.loadNamedStyle(
+            str(os.path.dirname(os.path.realpath(__file__))) + "/template\style/st_entrance.qml")
+        vlayer.setLayerName(QApplication.translate("Plugin", "Address Entrance"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            addrs_group.addLayer(vlayer)
+            # vlayer.setReadOnly(True)
+
         vlayer = LayerUtils.layer_by_data_source("data_address", "ca_building_address_view")
         if vlayer is None:
             vlayer = LayerUtils.load_layer_base_layer("ca_building_address_view", "id", "data_address")
@@ -1452,7 +1463,7 @@ class LM2Plugin:
         myalayer = root.findLayer(vlayer.id())
         if myalayer is None:
             addrs_group.addLayer(vlayer)
-            vlayer.setReadOnly(True)
+            # vlayer.setReadOnly(True)
 
         vlayer = LayerUtils.layer_by_data_source("data_address", "ca_parcel_address_view")
         if vlayer is None:
@@ -1462,7 +1473,7 @@ class LM2Plugin:
         myalayer = root.findLayer(vlayer.id())
         if myalayer is None:
             addrs_group.addLayer(vlayer)
-            vlayer.setReadOnly(True)
+            # vlayer.setReadOnly(True)
 
         vlayer = LayerUtils.layer_by_data_source("data_address", "st_street_sub")
         if vlayer is None:

@@ -215,25 +215,25 @@ CREATE INDEX st_street_street_sub_type_id_idx ON st_street(street_type_id);
 
 CREATE TABLE ca_parcel_address
 (
-    id BIGSERIAL PRIMARY KEY,
-	parcel_id varchar(10) references data_soums_union.ca_parcel_tbl on update cascade on delete restrict,
-	is_active boolean not null DEFAULT false,
-	in_source int references data_address.cl_address_source on update cascade on delete restrict,
-	zipcode_id int references data_address.au_zipcode_area on update cascade on delete restrict,
-	street_id int references data_address.st_street on update cascade on delete restrict,
-    address_parcel_no VARCHAR(64),
-	address_streetname character varying(250),
-	address_neighbourhood character varying(250),
-	geographic_name character varying(250),
-	au1 varchar(3) references admin_units.au_level1 on update cascade on delete restrict,
-	au2 varchar(5) references admin_units.au_level2 on update cascade on delete restrict,
-	au3 varchar(8) references admin_units.au_level3 on update cascade on delete restrict,
-	khoroolol_id int references admin_units.au_khoroolol on update cascade on delete restrict,
-	sort_value int,
-	created_by integer,
-    updated_by integer,
-    created_at timestamp(0) without time zone NOT NULL DEFAULT now(),
-    updated_at timestamp(0) without time zone NOT NULL DEFAULT now()
+id BIGSERIAL PRIMARY KEY,
+parcel_id varchar(10) references data_soums_union.ca_parcel_tbl on update cascade on delete restrict,
+is_active boolean not null DEFAULT false,
+in_source int references data_address.cl_address_source on update cascade on delete restrict,
+zipcode_id int references data_address.au_zipcode_area on update cascade on delete restrict,
+street_id int references data_address.st_street on update cascade on delete restrict,
+address_parcel_no VARCHAR(64),
+address_streetname character varying(250),
+address_neighbourhood character varying(250),
+geographic_name character varying(250),
+au1 varchar(3) references admin_units.au_level1 on update cascade on delete restrict,
+au2 varchar(5) references admin_units.au_level2 on update cascade on delete restrict,
+au3 varchar(8) references admin_units.au_level3 on update cascade on delete restrict,
+khoroolol_id int references admin_units.au_khoroolol on update cascade on delete restrict,
+sort_value int,
+created_by integer,
+updated_by integer,
+created_at timestamp(0) without time zone NOT NULL DEFAULT now(),
+updated_at timestamp(0) without time zone NOT NULL DEFAULT now()
 );
 COMMENT ON TABLE ca_parcel_address
   IS 'Нэгж талбарын хаяг';
@@ -246,26 +246,26 @@ CREATE INDEX ca_parcel_address_parcel_id_idx ON ca_parcel_address(parcel_id);
 
 CREATE TABLE ca_building_address
 (
-    id BIGSERIAL PRIMARY KEY,
-	parcel_id varchar(10) references data_soums_union.ca_parcel_tbl on update cascade on delete restrict,
-	building_id varchar(13) references data_soums_union.ca_building_tbl on update cascade on delete restrict,
-	is_active boolean not null DEFAULT false,
-	building_name text,
-	in_source int references data_address.cl_address_source on update cascade on delete restrict,
-	zipcode_id int references data_address.au_zipcode_area on update cascade on delete restrict,
-	street_id int references data_address.st_street on update cascade on delete restrict,
-	address_parcel_no VARCHAR(64),
-	address_streetname character varying(250),
-    address_building_no VARCHAR(64),	
-	au1 varchar(3) references admin_units.au_level1 on update cascade on delete restrict,
-	au2 varchar(5) references admin_units.au_level2 on update cascade on delete restrict,
-	au3 varchar(8) references admin_units.au_level3 on update cascade on delete restrict,
-	khoroolol_id int references admin_units.au_khoroolol on update cascade on delete restrict,
-	sort_value int,
-	created_by integer,
-    updated_by integer,
-    created_at timestamp(0) without time zone NOT NULL DEFAULT now(),
-    updated_at timestamp(0) without time zone NOT NULL DEFAULT now()
+id BIGSERIAL PRIMARY KEY,
+parcel_id varchar(10) references data_soums_union.ca_parcel_tbl on update cascade on delete restrict,
+building_id varchar(13) references data_soums_union.ca_building_tbl on update cascade on delete restrict,
+is_active boolean not null DEFAULT false,
+building_name text,
+in_source int references data_address.cl_address_source on update cascade on delete restrict,
+zipcode_id int references data_address.au_zipcode_area on update cascade on delete restrict,
+street_id int references data_address.st_street on update cascade on delete restrict,
+address_parcel_no VARCHAR(64),
+address_streetname character varying(250),
+address_building_no VARCHAR(64),	
+au1 varchar(3) references admin_units.au_level1 on update cascade on delete restrict,
+au2 varchar(5) references admin_units.au_level2 on update cascade on delete restrict,
+au3 varchar(8) references admin_units.au_level3 on update cascade on delete restrict,
+khoroolol_id int references admin_units.au_khoroolol on update cascade on delete restrict,
+sort_value int,
+created_by integer,
+updated_by integer,
+created_at timestamp(0) without time zone NOT NULL DEFAULT now(),
+updated_at timestamp(0) without time zone NOT NULL DEFAULT now()
 );
 COMMENT ON TABLE ca_building_address
   IS 'Барилгын хаяг';
