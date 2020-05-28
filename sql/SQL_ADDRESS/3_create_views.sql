@@ -39,3 +39,20 @@ GRANT SELECT ON TABLE data_address.ca_building_address_view TO land_office_admin
 GRANT INSERT, DELETE ON TABLE data_address.ca_building_address_view TO cadastre_view;
 GRANT INSERT, DELETE ON TABLE data_address.ca_building_address_view TO db_creation;
 GRANT UPDATE, INSERT, DELETE ON TABLE data_address.ca_building_address_view TO cadastre_update;
+
+--------------
+DROP VIEW if exists data_address.st_street_line_view;
+CREATE OR REPLACE VIEW data_address.st_street_line_view AS 
+select row_number() over() as fid, street_sub_id, street_name || '-' || street_code as street_name, ST_LineMerge(ST_Multi(St_Collect(line_geom))) from data_address.st_road
+group by street_code, street_name, street_sub_id;
+ALTER TABLE data_address.st_street_line_view
+  OWNER TO geodb_admin;
+GRANT ALL ON TABLE data_address.st_street_line_view TO geodb_admin;
+GRANT SELECT ON TABLE data_address.st_street_line_view TO reporting;
+GRANT SELECT ON TABLE data_address.st_street_line_view TO land_office_administration;
+GRANT INSERT, DELETE ON TABLE data_address.st_street_line_view TO cadastre_view;
+GRANT INSERT, DELETE ON TABLE data_address.st_street_line_view TO db_creation;
+GRANT UPDATE, INSERT, DELETE ON TABLE data_address.st_street_line_view TO cadastre_update;
+
+-----------
+

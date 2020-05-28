@@ -114,64 +114,71 @@ insert into data_address.cl_entry_type values (3, 'зөвхөн гарц');
 
 -------------
 DROP TABLE if exists  data_address.st_road cascade;
-CREATE TABLE st_road
+CREATE TABLE data_address.st_road
 (
-    id BIGSERIAL PRIMARY KEY,
-	code varchar(250),
-	name varchar(250),
-	name_en varchar(250),
-	description text,
-	is_active boolean not null DEFAULT false,
-	in_source int references data_address.cl_address_source on update cascade on delete restrict,
-	road_type_id int references data_address.cl_road_type on update cascade on delete restrict,
-	valid_from date DEFAULT ('now'::text)::date,
-    valid_till date DEFAULT 'infinity'::date,
-	geometry geometry(POLYGON, 4326),
-	area_m2 numeric,
-	line_geom geometry(MultiLineString,4326),
-	length numeric,
-	created_by integer,
-    updated_by integer,
-    created_at timestamp(0) without time zone NOT NULL DEFAULT now(),
-    updated_at timestamp(0) without time zone NOT NULL DEFAULT now(),
-	au1 varchar(3) references admin_units.au_level1 on update cascade on delete restrict,
-	au2 varchar(5) references admin_units.au_level2 on update cascade on delete restrict,
-	au3 text
+id BIGSERIAL PRIMARY KEY,
+code varchar(250),
+name varchar(250),
+name_en varchar(250),
+description text,
+street_code varchar(250),
+street_name text,
+street_sub_id int references data_address.st_street_sub on update cascade on delete restrict,
+source integer,
+target integer,
+is_active boolean not null DEFAULT false,
+in_source int references data_address.cl_address_source on update cascade on delete restrict,
+road_type_id int references data_address.cl_road_type on update cascade on delete restrict,
+valid_from date DEFAULT ('now'::text)::date,
+valid_till date DEFAULT 'infinity'::date,
+geometry geometry(POLYGON, 4326),
+area_m2 numeric,
+line_geom geometry(LineString,4326),
+length numeric,
+created_by integer,
+updated_by integer,
+created_at timestamp(0) without time zone NOT NULL DEFAULT now(),
+updated_at timestamp(0) without time zone NOT NULL DEFAULT now(),
+au1 varchar(3) references admin_units.au_level1 on update cascade on delete restrict,
+au2 varchar(5) references admin_units.au_level2 on update cascade on delete restrict,
+au3 text
 );
-grant select, insert, update, delete on st_road to address_update;
-grant select on st_road to address_view;
+GRANT ALL ON TABLE data_address.st_road TO geodb_admin;
+GRANT SELECT, UPDATE, INSERT, DELETE ON TABLE data_address.st_road TO address_update;
+GRANT SELECT ON TABLE data_address.st_road TO address_view;
+GRANT SELECT, UPDATE, INSERT, DELETE ON TABLE data_address.st_road TO cadastre_update;
 
-CREATE INDEX st_road_geometry_idx ON st_road USING GIST(geometry);
-CREATE INDEX st_road_road_type_id_idx ON st_road(road_type_id);
+CREATE INDEX st_road_geometry_idx ON data_address.st_road USING GIST(geometry);
+CREATE INDEX st_road_road_type_id_idx ON data_address.st_road(road_type_id);
 
 -------------
 DROP TABLE if exists  data_address.st_street cascade;
 CREATE TABLE st_street
 (
-    id BIGSERIAL PRIMARY KEY,
-	code varchar(250),
-	name varchar(250),
-	name_en varchar(250),
-	description text,
-	decision_date date,
-	decision_no varchar(20),
-	decision_level_id int references data_plan.cl_plan_decision_level on update cascade on delete restrict,
-	is_active boolean not null DEFAULT false,
-	in_source int references data_address.cl_address_source on update cascade on delete restrict,
-	street_type_id int references data_address.cl_street_type on update cascade on delete restrict,
-	valid_from date DEFAULT ('now'::text)::date,
-    valid_till date DEFAULT 'infinity'::date,
-	geometry geometry(MULTIPOLYGON, 4326),
-	area_m2 numeric,
-	line_geom geometry(MultiLineString,4326),
-	length numeric,
-	created_by integer,
-    updated_by integer,
-    created_at timestamp(0) without time zone NOT NULL DEFAULT now(),
-    updated_at timestamp(0) without time zone NOT NULL DEFAULT now(),
-	au1 varchar(3) references admin_units.au_level1 on update cascade on delete restrict,
-	au2 varchar(5) references admin_units.au_level2 on update cascade on delete restrict,
-	au3 text
+id BIGSERIAL PRIMARY KEY,
+code varchar(250),
+name varchar(250),
+name_en varchar(250),
+description text,
+decision_date date,
+decision_no varchar(20),
+decision_level_id int references data_plan.cl_plan_decision_level on update cascade on delete restrict,
+is_active boolean not null DEFAULT false,
+in_source int references data_address.cl_address_source on update cascade on delete restrict,
+street_type_id int references data_address.cl_street_type on update cascade on delete restrict,
+valid_from date DEFAULT ('now'::text)::date,
+valid_till date DEFAULT 'infinity'::date,
+geometry geometry(MULTIPOLYGON, 4326),
+area_m2 numeric,
+line_geom geometry(MultiLineString,4326),
+length numeric,
+created_by integer,
+updated_by integer,
+created_at timestamp(0) without time zone NOT NULL DEFAULT now(),
+updated_at timestamp(0) without time zone NOT NULL DEFAULT now(),
+au1 varchar(3) references admin_units.au_level1 on update cascade on delete restrict,
+au2 varchar(5) references admin_units.au_level2 on update cascade on delete restrict,
+au3 text
 );
 grant select, insert, update, delete on st_street to address_update;
 grant select on st_street to address_view;
@@ -182,28 +189,28 @@ CREATE INDEX st_street_street_type_id_idx ON st_street(street_type_id);
 DROP TABLE if exists  data_address.st_street_sub cascade;
 CREATE TABLE st_street_sub
 (
-    id BIGSERIAL PRIMARY KEY,
-	code varchar(250),
-	name varchar(250),
-	name_en varchar(250),
-	description text,
-	is_active boolean not null DEFAULT false,
-	in_source int references data_address.cl_address_source on update cascade on delete restrict,
-	street_type_id int references data_address.cl_street_type on update cascade on delete restrict,
-	street_id int references data_address.st_street on update cascade on delete restrict,
-	valid_from date DEFAULT ('now'::text)::date,
-    valid_till date DEFAULT 'infinity'::date,
-	geometry geometry(POLYGON, 4326),
-	area_m2 numeric,
-	line_geom geometry(MultiLineString,4326),
-	created_by integer,
-    updated_by integer,
-    created_at timestamp(0) without time zone NOT NULL DEFAULT now(),
-    updated_at timestamp(0) without time zone NOT NULL DEFAULT now(),
-	au1 varchar(3) references admin_units.au_level1 on update cascade on delete restrict,
-	au2 varchar(5) references admin_units.au_level2 on update cascade on delete restrict,
-	au3 text,
-	unique (au2, street_id, code)
+id BIGSERIAL PRIMARY KEY,
+code varchar(250),
+name varchar(250),
+name_en varchar(250),
+description text,
+is_active boolean not null DEFAULT false,
+in_source int references data_address.cl_address_source on update cascade on delete restrict,
+street_type_id int references data_address.cl_street_type on update cascade on delete restrict,
+street_id int references data_address.st_street on update cascade on delete restrict,
+valid_from date DEFAULT ('now'::text)::date,
+valid_till date DEFAULT 'infinity'::date,
+geometry geometry(POLYGON, 4326),
+area_m2 numeric,
+line_geom geometry(MultiLineString,4326),
+created_by integer,
+updated_by integer,
+created_at timestamp(0) without time zone NOT NULL DEFAULT now(),
+updated_at timestamp(0) without time zone NOT NULL DEFAULT now(),
+au1 varchar(3) references admin_units.au_level1 on update cascade on delete restrict,
+au2 varchar(5) references admin_units.au_level2 on update cascade on delete restrict,
+au3 text,
+unique (au2, street_id, code)
 );
 grant select, insert, update, delete on st_street to address_update;
 grant select on st_street to address_view;
@@ -298,30 +305,30 @@ CREATE TRIGGER update_area
 DROP TABLE if exists  data_address.st_entrance cascade;
 CREATE TABLE data_address.st_entrance
 (
-    entrance_id varchar(20) PRIMARY KEY,
-	code varchar(250),
-	name varchar(250),
-	type int references data_address.cl_entry_type on update cascade on delete restrict,
+entrance_id varchar(20) PRIMARY KEY,
+code varchar(250),
+name varchar(250),
+type int references data_address.cl_entry_type on update cascade on delete restrict,
 address_entry_no character varying(10) not null,
-	description text,
-	is_active boolean not null DEFAULT true,
-	building_id int references data_address.ca_building_address on update cascade on delete restrict,
-	parcel_id int references data_address.ca_parcel_address on update cascade on delete restrict,
-	address_parcel_no character varying(64),
-    address_streetname character varying(250),
-    address_neighbourhood character varying(250),
-    geographic_name character varying(250),
-	
-	valid_from date DEFAULT ('now'::text)::date,
-    valid_till date DEFAULT 'infinity'::date,
-	geometry geometry(POINT, 4326),	
-	created_by integer,
-    updated_by integer,
-    created_at timestamp(0) without time zone NOT NULL DEFAULT now(),
-    updated_at timestamp(0) without time zone NOT NULL DEFAULT now(),
-	au1 varchar(3) references admin_units.au_level1 on update cascade on delete restrict,
-	au2 varchar(5) references admin_units.au_level2 on update cascade on delete restrict,
-	au3 varchar(8) references admin_units.au_level3 on update cascade on delete restrict
+description text,
+is_active boolean not null DEFAULT true,
+building_id int references data_address.ca_building_address on update cascade on delete restrict,
+parcel_id int references data_address.ca_parcel_address on update cascade on delete restrict,
+address_parcel_no character varying(64),
+address_streetname character varying(250),
+address_neighbourhood character varying(250),
+geographic_name character varying(250),
+
+valid_from date DEFAULT ('now'::text)::date,
+valid_till date DEFAULT 'infinity'::date,
+geometry geometry(POINT, 4326),	
+created_by integer,
+updated_by integer,
+created_at timestamp(0) without time zone NOT NULL DEFAULT now(),
+updated_at timestamp(0) without time zone NOT NULL DEFAULT now(),
+au1 varchar(3) references admin_units.au_level1 on update cascade on delete restrict,
+au2 varchar(5) references admin_units.au_level2 on update cascade on delete restrict,
+au3 varchar(8) references admin_units.au_level3 on update cascade on delete restrict
 );
 grant select, insert, update, delete on data_address.st_entrance to address_update;
 grant select on data_address.st_entrance to address_view;
@@ -330,3 +337,54 @@ GRANT SELECT ON TABLE data_address.st_entrance TO cadastre_view;
 
 CREATE INDEX st_entrance_geometry_idx ON data_address.st_entrance USING GIST(geometry);
 CREATE INDEX st_entrance_road_type_id_idx ON data_address.st_entrance(entrance_id);
+
+------------
+DROP TABLE if exists data_address.st_street_point;
+CREATE TABLE data_address.st_street_point
+(
+  id bigserial primary key,
+  is_active boolean NOT NULL DEFAULT true,
+  valid_from date DEFAULT ('now'::text)::date,
+  valid_till date DEFAULT 'infinity'::date,
+  geometry geometry(Point,4326),
+  created_by integer,
+  updated_by integer,
+  created_at timestamp(0) without time zone NOT NULL DEFAULT now(),
+  updated_at timestamp(0) without time zone NOT NULL DEFAULT now(),
+  au1 character varying(3),
+  au2 character varying(5),
+  au3 text
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE data_address.st_street_point
+  OWNER TO geodb_admin;
+GRANT ALL ON TABLE data_address.st_street_point TO geodb_admin;
+GRANT SELECT ON TABLE data_address.st_street_point TO reporting;
+GRANT SELECT ON TABLE data_address.st_street_point TO land_office_administration;
+GRANT INSERT, DELETE ON TABLE data_address.st_street_point TO cadastre_view;
+GRANT INSERT, DELETE ON TABLE data_address.st_street_point TO db_creation;
+GRANT UPDATE, INSERT, DELETE ON TABLE data_address.st_street_point TO cadastre_update;
+
+---------------
+DROP TABLE if exists data_address.st_map_street_point;
+CREATE TABLE data_address.st_map_street_point
+(
+id int primary key,
+street_point_id int references data_address.st_street_point on update cascade on delete restrict not null,
+street_id int references data_address.st_street_sub on update cascade on delete restrict not null,
+type int,
+unique(street_id, street_point_id, type)
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE data_address.st_map_street_point
+  OWNER TO geodb_admin;
+GRANT ALL ON TABLE data_address.st_map_street_point TO geodb_admin;
+GRANT SELECT ON TABLE data_address.st_map_street_point TO reporting;
+GRANT SELECT ON TABLE data_address.st_map_street_point TO land_office_administration;
+GRANT INSERT, DELETE ON TABLE data_address.st_map_street_point TO cadastre_view;
+GRANT INSERT, DELETE ON TABLE data_address.st_map_street_point TO db_creation;
+GRANT UPDATE, INSERT, DELETE ON TABLE data_address.st_map_street_point TO cadastre_update;
