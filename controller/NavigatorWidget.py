@@ -13562,6 +13562,18 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         column_name = 'landuse'
         root = QgsProject.instance().layerTreeRoot()
         mygroup = root.findGroup(u"ГНСТайлан")
+
+        table_name = "ca_landuse_type"
+        vlayer = LayerUtils.layer_by_data_source("data_landuse", table_name)
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer(table_name, "parcel_id", "data_landuse")
+        # vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/gt1_report.qml")
+        vlayer.setLayerName(self.tr("Landuse Type"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            mygroup.addLayer(vlayer)
+        self.__load_layer_style(vlayer, column_name, table_name)
+
         table_name = "ca_landuse_type1"
         vlayer = LayerUtils.layer_by_data_source("data_landuse", table_name)
         if vlayer is None:
@@ -13632,7 +13644,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
 
         sql = "select p.landuse, t.description, c.fill_color, t.boundary_color from data_landuse."+ table_name +" p " \
               "join data_landuse.landuse_color c on p.landuse = c.landuse_code " \
-              "join codelists.cl_landuse_type t on p.landuse = t.code group by p.landuse, t.description, c.fill_color, t.boundary_color "
+              "join codelists.cl_landuse_type t on p.landuse = t.code group by p.landuse, t.description, c.fill_color, t.boundary_color order by p.landuse "
 
         # sql = "select * from data_landuse.landuse_color c "
         categories = []

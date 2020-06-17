@@ -7,6 +7,8 @@ from PyQt4.QtXml import *
 from geoalchemy2.elements import WKTElement
 from qgis.core import *
 from sqlalchemy.exc import SQLAlchemyError
+from geoalchemy2 import functions
+from geoalchemy2.shape import to_shape
 from sqlalchemy import func, or_, and_, desc
 from decimal import Decimal
 from ..view.Ui_ParcelInfoDialog import Ui_ParcelInfoDialog
@@ -61,6 +63,9 @@ import datetime
 from ftplib import FTP, error_perm
 from contextlib import closing
 from difflib import SequenceMatcher
+import urllib
+import urllib2
+import json
 
 DELETE_STATUS = 40
 
@@ -2372,6 +2377,28 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
         ub_parcel = self.session.query(CaUBParcelTbl).filter(CaUBParcelTbl.old_parcel_id == old_parcel_id).one()
         parcel_within_count = self.session.query(CaParcel).filter(
             ub_parcel.geometry.ST_Within(CaParcel.geometry)).count()
+
+        wkb_elem = self.session.query(CaUBParcelTbl.geometry).filter(CaUBParcelTbl.old_parcel_id == old_parcel_id).scalar()
+        shply_geom = to_shape(wkb_elem)
+        wkt_geom = shply_geom.to_wkt()
+        params = urllib.urlencode({'geom': wkt_geom})
+        f = urllib.urlopen("http://192.168.15.222/api/geo/parcel/check/by/geom/wkt", params)
+        data = json.load(f)
+        status = data['status']
+        result = data['result']
+        if not status:
+            # PluginUtils.show_message(self, u'Амжилтгүй', u'Өгөгдөл буруу байна!!!')
+            valid = False
+            parcel_error = u'Өгөгдөл буруу байна!!!'
+            error_message = error_message + "\n \n" + parcel_error
+            # return
+        else:
+            if result:
+                # PluginUtils.show_message(self, u'Амжилтгүй', u'Газар олгох боломжгүй байршил!!!')
+                valid = False
+                parcel_error = u'Газар олгох боломжгүй байршил!!!'
+                error_message = error_message + "\n \n" + parcel_error
+                # return
 
         # parcel
         validaty_result = self.__check_parcel_correct(ub_parcel.geometry, '')

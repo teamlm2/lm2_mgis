@@ -2,7 +2,7 @@
 CREATE TABLE data_landuse.ca_landuse_type_tbl
 (
   parcel_id serial PRIMARY KEY,
-  is_active boolean not null DEFAULT false,
+  is_active boolean not null DEFAULT true,
   landuse int references codelists.cl_landuse_type on update cascade on delete restrict NOT NULL,
   landuse_level1 int references codelists.cl_landuse_type on update cascade on delete restrict NOT NULL,
   landuse_level2 int references codelists.cl_landuse_type on update cascade on delete restrict NOT NULL,
@@ -25,8 +25,8 @@ WITH (
   OIDS=FALSE
 );
 ALTER TABLE data_landuse.ca_landuse_type_tbl
-  OWNER TO gns_admin;
-GRANT ALL ON TABLE data_landuse.ca_landuse_type_tbl TO gns_admin;
+  OWNER TO geodb_admin;
+GRANT ALL ON TABLE data_landuse.ca_landuse_type_tbl TO geodb_admin;
 GRANT SELECT, UPDATE, INSERT, DELETE ON TABLE data_landuse.ca_landuse_type_tbl TO cadastre_update;
 GRANT SELECT ON TABLE data_landuse.ca_landuse_type_tbl TO cadastre_view;
 GRANT SELECT ON TABLE data_landuse.ca_landuse_type_tbl TO reporting;
@@ -114,3 +114,19 @@ CREATE TRIGGER set_default_au3
   ON data_landuse.ca_landuse_type_tbl
   FOR EACH ROW
   EXECUTE PROCEDURE base.set_default_au3();
+
+--------------
+
+set search_path to data_landuse, public, codelists;
+create or replace view ca_landuse_type as select * from ca_landuse_type_tbl 
+WHERE ca_landuse_type_tbl.au2::text = (( SELECT set_role_user.working_au_level2::text AS au2
+           FROM settings.set_role_user
+          WHERE set_role_user.user_name::name = "current_user"() AND set_role_user.is_active = true)) AND "overlaps"(ca_landuse_type_tbl.valid_from::timestamp with time zone, ca_landuse_type_tbl.valid_till::timestamp with time zone, (( SELECT set_role_user.pa_from
+           FROM settings.set_role_user
+          WHERE set_role_user.user_name::name = "current_user"() AND set_role_user.is_active = true))::timestamp with time zone, (( SELECT set_role_user.pa_till
+           FROM settings.set_role_user
+          WHERE set_role_user.user_name::name = "current_user"() AND set_role_user.is_active = true))::timestamp with time zone);
+
+grant select, insert, update, delete on ca_landuse_type to top_cadastre_update;
+grant select on ca_landuse_type to top_cadastre_view, reporting;
+

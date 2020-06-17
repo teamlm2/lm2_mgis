@@ -8,6 +8,8 @@ from geoalchemy2.elements import WKTElement
 from qgis.core import *
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import func, or_, and_, desc
+from geoalchemy2 import functions
+from geoalchemy2.shape import to_shape
 from inspect import currentframe
 from decimal import Decimal
 from ..view.Ui_ParcelMpaDialog import *
@@ -49,7 +51,10 @@ import math
 import locale
 import os
 import pyproj
+from difflib import SequenceMatcher
+import urllib
 import urllib2
+import json
 import shutil
 import sys
 import datetime
@@ -1806,6 +1811,25 @@ class ParcelMpaDialog(QDockWidget, Ui_ParcelMpaDialog, DatabaseHelper):
         ub_parcel = self.session.query(MpaGisEditSubject).filter(MpaGisEditSubject.gid == old_parcel_id).one()
         parcel_within_count = self.session.query(CaParcel).filter(
             ub_parcel.geometry.ST_Within(CaParcel.geometry)).count()
+
+        wkb_elem = self.session.query(MpaGisEditSubject.geometry).filter(
+            MpaGisEditSubject.gid == old_parcel_id).scalar()
+        shply_geom = to_shape(wkb_elem)
+        wkt_geom = shply_geom.to_wkt()
+        params = urllib.urlencode({'geom': wkt_geom})
+        f = urllib.urlopen("http://192.168.15.222/api/geo/parcel/check/by/geom/wkt", params)
+        data = json.load(f)
+        status = data['status']
+        result = data['result']
+        if not status:
+            valid = False
+            parcel_error = u'Өгөгдөл буруу байна!!!'
+            error_message = error_message + "\n \n" + parcel_error
+        else:
+            if result:
+                valid = False
+                parcel_error = u'Газар олгох боломжгүй байршил!!!'
+                error_message = error_message + "\n \n" + parcel_error
 
         # parcel
         validaty_result = self.__check_parcel_correct(ub_parcel.geometry, '')
