@@ -25,6 +25,8 @@ from ..model.AuMpa import *
 from ..model.PlProjectParcel import *
 from ..model.PlProject import *
 from ..model.ClPlanType import *
+from ..model.StStreet import *
+from ..model.StRoad import *
 import urllib
 import urllib2
 import json
@@ -1286,3 +1288,53 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
         except SQLAlchemyError, e:
             PluginUtils.show_error(self, self.tr("Database Query Error"), self.tr("Could not execute: {0}").format(e.message))
             return
+
+    def __setup_street_table_widget(self):
+
+        self.street_twidget.setAlternatingRowColors(True)
+        self.street_twidget.setEditTriggers(QTableWidget.NoEditTriggers)
+        self.street_twidget.setSelectionBehavior(QTableWidget.SelectRows)
+        self.street_twidget.setSelectionMode(QTableWidget.SingleSelection)
+
+    @pyqtSlot()
+    def on_street_find_button_clicked(self):
+
+        self.__setup_street_table_widget()
+        au2 = DatabaseUtils.working_l2_code()
+        values = self.session.query(StStreet).filter(StStreet.au2 == au2).order_by(StStreet.name, StStreet.code).all()
+
+        for value in values:
+            row = self.street_twidget.rowCount()
+            self.street_twidget.insertRow(row)
+
+            item = QTableWidgetItem(unicode(value.name))
+            item.setData(Qt.UserRole, value.id)
+            self.street_twidget.setItem(row, 0, item)
+
+            item = QTableWidgetItem(unicode(value.code))
+            item.setData(Qt.UserRole, value.code)
+            self.street_twidget.setItem(row, 1, item)
+
+    @pyqtSlot(QTableWidgetItem)
+    def on_street_twidget_itemClicked(self, item):
+
+        selected_row = self.street_twidget.currentRow()
+        id = self.street_twidget.item(selected_row, 0).data(Qt.UserRole)
+
+        self.__load_touches_roads(id)
+        self.__load_joined_roads(id)
+
+    def __load_touches_roads(self, id):
+
+        print id
+
+    def __load_joined_roads(self, id):
+
+        print id
+
+    @pyqtSlot(QTableWidgetItem)
+    def on_street_twidget_itemDoubleClicked(self, item):
+
+        selected_row = self.street_twidget.currentRow()
+        id = self.street_twidget.item(selected_row, 0).data(Qt.UserRole)
+

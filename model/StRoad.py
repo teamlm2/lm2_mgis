@@ -7,12 +7,11 @@ from Base import *
 from ClAddressSource import *
 from ClStreetType import *
 
-class StStreet(Base):
+class StRoad(Base):
 
-    __tablename__ = 'st_street'
+    __tablename__ = 'st_road'
 
     id = Column(Integer, primary_key=True)
-    code = Column(String)
     name = Column(String)
     name_en = Column(String)
     description = Column(String)
@@ -20,13 +19,17 @@ class StStreet(Base):
     valid_from = Column(Date)
     valid_till = Column(Date)
     area_m2 = Column(Float)
-    geometry = Column(Geometry('MULTIPOLYGON', 4326))
-    line_geom = Column(Geometry('MULTILINESTRING', 4326))
-    parent_id = Column(Integer)
+    length = Column(Float)
+    geometry = Column(Geometry('POLYGON', 4326))
+    line_geom = Column(Geometry('LINESTRING', 4326))
+
     created_by = Column(Integer)
     updated_by = Column(Integer)
     created_at = Column(DateTime)
     updated_at = Column(DateTime)
+
+    street_id = Column(Integer, ForeignKey('st_street.id'))
+    street_id_ref = relationship("StStreet")
 
     street_type_id = Column(Integer, ForeignKey('cl_street_type.code'))
     street_type_id_ref = relationship("ClStreetType")

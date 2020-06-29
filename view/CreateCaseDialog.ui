@@ -669,179 +669,154 @@
     <attribute name="title">
      <string>Гудамжны өөрчлөлт</string>
     </attribute>
-    <widget class="QTreeWidget" name="result_twidget_2">
+    <widget class="QTableWidget" name="street_twidget">
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>140</y>
-       <width>381</width>
-       <height>231</height>
+       <y>40</y>
+       <width>771</width>
+       <height>161</height>
       </rect>
      </property>
-     <property name="verticalScrollBarPolicy">
-      <enum>Qt::ScrollBarAlwaysOn</enum>
-     </property>
-     <attribute name="headerDefaultSectionSize">
-      <number>100</number>
-     </attribute>
      <column>
       <property name="text">
-       <string>Maintenance Case Objects</string>
+       <string>Гудамжны нэр</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Дугаар</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Шийдвэрийн дугаар</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>New Column</string>
       </property>
      </column>
     </widget>
-    <widget class="QGroupBox" name="import_groupbox_2">
-     <property name="enabled">
-      <bool>false</bool>
+    <widget class="QPushButton" name="street_find_button">
+     <property name="geometry">
+      <rect>
+       <x>710</x>
+       <y>10</y>
+       <width>75</width>
+       <height>23</height>
+      </rect>
      </property>
+     <property name="text">
+      <string>Load</string>
+     </property>
+    </widget>
+    <widget class="QTableWidget" name="touches_road_twidget">
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>30</y>
-       <width>381</width>
-       <height>101</height>
+       <y>270</y>
+       <width>351</width>
+       <height>161</height>
       </rect>
      </property>
-     <property name="title">
-      <string>Import</string>
-     </property>
-     <widget class="QLineEdit" name="building_shape_edit_2">
-      <property name="geometry">
-       <rect>
-        <x>127</x>
-        <y>62</y>
-        <width>200</width>
-        <height>21</height>
-       </rect>
-      </property>
-      <property name="readOnly">
-       <bool>true</bool>
-      </property>
-     </widget>
-     <widget class="QLineEdit" name="parcel_shape_edit_2">
-      <property name="geometry">
-       <rect>
-        <x>126</x>
-        <y>32</y>
-        <width>200</width>
-        <height>21</height>
-       </rect>
-      </property>
-      <property name="readOnly">
-       <bool>true</bool>
-      </property>
-     </widget>
-     <widget class="QLabel" name="label_13">
-      <property name="geometry">
-       <rect>
-        <x>6</x>
-        <y>64</y>
-        <width>111</width>
-        <height>16</height>
-       </rect>
-      </property>
+     <column>
       <property name="text">
-       <string>Building Shapefile</string>
+       <string>Нэр</string>
       </property>
-     </widget>
-     <widget class="QLabel" name="label_14">
-      <property name="geometry">
-       <rect>
-        <x>8</x>
-        <y>34</y>
-        <width>101</width>
-        <height>16</height>
-       </rect>
-      </property>
+     </column>
+     <column>
       <property name="text">
-       <string>Parcel Shapefile</string>
+       <string>Урт</string>
       </property>
-     </widget>
-     <widget class="QPushButton" name="open_parcel_file_button_2">
-      <property name="geometry">
-       <rect>
-        <x>330</x>
-        <y>30</y>
-        <width>40</width>
-        <height>25</height>
-       </rect>
-      </property>
+     </column>
+     <column>
       <property name="text">
-       <string/>
+       <string>Төрөл</string>
       </property>
-      <property name="icon">
-       <iconset resource="resources.qrc">
-        <normaloff>:/plugins/lm2/open.png</normaloff>:/plugins/lm2/open.png</iconset>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="open_building_file_button_2">
-      <property name="geometry">
-       <rect>
-        <x>330</x>
-        <y>58</y>
-        <width>40</width>
-        <height>25</height>
-       </rect>
-      </property>
+     </column>
+     <column>
       <property name="text">
-       <string/>
+       <string>Хүчинтэй эсэх</string>
       </property>
-      <property name="icon">
-       <iconset resource="resources.qrc">
-        <normaloff>:/plugins/lm2/open.png</normaloff>:/plugins/lm2/open.png</iconset>
-      </property>
-     </widget>
+     </column>
     </widget>
-    <widget class="QLabel" name="label_15">
+    <widget class="QPushButton" name="pushButton">
      <property name="geometry">
       <rect>
-       <x>410</x>
-       <y>140</y>
-       <width>96</width>
-       <height>13</height>
+       <x>380</x>
+       <y>300</y>
+       <width>31</width>
+       <height>31</height>
       </rect>
      </property>
      <property name="text">
-      <string>Гудамжны дугаар:</string>
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="resources.qrc">
+       <normaloff>:/plugins/lm2/double_right_button.png</normaloff>:/plugins/lm2/double_right_button.png</iconset>
      </property>
     </widget>
-    <widget class="QLabel" name="label_16">
+    <widget class="QPushButton" name="pushButton_2">
      <property name="geometry">
       <rect>
-       <x>410</x>
-       <y>170</y>
-       <width>77</width>
-       <height>13</height>
+       <x>380</x>
+       <y>340</y>
+       <width>31</width>
+       <height>31</height>
       </rect>
      </property>
      <property name="text">
-      <string>Гудамжны нэр:</string>
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="resources.qrc">
+       <normaloff>:/plugins/lm2/double_left_button.png</normaloff>:/plugins/lm2/double_left_button.png</iconset>
      </property>
     </widget>
-    <widget class="QLabel" name="label_17">
+    <widget class="QTableWidget" name="joined_road_twidget">
      <property name="geometry">
       <rect>
-       <x>410</x>
-       <y>200</y>
-       <width>112</width>
-       <height>13</height>
+       <x>430</x>
+       <y>270</y>
+       <width>351</width>
+       <height>161</height>
+      </rect>
+     </property>
+     <column>
+      <property name="text">
+       <string>Нэр</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Урт</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Төрөл</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Хүчинтэй эсэх</string>
+      </property>
+     </column>
+    </widget>
+    <widget class="QCheckBox" name="all_road_chbox">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>240</y>
+       <width>121</width>
+       <height>17</height>
       </rect>
      </property>
      <property name="text">
-      <string>Дугаарлалтын төрөл:</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_18">
-     <property name="geometry">
-      <rect>
-       <x>410</x>
-       <y>230</y>
-       <width>112</width>
-       <height>13</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Дугаарлалтын алхам:</string>
+      <string>Бүгд</string>
      </property>
     </widget>
    </widget>

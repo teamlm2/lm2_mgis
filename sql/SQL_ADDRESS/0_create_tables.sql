@@ -121,9 +121,8 @@ code varchar(250),
 name varchar(250),
 name_en varchar(250),
 description text,
-street_code varchar(250),
-street_name text,
 street_sub_id int references data_address.st_street_sub on update cascade on delete restrict,
+street_id int references data_address.st_sub on update cascade on delete restrict,
 source integer,
 target integer,
 is_active boolean not null DEFAULT false,
@@ -172,6 +171,7 @@ geometry geometry(MULTIPOLYGON, 4326),
 area_m2 numeric,
 line_geom geometry(MultiLineString,4326),
 length numeric,
+parent_id bigint,
 created_by integer,
 updated_by integer,
 created_at timestamp(0) without time zone NOT NULL DEFAULT now(),
@@ -182,6 +182,8 @@ au3 text
 );
 grant select, insert, update, delete on st_street to address_update;
 grant select on st_street to address_view;
+
+ALTER TABLE data_address.st_street ADD CONSTRAINT st_street_unique UNIQUE (code, name, parent_id);
 
 CREATE INDEX st_street_geometry_idx ON st_street USING GIST(geometry);
 CREATE INDEX st_street_street_type_id_idx ON st_street(street_type_id);
@@ -203,6 +205,7 @@ valid_till date DEFAULT 'infinity'::date,
 geometry geometry(POLYGON, 4326),
 area_m2 numeric,
 line_geom geometry(MultiLineString,4326),
+length numeric,
 created_by integer,
 updated_by integer,
 created_at timestamp(0) without time zone NOT NULL DEFAULT now(),
