@@ -6,6 +6,7 @@ from geoalchemy2 import Geometry
 from Base import *
 from ClAddressSource import *
 from ClStreetType import *
+from ClRoadType import *
 
 class StRoad(Base):
 
@@ -28,11 +29,11 @@ class StRoad(Base):
     created_at = Column(DateTime)
     updated_at = Column(DateTime)
 
+    road_type_id = Column(Integer, ForeignKey('cl_road_type.code'))
+    road_type_id_ref = relationship("ClRoadType")
+
     street_id = Column(Integer, ForeignKey('st_street.id'))
     street_id_ref = relationship("StStreet")
-
-    street_type_id = Column(Integer, ForeignKey('cl_street_type.code'))
-    street_type_id_ref = relationship("ClStreetType")
 
     in_source = Column(Integer, ForeignKey('cl_address_source.code'))
     in_source_ref = relationship("ClAddressSource")

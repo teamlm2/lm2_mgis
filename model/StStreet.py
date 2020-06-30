@@ -15,6 +15,8 @@ class StStreet(Base):
     code = Column(String)
     name = Column(String)
     name_en = Column(String)
+    decision_date = Column(Date)
+    decision_no = Column(String)
     description = Column(String)
     is_active = Column(Boolean)
     valid_from = Column(Date)
@@ -27,6 +29,9 @@ class StStreet(Base):
     updated_by = Column(Integer)
     created_at = Column(DateTime)
     updated_at = Column(DateTime)
+
+    decision_level_id = Column(Integer, ForeignKey('cl_plan_decision_level.plan_decision_level_id'))
+    decision_level_id_ref = relationship("ClPlanDecisionLevel")
 
     street_type_id = Column(Integer, ForeignKey('cl_street_type.code'))
     street_type_id_ref = relationship("ClStreetType")

@@ -183,7 +183,6 @@ class PlanSettingsDialog(QDialog, Ui_PlanSettingsDialog):
             value_p = self.main_load_pbar.value() + 1
             self.main_load_pbar.setValue(value_p)
 
-
     def __setup_table_widget(self):
 
         self.settings_twidget.setAlternatingRowColors(True)

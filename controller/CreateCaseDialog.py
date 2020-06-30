@@ -3,7 +3,7 @@ __author__ = 'B.Ankhbold'
 
 from qgis.core import *
 from geoalchemy2.elements import WKTElement
-
+from sqlalchemy import func, or_, and_, desc
 from ..view.Ui_CreateCaseDialog import *
 from ..utils.LayerUtils import LayerUtils
 from ..model.CaTmpParcel import *
@@ -27,6 +27,8 @@ from ..model.PlProject import *
 from ..model.ClPlanType import *
 from ..model.StStreet import *
 from ..model.StRoad import *
+from ..model.ClPlanDecisionLevel import *
+from ..model.StStreetLineView import *
 import urllib
 import urllib2
 import json
@@ -56,6 +58,12 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
         self.working_soum = DatabaseUtils.working_l2_code()
         self.maintenance_parcels = []
         self.maintenance_buildings = []
+        self.tabWidget.currentChanged.connect(self.onChangetab)
+        self.tab_index = 0
+
+        self.__setup_street_table_widget()
+        self.street_treewidget.itemClicked.connect(self.__onItemClickedStreetTreewidget)
+        self.street_treewidget.itemDoubleClicked.connect(self.__onItemDoubleClickedStreetTreewidget)
 
         # self.__setup_twidgets()
         self.__setup_context_menu()
@@ -74,6 +82,10 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
 
         except LM2Exception, e:
             PluginUtils.show_error(self, e.title(), e.message())
+
+    def onChangetab(self, i):
+
+        self.tab_index = i
 
     def __setup_mapping(self):
 
@@ -1051,103 +1063,118 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
     def on_apply_button_clicked(self):
 
         # try:
-        self.ca_maintenance_case.creation_date = PluginUtils.convert_qt_date_to_python(self.start_date.date())
-        self.create_savepoint()
+        root = self.result_twidget.invisibleRootItem()
+        self.result_twidget.topLevelItemCount()
+        child_count = root.childCount()
+        print child_count
+        parent_item = root.child(0)
+        b_count = parent_item.childCount()
 
-        if self.connect_app_checkbox.isChecked():
-            count = self.applications_twidget.rowCount()
-            if count == 0:
-                PluginUtils.show_error(self, self.tr("Maintenance case Error"), self.tr("Select an application to create an maintenance case"))
-                return
+        parent_item = root.child(1)
+        p_count = parent_item.childCount()
 
-            for i in range(self.applications_twidget.rowCount()):
+        print b_count
+        print p_count
+        if self.tab_index == 0:
+            if b_count > 0 and p_count > 0:
+                self.ca_maintenance_case.creation_date = PluginUtils.convert_qt_date_to_python(self.start_date.date())
+                self.create_savepoint()
 
-                item = self.applications_twidget.item(i, 0)
+                if self.connect_app_checkbox.isChecked():
+                    count = self.applications_twidget.rowCount()
+                    if count == 0:
+                        PluginUtils.show_error(self, self.tr("Maintenance case Error"), self.tr("Select an application to create an maintenance case"))
+                        return
 
-                if item is None:
-                    continue
-                app_no = item.text()
-                application_count = self.session.query(CtApplication).filter(CtApplication.app_no == app_no).count()
-                if application_count != 0:
-                    application = self.session.query(CtApplication).filter(CtApplication.app_no == app_no).one()
-                    application.maintenance_case = self.ca_maintenance_case.id
+                    for i in range(self.applications_twidget.rowCount()):
 
-        for parcel_id in self.maintenance_parcels:
-            self.create_savepoint()
+                        item = self.applications_twidget.item(i, 0)
 
-            parcel = self.session.query(CaParcel).filter(CaParcel.parcel_id == parcel_id).one()
-            if parcel in self.ca_maintenance_case.parcels:
-                continue
-            soum = DatabaseUtils.working_l2_code()
-            self.ca_maintenance_case.parcels.append(parcel)
-            temp_parcel = CaTmpParcel()
-            temp_parcel.parcel_id = parcel.parcel_id
-            temp_parcel.old_parcel_id = parcel.old_parcel_id
-            temp_parcel.geo_id = parcel.geo_id
-            temp_parcel.landuse = parcel.landuse
-            temp_parcel.address_khashaa = parcel.address_khashaa
-            temp_parcel.address_streetname = parcel.address_streetname
-            temp_parcel.address_neighbourhood = parcel.address_neighbourhood
-            temp_parcel.valid_from = parcel.valid_from
-            temp_parcel.valid_till = parcel.valid_till
-            temp_parcel.documented_area_m2 = parcel.documented_area_m2
-            temp_parcel.area_m2 = parcel.area_m2
-            temp_parcel.geometry = parcel.geometry
-            temp_parcel.maintenance_case = self.ca_maintenance_case.id
-            temp_parcel.initial_insert = True
-            temp_parcel.au2 = soum
+                        if item is None:
+                            continue
+                        app_no = item.text()
+                        application_count = self.session.query(CtApplication).filter(CtApplication.app_no == app_no).count()
+                        if application_count != 0:
+                            application = self.session.query(CtApplication).filter(CtApplication.app_no == app_no).one()
+                            application.maintenance_case = self.ca_maintenance_case.id
 
-            self.session.add(temp_parcel)
+                for parcel_id in self.maintenance_parcels:
+                    self.create_savepoint()
 
-        for building_id in self.maintenance_buildings:
+                    parcel = self.session.query(CaParcel).filter(CaParcel.parcel_id == parcel_id).one()
+                    if parcel in self.ca_maintenance_case.parcels:
+                        continue
+                    soum = DatabaseUtils.working_l2_code()
+                    self.ca_maintenance_case.parcels.append(parcel)
+                    temp_parcel = CaTmpParcel()
+                    temp_parcel.parcel_id = parcel.parcel_id
+                    temp_parcel.old_parcel_id = parcel.old_parcel_id
+                    temp_parcel.geo_id = parcel.geo_id
+                    temp_parcel.landuse = parcel.landuse
+                    temp_parcel.address_khashaa = parcel.address_khashaa
+                    temp_parcel.address_streetname = parcel.address_streetname
+                    temp_parcel.address_neighbourhood = parcel.address_neighbourhood
+                    temp_parcel.valid_from = parcel.valid_from
+                    temp_parcel.valid_till = parcel.valid_till
+                    temp_parcel.documented_area_m2 = parcel.documented_area_m2
+                    temp_parcel.area_m2 = parcel.area_m2
+                    temp_parcel.geometry = parcel.geometry
+                    temp_parcel.maintenance_case = self.ca_maintenance_case.id
+                    temp_parcel.initial_insert = True
+                    temp_parcel.au2 = soum
 
-            self.create_savepoint()
+                    self.session.add(temp_parcel)
 
-            building = self.session.query(CaBuilding).filter(CaBuilding.building_id == building_id).one()
-            if building in self.ca_maintenance_case.buildings:
-                continue
-            python_date = PluginUtils.convert_qt_date_to_python(QDateTime().currentDateTime())
-            self.ca_maintenance_case.buildings.append(building)
-            temp_building = CaTmpBuilding()
+                for building_id in self.maintenance_buildings:
 
-            temp_building.building_id = building.building_id
-            temp_building.geo_id = building.geo_id
-            temp_building.valid_from = building.valid_from
-            temp_building.valid_till = building.valid_till
-            temp_building.address_streetname = building.address_streetname
-            temp_building.address_neighbourhood = building.address_neighbourhood
-            temp_building.address_khashaa = building.address_khashaa
-            temp_building.area_m2 = building.area_m2
-            temp_building.geometry = building.geometry#.ST_SetSRID(32648)
-            temp_building.maintenance_case = self.ca_maintenance_case.id
-            temp_building.au2 = soum
+                    self.create_savepoint()
 
-            self.session.add(temp_building)
+                    building = self.session.query(CaBuilding).filter(CaBuilding.building_id == building_id).one()
+                    if building in self.ca_maintenance_case.buildings:
+                        continue
+                    python_date = PluginUtils.convert_qt_date_to_python(QDateTime().currentDateTime())
+                    self.ca_maintenance_case.buildings.append(building)
+                    temp_building = CaTmpBuilding()
 
-        self.commit()
+                    temp_building.building_id = building.building_id
+                    temp_building.geo_id = building.geo_id
+                    temp_building.valid_from = building.valid_from
+                    temp_building.valid_till = building.valid_till
+                    temp_building.address_streetname = building.address_streetname
+                    temp_building.address_neighbourhood = building.address_neighbourhood
+                    temp_building.address_khashaa = building.address_khashaa
+                    temp_building.area_m2 = building.area_m2
+                    temp_building.geometry = building.geometry#.ST_SetSRID(32648)
+                    temp_building.maintenance_case = self.ca_maintenance_case.id
+                    temp_building.au2 = soum
 
-        # except SQLAlchemyError, e:
-        #     self.rollback()
-        #     PluginUtils.show_error(self, self.tr("Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
-        #     return
-        case_none = self.session.query(CaMaintenanceCase).all()
+                    self.session.add(temp_building)
 
-        # for case in case_none:
-        #     case_count = self.session.query(CaParcel).\
-        #         outerjoin(CaMaintenanceCase.parcels).\
-        #         filter(CaMaintenanceCase.id == case.id).count()
-        #
-        #     if case_count == 0:
-        #         self.session.query(CaMaintenanceCase).\
-        #             filter(CaMaintenanceCase.id == case.id).delete()
+            self.commit()
+            self.__set_visible_layers()
 
-        self.__set_visible_layers()
+            self.__delete_template_parcel_features()
+            self.__delete_template_building_features()
 
-        self.__delete_template_parcel_features()
-        self.__delete_template_building_features()
+            self.__start_fade_out_timer()
+            self.plugin.iface.mapCanvas().refresh()
 
-        self.__start_fade_out_timer()
-        self.plugin.iface.mapCanvas().refresh()
+            # except SQLAlchemyError, e:
+            #     self.rollback()
+            #     PluginUtils.show_error(self, self.tr("Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+            #     return
+            case_none = self.session.query(CaMaintenanceCase).all()
+
+            # for case in case_none:
+            #     case_count = self.session.query(CaParcel).\
+            #         outerjoin(CaMaintenanceCase.parcels).\
+            #         filter(CaMaintenanceCase.id == case.id).count()
+            #
+            #     if case_count == 0:
+            #         self.session.query(CaMaintenanceCase).\
+            #             filter(CaMaintenanceCase.id == case.id).delete()
+        else:
+            self.commit()
 
     def __set_visible_layers(self):
 
@@ -1291,50 +1318,269 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
 
     def __setup_street_table_widget(self):
 
-        self.street_twidget.setAlternatingRowColors(True)
-        self.street_twidget.setEditTriggers(QTableWidget.NoEditTriggers)
-        self.street_twidget.setSelectionBehavior(QTableWidget.SelectRows)
-        self.street_twidget.setSelectionMode(QTableWidget.SingleSelection)
+        names = [u'Нэр', u'Дугаар', u'Шийдвэрийн түвшин', u'Шийдвэрийн дугаар', u'Шийдвэрийн огноо', u'Тайлбар']
+        self.street_treewidget.setHeaderHidden(False)
+        self.street_treewidget.setColumnCount(len(names))
+        self.street_treewidget.setHeaderLabels(names)
 
-    @pyqtSlot()
-    def on_street_find_button_clicked(self):
+        self.touches_road_twidget.setAlternatingRowColors(True)
+        self.touches_road_twidget.setEditTriggers(QTableWidget.NoEditTriggers)
+        self.touches_road_twidget.setSelectionBehavior(QTableWidget.SelectRows)
+        self.touches_road_twidget.setSelectionMode(QTableWidget.SingleSelection)
 
-        self.__setup_street_table_widget()
-        au2 = DatabaseUtils.working_l2_code()
-        values = self.session.query(StStreet).filter(StStreet.au2 == au2).order_by(StStreet.name, StStreet.code).all()
+        self.joined_road_twidget.setAlternatingRowColors(True)
+        self.joined_road_twidget.setEditTriggers(QTableWidget.NoEditTriggers)
+        self.joined_road_twidget.setSelectionBehavior(QTableWidget.SelectRows)
+        self.joined_road_twidget.setSelectionMode(QTableWidget.SingleSelection)
 
-        for value in values:
-            row = self.street_twidget.rowCount()
-            self.street_twidget.insertRow(row)
+    @pyqtSlot(QTreeWidgetItem, int)
+    def __onItemDoubleClickedStreetTreewidget(self, item, col):
 
-            item = QTableWidgetItem(unicode(value.name))
-            item.setData(Qt.UserRole, value.id)
-            self.street_twidget.setItem(row, 0, item)
+        id = item.data(0, Qt.UserRole)
+        print id
 
-            item = QTableWidgetItem(unicode(value.code))
-            item.setData(Qt.UserRole, value.code)
-            self.street_twidget.setItem(row, 1, item)
+    @pyqtSlot(QTreeWidgetItem, int)
+    def __onItemClickedStreetTreewidget(self, item, col):
 
-    @pyqtSlot(QTableWidgetItem)
-    def on_street_twidget_itemClicked(self, item):
-
-        selected_row = self.street_twidget.currentRow()
-        id = self.street_twidget.item(selected_row, 0).data(Qt.UserRole)
-
+        id = item.data(0, Qt.UserRole)
+        # print(item, col, item.text(col))
         self.__load_touches_roads(id)
         self.__load_joined_roads(id)
 
     def __load_touches_roads(self, id):
 
-        print id
+        self.touches_road_twidget.setRowCount(0)
+        street = self.session.query(StStreet).filter_by(id=id).one()
+        count = self.session.query(StRoad).filter(StRoad.street_id == id).count()
+        roads = None
+        if count == 0:
+            if street.geometry is not None:
+                roads = self.session.query(StRoad). \
+                    filter(street.geometry.ST_Intersects(StRoad.line_geom)).all()
+        else:
+            roads = self.session.query(StRoad).\
+                filter(StRoad.line_geom.ST_Touches(StStreetLineView.geometry)).\
+                filter(StStreetLineView.id == id).all()
+
+        for value in roads:
+            count = self.touches_road_twidget.rowCount()
+            self.touches_road_twidget.insertRow(count)
+            name = u''
+            if value.name:
+                name = value.name
+            item = QTableWidgetItem(unicode(name))
+            item.setData(Qt.UserRole, value.id)
+            self.touches_road_twidget.setItem(count, 0, item)
+
+            length = ''
+            if value.length:
+                length = value.length
+            item = QTableWidgetItem(str(length))
+            item.setData(Qt.UserRole, value.length)
+            self.touches_road_twidget.setItem(count, 1, item)
+
+            if value.road_type_id_ref:
+                road_type = value.road_type_id_ref
+                item = QTableWidgetItem(unicode(road_type.description))
+                item.setData(Qt.UserRole, road_type.code)
+                self.touches_road_twidget.setItem(count, 2, item)
+
+            item = QTableWidgetItem()
+            item.setCheckState(True)
+            if value.is_active == False:
+                item.setCheckState(False)
+            item.setData(Qt.UserRole, value.is_active)
+            self.touches_road_twidget.setItem(count, 3, item)
 
     def __load_joined_roads(self, id):
 
-        print id
+        self.joined_road_twidget.setRowCount(0)
+        roads = self.session.query(StRoad).filter(StRoad.street_id == id).all()
+        for value in roads:
+            count = self.joined_road_twidget.rowCount()
+            self.joined_road_twidget.insertRow(count)
+            name = u''
+            if value.name:
+                name = value.name
+            item = QTableWidgetItem(unicode(name))
+            item.setData(Qt.UserRole, value.id)
+            self.joined_road_twidget.setItem(count, 0, item)
+
+            length = ''
+            if value.length:
+                length = value.length
+            item = QTableWidgetItem(str(length))
+            item.setData(Qt.UserRole, value.length)
+            self.joined_road_twidget.setItem(count, 1, item)
+
+            if value.road_type_id_ref:
+                road_type = value.road_type_id_ref
+                item = QTableWidgetItem(unicode(road_type.description))
+                item.setData(Qt.UserRole, road_type.code)
+                self.joined_road_twidget.setItem(count, 2, item)
+
+            item = QTableWidgetItem()
+            item.setCheckState(True)
+            if value.is_active == False:
+                item.setCheckState(False)
+            item.setData(Qt.UserRole, value.is_active)
+            self.joined_road_twidget.setItem(count, 3, item)
+
+    @pyqtSlot()
+    def on_street_find_button_clicked(self):
+
+        self.street_treewidget.clear()
+        self.__setup_street_table_widget()
+
+        tree = self.street_treewidget
+
+        au2 = DatabaseUtils.working_l2_code()
+        values = self.session.query(StStreet).filter(StStreet.au2 == au2).\
+            filter(StStreet.parent_id == None).\
+            order_by(StStreet.name, StStreet.code).all()
+
+        for value in values:
+            parent = QTreeWidgetItem(tree)
+            parent.setText(0, unicode(value.name))
+            parent.setToolTip(0, unicode(value.name))
+            parent.setData(0, Qt.UserRole, value.id)
+
+            if value.decision_level_id_ref:
+                d_level = value.decision_level_id_ref
+                parent.setText(2, unicode(d_level.description))
+                parent.setToolTip(2, unicode(d_level.description))
+                parent.setData(2, Qt.UserRole, d_level.plan_decision_level_id)
+
+            if value.decision_no:
+                parent.setText(3, unicode(value.decision_no))
+                parent.setToolTip(3, unicode(value.decision_no))
+                parent.setData(3, Qt.UserRole, value.decision_no)
+
+            if value.decision_date:
+                parent.setText(4, unicode(value.decision_date))
+                parent.setToolTip(4, unicode(value.decision_date))
+                parent.setData(4, Qt.UserRole, value.decision_date)
+
+            if value.decision_date:
+                parent.setText(5, unicode(value.description))
+                parent.setToolTip(5, unicode(value.description))
+                parent.setData(5, Qt.UserRole, value.description)
+
+            values_sub = self.session.query(StStreet).filter(StStreet.au2 == au2). \
+                filter(StStreet.parent_id == value.id).\
+                order_by(StStreet.code).all()
+            for value_sub in values_sub:
+                child = QTreeWidgetItem(parent)
+                child.setText(0, unicode(value_sub.name))
+                child.setToolTip(0, unicode(value_sub.name))
+                child.setData(0, Qt.UserRole, value_sub.id)
+
+                child.setText(1, unicode(value_sub.code))
+                child.setToolTip(1, unicode(value_sub.code))
+                child.setData(1, Qt.UserRole, value_sub.code)
+
+                if value_sub.description:
+                    child.setText(5, unicode(value_sub.description))
+                    child.setToolTip(5, unicode(value_sub.description))
+                    child.setData(5, Qt.UserRole, value_sub.description)
+
+        tree.show()
+
+        self.street_treewidget.resizeColumnToContents(0)
+        self.street_treewidget.resizeColumnToContents(1)
+        self.street_treewidget.resizeColumnToContents(2)
+        self.street_treewidget.resizeColumnToContents(3)
+        self.street_treewidget.resizeColumnToContents(4)
+        self.street_treewidget.resizeColumnToContents(5)
+        # self.street_treewidget.resizeColumnToContents(6)
 
     @pyqtSlot(QTableWidgetItem)
-    def on_street_twidget_itemDoubleClicked(self, item):
+    def on_touches_road_twidget_itemDoubleClicked(self, item):
 
-        selected_row = self.street_twidget.currentRow()
-        id = self.street_twidget.item(selected_row, 0).data(Qt.UserRole)
+        selected_row = self.touches_road_twidget.currentRow()
+        id = self.touches_road_twidget.item(selected_row, 0).data(Qt.UserRole)
 
+        layer = LayerUtils.layer_by_data_source("data_address", 'st_road')
+        self.__select_feature(str(id), layer)
+
+    @pyqtSlot(QTableWidgetItem)
+    def on_joined_road_twidget_itemDoubleClicked(self, item):
+
+        selected_row = self.joined_road_twidget.currentRow()
+        id = self.joined_road_twidget.item(selected_row, 0).data(Qt.UserRole)
+
+        layer = LayerUtils.layer_by_data_source("data_address", 'st_road')
+        self.__select_feature(str(id), layer)
+
+    def __select_feature(self, id, layer):
+
+        expression = " id = \'" + id + "\'"
+        request = QgsFeatureRequest()
+        request.setFilterExpression(expression)
+        feature_ids = []
+        if layer:
+            iterator = layer.getFeatures(request)
+
+            for feature in iterator:
+                feature_ids.append(feature.id())
+            if len(feature_ids) == 0:
+                self.error_label.setText(self.tr("No geometry assigned"))
+
+            layer.setSelectedFeatures(feature_ids)
+            self.plugin.iface.mapCanvas().zoomToSelected(layer)
+
+    @pyqtSlot()
+    def on_join_road_button_clicked(self):
+
+        current_item = self.street_treewidget.selectedItems()[0]
+        street_id = current_item.data(0, Qt.UserRole)
+        print street_id
+
+        selected_row = self.touches_road_twidget.currentRow()
+        id = self.touches_road_twidget.item(selected_row, 0).data(Qt.UserRole)
+
+        count = self.session.query(StRoad).\
+            filter(StRoad.street_id == street_id).\
+            filter(StRoad.id == id).count()
+        if count > 0:
+            PluginUtils.show_message(self, u'Анхааруулга', u'Энэ зам гудамжинд бүртгэгдсэн байна.')
+            return
+
+        count = self.session.query(StRoad). \
+            filter(StRoad.street_id != street_id). \
+            filter(StRoad.id == id).count()
+        if count > 0:
+            PluginUtils.show_message(self, u'Анхааруулга', u'Энэ зам өөр гудамжинд бүртгэгдсэн байна.')
+            return
+
+        value = self.session.query(StRoad).filter_by(id=id).one()
+        count = self.joined_road_twidget.rowCount()
+        self.joined_road_twidget.insertRow(count)
+        name = u''
+        if value.name:
+            name = value.name
+        item = QTableWidgetItem(unicode(name))
+        item.setData(Qt.UserRole, value.id)
+        self.joined_road_twidget.setItem(count, 0, item)
+
+        length = ''
+        if value.length:
+            length = value.length
+        item = QTableWidgetItem(str(length))
+        item.setData(Qt.UserRole, value.length)
+        self.joined_road_twidget.setItem(count, 1, item)
+
+        if value.road_type_id_ref:
+            road_type = value.road_type_id_ref
+            item = QTableWidgetItem(unicode(road_type.description))
+            item.setData(Qt.UserRole, road_type.code)
+            self.joined_road_twidget.setItem(count, 2, item)
+
+        item = QTableWidgetItem()
+        item.setCheckState(True)
+        if value.is_active == False:
+            item.setCheckState(False)
+        item.setData(Qt.UserRole, value.is_active)
+        self.joined_road_twidget.setItem(count, 3, item)
+
+        value.street_id = street_id
