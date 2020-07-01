@@ -1475,9 +1475,19 @@ class LM2Plugin:
             addrs_group.addLayer(vlayer)
             # vlayer.setReadOnly(True)
 
-        vlayer = LayerUtils.layer_by_data_source("data_address", "st_street_sub")
+        vlayer = LayerUtils.layer_by_data_source("data_address", "st_street_line_view")
         if vlayer is None:
-            vlayer = LayerUtils.load_layer_base_layer("st_street_sub", "id", "data_address")
+            vlayer = LayerUtils.load_layer_base_layer("st_street_line_view", "id", "data_address")
+        # vlayer.loadNamedStyle(
+        #     str(os.path.dirname(os.path.realpath(__file__))) + "/template\style/st_street_sub.qml")
+        vlayer.setLayerName(QApplication.translate("Plugin", "Address Line Street"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            addrs_group.addLayer(vlayer)
+
+        vlayer = LayerUtils.layer_by_data_source("data_address", "st_street_sub_polygon_view")
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer("st_street_sub_polygon_view", "id", "data_address")
         vlayer.loadNamedStyle(
             str(os.path.dirname(os.path.realpath(__file__))) + "/template\style/st_street_sub.qml")
         vlayer.setLayerName(QApplication.translate("Plugin", "Address Sub Street"))
@@ -1486,9 +1496,9 @@ class LM2Plugin:
             addrs_group.addLayer(vlayer)
 
         ######
-        vlayer = LayerUtils.layer_by_data_source("data_address", "st_street")
+        vlayer = LayerUtils.layer_by_data_source("data_address", "st_street_polygon_view")
         if vlayer is None:
-            vlayer = LayerUtils.load_layer_base_layer("st_street", "id", "data_address")
+            vlayer = LayerUtils.load_layer_base_layer("st_street_polygon_view", "id", "data_address")
         vlayer.loadNamedStyle(
             str(os.path.dirname(os.path.realpath(__file__))) + "/template\style/st_street.qml")
         vlayer.setLayerName(QApplication.translate("Plugin", "Address Street"))
