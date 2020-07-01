@@ -29,6 +29,7 @@ from ..model.StStreet import *
 from ..model.StRoad import *
 from ..model.ClPlanDecisionLevel import *
 from ..model.StStreetLineView import *
+from ..model.AuLevel3 import *
 import urllib
 import urllib2
 import json
@@ -999,11 +1000,10 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
 
             # try:
             tmp_parcel_count = self.session.query(CaTmpParcel).filter(WKTElement(building.geometry().exportToWkt(), srid=4326).ST_Contains(CaTmpParcel.geometry)).count()
-            print tmp_parcel_count
 
             parcel_count = self.session.query(CaParcel).filter(
                 WKTElement(building.geometry().exportToWkt(), srid=4326).ST_Within(CaParcel.geometry)).count()
-            print parcel_count
+
             if tmp_parcel_count == 0 and parcel_count == 0:
                 PluginUtils.show_message(self, self.tr('No parcel'), self.tr('This building no parcel.'))
                 return
@@ -1066,15 +1066,13 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
         root = self.result_twidget.invisibleRootItem()
         self.result_twidget.topLevelItemCount()
         child_count = root.childCount()
-        print child_count
+
         parent_item = root.child(0)
         b_count = parent_item.childCount()
 
         parent_item = root.child(1)
         p_count = parent_item.childCount()
 
-        print b_count
-        print p_count
         if self.tab_index == 0:
             if b_count > 0 and p_count > 0:
                 self.ca_maintenance_case.creation_date = PluginUtils.convert_qt_date_to_python(self.start_date.date())
@@ -1333,11 +1331,20 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
         self.joined_road_twidget.setSelectionBehavior(QTableWidget.SelectRows)
         self.joined_road_twidget.setSelectionMode(QTableWidget.SingleSelection)
 
+        au2 = DatabaseUtils.working_l2_code()
+        au3s = self.session.query(AuLevel3).filter(AuLevel3.au2_code == au2).all()
+        self.find_au3_cbox.clear()
+        self.find_au3_cbox.addItem("*", -1)
+        for item in au3s:
+            self.find_au3_cbox.addItem(item.name, item.code)
+
+
     @pyqtSlot(QTreeWidgetItem, int)
     def __onItemDoubleClickedStreetTreewidget(self, item, col):
 
         id = item.data(0, Qt.UserRole)
-        print id
+        layer = LayerUtils.layer_by_data_source("data_address", 'st_street_line_view')
+        self.__select_feature(str(id), layer)
 
     @pyqtSlot(QTreeWidgetItem, int)
     def __onItemClickedStreetTreewidget(self, item, col):
@@ -1430,16 +1437,26 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
     def on_street_find_button_clicked(self):
 
         self.street_treewidget.clear()
-        self.__setup_street_table_widget()
 
         tree = self.street_treewidget
 
         au2 = DatabaseUtils.working_l2_code()
         values = self.session.query(StStreet).filter(StStreet.au2 == au2).\
             filter(StStreet.parent_id == None).\
-            order_by(StStreet.name, StStreet.code).all()
+            order_by(StStreet.name, StStreet.code)
 
-        for value in values:
+        filter_is_set = False
+        if self.find_street_name_edit.text():
+            filter_is_set = True
+            find_value = "%" + self.find_street_name_edit.text() + "%"
+            values = values.filter(StStreet.name.ilike(find_value))
+
+        if not self.find_au3_cbox.itemData(self.find_au3_cbox.currentIndex()) == -1:
+            filter_is_set = True
+            au3 = self.find_au3_cbox.itemData(self.find_au3_cbox.currentIndex())
+            values = values.filter(StStreet.au3 == au3)
+
+        for value in values.all():
             parent = QTreeWidgetItem(tree)
             parent.setText(0, unicode(value.name))
             parent.setToolTip(0, unicode(value.name))
@@ -1523,18 +1540,31 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
 
             for feature in iterator:
                 feature_ids.append(feature.id())
-            if len(feature_ids) == 0:
-                self.error_label.setText(self.tr("No geometry assigned"))
+            # if len(feature_ids) == 0:
+            #     self.status_label.setText(self.tr("No geometry assigned"))
 
             layer.setSelectedFeatures(feature_ids)
             self.plugin.iface.mapCanvas().zoomToSelected(layer)
+
+    @pyqtSlot()
+    def on_remove_road_button_clicked(self):
+
+        current_item = self.street_treewidget.selectedItems()[0]
+        street_id = current_item.data(0, Qt.UserRole)
+
+        selected_row = self.joined_road_twidget.currentRow()
+        id = self.joined_road_twidget.item(selected_row, 0).data(Qt.UserRole)
+
+        value = self.session.query(StRoad).filter_by(id=id).one()
+        value.street_id = None
+
+        self.joined_road_twidget.removeRow(selected_row)
 
     @pyqtSlot()
     def on_join_road_button_clicked(self):
 
         current_item = self.street_treewidget.selectedItems()[0]
         street_id = current_item.data(0, Qt.UserRole)
-        print street_id
 
         selected_row = self.touches_road_twidget.currentRow()
         id = self.touches_road_twidget.item(selected_row, 0).data(Qt.UserRole)
