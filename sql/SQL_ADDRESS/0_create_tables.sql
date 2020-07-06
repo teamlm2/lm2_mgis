@@ -95,6 +95,27 @@ insert into data_address.cl_street_type values (5, 'Бусад', null);
 
 -------------
 
+DROP TABLE if exists  data_address.cl_street_shape cascade;
+CREATE TABLE data_address.cl_street_shape
+(
+  code integer NOT NULL primary key,
+  description character varying(75) NOT NULL UNIQUE,
+  description_en character varying(75)
+);
+grant select, insert, update, delete on data_address.cl_street_shape to address_admin;
+grant select, insert, update, delete on data_address.cl_street_shape to cadastre_update;
+grant select on data_address.cl_street_shape to address_view;
+grant select on data_address.cl_address_status to address_view, cadastre_view;
+COMMENT ON TABLE data_address.cl_street_shape
+  IS 'Гудамжны хэлбэр';
+
+insert into data_address.cl_street_shape values (1, 'Тойрог', null);
+insert into data_address.cl_street_shape values (2, 'Шулуун', null);
+insert into data_address.cl_street_shape values (3, 'Цогцолбор', null);
+
+
+-------------
+
 DROP TABLE if exists  data_address.cl_entry_type cascade;
 CREATE TABLE data_address.cl_entry_type
 (
@@ -165,6 +186,7 @@ decision_level_id int references data_plan.cl_plan_decision_level on update casc
 is_active boolean not null DEFAULT false,
 in_source int references data_address.cl_address_source on update cascade on delete restrict,
 street_type_id int references data_address.cl_street_type on update cascade on delete restrict,
+street_shape_id int references data_address.cl_street_shape on update cascade on delete restrict,
 valid_from date DEFAULT ('now'::text)::date,
 valid_till date DEFAULT 'infinity'::date,
 geometry geometry(MULTIPOLYGON, 4326),

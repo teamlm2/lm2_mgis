@@ -1478,8 +1478,8 @@ class LM2Plugin:
         vlayer = LayerUtils.layer_by_data_source("data_address", "st_street_line_view")
         if vlayer is None:
             vlayer = LayerUtils.load_layer_base_layer("st_street_line_view", "id", "data_address")
-        # vlayer.loadNamedStyle(
-        #     str(os.path.dirname(os.path.realpath(__file__))) + "/template\style/st_street_sub.qml")
+        vlayer.loadNamedStyle(
+            str(os.path.dirname(os.path.realpath(__file__))) + "/template\style/st_street_line.qml")
         vlayer.setLayerName(QApplication.translate("Plugin", "Address Line Street"))
         myalayer = root.findLayer(vlayer.id())
         if myalayer is None:

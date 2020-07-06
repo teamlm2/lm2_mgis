@@ -30,6 +30,7 @@ from ..model.StRoad import *
 from ..model.ClPlanDecisionLevel import *
 from ..model.StStreetLineView import *
 from ..model.AuLevel3 import *
+from ..model.SetLanduseSafetyZone import *
 import urllib
 import urllib2
 import json
@@ -808,6 +809,8 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
                 WKTElement(parcel.geometry().exportToWkt(), srid=4326).ST_Overlaps(CaTmpParcel.geometry)) \
                 .filter(CaTmpParcel.valid_till == "infinity").count()
 
+            safety_zone_overlap_c = self.session.query(SetLanduseSafetyZone) \
+                .filter(WKTElement(parcel.geometry().exportToWkt(), srid=4326).ST_Overlaps(SetLanduseSafetyZone.geometry)).count()
             # parcel_c = self.session.query(CaParcel.parcel_id) \
             #     .filter(WKTElement(parcel.geometry().exportToWkt(), srid=4326).ST_Within(CaParcel.geometry)).count()
 
@@ -835,6 +838,10 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
             # if parcel_plan_c == 0:
             #     PluginUtils.show_message(self, self.tr("Error"), self.tr("This parcel not in cadastre plan!!!"))
             #     return
+
+            if safety_zone_overlap_c != 0:
+                PluginUtils.show_message(self, self.tr("Error"), self.tr("Safety zone layer parcel overlap!!!"))
+                return
 
             if parcel_overlap_c != 0:
                 PluginUtils.show_message(self, self.tr("Error"), self.tr("Ca_Parcel layer parcel overlap!!!"))
