@@ -1396,6 +1396,22 @@ class LM2Plugin:
 
         root = QgsProject.instance().layerTreeRoot()
         LayerUtils.refresh_layer()
+
+        ###
+        saf_group = root.findGroup(u"Мэдээний хяналт")
+        layers = self.iface.legendInterface().layers()
+
+        vlayer = LayerUtils.layer_by_data_source("data_landuse", "set_landuse_safety_zone")
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer("set_landuse_safety_zone", "id", "data_landuse")
+        # vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))) + "/template\style/ca_parcel.qml")
+        vlayer.setLayerName(QApplication.translate("Plugin", "Safety Zone"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            saf_group.addLayer(vlayer)
+            vlayer.setReadOnly(True)
+        ###
+
         mygroup = root.findGroup(u"Кадастр")
         layers = self.iface.legendInterface().layers()
 
