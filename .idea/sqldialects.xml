@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="SqlDialectMappings">
+    <file url="file://$PROJECT_DIR$/sql/SQL_ADDRESS/0_create_tables.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/sql/SQL_ADDRESS/triggers/create_address_entry_id.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/sql/SQL_ADDRESS/triggers/create_address_parcel.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/sql/SQL_ADDRESS/zug_chig_tootsooloh.sql" dialect="TSQL" />
+  </component>
+</project>
