@@ -24,12 +24,12 @@ BEGIN
 					where l.is_active = true and st_overlaps(l.geometry, ST_GeomFromText('''||ST_AsText(NEW.geometry)||'''::text, 4326))
 					)
 				SELECT parcel_id, 
-						ST_Difference(
+				(ST_DUMP(ST_Difference(
 							f.geometry,        
 							(
-								select ST_GeomFromText('''||ST_AsText(NEW.geometry)||'''::text, 4326)
+								select (ST_GeomFromText('''||ST_AsText(NEW.geometry)||'''::text, 4326)::geometry(Polygon, 4326))
 							)
-						) as geometry
+						))).geom::geometry(Polygon,4326) as geometry
 				FROM gns f
 			)
 			update data_landuse.ca_landuse_type_tbl

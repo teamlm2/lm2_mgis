@@ -276,7 +276,7 @@ class Ui_CreateCaseDialog(object):
         self.tabWidget.addTab(self.tab_2, _fromUtf8(""))
 
         self.retranslateUi(CreateCaseDialog)
-        self.tabWidget.setCurrentIndex(1)
+        self.tabWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(CreateCaseDialog)
         CreateCaseDialog.setTabOrder(self.apply_button, self.close_button)
 

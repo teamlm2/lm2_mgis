@@ -31,6 +31,7 @@ from ..model.ClPlanDecisionLevel import *
 from ..model.StStreetLineView import *
 from ..model.AuLevel3 import *
 from ..model.SetLanduseSafetyZone import *
+from ..model.SetOverlapsLanduse import *
 import urllib
 import urllib2
 import json
@@ -839,13 +840,22 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
             #     PluginUtils.show_message(self, self.tr("Error"), self.tr("This parcel not in cadastre plan!!!"))
             #     return
 
+            landuse_code =  self.__attribute_landuse(parcel, new_parcel, parcel_shape_layer)
             if safety_zone_overlap_c != 0:
                 PluginUtils.show_message(self, self.tr("Error"), self.tr("Safety zone layer parcel overlap!!!"))
                 return
 
             if parcel_overlap_c != 0:
-                PluginUtils.show_message(self, self.tr("Error"), self.tr("Ca_Parcel layer parcel overlap!!!"))
-                return
+                parcel_overlaps = self.session.query(CaParcel) \
+                    .filter(WKTElement(parcel.geometry().exportToWkt(), srid=4326).ST_Overlaps(CaParcel.geometry)) \
+                    .filter(CaParcel.valid_till == "infinity").all()
+                for value in parcel_overlaps:
+                    landuse_count = self.session.query(SetOverlapsLanduse). \
+                        filter(SetOverlapsLanduse.in_landuse == landuse_code). \
+                        filter(SetOverlapsLanduse.ch_landuse == value.landuse).count()
+                    if landuse_count == 0:
+                        PluginUtils.show_message(self, self.tr("Error"), self.tr("Ca_Parcel layer parcel overlap!!!"))
+                        return
 
             if tmp_parcel_overlap_c != 0:
                 PluginUtils.show_message(self, self.tr("Error"), self.tr("Ca_Tmp_Parcel layer parcel overlap!!!"))
@@ -878,6 +888,40 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
         #     return
 
         self.is_shape_parcel = True
+
+    def __attribute_landuse(self, parcel_feature, parcel_object, layer):
+
+        column_name_old_parcel = "old_parcel"
+        column_name_geo_id = "geo_id"
+        column_name_landuse = "landuse"
+        column_name_documented = "documented"
+        column_name_khashaa = "address_kh"
+        column_name_street = "address_st"
+        column_name_neighbourhood = "address_ne"
+
+        column_names = {column_name_old_parcel: "", column_name_geo_id: "", column_name_landuse: "",
+                        column_name_documented: "", column_name_khashaa: "", column_name_street: "",
+                        column_name_neighbourhood: ""}
+
+        provider = layer.dataProvider()
+        for key, item in column_names.iteritems():
+            index = provider.fieldNameIndex(key)
+            if index != -1:
+                value = parcel_feature.attributes()[index]
+                column_names[key] = value
+        landuse_invalid = False
+        try:
+            count = self.session.query(ClLanduseType).filter(ClLanduseType.code == column_names[column_name_landuse]).count()
+            if count == 0:
+                PluginUtils.show_error(self, self.tr("Shapefile error"), self.tr("The landuse is not available in the database."))
+                column_names[column_name_landuse] = ""
+                landuse_invalid = True
+
+        except SQLAlchemyError, e:
+            landuse_invalid = True
+            PluginUtils.show_error(self, self.tr("Shapefile error"), self.tr("The landuse is not available in the database."))
+
+        return column_names[column_name_landuse]
 
     def __copy_parcel_attributes(self, parcel_feature, parcel_object, layer):
 
