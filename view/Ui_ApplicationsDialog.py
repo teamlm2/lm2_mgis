@@ -746,7 +746,7 @@ class Ui_ApplicationsDialog(object):
         self.status_label.setObjectName(_fromUtf8("status_label"))
 
         self.retranslateUi(ApplicationsDialog)
-        self.application_tab_widget.setCurrentIndex(9)
+        self.application_tab_widget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(ApplicationsDialog)
         ApplicationsDialog.setTabOrder(self.application_tab_widget, self.date_time_date)
         ApplicationsDialog.setTabOrder(self.date_time_date, self.application_type_cbox)
