@@ -1395,7 +1395,7 @@ class LM2Plugin:
     def __refresh_layer(self):
 
         root = QgsProject.instance().layerTreeRoot()
-        LayerUtils.refresh_layer()
+        LayerUtils.refresh_layer1()
 
         ###
         saf_group = root.findGroup(u"Мэдээний хяналт")
@@ -1491,12 +1491,22 @@ class LM2Plugin:
             addrs_group.addLayer(vlayer)
             # vlayer.setReadOnly(True)
 
+        vlayer = LayerUtils.layer_by_data_source("data_address", "st_road_line_view")
+        if vlayer is None:
+            vlayer = LayerUtils.load_line_layer_base_layer("st_road_line_view", "id", "data_address")
+        vlayer.loadNamedStyle(
+            str(os.path.dirname(os.path.realpath(__file__))) + "/template\style/st_road_line.qml")
+        vlayer.setLayerName(QApplication.translate("Plugin", "Road Line"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            addrs_group.addLayer(vlayer)
+
         vlayer = LayerUtils.layer_by_data_source("data_address", "st_street_line_view")
         if vlayer is None:
             vlayer = LayerUtils.load_layer_base_layer("st_street_line_view", "id", "data_address")
         vlayer.loadNamedStyle(
             str(os.path.dirname(os.path.realpath(__file__))) + "/template\style/st_street_line.qml")
-        vlayer.setLayerName(QApplication.translate("Plugin", "Address Line Street"))
+        vlayer.setLayerName(QApplication.translate("Plugin", "Street Line"))
         myalayer = root.findLayer(vlayer.id())
         if myalayer is None:
             addrs_group.addLayer(vlayer)

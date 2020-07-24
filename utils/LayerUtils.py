@@ -384,6 +384,46 @@ class LayerUtils(object):
                 layer.removeSelection()
 
     @staticmethod
+    def refresh_layer1():
+
+        root = QgsProject.instance().layerTreeRoot()
+        mygroup = root.findGroup(u"Мэдээний хяналт")
+        if mygroup is None:
+            group = root.insertGroup(0, u"Мэдээний хяналт")
+            myNewGroup = group.addGroup(u"Хамгаалалтын зурвас")
+        mygroup = root.findGroup(u"ГНСТайлан")
+        if mygroup is None:
+            group = root.insertGroup(1, u"ГНСТайлан")
+        mygroup = root.findGroup(u"Тайлан")
+        if mygroup is None:
+            group = root.insertGroup(2, u"Тайлан")
+            myNewGroup = group.addGroup(u"Газрын улсын бүртгэл")
+        mygroup = root.findGroup(u"Кадастрын төлөвлөгөө")
+        if mygroup is None:
+            group = root.insertGroup(3, u"Кадастрын төлөвлөгөө")
+        mygroup = root.findGroup(u"Тусгай хэрэгцээний газар")
+        if mygroup is None:
+            group = root.insertGroup(6, u"Тусгай хэрэгцээний газар")
+        mygroup = root.findGroup(u"Кадастрын өөрчлөлт")
+        if mygroup is None:
+            group = root.insertGroup(2, u"Кадастрын өөрчлөлт")
+        mygroup = root.findGroup(u"Кадастр")
+        if mygroup is None:
+            group = root.insertGroup(4, u"Кадастр")
+        mygroup = root.findGroup(u"Үнэлгээ, төлбөрийн бүс")
+        if mygroup is None:
+            group = root.insertGroup(7, u"Үнэлгээ, төлбөрийн бүс")
+        mygroup = root.findGroup(U"Хил")
+        if mygroup is None:
+            group = root.insertGroup(8, u"Хил")
+        mygroup = root.findGroup(U"CAMA")
+        if mygroup is None:
+            group = root.insertGroup(8, u"CAMA")
+        mygroup = root.findGroup(U"Хаяг")
+        if mygroup is None:
+            group = root.insertGroup(8, u"Хаяг")
+
+    @staticmethod
     def refresh_layer():
 
         session = SessionHandler().session_instance()

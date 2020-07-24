@@ -1,4 +1,4 @@
-﻿DROP TABLE logging.ca_landuse_type_tbl;
+﻿DROP TABLE if exists logging.ca_landuse_type_tbl;
 
 CREATE TABLE logging.ca_landuse_type_tbl
 (
@@ -25,7 +25,8 @@ CREATE TABLE logging.ca_landuse_type_tbl
   updated_by integer,
   created_at timestamp(0) without time zone,
   updated_at timestamp(0) without time zone,
-  cad_parcel_id varchar(10)
+  cad_parcel_id varchar(10),
+  is_overlaps_historiy boolean
 )
 WITH (
   OIDS=FALSE

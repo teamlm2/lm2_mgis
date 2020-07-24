@@ -1568,7 +1568,7 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
         selected_row = self.touches_road_twidget.currentRow()
         id = self.touches_road_twidget.item(selected_row, 0).data(Qt.UserRole)
 
-        layer = LayerUtils.layer_by_data_source("data_address", 'st_road')
+        layer = LayerUtils.layer_by_data_source("data_address", 'st_road_line_view')
         self.__select_feature(str(id), layer)
 
     @pyqtSlot(QTableWidgetItem)
@@ -1577,7 +1577,7 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
         selected_row = self.joined_road_twidget.currentRow()
         id = self.joined_road_twidget.item(selected_row, 0).data(Qt.UserRole)
 
-        layer = LayerUtils.layer_by_data_source("data_address", 'st_road')
+        layer = LayerUtils.layer_by_data_source("data_address", 'st_road_line_view')
         self.__select_feature(str(id), layer)
 
     def __select_feature(self, id, layer):
