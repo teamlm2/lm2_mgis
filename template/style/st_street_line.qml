@@ -144,7 +144,7 @@
     <property key="labeling/obstacleType" value="0"/>
     <property key="labeling/offsetType" value="0"/>
     <property key="labeling/placeDirectionSymbol" value="0"/>
-    <property key="labeling/placement" value="3"/>
+    <property key="labeling/placement" value="2"/>
     <property key="labeling/placementFlags" value="10"/>
     <property key="labeling/plussign" value="false"/>
     <property key="labeling/predefinedPositionOrder" value="TR,TL,BR,BL,R,L,TSR,BSR"/>
@@ -211,9 +211,9 @@
     <property key="labeling/shapeType" value="0"/>
     <property key="labeling/substitutions" value="&lt;substitutions/>"/>
     <property key="labeling/textColorA" value="255"/>
-    <property key="labeling/textColorB" value="195"/>
-    <property key="labeling/textColorG" value="18"/>
-    <property key="labeling/textColorR" value="18"/>
+    <property key="labeling/textColorB" value="64"/>
+    <property key="labeling/textColorG" value="64"/>
+    <property key="labeling/textColorR" value="127"/>
     <property key="labeling/textTransp" value="0"/>
     <property key="labeling/upsidedownLabels" value="0"/>
     <property key="labeling/useSubstitutions" value="false"/>

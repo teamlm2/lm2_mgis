@@ -41,5 +41,7 @@
     <file alias="land_plan.png">icons/land_plan.png</file>
     <file alias="nature_reserve.png">icons/nature_reserve.png</file>
     <file alias="refresh.png">icons/refresh.png</file>
+    <file alias="address.png">icons/address.png</file>
+    <file alias="address_1.png">icons/address_1.png</file>
   </qresource>
 </RCC>
