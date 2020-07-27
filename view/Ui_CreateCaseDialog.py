@@ -273,6 +273,13 @@ class Ui_CreateCaseDialog(object):
         self.find_street_name_edit = QtGui.QLineEdit(self.tab_2)
         self.find_street_name_edit.setGeometry(QtCore.QRect(390, 5, 264, 20))
         self.find_street_name_edit.setObjectName(_fromUtf8("find_street_name_edit"))
+        self.select_road_button = QtGui.QPushButton(self.tab_2)
+        self.select_road_button.setGeometry(QtCore.QRect(380, 400, 31, 31))
+        self.select_road_button.setText(_fromUtf8(""))
+        icon3 = QtGui.QIcon()
+        icon3.addPixmap(QtGui.QPixmap(_fromUtf8(":/plugins/lm2/parcel.gif")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.select_road_button.setIcon(icon3)
+        self.select_road_button.setObjectName(_fromUtf8("select_road_button"))
         self.tabWidget.addTab(self.tab_2, _fromUtf8(""))
 
         self.retranslateUi(CreateCaseDialog)

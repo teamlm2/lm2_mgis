@@ -1492,7 +1492,9 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
         tree = self.street_treewidget
 
         au2 = DatabaseUtils.working_l2_code()
-        values = self.session.query(StStreet).filter(StStreet.au2 == au2).\
+        values = self.session.query(StStreet).\
+            filter(AuLevel2.geometry.ST_Intersects(StStreet.geometry)).\
+            filter(AuLevel2.code == au2).\
             filter(StStreet.parent_id == None).\
             order_by(StStreet.name, StStreet.code)
 
@@ -1614,14 +1616,23 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
     @pyqtSlot()
     def on_join_road_button_clicked(self):
 
-        current_item = self.street_treewidget.selectedItems()[0]
-        street_id = current_item.data(0, Qt.UserRole)
-
         selected_row = self.touches_road_twidget.currentRow()
         id = self.touches_road_twidget.item(selected_row, 0).data(Qt.UserRole)
 
-        count = self.session.query(StRoad).\
-            filter(StRoad.street_id == street_id).\
+        self.__add_road_to_street(id)
+
+    def __add_road_to_street(self, road_id):
+
+        if len(self.street_treewidget.selectedItems()) == 0:
+            PluginUtils.show_message(self, u'Анхааруулга', u'Гудамж сонгоогүй байна.')
+            return
+
+        current_item = self.street_treewidget.selectedItems()[0]
+        street_id = current_item.data(0, Qt.UserRole)
+
+        id = road_id
+        count = self.session.query(StRoad). \
+            filter(StRoad.street_id == street_id). \
             filter(StRoad.id == id).count()
         if count > 0:
             PluginUtils.show_message(self, u'Анхааруулга', u'Энэ зам гудамжинд бүртгэгдсэн байна.')
@@ -1665,3 +1676,15 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
         self.joined_road_twidget.setItem(count, 3, item)
 
         value.street_id = street_id
+
+    @pyqtSlot()
+    def on_select_road_button_clicked(self):
+
+        parcelLayer = LayerUtils.layer_by_data_source("data_address", "st_road_line_view")
+        select_feature = parcelLayer.selectedFeatures()
+
+        for feature in select_feature:
+            attr = feature.attributes()
+            id = attr[0]
+            print id
+            self.__add_road_to_street(id)

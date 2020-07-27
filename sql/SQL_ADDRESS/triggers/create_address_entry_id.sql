@@ -146,11 +146,4 @@ $BODY$
   COST 100;
 ALTER FUNCTION base.create_address_entry_id()
   OWNER TO geodb_admin;
-
-DROP TRIGGER a_create_address_entry_id ON data_address.st_entrance;
-CREATE TRIGGER a_create_address_entry_id
-  BEFORE INSERT OR UPDATE
-  ON data_address.st_entrance
-  FOR EACH ROW
-  EXECUTE PROCEDURE base.create_address_entry_id();
-
+	
