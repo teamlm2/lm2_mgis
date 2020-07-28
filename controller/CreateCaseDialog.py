@@ -1686,5 +1686,5 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
         for feature in select_feature:
             attr = feature.attributes()
             id = attr[0]
-            print id
+
             self.__add_road_to_street(id)

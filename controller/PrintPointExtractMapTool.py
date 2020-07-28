@@ -197,8 +197,6 @@ class PrintPointExtractMapTool(QgsMapTool):
         vector_layer.dataProvider().deleteFeatures(ids)
         vector_layer.commitChanges()
 
-
-
     @pyqtSlot()
     def on_help_button_clicked(self):
 
