@@ -1,4 +1,4 @@
-﻿--CREATE ROLE address_view;
+﻿﻿--CREATE ROLE address_view;
 --CREATE ROLE address_update;
 --CREATE ROLE address_admin;
 

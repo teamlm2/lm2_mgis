@@ -2395,11 +2395,11 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         if not officer:
             officer = DatabaseUtils.current_employee()
 
-        if not officer:
-            for p in app_status:
-                officer = DatabaseUtils.get_sd_employee(p.officer_in_charge);
-                if officer:
-                    break
+        if not officer:f
+        for p in app_status:
+            officer = DatabaseUtils.get_sd_employee(p.officer_in_charge);
+            if officer:
+                break
 
         self.officer = officer
         app_no = self.application_this_contract_based_edit.text()
@@ -2507,14 +2507,14 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         else:
             if person.type == 10 or person.type == 20 or person.type == 30 or person.type == 40:
                 tpl = DocxTemplate(path + 'geree_ezemshix_DX.docx')
-            elif person.type == 50 or person.type == 60 or person.type == 70:
+            elif person.type == 30 or person.type == 50 or person.type == 60 or person.type == 70 or app_type == 6:
                 tpl = DocxTemplate(path + 'geree_ashigluulah_DX.docx')
             elif person.type == 80:
                 tpl = DocxTemplate(path + 'geree_ashigluulah_SUH.docx')
 
         if not officer:
             PluginUtils.show_message(self, self.tr(" Employee"), self.tr("Employee not found"))
-            return
+        return
 
         o_position = ''
         aimag_name = aimag.name
@@ -2750,115 +2750,115 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             if p.main_applicant == True:
                 person = self.session.query(BsPerson).filter(BsPerson.person_id == p.person).one()
         self.__contract_possess()
-        # if not self.pdf_checkbox.isChecked():
-        #     self.__contract_possess()
-        # else:
-        #     contract_no = self.contract_num_edit.text()
-        #     contract_count = self.session.query(CtContract).filter(CtContract.contract_id == self.contract.contract_id).count()
-        #     if contract_count == 0:
-        #         PluginUtils.show_error(self, self.tr("contract error"), self.tr("not save"))
-        #         return
-        #
-        #
-        #     ok = 0
-        #     try:
-        #         app_status = self.session.query(CtApplicationStatus).filter(CtApplicationStatus.application == self.app_id).all()
-        #         for p in app_status:
-        #             if p.status == 9:
-        #                 ok = 1
-        #                 officer = self.session.query(SetRole).filter(SetRole.user_name_real == p.officer_in_charge).one()
-        #     except SQLAlchemyError, e:
-        #         raise LM2Exception(self.tr("Database Query Error"), self.tr("aCould not execute: {0}").format(e.message))
-        #     if ok == 0:
-        #         PluginUtils.show_error(self, self.tr("contract error"), self.tr("Application status must be 9 !!!"))
-        #         return
-        #     header = "no text"
-        #
-        #     path = FileUtils.map_file_path()
-        #     if person.type == 10 or person.type == 20 or person.type == 30 or person.type == 40:
-        #         template = path + "contract_possess.qpt"
-        #     else:
-        #         template = path + "contract_use.qpt"
-        #
-        #     templateDOM = QDomDocument()
-        #     templateDOM.setContent(QFile(template), False)
-        #
-        #     map_canvas = QgsMapCanvas()
-        #
-        #     map_composition = QgsComposition(map_canvas.mapRenderer())
-        #     map_composition.loadFromTemplate(templateDOM)
-        #
-        #     map_composition.setPrintResolution(300)
-        #
-        #     default_path = r'D:/TM_LM2/contracts'
-        #     default_parent_path = r'D:/TM_LM2'
-        #     if not os.path.exists(default_parent_path):
-        #         os.makedirs('D:/TM_LM2')
-        #         os.makedirs('D:/TM_LM2/application_response')
-        #         os.makedirs('D:/TM_LM2/application_list')
-        #         os.makedirs('D:/TM_LM2/approved_decision')
-        #         os.makedirs('D:/TM_LM2/cad_maintenance')
-        #         os.makedirs('D:/TM_LM2/cad_maps')
-        #         os.makedirs('D:/TM_LM2/contracts')
-        #         os.makedirs('D:/TM_LM2/decision_draft')
-        #         os.makedirs('D:/TM_LM2/dumps')
-        #         os.makedirs('D:/TM_LM2/q_data')
-        #         os.makedirs('D:/TM_LM2/refused_decision')
-        #         os.makedirs('D:/TM_LM2/reports')
-        #         os.makedirs('D:/TM_LM2/training')
-        #     if not os.path.exists(default_path):
-        #         os.makedirs(default_path)
-        #     printer = QPrinter()
-        #     printer.setOutputFormat(QPrinter.PdfFormat)
-        #     printer.setOutputFileName(path+"contract_poss.pdf")
-        #     printer.setPaperSize(QSizeF(map_composition.paperWidth(), map_composition.paperHeight()), QPrinter.Millimeter)
-        #     printer.setFullPage(True)
-        #     printer.setColorMode(QPrinter.Color)
-        #     printer.setResolution(map_composition.printResolution())
-        #
-        #     pdfPainter = QPainter(printer)
-        #     paperRectMM = printer.pageRect(QPrinter.Millimeter)
-        #     paperRectPixel = printer.pageRect(QPrinter.DevicePixel)
-        #     map_composition.render(pdfPainter, paperRectPixel, paperRectMM)
-        #     pdfPainter.end()
-        #
-        #     contract_no = self.contract_num_edit.text()
-        #     fee_count = self.session.query(CtFee).filter(CtFee.contract == self.contract.contract_id).count()
-        #     if fee_count == 0:
-        #         PluginUtils.show_message(self,self.tr("Not sava contract"),self.tr("First click save button and then print contract"))
-        #         return
-        #     self.__add_aimag_name(map_composition)
-        #     self.__add_soum_name(map_composition)
-        #     self.__add_contract_no(map_composition)
-        #     self.__add_decision(map_composition)
-        #     self.__add_parcel(map_composition)
-        #     self.__add_fee(map_composition)
-        #     self.__add_contract_condition(map_composition)
-        #     self.__add_person_signature(map_composition)
-        #     # self.__add_app_status_date(map_composition)
-        #     self.__add_person_name(map_composition)
-        #     # self.__add_duration(map_composition)
-        #     self.__add_officer(map_composition)
-        #     self.__officer_info(map_composition)
-        #     map_composition.exportAsPDF(path + "contract_poss.pdf")
-        #     map_composition.exportAsPDF(default_path + "/"+contract_no[:-6]+'-'+contract_no[-5:]+".pdf")
-        #     QDesktopServices.openUrl(QUrl.fromLocalFile(default_path + "/"+contract_no[:-6]+'-'+contract_no[-5:]+".pdf"))
+        if not self.pdf_checkbox.isChecked():
+            self.__contract_possess()
+        else:
+            contract_no = self.contract_num_edit.text()
+            contract_count = self.session.query(CtContract).filter(CtContract.contract_id == self.contract.contract_id).count()
+            if contract_count == 0:
+                PluginUtils.show_error(self, self.tr("contract error"), self.tr("not save"))
+                return
 
-    # def __admin_settings(self, table_name):
-    #
-    #     session = SessionHandler().session_instance()
-    #     lookup = {}
-    #     l2_code = DatabaseUtils.working_l2_code()
-    #     try:
-    #         sql = "SELECT * FROM " + "s" + l2_code + ".{0};".format(table_name)
-    #         result = session.execute(sql).fetchall()
-    #         for row in result:
-    #             lookup[row[0]] = row[1]
-    #
-    #     except exc.SQLAlchemyError, e:
-    #         PluginUtils.show_error(self, self.tr("SQL Error"), e.message)
-    #
-    #     return lookup
+
+            ok = 0
+            try:
+                app_status = self.session.query(CtApplicationStatus).filter(CtApplicationStatus.application == self.app_id).all()
+                for p in app_status:
+                    if p.status == 9:
+                        ok = 1
+                        officer = self.session.query(SetRole).filter(SetRole.user_name_real == p.officer_in_charge).one()
+            except SQLAlchemyError, e:
+                raise LM2Exception(self.tr("Database Query Error"), self.tr("aCould not execute: {0}").format(e.message))
+            if ok == 0:
+                PluginUtils.show_error(self, self.tr("contract error"), self.tr("Application status must be 9 !!!"))
+                return
+            header = "no text"
+
+            path = FileUtils.map_file_path()
+            if person.type == 10 or person.type == 20 or person.type == 30 or person.type == 40:
+                template = path + "contract_possess.qpt"
+            else:
+                template = path + "contract_use.qpt"
+
+            templateDOM = QDomDocument()
+            templateDOM.setContent(QFile(template), False)
+
+            map_canvas = QgsMapCanvas()
+
+            map_composition = QgsComposition(map_canvas.mapRenderer())
+            map_composition.loadFromTemplate(templateDOM)
+
+            map_composition.setPrintResolution(300)
+
+            default_path = r'D:/TM_LM2/contracts'
+            default_parent_path = r'D:/TM_LM2'
+            if not os.path.exists(default_parent_path):
+                os.makedirs('D:/TM_LM2')
+                os.makedirs('D:/TM_LM2/application_response')
+                os.makedirs('D:/TM_LM2/application_list')
+                os.makedirs('D:/TM_LM2/approved_decision')
+                os.makedirs('D:/TM_LM2/cad_maintenance')
+                os.makedirs('D:/TM_LM2/cad_maps')
+                os.makedirs('D:/TM_LM2/contracts')
+                os.makedirs('D:/TM_LM2/decision_draft')
+                os.makedirs('D:/TM_LM2/dumps')
+                os.makedirs('D:/TM_LM2/q_data')
+                os.makedirs('D:/TM_LM2/refused_decision')
+                os.makedirs('D:/TM_LM2/reports')
+                os.makedirs('D:/TM_LM2/training')
+            if not os.path.exists(default_path):
+                os.makedirs(default_path)
+            printer = QPrinter()
+            printer.setOutputFormat(QPrinter.PdfFormat)
+            printer.setOutputFileName(path+"contract_poss.pdf")
+            printer.setPaperSize(QSizeF(map_composition.paperWidth(), map_composition.paperHeight()), QPrinter.Millimeter)
+            printer.setFullPage(True)
+            printer.setColorMode(QPrinter.Color)
+            printer.setResolution(map_composition.printResolution())
+
+            pdfPainter = QPainter(printer)
+            paperRectMM = printer.pageRect(QPrinter.Millimeter)
+            paperRectPixel = printer.pageRect(QPrinter.DevicePixel)
+            map_composition.render(pdfPainter, paperRectPixel, paperRectMM)
+            pdfPainter.end()
+
+            contract_no = self.contract_num_edit.text()
+            fee_count = self.session.query(CtFee).filter(CtFee.contract == self.contract.contract_id).count()
+            if fee_count == 0:
+                PluginUtils.show_message(self,self.tr("Not sava contract"),self.tr("First click save button and then print contract"))
+                return
+            self.__add_aimag_name(map_composition)
+            self.__add_soum_name(map_composition)
+            self.__add_contract_no(map_composition)
+            self.__add_decision(map_composition)
+            self.__add_parcel(map_composition)
+            self.__add_fee(map_composition)
+            self.__add_contract_condition(map_composition)
+            self.__add_person_signature(map_composition)
+            # self.__add_app_status_date(map_composition)
+            self.__add_person_name(map_composition)
+            # self.__add_duration(map_composition)
+            self.__add_officer(map_composition)
+            self.__officer_info(map_composition)
+            map_composition.exportAsPDF(path + "contract_poss.pdf")
+            map_composition.exportAsPDF(default_path + "/"+contract_no[:-6]+'-'+contract_no[-5:]+".pdf")
+            QDesktopServices.openUrl(QUrl.fromLocalFile(default_path + "/"+contract_no[:-6]+'-'+contract_no[-5:]+".pdf"))
+
+    def __admin_settings(self, table_name):
+
+        session = SessionHandler().session_instance()
+        lookup = {}
+        l2_code = DatabaseUtils.working_l2_code()
+        try:
+            sql = "SELECT * FROM " + "s" + l2_code + ".{0};".format(table_name)
+            result = session.execute(sql).fetchall()
+            for row in result:
+                lookup[row[0]] = row[1]
+
+        except exc.SQLAlchemyError, e:
+            PluginUtils.show_error(self, self.tr("SQL Error"), e.message)
+
+        return lookup
 
     def __add_duration(self, map_composition):
 

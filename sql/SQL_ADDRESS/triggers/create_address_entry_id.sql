@@ -1,4 +1,4 @@
-﻿-- Function: base.create_address_entry_id()
+﻿﻿-- Function: base.create_address_entry_id()
 
 -- DROP FUNCTION base.create_address_entry_id();
 
