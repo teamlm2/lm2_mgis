@@ -393,12 +393,12 @@ GRANT INSERT, DELETE ON TABLE data_address.st_street_point TO db_creation;
 GRANT UPDATE, INSERT, DELETE ON TABLE data_address.st_street_point TO cadastre_update;
 
 ---------------
-DROP TABLE if exists data_address.st_map_street_point;
+DROP TABLE if exists data_address.st_map_street_point CASCADE ;
 CREATE TABLE data_address.st_map_street_point
 (
-id int primary key,
+id serial primary key,
 street_point_id int references data_address.st_street_point on update cascade on delete restrict not null,
-street_id int references data_address.st_street_sub on update cascade on delete restrict not null,
+street_id int references data_address.st_street on update cascade on delete restrict not null,
 type int,
 unique(street_id, street_point_id, type)
 )
@@ -413,3 +413,7 @@ GRANT SELECT ON TABLE data_address.st_map_street_point TO land_office_administra
 GRANT INSERT, DELETE ON TABLE data_address.st_map_street_point TO cadastre_view;
 GRANT INSERT, DELETE ON TABLE data_address.st_map_street_point TO db_creation;
 GRANT UPDATE, INSERT, DELETE ON TABLE data_address.st_map_street_point TO cadastre_update;
+
+GRANT ALL ON SEQUENCE data_address.st_map_street_point_id_seq TO geodb_admin;
+GRANT USAGE ON SEQUENCE data_address.st_map_street_point_id_seq TO cadastre_view;
+GRANT USAGE ON SEQUENCE data_address.st_map_street_point_id_seq TO cadastre_update;

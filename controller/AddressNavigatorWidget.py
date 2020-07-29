@@ -105,13 +105,28 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
             x = item_row[2]
             y = item_row[3]
 
+            geom_spot4 = QgsPoint(x, y)
+            geometry = QgsGeometry.fromPoint(geom_spot4)
+
+            geometry = WKTElement(geometry.exportToWkt(), srid=4326)
+
+            object_count = 0
+            map_point_count = self.session.query(StMapStreetPoint).filter(StMapStreetPoint.street_id == street_id).count()
+            if map_point_count != 0:
+                map_object = self.session.query(StMapStreetPoint).filter(StMapStreetPoint.street_id == street_id).first()
+                object_count = self.session.query(StStreetPoint).\
+                    filter(StStreetPoint.id == map_object.street_point_id).\
+                    filter(StStreetPoint.geometry.ST_Equals(geometry)).count()
             count = self.str_nodes_twidget.rowCount()
             self.str_nodes_twidget.insertRow(count)
 
             item = QTableWidgetItem(str(id))
             item.setData(Qt.UserRole, id)
             item.setData(Qt.UserRole + 1, street_id)
-            item.setCheckState(Qt.Unchecked)
+            if object_count == 1:
+                item.setCheckState(Qt.Checked)
+            else:
+                item.setCheckState(Qt.Unchecked)
             self.str_nodes_twidget.setItem(count, 0, item)
 
             item = QTableWidgetItem(str(x))
@@ -288,13 +303,30 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
 
                 count = self.session.query(StStreetPoint).\
                     filter(StStreetPoint.geometry.ST_Equals(geometry)).count()
+                print count
                 if count == 0:
                     object = StStreetPoint()
                     object.is_active = True
                     object.geometry = geometry
+                    object.valid_from = DatabaseUtils.current_date_time()
+                    object.created_at = DatabaseUtils.current_date_time()
+                    object.updated_at = DatabaseUtils.current_date_time()
                     object.au1 = self.au1
                     object.au2 = self.au2
                     self.session.add(object)
+                    self.session.flush()
 
+                    print object.id
+                    map_object = StMapStreetPoint()
+                    map_object.street_point_id = object.id
+                    map_object.street_id = street_id
+                    self.session.add(map_object)
+                if count == 1:
+                    object = self.session.query(StStreetPoint). \
+                        filter(StStreetPoint.geometry.ST_Equals(geometry)).one()
+                    map_object = StMapStreetPoint()
+                    map_object.street_point_id = object.id
+                    map_object.street_id = street_id
+                    self.session.add(map_object)
 
-
+            self.session.commit()
