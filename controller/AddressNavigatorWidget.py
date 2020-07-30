@@ -30,6 +30,8 @@ from ..model.DatabaseHelper import *
 from ..model.StStreetPoint import *
 from ..model.StMapStreetPoint import *
 from ..model.StStreetLineView import *
+from ..model.CaBuildingAddress import *
+from ..model.CaParcelAddress import *
 from ..controller.PlanDetailWidget import *
 from ..controller.PlanLayerFilterDialog import *
 # from ..LM2Plugin import *
@@ -329,3 +331,18 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
                     self.session.add(map_object)
 
             self.session.commit()
+
+    @pyqtSlot()
+    def on_selected_str_load_button_clicked(self):
+
+        self.str_nodes_twidget.setRowCount(0)
+        parcelLayer = LayerUtils.layer_by_data_source("data_address", "ca_parcel_address")
+        select_feature = parcelLayer.selectedFeatures()
+
+        id = None
+        for feature in select_feature:
+            attr = feature.attributes()
+            id = attr[0]
+
+        if id is None:
+            return

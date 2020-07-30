@@ -1094,7 +1094,7 @@ class LM2Plugin:
 
     def __addressVisibilityChanged(self):
 
-        if self.camaWidget.isVisible():
+        if self.address_action.isVisible():
             self.address_action.setChecked(True)
         else:
             self.address_action.setChecked(False)
