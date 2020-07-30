@@ -303,7 +303,7 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
 
                 count = self.session.query(StStreetPoint).\
                     filter(StStreetPoint.geometry.ST_Equals(geometry)).count()
-                print count
+
                 if count == 0:
                     object = StStreetPoint()
                     object.is_active = True
@@ -316,7 +316,6 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
                     self.session.add(object)
                     self.session.flush()
 
-                    print object.id
                     map_object = StMapStreetPoint()
                     map_object.street_point_id = object.id
                     map_object.street_id = street_id

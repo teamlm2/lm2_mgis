@@ -198,6 +198,8 @@ created_by integer,
 updated_by integer,
 created_at timestamp(0) without time zone NOT NULL DEFAULT now(),
 updated_at timestamp(0) without time zone NOT NULL DEFAULT now(),
+start_number int,
+end_number int,
 au1 varchar(3) references admin_units.au_level1 on update cascade on delete restrict,
 au2 varchar(5) references admin_units.au_level2 on update cascade on delete restrict,
 au3 text
