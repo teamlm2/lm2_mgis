@@ -1,4 +1,4 @@
-﻿CREATE OR REPLACE VIEW data_address.ca_parcel_address_view AS 
+﻿﻿CREATE OR REPLACE VIEW data_address.ca_parcel_address_view AS 
  SELECT *
    FROM data_address.ca_parcel_address
   WHERE ca_parcel_address.au2::text = (( SELECT set_role_user.working_au_level2::text AS au2
