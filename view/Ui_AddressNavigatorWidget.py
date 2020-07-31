@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '.\AddressNavigatorWidget.ui'
+# Form implementation generated from reading ui file '.\AddressNavigatorWidget.ui.'
 #
 # Created by: PyQt4 UI code generator 4.11.4
 #
@@ -97,29 +97,35 @@ class Ui_AddressNavigatorWidget(object):
         self.tab_2 = QtGui.QWidget()
         self.tab_2.setObjectName(_fromUtf8("tab_2"))
         self.selected_parcel_load_button = QtGui.QPushButton(self.tab_2)
-        self.selected_parcel_load_button.setGeometry(QtCore.QRect(10, 20, 281, 23))
+        self.selected_parcel_load_button.setGeometry(QtCore.QRect(10, 50, 281, 23))
         self.selected_parcel_load_button.setObjectName(_fromUtf8("selected_parcel_load_button"))
         self.geographic_name_edit = QtGui.QLineEdit(self.tab_2)
-        self.geographic_name_edit.setGeometry(QtCore.QRect(10, 80, 441, 20))
+        self.geographic_name_edit.setGeometry(QtCore.QRect(10, 110, 441, 20))
         self.geographic_name_edit.setObjectName(_fromUtf8("geographic_name_edit"))
         self.label = QtGui.QLabel(self.tab_2)
-        self.label.setGeometry(QtCore.QRect(10, 63, 74, 13))
+        self.label.setGeometry(QtCore.QRect(10, 93, 74, 13))
         self.label.setObjectName(_fromUtf8("label"))
         self.khashaa_no_edit = QtGui.QLineEdit(self.tab_2)
-        self.khashaa_no_edit.setGeometry(QtCore.QRect(10, 180, 441, 20))
+        self.khashaa_no_edit.setGeometry(QtCore.QRect(10, 210, 441, 20))
         self.khashaa_no_edit.setObjectName(_fromUtf8("khashaa_no_edit"))
         self.label_2 = QtGui.QLabel(self.tab_2)
-        self.label_2.setGeometry(QtCore.QRect(10, 163, 85, 13))
+        self.label_2.setGeometry(QtCore.QRect(10, 193, 85, 13))
         self.label_2.setObjectName(_fromUtf8("label_2"))
         self.label_3 = QtGui.QLabel(self.tab_2)
-        self.label_3.setGeometry(QtCore.QRect(10, 111, 74, 13))
+        self.label_3.setGeometry(QtCore.QRect(10, 141, 74, 13))
         self.label_3.setObjectName(_fromUtf8("label_3"))
         self.street_cbox = QtGui.QComboBox(self.tab_2)
-        self.street_cbox.setGeometry(QtCore.QRect(10, 130, 387, 22))
+        self.street_cbox.setGeometry(QtCore.QRect(10, 160, 387, 22))
         self.street_cbox.setObjectName(_fromUtf8("street_cbox"))
         self.spinBox = QtGui.QSpinBox(self.tab_2)
-        self.spinBox.setGeometry(QtCore.QRect(403, 130, 48, 22))
+        self.spinBox.setGeometry(QtCore.QRect(403, 160, 48, 22))
         self.spinBox.setObjectName(_fromUtf8("spinBox"))
+        self.layer_type_cbox = QtGui.QComboBox(self.tab_2)
+        self.layer_type_cbox.setGeometry(QtCore.QRect(10, 20, 281, 22))
+        self.layer_type_cbox.setObjectName(_fromUtf8("layer_type_cbox"))
+        self.get_address_button = QtGui.QPushButton(self.tab_2)
+        self.get_address_button.setGeometry(QtCore.QRect(10, 280, 281, 23))
+        self.get_address_button.setObjectName(_fromUtf8("get_address_button"))
         self.tabWidget.addTab(self.tab_2, _fromUtf8(""))
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
         AddressNavigatorWidget.setWidget(self.dockWidgetContents)
@@ -147,5 +153,6 @@ class Ui_AddressNavigatorWidget(object):
         self.label.setText(_translate("AddressNavigatorWidget", "Газар зүйн нэр", None))
         self.label_2.setText(_translate("AddressNavigatorWidget", "Хашааны дугаар", None))
         self.label_3.setText(_translate("AddressNavigatorWidget", "Гудамж", None))
+        self.get_address_button.setText(_translate("AddressNavigatorWidget", "Хаяг авах", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("AddressNavigatorWidget", "Нэгж талбар", None))
 

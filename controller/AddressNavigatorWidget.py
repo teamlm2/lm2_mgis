@@ -34,6 +34,7 @@ from ..model.CaBuildingAddress import *
 from ..model.CaParcelAddress import *
 from ..controller.PlanDetailWidget import *
 from ..controller.PlanLayerFilterDialog import *
+from ..model.ClParcelType import *
 # from ..LM2Plugin import *
 from datetime import timedelta
 from xlsxwriter.utility import xl_rowcol_to_cell, xl_col_to_name
@@ -69,6 +70,17 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
         self.current_dialog = None
         self.__boundaryPointsLayer = None
         self.__setup_table_widget()
+        self.__combobox_setup()
+
+    def __combobox_setup(self):
+
+        layer_types = self.session.query(ClParcelType).order_by(ClParcelType.code.asc()).all()
+
+        self.layer_type_cbox.clear()
+        self.layer_type_cbox.addItem('*', -1)
+
+        for value in layer_types:
+            self.layer_type_cbox.addItem(value.description, value.code)
 
     def __setup_table_widget(self):
 
@@ -333,16 +345,70 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
             self.session.commit()
 
     @pyqtSlot()
-    def on_selected_str_load_button_clicked(self):
+    def on_selected_parcel_load_button_clicked(self):
 
-        self.str_nodes_twidget.setRowCount(0)
-        parcelLayer = LayerUtils.layer_by_data_source("data_address", "ca_parcel_address")
+        layer_type_id = self.layer_type_cbox.itemData(self.layer_type_cbox.currentIndex())
+        print layer_type_id
+
+        layer_type = self.session.query(ClParcelType).filter_by(code = layer_type_id).one()
+
+        layer_name = None
+        schema_name = None
+        if layer_type.table_name == 'data_soums_union.ca_parcel_tbl':
+            layer_name = "ca_parcel"
+            schema_name = "data_soums_union"
+        elif layer_type.table_name == 'data_soums_union.ca_tmp_parcel':
+            layer_name = "ca_tmp_parcel_view"
+            schema_name = "data_soums_union"
+        elif layer_type.table_name == 'data_soums_union.ca_building_tbl':
+            layer_name = "ca_building"
+            schema_name = "data_soums_union"
+        elif layer_type.table_name == 'data_soums_union.ca_tmp_building':
+            layer_name = "ca_tmp_building_view"
+            schema_name = "data_soums_union"
+
+        if not layer_name:
+            return
+        parcelLayer = LayerUtils.layer_by_data_source(schema_name, layer_name)
         select_feature = parcelLayer.selectedFeatures()
 
         id = None
         for feature in select_feature:
             attr = feature.attributes()
             id = attr[0]
+            geometry = WKTElement(feature.geometry().exportToWkt(), srid=4326)
 
         if id is None:
             return
+
+        addrs_parcel_count = self.session.query(CaParcelAddress).\
+            filter(CaParcelAddress.parcel_type == layer_type.code).\
+            filter(CaParcelAddress.parcel_id == id).count()
+        print addrs_parcel_count
+        if addrs_parcel_count == 1:
+            addrs_parcel = self.session.query(CaParcelAddress). \
+                filter(CaParcelAddress.parcel_type == layer_type.code). \
+                filter(CaParcelAddress.parcel_id == id).one()
+            PluginUtils.show_message(self, u'Анхааруулга', u'Энэ нэгж талбар хаягын мэдээллийн санд бүртгэлтэй байна.')
+            return
+        if addrs_parcel_count == 0:
+            addrs_parcel_overlaps_count = self.session.query(CaParcelAddress).\
+                filter(geometry.ST_Overlaps(CaParcelAddress.geometry)).\
+                filter(CaParcelAddress.is_active == True).count()
+            print '**'
+            print addrs_parcel_overlaps_count
+            print '**'
+            if addrs_parcel_overlaps_count == 0:
+                addrs_parcel = CaParcelAddress()
+                addrs_parcel.parcel_id = id
+                addrs_parcel.is_active = True
+                addrs_parcel.geometry = geometry
+                addrs_parcel.parcel_type = layer_type.code
+                addrs_parcel.status = 1
+
+                self.session.add(addrs_parcel)
+
+    @pyqtSlot()
+    def on_get_address_button_clicked(self):
+
+        print ''
