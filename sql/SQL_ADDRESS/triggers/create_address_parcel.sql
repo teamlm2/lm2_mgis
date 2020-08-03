@@ -15,8 +15,7 @@ DECLARE
   v_admin_unit_l1_code text;
   v_admin_unit_l2_code text;
   v_admin_unit_l3_code text;
-  v_au_khoroolol_id int;
-  v_street_sub_id int;
+  v_au_khoroolol_id int;  
   v_au_post_zone_id int;
   address_streetname text;
 BEGIN
@@ -39,9 +38,8 @@ BEGIN
   SELECT code FROM admin_units.au_level1 INTO v_admin_unit_l1_code WHERE ST_COVERS(geometry, ST_PointOnSurface(ST_Makevalid(NEW.geometry)));
 	SELECT code FROM admin_units.au_level2 INTO v_admin_unit_l2_code WHERE ST_COVERS(geometry, ST_PointOnSurface(ST_Makevalid(NEW.geometry)));
 	SELECT code FROM admin_units.au_level3 INTO v_admin_unit_l3_code WHERE ST_COVERS(geometry, ST_PointOnSurface(ST_Makevalid(NEW.geometry)));
-	SELECT fid FROM admin_units.au_khoroolol INTO v_au_khoroolol_id WHERE ST_COVERS(geometry, ST_PointOnSurface(ST_Makevalid(NEW.geometry)));
-	SELECT id FROM data_address.st_street_sub INTO v_street_sub_id WHERE ST_COVERS(geometry, ST_PointOnSurface(ST_Makevalid(NEW.geometry)));
-	SELECT name || '-' || code FROM data_address.st_street_sub INTO address_streetname WHERE ST_COVERS(geometry, ST_PointOnSurface(ST_Makevalid(NEW.geometry)));
+	SELECT fid FROM admin_units.au_khoroolol INTO v_au_khoroolol_id WHERE ST_COVERS(geometry, ST_PointOnSurface(ST_Makevalid(NEW.geometry)));	
+	--SELECT name || '-' || code FROM data_address.st_street_sub INTO address_streetname WHERE ST_COVERS(geometry, ST_PointOnSurface(ST_Makevalid(NEW.geometry)));
 	SELECT id FROM data_address.au_zipcode_area INTO v_au_post_zone_id WHERE ST_COVERS(geometry, ST_PointOnSurface(ST_Makevalid(NEW.geometry)));
 
 -- 	EXECUTE 'SELECT ST_ClosestPoint(ST_MakeLine(sp,ep), ST_GeomFromText(pp.new_geometry, 4326))::geometry(Point,4326) FROM
@@ -70,9 +68,8 @@ BEGIN
 	NEW.au1 := v_admin_unit_l1_code;
 	NEW.au2 := v_admin_unit_l2_code;
 	NEW.au3 := v_admin_unit_l3_code;
-	NEW.khoroolol_id := v_au_khoroolol_id;
-	NEW.street_id := v_street_sub_id;
-	NEW.address_streetname := address_streetname;
+	NEW.khoroolol_id := v_au_khoroolol_id;	
+	--NEW.address_streetname := address_streetname;
 	NEW.zipcode_id := v_au_post_zone_id;
 	NEW.updated_at := now();
 

@@ -32,6 +32,8 @@ from ..model.StMapStreetPoint import *
 from ..model.StStreetLineView import *
 from ..model.CaBuildingAddress import *
 from ..model.CaParcelAddress import *
+from ..model.ClAddressStatus import *
+from ..model.StEntrance import *
 from ..controller.PlanDetailWidget import *
 from ..controller.PlanLayerFilterDialog import *
 from ..model.ClParcelType import *
@@ -95,6 +97,11 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
         self.str_nodes_twidget.setColumnWidth(0, 30)
         self.str_nodes_twidget.setColumnWidth(1, 130)
         self.str_nodes_twidget.setColumnWidth(2, 130)
+
+        self.address_parcel_twidget.setAlternatingRowColors(True)
+        self.address_parcel_twidget.setEditTriggers(QTableWidget.NoEditTriggers)
+        self.address_parcel_twidget.setSelectionBehavior(QTableWidget.SelectRows)
+        self.address_parcel_twidget.setSelectionMode(QTableWidget.SingleSelection)
 
     @pyqtSlot()
     def on_selected_str_load_button_clicked(self):
@@ -348,7 +355,6 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
     def on_selected_parcel_load_button_clicked(self):
 
         layer_type_id = self.layer_type_cbox.itemData(self.layer_type_cbox.currentIndex())
-        print layer_type_id
 
         layer_type = self.session.query(ClParcelType).filter_by(code = layer_type_id).one()
 
@@ -366,6 +372,12 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
         elif layer_type.table_name == 'data_soums_union.ca_tmp_building':
             layer_name = "ca_tmp_building_view"
             schema_name = "data_soums_union"
+        elif layer_type.table_name == 'data_address.ca_parcel_address_view':
+            layer_name = "ca_parcel_address_view"
+            schema_name = "data_address"
+        elif layer_type.table_name == 'data_address.ca_building_address_view':
+            layer_name = "ca_building_address_view"
+            schema_name = "data_address"
 
         if not layer_name:
             return
@@ -380,35 +392,128 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
 
         if id is None:
             return
+        if layer_name == "ca_parcel_address_view":
+            addrs_parcel = self.session.query(CaParcelAddress).filter_by(id=id).one()
+            address_status = self.session.query(ClAddressStatus).filter_by(code=addrs_parcel.status).one()
+            if not self.__is_add_addrs_parcel(addrs_parcel.id):
+                count = self.address_parcel_twidget.rowCount()
+                self.address_parcel_twidget.insertRow(count)
 
-        addrs_parcel_count = self.session.query(CaParcelAddress).\
-            filter(CaParcelAddress.parcel_type == layer_type.code).\
-            filter(CaParcelAddress.parcel_id == id).count()
-        print addrs_parcel_count
-        if addrs_parcel_count == 1:
-            addrs_parcel = self.session.query(CaParcelAddress). \
-                filter(CaParcelAddress.parcel_type == layer_type.code). \
-                filter(CaParcelAddress.parcel_id == id).one()
-            PluginUtils.show_message(self, u'Анхааруулга', u'Энэ нэгж талбар хаягын мэдээллийн санд бүртгэлтэй байна.')
-            return
-        if addrs_parcel_count == 0:
-            addrs_parcel_overlaps_count = self.session.query(CaParcelAddress).\
-                filter(geometry.ST_Overlaps(CaParcelAddress.geometry)).\
-                filter(CaParcelAddress.is_active == True).count()
-            print '**'
-            print addrs_parcel_overlaps_count
-            print '**'
-            if addrs_parcel_overlaps_count == 0:
-                addrs_parcel = CaParcelAddress()
-                addrs_parcel.parcel_id = id
-                addrs_parcel.is_active = True
-                addrs_parcel.geometry = geometry
-                addrs_parcel.parcel_type = layer_type.code
-                addrs_parcel.status = 1
+                item = QTableWidgetItem(str(addrs_parcel.parcel_id))
+                item.setData(Qt.UserRole, addrs_parcel.parcel_id)
+                item.setData(Qt.UserRole + 1, addrs_parcel.id)
+                self.address_parcel_twidget.setItem(count, 0, item)
 
-                self.session.add(addrs_parcel)
+                item = QTableWidgetItem(unicode(layer_type.description))
+                item.setData(Qt.UserRole, layer_type.code)
+                item.setData(Qt.UserRole + 1, layer_type.layer_type)
+                self.address_parcel_twidget.setItem(count, 1, item)
+
+                item = QTableWidgetItem(unicode(address_status.description))
+                item.setData(Qt.UserRole, address_status.code)
+                self.address_parcel_twidget.setItem(count, 2, item)
+        else:
+            addrs_parcel_count = self.session.query(CaParcelAddress).\
+                filter(CaParcelAddress.parcel_type == layer_type.code).\
+                filter(CaParcelAddress.parcel_id == id).count()
+            if addrs_parcel_count == 1:
+                addrs_parcel = self.session.query(CaParcelAddress). \
+                    filter(CaParcelAddress.parcel_type == layer_type.code). \
+                    filter(CaParcelAddress.parcel_id == id).one()
+                # PluginUtils.show_message(self, u'Анхааруулга', u'Энэ нэгж талбар хаягын мэдээллийн санд бүртгэлтэй байна.')
+                # return
+
+                message_box = QMessageBox()
+                message_box.setText(u'Энэ нэгж талбар хаягын мэдээллийн санд бүртгэлтэй байна. Жагсаалтад нэмэх үү?')
+
+                yes_button = message_box.addButton(u'Тийм', QMessageBox.ActionRole)
+                message_box.addButton(u'Үгүй', QMessageBox.ActionRole)
+                message_box.exec_()
+                address_status = self.session.query(ClAddressStatus).filter_by(code=addrs_parcel.status).one()
+                if message_box.clickedButton() == yes_button:
+                    if not self.__is_add_addrs_parcel(addrs_parcel.id):
+                        count = self.address_parcel_twidget.rowCount()
+                        self.address_parcel_twidget.insertRow(count)
+
+                        item = QTableWidgetItem(str(addrs_parcel.parcel_id))
+                        item.setData(Qt.UserRole, addrs_parcel.parcel_id)
+                        item.setData(Qt.UserRole + 1, addrs_parcel.id)
+                        self.address_parcel_twidget.setItem(count, 0, item)
+
+                        item = QTableWidgetItem(unicode(layer_type.description))
+                        item.setData(Qt.UserRole, layer_type.code)
+                        item.setData(Qt.UserRole + 1, layer_type.layer_type)
+                        self.address_parcel_twidget.setItem(count, 1, item)
+
+                        item = QTableWidgetItem(unicode(address_status.description))
+                        item.setData(Qt.UserRole, address_status.code)
+                        self.address_parcel_twidget.setItem(count, 2, item)
+
+            if addrs_parcel_count == 0:
+                addrs_parcel_overlaps_count = self.session.query(CaParcelAddress).\
+                    filter(geometry.ST_Overlaps(CaParcelAddress.geometry)).\
+                    filter(CaParcelAddress.is_active == True).count()
+                if addrs_parcel_overlaps_count == 0:
+
+                    address_status = self.session.query(ClAddressStatus).filter_by(code = 1).one()
+
+                    addrs_parcel = CaParcelAddress()
+                    addrs_parcel.parcel_id = id
+                    addrs_parcel.is_active = True
+                    addrs_parcel.geometry = geometry
+                    addrs_parcel.parcel_type = layer_type.code
+                    addrs_parcel.status = 1
+
+                    self.session.add(addrs_parcel)
+                    self.session.flush()
+
+                    count = self.address_parcel_twidget.rowCount()
+                    self.address_parcel_twidget.insertRow(count)
+
+                    item = QTableWidgetItem(str(id))
+                    item.setData(Qt.UserRole, id)
+                    item.setData(Qt.UserRole + 1, addrs_parcel.id)
+                    self.address_parcel_twidget.setItem(count, 0, item)
+
+                    item = QTableWidgetItem(unicode(layer_type.description))
+                    item.setData(Qt.UserRole, layer_type.code)
+                    item.setData(Qt.UserRole + 1, layer_type.layer_type)
+                    self.address_parcel_twidget.setItem(count, 1, item)
+
+                    item = QTableWidgetItem(unicode(address_status.description))
+                    item.setData(Qt.UserRole, address_status.code)
+                    self.address_parcel_twidget.setItem(count, 2, item)
+
+        self.session.commit()
+
+    def __is_add_addrs_parcel(self, id):
+
+        is_true = False
+        for row in range(self.address_parcel_twidget.rowCount()):
+            item_id = self.address_parcel_twidget.item(row, 0)
+            addrs_id = item_id.data(Qt.UserRole + 1)
+
+            if addrs_id == id:
+                is_true = True
+
+        return is_true
 
     @pyqtSlot()
     def on_get_address_button_clicked(self):
 
-        print ''
+        selected_row = self.address_parcel_twidget.currentRow()
+        if selected_row == -1:
+            return
+        id = self.address_parcel_twidget.item(selected_row, 0).data(Qt.UserRole + 1)
+
+        addrs_parcel = self.session.query(CaParcelAddress).filter_by(id = id).one()
+
+        if addrs_parcel == 2:
+            PluginUtils.show_message(self, u'Анхааруулга', u'Энэ нэгж талбарын хаяг баталгаажсан байна.')
+            return
+
+        entry_count = self.session.query(StEntrance).filter(StEntrance.parcel_id == addrs_parcel.id).count()
+        print entry_count
+        if entry_count == 0:
+            PluginUtils.show_message(self, u'Анхааруулга', u'Энэ нэгж талбарын орц, гарцыг тодорхойлоогүй байна.')
+            return

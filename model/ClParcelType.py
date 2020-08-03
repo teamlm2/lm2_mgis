@@ -12,4 +12,5 @@ class ClParcelType(Base):
     table_name = Column(String)
     python_model_name = Column(String)
     php_model_name = Column(String)
+    layer_type = Column(Integer)
     is_insert_state_parcel = Column(Boolean)
