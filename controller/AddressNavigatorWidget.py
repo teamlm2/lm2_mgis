@@ -453,6 +453,7 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
                 addrs_parcel_overlaps_count = self.session.query(CaParcelAddress).\
                     filter(geometry.ST_Overlaps(CaParcelAddress.geometry)).\
                     filter(CaParcelAddress.is_active == True).count()
+
                 if addrs_parcel_overlaps_count == 0:
 
                     address_status = self.session.query(ClAddressStatus).filter_by(code = 1).one()
@@ -483,8 +484,6 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
                     item = QTableWidgetItem(unicode(address_status.description))
                     item.setData(Qt.UserRole, address_status.code)
                     self.address_parcel_twidget.setItem(count, 2, item)
-
-        self.session.commit()
 
     def __is_add_addrs_parcel(self, id):
 
@@ -517,3 +516,8 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
         if entry_count == 0:
             PluginUtils.show_message(self, u'Анхааруулга', u'Энэ нэгж талбарын орц, гарцыг тодорхойлоогүй байна.')
             return
+
+    @pyqtSlot()
+    def on_apply_address_button_clicked(self):
+
+        self.session.commit()

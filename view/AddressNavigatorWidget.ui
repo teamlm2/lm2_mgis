@@ -130,7 +130,7 @@
          <rect>
           <x>9</x>
           <y>50</y>
-          <width>283</width>
+          <width>221</width>
           <height>23</height>
          </rect>
         </property>
@@ -267,6 +267,32 @@
           <string>Хаягийн төлөв</string>
          </property>
         </column>
+       </widget>
+       <widget class="QPushButton" name="apply_address_button">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>480</y>
+          <width>283</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Хадгалах</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="selected_parcel_remove_button">
+        <property name="geometry">
+         <rect>
+          <x>250</x>
+          <y>50</y>
+          <width>201</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Хаягийн мэдээллийн сангаас хасах</string>
+        </property>
        </widget>
       </widget>
       <widget class="QWidget" name="tab">
