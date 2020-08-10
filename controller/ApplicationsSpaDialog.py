@@ -655,18 +655,18 @@ class ApplicationsSpaDialog(QDialog, Ui_ApplicationsSpaDialog, DatabaseHelper):
         current_parcel_type = self.parcel_type_cbox.itemData(self.parcel_type_cbox.currentIndex())
 
         parcel_type = self.session.query(ClParcelType).filter(ClParcelType.code == current_parcel_type).one()
-        print('hud2')
+
         parcel_table_name = str(parcel_type.table_name)
-        print('hud3')
+
         sql = "select count(*) from " +  parcel_table_name + " parcel " \
               "join admin_units.au_level2 au2 on public.st_within(parcel.geometry, au2.geometry) " \
               "where parcel.parcel_id = " + "'" + parcel_id + "' and au2.code = " + "'" + soum_code + "'"
-        print('hud4')
+
         values = self.session.execute(sql).fetchall()
         count = 0
         for row in values:
             count = row[0]
-        print('hud5')
+
         if count == 0:
             PluginUtils.show_error(self, self.tr("No Parcel found"),
                             self.tr("The parcel number {0} could not be found within the current working soum.")

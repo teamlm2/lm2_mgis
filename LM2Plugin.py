@@ -227,6 +227,7 @@ class LM2Plugin:
 
         self.lm_toolbar.addSeparator()
         self.lm_toolbar.addAction(self.address_action)
+        self.lm_toolbar.addAction(self.parcel_map_action)
         self.lm_toolbar.addAction(self.parcel_mpa_action)
         self.lm_toolbar.addAction(self.parcel_spa_action)
         self.lm_toolbar.addSeparator()

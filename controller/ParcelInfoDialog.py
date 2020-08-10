@@ -2675,7 +2675,7 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
 
             self.commit()
 
-        # self.__import_archive()
+        self.__import_archive()
 
     def __multi_owner_save(self, person_id):
 
@@ -3980,6 +3980,7 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
 
             try:
                 if str(parcel_id) in ftp.nlst():
+
                     files = ftp.nlst(str(parcel_id))
                 else:
                     is_find_doc = False
@@ -3991,7 +3992,6 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
 
             ch_path = None
             for f in files:
-
                 self.decision_num_cbox.addItem(f, f)
                 doc_decision = f.split('/')[-1]
                 # doc_decision = doc_decision.decode('utf8')
@@ -4125,6 +4125,12 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
                                 archive_ftp_path_role = archive_ftp_path + '/' + str(role).zfill(2)
                                 FtpConnection.chdir(archive_ftp_path_role, ftp[0])
                                 FtpConnection.upload_app_ftp_file(file_url, file_name,ftp[0])
+
+                                app_id = self.application.app_id
+
+                                conf = self.session.query(SdConfiguration).filter(SdConfiguration.code == 'ip_web_lm').one()
+                                urllib2.urlopen(
+                                    'http://' + conf.value + '/api/application/document/move?app_id=' + str(app_id))
 
                     # if ftp:
                     #     filelist = ftp.nlst()

@@ -652,7 +652,7 @@ class SpaParcelWidget(QDockWidget, Ui_SpaParcelWidget, DatabaseHelper):
         self.working_l1_cbox.setCurrentIndex(self.working_l1_cbox.findData(aimag_code))
         self.working_l2_cbox.setCurrentIndex(self.working_l2_cbox.findData(soum_code))
         # try:
-        print id
+
         app_result = self.session.query(CtApplication).filter(CtApplication.app_no == id).one()
         self.parcel_app_num_edit.setText(app_result.app_no)
             # self.parcel_right_holder_name_edit.setText(app_result.first_name)

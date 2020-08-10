@@ -434,6 +434,7 @@ class PrintDialog(QDialog, Ui_PrintDialog):
                 self.__add_admin_unit_l3_name_h(map_composition)
             if self.table_name == TABLE_SPA_PARCEL or self.table_name == TABLE_STATE_PARCEL:
                 self.__add_admin_units_h(map_composition)
+
         self.__adjust_map_center_and_scale(overview_map, 30, 30, scale_denominator)
         self.__set_north_arrow_position(map_composition)
         self.__add_labels(map_composition)
@@ -1037,20 +1038,26 @@ class PrintDialog(QDialog, Ui_PrintDialog):
             return
 
         au1 = self.session.query(AuLevel1).filter(
-            AuLevel1.geometry.ST_Overlaps(parcel_geometry[0])).all()
+            AuLevel1.geometry.ST_Intersects(parcel_geometry[0])).all()
 
         for au1_value in au1:
             if admin_unit_lbl != '':
                 admin_unit_lbl = admin_unit_lbl + '; '
             au2 = self.session.query(AuLevel2).\
-                filter(AuLevel2.geometry.ST_Overlaps(parcel_geometry[0])).\
+                filter(AuLevel2.geometry.ST_Intersects(parcel_geometry[0])).\
                 filter(AuLevel2.au1_code == au1_value.code).all()
             au2_lbl = ''
+            au1_lbl_type = u' аймаг'
+            au2_lbl_type = u' сум'
+            if au1_value.code == '011':
+                au1_lbl_type = u' хот'
+                au2_lbl_type = u' дүүрэг'
             for au2_value in au2:
                 if au2_lbl != '':
                     au2_lbl = au2_lbl + ', '
-                au2_lbl = au2_lbl + au2_value.name + u' сум'
-            admin_unit_lbl = admin_unit_lbl + au1_value.name + u' аймаг, ' + au2_lbl
+
+                au2_lbl = au2_lbl + au2_value.name + au2_lbl_type
+            admin_unit_lbl = admin_unit_lbl + au1_value.name + au1_lbl_type + u', ' + au2_lbl
 
         item = map_composition.getComposerItemById("admin_units_h")
         item.setText(admin_unit_lbl)
@@ -1071,20 +1078,26 @@ class PrintDialog(QDialog, Ui_PrintDialog):
             return
 
         au1 = self.session.query(AuLevel1).filter(
-            AuLevel1.geometry.ST_Overlaps(parcel_geometry[0])).all()
+            AuLevel1.geometry.ST_Intersects(parcel_geometry[0])).all()
 
         for au1_value in au1:
             if admin_unit_lbl != '':
                 admin_unit_lbl = admin_unit_lbl + '; '
-            au2 = self.session.query(AuLevel2). \
-                filter(AuLevel2.geometry.ST_Overlaps(parcel_geometry[0])). \
+            au2 = self.session.query(AuLevel2).\
+                filter(AuLevel2.geometry.ST_Intersects(parcel_geometry[0])).\
                 filter(AuLevel2.au1_code == au1_value.code).all()
             au2_lbl = ''
+            au1_lbl_type = u' аймаг'
+            au2_lbl_type = u' сум'
+            if au1_value.code == '011':
+                au1_lbl_type = u' хот'
+                au2_lbl_type = u' дүүрэг'
             for au2_value in au2:
                 if au2_lbl != '':
                     au2_lbl = au2_lbl + ', '
-                au2_lbl = au2_lbl + au2_value.name + u' сум'
-            admin_unit_lbl = admin_unit_lbl + au1_value.name + u' аймаг, ' + au2_lbl
+
+                au2_lbl = au2_lbl + au2_value.name + au2_lbl_type
+            admin_unit_lbl = admin_unit_lbl + au1_value.name + au1_lbl_type + u', ' + au2_lbl
 
         item = map_composition.getComposerItemById("admin_units")
         item.setText(admin_unit_lbl)
