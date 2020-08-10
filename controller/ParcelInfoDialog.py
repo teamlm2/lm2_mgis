@@ -3131,7 +3131,9 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
         parcel.address_khashaa = self.khashaa_edit.text()
         parcel.address_streetname = self.streetname_edit.text()
         parcel.address_neighbourhood = self.neighbourhood_edit.text()
-        valid_from = self.decision_date.date().toString(Constants.DATABASE_DATE_FORMAT)
+        # valid_from = self.decision_date.date().toString(Constants.DATABASE_DATE_FORMAT)
+
+        valid_from = PluginUtils.convert_qt_date_to_python(QDate.currentDate())
         parcel.valid_from = valid_from
         parcel.geometry = ub_parcel.geometry
         self.session.add(parcel)
