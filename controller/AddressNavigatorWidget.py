@@ -76,7 +76,8 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
 
     def __combobox_setup(self):
 
-        layer_types = self.session.query(ClParcelType).order_by(ClParcelType.code.asc()).all()
+        layer_types = self.session.query(ClParcelType).filter(ClParcelType.layer_type == 1).\
+            order_by(ClParcelType.code.asc()).all()
 
         self.layer_type_cbox.clear()
         self.layer_type_cbox.addItem('*', -1)
@@ -485,6 +486,17 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
                     item.setData(Qt.UserRole, address_status.code)
                     self.address_parcel_twidget.setItem(count, 2, item)
 
+    @pyqtSlot()
+    def on_selected_parcel_remove_button_clicked(self):
+
+        selected_row = self.address_parcel_twidget.currentRow()
+        id = self.address_parcel_twidget.item(selected_row, 0).data(Qt.UserRole + 1)
+
+        self.session.query(StEntrance).filter(StEntrance.parcel_id == id).delete()
+        self.session.query(CaParcelAddress).filter(CaParcelAddress.id == id).delete()
+
+        self.address_parcel_twidget.removeRow(selected_row)
+
     def __is_add_addrs_parcel(self, id):
 
         is_true = False
@@ -512,7 +524,7 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
             return
 
         entry_count = self.session.query(StEntrance).filter(StEntrance.parcel_id == addrs_parcel.id).count()
-        print entry_count
+
         if entry_count == 0:
             PluginUtils.show_message(self, u'Анхааруулга', u'Энэ нэгж талбарын орц, гарцыг тодорхойлоогүй байна.')
             return
