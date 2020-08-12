@@ -165,7 +165,7 @@
         <property name="geometry">
          <rect>
           <x>10</x>
-          <y>390</y>
+          <y>412</y>
           <width>441</width>
           <height>20</height>
          </rect>
@@ -175,7 +175,7 @@
         <property name="geometry">
          <rect>
           <x>10</x>
-          <y>373</y>
+          <y>395</y>
           <width>85</width>
           <height>13</height>
          </rect>
@@ -197,7 +197,7 @@
          <string>Гудамж</string>
         </property>
        </widget>
-       <widget class="QComboBox" name="street_cbox">
+       <widget class="QComboBox" name="streets_cbox">
         <property name="geometry">
          <rect>
           <x>10</x>
@@ -207,7 +207,7 @@
          </rect>
         </property>
        </widget>
-       <widget class="QSpinBox" name="spinBox">
+       <widget class="QSpinBox" name="str_count_sbox">
         <property name="geometry">
          <rect>
           <x>403</x>
@@ -215,6 +215,9 @@
           <width>48</width>
           <height>22</height>
          </rect>
+        </property>
+        <property name="value">
+         <number>2</number>
         </property>
        </widget>
        <widget class="QComboBox" name="layer_type_cbox">
@@ -231,7 +234,7 @@
         <property name="geometry">
          <rect>
           <x>10</x>
-          <y>420</y>
+          <y>442</y>
           <width>283</width>
           <height>23</height>
          </rect>
@@ -272,7 +275,7 @@
         <property name="geometry">
          <rect>
           <x>10</x>
-          <y>480</y>
+          <y>510</y>
           <width>283</width>
           <height>23</height>
          </rect>
@@ -292,6 +295,54 @@
         </property>
         <property name="text">
          <string>Хаягийн мэдээллийн сангаас хасах</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="str_txt_lbl">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>381</y>
+          <width>441</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>6</pointsize>
+          <weight>75</weight>
+          <italic>true</italic>
+          <bold>true</bold>
+          <underline>true</underline>
+         </font>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+       <widget class="QLabel" name="str_txt_lbl_2">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>370</y>
+          <width>90</width>
+          <height>13</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Гудамжны төрөл:</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="str_type_lbl">
+        <property name="geometry">
+         <rect>
+          <x>110</x>
+          <y>369</y>
+          <width>341</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string/>
         </property>
        </widget>
       </widget>

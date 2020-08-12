@@ -27,6 +27,7 @@ from ..utils.DatabaseUtils import *
 from ..utils.PluginUtils import *
 from ..utils.LayerUtils import *
 from ..model.DatabaseHelper import *
+from ..model.StStreet import *
 from ..model.StStreetPoint import *
 from ..model.StMapStreetPoint import *
 from ..model.StStreetLineView import *
@@ -533,3 +534,91 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
     def on_apply_address_button_clicked(self):
 
         self.session.commit()
+
+    @pyqtSlot(QTableWidgetItem)
+    def on_address_parcel_twidget_itemClicked(self, item):
+
+        selected_row = self.address_parcel_twidget.currentRow()
+        id = self.address_parcel_twidget.item(selected_row, 0).data(Qt.UserRole + 1)
+
+        str_count = self.str_count_sbox.value()
+        sql = "select s.id, s.code, s.name from data_address.st_all_street_line_view s, data_address.ca_parcel_address p " \
+            "where p.id = " + str(id) + " group by s.name, s.id, s.code " \
+            "order by min(st_distance(s.geometry, p.geometry)) asc limit " + str(str_count) + ";"
+
+        result = self.session.execute(sql)
+
+        self.streets_cbox.clear()
+        for row in result:
+            str_id = row[0]
+            str_code = row[1]
+            str_name = row[2]
+
+            street_name = str_name
+            if str_code:
+                street_name = str_name + " - " + str_code
+            self.streets_cbox.addItem(street_name, str_id)
+
+        # layer = LayerUtils.layer_by_data_source("data_address", 'st_road_line_view')
+        # self.__select_feature(str(id), layer)
+
+    @pyqtSlot(int)
+    def on_str_count_sbox_valueChanged(self, str_count):
+
+        selected_row = self.address_parcel_twidget.currentRow()
+        id = self.address_parcel_twidget.item(selected_row, 0).data(Qt.UserRole + 1)
+
+        str_count = self.str_count_sbox.value()
+        sql = "select s.id, s.code, s.name from data_address.st_all_street_line_view s, data_address.ca_parcel_address p " \
+              "where p.id = " + str(id) + " group by s.name, s.id, s.code " \
+                                          "order by min(st_distance(s.geometry, p.geometry)) asc limit " + str(str_count) + ";"
+
+        result = self.session.execute(sql)
+
+        self.streets_cbox.clear()
+        for row in result:
+            str_id = row[0]
+            str_code = row[1]
+            str_name = row[2]
+
+            street_name = str_name
+            if str_code:
+                street_name = str_name + " - " + str_code
+            self.streets_cbox.addItem(street_name, str_id)
+
+    @pyqtSlot(int)
+    def on_streets_cbox_currentIndexChanged(self, index):
+
+        str_id = self.streets_cbox.itemData(self.streets_cbox.currentIndex())
+
+        print str_id
+        print '**'
+        if not str_id:
+            return
+        street = self.session.query(StStreet).filter_by(id=str_id).one()
+        str_shape = street.street_shape_id_ref
+
+        selected_row = self.address_parcel_twidget.currentRow()
+        id = self.address_parcel_twidget.item(selected_row, 0).data(Qt.UserRole + 1)
+
+        sql = "select unnest(string_to_array(base.st_street_line_parcel_side1(" + str(str_id) + ", " + str(id) + ")::text, ','));"
+        result = self.session.execute(sql)
+        side = None
+        for row in result:
+            side = row[0]
+
+        if not str_shape:
+            self.str_type_lbl.setText(u'Гудамжны хэлбэрийг тодорхойлоогүй байна. Гудамжны бүртгэлрүү орж засна уу!')
+        else:
+            self.str_type_lbl.setText(unicode(str_shape.description))
+        print side
+        if side == '-1':
+            self.str_txt_lbl.setText(u'Гудамжны зүүн гар талд байрлаж байгаа тул СОНДГОЙ дугаар авна')
+
+        if side == '1':
+            self.str_txt_lbl.setText(u'Гудамжны баруун гар талд байрлаж байгаа тул ТЭГШ дугаар авна')
+
+        layer = LayerUtils.layer_by_data_source("data_address", 'st_street_line_view')
+        self.__select_feature(str(str_id), layer)
+
+
