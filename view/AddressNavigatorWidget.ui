@@ -345,6 +345,19 @@
          <string/>
         </property>
        </widget>
+       <widget class="QPushButton" name="address_layer_button">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>570</y>
+          <width>283</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Давхарга</string>
+        </property>
+       </widget>
       </widget>
       <widget class="QWidget" name="tab">
        <attribute name="title">

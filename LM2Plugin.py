@@ -1557,6 +1557,17 @@ class LM2Plugin:
         ######
         addrs_group = root.findGroup(u"Хаяг")
 
+        vlayer = LayerUtils.layer_by_data_source("data_address", "st_street_start_point_view")
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer("st_street_start_point_view", "id", "data_address")
+        vlayer.loadNamedStyle(
+            str(os.path.dirname(os.path.realpath(__file__))) + "/template\style/st_street_start_point_view.qml")
+        vlayer.setLayerName(QApplication.translate("Plugin", "Street Start Point"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            addrs_group.addLayer(vlayer)
+            # vlayer.setReadOnly(True)
+
         vlayer = LayerUtils.layer_by_data_source("data_address", "st_entrance_view")
         if vlayer is None:
             vlayer = LayerUtils.load_layer_base_layer("st_entrance_view", "entrance_id", "data_address")
@@ -1641,6 +1652,17 @@ class LM2Plugin:
         myalayer = root.findLayer(vlayer.id())
         if myalayer is None:
             addrs_group.addLayer(vlayer)
+
+        au_group = root.findGroup(u"Хил")
+        vlayer = LayerUtils.layer_by_data_source("data_address", "au2_settlement_zone_view")
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer("au2_settlement_zone_view", "id", "data_address")
+        vlayer.loadNamedStyle(
+            str(os.path.dirname(os.path.realpath(__file__))) + "/template\style/au2_settlement_zone_view.qml")
+        vlayer.setLayerName(QApplication.translate("Plugin", "Settlement Zone"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            au_group.addLayer(vlayer)
 
         self.iface.mapCanvas().refresh()
 

@@ -621,4 +621,7 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
         layer = LayerUtils.layer_by_data_source("data_address", 'st_street_line_view')
         self.__select_feature(str(str_id), layer)
 
+    @pyqtSlot()
+    def on_address_layer_button_clicked(self):
 
+        print ''
