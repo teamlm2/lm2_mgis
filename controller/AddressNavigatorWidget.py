@@ -71,6 +71,7 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
         self.au2 = DatabaseUtils.working_l2_code()
         self.au1 = DatabaseUtils.working_l1_code()
         self.current_dialog = None
+        self.side = None
         self.__boundaryPointsLayer = None
         self.__setup_table_widget()
         self.__combobox_setup()
@@ -389,8 +390,10 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
         id = None
         for feature in select_feature:
             attr = feature.attributes()
-            id = attr[0]
-            geometry = WKTElement(feature.geometry().exportToWkt(), srid=4326)
+            print len(attr)
+            if len(attr) > 0:
+                id = attr[0]
+                geometry = WKTElement(feature.geometry().exportToWkt(), srid=4326)
 
         if id is None:
             return
@@ -492,9 +495,9 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
 
         selected_row = self.address_parcel_twidget.currentRow()
         id = self.address_parcel_twidget.item(selected_row, 0).data(Qt.UserRole + 1)
-
-        self.session.query(StEntrance).filter(StEntrance.parcel_id == id).delete()
-        self.session.query(CaParcelAddress).filter(CaParcelAddress.id == id).delete()
+        #
+        # self.session.query(StEntrance).filter(StEntrance.parcel_id == id).delete()
+        # self.session.query(CaParcelAddress).filter(CaParcelAddress.id == id).delete()
 
         self.address_parcel_twidget.removeRow(selected_row)
 
@@ -529,6 +532,32 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
         if entry_count == 0:
             PluginUtils.show_message(self, u'Анхааруулга', u'Энэ нэгж талбарын орц, гарцыг тодорхойлоогүй байна.')
             return
+        str_id = self.streets_cbox.itemData(self.streets_cbox.currentIndex())
+
+        if not str_id:
+            return
+        street = self.session.query(StStreet).filter_by(id=str_id).one()
+        str_shape = street.street_shape_id_ref
+
+        parcel_address_no = None
+
+        if self.side == '-1':
+            sql = "select unnest(string_to_array(base.st_generate_address_khashaa_no_sondgoi(" + str(
+                str_id) + ", " + str(id) + ")::text, ','));"
+            result = self.session.execute(sql)
+            for row in result:
+                parcel_address_no = row[0]
+        if self.side == '1':
+            sql = "select unnest(string_to_array(base.st_generate_address_khashaa_no_tegsh(" + str(
+                str_id) + ", " + str(id) + ")::text, ','));"
+            result = self.session.execute(sql)
+            for row in result:
+                parcel_address_no = row[0]
+        if parcel_address_no:
+            self.khashaa_no_edit.setText(parcel_address_no)
+
+        addrs_parcel.street_id = str_id
+        addrs_parcel.address_parcel_no = parcel_address_no
 
     @pyqtSlot()
     def on_apply_address_button_clicked(self):
@@ -601,21 +630,21 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
         selected_row = self.address_parcel_twidget.currentRow()
         id = self.address_parcel_twidget.item(selected_row, 0).data(Qt.UserRole + 1)
 
-        sql = "select unnest(string_to_array(base.st_street_line_parcel_side1(" + str(str_id) + ", " + str(id) + ")::text, ','));"
+        sql = "select unnest(string_to_array(base.st_street_parcel_side_with_str_start_point(" + str(str_id) + ", " + str(id) + ")::text, ','));"
         result = self.session.execute(sql)
-        side = None
+
         for row in result:
-            side = row[0]
+            self.side = row[0]
 
         if not str_shape:
             self.str_type_lbl.setText(u'Гудамжны хэлбэрийг тодорхойлоогүй байна. Гудамжны бүртгэлрүү орж засна уу!')
         else:
             self.str_type_lbl.setText(unicode(str_shape.description))
-        print side
-        if side == '-1':
+        print self.side
+        if self.side == '-1':
             self.str_txt_lbl.setText(u'Гудамжны зүүн гар талд байрлаж байгаа тул СОНДГОЙ дугаар авна')
 
-        if side == '1':
+        if self.side == '1':
             self.str_txt_lbl.setText(u'Гудамжны баруун гар талд байрлаж байгаа тул ТЭГШ дугаар авна')
 
         layer = LayerUtils.layer_by_data_source("data_address", 'st_street_line_view')
