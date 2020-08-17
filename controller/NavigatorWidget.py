@@ -13444,7 +13444,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
     def on_au_level1_button_clicked(self):
 
         root = QgsProject.instance().layerTreeRoot()
-        mygroup = root.findGroup(u"Хил")
+        mygroup = root.findGroup(U"Хилийн цэс, бүсчлэл")
         vlayer = LayerUtils.layer_by_data_source("admin_units", "au_level1")
         if vlayer is None:
             vlayer = LayerUtils.load_layer_base_layer("au_level1", "code","admin_units")
@@ -13458,7 +13458,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
     def on_au_level2_button_clicked(self):
 
         root = QgsProject.instance().layerTreeRoot()
-        mygroup = root.findGroup(u"Хил")
+        mygroup = root.findGroup(U"Хилийн цэс, бүсчлэл")
         vlayer = LayerUtils.layer_by_data_source("admin_units", "au_level2")
         if vlayer is None:
         # if not self.is_au_level2:
@@ -13474,7 +13474,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
     def on_au_level3_button_clicked(self):
 
         root = QgsProject.instance().layerTreeRoot()
-        mygroup = root.findGroup(u"Хил")
+        mygroup = root.findGroup(U"Хилийн цэс, бүсчлэл")
         vlayer = LayerUtils.layer_by_data_source("admin_units", "au_level3")
         if vlayer is None:
             vlayer = LayerUtils.load_layer_base_layer("au_level3", "code", "admin_units")

@@ -430,3 +430,75 @@ GRANT UPDATE, INSERT, DELETE ON TABLE data_address.st_map_street_point TO cadast
 GRANT ALL ON SEQUENCE data_address.st_map_street_point_id_seq TO geodb_admin;
 GRANT USAGE ON SEQUENCE data_address.st_map_street_point_id_seq TO cadastre_view;
 GRANT USAGE ON SEQUENCE data_address.st_map_street_point_id_seq TO cadastre_update;
+
+------
+
+set search_path to data_address;
+
+drop table if exists ca_parcel_address_history cascade;
+CREATE TABLE ca_parcel_address_history
+(
+id BIGSERIAL PRIMARY KEY,
+parcel_id int references data_address.ca_parcel_address_history on update cascade on delete restrict,
+is_active boolean not null DEFAULT false,
+in_source int references data_address.cl_address_source on update cascade on delete restrict,
+zipcode_id int references data_address.au_zipcode_area on update cascade on delete restrict,
+street_id int references data_address.st_street on update cascade on delete restrict,
+address_parcel_no VARCHAR(64),
+address_streetname character varying(250),
+address_neighbourhood character varying(250),
+geographic_name character varying(250),
+description text,
+valid_from date DEFAULT ('now'::text)::date,
+valid_till date DEFAULT 'infinity'::date,
+au1 varchar(3) references admin_units.au_level1 on update cascade on delete restrict,
+au2 varchar(5) references admin_units.au_level2 on update cascade on delete restrict,
+au3 varchar(8) references admin_units.au_level3 on update cascade on delete restrict,
+khoroolol_id int references admin_units.au_khoroolol on update cascade on delete restrict,
+sort_value int,
+created_by integer,
+updated_by integer,
+created_at timestamp(0) without time zone NOT NULL DEFAULT now(),
+updated_at timestamp(0) without time zone NOT NULL DEFAULT now()
+);
+COMMENT ON TABLE ca_parcel_address_history
+  IS 'Нэгж талбарын хаягийн түүх';
+grant select, insert, update, delete on ca_parcel_address_history to address_update;
+grant select on ca_parcel_address_history to address_view;
+GRANT SELECT, UPDATE, INSERT, DELETE ON TABLE data_address.ca_parcel_address_history TO cadastre_update;
+GRANT SELECT ON TABLE data_address.ca_parcel_address_history TO cadastre_view;
+
+CREATE INDEX ca_parcel_address_history_parcel_id_idx ON ca_parcel_address_history(parcel_id);
+
+------------
+drop table if exists ca_building_address_history cascade;
+CREATE TABLE ca_building_address_history
+(
+id BIGSERIAL PRIMARY KEY,
+building_id int references data_address.ca_building_address_history on update cascade on delete restrict,
+is_active boolean not null DEFAULT false,
+building_name text,
+in_source int references data_address.cl_address_source on update cascade on delete restrict,
+zipcode_id int references data_address.au_zipcode_area on update cascade on delete restrict,
+street_id int references data_address.st_street on update cascade on delete restrict,
+address_parcel_no VARCHAR(64),
+address_streetname character varying(250),
+address_building_no VARCHAR(64),
+valid_from date DEFAULT ('now'::text)::date,
+valid_till date DEFAULT 'infinity'::date,
+au1 varchar(3) references admin_units.au_level1 on update cascade on delete restrict,
+au2 varchar(5) references admin_units.au_level2 on update cascade on delete restrict,
+au3 varchar(8) references admin_units.au_level3 on update cascade on delete restrict,
+khoroolol_id int references admin_units.au_khoroolol on update cascade on delete restrict,
+sort_value int,
+created_by integer,
+updated_by integer,
+created_at timestamp(0) without time zone NOT NULL DEFAULT now(),
+updated_at timestamp(0) without time zone NOT NULL DEFAULT now()
+);
+COMMENT ON TABLE ca_building_address_history
+  IS 'Барилгын хаягийн түүх';
+grant select, insert, update, delete on ca_building_address_history to address_update;
+grant select on ca_building_address_history to address_view;
+
+CREATE INDEX ca_building_address_history_parcel_id_idx ON ca_building_address_history(building_id);

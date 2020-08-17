@@ -1493,7 +1493,7 @@ class LM2Plugin:
     def __refresh_layer(self):
 
         root = QgsProject.instance().layerTreeRoot()
-        LayerUtils.refresh_layer1()
+        LayerUtils.refresh_layer()
 
         ###
         saf_group = root.findGroup(u"Мэдээний хяналт")
@@ -1502,12 +1502,13 @@ class LM2Plugin:
         vlayer = LayerUtils.layer_by_data_source("data_landuse", "set_landuse_safety_zone")
         if vlayer is None:
             vlayer = LayerUtils.load_layer_base_layer("set_landuse_safety_zone", "id", "data_landuse")
-        # vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))) + "/template\style/ca_parcel.qml")
+        vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))) + "/template\style/set_landuse_safety_zone.qml")
         vlayer.setLayerName(QApplication.translate("Plugin", "Safety Zone"))
         myalayer = root.findLayer(vlayer.id())
         if myalayer is None:
             saf_group.addLayer(vlayer)
             vlayer.setReadOnly(True)
+        root.findLayer(vlayer.id()).setVisible(0)
         ###
 
         mygroup = root.findGroup(u"Кадастр")
@@ -1566,6 +1567,7 @@ class LM2Plugin:
         myalayer = root.findLayer(vlayer.id())
         if myalayer is None:
             addrs_group.addLayer(vlayer)
+        root.findLayer(vlayer.id()).setVisible(0)
             # vlayer.setReadOnly(True)
 
         vlayer = LayerUtils.layer_by_data_source("data_address", "st_entrance_view")
@@ -1577,6 +1579,7 @@ class LM2Plugin:
         myalayer = root.findLayer(vlayer.id())
         if myalayer is None:
             addrs_group.addLayer(vlayer)
+        root.findLayer(vlayer.id()).setVisible(0)
             # vlayer.setReadOnly(True)
 
         vlayer = LayerUtils.layer_by_data_source("data_address", "ca_building_address_view")
@@ -1588,6 +1591,7 @@ class LM2Plugin:
         myalayer = root.findLayer(vlayer.id())
         if myalayer is None:
             addrs_group.addLayer(vlayer)
+        root.findLayer(vlayer.id()).setVisible(0)
             # vlayer.setReadOnly(True)
 
         vlayer = LayerUtils.layer_by_data_source("data_address", "ca_parcel_address_view")
@@ -1598,6 +1602,7 @@ class LM2Plugin:
         myalayer = root.findLayer(vlayer.id())
         if myalayer is None:
             addrs_group.addLayer(vlayer)
+        root.findLayer(vlayer.id()).setVisible(0)
             # vlayer.setReadOnly(True)
 
         vlayer = LayerUtils.layer_by_data_source("data_address", "st_road_line_view")
@@ -1609,6 +1614,7 @@ class LM2Plugin:
         myalayer = root.findLayer(vlayer.id())
         if myalayer is None:
             addrs_group.addLayer(vlayer)
+        root.findLayer(vlayer.id()).setVisible(0)
 
         vlayer = LayerUtils.layer_by_data_source("data_address", "st_street_line_view")
         if vlayer is None:
@@ -1619,6 +1625,7 @@ class LM2Plugin:
         myalayer = root.findLayer(vlayer.id())
         if myalayer is None:
             addrs_group.addLayer(vlayer)
+        root.findLayer(vlayer.id()).setVisible(0)
 
         vlayer = LayerUtils.layer_by_data_source("data_address", "st_street_sub_polygon_view")
         if vlayer is None:
@@ -1629,6 +1636,7 @@ class LM2Plugin:
         myalayer = root.findLayer(vlayer.id())
         if myalayer is None:
             addrs_group.addLayer(vlayer)
+        root.findLayer(vlayer.id()).setVisible(0)
 
         ######
         vlayer = LayerUtils.layer_by_data_source("data_address", "st_street_polygon_view")
@@ -1640,6 +1648,7 @@ class LM2Plugin:
         myalayer = root.findLayer(vlayer.id())
         if myalayer is None:
             addrs_group.addLayer(vlayer)
+        root.findLayer(vlayer.id()).setVisible(0)
 
         self.iface.mapCanvas().refresh()
 
@@ -1652,8 +1661,9 @@ class LM2Plugin:
         myalayer = root.findLayer(vlayer.id())
         if myalayer is None:
             addrs_group.addLayer(vlayer)
+        root.findLayer(vlayer.id()).setVisible(0)
 
-        au_group = root.findGroup(u"Хил")
+        au_group = root.findGroup(U"Хилийн цэс, бүсчлэл")
         vlayer = LayerUtils.layer_by_data_source("data_address", "au2_settlement_zone_view")
         if vlayer is None:
             vlayer = LayerUtils.load_layer_base_layer("au2_settlement_zone_view", "id", "data_address")
@@ -1663,6 +1673,7 @@ class LM2Plugin:
         myalayer = root.findLayer(vlayer.id())
         if myalayer is None:
             au_group.addLayer(vlayer)
+        root.findLayer(vlayer.id()).setVisible(0)
 
         self.iface.mapCanvas().refresh()
 

@@ -384,47 +384,55 @@ class LayerUtils(object):
                 layer.removeSelection()
 
     @staticmethod
-    def refresh_layer1():
+    def refresh_layer():
 
         root = QgsProject.instance().layerTreeRoot()
+
         mygroup = root.findGroup(u"Мэдээний хяналт")
         if mygroup is None:
             group = root.insertGroup(0, u"Мэдээний хяналт")
+            group.setExpanded(False)
             myNewGroup = group.addGroup(u"Хамгаалалтын зурвас")
-        mygroup = root.findGroup(u"ГНСТайлан")
-        if mygroup is None:
-            group = root.insertGroup(1, u"ГНСТайлан")
+
         mygroup = root.findGroup(u"Тайлан")
         if mygroup is None:
-            group = root.insertGroup(2, u"Тайлан")
+            group = root.insertGroup(1, u"Тайлан")
             myNewGroup = group.addGroup(u"Газрын улсын бүртгэл")
-        mygroup = root.findGroup(u"Кадастрын төлөвлөгөө")
+
+        mygroup = root.findGroup(u"ГНСТайлан")
         if mygroup is None:
-            group = root.insertGroup(3, u"Кадастрын төлөвлөгөө")
-        mygroup = root.findGroup(u"Тусгай хэрэгцээний газар")
-        if mygroup is None:
-            group = root.insertGroup(6, u"Тусгай хэрэгцээний газар")
-        mygroup = root.findGroup(u"Кадастрын өөрчлөлт")
-        if mygroup is None:
-            group = root.insertGroup(2, u"Кадастрын өөрчлөлт")
+            group = root.insertGroup(2, u"ГНСТайлан")
+
         mygroup = root.findGroup(u"Кадастр")
         if mygroup is None:
-            group = root.insertGroup(4, u"Кадастр")
+            group = root.insertGroup(3, u"Кадастр")
+            group.setExpanded(False)
+            myNewGroup = group.addGroup(u"Кадастрын өөрчлөлт")
+
+        mygroup = root.findGroup(u"Тусгай хэрэгцээний газар")
+        if mygroup is None:
+            group = root.insertGroup(4, u"Тусгай хэрэгцээний газар")
+            group.setExpanded(False)
+
         mygroup = root.findGroup(u"Үнэлгээ, төлбөрийн бүс")
         if mygroup is None:
-            group = root.insertGroup(7, u"Үнэлгээ, төлбөрийн бүс")
-        mygroup = root.findGroup(U"Хил")
+            group = root.insertGroup(5, u"Үнэлгээ, төлбөрийн бүс")
+            group.setExpanded(False)
+        mygroup = root.findGroup(U"Хилийн цэс, бүсчлэл")
         if mygroup is None:
-            group = root.insertGroup(8, u"Хил")
+            group = root.insertGroup(6, u"Хилийн цэс, бүсчлэл")
+            group.setExpanded(False)
         mygroup = root.findGroup(U"CAMA")
         if mygroup is None:
-            group = root.insertGroup(8, u"CAMA")
+            group = root.insertGroup(7, u"CAMA")
+            group.setExpanded(False)
         mygroup = root.findGroup(U"Хаяг")
         if mygroup is None:
             group = root.insertGroup(8, u"Хаяг")
+            group.setExpanded(False)
 
     @staticmethod
-    def refresh_layer():
+    def refresh_layer1():
 
         session = SessionHandler().session_instance()
 
@@ -432,12 +440,19 @@ class LayerUtils(object):
         mygroup = root.findGroup(u"Мэдээний хяналт")
         if mygroup is None:
             quality_check_group = root.insertGroup(0, u"Мэдээний хяналт")
-        mygroup = root.findGroup(u"ГНСТайлан")
-        if mygroup is None:
-            gt_report_group = root.insertGroup(1, u"ГНСТайлан")
+
         mygroup = root.findGroup(u"Тайлан")
         if mygroup is None:
             reports_group = root.insertGroup(2, u"Тайлан")
+
+        mygroup = root.findGroup(u"ГНСТайлан")
+        if mygroup is None:
+            gt_report_group = root.insertGroup(1, u"ГНСТайлан")
+
+        mygroup = root.findGroup(u"Кадастр")
+        if mygroup is None:
+            cadastre_group = root.insertGroup(4, u"Кадастр")
+
         mygroup = root.findGroup(u"Кадастрын төлөвлөгөө")
         if mygroup is None:
             cadastre_plan_group = root.insertGroup(3, u"Кадастрын төлөвлөгөө")
@@ -447,15 +462,13 @@ class LayerUtils(object):
         mygroup = root.findGroup(u"Кадастрын өөрчлөлт")
         if mygroup is None:
             cadastre_maintenance_group = root.insertGroup(2, u"Кадастрын өөрчлөлт")
-        mygroup = root.findGroup(u"Кадастр")
-        if mygroup is None:
-            cadastre_group = root.insertGroup(4, u"Кадастр")
+
         mygroup = root.findGroup(u"Үнэлгээ, төлбөрийн бүс")
         if mygroup is None:
             land_fee_and_tax_zones_group = root.insertGroup(7, u"Үнэлгээ, төлбөрийн бүс")
-        mygroup = root.findGroup(U"Хил")
+        mygroup = root.findGroup(U"Хилийн цэс, бүсчлэл")
         if mygroup is None:
-            admin_units_group = root.insertGroup(8, u"Хил")
+            admin_units_group = root.insertGroup(8, u"Хилийн цэс, бүсчлэл")
         mygroup = root.findGroup(U"CAMA")
         if mygroup is None:
             admin_units_group = root.insertGroup(8, u"CAMA")
