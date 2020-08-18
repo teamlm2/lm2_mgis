@@ -439,12 +439,13 @@ drop table if exists ca_parcel_address_history cascade;
 CREATE TABLE ca_parcel_address_history
 (
 id BIGSERIAL PRIMARY KEY,
-parcel_id int references data_address.ca_parcel_address_history on update cascade on delete restrict,
+parcel_id int references data_address.ca_parcel_address on update cascade on delete restrict,
 is_active boolean not null DEFAULT false,
 in_source int references data_address.cl_address_source on update cascade on delete restrict,
 zipcode_id int references data_address.au_zipcode_area on update cascade on delete restrict,
 street_id int references data_address.st_street on update cascade on delete restrict,
 address_parcel_no VARCHAR(64),
+address_street_code character varying(250),
 address_streetname character varying(250),
 address_neighbourhood character varying(250),
 geographic_name character varying(250),
@@ -475,13 +476,14 @@ drop table if exists ca_building_address_history cascade;
 CREATE TABLE ca_building_address_history
 (
 id BIGSERIAL PRIMARY KEY,
-building_id int references data_address.ca_building_address_history on update cascade on delete restrict,
+building_id int references data_address.ca_building_address on update cascade on delete restrict,
 is_active boolean not null DEFAULT false,
 building_name text,
 in_source int references data_address.cl_address_source on update cascade on delete restrict,
 zipcode_id int references data_address.au_zipcode_area on update cascade on delete restrict,
 street_id int references data_address.st_street on update cascade on delete restrict,
 address_parcel_no VARCHAR(64),
+address_street_code character varying(250),
 address_streetname character varying(250),
 address_building_no VARCHAR(64),
 valid_from date DEFAULT ('now'::text)::date,
