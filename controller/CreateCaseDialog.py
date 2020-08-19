@@ -1420,6 +1420,8 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
                 filter(StRoad.line_geom.ST_Touches(StStreetLineView.geometry)).\
                 filter(StStreetLineView.id == id).all()
 
+        if roads is None:
+            return
         for value in roads:
             count = self.touches_road_twidget.rowCount()
             self.touches_road_twidget.insertRow(count)
@@ -1492,10 +1494,15 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
         tree = self.street_treewidget
 
         au2 = DatabaseUtils.working_l2_code()
-        values = self.session.query(StStreet).\
-            filter(AuLevel2.geometry.ST_Intersects(StStreet.geometry)).\
-            filter(AuLevel2.code == au2).\
-            filter(StStreet.parent_id == None).\
+        # values = self.session.query(StStreet).\
+        #     filter(AuLevel2.geometry.ST_Intersects(StStreet.geometry)).\
+        #     filter(AuLevel2.code == au2).\
+        #     filter(StStreet.parent_id == None).\
+        #     order_by(StStreet.name, StStreet.code)
+
+        values = self.session.query(StStreet). \
+            filter(StStreet.au2 == au2). \
+            filter(StStreet.parent_id == None). \
             order_by(StStreet.name, StStreet.code)
 
         filter_is_set = False

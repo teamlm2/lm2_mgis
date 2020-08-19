@@ -155,6 +155,10 @@ geometry geometry(POLYGON, 4326),
 area_m2 numeric,
 line_geom geometry(LineString,4326),
 length numeric,
+max_speed integer;
+lanes integer;
+surface text;
+highway text;
 created_by integer,
 updated_by integer,
 created_at timestamp(0) without time zone NOT NULL DEFAULT now(),
