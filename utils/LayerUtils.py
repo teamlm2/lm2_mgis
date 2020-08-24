@@ -430,6 +430,7 @@ class LayerUtils(object):
         if mygroup is None:
             group = root.insertGroup(8, u"Хаяг")
             group.setExpanded(False)
+            myNewGroup = group.addGroup(u"Хаяг засварлалт")
 
     @staticmethod
     def refresh_layer1():

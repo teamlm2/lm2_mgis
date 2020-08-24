@@ -653,4 +653,53 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
     @pyqtSlot()
     def on_address_layer_button_clicked(self):
 
-        print ''
+        root = QgsProject.instance().layerTreeRoot()
+
+        mygroup = root.findGroup(U"Хаяг")
+        myNewGroup = root.findGroup(U"Хаяг засварлалт")
+        if mygroup is None:
+            group = root.insertGroup(8, u"Хаяг")
+            group.setExpanded(False)
+            if myNewGroup is None:
+                myNewGroup = group.addGroup(u"Хаяг засварлалт")
+
+        vlayer = LayerUtils.layer_by_data_source("data_address", "geocad_building_view")
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer("geocad_building_view", "gid", "data_address")
+        vlayer.loadNamedStyle(
+            str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "template\style/geocad_building_view.qml")
+        vlayer.setLayerName(QApplication.translate("Plugin", "GeoCad Building"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            myNewGroup.addLayer(vlayer)
+        # root.findLayer(vlayer.id()).setVisible(0)
+
+        vlayer = LayerUtils.layer_by_data_source("data_address", "geocad_parcel_view")
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer("geocad_parcel_view", "gid", "data_address")
+        vlayer.loadNamedStyle(
+            str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "template\style/geocad_parcel_view.qml")
+        vlayer.setLayerName(QApplication.translate("Plugin", "GeoCad Parcel"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            myNewGroup.addLayer(vlayer)
+
+        vlayer = LayerUtils.layer_by_data_source("data_address", "geocad_street_view")
+        if vlayer is None:
+            vlayer = LayerUtils.load_line_layer_base_layer("geocad_street_view", "gid", "data_address")
+        vlayer.loadNamedStyle(
+            str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "template\style/geocad_street_view.qml")
+        vlayer.setLayerName(QApplication.translate("Plugin", "GeoCad Street"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            myNewGroup.addLayer(vlayer)
+
+        vlayer = LayerUtils.layer_by_data_source("data_address", "geocad_street_point_view")
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer("geocad_street_point_view", "id", "data_address")
+        vlayer.loadNamedStyle(
+            str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "template\style/geocad_street_point_view.qml")
+        vlayer.setLayerName(QApplication.translate("Plugin", "GeoCad Street Point"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            myNewGroup.addLayer(vlayer)
