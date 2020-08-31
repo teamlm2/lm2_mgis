@@ -78,6 +78,7 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
 
     def __combobox_setup(self):
 
+        #parcel
         layer_types = self.session.query(ClParcelType).filter(ClParcelType.layer_type == 1).\
             order_by(ClParcelType.code.asc()).all()
 
@@ -86,6 +87,16 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
 
         for value in layer_types:
             self.layer_type_cbox.addItem(value.description, value.code)
+
+        #building
+        layer_types = self.session.query(ClParcelType).filter(ClParcelType.layer_type == 2). \
+            order_by(ClParcelType.code.asc()).all()
+
+        self.building_layer_type_cbox.clear()
+        self.building_layer_type_cbox.addItem('*', -1)
+
+        for value in layer_types:
+            self.building_layer_type_cbox.addItem(value.description, value.code)
 
     def __setup_table_widget(self):
 
@@ -106,6 +117,11 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
         self.address_parcel_twidget.setSelectionBehavior(QTableWidget.SelectRows)
         self.address_parcel_twidget.setSelectionMode(QTableWidget.SingleSelection)
 
+        self.address_building_twidget.setAlternatingRowColors(True)
+        self.address_building_twidget.setEditTriggers(QTableWidget.NoEditTriggers)
+        self.address_building_twidget.setSelectionBehavior(QTableWidget.SelectRows)
+        self.address_building_twidget.setSelectionMode(QTableWidget.SingleSelection)
+
     @pyqtSlot()
     def on_selected_str_load_button_clicked(self):
 
@@ -120,6 +136,12 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
 
         if str_id is None:
             return
+        street = self.session.query(StStreet).filter(StStreet.id == str_id).one()
+
+        self.str_id_lbl.setText(str(str_id))
+        self.str_code_lbl.setText(str(street.code))
+        self.str_name_lbl.setText(street.name)
+
         sql = "select * from base.st_street_line_view_start_end_nodes("+ str(str_id) +");"
 
         result = self.session.execute(sql)
@@ -307,8 +329,7 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
 
         self.plugin.iface.mapCanvas().refresh()
 
-    @pyqtSlot()
-    def on_apply_button_clicked(self):
+    def __save_street_point(self):
 
         for row in range(self.str_nodes_twidget.rowCount()):
             item_main = self.str_nodes_twidget.item(row, 0)
@@ -490,6 +511,153 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
                     item.setData(Qt.UserRole, address_status.code)
                     self.address_parcel_twidget.setItem(count, 2, item)
 
+    #building add
+    @pyqtSlot()
+    def on_selected_building_load_button_clicked(self):
+
+        layer_type_id = self.building_layer_type_cbox.itemData(self.building_layer_type_cbox.currentIndex())
+
+        layer_type = self.session.query(ClParcelType).filter_by(code=layer_type_id).one()
+
+        layer_name = None
+        schema_name = None
+        if layer_type.table_name == 'data_soums_union.ca_parcel_tbl':
+            layer_name = "ca_parcel"
+            schema_name = "data_soums_union"
+        elif layer_type.table_name == 'data_soums_union.ca_tmp_parcel':
+            layer_name = "ca_tmp_parcel_view"
+            schema_name = "data_soums_union"
+        elif layer_type.table_name == 'data_soums_union.ca_building_tbl':
+            layer_name = "ca_building"
+            schema_name = "data_soums_union"
+        elif layer_type.table_name == 'data_soums_union.ca_tmp_building':
+            layer_name = "ca_tmp_building_view"
+            schema_name = "data_soums_union"
+        elif layer_type.table_name == 'data_address.ca_parcel_address_view':
+            layer_name = "ca_parcel_address_view"
+            schema_name = "data_address"
+        elif layer_type.table_name == 'data_address.ca_building_address_view':
+            layer_name = "ca_building_address_view"
+            schema_name = "data_address"
+
+        if not layer_name:
+            return
+        parcelLayer = LayerUtils.layer_by_data_source(schema_name, layer_name)
+        select_feature = parcelLayer.selectedFeatures()
+
+        id = None
+        for feature in select_feature:
+            attr = feature.attributes()
+            print len(attr)
+            if len(attr) > 0:
+                id = attr[0]
+                geometry = WKTElement(feature.geometry().exportToWkt(), srid=4326)
+
+        if id is None:
+            return
+        if layer_name == "ca_building_address_view":
+            addrs_building = self.session.query(CaBuildingAddress).filter_by(id=id).one()
+            address_status = self.session.query(ClAddressStatus).filter_by(code=addrs_building.status).one()
+            if not self.__is_add_addrs_building(addrs_building.id):
+                count = self.address_building_twidget.rowCount()
+                self.address_building_twidget.insertRow(count)
+
+                item = QTableWidgetItem(str(addrs_building.building_id))
+                item.setData(Qt.UserRole, addrs_building.building_id)
+                item.setData(Qt.UserRole + 1, addrs_building.id)
+                self.address_building_twidget.setItem(count, 0, item)
+
+                item = QTableWidgetItem(unicode(layer_type.description))
+                item.setData(Qt.UserRole, layer_type.code)
+                item.setData(Qt.UserRole + 1, layer_type.layer_type)
+                self.address_building_twidget.setItem(count, 1, item)
+
+                item = QTableWidgetItem(unicode(address_status.description))
+                item.setData(Qt.UserRole, address_status.code)
+                self.address_building_twidget.setItem(count, 2, item)
+        else:
+            addrs_building_count = self.session.query(CaBuildingAddress). \
+                filter(CaBuildingAddress.parcel_type == layer_type.code). \
+                filter(CaBuildingAddress.building_id == id).count()
+            if addrs_building_count == 1:
+                addrs_building = self.session.query(CaBuildingAddress). \
+                    filter(CaBuildingAddress.parcel_type == layer_type.code). \
+                    filter(CaBuildingAddress.building_id == id).one()
+                # PluginUtils.show_message(self, u'Анхааруулга', u'Энэ нэгж талбар хаягын мэдээллийн санд бүртгэлтэй байна.')
+                # return
+
+                message_box = QMessageBox()
+                message_box.setText(u'Энэ нэгж талбар хаягын мэдээллийн санд бүртгэлтэй байна. Жагсаалтад нэмэх үү?')
+
+                yes_button = message_box.addButton(u'Тийм', QMessageBox.ActionRole)
+                message_box.addButton(u'Үгүй', QMessageBox.ActionRole)
+                message_box.exec_()
+                address_status = self.session.query(ClAddressStatus).filter_by(code=addrs_building.status).one()
+                if message_box.clickedButton() == yes_button:
+                    if not self.__is_add_addrs_building(addrs_building.id):
+                        count = self.address_building_twidget.rowCount()
+                        self.address_building_twidget.insertRow(count)
+
+                        item = QTableWidgetItem(str(addrs_building.building_id))
+                        item.setData(Qt.UserRole, addrs_building.building_id)
+                        item.setData(Qt.UserRole + 1, addrs_building.id)
+                        self.address_building_twidget.setItem(count, 0, item)
+
+                        item = QTableWidgetItem(unicode(layer_type.description))
+                        item.setData(Qt.UserRole, layer_type.code)
+                        item.setData(Qt.UserRole + 1, layer_type.layer_type)
+                        self.address_building_twidget.setItem(count, 1, item)
+
+                        item = QTableWidgetItem(unicode(address_status.description))
+                        item.setData(Qt.UserRole, address_status.code)
+                        self.address_building_twidget.setItem(count, 2, item)
+
+            if addrs_building_count == 0:
+                addrs_building_overlaps_count = self.session.query(CaBuildingAddress). \
+                    filter(geometry.ST_Overlaps(CaBuildingAddress.geometry)). \
+                    filter(CaBuildingAddress.is_active == True).count()
+
+                if addrs_building_overlaps_count == 0:
+                    address_status = self.session.query(ClAddressStatus).filter_by(code=1).one()
+
+                    addrs_building = CaBuildingAddress()
+                    addrs_building.building_id = id
+                    addrs_building.is_active = True
+                    addrs_building.geometry = geometry
+                    addrs_building.parcel_type = layer_type.code
+                    addrs_building.status = 1
+
+                    self.session.add(addrs_building)
+                    self.session.flush()
+
+                    count = self.address_building_twidget.rowCount()
+                    self.address_building_twidget.insertRow(count)
+
+                    item = QTableWidgetItem(str(id))
+                    item.setData(Qt.UserRole, id)
+                    item.setData(Qt.UserRole + 1, addrs_parcel.id)
+                    self.address_building_twidget.setItem(count, 0, item)
+
+                    item = QTableWidgetItem(unicode(layer_type.description))
+                    item.setData(Qt.UserRole, layer_type.code)
+                    item.setData(Qt.UserRole + 1, layer_type.layer_type)
+                    self.address_building_twidget.setItem(count, 1, item)
+
+                    item = QTableWidgetItem(unicode(address_status.description))
+                    item.setData(Qt.UserRole, address_status.code)
+                    self.address_building_twidget.setItem(count, 2, item)
+
+    @pyqtSlot()
+    def on_selected_building_remove_button_clicked(self):
+
+        selected_row = self.address_building_twidget.currentRow()
+        id = self.address_building_twidget.item(selected_row, 0).data(Qt.UserRole + 1)
+        #
+        # self.session.query(StEntrance).filter(StEntrance.parcel_id == id).delete()
+        # self.session.query(CaBuildingAddress).filter(CaBuildingAddress.id == id).delete()
+
+        self.address_building_twidget.removeRow(selected_row)
+
     @pyqtSlot()
     def on_selected_parcel_remove_button_clicked(self):
 
@@ -513,17 +681,46 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
 
         return is_true
 
+    def __is_add_addrs_building(self, id):
+
+        is_true = False
+        for row in range(self.address_building_twidget.rowCount()):
+            item_id = self.address_building_twidget.item(row, 0)
+            addrs_id = item_id.data(Qt.UserRole + 1)
+
+            if addrs_id == id:
+                is_true = True
+
+        return is_true
+
     @pyqtSlot()
     def on_get_address_button_clicked(self):
+
+        if self.tabWidget.currentIndex() == 0:
+            self.__get_parcel_address()
+        if self.tabWidget.currentIndex() == 1:
+            self.__get_building_address()
+
+    def __get_parcel_address(self):
 
         selected_row = self.address_parcel_twidget.currentRow()
         if selected_row == -1:
             return
         id = self.address_parcel_twidget.item(selected_row, 0).data(Qt.UserRole + 1)
 
-        addrs_parcel = self.session.query(CaParcelAddress).filter_by(id = id).one()
+        addrs_parcel_count = self.session.query(CaParcelAddress).filter_by(id=id).count()
+        if addrs_parcel_count == 0:
+            PluginUtils.show_message(self, u'Анхааруулга', u'Энэ нэгж талбар хаяг мэдээллийн санд ороогүй байна.')
+            return
 
-        if addrs_parcel == 2:
+        addrs_parcel = self.session.query(CaParcelAddress).filter_by(id=id).one()
+
+        status_code = 1
+        if addrs_parcel.status_ref:
+            status = addrs_parcel.status_ref
+            status_code = status.code
+
+        if status_code == 3:
             PluginUtils.show_message(self, u'Анхааруулга', u'Энэ нэгж талбарын хаяг баталгаажсан байна.')
             return
 
@@ -538,6 +735,10 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
             return
         street = self.session.query(StStreet).filter_by(id=str_id).one()
         str_shape = street.street_shape_id_ref
+
+        if street.start_number is None:
+            PluginUtils.show_message(self, u'Анхааруулга', u'Гудамжны бүртгэлд нэгж талбарт олгох хаягын эхлэх дугаарыг оруулаагүй байна.')
+            return
 
         parcel_address_no = None
 
@@ -559,9 +760,77 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
         addrs_parcel.street_id = str_id
         addrs_parcel.address_parcel_no = parcel_address_no
 
+    #building
+    def __get_building_address(self):
+
+        print 'dddddddd'
+        selected_row = self.address_building_twidget.currentRow()
+        if selected_row == -1:
+            return
+        id = self.address_building_twidget.item(selected_row, 0).data(Qt.UserRole + 1)
+
+        addrs_parcel_count = self.session.query(CaBuildingAddress).filter_by(id=id).count()
+        if addrs_parcel_count == 0:
+            PluginUtils.show_message(self, u'Анхааруулга', u'Энэ нэгж талбар хаяг мэдээллийн санд ороогүй байна.')
+            return
+
+        addrs_parcel = self.session.query(CaBuildingAddress).filter_by(id=id).one()
+
+        status_code = 1
+        if addrs_parcel.status_ref:
+            status = addrs_parcel.status_ref
+            status_code = status.code
+
+        if status_code == 3:
+            PluginUtils.show_message(self, u'Анхааруулга', u'Энэ барилгын хаяг баталгаажсан байна.')
+            return
+
+        entry_count = self.session.query(StEntrance).filter(StEntrance.building_id == addrs_parcel.id).count()
+
+        if entry_count == 0:
+            PluginUtils.show_message(self, u'Анхааруулга', u'Энэ барилгын орц, гарцыг тодорхойлоогүй байна.')
+            return
+        str_id = self.building_streets_cbox.itemData(self.building_streets_cbox.currentIndex())
+
+        if not str_id:
+            return
+        street = self.session.query(StStreet).filter_by(id=str_id).one()
+        str_shape = street.street_shape_id_ref
+        if street.building_start_number is None:
+            PluginUtils.show_message(self, u'Анхааруулга', u'Гудамжны бүртгэлд барилгад олгох хаягын эхлэх дугаарыг оруулаагүй байна.')
+            return
+        parcel_address_no = None
+
+        sql = "select unnest(string_to_array(base.st_generate_address_building_without_parcel(" + str(
+            str_id) + ", " + str(id) + ")::text, ','));"
+        result = self.session.execute(sql)
+        print result
+        for row in result:
+            print row[0]
+            parcel_address_no = row[0]
+        # if self.side == '-1':
+        #     sql = "select unnest(string_to_array(base.st_generate_address_khashaa_no_sondgoi(" + str(
+        #         str_id) + ", " + str(id) + ")::text, ','));"
+        #     result = self.session.execute(sql)
+        #     for row in result:
+        #         parcel_address_no = row[0]
+        # if self.side == '1':
+        #     sql = "select unnest(string_to_array(base.st_generate_address_khashaa_no_tegsh(" + str(
+        #         str_id) + ", " + str(id) + ")::text, ','));"
+        #     result = self.session.execute(sql)
+        #     for row in result:
+        #         parcel_address_no = row[0]
+        if parcel_address_no:
+            self.building_no_edit.setText(parcel_address_no)
+
+        addrs_parcel.street_id = str_id
+        addrs_parcel.address_building_no = parcel_address_no
+
     @pyqtSlot()
     def on_apply_address_button_clicked(self):
 
+        if self.tabWidget.currentIndex() == 2:
+            self.__save_street_point()
         self.session.commit()
 
     @pyqtSlot(QTableWidgetItem)
@@ -591,6 +860,32 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
         # layer = LayerUtils.layer_by_data_source("data_address", 'st_road_line_view')
         # self.__select_feature(str(id), layer)
 
+    #building
+    @pyqtSlot(QTableWidgetItem)
+    def on_address_building_twidget_itemClicked(self, item):
+
+        selected_row = self.address_building_twidget.currentRow()
+        id = self.address_building_twidget.item(selected_row, 0).data(Qt.UserRole + 1)
+
+        str_count = self.building_str_count_sbox.value()
+        sql = "select s.id, s.code, s.name from data_address.st_all_street_line_view s, data_address.ca_building_address p " \
+              "where p.id = " + str(id) + " group by s.name, s.id, s.code " \
+                                          "order by min(st_distance(s.geometry, p.geometry)) asc limit " + str(
+            str_count) + ";"
+
+        result = self.session.execute(sql)
+
+        self.building_streets_cbox.clear()
+        for row in result:
+            str_id = row[0]
+            str_code = row[1]
+            str_name = row[2]
+
+            street_name = str_name
+            if str_code:
+                street_name = str_name + " - " + str_code
+            self.building_streets_cbox.addItem(street_name, str_id)
+
     @pyqtSlot(int)
     def on_str_count_sbox_valueChanged(self, str_count):
 
@@ -615,13 +910,37 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
                 street_name = str_name + " - " + str_code
             self.streets_cbox.addItem(street_name, str_id)
 
+    #building
+    @pyqtSlot(int)
+    def on_building_str_count_sbox_valueChanged(self, str_count):
+
+        selected_row = self.address_building_twidget.currentRow()
+        id = self.address_building_twidget.item(selected_row, 0).data(Qt.UserRole + 1)
+
+        str_count = self.building_str_count_sbox.value()
+        sql = "select s.id, s.code, s.name from data_address.st_all_street_line_view s, data_address.ca_building_address p " \
+              "where p.id = " + str(id) + " group by s.name, s.id, s.code " \
+                                          "order by min(st_distance(s.geometry, p.geometry)) asc limit " + str(
+            str_count) + ";"
+
+        result = self.session.execute(sql)
+
+        self.building_streets_cbox.clear()
+        for row in result:
+            str_id = row[0]
+            str_code = row[1]
+            str_name = row[2]
+
+            street_name = str_name
+            if str_code:
+                street_name = str_name + " - " + str_code
+            self.building_streets_cbox.addItem(street_name, str_id)
+
     @pyqtSlot(int)
     def on_streets_cbox_currentIndexChanged(self, index):
 
         str_id = self.streets_cbox.itemData(self.streets_cbox.currentIndex())
 
-        print str_id
-        print '**'
         if not str_id:
             return
         street = self.session.query(StStreet).filter_by(id=str_id).one()
@@ -640,12 +959,48 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
             self.str_type_lbl.setText(u'Гудамжны хэлбэрийг тодорхойлоогүй байна. Гудамжны бүртгэлрүү орж засна уу!')
         else:
             self.str_type_lbl.setText(unicode(str_shape.description))
-        print self.side
+
         if self.side == '-1':
             self.str_txt_lbl.setText(u'Гудамжны зүүн гар талд байрлаж байгаа тул СОНДГОЙ дугаар авна')
 
         if self.side == '1':
             self.str_txt_lbl.setText(u'Гудамжны баруун гар талд байрлаж байгаа тул ТЭГШ дугаар авна')
+
+        layer = LayerUtils.layer_by_data_source("data_address", 'st_street_line_view')
+        self.__select_feature(str(str_id), layer)
+
+    #building
+    @pyqtSlot(int)
+    def on_building_streets_cbox_currentIndexChanged(self, index):
+
+        str_id = self.building_streets_cbox.itemData(self.building_streets_cbox.currentIndex())
+
+        if not str_id:
+            return
+        street = self.session.query(StStreet).filter_by(id=str_id).one()
+        str_shape = street.street_shape_id_ref
+
+        selected_row = self.address_building_twidget.currentRow()
+        id = self.address_building_twidget.item(selected_row, 0).data(Qt.UserRole + 1)
+
+        sql = "select unnest(string_to_array(base.st_street_building_side_with_str_start_point(" + str(
+            str_id) + ", " + str(id) + ")::text, ','));"
+        result = self.session.execute(sql)
+
+        for row in result:
+            self.side = row[0]
+
+        if not str_shape:
+            self.building_str_type_lbl.setText(u'Гудамжны хэлбэрийг тодорхойлоогүй байна. Гудамжны бүртгэлрүү орж засна уу!')
+        else:
+            self.building_str_type_lbl.setText(unicode(str_shape.description))
+
+        print self.side
+        if self.side == '-1':
+            self.building_str_txt_lbl.setText(u'Гудамжны зүүн гар талд байрлаж байгаа тул СОНДГОЙ дугаар авна')
+
+        if self.side == '1':
+            self.building_str_txt_lbl.setText(u'Гудамжны баруун гар талд байрлаж байгаа тул ТЭГШ дугаар авна')
 
         layer = LayerUtils.layer_by_data_source("data_address", 'st_street_line_view')
         self.__select_feature(str(str_id), layer)

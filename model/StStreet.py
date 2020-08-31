@@ -30,6 +30,11 @@ class StStreet(Base):
     updated_by = Column(Integer)
     created_at = Column(DateTime)
     updated_at = Column(DateTime)
+    is_marked = Column(Boolean)
+    start_number = Column(Integer)
+    end_number = Column(Integer)
+    building_start_number = Column(Integer)
+    building_end_number = Column(Integer)
 
     decision_level_id = Column(Integer, ForeignKey('cl_plan_decision_level.plan_decision_level_id'))
     decision_level_id_ref = relationship("ClPlanDecisionLevel")

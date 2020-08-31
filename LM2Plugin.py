@@ -1555,6 +1555,17 @@ class LM2Plugin:
         if myalayer is None:
             mygroup.addLayer(vlayer)
 
+        ####
+        vlayer = LayerUtils.layer_by_data_source("data_soums_union", "ca_temporary_parcel")
+        if vlayer is None:
+            vlayer = LayerUtils.load_line_layer_base_layer("ca_temporary_parcel", "parcel_id", "data_soums_union")
+        vlayer.loadNamedStyle(
+            str(os.path.dirname(os.path.realpath(__file__))) + "/template\style/ca_sub_parcel_tbl.qml")
+        vlayer.setLayerName(QApplication.translate("Plugin", "Temporary Parcel"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            mygroup.addLayer(vlayer)
+
         ######
         addrs_group = root.findGroup(u"Хаяг")
 

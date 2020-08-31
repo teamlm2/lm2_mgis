@@ -197,6 +197,7 @@ geometry geometry(MULTIPOLYGON, 4326),
 area_m2 numeric,
 line_geom geometry(MultiLineString,4326),
 length numeric,
+is_marked boolean,
 parent_id bigint,
 created_by integer,
 updated_by integer,
@@ -204,6 +205,8 @@ created_at timestamp(0) without time zone NOT NULL DEFAULT now(),
 updated_at timestamp(0) without time zone NOT NULL DEFAULT now(),
 start_number int,
 end_number int,
+building_start_number int,
+building_end_number int,
 current_number int,
 parcel_numbering_space int,
 building_numbering_space int,
@@ -271,6 +274,8 @@ geographic_name character varying(250),
 description text,
 valid_from date DEFAULT ('now'::text)::date,
 valid_till date DEFAULT 'infinity'::date,
+is_marked boolean,
+area_m2 numeric,
 geometry geometry(Polygon,4326),
 au1 varchar(3) references admin_units.au_level1 on update cascade on delete restrict,
 au2 varchar(5) references admin_units.au_level2 on update cascade on delete restrict,
@@ -306,8 +311,10 @@ status int references data_address.cl_address_status on update cascade on delete
 address_parcel_no VARCHAR(64),
 address_streetname character varying(250),
 address_building_no VARCHAR(64),
+is_marked boolean,
 valid_from date DEFAULT ('now'::text)::date,
 valid_till date DEFAULT 'infinity'::date,
+area_m2 numeric,
 geometry geometry(Polygon,4326),
 au1 varchar(3) references admin_units.au_level1 on update cascade on delete restrict,
 au2 varchar(5) references admin_units.au_level2 on update cascade on delete restrict,
@@ -511,3 +518,107 @@ grant select, insert, update, delete on ca_building_address_history to address_u
 grant select on ca_building_address_history to address_view;
 
 CREATE INDEX ca_building_address_history_parcel_id_idx ON ca_building_address_history(building_id);
+
+------------
+set search_path to data_address;
+
+DROP TABLE if exists  data_address.cl_building_purpose cascade;
+CREATE TABLE cl_building_purpose
+(
+  id serial  primary key,
+  code integer,
+  description character varying(256) NOT NULL UNIQUE,
+  shortname character varying(256),
+  description_en character varying(256),
+  is_special boolean NOT NULL DEFAULT false
+);
+grant select, insert, update, delete on cl_building_purpose to address_admin;
+grant select on cl_building_purpose to address_view;
+grant select on cl_address_status to address_view, cadastre_view;
+GRANT SELECT, UPDATE, INSERT, DELETE ON TABLE codelists.cl_contract_type TO land_office_administration;
+GRANT SELECT ON TABLE codelists.cl_contract_type TO cadastre_view;
+GRANT SELECT ON TABLE codelists.cl_contract_type TO cadastre_update;
+GRANT SELECT ON TABLE codelists.cl_contract_type TO contracting_view;
+GRANT SELECT ON TABLE codelists.cl_contract_type TO contracting_update;
+GRANT SELECT ON TABLE codelists.cl_contract_type TO reporting;
+
+COMMENT ON TABLE cl_building_purpose
+  IS 'Барилгын зориулалт';
+  
+---------------
+set search_path to data_address;
+
+CREATE TABLE data_address.cl_address_document_type
+(
+  document_type_id serial PRIMARY KEY,
+  code character varying(10) NOT NULL,
+  description character varying(255) NOT NULL,
+  description_en character varying(255),
+  is_required boolean NOT NULL,
+  type character varying(50),
+  is_active boolean NOT NULL,
+  created_at timestamp without time zone,
+  created_by character varying(50),
+  updated_at timestamp without time zone,
+  updated_by character varying(50),
+  is_multiple boolean,
+  is_public_show boolean DEFAULT true,
+  is_delete boolean DEFAULT true
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE data_address.cl_address_document_type
+  OWNER TO geodb_admin;
+GRANT ALL ON TABLE data_address.cl_address_document_type TO geodb_admin;
+GRANT SELECT, UPDATE, INSERT, DELETE ON TABLE data_address.cl_address_document_type TO reporting;
+GRANT SELECT, UPDATE, INSERT, DELETE ON TABLE data_address.cl_address_document_type TO application_update;
+GRANT SELECT, INSERT ON TABLE data_address.cl_address_document_type TO cadastre_view;
+
+insert into data_address.cl_address_document_type(code, description, is_required, type, is_active, is_multiple, is_public_show, is_delete) values('01', 'ИТХ-н тогтоол', true, 'pdf', true, true, true, true);
+insert into data_address.cl_address_document_type(code, description, is_required, type, is_active, is_multiple, is_public_show, is_delete) values('01', 'Тэмдэглэгээ хийсэн зураг', true, 'pdf', true, true, true, true);
+
+
+CREATE TABLE data_address.st_document
+(
+  document_id serial PRIMARY KEY,
+  name character varying(100) NOT NULL,
+  file_url character varying(500) NOT NULL,
+  description text,
+  ftp_id integer NOT NULL,
+  created_at timestamp without time zone,
+  created_by integer,
+  updated_at timestamp without time zone,
+  updated_by integer,
+  document_type_id int references data_address.cl_address_document_type on update cascade on delete restrict
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE data_address.st_document
+  OWNER TO geodb_admin;
+GRANT ALL ON TABLE data_address.st_document TO geodb_admin;
+GRANT SELECT, UPDATE, INSERT, DELETE ON TABLE data_address.st_document TO reporting;
+GRANT SELECT, UPDATE, INSERT, DELETE ON TABLE data_address.st_document TO application_update;
+GRANT SELECT, INSERT ON TABLE data_address.st_document TO cadastre_view;
+
+------
+
+CREATE TABLE data_address.st_street_document
+(
+  document_id integer NOT NULL,
+  street_id int references data_address.st_street on update cascade on delete restrict,
+  created_at timestamp without time zone,
+  created_by integer,
+  document_type_id int references data_address.cl_address_document_type on update cascade on delete restrict,
+  CONSTRAINT "PK_st_street_document" PRIMARY KEY (document_id, street_id)
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE data_address.st_street_document
+  OWNER TO geodb_admin;
+GRANT ALL ON TABLE data_address.st_street_document TO geodb_admin;
+GRANT SELECT, UPDATE, INSERT, DELETE ON TABLE data_address.st_street_document TO reporting;
+GRANT SELECT, UPDATE, INSERT, DELETE ON TABLE data_address.st_street_document TO application_update;
+GRANT SELECT, INSERT ON TABLE data_address.st_street_document TO cadastre_view;

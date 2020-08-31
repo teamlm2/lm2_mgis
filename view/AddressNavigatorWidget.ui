@@ -115,13 +115,13 @@
         <x>6</x>
         <y>34</y>
         <width>466</width>
-        <height>631</height>
+        <height>521</height>
        </rect>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
-      <widget class="QWidget" name="tab_2">
+      <widget class="QWidget" name="parcel_tab">
        <attribute name="title">
         <string>Нэгж талбар</string>
        </attribute>
@@ -230,19 +230,6 @@
          </rect>
         </property>
        </widget>
-       <widget class="QPushButton" name="get_address_button">
-        <property name="geometry">
-         <rect>
-          <x>10</x>
-          <y>442</y>
-          <width>283</width>
-          <height>23</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Хаяг авах</string>
-        </property>
-       </widget>
        <widget class="QTableWidget" name="address_parcel_twidget">
         <property name="geometry">
          <rect>
@@ -270,19 +257,6 @@
           <string>Хаягийн төлөв</string>
          </property>
         </column>
-       </widget>
-       <widget class="QPushButton" name="apply_address_button">
-        <property name="geometry">
-         <rect>
-          <x>10</x>
-          <y>510</y>
-          <width>283</width>
-          <height>23</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Хадгалах</string>
-        </property>
        </widget>
        <widget class="QPushButton" name="selected_parcel_remove_button">
         <property name="geometry">
@@ -345,21 +319,207 @@
          <string/>
         </property>
        </widget>
-       <widget class="QPushButton" name="address_layer_button">
+      </widget>
+      <widget class="QWidget" name="building_tab">
+       <attribute name="title">
+        <string>Барилга</string>
+       </attribute>
+       <widget class="QComboBox" name="building_streets_cbox">
         <property name="geometry">
          <rect>
           <x>10</x>
-          <y>570</y>
-          <width>283</width>
+          <y>340</y>
+          <width>387</width>
+          <height>22</height>
+         </rect>
+        </property>
+       </widget>
+       <widget class="QSpinBox" name="building_str_count_sbox">
+        <property name="geometry">
+         <rect>
+          <x>403</x>
+          <y>340</y>
+          <width>48</width>
+          <height>22</height>
+         </rect>
+        </property>
+        <property name="value">
+         <number>2</number>
+        </property>
+       </widget>
+       <widget class="QLabel" name="str_txt_lbl_3">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>370</y>
+          <width>90</width>
+          <height>13</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Гудамжны төрөл:</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="building_str_txt_lbl">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>381</y>
+          <width>441</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>6</pointsize>
+          <weight>75</weight>
+          <italic>true</italic>
+          <bold>true</bold>
+          <underline>true</underline>
+         </font>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="selected_building_remove_button">
+        <property name="geometry">
+         <rect>
+          <x>250</x>
+          <y>50</y>
+          <width>201</width>
           <height>23</height>
          </rect>
         </property>
         <property name="text">
-         <string>Давхарга</string>
+         <string>Хаягийн мэдээллийн сангаас хасах</string>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="geographic_building_name_edit">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>290</y>
+          <width>441</width>
+          <height>20</height>
+         </rect>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_4">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>321</y>
+          <width>74</width>
+          <height>13</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Гудамж</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_5">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>273</y>
+          <width>74</width>
+          <height>13</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Газар зүйн нэр</string>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="building_no_edit">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>412</y>
+          <width>441</width>
+          <height>20</height>
+         </rect>
+        </property>
+       </widget>
+       <widget class="QComboBox" name="building_layer_type_cbox">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>20</y>
+          <width>281</width>
+          <height>22</height>
+         </rect>
+        </property>
+       </widget>
+       <widget class="QTableWidget" name="address_building_twidget">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>80</y>
+          <width>441</width>
+          <height>141</height>
+         </rect>
+        </property>
+        <attribute name="horizontalHeaderDefaultSectionSize">
+         <number>140</number>
+        </attribute>
+        <column>
+         <property name="text">
+          <string>Барилгын дугаар</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Давхаргын төрөл</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Хаягийн төлөв</string>
+         </property>
+        </column>
+       </widget>
+       <widget class="QLabel" name="label_6">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>395</y>
+          <width>88</width>
+          <height>13</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Барилгын дугаар</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="selected_building_load_button">
+        <property name="geometry">
+         <rect>
+          <x>9</x>
+          <y>50</y>
+          <width>221</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Хаягийн мэдээллийн санд оруулах</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="building_str_type_lbl">
+        <property name="geometry">
+         <rect>
+          <x>110</x>
+          <y>369</y>
+          <width>341</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string/>
         </property>
        </widget>
       </widget>
-      <widget class="QWidget" name="tab">
+      <widget class="QWidget" name="street_tab">
        <attribute name="title">
         <string>Гудамж</string>
        </attribute>
@@ -380,9 +540,9 @@
         <property name="geometry">
          <rect>
           <x>10</x>
-          <y>70</y>
+          <y>110</y>
           <width>441</width>
-          <height>531</height>
+          <height>371</height>
          </rect>
         </property>
         <property name="currentIndex">
@@ -420,19 +580,6 @@
            </property>
           </column>
          </widget>
-         <widget class="QPushButton" name="apply_button">
-          <property name="geometry">
-           <rect>
-            <x>10</x>
-            <y>250</y>
-            <width>75</width>
-            <height>23</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Apply</string>
-          </property>
-         </widget>
         </widget>
         <widget class="QWidget" name="tab_5">
          <attribute name="title">
@@ -445,7 +592,124 @@
          </attribute>
         </widget>
        </widget>
+       <widget class="QLabel" name="label_7">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>50</y>
+          <width>96</width>
+          <height>13</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Гудамжны дугаар:</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_8">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>70</y>
+          <width>92</width>
+          <height>13</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Гудамжны код:</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_9">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>90</y>
+          <width>92</width>
+          <height>13</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Гудамжны нэр:</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="str_id_lbl">
+        <property name="geometry">
+         <rect>
+          <x>110</x>
+          <y>49</y>
+          <width>331</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+       <widget class="QLabel" name="str_code_lbl">
+        <property name="geometry">
+         <rect>
+          <x>110</x>
+          <y>70</y>
+          <width>331</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+       <widget class="QLabel" name="str_name_lbl">
+        <property name="geometry">
+         <rect>
+          <x>110</x>
+          <y>90</y>
+          <width>331</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
       </widget>
+     </widget>
+     <widget class="QPushButton" name="address_layer_button">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>618</y>
+        <width>283</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Давхарга</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="get_address_button">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>560</y>
+        <width>283</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Хаяг авах</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="apply_address_button">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>588</y>
+        <width>283</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Хадгалах</string>
+      </property>
      </widget>
     </widget>
    </widget>

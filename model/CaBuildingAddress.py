@@ -30,6 +30,7 @@ class CaBuildingAddress(Base):
 
     valid_from = Column(Date)
     valid_till = Column(Date)
+    is_marked = Column(Boolean)
     geometry = Column(Geometry('POLYGON', 4326))
 
     # foreign keys:
