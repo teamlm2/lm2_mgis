@@ -66,6 +66,7 @@ from difflib import SequenceMatcher
 import urllib
 import urllib2
 import json
+import codecs
 
 DELETE_STATUS = 40
 
@@ -3993,8 +3994,11 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
                 return
 
             ch_path = None
+            self.decision_num_cbox.clear()
             for f in files:
+                f = codecs.decode(f, 'utf-8')
                 self.decision_num_cbox.addItem(f, f)
+
                 doc_decision = f.split('/')[-1]
                 # doc_decision = doc_decision.decode('utf8')
                 doc_decision_no = doc_decision.split('-')[-1]
@@ -4005,8 +4009,10 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
                 doc_decision_no = doc_decision_no.replace('A', '')
                 decision_no = decision_no.replace('A', '')
 
-                doc_decision_no = doc_decision_no.replace(u'A', '')
-                decision_no = decision_no.replace(u'A', '')
+                # doc_decision_no = codecs.decode(doc_decision_no, 'utf-8')
+
+                doc_decision_no = doc_decision_no.replace('A', '')
+                decision_no = decision_no.replace('A', '')
 
                 if self.__mysplit(decision_no)[1] == self.__mysplit(doc_decision_no)[1]:
                     self.decision_num_cbox.setCurrentIndex(
@@ -4024,45 +4030,48 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
         ftp = DatabaseUtils.ftp_connect()
         ftp = ftp[0]
         ftp.cwd(archive_path)
-        ftp.cwd(ch_path)
 
-        try:
-            files = ftp.nlst()
-        except error_perm:
-            is_find_doc = False
+        # ftp.cwd(ch_path)
+        if ch_path:
+            ftp.cwd(unicode(ch_path).encode('utf8'))
 
-        if not files:
-            return
+            try:
+                files = ftp.nlst()
+            except error_perm:
+                is_find_doc = False
 
-        for f in files:
+            if not files:
+                return
 
-            if self.__is_file(ftp, f):
-                file_full_name = f
-                file_name = f.split('.')[0]
-                file_type = str(f.split('.')[-1])
-                doc_no = file_name[-2:]
+            for f in files:
 
-                if self.session.query(ClDocumentRole).filter(ClDocumentRole.code == doc_no).count() == 1:
-                    document = self.session.query(ClDocumentRole).filter(ClDocumentRole.code == doc_no).one()
+                if self.__is_file(ftp, f):
+                    file_full_name = f
+                    file_name = f.split('.')[0]
+                    file_type = str(f.split('.')[-1])
+                    doc_no = file_name[-2:]
 
-                    row = self.new_doc_twidget.rowCount()
-                    self.new_doc_twidget.insertRow(row)
+                    if self.session.query(ClDocumentRole).filter(ClDocumentRole.code == doc_no).count() == 1:
+                        document = self.session.query(ClDocumentRole).filter(ClDocumentRole.code == doc_no).one()
 
-                    item_name = QTableWidgetItem()
-                    item_name.setText(str(file_name))
-                    item_name.setData(Qt.UserRole, ftp)
-                    item_name.setData(Qt.UserRole + 1, file_full_name)
-                    item_name.setData(Qt.UserRole + 2, file_type)
-                    item_name.setData(Qt.UserRole + 3, doc_no)
+                        row = self.new_doc_twidget.rowCount()
+                        self.new_doc_twidget.insertRow(row)
 
-                    item_description = QTableWidgetItem()
-                    item_description.setText(document.description)
+                        item_name = QTableWidgetItem()
+                        item_name.setText(str(file_name))
+                        item_name.setData(Qt.UserRole, ftp)
+                        item_name.setData(Qt.UserRole + 1, file_full_name)
+                        item_name.setData(Qt.UserRole + 2, file_type)
+                        item_name.setData(Qt.UserRole + 3, doc_no)
 
-                    item_view = QTableWidgetItem()
+                        item_description = QTableWidgetItem()
+                        item_description.setText(document.description)
 
-                    self.new_doc_twidget.setItem(row, 0, item_name)
-                    self.new_doc_twidget.setItem(row, 1, item_description)
-                    self.new_doc_twidget.setItem(row, 2, item_view)
+                        item_view = QTableWidgetItem()
+
+                        self.new_doc_twidget.setItem(row, 0, item_name)
+                        self.new_doc_twidget.setItem(row, 1, item_description)
+                        self.new_doc_twidget.setItem(row, 2, item_view)
 
     def __import_archive(self):
 
