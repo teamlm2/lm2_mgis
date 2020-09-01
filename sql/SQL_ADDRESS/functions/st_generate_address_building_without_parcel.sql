@@ -19,7 +19,7 @@ case
 end as parcel_address_no
  from (
 select COALESCE(max(address_building_no)::text, ''0'') as p_n from data_address.ca_building_address p
-where p.address_building_no ~ ''^[0-9]'' and p.street_id = $1
+where p.address_building_no ~ ''^[0-9]'' and p.street_id = $1 and p.id not in (select id from data_address.ca_building_address p where p.id = $2)
 )p , data_address.st_street s
 where s.id = $1 ' into st_generate_address_building_without_parcel USING str_id, parcel_id;
 

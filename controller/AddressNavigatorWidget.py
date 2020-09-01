@@ -760,8 +760,11 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
         if not self.parcel_address_no:
             return
 
-        str_addrs_count = self.session.query(StStreet).join(CaParcelAddress, StStreet.id == CaParcelAddress.street_id).\
-            filter(StStreet.id == str_id).filter(CaParcelAddress.address_parcel_no == self.parcel_address_no).count()
+        str_addrs_count = self.session.query(StStreet).\
+            join(CaParcelAddress, StStreet.id == CaParcelAddress.street_id).\
+            filter(StStreet.id == str_id).\
+            filter(CaParcelAddress.address_parcel_no == self.parcel_address_no). \
+            filter(CaParcelAddress.id != addrs_parcel.id).count()
         if str_addrs_count > 0:
             PluginUtils.show_message(self, u'Анхааруулга',
                                      u'Гудамжинд нэгж талбарын ' + unicode(self.parcel_address_no) + u'q хаяг давхардаж байна.')
@@ -769,9 +772,11 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
 
         zipcode = self.session.query(AuZipCodeArea). \
             filter(AuZipCodeArea.geometry.ST_Within(func.ST_Centroid(addrs_parcel.geometry))).first()
-        zip_addrs_count = self.session.query(AuZipCodeArea).join(CaParcelAddress, AuZipCodeArea.id == CaParcelAddress.zipcode_id). \
+        zip_addrs_count = self.session.query(AuZipCodeArea).\
+            join(CaParcelAddress, AuZipCodeArea.id == CaParcelAddress.zipcode_id). \
             filter(CaParcelAddress.address_parcel_no == self.parcel_address_no).\
-            filter(AuZipCodeArea.id == zipcode.id).count()
+            filter(AuZipCodeArea.id == zipcode.id). \
+            filter(CaParcelAddress.id != addrs_parcel.id).count()
         if zip_addrs_count > 0:
             PluginUtils.show_message(self, u'Анхааруулга',
                                      u'Шуудангийн бүсчлэлд нэгж талбарын ' + unicode(self.parcel_address_no) + u' хаяг давхардаж байна.')
@@ -844,8 +849,11 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
         #         parcel_address_no = row[0]
         if self.building_address_no is None:
             return
-        str_addrs_count = self.session.query(StStreet).join(CaBuildingAddress, StStreet.id == CaBuildingAddress.street_id). \
-            filter(StStreet.id == str_id).filter(CaBuildingAddress.address_building_no == self.building_address_no).count()
+        str_addrs_count = self.session.query(StStreet).\
+            join(CaBuildingAddress, StStreet.id == CaBuildingAddress.street_id). \
+            filter(StStreet.id == str_id).\
+            filter(CaBuildingAddress.address_building_no == self.building_address_no).\
+            filter(CaBuildingAddress.id != addrs_parcel.id).count()
         if str_addrs_count > 0:
             PluginUtils.show_message(self, u'Анхааруулга',
                                      u'Гудамжинд барилгын ' + unicode(self.building_address_no) + u' хаяг давхардаж байна.')
@@ -854,10 +862,11 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
         zipcode = self.session.query(AuZipCodeArea). \
             filter(func.ST_Centroid(addrs_parcel.geometry).ST_Within(AuZipCodeArea.geometry)).first()
 
-        zip_addrs_count = self.session.query(AuZipCodeArea).join(CaBuildingAddress,
-                                                                 AuZipCodeArea.id == CaBuildingAddress.zipcode_id). \
+        zip_addrs_count = self.session.query(AuZipCodeArea).\
+            join(CaBuildingAddress, AuZipCodeArea.id == CaBuildingAddress.zipcode_id). \
             filter(CaBuildingAddress.address_building_no == self.building_address_no). \
-            filter(AuZipCodeArea.id == zipcode.id).count()
+            filter(AuZipCodeArea.id == zipcode.id). \
+            filter(CaBuildingAddress.id != addrs_parcel.id).count()
 
         if zip_addrs_count > 0:
             PluginUtils.show_message(self, u'Анхааруулга',
