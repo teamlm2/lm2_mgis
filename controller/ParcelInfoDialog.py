@@ -702,6 +702,7 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
         self.person_khashaa_edit.clear()
         self.building_edit.clear()
         self.apartment_edit.clear()
+        self.decision_num_cbox.clear()
 
         self.is_find_ubgis = False
         selected_row = self.right_holder_twidget.currentRow()

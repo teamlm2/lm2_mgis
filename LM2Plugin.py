@@ -488,6 +488,7 @@ class LM2Plugin:
                                                           "If you going to chagne base parcel, Please choose the Base Parcel"))
 
         new_parcel_button = message_box.addButton(QApplication.translate("LM2", "New Parcel"), QMessageBox.ActionRole)
+        new_parcel_button.setDisable(True)
         message_box.addButton(QApplication.translate("LM2", "Base Parcel"), QMessageBox.ActionRole)
         message_box.exec_()
         restrictions = DatabaseUtils.working_l2_code()
