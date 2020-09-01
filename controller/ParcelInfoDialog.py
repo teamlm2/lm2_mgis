@@ -3991,6 +3991,19 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
                 is_find_doc = False
 
             if not files:
+
+                parcel_id = '0' + parcel_id[:2] + '0' + parcel_id[2:]
+
+                try:
+                    if str(parcel_id) in ftp.nlst():
+
+                        files = ftp.nlst(str(parcel_id))
+                    else:
+                        is_find_doc = False
+                except error_perm:
+                    is_find_doc = False
+
+            if not files:
                 return
 
             ch_path = None
@@ -4029,6 +4042,7 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
             return
         ftp = DatabaseUtils.ftp_connect()
         ftp = ftp[0]
+
         ftp.cwd(archive_path)
 
         # ftp.cwd(ch_path)
@@ -4113,6 +4127,9 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
                         file_type = self.new_doc_twidget.item(row, 0).data(Qt.UserRole + 2)
                         role = self.new_doc_twidget.item(row, 0).data(Qt.UserRole + 3)
 
+                        if str(role) == '17':
+                            role = '22'
+
                         view_pdf = open(FilePath.view_file_path(), 'wb')
                         view_png = open(FilePath.view_file_png_path(), 'wb')
 
@@ -4143,35 +4160,6 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
                                 urllib2.urlopen(
                                     'http://' + conf.value + '/api/application/document/move?app_id=' + str(app_id))
 
-                    # if ftp:
-                    #     filelist = ftp.nlst()
-                    #     for file in filelist:
-                    #         file_info = QFileInfo(file)
-                    #         file_type = file_info.suffix()
-                    #         view_pdf = open(FilePath.view_file_path(), 'wb')
-                    #         view_png = open(FilePath.view_file_png_path(), 'wb')
-                    #         print file
-                    #         print file_type
-                    #         print ftp.nlst()
-                    #         file_url = None
-                    #         if file_type == 'png':
-                    #             ftp.retrbinary('RETR ' + file, view_png.write)
-                    #             file_url = FilePath.view_file_png_path()
-                    #         else:
-                    #             ftp.retrbinary('RETR ' + file, view_pdf.write)
-                    #             file_url = FilePath.view_file_path()
-                    #
-                    #         # ftp.retrbinary("RETR " + file, open(os.path.join(destination, file), "wb").write)
-                    #         if DatabaseUtils.ftp_connect():
-                    #             ftp1 = DatabaseUtils.ftp_connect()
-                    #             file_name = str(self.application.app_no) + "-" + str('ssaa').zfill(
-                    #                 2) + "." + file_info.suffix()
-                    #             archive_ftp_path = FilePath.app_ftp_parent_path() + '/' + str(self.application.app_no)
-                    #             archive_ftp_path_role = archive_ftp_path + '/' + str(role).zfill(2)
-                    #             FtpConnection.chdir(archive_ftp_path_role, ftp1[0])
-                    #             FtpConnection.upload_app_ftp_file(file_url, file_name,ftp1[0])
-                    #
-                    #         break
 
                     conf = self.session.query(SdConfiguration).filter(SdConfiguration.code == 'ip_web_lm').one()
                     urllib2.urlopen(
