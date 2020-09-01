@@ -34,6 +34,7 @@ from ..model.StStreetLineView import *
 from ..model.CaBuildingAddress import *
 from ..model.CaParcelAddress import *
 from ..model.ClAddressStatus import *
+from ..model.AuZipCodeArea import *
 from ..model.StEntrance import *
 from ..controller.PlanDetailWidget import *
 from ..controller.PlanLayerFilterDialog import *
@@ -72,6 +73,9 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
         self.au1 = DatabaseUtils.working_l1_code()
         self.current_dialog = None
         self.side = None
+        self.str_id = None
+        self.parcel_address_no = None
+        self.building_address_no = None
         self.__boundaryPointsLayer = None
         self.__setup_table_widget()
         self.__combobox_setup()
@@ -411,7 +415,7 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
         id = None
         for feature in select_feature:
             attr = feature.attributes()
-            print len(attr)
+
             if len(attr) > 0:
                 id = attr[0]
                 geometry = WKTElement(feature.geometry().exportToWkt(), srid=4326)
@@ -548,7 +552,7 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
         id = None
         for feature in select_feature:
             attr = feature.attributes()
-            print len(attr)
+
             if len(attr) > 0:
                 id = attr[0]
                 geometry = WKTElement(feature.geometry().exportToWkt(), srid=4326)
@@ -733,6 +737,7 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
 
         if not str_id:
             return
+        self.str_id = str_id
         street = self.session.query(StStreet).filter_by(id=str_id).one()
         str_shape = street.street_shape_id_ref
 
@@ -740,30 +745,47 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
             PluginUtils.show_message(self, u'Анхааруулга', u'Гудамжны бүртгэлд нэгж талбарт олгох хаягын эхлэх дугаарыг оруулаагүй байна.')
             return
 
-        parcel_address_no = None
-
         if self.side == '-1':
             sql = "select unnest(string_to_array(base.st_generate_address_khashaa_no_sondgoi(" + str(
                 str_id) + ", " + str(id) + ")::text, ','));"
             result = self.session.execute(sql)
             for row in result:
-                parcel_address_no = row[0]
+                self.parcel_address_no = row[0]
         if self.side == '1':
             sql = "select unnest(string_to_array(base.st_generate_address_khashaa_no_tegsh(" + str(
                 str_id) + ", " + str(id) + ")::text, ','));"
             result = self.session.execute(sql)
             for row in result:
-                parcel_address_no = row[0]
-        if parcel_address_no:
-            self.khashaa_no_edit.setText(parcel_address_no)
+                self.parcel_address_no = row[0]
+        if not self.parcel_address_no:
+            return
 
-        addrs_parcel.street_id = str_id
-        addrs_parcel.address_parcel_no = parcel_address_no
+        str_addrs_count = self.session.query(StStreet).join(CaParcelAddress, StStreet.id == CaParcelAddress.street_id).\
+            filter(StStreet.id == str_id).filter(CaParcelAddress.address_parcel_no == self.parcel_address_no).count()
+        if str_addrs_count > 0:
+            PluginUtils.show_message(self, u'Анхааруулга',
+                                     u'Гудамжинд нэгж талбарын ' + unicode(self.parcel_address_no) + u'q хаяг давхардаж байна.')
+            return
+
+        zipcode = self.session.query(AuZipCodeArea). \
+            filter(AuZipCodeArea.geometry.ST_Within(func.ST_Centroid(addrs_parcel.geometry))).first()
+        zip_addrs_count = self.session.query(AuZipCodeArea).join(CaParcelAddress, AuZipCodeArea.id == CaParcelAddress.zipcode_id). \
+            filter(CaParcelAddress.address_parcel_no == self.parcel_address_no).\
+            filter(AuZipCodeArea.id == zipcode.id).count()
+        if zip_addrs_count > 0:
+            PluginUtils.show_message(self, u'Анхааруулга',
+                                     u'Шуудангийн бүсчлэлд нэгж талбарын ' + unicode(self.parcel_address_no) + u' хаяг давхардаж байна.')
+            return
+
+        if self.khashaa_no_edit.text() != self.parcel_address_no:
+            self.khashaa_no_edit.setText(self.parcel_address_no)
+
+        # addrs_parcel.street_id = str_id
+        # addrs_parcel.address_parcel_no = self.parcel_address_no
 
     #building
     def __get_building_address(self):
 
-        print 'dddddddd'
         selected_row = self.address_building_twidget.currentRow()
         if selected_row == -1:
             return
@@ -771,7 +793,7 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
 
         addrs_parcel_count = self.session.query(CaBuildingAddress).filter_by(id=id).count()
         if addrs_parcel_count == 0:
-            PluginUtils.show_message(self, u'Анхааруулга', u'Энэ нэгж талбар хаяг мэдээллийн санд ороогүй байна.')
+            PluginUtils.show_message(self, u'Анхааруулга', u'Энэ барилга хаягын мэдээллийн санд ороогүй байна.')
             return
 
         addrs_parcel = self.session.query(CaBuildingAddress).filter_by(id=id).one()
@@ -794,20 +816,20 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
 
         if not str_id:
             return
+        self.str_id = str_id
         street = self.session.query(StStreet).filter_by(id=str_id).one()
         str_shape = street.street_shape_id_ref
         if street.building_start_number is None:
             PluginUtils.show_message(self, u'Анхааруулга', u'Гудамжны бүртгэлд барилгад олгох хаягын эхлэх дугаарыг оруулаагүй байна.')
             return
-        parcel_address_no = None
+
 
         sql = "select unnest(string_to_array(base.st_generate_address_building_without_parcel(" + str(
             str_id) + ", " + str(id) + ")::text, ','));"
         result = self.session.execute(sql)
-        print result
+
         for row in result:
-            print row[0]
-            parcel_address_no = row[0]
+            self.building_address_no = row[0]
         # if self.side == '-1':
         #     sql = "select unnest(string_to_array(base.st_generate_address_khashaa_no_sondgoi(" + str(
         #         str_id) + ", " + str(id) + ")::text, ','));"
@@ -820,15 +842,77 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
         #     result = self.session.execute(sql)
         #     for row in result:
         #         parcel_address_no = row[0]
-        if parcel_address_no:
-            self.building_no_edit.setText(parcel_address_no)
+        if self.building_address_no is None:
+            return
+        str_addrs_count = self.session.query(StStreet).join(CaBuildingAddress, StStreet.id == CaBuildingAddress.street_id). \
+            filter(StStreet.id == str_id).filter(CaBuildingAddress.address_building_no == self.building_address_no).count()
+        if str_addrs_count > 0:
+            PluginUtils.show_message(self, u'Анхааруулга',
+                                     u'Гудамжинд барилгын ' + unicode(self.building_address_no) + u' хаяг давхардаж байна.')
+            return
 
-        addrs_parcel.street_id = str_id
-        addrs_parcel.address_building_no = parcel_address_no
+        zipcode = self.session.query(AuZipCodeArea). \
+            filter(func.ST_Centroid(addrs_parcel.geometry).ST_Within(AuZipCodeArea.geometry)).first()
+
+        zip_addrs_count = self.session.query(AuZipCodeArea).join(CaBuildingAddress,
+                                                                 AuZipCodeArea.id == CaBuildingAddress.zipcode_id). \
+            filter(CaBuildingAddress.address_building_no == self.building_address_no). \
+            filter(AuZipCodeArea.id == zipcode.id).count()
+
+        if zip_addrs_count > 0:
+            PluginUtils.show_message(self, u'Анхааруулга',
+                                     u'Шуудангийн бүсчлэлд барилгын ' + unicode(self.building_address_no) + u' хаяг давхардаж байна.')
+            return
+
+        if self.building_no_edit.text() != self.building_address_no:
+            self.building_no_edit.setText(self.building_address_no)
+
+        # addrs_parcel.street_id = str_id
+        # addrs_parcel.address_building_no = self.building_address_no
+
+    def __save_parcel_address(self):
+
+        selected_row = self.address_parcel_twidget.currentRow()
+        if selected_row == -1:
+            return
+
+        id = self.address_parcel_twidget.item(selected_row, 0).data(Qt.UserRole + 1)
+
+        addrs_parcel_count = self.session.query(CaParcelAddress).filter_by(id=id).count()
+        if addrs_parcel_count == 0:
+            PluginUtils.show_message(self, u'Анхааруулга', u'Энэ нэгж талбар хаяг мэдээллийн санд ороогүй байна.')
+            return
+
+        addrs_parcel = self.session.query(CaParcelAddress).filter_by(id=id).one()
+
+        addrs_parcel.street_id = self.str_id
+        addrs_parcel.address_parcel_no = self.parcel_address_no
+
+    def __save_building_address(self):
+
+        selected_row = self.address_building_twidget.currentRow()
+        if selected_row == -1:
+            return
+
+        id = self.address_building_twidget.item(selected_row, 0).data(Qt.UserRole + 1)
+
+        addrs_parcel_count = self.session.query(CaBuildingAddress).filter_by(id=id).count()
+        if addrs_parcel_count == 0:
+            PluginUtils.show_message(self, u'Анхааруулга', u'Энэ нэгж талбар хаяг мэдээллийн санд ороогүй байна.')
+            return
+
+        addrs_parcel = self.session.query(CaBuildingAddress).filter_by(id=id).one()
+
+        addrs_parcel.street_id = self.str_id
+        addrs_parcel.address_building_no = self.building_address_no
 
     @pyqtSlot()
     def on_apply_address_button_clicked(self):
 
+        if self.tabWidget.currentIndex() == 0:
+            self.__save_parcel_address()
+        if self.tabWidget.currentIndex() == 1:
+            self.__save_building_address()
         if self.tabWidget.currentIndex() == 2:
             self.__save_street_point()
         self.session.commit()
@@ -995,7 +1079,6 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
         else:
             self.building_str_type_lbl.setText(unicode(str_shape.description))
 
-        print self.side
         if self.side == '-1':
             self.building_str_txt_lbl.setText(u'Гудамжны зүүн гар талд байрлаж байгаа тул СОНДГОЙ дугаар авна')
 

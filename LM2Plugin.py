@@ -1578,7 +1578,7 @@ class LM2Plugin:
         myalayer = root.findLayer(vlayer.id())
         if myalayer is None:
             addrs_group.addLayer(vlayer)
-        root.findLayer(vlayer.id()).setVisible(0)
+        # root.findLayer(vlayer.id()).setVisible(0)
             # vlayer.setReadOnly(True)
 
         vlayer = LayerUtils.layer_by_data_source("data_address", "st_entrance_view")
@@ -1590,7 +1590,7 @@ class LM2Plugin:
         myalayer = root.findLayer(vlayer.id())
         if myalayer is None:
             addrs_group.addLayer(vlayer)
-        root.findLayer(vlayer.id()).setVisible(0)
+        # root.findLayer(vlayer.id()).setVisible(0)
             # vlayer.setReadOnly(True)
 
         vlayer = LayerUtils.layer_by_data_source("data_address", "ca_building_address_view")
@@ -1602,7 +1602,7 @@ class LM2Plugin:
         myalayer = root.findLayer(vlayer.id())
         if myalayer is None:
             addrs_group.addLayer(vlayer)
-        root.findLayer(vlayer.id()).setVisible(0)
+        # root.findLayer(vlayer.id()).setVisible(0)
             # vlayer.setReadOnly(True)
 
         vlayer = LayerUtils.layer_by_data_source("data_address", "ca_parcel_address_view")
@@ -1613,7 +1613,7 @@ class LM2Plugin:
         myalayer = root.findLayer(vlayer.id())
         if myalayer is None:
             addrs_group.addLayer(vlayer)
-        root.findLayer(vlayer.id()).setVisible(0)
+        # root.findLayer(vlayer.id()).setVisible(0)
             # vlayer.setReadOnly(True)
 
         vlayer = LayerUtils.layer_by_data_source("data_address", "st_road_line_view")
@@ -1625,7 +1625,7 @@ class LM2Plugin:
         myalayer = root.findLayer(vlayer.id())
         if myalayer is None:
             addrs_group.addLayer(vlayer)
-        root.findLayer(vlayer.id()).setVisible(0)
+        # root.findLayer(vlayer.id()).setVisible(0)
 
         vlayer = LayerUtils.layer_by_data_source("data_address", "st_street_line_view")
         if vlayer is None:
@@ -1636,7 +1636,7 @@ class LM2Plugin:
         myalayer = root.findLayer(vlayer.id())
         if myalayer is None:
             addrs_group.addLayer(vlayer)
-        root.findLayer(vlayer.id()).setVisible(0)
+        # root.findLayer(vlayer.id()).setVisible(0)
 
         vlayer = LayerUtils.layer_by_data_source("data_address", "st_street_sub_polygon_view")
         if vlayer is None:

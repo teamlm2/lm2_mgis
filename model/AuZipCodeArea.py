@@ -11,7 +11,7 @@ class AuZipCodeArea(Base):
     __tablename__ = 'au_zipcode_area'
 
     id = Column(Integer, primary_key=True)
-    code = Column(String, primary_key=True)
+    code = Column(String)
     description = Column(String)
     area_m2 = Column(Float)
     geometry = Column(Geometry('MULTIPOLYGON', 4326))
