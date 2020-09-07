@@ -1600,6 +1600,7 @@ class LM2Plugin:
         # root.findLayer(vlayer.id()).setVisible(0)
             # vlayer.setReadOnly(True)
 
+        addrs_parcel_group = root.findGroup(u"Хаягийн барилга")
         vlayer = LayerUtils.layer_by_data_source("data_address", "ca_building_address_view")
         if vlayer is None:
             vlayer = LayerUtils.load_layer_base_layer("ca_building_address_view", "id", "data_address")
@@ -1608,10 +1609,11 @@ class LM2Plugin:
         vlayer.setLayerName(QApplication.translate("Plugin", "Address Building"))
         myalayer = root.findLayer(vlayer.id())
         if myalayer is None:
-            addrs_group.addLayer(vlayer)
+            addrs_parcel_group.addLayer(vlayer)
         # root.findLayer(vlayer.id()).setVisible(0)
             # vlayer.setReadOnly(True)
 
+        addrs_parcel_group = root.findGroup(u"Хаягийн нэгж талбар")
         vlayer = LayerUtils.layer_by_data_source("data_address", "ca_parcel_address_view")
         if vlayer is None:
             vlayer = LayerUtils.load_layer_base_layer("ca_parcel_address_view", "id", "data_address")
@@ -1619,9 +1621,59 @@ class LM2Plugin:
         vlayer.setLayerName(QApplication.translate("Plugin", " Address Parcel"))
         myalayer = root.findLayer(vlayer.id())
         if myalayer is None:
-            addrs_group.addLayer(vlayer)
+            addrs_parcel_group.addLayer(vlayer)
         # root.findLayer(vlayer.id()).setVisible(0)
             # vlayer.setReadOnly(True)
+
+        vlayer = LayerUtils.layer_by_data_source("data_address", "ca_parcel_address_bairzui_view")
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer("ca_parcel_address_bairzui_view", "id", "data_address")
+        vlayer.loadNamedStyle(
+            str(os.path.dirname(os.path.realpath(__file__))) + "/template\style/ca_parcel_address_bairzui_view.qml")
+        vlayer.setLayerName(QApplication.translate("Plugin", " Address BairZui Parcel"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            addrs_parcel_group.addLayer(vlayer)
+
+        vlayer = LayerUtils.layer_by_data_source("data_address", "ca_parcel_address_cadastre_view")
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer("ca_parcel_address_cadastre_view", "id", "data_address")
+        vlayer.loadNamedStyle(
+            str(os.path.dirname(os.path.realpath(__file__))) + "/template\style/ca_parcel_address_cadastre_view.qml")
+        vlayer.setLayerName(QApplication.translate("Plugin", " Address Cadastre Parcel"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            addrs_parcel_group.addLayer(vlayer)
+
+        vlayer = LayerUtils.layer_by_data_source("data_address", "ca_parcel_address_temp_cadastre_view")
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer("ca_parcel_address_temp_cadastre_view", "id", "data_address")
+        vlayer.loadNamedStyle(
+            str(os.path.dirname(os.path.realpath(__file__))) + "/template\style/ca_parcel_address_temp_cadastre_view.qml")
+        vlayer.setLayerName(QApplication.translate("Plugin", " Address Temp Cadastre Parcel"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            addrs_parcel_group.addLayer(vlayer)
+
+        vlayer = LayerUtils.layer_by_data_source("data_address", "ca_parcel_address_plan_view")
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer("ca_parcel_address_plan_view", "id", "data_address")
+        vlayer.loadNamedStyle(
+            str(os.path.dirname(os.path.realpath(__file__))) + "/template\style/ca_parcel_address_plan_view.qml")
+        vlayer.setLayerName(QApplication.translate("Plugin", " Address Plan Parcel"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            addrs_parcel_group.addLayer(vlayer)
+
+        vlayer = LayerUtils.layer_by_data_source("data_address", "ca_parcel_address_is_new_view")
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer("ca_parcel_address_is_new_view", "id", "data_address")
+        vlayer.loadNamedStyle(
+            str(os.path.dirname(os.path.realpath(__file__))) + "/template\style/ca_parcel_address_is_new_view.qml")
+        vlayer.setLayerName(QApplication.translate("Plugin", " Is New Address Parcel"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            addrs_parcel_group.addLayer(vlayer)
 
         vlayer = LayerUtils.layer_by_data_source("data_address", "st_road_line_view")
         if vlayer is None:

@@ -431,6 +431,8 @@ class LayerUtils(object):
             group = root.insertGroup(8, u"Хаяг")
             group.setExpanded(False)
             myNewGroup = group.addGroup(u"Хаяг засварлалт")
+            myNewGroup = group.addGroup(u"Хаягийн нэгж талбар")
+            myNewGroup = group.addGroup(u"Хаягийн барилга")
 
     @staticmethod
     def refresh_layer1():
