@@ -214,8 +214,8 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
         self.record_drop_label.itemDropped.connect(self.on_record_drop_label_itemDropped)
 
         if self.attribute_update:
-            self.__setup_mapping()
             self.__setup_combo_boxes()
+            self.__setup_mapping()
         else:
             self.date_time_date.setDateTime(QDateTime.currentDateTime())
             self.__setup_combo_boxes()
@@ -337,6 +337,8 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
         # App29Ext
         if self.application.app29ext:
             court_status = self.application.app29ext.court_status
+            print 'court_status'
+            print court_status
             start_period = self.application.app29ext.start_period
             start_period_qt = PluginUtils.convert_python_date_to_qt(start_period)
 
@@ -345,6 +347,7 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
 
             rigth_code = self.rigth_type_cbox.itemData(self.rigth_type_cbox.currentIndex())
             if self.application.app_type == ApplicationType.court_decision:
+                print 'ddfffdd'
                 if rigth_code == 3:
                     self.record_court_decision_label.setVisible(True)
                     self.record_court_status_cbox.setVisible(True)
@@ -371,6 +374,7 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
                     self.contract_court_start_date_edit.setDate(start_period_qt)
                     self.contract_court_end_date_edit.setDate(end_period_qt)
                     if court_status:
+                        print 'ttttttt'
                         self.contract_court_status_cbox.setCurrentIndex(self.contract_court_status_cbox.findData(court_status))
                     if self.application.app29ext.court_decision_no:
                         self.contract_court_decision_no_edit.setText(self.application.app29ext.court_decision_no)
@@ -724,6 +728,15 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
 
         for item in court_status:
             self.record_court_status_cbox.addItem(item.description, item.code)
+
+        court_status = self.application.app29ext.court_status
+        rigth_code = self.rigth_type_cbox.itemData(self.rigth_type_cbox.currentIndex())
+
+        if court_status:
+            if rigth_code == 3:
+                self.record_court_status_cbox.setCurrentIndex(self.record_court_status_cbox.findData(court_status))
+            else:
+                self.contract_court_status_cbox.setCurrentIndex(self.contract_court_status_cbox.findData(court_status))
 
     def __validity_of_application(self):
 
@@ -3045,6 +3058,7 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
 
         self.create_savepoint()
         right_type = self.rigth_type_cbox.itemData(self.rigth_type_cbox.currentIndex())
+        print right_type
 
         try:
 
@@ -3055,6 +3069,9 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
                     Constants.DATABASE_DATE_FORMAT)
                 self.application.app29ext.start_period = self.contract_court_start_date_edit.date().toString(
                     Constants.DATABASE_DATE_FORMAT)
+                print 'ddd'
+                print self.contract_court_status_cbox.itemData(
+                    self.contract_court_status_cbox.currentIndex())
                 self.application.app29ext.court_status = self.contract_court_status_cbox.itemData(
                     self.contract_court_status_cbox.currentIndex())
 
