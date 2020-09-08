@@ -39,6 +39,7 @@ from ..model.StEntrance import *
 from ..controller.PlanDetailWidget import *
 from ..controller.PlanLayerFilterDialog import *
 from ..model.ClParcelType import *
+from ..model.StSettlementPoint import *
 # from ..LM2Plugin import *
 from datetime import timedelta
 from xlsxwriter.utility import xl_rowcol_to_cell, xl_col_to_name
@@ -186,6 +187,71 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
             item = QTableWidgetItem(str(y))
             item.setData(Qt.UserRole, y)
             self.str_nodes_twidget.setItem(count, 2, item)
+
+    @pyqtSlot()
+    def on_get_str_start_button_clicked(self):
+
+        strs = self.session.query(StStreetLineView).all()
+
+        self.progressBar.setValue(0)
+
+        self.progressBar.setMaximum(len(strs))
+        str_count = str(len(strs))
+        a_count = 0
+        str_count_lbl = str_count + '/' +  str(a_count)
+        self.str_count_lbl.setText(str_count_lbl)
+        for value in strs:
+            street_id = value.id
+
+            sql = "select * from base.st_street_line_view_start_end_nodes_auto(" + str(street_id) + ");"
+
+            geometry = None
+            result = self.session.execute(sql)
+            for item_row in result:
+                street_id = item_row[0]
+                x = item_row[1]
+                y = item_row[2]
+
+                geom_spot4 = QgsPoint(x, y)
+                geometry = QgsGeometry.fromPoint(geom_spot4)
+
+                geometry = WKTElement(geometry.exportToWkt(), srid=4326)
+            if geometry is not None:
+                self.session.query(StMapStreetPoint).filter(StMapStreetPoint.street_id == street_id).delete()
+
+                count = self.session.query(StStreetPoint). \
+                    filter(StStreetPoint.geometry.ST_Equals(geometry)).count()
+
+                if count == 0:
+                    object = StStreetPoint()
+                    object.is_active = True
+                    object.geometry = geometry
+                    object.valid_from = DatabaseUtils.current_date_time()
+                    object.created_at = DatabaseUtils.current_date_time()
+                    object.updated_at = DatabaseUtils.current_date_time()
+                    object.au1 = self.au1
+                    object.au2 = self.au2
+                    self.session.add(object)
+                    self.session.flush()
+
+                    map_object = StMapStreetPoint()
+                    map_object.street_point_id = object.id
+                    map_object.street_id = street_id
+                    self.session.add(map_object)
+                if count == 1:
+                    object = self.session.query(StStreetPoint). \
+                        filter(StStreetPoint.geometry.ST_Equals(geometry)).one()
+                    map_object = StMapStreetPoint()
+                    map_object.street_point_id = object.id
+                    map_object.street_id = street_id
+                    self.session.add(map_object)
+
+            a_count = a_count + 1
+            str_count_lbl = str_count + '/' + str(a_count)
+            self.str_count_lbl.setText(str_count_lbl)
+            value_p = self.progressBar.value() + 1
+            self.progressBar.setValue(value_p)
+
 
     @pyqtSlot(QTableWidgetItem)
     def on_str_nodes_twidget_itemClicked(self, item):
@@ -1150,3 +1216,68 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
         myalayer = root.findLayer(vlayer.id())
         if myalayer is None:
             myNewGroup.addLayer(vlayer)
+
+        addrs_group = root.findGroup(u"Хаяг")
+        addrs_parcel_group = root.findGroup(u"Хаягийн нэгж талбар")
+
+        vlayer = LayerUtils.layer_by_data_source("data_address", "ca_parcel_address_bairzui_view")
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer("ca_parcel_address_bairzui_view", "id", "data_address")
+        vlayer.loadNamedStyle(
+            str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/ca_parcel_address_bairzui_view.qml")
+        vlayer.setLayerName(QApplication.translate("Plugin", " Address BairZui Parcel"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            addrs_parcel_group.addLayer(vlayer)
+
+        vlayer = LayerUtils.layer_by_data_source("data_address", "ca_parcel_address_cadastre_view")
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer("ca_parcel_address_cadastre_view", "id", "data_address")
+        vlayer.loadNamedStyle(
+            str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/ca_parcel_address_cadastre_view.qml")
+        vlayer.setLayerName(QApplication.translate("Plugin", " Address Cadastre Parcel"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            addrs_parcel_group.addLayer(vlayer)
+
+        vlayer = LayerUtils.layer_by_data_source("data_address", "ca_parcel_address_temp_cadastre_view")
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer("ca_parcel_address_temp_cadastre_view", "id", "data_address")
+        vlayer.loadNamedStyle(
+            str(os.path.dirname(
+                os.path.realpath(__file__))[:-10]) + "/template\style/ca_parcel_address_temp_cadastre_view.qml")
+        vlayer.setLayerName(QApplication.translate("Plugin", " Address Temp Cadastre Parcel"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            addrs_parcel_group.addLayer(vlayer)
+
+        vlayer = LayerUtils.layer_by_data_source("data_address", "ca_parcel_address_plan_view")
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer("ca_parcel_address_plan_view", "id", "data_address")
+        vlayer.loadNamedStyle(
+            str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/ca_parcel_address_plan_view.qml")
+        vlayer.setLayerName(QApplication.translate("Plugin", " Address Plan Parcel"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            addrs_parcel_group.addLayer(vlayer)
+
+        vlayer = LayerUtils.layer_by_data_source("data_address", "ca_parcel_address_is_new_view")
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer("ca_parcel_address_is_new_view", "id", "data_address")
+        vlayer.loadNamedStyle(
+            str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/ca_parcel_address_is_new_view.qml")
+        vlayer.setLayerName(QApplication.translate("Plugin", " Is New Address Parcel"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            addrs_parcel_group.addLayer(vlayer)
+
+        vlayer = LayerUtils.layer_by_data_source("data_address", "au_settlement_zone_point")
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer("au_settlement_zone_point", "id", "data_address")
+        vlayer.loadNamedStyle(
+            str(os.path.dirname(os.path.realpath(__file__))[
+                :-10]) + "/template\style/au_settlement_zone_point.qml")
+        vlayer.setLayerName(QApplication.translate("Plugin", " Settlement Center"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            addrs_group.addLayer(vlayer)

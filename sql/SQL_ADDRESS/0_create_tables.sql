@@ -622,3 +622,37 @@ GRANT ALL ON TABLE data_address.st_street_document TO geodb_admin;
 GRANT SELECT, UPDATE, INSERT, DELETE ON TABLE data_address.st_street_document TO reporting;
 GRANT SELECT, UPDATE, INSERT, DELETE ON TABLE data_address.st_street_document TO application_update;
 GRANT SELECT, INSERT ON TABLE data_address.st_street_document TO cadastre_view;
+
+-------------
+drop table if exists data_address.au_settlement_zone_point;
+CREATE TABLE data_address.au_settlement_zone_point
+(
+  id bigserial NOT NULL,
+  is_active boolean NOT NULL DEFAULT true,
+  valid_from date DEFAULT ('now'::text)::date,
+  valid_till date DEFAULT 'infinity'::date,
+  geometry geometry(Point,4326),
+  created_by integer,
+  updated_by integer,
+  created_at timestamp(0) without time zone NOT NULL DEFAULT now(),
+  updated_at timestamp(0) without time zone NOT NULL DEFAULT now(),
+  au1 character varying(3),
+  au2 character varying(5),
+  au3 text,
+  CONSTRAINT au_settlement_zone_point_pkey PRIMARY KEY (id)
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE data_address.au_settlement_zone_point
+  OWNER TO geodb_admin;
+GRANT ALL ON TABLE data_address.au_settlement_zone_point TO geodb_admin;
+GRANT SELECT ON TABLE data_address.au_settlement_zone_point TO reporting;
+GRANT SELECT ON TABLE data_address.au_settlement_zone_point TO land_office_administration;
+GRANT INSERT, DELETE ON TABLE data_address.au_settlement_zone_point TO cadastre_view;
+GRANT INSERT, DELETE ON TABLE data_address.au_settlement_zone_point TO db_creation;
+GRANT UPDATE, INSERT, DELETE ON TABLE data_address.au_settlement_zone_point TO cadastre_update;
+
+GRANT ALL ON SEQUENCE data_address.au_settlement_zone_point_id_seq TO geodb_admin;
+GRANT USAGE ON SEQUENCE data_address.au_settlement_zone_point_id_seq TO cadastre_view;
+GRANT USAGE ON SEQUENCE data_address.au_settlement_zone_point_id_seq TO cadastre_update;

@@ -65,7 +65,7 @@ BEGIN
 		group by pp.new_geometry, sp,ep
 		order by min(st_distance(ST_MakeLine(sp,ep), ST_GeomFromText(pp.new_geometry, 4326))) asc limit 1; ' INTO point_geometry;
 
-	if parcel_id is null then
+	if NEW.parcel_id is null then
 		SELECT id FROM data_address.ca_parcel_address INTO parcel_id WHERE ST_COVERS(geometry, point_geometry);
 	end if;
 	if building_id is null then
@@ -107,8 +107,12 @@ BEGIN
 	SELECT code FROM admin_units.au_level2 INTO v_admin_unit_l2_code WHERE ST_COVERS(geometry, point_geometry);
 	SELECT code FROM admin_units.au_level3 INTO v_admin_unit_l3_code WHERE ST_COVERS(geometry, point_geometry);
 	SELECT fid FROM admin_units.au_khoroolol INTO v_au_khoroolol_id WHERE ST_COVERS(geometry, point_geometry);
-	SELECT id FROM data_address.ca_parcel_address INTO parcel_id WHERE ST_Intersects(geometry, point_geometry);
-	SELECT id FROM data_address.ca_building_address INTO building_id WHERE ST_Intersects(geometry, point_geometry);
+	if NEW.parcel_id is null then
+		SELECT id FROM data_address.ca_parcel_address INTO parcel_id WHERE ST_Intersects(geometry, point_geometry);
+	end if;
+	if building_id is null then
+		SELECT id FROM data_address.ca_building_address INTO building_id WHERE ST_Intersects(geometry, point_geometry);
+	end if;
 	--SELECT id FROM data_address.st_street INTO v_street_id WHERE ST_COVERS(geometry, point_geometry);
 	SELECT name || '-' || code FROM data_address.st_street_sub INTO address_streetname WHERE ST_COVERS(geometry, point_geometry);
 	SELECT id FROM data_address.au_zipcode_area INTO v_au_post_zone_id WHERE ST_COVERS(geometry, point_geometry);
@@ -148,4 +152,11 @@ $BODY$
   COST 100;
 ALTER FUNCTION base.create_address_entry_id()
   OWNER TO geodb_admin;
+
+------
+CREATE TRIGGER a_create_address_entry_id
+  BEFORE INSERT OR UPDATE
+  ON data_address.st_entrance
+  FOR EACH ROW
+  EXECUTE PROCEDURE base.create_address_entry_id();
 	
