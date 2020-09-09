@@ -1,7 +1,7 @@
-select count(pp.parcel_id) from data_plan.pl_project p
+﻿select count(pp.parcel_id) from data_plan.pl_project p
 join data_plan.cl_plan_type pt on p.plan_type_id = pt.plan_type_id
 join data_plan.pl_project_parcel pp on p.project_id = pp.project_id
-where pt.code in ('04', '05', '07', '12') and p.is_active = true and now() between p.start_date and p.end_date
+where pt.code in ('04', '05', '07', '12') and p.is_active = true and now() between '1900-01-01'::date and p.end_date
 --order by p.start_date desc
 
 -------------
@@ -80,3 +80,10 @@ where st_equals(p.geometry, x.polygon_geom) and st_isvalid(p.geometry) = true an
 select * from data_soums_union.ct_application app
 join data_soums_union.ca_tmp_plan_parcel p on app.app_id = p.app_id
 where project_parcel is not null
+
+------
+
+select bz.address_parcel_no, bz.address_streetname, bz.street_code, p.address_parcel_no, p.address_streetname, p.street_code from (select * from data_address.ca_parcel_address
+where parcel_type = 10 and au2 = '04201') as bz, (select * from data_address.ca_parcel_address
+where parcel_type = 1 and au2 = '04201' and is_new_address = true) p
+where st_within(st_centroid(bz.geometry), p.geometry) and bz.address_streetname || '-' || bz.street_code = p.address_streetname and bz.address_parcel_no = p.address_parcel_no

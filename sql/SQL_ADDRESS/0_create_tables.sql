@@ -159,6 +159,9 @@ max_speed integer;
 lanes integer;
 surface text;
 highway text;
+ref text,
+oneway text,
+bridge text,
 created_by integer,
 updated_by integer,
 created_at timestamp(0) without time zone NOT NULL DEFAULT now(),

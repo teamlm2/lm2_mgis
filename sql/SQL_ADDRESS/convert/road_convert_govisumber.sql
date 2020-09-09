@@ -1,9 +1,14 @@
 ﻿---st_road
 insert into data_address.st_road(code, name, street_code, street_name, is_active, max_speed, lanes, surface, highway, line_geom)
-select au2.code||lpad((row_number() over(partition by au2.code))::text, 5, '0') as str_code, z.name, g.gudamjid, z.name, true, maxspeed::int, lanes::int, surface, highway, z.geom from data_address.aa_govisumber z
+select au2.code||lpad((row_number() over(partition by au2.code))::text, 5, '0') as str_code, z.name, g.gudamjid, z.name, true, maxspeed::int, lanes::int, surface, highway, z.geom from data_address.aa_ubroad z
 join admin_units.au_level2 au2 on st_within(st_centroid(z.geom), au2.geometry)
 left join data_address.all_gudamj g on st_intersects(z.geom, g.geom) and g.gudamjner = z.name
 
+-----
+insert into data_address.st_road(code, name, name_en, street_code, street_name, is_active, max_speed, lanes, surface, highway, ref, oneway, bridge, au2, line_geom)
+select au2.code||lpad((row_number() over(partition by au2.code))::text, 5, '0') as str_code, ss.name, z.name_en, ss.code, ss.name, true, maxspeed::int, lanes::int, surface, highway, ref, oneway, bridge, au2.code, z.geom from data_address.aa_ubroad z
+left join admin_units.au_level2 au2 on st_within(st_centroid(z.geom), au2.geometry)
+left join data_address.st_street_sub ss on st_within(st_centroid(z.geom), ss.geometry)
 
 ----------
 select z.name, g.gudamjner, g.gudamjid, min(st_distance(z.geom, g.geom)) from data_address.aa_govisumber z, data_address.all_gudamj g, admin_units.au_level2 au2
@@ -35,8 +40,8 @@ ON CONFLICT (code, name, parent_id) DO nothing
 ----------update st_road street_id
 
 WITH s AS (
-select s.id as str_id, r.id as road_id, street_code, street_name, s.au2 from data_address.st_road r, admin_units.au_level2 au2, data_address.st_street s 
-where st_within(st_centroid(r.line_geom), au2.geometry) and substring(au2.code, 1, 3) = '042' and street_code || '-' || street_name = s.code || '-' || s.name and s.au1 = '042'
+select s.id as str_id, r.id as road_id, street_code, street_name, s.au2 from data_address.st_road r, data_address.st_street s 
+where substring(r.au2, 1, 3) = '011' and street_code || '-' || street_name = s.code || '-' || s.name and s.au1 = '011'
 )
 UPDATE data_address.st_road
 SET street_id = s.str_id

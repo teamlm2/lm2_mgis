@@ -3,17 +3,17 @@
 select 1, xxx.geom from (
 select xxx.* from (
 SELECT row_number() over() gid, st_centroid(line.geom) as geom
-FROM ST_Boundary(((select ((geometry)) from data_address.ca_parcel_address where id = 1305436))) AS t(geom)
+FROM ST_Boundary(((select ((geometry)) from data_address.ca_parcel_address where id = 1410450))) AS t(geom)
 CROSS JOIN LATERAL generate_series(1, ST_NPoints(geom) - 1)AS gs(x)
 CROSS JOIN LATERAL ST_MakeLine(ST_PointN(geom, x), ST_PointN(geom, x+1)) AS line(geom)
 )xxx
 where gid not in ( 
 select aa.gid from (
 SELECT row_number() over() gid, ST_SRID(line.geom) ,st_centroid(line.geom) as geom
-FROM ST_Boundary(((select ((geometry)) from data_address.ca_parcel_address where id = 1305436))) AS t(geom)
+FROM ST_Boundary(((select ((geometry)) from data_address.ca_parcel_address where id = 1410450))) AS t(geom)
 CROSS JOIN LATERAL generate_series(1, ST_NPoints(geom) - 1)AS gs(x)
 CROSS JOIN LATERAL ST_MakeLine(ST_PointN(geom, x), ST_PointN(geom, x+1)) AS line(geom)
-) aa, (select p.parcel_id, d.parcel_id, d.geometry from data_address.ca_parcel_address p, data_address.ca_parcel_address d where p.id = 1305436 and st_touches(p.geometry, d.geometry) and now() between d.valid_from and d.valid_till) p
+) aa, (select p.parcel_id, d.parcel_id, d.geometry from data_address.ca_parcel_address p, data_address.ca_parcel_address d where p.id = 1410450 and st_touches(p.geometry, d.geometry) and now() between d.valid_from and d.valid_till) p
 where st_intersects((aa.geom),(st_buffer(p.geometry, 0.000001)))) 
 )xxx, data_address.st_all_street_line_view line
 group by xxx.gid, xxx.geom

@@ -189,68 +189,180 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
             self.str_nodes_twidget.setItem(count, 2, item)
 
     @pyqtSlot()
+    def on_get_entry_parcels_button_clicked(self):
+
+        self.parcel_progressBar.setValue(0)
+        a_count = 0
+        if self.is_selected_parcels_chbox.isChecked():
+            parcelLayer = LayerUtils.layer_by_data_source("data_address", "ca_parcel_address_view")
+            select_feature = parcelLayer.selectedFeatures()
+            str_count = str(len(select_feature))
+            self.parcel_progressBar.setMaximum(len(select_feature))
+            str_count_lbl = str_count + '/' + str(a_count)
+            self.parcel_count_lbl.setText(str_count_lbl)
+
+            # self.session.execute("alter table data_address.st_entrance disable trigger a_create_address_entry_id;")
+            for feature in select_feature:
+                attr = feature.attributes()
+                id = attr[0]
+
+                sql = "select * from base.st_generate_parcel_entry_auto(" + str(id) + ");"
+
+                geometry = None
+                result = self.session.execute(sql)
+                for item_row in result:
+                    entry_type = item_row[0]
+                    x = item_row[1]
+                    y = item_row[2]
+
+                    geom_spot4 = QgsPoint(x, y)
+                    geometry = QgsGeometry.fromPoint(geom_spot4)
+
+                    geometry = WKTElement(geometry.exportToWkt(), srid=4326)
+                if geometry is not None:
+                    count = self.session.query(StEntrance).filter(StEntrance.parcel_id == id).count()
+                    if count == 0:
+                        print a_count
+                        object = StEntrance()
+                        object.type = entry_type
+                        object.parcel_id = id
+                        object.is_active = True
+                        # object.au2 = self.au2
+                        object.geometry = geometry
+                        self.session.add(object)
+                        self.session.flush()
+
+                a_count = a_count + 1
+                str_count_lbl = str_count + '/' + str(a_count)
+                self.parcel_count_lbl.setText(str_count_lbl)
+                value_p = self.parcel_progressBar.value() + 1
+                self.parcel_progressBar.setValue(value_p)
+            # self.session.execute("alter table data_address.st_entrance enable trigger a_create_address_entry_id;")
+        else:
+            print 'ffgg'
+
+    @pyqtSlot()
     def on_get_str_start_button_clicked(self):
 
-        strs = self.session.query(StStreetLineView).all()
-
         self.progressBar.setValue(0)
-
-        self.progressBar.setMaximum(len(strs))
-        str_count = str(len(strs))
         a_count = 0
-        str_count_lbl = str_count + '/' +  str(a_count)
-        self.str_count_lbl.setText(str_count_lbl)
-        for value in strs:
-            street_id = value.id
-
-            sql = "select * from base.st_street_line_view_start_end_nodes_auto(" + str(street_id) + ");"
-
-            geometry = None
-            result = self.session.execute(sql)
-            for item_row in result:
-                street_id = item_row[0]
-                x = item_row[1]
-                y = item_row[2]
-
-                geom_spot4 = QgsPoint(x, y)
-                geometry = QgsGeometry.fromPoint(geom_spot4)
-
-                geometry = WKTElement(geometry.exportToWkt(), srid=4326)
-            if geometry is not None:
-                self.session.query(StMapStreetPoint).filter(StMapStreetPoint.street_id == street_id).delete()
-
-                count = self.session.query(StStreetPoint). \
-                    filter(StStreetPoint.geometry.ST_Equals(geometry)).count()
-
-                if count == 0:
-                    object = StStreetPoint()
-                    object.is_active = True
-                    object.geometry = geometry
-                    object.valid_from = DatabaseUtils.current_date_time()
-                    object.created_at = DatabaseUtils.current_date_time()
-                    object.updated_at = DatabaseUtils.current_date_time()
-                    object.au1 = self.au1
-                    object.au2 = self.au2
-                    self.session.add(object)
-                    self.session.flush()
-
-                    map_object = StMapStreetPoint()
-                    map_object.street_point_id = object.id
-                    map_object.street_id = street_id
-                    self.session.add(map_object)
-                if count == 1:
-                    object = self.session.query(StStreetPoint). \
-                        filter(StStreetPoint.geometry.ST_Equals(geometry)).one()
-                    map_object = StMapStreetPoint()
-                    map_object.street_point_id = object.id
-                    map_object.street_id = street_id
-                    self.session.add(map_object)
-
-            a_count = a_count + 1
+        if self.is_selected_str_chbox.isChecked():
+            parcelLayer = LayerUtils.layer_by_data_source("data_address", "st_street_line_view")
+            select_feature = parcelLayer.selectedFeatures()
+            str_count = str(len(select_feature))
+            self.progressBar.setMaximum(len(select_feature))
             str_count_lbl = str_count + '/' + str(a_count)
             self.str_count_lbl.setText(str_count_lbl)
-            value_p = self.progressBar.value() + 1
-            self.progressBar.setValue(value_p)
+
+            for feature in select_feature:
+                attr = feature.attributes()
+                street_id = attr[0]
+                sql = "select * from base.st_street_line_view_start_end_nodes_auto(" + str(street_id) + ");"
+
+                geometry = None
+                result = self.session.execute(sql)
+                for item_row in result:
+                    street_id = item_row[0]
+                    x = item_row[1]
+                    y = item_row[2]
+
+                    geom_spot4 = QgsPoint(x, y)
+                    geometry = QgsGeometry.fromPoint(geom_spot4)
+
+                    geometry = WKTElement(geometry.exportToWkt(), srid=4326)
+                if geometry is not None:
+                    self.session.query(StMapStreetPoint).filter(StMapStreetPoint.street_id == street_id).delete()
+
+                    count = self.session.query(StStreetPoint). \
+                        filter(StStreetPoint.geometry.ST_Equals(geometry)).count()
+
+                    if count == 0:
+                        object = StStreetPoint()
+                        object.is_active = True
+                        object.geometry = geometry
+                        object.valid_from = DatabaseUtils.current_date_time()
+                        object.created_at = DatabaseUtils.current_date_time()
+                        object.updated_at = DatabaseUtils.current_date_time()
+                        object.au1 = self.au1
+                        object.au2 = self.au2
+                        self.session.add(object)
+                        self.session.flush()
+
+                        map_object = StMapStreetPoint()
+                        map_object.street_point_id = object.id
+                        map_object.street_id = street_id
+                        self.session.add(map_object)
+                    if count == 1:
+                        object = self.session.query(StStreetPoint). \
+                            filter(StStreetPoint.geometry.ST_Equals(geometry)).one()
+                        map_object = StMapStreetPoint()
+                        map_object.street_point_id = object.id
+                        map_object.street_id = street_id
+                        self.session.add(map_object)
+
+                a_count = a_count + 1
+                str_count_lbl = str_count + '/' + str(a_count)
+                self.str_count_lbl.setText(str_count_lbl)
+                value_p = self.progressBar.value() + 1
+                self.progressBar.setValue(value_p)
+        else:
+            strs = self.session.query(StStreetLineView).all()
+            self.progressBar.setMaximum(len(strs))
+            str_count = str(len(strs))
+
+            str_count_lbl = str_count + '/' +  str(a_count)
+            self.str_count_lbl.setText(str_count_lbl)
+            for value in strs:
+                street_id = value.id
+
+                sql = "select * from base.st_street_line_view_start_end_nodes_auto(" + str(street_id) + ");"
+
+                geometry = None
+                result = self.session.execute(sql)
+                for item_row in result:
+                    street_id = item_row[0]
+                    x = item_row[1]
+                    y = item_row[2]
+
+                    geom_spot4 = QgsPoint(x, y)
+                    geometry = QgsGeometry.fromPoint(geom_spot4)
+
+                    geometry = WKTElement(geometry.exportToWkt(), srid=4326)
+                if geometry is not None:
+                    self.session.query(StMapStreetPoint).filter(StMapStreetPoint.street_id == street_id).delete()
+
+                    count = self.session.query(StStreetPoint). \
+                        filter(StStreetPoint.geometry.ST_Equals(geometry)).count()
+
+                    if count == 0:
+                        object = StStreetPoint()
+                        object.is_active = True
+                        object.geometry = geometry
+                        object.valid_from = DatabaseUtils.current_date_time()
+                        object.created_at = DatabaseUtils.current_date_time()
+                        object.updated_at = DatabaseUtils.current_date_time()
+                        object.au1 = self.au1
+                        object.au2 = self.au2
+                        self.session.add(object)
+                        self.session.flush()
+
+                        map_object = StMapStreetPoint()
+                        map_object.street_point_id = object.id
+                        map_object.street_id = street_id
+                        self.session.add(map_object)
+                    if count == 1:
+                        object = self.session.query(StStreetPoint). \
+                            filter(StStreetPoint.geometry.ST_Equals(geometry)).one()
+                        map_object = StMapStreetPoint()
+                        map_object.street_point_id = object.id
+                        map_object.street_id = street_id
+                        self.session.add(map_object)
+
+                a_count = a_count + 1
+                str_count_lbl = str_count + '/' + str(a_count)
+                self.str_count_lbl.setText(str_count_lbl)
+                value_p = self.progressBar.value() + 1
+                self.progressBar.setValue(value_p)
 
 
     @pyqtSlot(QTableWidgetItem)
@@ -1219,6 +1331,7 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
 
         addrs_group = root.findGroup(u"Хаяг")
         addrs_parcel_group = root.findGroup(u"Хаягийн нэгж талбар")
+        addrs_building_group = root.findGroup(u"Хаягийн барилга")
 
         vlayer = LayerUtils.layer_by_data_source("data_address", "ca_parcel_address_bairzui_view")
         if vlayer is None:
@@ -1281,3 +1394,48 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
         myalayer = root.findLayer(vlayer.id())
         if myalayer is None:
             addrs_group.addLayer(vlayer)
+
+        ###building
+        vlayer = LayerUtils.layer_by_data_source("data_address", "ca_building_address_bairzui_view")
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer("ca_building_address_bairzui_view", "id", "data_address")
+        vlayer.loadNamedStyle(
+            str(os.path.dirname(os.path.realpath(__file__))[
+                :-10]) + "/template\style/ca_building_address_bairzui_view.qml")
+        vlayer.setLayerName(QApplication.translate("Plugin", " Address BairZui Building"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            addrs_building_group.addLayer(vlayer)
+
+        vlayer = LayerUtils.layer_by_data_source("data_address", "ca_building_address_cadastre_view")
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer("ca_building_address_cadastre_view", "id", "data_address")
+        vlayer.loadNamedStyle(
+            str(os.path.dirname(os.path.realpath(__file__))[
+                :-10]) + "/template\style/ca_building_address_cadastre_view.qml")
+        vlayer.setLayerName(QApplication.translate("Plugin", " Address Cadastre Building"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            addrs_building_group.addLayer(vlayer)
+
+        vlayer = LayerUtils.layer_by_data_source("data_address", "ca_building_address_is_new_view")
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer("ca_building_address_is_new_view", "id", "data_address")
+        vlayer.loadNamedStyle(
+            str(os.path.dirname(os.path.realpath(__file__))[
+                :-10]) + "/template\style/ca_building_address_is_new_view.qml")
+        vlayer.setLayerName(QApplication.translate("Plugin", " Is New Address Building"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            addrs_building_group.addLayer(vlayer)
+
+        vlayer = LayerUtils.layer_by_data_source("data_address", "ca_building_address_temp_cadastre_view")
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer("ca_building_address_temp_cadastre_view", "id", "data_address")
+        vlayer.loadNamedStyle(
+            str(os.path.dirname(os.path.realpath(__file__))[
+                :-10]) + "/template\style/ca_building_address_temp_cadastre_view.qml")
+        vlayer.setLayerName(QApplication.translate("Plugin", " Address Temp Cadastre Building"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            addrs_building_group.addLayer(vlayer)

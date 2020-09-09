@@ -729,14 +729,16 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
         for item in court_status:
             self.record_court_status_cbox.addItem(item.description, item.code)
 
-        court_status = self.application.app29ext.court_status
-        rigth_code = self.rigth_type_cbox.itemData(self.rigth_type_cbox.currentIndex())
+        if self.application.app29ext:
+            if self.application.app29ext.court_status:
+                court_status = self.application.app29ext.court_status
+                rigth_code = self.rigth_type_cbox.itemData(self.rigth_type_cbox.currentIndex())
 
-        if court_status:
-            if rigth_code == 3:
-                self.record_court_status_cbox.setCurrentIndex(self.record_court_status_cbox.findData(court_status))
-            else:
-                self.contract_court_status_cbox.setCurrentIndex(self.contract_court_status_cbox.findData(court_status))
+                if court_status:
+                    if rigth_code == 3:
+                        self.record_court_status_cbox.setCurrentIndex(self.record_court_status_cbox.findData(court_status))
+                    else:
+                        self.contract_court_status_cbox.setCurrentIndex(self.contract_court_status_cbox.findData(court_status))
 
     def __validity_of_application(self):
 

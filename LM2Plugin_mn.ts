@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.0" language="mn_MN">
+<!DOCTYPE TS><TS version="2.0" language="mn_MN" sourcelanguage="">
 <context>
     <name>AboutDialog</name>
     <message>
@@ -57,6 +56,169 @@
         <location filename="controller/AboutDialog.py" line="16"/>
         <source>About Landmanager II</source>
         <translation>Лэндменежер II -ийн тухай</translation>
+    </message>
+</context>
+<context>
+    <name>AddressNavigatorWidget</name>
+    <message>
+        <location filename="view/AddressNavigatorWidget.ui" line="38"/>
+        <source>Selection / Filter</source>
+        <translation>Хайлтын утгууд</translation>
+    </message>
+    <message encoding="UTF-8">
+        <location filename="view/AddressNavigatorWidget.ui" line="126"/>
+        <source>Нэгж талбар</source>
+        <translation></translation>
+    </message>
+    <message encoding="UTF-8">
+        <location filename="view/AddressNavigatorWidget.ui" line="570"/>
+        <source>Хаягийн мэдээллийн санд оруулах</source>
+        <translation></translation>
+    </message>
+    <message encoding="UTF-8">
+        <location filename="view/AddressNavigatorWidget.ui" line="496"/>
+        <source>Газар зүйн нэр</source>
+        <translation></translation>
+    </message>
+    <message encoding="UTF-8">
+        <location filename="view/AddressNavigatorWidget.ui" line="184"/>
+        <source>Хашааны дугаар</source>
+        <translation></translation>
+    </message>
+    <message encoding="UTF-8">
+        <location filename="view/AddressNavigatorWidget.ui" line="589"/>
+        <source>Гудамж</source>
+        <translation></translation>
+    </message>
+    <message encoding="UTF-8">
+        <location filename="view/AddressNavigatorWidget.ui" line="247"/>
+        <source>Нэгж талбарын дугаар</source>
+        <translation></translation>
+    </message>
+    <message encoding="UTF-8">
+        <location filename="view/AddressNavigatorWidget.ui" line="538"/>
+        <source>Давхаргын төрөл</source>
+        <translation></translation>
+    </message>
+    <message encoding="UTF-8">
+        <location filename="view/AddressNavigatorWidget.ui" line="543"/>
+        <source>Хаягийн төлөв</source>
+        <translation></translation>
+    </message>
+    <message encoding="UTF-8">
+        <location filename="view/AddressNavigatorWidget.ui" line="460"/>
+        <source>Хаягийн мэдээллийн сангаас хасах</source>
+        <translation></translation>
+    </message>
+    <message encoding="UTF-8">
+        <location filename="view/AddressNavigatorWidget.ui" line="425"/>
+        <source>Гудамжны төрөл:</source>
+        <translation></translation>
+    </message>
+    <message encoding="UTF-8">
+        <location filename="view/AddressNavigatorWidget.ui" line="332"/>
+        <source>Нийт нэгж талбар:</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="view/AddressNavigatorWidget.ui" line="371"/>
+        <source>Is Selected Parcel</source>
+        <translation>Сонгосон НТ</translation>
+    </message>
+    <message encoding="UTF-8">
+        <location filename="view/AddressNavigatorWidget.ui" line="384"/>
+        <source>Орц, гарцыг автоматаар авах</source>
+        <translation></translation>
+    </message>
+    <message encoding="UTF-8">
+        <location filename="view/AddressNavigatorWidget.ui" line="390"/>
+        <source>Барилга</source>
+        <translation></translation>
+    </message>
+    <message encoding="UTF-8">
+        <location filename="view/AddressNavigatorWidget.ui" line="557"/>
+        <source>Барилгын дугаар</source>
+        <translation></translation>
+    </message>
+    <message encoding="UTF-8">
+        <location filename="view/AddressNavigatorWidget.ui" line="601"/>
+        <source>Гудамжны мэдээлэл харах</source>
+        <translation></translation>
+    </message>
+    <message encoding="UTF-8">
+        <location filename="view/AddressNavigatorWidget.ui" line="618"/>
+        <source>Эхлэлийн Цэг</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="view/AddressNavigatorWidget.ui" line="634"/>
+        <source>ID</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="view/AddressNavigatorWidget.ui" line="639"/>
+        <source>X</source>
+        <translation>X</translation>
+    </message>
+    <message>
+        <location filename="view/AddressNavigatorWidget.ui" line="644"/>
+        <source>Y</source>
+        <translation>Y</translation>
+    </message>
+    <message encoding="UTF-8">
+        <location filename="view/AddressNavigatorWidget.ui" line="651"/>
+        <source>Хамаарах Зам</source>
+        <translation></translation>
+    </message>
+    <message encoding="UTF-8">
+        <location filename="view/AddressNavigatorWidget.ui" line="656"/>
+        <source>Хавсралт Материал</source>
+        <translation></translation>
+    </message>
+    <message encoding="UTF-8">
+        <location filename="view/AddressNavigatorWidget.ui" line="670"/>
+        <source>Гудамжны дугаар:</source>
+        <translation></translation>
+    </message>
+    <message encoding="UTF-8">
+        <location filename="view/AddressNavigatorWidget.ui" line="683"/>
+        <source>Гудамжны код:</source>
+        <translation></translation>
+    </message>
+    <message encoding="UTF-8">
+        <location filename="view/AddressNavigatorWidget.ui" line="696"/>
+        <source>Гудамжны нэр:</source>
+        <translation></translation>
+    </message>
+    <message encoding="UTF-8">
+        <location filename="view/AddressNavigatorWidget.ui" line="748"/>
+        <source>Суурьшлын төвөөс гудамжны эхлэлийг авах</source>
+        <translation></translation>
+    </message>
+    <message encoding="UTF-8">
+        <location filename="view/AddressNavigatorWidget.ui" line="787"/>
+        <source>Нийт гудамж:</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="view/AddressNavigatorWidget.ui" line="800"/>
+        <source>Is Selected Street</source>
+        <translation>Сонгосон гудамж</translation>
+    </message>
+    <message encoding="UTF-8">
+        <location filename="view/AddressNavigatorWidget.ui" line="815"/>
+        <source>Давхарга</source>
+        <translation></translation>
+    </message>
+    <message encoding="UTF-8">
+        <location filename="view/AddressNavigatorWidget.ui" line="828"/>
+        <source>Хаяг авах</source>
+        <translation></translation>
+    </message>
+    <message encoding="UTF-8">
+        <location filename="view/AddressNavigatorWidget.ui" line="841"/>
+        <source>Хадгалах</source>
+        <translation></translation>
     </message>
 </context>
 <context>
@@ -125,7 +287,7 @@
         <translation>Өргөдлийн төрөл</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="2758"/>
+        <location filename="controller/ApplicationsDialog.py" line="2773"/>
         <source>Application Number</source>
         <translation>Өргөдлийн дугаар</translation>
     </message>
@@ -150,7 +312,7 @@
         <translation>-</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="2532"/>
+        <location filename="controller/ApplicationsDialog.py" line="2547"/>
         <source>Application Status</source>
         <translation>Өргөдлийн явц</translation>
     </message>
@@ -210,12 +372,12 @@
         <translation>Өргөдөл гаргагч</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="595"/>
+        <location filename="controller/ApplicationsDialog.py" line="599"/>
         <source>Main Applicant</source>
         <translation>Өргөдөл гаргагч</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="4997"/>
+        <location filename="controller/ApplicationsDialog.py" line="5016"/>
         <source>Mortgagee</source>
         <translation>Барьцаа</translation>
     </message>
@@ -230,22 +392,22 @@
         <translation></translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="520"/>
+        <location filename="controller/ApplicationsDialog.py" line="524"/>
         <source>Share (0.0-1.0)</source>
         <translation>Хувь (0.0-1.0)</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="597"/>
+        <location filename="controller/ApplicationsDialog.py" line="601"/>
         <source>Personal/Company ID</source>
         <translation>Регистр</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="598"/>
+        <location filename="controller/ApplicationsDialog.py" line="602"/>
         <source>Surname/Company</source>
         <translation>Овог/ААН</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="599"/>
+        <location filename="controller/ApplicationsDialog.py" line="603"/>
         <source>First Name</source>
         <translation>Нэр</translation>
     </message>
@@ -255,7 +417,7 @@
         <translation>Хасах</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="4927"/>
+        <location filename="controller/ApplicationsDialog.py" line="4946"/>
         <source>Legal Representative</source>
         <translation>Итгэмжлэгдсэн төлөөлөгч</translation>
     </message>
@@ -324,13 +486,13 @@
         <source>Excess Area [m2]</source>
         <translation>Илүү талбай (м2)</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ApplicationsDialog.ui" line="944"/>
         <source>Price To Be Paid [₮J]</source>
         <translation>Үнийн дүн (₮)</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="4911"/>
+        <location filename="controller/ApplicationsDialog.py" line="4930"/>
         <source>Change Of Co-Ownership</source>
         <translation>Хамтран өмчлөгч</translation>
     </message>
@@ -345,7 +507,7 @@
         <translation>Эрхээ шилжүүлж байгаа</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="5224"/>
+        <location filename="controller/ApplicationsDialog.py" line="5243"/>
         <source>Contract Cancelled</source>
         <translation>Цуцлагдсан гэрээ</translation>
     </message>
@@ -365,7 +527,7 @@
         <translation></translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="5263"/>
+        <location filename="controller/ApplicationsDialog.py" line="5282"/>
         <source>Record Cancelled</source>
         <translation>Бүртгэлийг цуцлах</translation>
     </message>
@@ -390,7 +552,7 @@
         <translation>Газар өмчлөлийн бүртгэл цонхонд үндсэн бүртгэл цуцлагдаж байж энэ цонхтой холбогдоно!</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="5247"/>
+        <location filename="controller/ApplicationsDialog.py" line="5266"/>
         <source>Relating Contract</source>
         <translation>Хүчинтэй гэрээ</translation>
     </message>
@@ -410,7 +572,7 @@
         <translation>Тухайн өргөдөл нь доорхи дугаартай газар өмчлөлтэй холбоотой</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="5196"/>
+        <location filename="controller/ApplicationsDialog.py" line="5215"/>
         <source>Contract Created</source>
         <translation>Гэрээ</translation>
     </message>
@@ -470,7 +632,7 @@
         <translation>Шилжүүлэх төрөл</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="4848"/>
+        <location filename="controller/ApplicationsDialog.py" line="4867"/>
         <source>Decision</source>
         <translation>Захирамж</translation>
     </message>
@@ -510,185 +672,185 @@
         <translation>Өргөдлийн менежмент</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="464"/>
+        <location filename="controller/ApplicationsDialog.py" line="468"/>
         <source>Share (0.0 - 1.0)</source>
         <translation>Хувь (0.0 - 1.0)</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="5370"/>
+        <location filename="controller/ApplicationsDialog.py" line="5389"/>
         <source>File Error</source>
         <translation>Алдаатай файл</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="521"/>
+        <location filename="controller/ApplicationsDialog.py" line="525"/>
         <source>Person/Company ID</source>
         <translation>Регистр</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="733"/>
+        <location filename="controller/ApplicationsDialog.py" line="748"/>
         <source>The application can&apos;t be saved. The following errors have been found: </source>
         <translation>Өргөдөл хадгалагдсангүй. Доорхи алдаанууд гарсан байна:</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="738"/>
+        <location filename="controller/ApplicationsDialog.py" line="753"/>
         <source>Missing Application type.</source>
         <translation>Өргөдлийн төрөл сонгоогүй байна.</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="743"/>
+        <location filename="controller/ApplicationsDialog.py" line="758"/>
         <source>Missing timestamp for Application.</source>
         <translation>Өргөдөл бүртгэлийн огноог зааж өгөөгүй байна.</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="749"/>
+        <location filename="controller/ApplicationsDialog.py" line="764"/>
         <source>Missing applicants. </source>
         <translation>Өргөдөл гаргагчийг сонгоогүй байна.</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="824"/>
+        <location filename="controller/ApplicationsDialog.py" line="839"/>
         <source>The mortgage start date is later that the end date.</source>
         <translation>Барьцааны эхлэх огноо дуусах хугацаанаас хойш байж болохгүй.</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="836"/>
+        <location filename="controller/ApplicationsDialog.py" line="851"/>
         <source>The sum of the mortgagee share is larger than 1.0 .</source>
         <translation>Барьцааны хувийн нийлбэр утга 1.0 -ээс их байна.</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="866"/>
+        <location filename="controller/ApplicationsDialog.py" line="881"/>
         <source>The sum of the old and new right holders is not equal .</source>
         <translation>Хуучин болон шинэ газар эзэмшигчийн нийлбэр тэнцүү биш байна.</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="897"/>
+        <location filename="controller/ApplicationsDialog.py" line="912"/>
         <source>The sum of the applicants share is larger than 1.0 .</source>
         <translation>Өргөдөл гаргагчийн хувийн нийлбэр 1.0-ээс их байна.</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="3900"/>
+        <location filename="controller/ApplicationsDialog.py" line="3919"/>
         <source>Invalid Applicant</source>
         <translation>Буруу өргөдөл гаргагч байна</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="2004"/>
+        <location filename="controller/ApplicationsDialog.py" line="2019"/>
         <source>Double Applicant</source>
         <translation>Нэг өргөдөлд тухайн өргөдөл гаргагчийг нэгл удаа оруулна</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="2004"/>
+        <location filename="controller/ApplicationsDialog.py" line="2019"/>
         <source>The applicant {0} is already added.</source>
         <translation>Өргөдөл гаргагч {0} сонгогдсон байна.</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="2597"/>
+        <location filename="controller/ApplicationsDialog.py" line="2612"/>
         <source>Status error</source>
         <translation>Статус алдаа</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="2597"/>
+        <location filename="controller/ApplicationsDialog.py" line="2612"/>
         <source>This status is already added to the application.</source>
         <translation>Статусийг өргөдөлд оруулсан байна.</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="4308"/>
+        <location filename="controller/ApplicationsDialog.py" line="4327"/>
         <source>Query error</source>
         <translation>(Query ) лавлагаа алдаатай байна</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="4222"/>
+        <location filename="controller/ApplicationsDialog.py" line="4241"/>
         <source>No parcel selected in the Navigator.</source>
         <translation>Шүүлтэд нэгж талбар сонгогдоогүй байна.</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="4308"/>
+        <location filename="controller/ApplicationsDialog.py" line="4327"/>
         <source>No decision selected in the Navigator.</source>
         <translation>Шүүлтэд захирамж сонгогдоогүй байна.</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="5210"/>
+        <location filename="controller/ApplicationsDialog.py" line="5229"/>
         <source>Record Created</source>
         <translation>Одоогийн бүртгэл</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="5182"/>
+        <location filename="controller/ApplicationsDialog.py" line="5201"/>
         <source>Transfer Of Right</source>
         <translation>Эрх шилжүүлэх</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="1271"/>
+        <location filename="controller/ApplicationsDialog.py" line="1286"/>
         <source>No Parcel found</source>
         <translation>Нэгж талбар олдсонгүй</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="1271"/>
+        <location filename="controller/ApplicationsDialog.py" line="1286"/>
         <source>The parcel number {0} could not be found within the current working soum.</source>
         <translation> {0} дугаартай нэгж талбар энэ суманд байхгүй байна.</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="890"/>
+        <location filename="controller/ApplicationsDialog.py" line="905"/>
         <source>The share value is not a valid numerial. 
  The share should be between 0.0 and 1.0 with one precision.</source>
         <translation>Хувь-ийн утга буруу байна. Хувийн утгыг 0.0-0.1 хооронд нэг орны нарийвчлалтай өгнө.</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="4294"/>
+        <location filename="controller/ApplicationsDialog.py" line="4313"/>
         <source>Working Soum</source>
         <translation>Ажиллаж буй Сум</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="4275"/>
+        <location filename="controller/ApplicationsDialog.py" line="4294"/>
         <source>The selected Parcel {0} is not within the working soum. 
  
  Change the Working soum to create a new application for the parcel.</source>
         <translation>{0} дугаартай нэгж талбар ажиллаж буй суманд байхгүй байна. Ажиллаж буй сумыг өөрчилж шинээр өргөдлийг үүсгэнэ үү.</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="573"/>
+        <location filename="controller/ApplicationsDialog.py" line="577"/>
         <source>Age</source>
         <translation>Нас</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="761"/>
+        <location filename="controller/ApplicationsDialog.py" line="776"/>
         <source>In capable person share should be equal 0 </source>
         <translation>Эрх зүйн чадамжтай иргэний хувь нь 0 байна</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="2422"/>
+        <location filename="controller/ApplicationsDialog.py" line="2437"/>
         <source>First status can&apos;t be deleted.</source>
         <translation>Явцын мэдээлэл хоосон байж болохгүй.</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="4458"/>
+        <location filename="controller/ApplicationsDialog.py" line="4477"/>
         <source>This mortgagee is already added.</source>
         <translation>Барьцаалагчийг оруулсан байна.</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="4517"/>
+        <location filename="controller/ApplicationsDialog.py" line="4536"/>
         <source>Invalid input</source>
         <translation>Тохирохгүй мэдээ байна</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="4517"/>
+        <location filename="controller/ApplicationsDialog.py" line="4536"/>
         <source>A legal represantative has to be a mongolian capable person.</source>
         <translation>Хууль ёсны төлөөлөгч нь төлөөлөх эрхгүй субъект байна. </translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="793"/>
+        <location filename="controller/ApplicationsDialog.py" line="808"/>
         <source>Exactly one main applicant has to be defined.</source>
         <translation>Үндсэн өргөдөл гаргагчийг л чагтална уу.</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="874"/>
+        <location filename="controller/ApplicationsDialog.py" line="889"/>
         <source>At least two applicants have to be added. </source>
         <translation>Хоёроос доошгүй өргөдөл гаргагчийг оруулах.</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="2255"/>
+        <location filename="controller/ApplicationsDialog.py" line="2270"/>
         <source>Change of co-ownership</source>
         <translation>Хамтран өмчлөгчийг өөрчлөх</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="2255"/>
+        <location filename="controller/ApplicationsDialog.py" line="2270"/>
         <source>At least one owner should remain.</source>
         <translation>Аль нэг өмчлөгч нь заавал үлдэх ёстой.</translation>
     </message>
@@ -708,7 +870,7 @@
         <translation>Шийдвэр гаргасан түвшин</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="596"/>
+        <location filename="controller/ApplicationsDialog.py" line="600"/>
         <source>Share [0.0 - 1.0]</source>
         <translation>Хувь [0.0 - 1.0]</translation>
     </message>
@@ -723,12 +885,12 @@
         <translation>Анхаарах: Нэгж талбартай холбосны дараа гэрээг оруулна </translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="4168"/>
+        <location filename="controller/ApplicationsDialog.py" line="4187"/>
         <source>Error</source>
         <translation>Алдаа</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="4133"/>
+        <location filename="controller/ApplicationsDialog.py" line="4152"/>
         <source>The selected Contract {0} is not within the working soum. 
  
  Change the Working soum to create an application for this contract.</source>
@@ -736,42 +898,42 @@
 Ажлын сумыг сонгож тухайн гэрээний өргөдлийг шинээр үүсгэнэ үү.</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="4168"/>
+        <location filename="controller/ApplicationsDialog.py" line="4187"/>
         <source>The contract {0} is already cancelled.</source>
         <translation>{0} тоот гэрээ нь цуцлагдсан бүртгэлтэй байна.</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="2682"/>
+        <location filename="controller/ApplicationsDialog.py" line="2697"/>
         <source>Invalid application</source>
         <translation>Буруу өргөдөл</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="813"/>
+        <location filename="controller/ApplicationsDialog.py" line="828"/>
         <source>At least two applicants are required for this application type.</source>
         <translation>Турайн өргөдлийн төрөлд 2-оос доошгүй өргөдөл гаргагч байх ёстой.</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="2007"/>
+        <location filename="controller/ApplicationsDialog.py" line="2022"/>
         <source>Mortgagee found</source>
         <translation>Олдсон барьцаа </translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="2007"/>
+        <location filename="controller/ApplicationsDialog.py" line="2022"/>
         <source>The applicant {0} is already mortgagee.</source>
         <translation>{0} өргөдөл гаргагч нь барьцааны бүртгэлтэй байна.</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="4464"/>
+        <location filename="controller/ApplicationsDialog.py" line="4483"/>
         <source>This mortgagee is already applicant.</source>
         <translation>Өргөдөл гаргагч нь өөрөө барьцаалагч байж болохгүй.</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="4470"/>
+        <location filename="controller/ApplicationsDialog.py" line="4489"/>
         <source>A uncapable person can&apos;t be added as mortgagee.</source>
         <translation>Эрхзүйн чадамжгүй иргэнийг барьцаалагчаар оруулах боломжгүй.</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="5400"/>
+        <location filename="controller/ApplicationsDialog.py" line="5419"/>
         <source>Changes applied successfully.</source>
         <translation>Өөрчлөлт амжилттай хадгалагдлаа.</translation>
     </message>
@@ -786,17 +948,17 @@
         <translation>Захирамжаар гарсан ГНС-ийн ангилал</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="5370"/>
+        <location filename="controller/ApplicationsDialog.py" line="5389"/>
         <source>Error in line {0}: {1}</source>
         <translation>{0} мөрөн дэх алдаа: {1}</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="2758"/>
+        <location filename="controller/ApplicationsDialog.py" line="2773"/>
         <source>The application number was updated to the next available number.</source>
         <translation>Сонгосон дугаар бүртгэгдсэн тул шинэ дугаар авч бүртгэгдэнэ.</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="4294"/>
+        <location filename="controller/ApplicationsDialog.py" line="4313"/>
         <source>There is already an existing application for the parcel {0}</source>
         <translation>{0} нэгж талбар нь өргөдөлтэй холбоостой байна</translation>
     </message>
@@ -806,7 +968,7 @@
         <translation>Кадастрын өөрчлөлт</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="842"/>
+        <location filename="controller/ApplicationsDialog.py" line="857"/>
         <source>For this application type a parcel musst be assigned.</source>
         <translation>Тухайн өргөдлийн төрөл нь нэгж талбартай холбогдох ёстой.</translation>
     </message>
@@ -816,102 +978,102 @@
         <translation>Хариу өгөх мэдэгдэл</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="3432"/>
+        <location filename="controller/ApplicationsDialog.py" line="3451"/>
         <source>application error</source>
         <translation>Алдаа</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="3423"/>
+        <location filename="controller/ApplicationsDialog.py" line="3442"/>
         <source>not save</source>
         <translation>Хадгалаагүй байна</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="3808"/>
+        <location filename="controller/ApplicationsDialog.py" line="3827"/>
         <source>Database Query Error</source>
         <translation>Sql алдаа</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="3808"/>
+        <location filename="controller/ApplicationsDialog.py" line="3827"/>
         <source>aCould not execute: {0}</source>
         <translation>aГүйцэтгэл амжилтгүй: {0}</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="1501"/>
+        <location filename="controller/ApplicationsDialog.py" line="1516"/>
         <source>Parcel Duplicated</source>
         <translation>Идэвхтэй нэгж талбар</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="1501"/>
+        <location filename="controller/ApplicationsDialog.py" line="1516"/>
         <source>This parcel is already connected to person</source>
         <translation>Энэ нэгж талбар иргэн/хуулийн этгээдтай холбоотой байна</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="902"/>
+        <location filename="controller/ApplicationsDialog.py" line="917"/>
         <source>For this application connect to a parcel.</source>
         <translation>Нэгж талбартай холбогдоогүй байна.</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="1423"/>
+        <location filename="controller/ApplicationsDialog.py" line="1438"/>
         <source>Application Duplicated</source>
         <translation>Өргөдөл давхардсан</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="1423"/>
+        <location filename="controller/ApplicationsDialog.py" line="1438"/>
         <source>This application is already registered</source>
         <translation>Өргөдөл бүртгэгдсэн байна</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="1949"/>
+        <location filename="controller/ApplicationsDialog.py" line="1964"/>
         <source>Before acquiring land Twice do not own</source>
         <translation>Гэр бүлийн хэрэгцээнд хоёр удаа үнэгүй газар өмчилж болохгүй</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="1387"/>
+        <location filename="controller/ApplicationsDialog.py" line="1402"/>
         <source>Maintenance error</source>
         <translation>Алдаа</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="1387"/>
+        <location filename="controller/ApplicationsDialog.py" line="1402"/>
         <source>This application process cadastre changing!!!</source>
         <translation>Кадастрын өөрчлөлт хийгдэж байна!!!</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="2013"/>
+        <location filename="controller/ApplicationsDialog.py" line="2028"/>
         <source>add applicant error</source>
         <translation>Алдаа</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="2013"/>
+        <location filename="controller/ApplicationsDialog.py" line="2028"/>
         <source>it will acceptable only applicatin status one.</source>
         <translation>Зөвхөн өргөдлийн явц 1 дээр өөрчлөх боложтой.</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="2571"/>
+        <location filename="controller/ApplicationsDialog.py" line="2586"/>
         <source>This parcel cadastre changing!!!.</source>
         <translation>Кадастрын өөрчлөлт хийгдэж байна!!!.</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="3432"/>
+        <location filename="controller/ApplicationsDialog.py" line="3451"/>
         <source>there is no information in the remarks if application details. Application status must be 8.</source>
         <translation>Өргөдлийн тайлбар хэсэг мэдээлэл байхгүй байна. Өргөдлийн төрөл 8 байх ёстой.</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="2582"/>
+        <location filename="controller/ApplicationsDialog.py" line="2597"/>
         <source>Application status must be in order!.</source>
         <translation>Өргөдлийн явц дарааллын дагуу байх ёстой!.</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="2521"/>
+        <location filename="controller/ApplicationsDialog.py" line="2536"/>
         <source>First prepare draft decision for this application!!</source>
         <translation>Өргөдлийн захирамжийн төсөл бэлтгэнэ үү!!</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="2524"/>
+        <location filename="controller/ApplicationsDialog.py" line="2539"/>
         <source>First register governor decision!!</source>
         <translation>Өргөдлийн захирамжийг бүртгэнэ үү!!</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="2538"/>
+        <location filename="controller/ApplicationsDialog.py" line="2553"/>
         <source>This application refused by governor.</source>
         <translation>Захирамж гараагүй болон шийдвэрлэх боложгүй өргөдөл. </translation>
     </message>
@@ -921,112 +1083,112 @@
         <translation>Үндсэн</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="799"/>
+        <location filename="controller/ApplicationsDialog.py" line="814"/>
         <source>Exactly one main new right holder has to be defined.</source>
         <translation>Эрх шилжүүлэн авах иргэн аж ахуйн нэгжийг тодорхойлоогүй байна.</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="805"/>
+        <location filename="controller/ApplicationsDialog.py" line="820"/>
         <source>Exactly one main remaining ownership has to be defined.</source>
         <translation>Эрх шилжүүлэх авах иргэнийг тодорхойлоогүй байна.</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="774"/>
+        <location filename="controller/ApplicationsDialog.py" line="789"/>
         <source>In uncapable person should be main.</source>
         <translation>Эрх зүйн чадамжтай иргэн нь үндсэн өргөдөл гаргач байж болохгүй.</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="4269"/>
+        <location filename="controller/ApplicationsDialog.py" line="4288"/>
         <source>delete please</source>
         <translation>устгана уу</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="4269"/>
+        <location filename="controller/ApplicationsDialog.py" line="4288"/>
         <source>Delete please the parcel. This parcel is not referenced to any applications.</source>
         <translation>Энэ нэгж талбарыг устган уу. Ямар нэгэн өргөдөлтэй холбоогүй байна.</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="1298"/>
+        <location filename="controller/ApplicationsDialog.py" line="1313"/>
         <source>contract</source>
         <translation>гэрээ</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="1298"/>
+        <location filename="controller/ApplicationsDialog.py" line="1313"/>
         <source>Decision is approved but contract/ownership record is not yet created!</source>
         <translation>Захирамж гарсан боловч гэрээ/өмчлөлийн бүртгэл хийгдээгүй байна!</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="4261"/>
+        <location filename="controller/ApplicationsDialog.py" line="4280"/>
         <source>Maintenance Error</source>
         <translation>Алдаа</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="4261"/>
+        <location filename="controller/ApplicationsDialog.py" line="4280"/>
         <source>Is not complete</source>
         <translation>Амжилтгүй</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="1374"/>
+        <location filename="controller/ApplicationsDialog.py" line="1389"/>
         <source>This parcel wrong.</source>
         <translation>Буруу нэгж талбар байна.</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="4034"/>
+        <location filename="controller/ApplicationsDialog.py" line="4053"/>
         <source>The contract {0} is already expired.</source>
         <translation>Энэ гэрээний хугацаа дууссан байна.</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="4677"/>
+        <location filename="controller/ApplicationsDialog.py" line="4696"/>
         <source>Query Error</source>
         <translation>(Query ) лавлагаа алдаатай байна</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="1311"/>
+        <location filename="controller/ApplicationsDialog.py" line="1326"/>
         <source>Cadastre update must be complete</source>
         <translation>Кадастрын өөрчлөлтийг дуусгах ёстой</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="2517"/>
+        <location filename="controller/ApplicationsDialog.py" line="2532"/>
         <source>First connect to parcel for this application!!</source>
         <translation>Энэ явцыг оруулахын тулд нэгж талбартай холбогдсон байх ёстой!!</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="3918"/>
+        <location filename="controller/ApplicationsDialog.py" line="3937"/>
         <source>This person is not aplicable. Do you want to register for this person by legal representative ?</source>
         <translation>Энэ иргэн насанд хүрээгүй байна. Итгэмжлэгдсэн төлөөлөгчөөр дамжуулан авах уу?</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="3920"/>
+        <location filename="controller/ApplicationsDialog.py" line="3939"/>
         <source>Yes</source>
         <translation>Тийм</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="3921"/>
+        <location filename="controller/ApplicationsDialog.py" line="3940"/>
         <source>No</source>
         <translation>Үгүй</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="787"/>
+        <location filename="controller/ApplicationsDialog.py" line="802"/>
         <source>Please enter representative.</source>
         <translation>Итгэмжлэгдсэн төлөөлөгчийг оруулна уу.</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="1982"/>
+        <location filename="controller/ApplicationsDialog.py" line="1997"/>
         <source>The applicant of the type {0} can&apos;t be added to an application of the type {1}.</source>
         <translation>Тус өргөдөл гаргагч энэ өргөдлийн төрлөөр өргөдөл гаргаж болохгүй.</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="3909"/>
+        <location filename="controller/ApplicationsDialog.py" line="3928"/>
         <source>#state organisations or entities of foreign countries to this application type</source>
         <translation>Өргөдлийн төрөлд төрийн байгууллага эсвэл гадаадын хуулийн этгээд боломжгүй</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="2509"/>
+        <location filename="controller/ApplicationsDialog.py" line="2524"/>
         <source>Permission Status!!</source>
         <translation>Та энэ өргөдлийн явц дээр ажиллах эрхгүй байна!!</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="2545"/>
+        <location filename="controller/ApplicationsDialog.py" line="2560"/>
         <source>This applicant must excess area price to be paid.</source>
         <translation>Илүү талбайн үнийг төлсан байх ёстой.</translation>
     </message>
@@ -1036,12 +1198,12 @@
         <translation>Эрхийн төрөл</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="5267"/>
+        <location filename="controller/ApplicationsDialog.py" line="5286"/>
         <source>Relateing Record</source>
         <translation>Өмчлөлийн бүртгэл</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="2532"/>
+        <location filename="controller/ApplicationsDialog.py" line="2547"/>
         <source>First create contract!!</source>
         <translation>Эхлээд гэрээтэй холбоход энэ явц нэмэгдэнэ!!</translation>
     </message>
@@ -1061,37 +1223,37 @@
         <translation>Эхлэх</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="1580"/>
+        <location filename="controller/ApplicationsDialog.py" line="1595"/>
         <source>Area Limit</source>
         <translation>Талбай хэмжээ</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="1580"/>
+        <location filename="controller/ApplicationsDialog.py" line="1595"/>
         <source>The application limit parcel area.</source>
         <translation>Зөвшөөрөгдөх талбайн хэмжээ хэтэрсэн байна.</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="3992"/>
+        <location filename="controller/ApplicationsDialog.py" line="4011"/>
         <source>The contract {0} is mortgagee!</source>
         <translation>Барьцаалагдсан байна!</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="3999"/>
+        <location filename="controller/ApplicationsDialog.py" line="4018"/>
         <source>The contract {0} is court decision!</source>
         <translation>Гэрээг шүүхийн шийдвэрээр идэвхгүй болгосон байна!</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="1898"/>
+        <location filename="controller/ApplicationsDialog.py" line="1913"/>
         <source>This applicant not active contract.</source>
         <translation>Өргөдөл гаргагч нь идэвхтэй гэрээгүй байна.</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="1904"/>
+        <location filename="controller/ApplicationsDialog.py" line="1919"/>
         <source>This applicant not active owner record.</source>
         <translation>Өргөдөл гаргагчид хүчинтэй байгаа өмчийн бүртгэл байхгүй байна.</translation>
     </message>
     <message>
-        <location filename="controller/ApplicationsDialog.py" line="3900"/>
+        <location filename="controller/ApplicationsDialog.py" line="3919"/>
         <source>This new right holder duplicate applicant.</source>
         <translation>Шинээр эрх авч байгаа хуулийн этгээд нь үндсэн өргөдөл гаргагчтай адилхан байна.</translation>
     </message>
@@ -1100,55 +1262,55 @@
         <source>Connect to file server</source>
         <translation>Файл сервертэй холбогдох</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ApplicationsDialog.ui" line="602"/>
         <source>Явцын тайлбар/тухайн явц дээр дарахад энд тайлбар нь гарна/</source>
         <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ApplicationsDialog.ui" line="1239"/>
         <source>Барьцаалсан огноо</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ApplicationsDialog.ui" line="1252"/>
         <source>Дуусах огноо</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ApplicationsDialog.ui" line="1275"/>
         <source>Барьцааны төрөл</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ApplicationsDialog.ui" line="1298"/>
         <source>Төлөв</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ApplicationsDialog.ui" line="1365"/>
         <source>Зээлийн гэрээний дугаар</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ApplicationsDialog.ui" line="1388"/>
         <source>Барьцааны гэрээний дугаар</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ApplicationsDialog.ui" line="1411"/>
         <source>Мөнгөний нэгж</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ApplicationsDialog.ui" line="1434"/>
         <source>Барьцааны дүн</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ApplicationsDialog.ui" line="2044"/>
         <source>Шийдвэрийн дугаар</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
 </context>
 <context>
@@ -1933,70 +2095,70 @@
         <source>Parcel Price</source>
         <translation type="unfinished"></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/CamaNavigatorWidget.ui" line="326"/>
         <source>Давхарга</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="view/CamaNavigatorWidget.ui" line="754"/>
         <source>Parcel Information</source>
         <translation type="unfinished"></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/CamaNavigatorWidget.ui" line="782"/>
         <source>Нэгж талбарын дугаар</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/CamaNavigatorWidget.ui" line="795"/>
         <source>Талбай /м2/</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/CamaNavigatorWidget.ui" line="837"/>
         <source>З/З-н үнэ</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/CamaNavigatorWidget.ui" line="850"/>
         <source>Кадастр</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/CamaNavigatorWidget.ui" line="879"/>
         <source>Нэгж талбарын хаяг</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/CamaNavigatorWidget.ui" line="892"/>
         <source>Төлөвлөгөө</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/CamaNavigatorWidget.ui" line="918"/>
         <source>Талбай /га/</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/CamaNavigatorWidget.ui" line="944"/>
         <source>Суурь үнэ /м2/</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/CamaNavigatorWidget.ui" line="1038"/>
         <source>Н/Т-н суурь үнэ/сая.т/</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/CamaNavigatorWidget.ui" line="1051"/>
         <source>Бодогдсон үнэ/сая.т/</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/CamaNavigatorWidget.ui" line="1064"/>
         <source>З/З-н үнийн мэдээ</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="view/CamaNavigatorWidget.ui" line="1114"/>
@@ -2128,50 +2290,50 @@
         <source>Is No Calculate</source>
         <translation type="unfinished"></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/CamaNavigatorWidget.ui" line="126"/>
         <source>Бүсчлэлийн анализ</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/CamaNavigatorWidget.ui" line="207"/>
         <source>Тооцоолох үнийн интервал</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/CamaNavigatorWidget.ui" line="391"/>
         <source>Ө/Н-н анализ</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="view/CamaNavigatorWidget.ui" line="717"/>
         <source>Print</source>
-        <translation type="unfinished">Хэвлэх</translation>
+        <translation>Хэвлэх</translation>
     </message>
     <message>
         <location filename="controller/CamaNavigatorWidget.py" line="1065"/>
         <source>Out error</source>
-        <translation type="unfinished">Нээгдсэн байна</translation>
+        <translation>Нээгдсэн байна</translation>
     </message>
     <message>
         <location filename="controller/CamaNavigatorWidget.py" line="1065"/>
         <source>This file is already opened. Please close re-run</source>
-        <translation type="unfinished">Энэ тайлан нээгдсэн байна. Хаагаад дахин ажиллуулна уу</translation>
+        <translation>Энэ тайлан нээгдсэн байна. Хаагаад дахин ажиллуулна уу</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/CamaNavigatorWidget.ui" line="138"/>
         <source>Хамгийн их үнэ</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/CamaNavigatorWidget.ui" line="151"/>
         <source>Хамгийн бага үнэ</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/CamaNavigatorWidget.ui" line="194"/>
         <source>Нийт нэгж талбарын тоо</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="view/CamaNavigatorWidget.ui" line="273"/>
@@ -2183,25 +2345,25 @@
         <source>base price</source>
         <translation type="unfinished"></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/CamaNavigatorWidget.ui" line="307"/>
         <source>Хадгалах</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/CamaNavigatorWidget.ui" line="339"/>
         <source>Тооцоолох Бүсийн тоо</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/CamaNavigatorWidget.ui" line="362"/>
         <source>Үнэлгээний бүсчлэлийн төлөв</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/CamaNavigatorWidget.ui" line="375"/>
         <source>Бүсийн хүрээ (0.0002 &gt;)</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="view/CamaNavigatorWidget.ui" line="1071"/>
@@ -2226,12 +2388,12 @@
     <message>
         <location filename="controller/CamaNavigatorWidget.py" line="532"/>
         <source>Yes</source>
-        <translation type="unfinished">Тийм</translation>
+        <translation>Тийм</translation>
     </message>
     <message>
         <location filename="controller/CamaNavigatorWidget.py" line="533"/>
         <source>No</source>
-        <translation type="unfinished">Үгүй</translation>
+        <translation>Үгүй</translation>
     </message>
 </context>
 <context>
@@ -2534,7 +2696,7 @@
         <source>Base Figures</source>
         <translation>Үндсэн утгууд</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ContractDialog.ui" line="1738"/>
         <source>Base Fee Per m2 [₮]</source>
         <translation>Газрын төлбөр [м2] ₮</translation>
@@ -2564,13 +2726,13 @@
         <source>Area [m2]</source>
         <translation>Талбай [м2]</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ContractDialog.ui" line="1808"/>
         <source>Fee [₮] (Calculated)</source>
         <translation>Төлбөр [₮]
 (Бодит)</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ContractDialog.ui" line="1816"/>
         <source>Fee [₮] (Contract)</source>
         <translation>Төлбөр [₮]
@@ -3053,85 +3215,105 @@
         <source>Zone No</source>
         <translation>Бүсийн дугаар</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ContractDialog.ui" line="528"/>
         <source>Нэгж талбар</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ContractDialog.ui" line="566"/>
         <source>Хаяг засах</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ContractDialog.ui" line="731"/>
         <source>Гудамж/Газарзүйн нэр</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ContractDialog.ui" line="736"/>
         <source>Хашааны дугаар</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ContractDialog.ui" line="616"/>
         <source>Нутгийн нэршил</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ContractDialog.ui" line="746"/>
         <source>Хаягын эх сурвалж</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ContractDialog.ui" line="751"/>
         <source>Тайлбар</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="view/ContractDialog.ui" line="781"/>
         <source>Delete Row</source>
-        <translation type="unfinished">Мөр устгах</translation>
+        <translation>Мөр устгах</translation>
     </message>
     <message>
         <location filename="view/ContractDialog.ui" line="784"/>
         <source>-</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="view/ContractDialog.ui" line="765"/>
         <source>Add Row</source>
-        <translation type="unfinished">Мөр нэмэх</translation>
+        <translation>Мөр нэмэх</translation>
     </message>
     <message>
         <location filename="view/ContractDialog.ui" line="768"/>
         <source>+</source>
-        <translation type="unfinished">+</translation>
+        <translation>+</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ContractDialog.ui" line="702"/>
         <source>Ойрчмийн харуулах гудамжны тоо</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ContractDialog.ui" line="708"/>
         <source>Барилга</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ContractDialog.ui" line="741"/>
         <source>Барилгын дугаар</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="controller/ContractDialog.py" line="5257"/>
         <source>No parcel assigned</source>
-        <translation type="unfinished">Нэгж талбар холбогдоогүй байна</translation>
+        <translation>Нэгж талбар холбогдоогүй байна</translation>
     </message>
     <message>
         <location filename="controller/ContractDialog.py" line="5318"/>
         <source>Review entry!</source>
-        <translation type="unfinished">Мэдээллийг оруулна уу!</translation>
+        <translation>Мэдээллийг оруулна уу!</translation>
+    </message>
+    <message>
+        <location filename="controller/ContractDialog.py" line="2816"/>
+        <source>Application status must be 9 !!!</source>
+        <translation>Өргөдлийн явц 9 байх ёстой !!!</translation>
+    </message>
+    <message>
+        <location filename="controller/ContractDialog.py" line="2871"/>
+        <source>Not sava contract</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="controller/ContractDialog.py" line="2871"/>
+        <source>First click save button and then print contract</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="controller/ContractDialog.py" line="2902"/>
+        <source>SQL Error</source>
+        <translation>SQL-ийн алдаа</translation>
     </message>
 </context>
 <context>
@@ -3725,57 +3907,57 @@
         <translation>Нэгж талбарын *.shp файл</translation>
     </message>
     <message>
-        <location filename="controller/CreateCaseDialog.py" line="431"/>
+        <location filename="controller/CreateCaseDialog.py" line="432"/>
         <source>Parcels</source>
         <translation>Нэгж талбар</translation>
     </message>
     <message>
-        <location filename="controller/CreateCaseDialog.py" line="435"/>
+        <location filename="controller/CreateCaseDialog.py" line="436"/>
         <source>Buildings</source>
         <translation>Барилга</translation>
     </message>
     <message>
-        <location filename="controller/CreateCaseDialog.py" line="859"/>
+        <location filename="controller/CreateCaseDialog.py" line="869"/>
         <source>Error</source>
         <translation>Алдаа</translation>
     </message>
     <message>
-        <location filename="controller/CreateCaseDialog.py" line="449"/>
+        <location filename="controller/CreateCaseDialog.py" line="450"/>
         <source>Could not identify parcel layer. Please load the parcel layer for the working soum.</source>
         <translation>Буруу нэгж талбарын давхарга байна. Ажлын сумын нэгж талбарын давхаргыг оруулж ирнэ үү.</translation>
     </message>
     <message>
-        <location filename="controller/CreateCaseDialog.py" line="480"/>
+        <location filename="controller/CreateCaseDialog.py" line="481"/>
         <source>One of selected parcel is already in an active case. First finalize or revert from active case. Close dialog window</source>
         <translation>Сонгогдсон нэгж талбаруудаас өөрчлөлтийн горимд байна. Иймд тэдгээрийн өөрчлөлтийг буцаах эсвэл дуусгавар  болгоно уу. Харилцах цонхыг хаана уу</translation>
     </message>
     <message>
-        <location filename="controller/CreateCaseDialog.py" line="521"/>
+        <location filename="controller/CreateCaseDialog.py" line="522"/>
         <source>Selection Error</source>
         <translation>Сонголтын алдаа</translation>
     </message>
     <message>
-        <location filename="controller/CreateCaseDialog.py" line="521"/>
+        <location filename="controller/CreateCaseDialog.py" line="522"/>
         <source>One of selected parcel is already in active case. First finalize or revert from active case. Close dialog window</source>
         <translation>Өөрчлөлтийн горимд сонгогдсон нэгж талбаруудаас байна.Иймд эхлээд өөрчлөлтийн горимд байгаа тус нэгж талбаруудын өөрчлөлтийг буцаах эсвэл дуусгавар болгоно уу. Харилцах цонхыг хаана уу</translation>
     </message>
     <message>
-        <location filename="controller/CreateCaseDialog.py" line="731"/>
+        <location filename="controller/CreateCaseDialog.py" line="732"/>
         <source>Shapefiles (*.shp)</source>
         <translation>Шэйффайл (*.shp)</translation>
     </message>
     <message>
-        <location filename="controller/CreateCaseDialog.py" line="1009"/>
+        <location filename="controller/CreateCaseDialog.py" line="1054"/>
         <source>Error loading layer</source>
         <translation>Давхарга оруулахад алдаа гарлаа</translation>
     </message>
     <message>
-        <location filename="controller/CreateCaseDialog.py" line="1005"/>
+        <location filename="controller/CreateCaseDialog.py" line="1050"/>
         <source>The layer is invalid.</source>
         <translation>Тус давхарга буруу давхарга байна.</translation>
     </message>
     <message>
-        <location filename="controller/CreateCaseDialog.py" line="1009"/>
+        <location filename="controller/CreateCaseDialog.py" line="1054"/>
         <source>The crs of the has to be 32648.</source>
         <translation> crs нь 32648 байх ёстой.</translation>
     </message>
@@ -3835,57 +4017,57 @@
         <translation>ГХБХБГ-ын мэргэжилтэн:</translation>
     </message>
     <message>
-        <location filename="controller/CreateCaseDialog.py" line="624"/>
+        <location filename="controller/CreateCaseDialog.py" line="625"/>
         <source>Query Error</source>
         <translation>(Query ) лавлагаа алдаатай байна</translation>
     </message>
     <message>
-        <location filename="controller/CreateCaseDialog.py" line="624"/>
+        <location filename="controller/CreateCaseDialog.py" line="625"/>
         <source>Error in line {0}: {1}</source>
         <translation>{0} мөрөн дэх алдаа: {1}</translation>
     </message>
     <message>
-        <location filename="controller/CreateCaseDialog.py" line="752"/>
+        <location filename="controller/CreateCaseDialog.py" line="753"/>
         <source>The crs of the layer has to be 4326.</source>
         <translation>Давхаргийн crs нь 4326 байх ёстой.</translation>
     </message>
     <message>
-        <location filename="controller/CreateCaseDialog.py" line="1101"/>
+        <location filename="controller/CreateCaseDialog.py" line="1146"/>
         <source>Maintenance case Error</source>
         <translation>Кадастрын өөрчлөлт АЛДАА</translation>
     </message>
     <message>
-        <location filename="controller/CreateCaseDialog.py" line="1101"/>
+        <location filename="controller/CreateCaseDialog.py" line="1146"/>
         <source>Select an application to create an maintenance case</source>
         <translation>Кадастрын өөрчлөлт хийх өргөдлийг сонгоно уу</translation>
     </message>
     <message>
-        <location filename="controller/CreateCaseDialog.py" line="918"/>
+        <location filename="controller/CreateCaseDialog.py" line="963"/>
         <source>Shapefile error</source>
         <translation>*.shp файл алдаатай байна</translation>
     </message>
     <message>
-        <location filename="controller/CreateCaseDialog.py" line="918"/>
+        <location filename="controller/CreateCaseDialog.py" line="963"/>
         <source>The landuse is not available in the database.</source>
         <translation>ГНС-ийн ангилалд байхгүй код оруулсан байна.</translation>
     </message>
     <message>
-        <location filename="controller/CreateCaseDialog.py" line="1279"/>
+        <location filename="controller/CreateCaseDialog.py" line="1324"/>
         <source>Changes applied successfully.</source>
         <translation>Өөрчлөлт амжилттай хадгалагдлаа.</translation>
     </message>
     <message>
-        <location filename="controller/CreateCaseDialog.py" line="303"/>
+        <location filename="controller/CreateCaseDialog.py" line="304"/>
         <source>Invalid Parcel</source>
         <translation>Алдаа</translation>
     </message>
     <message>
-        <location filename="controller/CreateCaseDialog.py" line="271"/>
+        <location filename="controller/CreateCaseDialog.py" line="272"/>
         <source>This parcel connected active possess contract!!!</source>
         <translation>Нэгж талбарт эрх зүйн харилцаа үүссэн байна!!!</translation>
     </message>
     <message>
-        <location filename="controller/CreateCaseDialog.py" line="303"/>
+        <location filename="controller/CreateCaseDialog.py" line="304"/>
         <source>This parcel connected active ownership record!!!</source>
         <translation>Нэгж талбар өмчлөгдсөн байн!!!</translation>
     </message>
@@ -3895,12 +4077,12 @@
         <translation>Өргөдөлтэй холбохгүй бол тэмдэглэ</translation>
     </message>
     <message>
-        <location filename="controller/CreateCaseDialog.py" line="1332"/>
+        <location filename="controller/CreateCaseDialog.py" line="1377"/>
         <source>Database Query Error</source>
         <translation>Мэдээллийн сангийн алдаа</translation>
     </message>
     <message>
-        <location filename="controller/CreateCaseDialog.py" line="1332"/>
+        <location filename="controller/CreateCaseDialog.py" line="1377"/>
         <source>Could not execute: {0}</source>
         <translation>Гүйцэтгэл амжилтгүй: {0}</translation>
     </message>
@@ -3910,114 +4092,114 @@
         <translation>Регистийн дугаар</translation>
     </message>
     <message>
-        <location filename="controller/CreateCaseDialog.py" line="1025"/>
+        <location filename="controller/CreateCaseDialog.py" line="1070"/>
         <source>No parcel</source>
         <translation>Нэгж талбар байхгүй</translation>
     </message>
     <message>
-        <location filename="controller/CreateCaseDialog.py" line="1025"/>
+        <location filename="controller/CreateCaseDialog.py" line="1070"/>
         <source>This building no parcel.</source>
         <translation>Нэгж талбаргүй барилга.</translation>
     </message>
     <message>
-        <location filename="controller/CreateCaseDialog.py" line="859"/>
+        <location filename="controller/CreateCaseDialog.py" line="869"/>
         <source>Ca_Tmp_Parcel layer parcel duplicate!!!</source>
         <translation>Ажлын нэгж талбар давхаргад энэ нэгж талбар орсон байна!!! </translation>
     </message>
     <message>
-        <location filename="controller/CreateCaseDialog.py" line="851"/>
+        <location filename="controller/CreateCaseDialog.py" line="861"/>
         <source>Ca_Parcel layer parcel overlap!!!</source>
         <translation>Үндсэн давхаргын нэгж талбартай давхардаж байна!!!</translation>
     </message>
     <message>
-        <location filename="controller/CreateCaseDialog.py" line="855"/>
+        <location filename="controller/CreateCaseDialog.py" line="865"/>
         <source>Ca_Tmp_Parcel layer parcel overlap!!!</source>
         <translation>Ажлын давхарга дээрх нэгж талбартай давхардаж байна!!!</translation>
     </message>
     <message>
-        <location filename="controller/CreateCaseDialog.py" line="314"/>
+        <location filename="controller/CreateCaseDialog.py" line="315"/>
         <source>The contract {0} is mortgagee!</source>
         <translation>Гэрээ барьцаалагдсан байна!</translation>
     </message>
     <message>
-        <location filename="controller/CreateCaseDialog.py" line="321"/>
+        <location filename="controller/CreateCaseDialog.py" line="322"/>
         <source>The contract {0} is court decision!</source>
         <translation>Гэрээг шүүхээс идэхгүй болгосон байна!</translation>
     </message>
     <message>
-        <location filename="controller/CreateCaseDialog.py" line="876"/>
+        <location filename="controller/CreateCaseDialog.py" line="886"/>
         <source>Error Parcel</source>
         <translation>Нэгж талбар буруу байна</translation>
     </message>
     <message>
-        <location filename="controller/CreateCaseDialog.py" line="876"/>
+        <location filename="controller/CreateCaseDialog.py" line="886"/>
         <source>This parcel out current soum boundary.</source>
         <translation>Нэгж талбар сумын хилийн гадна байна.</translation>
     </message>
     <message>
-        <location filename="controller/CreateCaseDialog.py" line="773"/>
+        <location filename="controller/CreateCaseDialog.py" line="774"/>
         <source>Invalid parcel info</source>
         <translation>Идэвхгүй нэгж талбарын мэдээлэл</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/CreateCaseDialog.ui" line="139"/>
         <source>Кадастрын өөрчлөлт</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/CreateCaseDialog.ui" line="670"/>
         <source>Гудамжны өөрчлөлт</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/CreateCaseDialog.ui" line="877"/>
         <source>Гудамжны нэр:</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/CreateCaseDialog.ui" line="682"/>
         <source>Хайх</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/CreateCaseDialog.ui" line="760"/>
         <source>Нэр</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/CreateCaseDialog.ui" line="765"/>
         <source>Урт</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/CreateCaseDialog.ui" line="770"/>
         <source>Төрөл</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/CreateCaseDialog.ui" line="775"/>
         <source>Хүчинтэй эсэх</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/CreateCaseDialog.ui" line="789"/>
         <source>Бүгд</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="view/CreateCaseDialog.ui" line="840"/>
         <source>New Column</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/CreateCaseDialog.ui" line="854"/>
         <source>Баг/Хороо:</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
-        <location filename="controller/CreateCaseDialog.py" line="847"/>
+        <location filename="controller/CreateCaseDialog.py" line="849"/>
         <source>Safety zone layer parcel overlap!!!</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
 </context>
 <context>
@@ -4993,17 +5175,17 @@
         <translation>Мэдээллийн сантай холбогдоно уу!!!</translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="476"/>
+        <location filename="LM2Plugin.py" line="487"/>
         <source>If you going to add new parcel, Please choose the New Parcel or If you going to chagne base parcel, Please choose the Base Parcel</source>
         <translation>Шинээр нэгж талбар мэдээллийн санд оруулах бол &quot;Шинэ нэгж талбар&quot; гэсэн сонголтыг сонгоно уу! эсвэл мэдээллийн санд байгаа Үндсэн нэгж талбарт өөрчлөлт хийх гэж байгаа бол &quot;Үндсэн нэгж талбар&quot; гэсэн сонголтыг сонгоно уу!!!  </translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="479"/>
+        <location filename="LM2Plugin.py" line="490"/>
         <source>New Parcel</source>
         <translation>Шинэ нэгж талбар</translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="480"/>
+        <location filename="LM2Plugin.py" line="498"/>
         <source>Base Parcel</source>
         <translation>Үндсэн нэгж талбар</translation>
     </message>
@@ -5013,12 +5195,12 @@
         <translation>Нэгж талбар байхгүй</translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="494"/>
+        <location filename="LM2Plugin.py" line="512"/>
         <source>No select parcel</source>
         <translation>Нэгж талбар тэмдэглээгүй байна</translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="474"/>
+        <location filename="LM2Plugin.py" line="485"/>
         <source>Create cadastre update case</source>
         <translation>Кадастрын өөрчлөлт эхлүүлэх</translation>
     </message>
@@ -5108,7 +5290,7 @@
         <source>Contract End</source>
         <translation>Дуусах огноо</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/LandFeePaymentsDialog.ui" line="319"/>
         <source>Fee Paid [₮]</source>
         <translation>Төлсөн төлбөр [₮]</translation>
@@ -5118,12 +5300,12 @@
         <source>Fine</source>
         <translation>Алданги</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/LandFeePaymentsDialog.ui" line="423"/>
         <source>Fine Paid [₮]</source>
         <translation>Төлсөн алданги [₮]</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/LandFeePaymentsDialog.ui" line="436"/>
         <source>Fine To Pay [₮]</source>
         <translation>Алдангийн үлдэгдэл [₮]</translation>
@@ -5168,7 +5350,7 @@
         <source>Register</source>
         <translation>Бүртгэх</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/LandFeePaymentsDialog.ui" line="949"/>
         <source>Amount [₮]</source>
         <translation>Мөнгөн дүн [₮]</translation>
@@ -5188,27 +5370,27 @@
         <source>Register Payments</source>
         <translation>Төлбөр/Татвар бүртгэх</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/LandFeePaymentsDialog.ui" line="306"/>
         <source>Fee To Pay For Year [₮]</source>
         <translation>Жилийн төлбөр [₮] </translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/LandFeePaymentsDialog.ui" line="332"/>
         <source>Surplus From Previous Year(s) [₮]</source>
         <translation>Өмнөх жилийн зөрүү [₮]</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/LandFeePaymentsDialog.ui" line="345"/>
         <source>Fee Left To Be Paid [₮]</source>
         <translation>Үлдэгдэл төлбөр [₮]</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/LandFeePaymentsDialog.ui" line="410"/>
         <source>Effective Fine [₮]</source>
         <translation>Нийт төлөх алданги [₮]</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/LandFeePaymentsDialog.ui" line="462"/>
         <source>Potential Fine [₮]</source>
         <translation>Нийт төлөх алданги [₮]</translation>
@@ -5731,7 +5913,7 @@
         <source>Land Use Category</source>
         <translation>Нэгдсэн сангийн ангилал</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/LandOfficeAdministrativeSettingsDialog.ui" line="729"/>
         <source>Fee Per m2 (₮)</source>
         <translation>Газрын төлбөр м2(₮)</translation>
@@ -5821,7 +6003,7 @@
         <source>Copy Zone Entries</source>
         <translation>Бүсийн утга хуулах</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/LandOfficeAdministrativeSettingsDialog.ui" line="1219"/>
         <source>Base Value Per m2 (₮)</source>
         <translation>Газрын суурь үнэ м2(₮)</translation>
@@ -6586,7 +6768,7 @@
         <source>Tax</source>
         <translation>Татвар</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/LandTaxPaymentsDialog.ui" line="293"/>
         <source>Tax Paid [₮]</source>
         <translation>Төлсөн татвар [₮]</translation>
@@ -6596,12 +6778,12 @@
         <source>Fine</source>
         <translation>Алданги</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/LandTaxPaymentsDialog.ui" line="397"/>
         <source>Fine Paid [₮]</source>
         <translation>Төлсөн алданги [₮]</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/LandTaxPaymentsDialog.ui" line="410"/>
         <source>Fine To Pay [₮]</source>
         <translation>Алдангийн үлдэгдэл [₮]</translation>
@@ -6646,7 +6828,7 @@
         <source>Register</source>
         <translation>Бүртгэх</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/LandTaxPaymentsDialog.ui" line="890"/>
         <source>Amount [₮]</source>
         <translation>Мөнгөн дүн [₮]</translation>
@@ -6671,27 +6853,27 @@
         <source>Taxes And Fines</source>
         <translation>Татвар болон алдангийн дэлгэрэнгүй мэдээлэл</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/LandTaxPaymentsDialog.ui" line="280"/>
         <source>Tax To Pay For Year [₮]</source>
         <translation>Жилийн татвар [₮]</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/LandTaxPaymentsDialog.ui" line="306"/>
         <source>Surplus From Previous Year(s) [₮]</source>
         <translation>Өмнөх жилийн зөрүү [₮]</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/LandTaxPaymentsDialog.ui" line="319"/>
         <source>Tax Left To Be Paid [₮]</source>
         <translation>Татварын үлдэгдэл [₮]</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/LandTaxPaymentsDialog.ui" line="384"/>
         <source>Effective Fine [₮]</source>
         <translation>Нийт төлөх алданги [₮]</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/LandTaxPaymentsDialog.ui" line="436"/>
         <source>Potential Fine [₮]</source>
         <translation>Нийт төлөх алданги [₮]</translation>
@@ -7108,7 +7290,7 @@
         <source>Group Register</source>
         <translation>Бүртгэл</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/MemberGroupDialog.ui" line="91"/>
         <source>Is Contract (№)</source>
         <translation>Гэрээний дугаар(№)</translation>
@@ -8461,42 +8643,42 @@
         <source>Court</source>
         <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/NavigatorWidget.ui" line="482"/>
         <source>Давхарга</source>
         <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/NavigatorWidget.ui" line="497"/>
         <source>Баг/Хорооны хил</source>
         <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/NavigatorWidget.ui" line="513"/>
         <source>ГЗБТөлөвгөгөө</source>
         <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/NavigatorWidget.ui" line="526"/>
         <source>Төлбөр, Татварын бүс</source>
         <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/NavigatorWidget.ui" line="539"/>
         <source>Сум/Дүүргийн хил</source>
         <translation></translation>
     </message>
     <message>
         <location filename="view/NavigatorWidget.ui" line="552"/>
-        <source>Ð¢ÑÑÐ³Ð°Ð¹ ÑÑÑÑÐ³ÑÑÑÐ½Ð¸Ð¹ Ð³Ð°Ð·Ð°Ñ</source>
+        <source>&#xd0;&#xa2;&#xd1;&#x83;&#xd1;&#x81;&#xd0;&#xb3;&#xd0;&#xb0;&#xd0;&#xb9; &#xd1;&#x85;&#xd1;&#x8d;&#xd1;&#x80;&#xd1;&#x8d;&#xd0;&#xb3;&#xd1;&#x86;&#xd1;&#x8d;&#xd1;&#x8d;&#xd0;&#xbd;&#xd0;&#xb8;&#xd0;&#xb9; &#xd0;&#xb3;&#xd0;&#xb0;&#xd0;&#xb7;&#xd0;&#xb0;&#xd1;&#x80;</source>
         <translation type="unfinished"></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/NavigatorWidget.ui" line="565"/>
         <source>Хамгаалалтын зурвас</source>
         <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/NavigatorWidget.ui" line="578"/>
         <source>Аймаг/Нийслэлийн хил</source>
         <translation></translation>
@@ -8606,12 +8788,12 @@
         <source>Cannot delete this application.</source>
         <translation>Өргөдлийг устгах боломжгүй.</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/NavigatorWidget.ui" line="591"/>
         <source>Чөлөөт бүс</source>
         <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/NavigatorWidget.ui" line="604"/>
         <source>Үнэлгээний бүс</source>
         <translation></translation>
@@ -8631,30 +8813,30 @@
         <source>Success</source>
         <translation>Амжилттай</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/NavigatorWidget.ui" line="617"/>
         <source>Түр цугларах, Нүүлгэх</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/NavigatorWidget.ui" line="630"/>
         <source>Газрын нэгдмэл сан</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/NavigatorWidget.ui" line="643"/>
         <source>Нийтийн эзэмшил</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="view/NavigatorWidget.ui" line="2868"/>
         <source>Certificate No</source>
-        <translation type="unfinished">Гэрчилгээний дугаар</translation>
+        <translation>Гэрчилгээний дугаар</translation>
     </message>
     <message>
         <location filename="view/NavigatorWidget.ui" line="2891"/>
         <source>Property No</source>
-        <translation type="unfinished">Улсын бүртгэлийн дугаар</translation>
+        <translation>Улсын бүртгэлийн дугаар</translation>
     </message>
     <message>
         <location filename="view/NavigatorWidget.ui" line="3403"/>
@@ -9000,7 +9182,7 @@
         <source>Base Figures</source>
         <translation>Үндсэн утгууд</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/OwnRecordDialog.ui" line="1531"/>
         <source>Base Value Per m2 [₮]</source>
         <translation>Суурь үнэ [м2] ₮</translation>
@@ -9035,12 +9217,12 @@
         <source>Area [m2]</source>
         <translation>Талбай [м2]</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/OwnRecordDialog.ui" line="1490"/>
         <source>Price Paid [₮]</source>
         <translation>Худалдсан үнэ [₮]</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/OwnRecordDialog.ui" line="1495"/>
         <source>Land Tax [₮]</source>
         <translation>Газрын татвар [₮]</translation>
@@ -9218,12 +9400,12 @@
         <source>XXX</source>
         <translation>XXX</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/OwnRecordDialog.ui" line="1403"/>
         <source>Value Calculated [₮]</source>
         <translation>Бодогдсон дүн</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/OwnRecordDialog.ui" line="1485"/>
         <source>Value Calculated [₮] </source>
         <translation>Бодогдсон дүн</translation>
@@ -9371,87 +9553,87 @@
     <message>
         <location filename="view/OwnRecordDialog.ui" line="420"/>
         <source>ID (Main)</source>
-        <translation type="unfinished">Нэгж талбарын дугаар</translation>
+        <translation>Нэгж талбарын дугаар</translation>
     </message>
     <message>
         <location filename="view/OwnRecordDialog.ui" line="459"/>
         <source>Land Use type</source>
-        <translation type="unfinished">Газар ашиглалтын төрөл</translation>
+        <translation>Газар ашиглалтын төрөл</translation>
     </message>
     <message>
         <location filename="view/OwnRecordDialog.ui" line="537"/>
         <source>Parcel details will be populated automatically once an application was selected in the previous tab.</source>
-        <translation type="unfinished">Өмнөх өргөдөл цонхонд холбогдсон нэгж талбарын дэлгэрэнгүй мэдээлэл энэ цонхонд автоматаар харагдана.</translation>
+        <translation>Өмнөх өргөдөл цонхонд холбогдсон нэгж талбарын дэлгэрэнгүй мэдээлэл энэ цонхонд автоматаар харагдана.</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/OwnRecordDialog.ui" line="554"/>
         <source>Нэгж талбар</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/OwnRecordDialog.ui" line="714"/>
         <source>Гудамж/Газарзүйн нэр</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/OwnRecordDialog.ui" line="719"/>
         <source>Хашааны дугаар</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/OwnRecordDialog.ui" line="642"/>
         <source>Нутгийн нэршил</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/OwnRecordDialog.ui" line="729"/>
         <source>Хаягын эх сурвалж</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/OwnRecordDialog.ui" line="734"/>
         <source>Тайлбар</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="view/OwnRecordDialog.ui" line="764"/>
         <source>Delete Row</source>
-        <translation type="unfinished">Мөр устгах</translation>
+        <translation>Мөр устгах</translation>
     </message>
     <message>
         <location filename="view/OwnRecordDialog.ui" line="767"/>
         <source>-</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="view/OwnRecordDialog.ui" line="748"/>
         <source>Add Row</source>
-        <translation type="unfinished">Мөр нэмэх</translation>
+        <translation>Мөр нэмэх</translation>
     </message>
     <message>
         <location filename="view/OwnRecordDialog.ui" line="751"/>
         <source>+</source>
-        <translation type="unfinished">+</translation>
+        <translation>+</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/OwnRecordDialog.ui" line="691"/>
         <source>Барилга</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/OwnRecordDialog.ui" line="724"/>
         <source>Барилгын дугаар</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="controller/OwnRecordDialog.py" line="1723"/>
         <source>No parcel assigned</source>
-        <translation type="unfinished">Нэгж талбар холбогдоогүй байна</translation>
+        <translation>Нэгж талбар холбогдоогүй байна</translation>
     </message>
     <message>
         <location filename="controller/OwnRecordDialog.py" line="1784"/>
         <source>Review entry!</source>
-        <translation type="unfinished">Мэдээллийг оруулна уу!</translation>
+        <translation>Мэдээллийг оруулна уу!</translation>
     </message>
 </context>
 <context>
@@ -9472,7 +9654,7 @@
         <translation>Нэгж талбар</translation>
     </message>
     <message>
-        <location filename="controller/ParcelInfoDialog.py" line="2435"/>
+        <location filename="controller/ParcelInfoDialog.py" line="2437"/>
         <source>Khashaa</source>
         <translation>Хашааны дугаар</translation>
     </message>
@@ -9667,103 +9849,103 @@
         <translation>Шинэ</translation>
     </message>
     <message>
-        <location filename="controller/ParcelInfoDialog.py" line="312"/>
+        <location filename="controller/ParcelInfoDialog.py" line="313"/>
         <source>LM2</source>
         <comment>Sql Error</comment>
         <translation>ГЗБГЗЗГ</translation>
     </message>
     <message>
-        <location filename="controller/ParcelInfoDialog.py" line="3064"/>
+        <location filename="controller/ParcelInfoDialog.py" line="3066"/>
         <source>File Error</source>
         <translation>Алдаатай файл</translation>
     </message>
     <message>
-        <location filename="controller/ParcelInfoDialog.py" line="3064"/>
+        <location filename="controller/ParcelInfoDialog.py" line="3066"/>
         <source>Error in line {0}: {1}</source>
         <translation>{0} мөрөн дэх алдаа: {1}</translation>
     </message>
     <message>
-        <location filename="controller/ParcelInfoDialog.py" line="439"/>
+        <location filename="controller/ParcelInfoDialog.py" line="440"/>
         <source>Old Parcel ID: &lt;{0}&gt;. Select the decision.</source>
         <translation>Хуучин нэгж талбарын дугаар:&lt;{0}&gt;. Захирамж сонго.</translation>
     </message>
     <message>
-        <location filename="controller/ParcelInfoDialog.py" line="2807"/>
+        <location filename="controller/ParcelInfoDialog.py" line="2809"/>
         <source>Database Query Error</source>
         <translation>Мэдээллийн сангийн алдаа</translation>
     </message>
     <message>
-        <location filename="controller/ParcelInfoDialog.py" line="468"/>
+        <location filename="controller/ParcelInfoDialog.py" line="469"/>
         <source>dCould not execute: {0}</source>
         <translation>dГүйцэтгэл амжилтгүй: {0}</translation>
     </message>
     <message>
-        <location filename="controller/ParcelInfoDialog.py" line="679"/>
+        <location filename="controller/ParcelInfoDialog.py" line="680"/>
         <source>No parcel assigned</source>
         <translation>Нэгж талбар холбогдоогүй байна</translation>
     </message>
     <message>
-        <location filename="controller/ParcelInfoDialog.py" line="1374"/>
+        <location filename="controller/ParcelInfoDialog.py" line="1376"/>
         <source>Company id should be with numbers only.</source>
         <translation>Улсын бүртгэлийн дугаар зөвхөн тоо байна.</translation>
     </message>
     <message>
-        <location filename="controller/ParcelInfoDialog.py" line="1394"/>
+        <location filename="controller/ParcelInfoDialog.py" line="1396"/>
         <source>First letters of the person id should be capital letters and in mongolian.</source>
         <translation>Иргэний регистрийн дугаарын эхний 2 үсэг том, крилл үсгээр бичигдэнэ.</translation>
     </message>
     <message>
-        <location filename="controller/ParcelInfoDialog.py" line="1400"/>
+        <location filename="controller/ParcelInfoDialog.py" line="1402"/>
         <source>After the first two capital letters, the person id should contain only numbers.</source>
         <translation>Иргэний регистрийн  эхний 2 үсгээс хойш зөвхөн дугаар байна. </translation>
     </message>
     <message>
-        <location filename="controller/ParcelInfoDialog.py" line="1405"/>
+        <location filename="controller/ParcelInfoDialog.py" line="1407"/>
         <source>The person id shouldn&apos;t be longer than 10 characters.</source>
         <translation>Иргэний регистр 10 тэмдэгтээс илүүгүй байна.</translation>
     </message>
     <message>
-        <location filename="controller/ParcelInfoDialog.py" line="1426"/>
+        <location filename="controller/ParcelInfoDialog.py" line="1428"/>
         <source>The first letter and the letter after of a name and the letter after a &quot;-&quot;  should be a capital letters.</source>
         <translation>Нэр хоёроос  дээш үгнээс бүтэж байвал бүрийн эхний үсэг томоор, үгийн хооронд - гэж бичнэ.</translation>
     </message>
     <message>
-        <location filename="controller/ParcelInfoDialog.py" line="1433"/>
+        <location filename="controller/ParcelInfoDialog.py" line="1435"/>
         <source>Only mongolian characters are allowed.</source>
         <translation>Зөвхөн криллээр бичигдэнэ.</translation>
     </message>
     <message>
-        <location filename="controller/ParcelInfoDialog.py" line="1442"/>
+        <location filename="controller/ParcelInfoDialog.py" line="1444"/>
         <source>Capital letters are only allowed at the beginning of a name or after a &quot;-&quot;. </source>
         <translation>Томоор эхэлж бичнэ.Төгсгөлд нь удаа &quot;-&quot; тэмдэгт оруулж үсэг бичнэ.</translation>
     </message>
     <message>
-        <location filename="controller/ParcelInfoDialog.py" line="2044"/>
+        <location filename="controller/ParcelInfoDialog.py" line="2046"/>
         <source>Select one item to save.</source>
         <translation>Зөвхөн нэг мөр сонго.</translation>
     </message>
     <message>
-        <location filename="controller/ParcelInfoDialog.py" line="2131"/>
+        <location filename="controller/ParcelInfoDialog.py" line="2133"/>
         <source>{0} string contains not just numbers.</source>
         <translation>{0} дугаар нь зөвхөн тоон агуулсан байна.</translation>
     </message>
     <message>
-        <location filename="controller/ParcelInfoDialog.py" line="2135"/>
+        <location filename="controller/ParcelInfoDialog.py" line="2137"/>
         <source>{0} number contains wrong letters.</source>
         <translation>{0} дугаар нь буруу тэмдэгтээр бичигдсэн байна.</translation>
     </message>
     <message>
-        <location filename="controller/ParcelInfoDialog.py" line="2144"/>
+        <location filename="controller/ParcelInfoDialog.py" line="2146"/>
         <source>{0} number contains more than one letter.</source>
         <translation>{0} дугаар нь нэгээс олон үсэг агуулсан байна.</translation>
     </message>
     <message>
-        <location filename="controller/ParcelInfoDialog.py" line="2164"/>
+        <location filename="controller/ParcelInfoDialog.py" line="2166"/>
         <source>Street name can only end with a number, if a - is in front. </source>
         <translation>Гудамжны нэрэнд тоон дугаар орвол дугаарын өмнө - тэмдэг байна.</translation>
     </message>
     <message>
-        <location filename="controller/ParcelInfoDialog.py" line="2173"/>
+        <location filename="controller/ParcelInfoDialog.py" line="2175"/>
         <source>Street name can end with a number, if a - is in front. </source>
         <translation>Гудамжны нэрэнд тоон дугаар орвол дугаарын өмнө - тэмдэг байна.</translation>
     </message>
@@ -9923,97 +10105,97 @@
         <translation>Давхарга харах</translation>
     </message>
     <message>
-        <location filename="controller/ParcelInfoDialog.py" line="2395"/>
+        <location filename="controller/ParcelInfoDialog.py" line="2397"/>
         <source>The parcel info can&apos;t be saved. The following errors have been found: </source>
         <translation>Тус нэгж талбарын мэдээллийг үндсэн мэдээллийн санруу оруулах боломжгүй байна. Доорх санамжийн жагсаалтыг уншина уу:</translation>
     </message>
     <message>
-        <location filename="controller/ParcelInfoDialog.py" line="2432"/>
+        <location filename="controller/ParcelInfoDialog.py" line="2434"/>
         <source>Duplicate Parcel.</source>
         <translation>Нэгж талбар давхардаж байна.</translation>
     </message>
     <message>
-        <location filename="controller/ParcelInfoDialog.py" line="2437"/>
+        <location filename="controller/ParcelInfoDialog.py" line="2439"/>
         <source>Khashaa number contains wrong letters.</source>
         <translation>Хашааны дугаарлалт буруу форматтай байна.</translation>
     </message>
     <message>
-        <location filename="controller/ParcelInfoDialog.py" line="2444"/>
+        <location filename="controller/ParcelInfoDialog.py" line="2446"/>
         <source>Street name contains wrong letters.</source>
         <translation>Гудамжны нэршил форматын дагуу бичигдээгүй байна.</translation>
     </message>
     <message>
-        <location filename="controller/ParcelInfoDialog.py" line="2459"/>
+        <location filename="controller/ParcelInfoDialog.py" line="2461"/>
         <source>Person id error!.</source>
         <translation>Регистрийн дугаар алдаатай байна!.</translation>
     </message>
     <message>
-        <location filename="controller/ParcelInfoDialog.py" line="2466"/>
+        <location filename="controller/ParcelInfoDialog.py" line="2468"/>
         <source>Company id error!.</source>
         <translation>Регистрийн дугаар алдаатай!.</translation>
     </message>
     <message>
-        <location filename="controller/ParcelInfoDialog.py" line="2495"/>
+        <location filename="controller/ParcelInfoDialog.py" line="2497"/>
         <source>Person middle name error!.</source>
         <translation>Ургын овог алдаатай байна!.</translation>
     </message>
     <message>
-        <location filename="controller/ParcelInfoDialog.py" line="2512"/>
+        <location filename="controller/ParcelInfoDialog.py" line="2514"/>
         <source>Company name error!.</source>
         <translation>Хуулийн этгээдийн нэр алдаатай!.</translation>
     </message>
     <message>
-        <location filename="controller/ParcelInfoDialog.py" line="2524"/>
+        <location filename="controller/ParcelInfoDialog.py" line="2526"/>
         <source>Person name error!.</source>
         <translation>Хуулийн этгээдийн нэр алдаатай байна!.</translation>
     </message>
     <message>
-        <location filename="controller/ParcelInfoDialog.py" line="2554"/>
+        <location filename="controller/ParcelInfoDialog.py" line="2556"/>
         <source>Person first name error!.</source>
         <translation>Овог алдаатай байна!.</translation>
     </message>
     <message>
-        <location filename="controller/ParcelInfoDialog.py" line="2560"/>
+        <location filename="controller/ParcelInfoDialog.py" line="2562"/>
         <source>Decision number error!.</source>
         <translation>Захирамжийн дугаар алдаатай!.</translation>
     </message>
     <message>
-        <location filename="controller/ParcelInfoDialog.py" line="2570"/>
+        <location filename="controller/ParcelInfoDialog.py" line="2572"/>
         <source>Certificate number error!.</source>
         <translation>Гэрчилгээний дугаар алдаатай!.</translation>
     </message>
     <message>
-        <location filename="controller/ParcelInfoDialog.py" line="2576"/>
+        <location filename="controller/ParcelInfoDialog.py" line="2578"/>
         <source>Decision date error!.</source>
         <translation>Захирамжийн огноо алдаатай!.</translation>
     </message>
     <message>
-        <location filename="controller/ParcelInfoDialog.py" line="2583"/>
+        <location filename="controller/ParcelInfoDialog.py" line="2585"/>
         <source>Contract date error!.</source>
         <translation>Гэрээний огноо алдаатай!.</translation>
     </message>
     <message>
-        <location filename="controller/ParcelInfoDialog.py" line="2589"/>
+        <location filename="controller/ParcelInfoDialog.py" line="2591"/>
         <source>Contract end date error!.</source>
         <translation>Гэрээнийн дуусах хугацаа алдаатай!.</translation>
     </message>
     <message>
-        <location filename="controller/ParcelInfoDialog.py" line="2658"/>
+        <location filename="controller/ParcelInfoDialog.py" line="2660"/>
         <source>Invalid parcel info</source>
         <translation>Идэвхгүй нэгж талбарын мэдээлэл</translation>
     </message>
     <message>
-        <location filename="controller/ParcelInfoDialog.py" line="2662"/>
+        <location filename="controller/ParcelInfoDialog.py" line="2664"/>
         <source>Do you want to import for base database?</source>
         <translation>Үндсэн мэдээллийн санруу оруулах уу?</translation>
     </message>
     <message>
-        <location filename="controller/ParcelInfoDialog.py" line="3137"/>
+        <location filename="controller/ParcelInfoDialog.py" line="3139"/>
         <source>Yes</source>
         <translation>Тийм</translation>
     </message>
     <message>
-        <location filename="controller/ParcelInfoDialog.py" line="3138"/>
+        <location filename="controller/ParcelInfoDialog.py" line="3140"/>
         <source>No</source>
         <translation>Үгүй</translation>
     </message>
@@ -10228,33 +10410,33 @@
         <translation>Цэгийн координатын систем ITRF</translation>
     </message>
     <message>
-        <location filename="controller/ParcelInfoDialog.py" line="636"/>
+        <location filename="controller/ParcelInfoDialog.py" line="637"/>
         <source>None</source>
         <translation>Хоосон</translation>
     </message>
     <message>
-        <location filename="controller/ParcelInfoDialog.py" line="636"/>
+        <location filename="controller/ParcelInfoDialog.py" line="637"/>
         <source>Please specify a search filter.</source>
         <translation>Эхлээд хайх утгыг зааж өгнө үү.</translation>
     </message>
     <message>
-        <location filename="controller/ParcelInfoDialog.py" line="3712"/>
+        <location filename="controller/ParcelInfoDialog.py" line="3716"/>
         <source>Connection Error</source>
         <translation>Холболтын алдаа</translation>
     </message>
     <message>
-        <location filename="controller/ParcelInfoDialog.py" line="3712"/>
+        <location filename="controller/ParcelInfoDialog.py" line="3716"/>
         <source>Please connect to database!!!</source>
         <translation>Мэдээллийн сантай холбогдоно уу!!!</translation>
     </message>
     <message>
-        <location filename="controller/ParcelInfoDialog.py" line="3328"/>
+        <location filename="controller/ParcelInfoDialog.py" line="3332"/>
         <source>LM2</source>
         <comment>FTP connection</comment>
         <translation>ГЗБГЗЗГ</translation>
     </message>
     <message>
-        <location filename="controller/ParcelInfoDialog.py" line="3328"/>
+        <location filename="controller/ParcelInfoDialog.py" line="3332"/>
         <source>Document server not connect!!!</source>
         <translation>Архивын сервертэй холбогдохгүй байна!!!</translation>
     </message>
@@ -10269,18 +10451,18 @@
         <translation>Орон сууцны дугаар</translation>
     </message>
     <message>
-        <location filename="controller/ParcelInfoDialog.py" line="225"/>
+        <location filename="controller/ParcelInfoDialog.py" line="226"/>
         <source>Could not execute: {0}</source>
         <translation>Гүйцэтгэл амжилтгүй</translation>
     </message>
     <message>
-        <location filename="controller/ParcelInfoDialog.py" line="2058"/>
+        <location filename="controller/ParcelInfoDialog.py" line="2060"/>
         <source>LM2</source>
         <comment>Success</comment>
         <translation>ГЗБГЗЗГ</translation>
     </message>
     <message>
-        <location filename="controller/ParcelInfoDialog.py" line="2058"/>
+        <location filename="controller/ParcelInfoDialog.py" line="2060"/>
         <source>Success saved</source>
         <translation>Амжилттай хадгалагдлаа</translation>
     </message>
@@ -10305,7 +10487,7 @@
         <translation>Өргөдлийн төрөл</translation>
     </message>
     <message>
-        <location filename="controller/ParcelInfoDialog.py" line="2616"/>
+        <location filename="controller/ParcelInfoDialog.py" line="2618"/>
         <source>Can&apos;t match application type!!!</source>
         <translation>Өргөдлийн төрөл нь тухайн захирамжтай таарахгүй байна!!!</translation>
     </message>
@@ -10315,33 +10497,33 @@
         <translation>Засварын явц</translation>
     </message>
     <message>
-        <location filename="controller/ParcelInfoDialog.py" line="2048"/>
+        <location filename="controller/ParcelInfoDialog.py" line="2050"/>
         <source>LM2</source>
         <comment>Alert</comment>
         <translation>ЛМ2</translation>
     </message>
     <message>
-        <location filename="controller/ParcelInfoDialog.py" line="2048"/>
+        <location filename="controller/ParcelInfoDialog.py" line="2050"/>
         <source>Please select edit status!!!</source>
         <translation>Засварын явцыг өөрчилнө үү!!!</translation>
     </message>
     <message>
-        <location filename="controller/ParcelInfoDialog.py" line="2650"/>
+        <location filename="controller/ParcelInfoDialog.py" line="2652"/>
         <source>Alert</source>
         <translation>Анхааруулга</translation>
     </message>
     <message>
-        <location filename="controller/ParcelInfoDialog.py" line="2650"/>
+        <location filename="controller/ParcelInfoDialog.py" line="2652"/>
         <source>Select one item to finish.</source>
         <translation>Зөвхөн нэг мөрийг сонгоно уу.</translation>
     </message>
     <message>
-        <location filename="controller/ParcelInfoDialog.py" line="3083"/>
+        <location filename="controller/ParcelInfoDialog.py" line="3085"/>
         <source>Parcels mpa boundary overlap!!!</source>
         <translation>Нэгж талбар тусгай хамгаалалтай бүс нутагт байгаа тул оруулах боломжгүй!!!</translation>
     </message>
     <message>
-        <location filename="controller/ParcelInfoDialog.py" line="3092"/>
+        <location filename="controller/ParcelInfoDialog.py" line="3094"/>
         <source>Parcels out mpa boundary overlap!!!</source>
         <translation>Нэгж талбар тусгай хамгаалалтай бүс нутгийн гадна байгаа тул оруулах боломжгүй!!!</translation>
     </message>
@@ -10351,12 +10533,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="controller/ParcelInfoDialog.py" line="2483"/>
+        <location filename="controller/ParcelInfoDialog.py" line="2485"/>
         <source>Company contact Middle name error!.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="controller/ParcelInfoDialog.py" line="2541"/>
+        <location filename="controller/ParcelInfoDialog.py" line="2543"/>
         <source>Company contact first name error!.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -10365,30 +10547,30 @@
         <source>Fee Layer View</source>
         <translation type="unfinished"></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelInfoDialog.ui" line="1458"/>
         <source>Бүгд</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelInfoDialog.ui" line="2893"/>
         <source>Устгах шийдвэр</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelInfoDialog.ui" line="2935"/>
         <source>Огноо</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelInfoDialog.ui" line="2948"/>
         <source>Дугаар</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelInfoDialog.ui" line="2961"/>
         <source>Тайлбар</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
 </context>
 <context>
@@ -10414,12 +10596,12 @@
     <message>
         <location filename="view/ParcelInfoFeeDialog.ui" line="61"/>
         <source>Fee</source>
-        <translation type="unfinished">Жилийн төлбөр</translation>
+        <translation>Жилийн төлбөр</translation>
     </message>
     <message>
         <location filename="view/ParcelInfoFeeDialog.ui" line="380"/>
-        <source>Ð¢Ó©Ð»Ó©Ð»Ñ</source>
-        <translation type="unfinished">Нөхөн төлбөр</translation>
+        <source>&#xd0;&#xa2;&#xd3;&#xa9;&#xd0;&#xbb;&#xd3;&#xa9;&#xd0;&#xbb;&#xd1;&#x82;</source>
+        <translation>Нөхөн төлбөр</translation>
     </message>
     <message>
         <location filename="view/ParcelInfoFeeDialog.ui" line="88"/>
@@ -10431,275 +10613,275 @@
         <source>New</source>
         <translation>Шинэ</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelInfoFeeDialog.ui" line="44"/>
         <source>Хаах</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelInfoFeeDialog.ui" line="118"/>
         <source>Регистр:</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelInfoFeeDialog.ui" line="131"/>
         <source>Хуучин НТ Дугаар:</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelInfoFeeDialog.ui" line="147"/>
         <source>Гэрээний дугаар:</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelInfoFeeDialog.ui" line="197"/>
         <source>Ногдуулалт, төлбөл зохих төлбөр</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelInfoFeeDialog.ui" line="225"/>
         <source>Нийт төлбөр</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelInfoFeeDialog.ui" line="238"/>
         <source>Гэрээ ногд. Төлбөр</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelInfoFeeDialog.ui" line="261"/>
         <source>Дутуу Төлөлт(+)</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelInfoFeeDialog.ui" line="294"/>
         <source>Илүү Төлөлт(-)</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelInfoFeeDialog.ui" line="307"/>
         <source>Тухайн онд ногд. Төлбөр</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelInfoFeeDialog.ui" line="330"/>
         <source>Алданги, торгууль</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelInfoFeeDialog.ui" line="363"/>
         <source>Нөхөн төлбөр</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelInfoFeeDialog.ui" line="408"/>
         <source>Дутуу төлөлт</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelInfoFeeDialog.ui" line="421"/>
         <source>Урд оны дутуугаас</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelInfoFeeDialog.ui" line="444"/>
         <source>Тайлангаар ногдуулснаас</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelInfoFeeDialog.ui" line="477"/>
         <source>Хүү, торгууль, бусад</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelInfoFeeDialog.ui" line="822"/>
         <source>Дүүрэгт төлсөн</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelInfoFeeDialog.ui" line="513"/>
         <source>Хүчингүй болсон дүн</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelInfoFeeDialog.ui" line="817"/>
         <source>Нийслэлд төлсөн</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelInfoFeeDialog.ui" line="559"/>
         <source>Илүү төлөлт</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelInfoFeeDialog.ui" line="583"/>
         <source>Мэдээлэл</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelInfoFeeDialog.ui" line="865"/>
         <source>Гэрээний дугаар</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelInfoFeeDialog.ui" line="621"/>
         <source>Тайлбар</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelInfoFeeDialog.ui" line="644"/>
         <source>Зориулалт</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelInfoFeeDialog.ui" line="683"/>
         <source>Оноосон нэр</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelInfoFeeDialog.ui" line="696"/>
         <source>Талайн хэмжээ /м2/</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelInfoFeeDialog.ui" line="746"/>
         <source>Төлбөрийн мэдээлэл</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelInfoFeeDialog.ui" line="762"/>
         <source>Төлөв</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelInfoFeeDialog.ui" line="767"/>
         <source>Төрөл</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelInfoFeeDialog.ui" line="772"/>
         <source>НТ-н дугаар</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelInfoFeeDialog.ui" line="855"/>
         <source>Жил</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelInfoFeeDialog.ui" line="860"/>
         <source>Регистр</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelInfoFeeDialog.ui" line="870"/>
         <source>Гэрээнд ногдуулсан дүн</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelInfoFeeDialog.ui" line="875"/>
         <source>Тухайн онд ногдуулсан дүн</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelInfoFeeDialog.ui" line="880"/>
         <source>Тухайн жил нийт</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelInfoFeeDialog.ui" line="885"/>
         <source>Урд оны дутуу төлөлтөөс</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelInfoFeeDialog.ui" line="812"/>
         <source>Урд оны илүү төлөлтөөс</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelInfoFeeDialog.ui" line="895"/>
         <source>Хүчингүйд тооцсон дүн</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelInfoFeeDialog.ui" line="900"/>
         <source>Тайлан оны илүү, дутуу төлөлт </source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelInfoFeeDialog.ui" line="839"/>
         <source>ЛМ-н төлбөр төлөлтийн мэдээлэл</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelInfoFeeDialog.ui" line="890"/>
         <source>Бүгд дүн</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelInfoFeeDialog.ui" line="946"/>
         <source>Бүх төлөв</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelInfoFeeDialog.ui" line="961"/>
         <source>Хадгалах</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelInfoFeeDialog.ui" line="974"/>
         <source>Дуусгах</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelInfoFeeDialog.ui" line="987"/>
         <source>Бүх жилийн төлөлт оруулах</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelInfoFeeDialog.ui" line="1016"/>
         <source>Устгах</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="controller/ParcelInfoFeeDialog.py" line="431"/>
         <source>Only single selection allowed.</source>
-        <translation type="unfinished">Зөвхөн нэгийг сонгох боломжтой.</translation>
+        <translation>Зөвхөн нэгийг сонгох боломжтой.</translation>
     </message>
     <message>
         <location filename="controller/ParcelInfoFeeDialog.py" line="631"/>
         <source>Yes</source>
-        <translation type="unfinished">Тийм</translation>
+        <translation>Тийм</translation>
     </message>
     <message>
         <location filename="controller/ParcelInfoFeeDialog.py" line="632"/>
         <source>No</source>
-        <translation type="unfinished">Үгүй</translation>
+        <translation>Үгүй</translation>
     </message>
     <message>
         <location filename="controller/ParcelInfoFeeDialog.py" line="629"/>
         <source>Do you want to import for base database?</source>
-        <translation type="unfinished">Үндсэн мэдээллийн санруу оруулах уу?</translation>
+        <translation>Үндсэн мэдээллийн санруу оруулах уу?</translation>
     </message>
     <message>
         <location filename="controller/ParcelInfoFeeDialog.py" line="768"/>
         <source>Changes applied successfully.</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="controller/ParcelInfoFeeDialog.py" line="889"/>
         <source>Connection Error</source>
-        <translation type="unfinished">Холболтын алдаа</translation>
+        <translation>Холболтын алдаа</translation>
     </message>
     <message>
         <location filename="controller/ParcelInfoFeeDialog.py" line="889"/>
         <source>Please connect to database!!!</source>
-        <translation type="unfinished">Мэдээллийн сантай холбогдоно уу!!!</translation>
+        <translation>Мэдээллийн сантай холбогдоно уу!!!</translation>
     </message>
     <message>
         <location filename="controller/ParcelInfoFeeDialog.py" line="916"/>
         <source>No parcel assigned</source>
-        <translation type="unfinished">Нэгж талбар холбогдоогүй байна</translation>
+        <translation>Нэгж талбар холбогдоогүй байна</translation>
     </message>
 </context>
 <context>
@@ -10725,7 +10907,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="controller/ParcelMpaDialog.py" line="1864"/>
+        <location filename="controller/ParcelMpaDialog.py" line="1860"/>
         <source>Khashaa</source>
         <translation>Хашааны дугаар</translation>
     </message>
@@ -11010,7 +11192,7 @@
         <translation>Гудамжны нэр</translation>
     </message>
     <message>
-        <location filename="controller/ParcelMpaDialog.py" line="2173"/>
+        <location filename="controller/ParcelMpaDialog.py" line="2169"/>
         <source>Database Query Error</source>
         <translation type="unfinished"></translation>
     </message>
@@ -11020,259 +11202,259 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="controller/ParcelMpaDialog.py" line="331"/>
+        <location filename="controller/ParcelMpaDialog.py" line="327"/>
         <source>Old Parcel ID: &lt;{0}&gt;. Select the decision.</source>
         <translation>Хуучин нэгж талбарын дугаар:&lt;{0}&gt;. Захирамж сонго.</translation>
     </message>
     <message>
-        <location filename="controller/ParcelMpaDialog.py" line="360"/>
+        <location filename="controller/ParcelMpaDialog.py" line="356"/>
         <source>dCould not execute: {0}</source>
         <translation>dГүйцэтгэл амжилтгүй: {0}</translation>
     </message>
     <message>
-        <location filename="controller/ParcelMpaDialog.py" line="529"/>
+        <location filename="controller/ParcelMpaDialog.py" line="525"/>
         <source>None</source>
         <translation>Хоосон</translation>
     </message>
     <message>
-        <location filename="controller/ParcelMpaDialog.py" line="529"/>
+        <location filename="controller/ParcelMpaDialog.py" line="525"/>
         <source>Please specify a search filter.</source>
         <translation>Эхлээд хайх утгыг зааж өгнө үү.</translation>
     </message>
     <message>
-        <location filename="controller/ParcelMpaDialog.py" line="571"/>
+        <location filename="controller/ParcelMpaDialog.py" line="567"/>
         <source>No parcel assigned</source>
         <translation>Нэгж талбар холбогдоогүй байна</translation>
     </message>
     <message>
-        <location filename="controller/ParcelMpaDialog.py" line="581"/>
+        <location filename="controller/ParcelMpaDialog.py" line="577"/>
         <source>Connection Error</source>
         <translation>Холболтын алдаа</translation>
     </message>
     <message>
-        <location filename="controller/ParcelMpaDialog.py" line="581"/>
+        <location filename="controller/ParcelMpaDialog.py" line="577"/>
         <source>Please connect to database!!!</source>
         <translation>Мэдээллийн сантай холбогдоно уу!!!</translation>
     </message>
     <message>
-        <location filename="controller/ParcelMpaDialog.py" line="917"/>
+        <location filename="controller/ParcelMpaDialog.py" line="913"/>
         <source>Company id should be with numbers only.</source>
         <translation>Улсын бүртгэлийн дугаар зөвхөн тоо байна.</translation>
     </message>
     <message>
-        <location filename="controller/ParcelMpaDialog.py" line="937"/>
+        <location filename="controller/ParcelMpaDialog.py" line="933"/>
         <source>First letters of the person id should be capital letters and in mongolian.</source>
         <translation>Иргэний регистрийн дугаарын эхний 2 үсэг том, крилл үсгээр бичигдэнэ.</translation>
     </message>
     <message>
-        <location filename="controller/ParcelMpaDialog.py" line="943"/>
+        <location filename="controller/ParcelMpaDialog.py" line="939"/>
         <source>After the first two capital letters, the person id should contain only numbers.</source>
         <translation>Иргэний регистрийн  эхний 2 үсгээс хойш зөвхөн дугаар байна. </translation>
     </message>
     <message>
-        <location filename="controller/ParcelMpaDialog.py" line="948"/>
+        <location filename="controller/ParcelMpaDialog.py" line="944"/>
         <source>The person id shouldn&apos;t be longer than 10 characters.</source>
         <translation>Иргэний регистр 10 тэмдэгтээс илүүгүй байна.</translation>
     </message>
     <message>
-        <location filename="controller/ParcelMpaDialog.py" line="967"/>
+        <location filename="controller/ParcelMpaDialog.py" line="963"/>
         <source>The first letter and the letter after of a name and the letter after a &quot;-&quot;  should be a capital letters.</source>
         <translation>Нэр хоёроос  дээш үгнээс бүтэж байвал бүрийн эхний үсэг томоор, үгийн хооронд - гэж бичнэ.</translation>
     </message>
     <message>
-        <location filename="controller/ParcelMpaDialog.py" line="974"/>
+        <location filename="controller/ParcelMpaDialog.py" line="970"/>
         <source>Only mongolian characters are allowed.</source>
         <translation>Зөвхөн криллээр бичигдэнэ.</translation>
     </message>
     <message>
-        <location filename="controller/ParcelMpaDialog.py" line="983"/>
+        <location filename="controller/ParcelMpaDialog.py" line="979"/>
         <source>Capital letters are only allowed at the beginning of a name or after a &quot;-&quot;. </source>
         <translation>Томоор эхэлж бичнэ.Төгсгөлд нь удаа &quot;-&quot; тэмдэгт оруулж үсэг бичнэ.</translation>
     </message>
     <message>
-        <location filename="controller/ParcelMpaDialog.py" line="1510"/>
+        <location filename="controller/ParcelMpaDialog.py" line="1506"/>
         <source>Select one item to save.</source>
         <translation>Зөвхөн нэг мөр сонго.</translation>
     </message>
     <message>
-        <location filename="controller/ParcelMpaDialog.py" line="1514"/>
+        <location filename="controller/ParcelMpaDialog.py" line="1510"/>
         <source>LM2</source>
         <comment>Alert</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="controller/ParcelMpaDialog.py" line="1514"/>
+        <location filename="controller/ParcelMpaDialog.py" line="1510"/>
         <source>Please select edit status!!!</source>
         <translation>Засварын явцыг өөрчилнө үү!!!</translation>
     </message>
     <message>
-        <location filename="controller/ParcelMpaDialog.py" line="1521"/>
+        <location filename="controller/ParcelMpaDialog.py" line="1517"/>
         <source>LM2</source>
         <comment>Success</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="controller/ParcelMpaDialog.py" line="1521"/>
+        <location filename="controller/ParcelMpaDialog.py" line="1517"/>
         <source>Success saved</source>
         <translation>Амжилттай хадгалагдлаа</translation>
     </message>
     <message>
-        <location filename="controller/ParcelMpaDialog.py" line="1594"/>
+        <location filename="controller/ParcelMpaDialog.py" line="1590"/>
         <source>{0} string contains not just numbers.</source>
         <translation>{0} дугаар нь зөвхөн тоон агуулсан байна.</translation>
     </message>
     <message>
-        <location filename="controller/ParcelMpaDialog.py" line="1598"/>
+        <location filename="controller/ParcelMpaDialog.py" line="1594"/>
         <source>{0} number contains wrong letters.</source>
         <translation>{0} дугаар нь буруу тэмдэгтээр бичигдсэн байна.</translation>
     </message>
     <message>
-        <location filename="controller/ParcelMpaDialog.py" line="1607"/>
+        <location filename="controller/ParcelMpaDialog.py" line="1603"/>
         <source>{0} number contains more than one letter.</source>
         <translation>{0} дугаар нь нэгээс олон үсэг агуулсан байна.</translation>
     </message>
     <message>
-        <location filename="controller/ParcelMpaDialog.py" line="1627"/>
+        <location filename="controller/ParcelMpaDialog.py" line="1623"/>
         <source>Street name can only end with a number, if a - is in front. </source>
         <translation>Гудамжны нэрэнд тоон дугаар орвол дугаарын өмнө - тэмдэг байна.</translation>
     </message>
     <message>
-        <location filename="controller/ParcelMpaDialog.py" line="1636"/>
+        <location filename="controller/ParcelMpaDialog.py" line="1632"/>
         <source>Street name can end with a number, if a - is in front. </source>
         <translation>Гудамжны нэрэнд тоон дугаар орвол дугаарын өмнө - тэмдэг байна.</translation>
     </message>
     <message>
-        <location filename="controller/ParcelMpaDialog.py" line="1808"/>
+        <location filename="controller/ParcelMpaDialog.py" line="1804"/>
         <source>File Error</source>
         <translation>Алдаатай файл</translation>
     </message>
     <message>
-        <location filename="controller/ParcelMpaDialog.py" line="2173"/>
+        <location filename="controller/ParcelMpaDialog.py" line="2169"/>
         <source>Error in line {0}: {1}</source>
         <translation>{0} мөрөн дэх алдаа: {1}</translation>
     </message>
     <message>
-        <location filename="controller/ParcelMpaDialog.py" line="1827"/>
+        <location filename="controller/ParcelMpaDialog.py" line="1823"/>
         <source>The parcel info can&apos;t be saved. The following errors have been found: </source>
         <translation>Тус нэгж талбарын мэдээллийг үндсэн мэдээллийн санруу оруулах боломжгүй байна. Доорх санамжийн жагсаалтыг уншина уу:</translation>
     </message>
     <message>
-        <location filename="controller/ParcelMpaDialog.py" line="1861"/>
+        <location filename="controller/ParcelMpaDialog.py" line="1857"/>
         <source>Duplicate Parcel.</source>
         <translation>Нэгж талбар давхардаж байна.</translation>
     </message>
     <message>
-        <location filename="controller/ParcelMpaDialog.py" line="1866"/>
+        <location filename="controller/ParcelMpaDialog.py" line="1862"/>
         <source>Khashaa number contains wrong letters.</source>
         <translation>Хашааны дугаарлалт буруу форматтай байна.</translation>
     </message>
     <message>
-        <location filename="controller/ParcelMpaDialog.py" line="1873"/>
+        <location filename="controller/ParcelMpaDialog.py" line="1869"/>
         <source>Street name contains wrong letters.</source>
         <translation>Гудамжны нэршил форматын дагуу бичигдээгүй байна.</translation>
     </message>
     <message>
-        <location filename="controller/ParcelMpaDialog.py" line="1888"/>
+        <location filename="controller/ParcelMpaDialog.py" line="1884"/>
         <source>Person id error!.</source>
         <translation>Регистрийн дугаар алдаатай байна!.</translation>
     </message>
     <message>
-        <location filename="controller/ParcelMpaDialog.py" line="1895"/>
+        <location filename="controller/ParcelMpaDialog.py" line="1891"/>
         <source>Company id error!.</source>
         <translation>Регистрийн дугаар алдаатай!.</translation>
     </message>
     <message>
-        <location filename="controller/ParcelMpaDialog.py" line="1912"/>
+        <location filename="controller/ParcelMpaDialog.py" line="1908"/>
         <source>Person Middle name error!.</source>
         <translation>Ургын овог алдаатай байна!.</translation>
     </message>
     <message>
-        <location filename="controller/ParcelMpaDialog.py" line="1924"/>
+        <location filename="controller/ParcelMpaDialog.py" line="1920"/>
         <source>Person middle name error!.</source>
         <translation>Ургын овог алдаатай байна!.</translation>
     </message>
     <message>
-        <location filename="controller/ParcelMpaDialog.py" line="1941"/>
+        <location filename="controller/ParcelMpaDialog.py" line="1937"/>
         <source>Company name error!.</source>
         <translation>Хуулийн этгээдийн нэр алдаатай!.</translation>
     </message>
     <message>
-        <location filename="controller/ParcelMpaDialog.py" line="1953"/>
+        <location filename="controller/ParcelMpaDialog.py" line="1949"/>
         <source>Person name error!.</source>
         <translation>Хуулийн этгээдийн нэр алдаатай байна!.</translation>
     </message>
     <message>
-        <location filename="controller/ParcelMpaDialog.py" line="1983"/>
+        <location filename="controller/ParcelMpaDialog.py" line="1979"/>
         <source>Person first name error!.</source>
         <translation>Овог алдаатай байна!.</translation>
     </message>
     <message>
-        <location filename="controller/ParcelMpaDialog.py" line="1989"/>
+        <location filename="controller/ParcelMpaDialog.py" line="1985"/>
         <source>Decision number error!.</source>
         <translation>Захирамжийн дугаар алдаатай!.</translation>
     </message>
     <message>
-        <location filename="controller/ParcelMpaDialog.py" line="1999"/>
+        <location filename="controller/ParcelMpaDialog.py" line="1995"/>
         <source>Certificate number error!.</source>
         <translation>Гэрчилгээний дугаар алдаатай!.</translation>
     </message>
     <message>
-        <location filename="controller/ParcelMpaDialog.py" line="2005"/>
+        <location filename="controller/ParcelMpaDialog.py" line="2001"/>
         <source>Decision date error!.</source>
         <translation>Захирамжийн огноо алдаатай!.</translation>
     </message>
     <message>
-        <location filename="controller/ParcelMpaDialog.py" line="2012"/>
+        <location filename="controller/ParcelMpaDialog.py" line="2008"/>
         <source>Contract date error!.</source>
         <translation>Гэрээний огноо алдаатай!.</translation>
     </message>
     <message>
-        <location filename="controller/ParcelMpaDialog.py" line="2018"/>
+        <location filename="controller/ParcelMpaDialog.py" line="2014"/>
         <source>Contract end date error!.</source>
         <translation>Гэрээнийн дуусах хугацаа алдаатай!.</translation>
     </message>
     <message>
-        <location filename="controller/ParcelMpaDialog.py" line="2045"/>
+        <location filename="controller/ParcelMpaDialog.py" line="2041"/>
         <source>Can&apos;t match application type!!!</source>
         <translation>Өргөдлийн төрөл нь тухайн захирамжтай таарахгүй байна!!!</translation>
     </message>
     <message>
-        <location filename="controller/ParcelMpaDialog.py" line="2064"/>
+        <location filename="controller/ParcelMpaDialog.py" line="2060"/>
         <source>Parcels mpa boundary overlap!!!</source>
         <translation type="unfinished">Нэгж талбар тусгай хамгаалалтай бүс нутагт байгаа тул оруулах боломжгүй!!!</translation>
     </message>
     <message>
-        <location filename="controller/ParcelMpaDialog.py" line="2072"/>
+        <location filename="controller/ParcelMpaDialog.py" line="2068"/>
         <source>Parcels out mpa boundary overlap!!!</source>
         <translation type="unfinished">Нэгж талбар тусгай хамгаалалтай бүс нутгийн гадна байгаа тул оруулах боломжгүй!!!</translation>
     </message>
     <message>
-        <location filename="controller/ParcelMpaDialog.py" line="2100"/>
+        <location filename="controller/ParcelMpaDialog.py" line="2096"/>
         <source>Alert</source>
         <translation>Анхааруулга</translation>
     </message>
     <message>
-        <location filename="controller/ParcelMpaDialog.py" line="2100"/>
+        <location filename="controller/ParcelMpaDialog.py" line="2096"/>
         <source>Select one item to finish.</source>
         <translation>Зөвхөн нэг мөрийг сонгоно уу.</translation>
     </message>
     <message>
-        <location filename="controller/ParcelMpaDialog.py" line="2108"/>
+        <location filename="controller/ParcelMpaDialog.py" line="2104"/>
         <source>Invalid parcel info</source>
         <translation>Идэвхгүй нэгж талбарын мэдээлэл</translation>
     </message>
     <message>
-        <location filename="controller/ParcelMpaDialog.py" line="2112"/>
+        <location filename="controller/ParcelMpaDialog.py" line="2108"/>
         <source>Do you want to import for base database?</source>
         <translation>Үндсэн мэдээллийн санруу оруулах уу?</translation>
     </message>
     <message>
-        <location filename="controller/ParcelMpaDialog.py" line="2114"/>
+        <location filename="controller/ParcelMpaDialog.py" line="2110"/>
         <source>Yes</source>
         <translation>Тийм</translation>
     </message>
     <message>
-        <location filename="controller/ParcelMpaDialog.py" line="2115"/>
+        <location filename="controller/ParcelMpaDialog.py" line="2111"/>
         <source>No</source>
         <translation>Үгүй</translation>
     </message>
@@ -11324,7 +11506,7 @@
         <source>Tenure Duration [years]</source>
         <translation>Хугацаа[жил]</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelRecordDialog.ui" line="7582"/>
         <source>Calculated Area [m²]</source>
         <translation>Талбай [м2]</translation>
@@ -11389,7 +11571,7 @@
         <source>Use Type</source>
         <translation>Зориулалт</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelRecordDialog.ui" line="9508"/>
         <source>Area [m²]</source>
         <translation>Талбай[м2]</translation>
@@ -11399,7 +11581,7 @@
         <source>Duration [months]</source>
         <translation>Хугацаа[сар]</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelRecordDialog.ui" line="9577"/>
         <source>Monthly Rent [₮]</source>
         <translation>Сарын түрээс [₮]</translation>
@@ -11434,7 +11616,7 @@
         <source>Year of Construction</source>
         <translation>Засварласан он</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelRecordDialog.ui" line="10333"/>
         <source>Total Area [m²]</source>
         <translation>Нийт талбай[м2]</translation>
@@ -11644,7 +11826,7 @@
         <source>Crop Type</source>
         <translation>Таримлын төрөл</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelRecordDialog.ui" line="9868"/>
         <source>Costs[₮]</source>
         <translation>Нийт зардал[мян.₮]</translation>
@@ -11659,12 +11841,12 @@
         <source>Yield[ga]</source>
         <translation>Ургац[цн/га]</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelRecordDialog.ui" line="10061"/>
         <source>Profit[₮]</source>
         <translation>Нийт орлого[мян.₮]</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelRecordDialog.ui" line="10096"/>
         <source>Net Profit[₮]</source>
         <translation>Ашиг[мян.₮]</translation>
@@ -11674,7 +11856,7 @@
         <source>Agriculture Other</source>
         <translation>Бусад</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelRecordDialog.ui" line="10764"/>
         <source>Price[₮]</source>
         <translation>Үнэ[₮]</translation>
@@ -11709,12 +11891,12 @@
         <source>Minimum</source>
         <translation>Бага</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelRecordDialog.ui" line="10927"/>
         <source>Price[m2/₮]</source>
         <translation>Үнэ[м2/₮]</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelRecordDialog.ui" line="10937"/>
         <source>Sold Price[₮]</source>
         <translation>Үнэ[₮]</translation>
@@ -11949,22 +12131,22 @@
         <source>Infrastructure Other</source>
         <translation>Дэд бүтэц</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelRecordDialog.ui" line="9116"/>
         <source>Total Price [₮]</source>
         <translation>Нийт үнэ /₮/</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelRecordDialog.ui" line="4340"/>
         <source>Total price [₮]</source>
         <translation>Нийт үнэ /₮/</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelRecordDialog.ui" line="6159"/>
         <source>Price of m² [₮]</source>
         <translation>1 м2-ийн үнэ</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelRecordDialog.ui" line="6619"/>
         <source>Rent of m² [₮]</source>
         <translation>1 м2-ийн түрээс</translation>
@@ -11999,7 +12181,7 @@
         <source>Distancel [m]</source>
         <translation>Шугам хүртлэх зай /м/</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelRecordDialog.ui" line="3017"/>
         <source>Connection Cost [₮]</source>
         <translation>Гарах зардал /₮/</translation>
@@ -12039,7 +12221,7 @@
         <source>Vegetable Plot</source>
         <translation>Ногооны талбайтай эсэх</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelRecordDialog.ui" line="3314"/>
         <source>Size [m²]</source>
         <translation>Талбайн хэмжээ /м2/</translation>
@@ -12074,7 +12256,7 @@
         <source>3</source>
         <translation>3</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelRecordDialog.ui" line="4345"/>
         <source>Price og m² [₮]</source>
         <translation>1 м2-ийн үнэ /₮/</translation>
@@ -12084,17 +12266,17 @@
         <source>Calculated Area [ha]</source>
         <translation>Талбай /га/</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelRecordDialog.ui" line="9212"/>
         <source>Price of ha [₮]</source>
         <translation>Га-ийн үнэ /₮/</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelRecordDialog.ui" line="9518"/>
         <source>Rent of ha² [₮]</source>
         <translation>Га-ийн түрээсийн үнэ /₮/</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/ParcelRecordDialog.ui" line="9656"/>
         <source>Rent of 1 ha [₮]</source>
         <translation>1 га-ийн үнэ /₮/</translation>
@@ -12227,12 +12409,12 @@
         <source>Point</source>
         <translation>Цэг</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/PastureMonitoringValueDialog.ui" line="54"/>
         <source>x °</source>
         <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/PastureMonitoringValueDialog.ui" line="87"/>
         <source>y °</source>
         <translation></translation>
@@ -12572,27 +12754,27 @@
         <source>Unelgee:</source>
         <translation>Үнэлгээ:</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/PastureMonitoringValueDialog.ui" line="1155"/>
         <source>1 га-д бэлчиж болох хонин толгой</source>
         <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/PastureMonitoringValueDialog.ui" line="1207"/>
         <source>100 га-д бэлчиж болох хонин толгой</source>
         <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/PastureMonitoringValueDialog.ui" line="1298"/>
         <source>1 хонин толгойд шаардлагатай талбай</source>
         <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/PastureMonitoringValueDialog.ui" line="1142"/>
         <source>Боломжит даац</source>
         <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/PastureMonitoringValueDialog.ui" line="1272"/>
         <source>Боломжит ХТ- Одоо байгаа ХТ = Үнэлгээ</source>
         <translation></translation>
@@ -12994,7 +13176,7 @@
     <message>
         <location filename="view/PastureWidget.ui" line="1299"/>
         <source>Person Group</source>
-        <translation type="unfinished">Хамтрал</translation>
+        <translation>Хамтрал</translation>
     </message>
     <message>
         <location filename="view/PastureWidget.ui" line="1322"/>
@@ -13132,17 +13314,17 @@
         <source>Pasture</source>
         <translation>Бэлчээр</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/PastureWidget.ui" line="732"/>
         <source>Үнэлгээ</source>
         <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/PastureWidget.ui" line="758"/>
         <source>D3(Боломжит Даац)</source>
         <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/PastureWidget.ui" line="784"/>
         <source>Бэлчээр байгаа ХТ</source>
         <translation></translation>
@@ -13187,7 +13369,7 @@
         <source>Is daats level</source>
         <translation>даацын түвшин</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/PastureWidget.ui" line="1051"/>
         <source>Боломжит ХТ- Одоо байгаа ХТ = Үнэлгээ</source>
         <translation></translation>
@@ -13300,7 +13482,7 @@
     <message>
         <location filename="controller/PastureWidget.py" line="107"/>
         <source>Nature Reserve</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
 </context>
 <context>
@@ -13921,47 +14103,47 @@
         <source>Please specify a search filter.</source>
         <translation>Эхлээд хайх утгыг зааж өгнө үү.</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/PlanCaseDialog.ui" line="355"/>
         <source>Зөвхөн нэг арга хэмжээгээр оруулах</source>
         <translation type="unfinished"></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/PlanCaseDialog.ui" line="368"/>
         <source>Үндсэн тохиргооноос авах</source>
         <translation type="unfinished"></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/PlanCaseDialog.ui" line="397"/>
         <source>Арга хэмжээний төрөл</source>
         <translation type="unfinished"></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/PlanCaseDialog.ui" line="631"/>
         <source>Эрхийн төрөл</source>
         <translation type="unfinished"></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/PlanCaseDialog.ui" line="481"/>
         <source>Үр дүн</source>
         <translation type="unfinished"></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/PlanCaseDialog.ui" line="621"/>
         <source>ГЗБТ-ны үйл ажиллагаа</source>
         <translation type="unfinished"></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/PlanCaseDialog.ui" line="626"/>
         <source>Үйл ажиллагааны төрөл</source>
         <translation type="unfinished"></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/PlanCaseDialog.ui" line="636"/>
         <source>Хаанаас авсан</source>
         <translation type="unfinished"></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/PlanCaseDialog.ui" line="1083"/>
         <source>Бүгдийг сонгох</source>
         <translation type="unfinished"></translation>
@@ -13971,22 +14153,22 @@
         <source>Import From Monitoring</source>
         <translation type="unfinished"></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/PlanCaseDialog.ui" line="1105"/>
         <source>Бэлчээрийн мэдээлэл</source>
         <translation type="unfinished"></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/PlanCaseDialog.ui" line="1110"/>
         <source>Төлөв байдлын мэдээлэл</source>
         <translation type="unfinished"></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/PlanCaseDialog.ui" line="1281"/>
         <source>Баг</source>
         <translation type="unfinished"></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/PlanCaseDialog.ui" line="1294"/>
         <source>Улирал</source>
         <translation type="unfinished"></translation>
@@ -14262,14 +14444,14 @@
         <source>layer view</source>
         <translation type="unfinished"></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/PlanNavigatorWidget.ui" line="999"/>
         <source>Хамгаалалтын зурвас</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="view/PlanNavigatorWidget.ui" line="1012"/>
-        <source>ÐÐ°Ð³/Ð¥Ð¾ÑÐ¾Ð¾Ð½Ñ ÑÐ¸Ð»Ð¸Ð¹Ð½ Ð·Ð°Ð°Ð³</source>
+        <source>&#xd0;&#x91;&#xd0;&#xb0;&#xd0;&#xb3;/&#xd0;&#xa5;&#xd0;&#xbe;&#xd1;&#x80;&#xd0;&#xbe;&#xd0;&#xbe;&#xd0;&#xbd;&#xd1;&#x8b; &#xd1;&#x85;&#xd0;&#xb8;&#xd0;&#xbb;&#xd0;&#xb8;&#xd0;&#xb9;&#xd0;&#xbd; &#xd0;&#xb7;&#xd0;&#xb0;&#xd0;&#xb0;&#xd0;&#xb3;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -14277,12 +14459,12 @@
         <source>Type</source>
         <translation type="unfinished"></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/PlanNavigatorWidget.ui" line="1038"/>
         <source>Тусгай хамгаалалтай газар</source>
         <translation type="unfinished"></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/PlanNavigatorWidget.ui" line="1051"/>
         <source>Чөлөөт бүс</source>
         <translation type="unfinished"></translation>
@@ -14468,22 +14650,22 @@
         <source>Default plan zone</source>
         <translation type="unfinished"></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/PlanNavigatorWidget.ui" line="947"/>
         <source>Сум/Дүүргийн хилийн цэс</source>
         <translation type="unfinished"></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/PlanNavigatorWidget.ui" line="960"/>
         <source>Аймаг/Нийслэлийн хилийн цэс</source>
         <translation type="unfinished"></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/PlanNavigatorWidget.ui" line="1064"/>
         <source>Улсын хилийн цэс</source>
         <translation type="unfinished"></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/PlanNavigatorWidget.ui" line="1077"/>
         <source>Олон нийтийн санал</source>
         <translation type="unfinished"></translation>
@@ -14493,12 +14675,12 @@
         <source>Settings</source>
         <translation type="unfinished">Тохиргоо</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/PlanNavigatorWidget.ui" line="1097"/>
         <source>ГЗБТөлөвлөгөөний давхардал шалгах</source>
         <translation type="unfinished"></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/PlanNavigatorWidget.ui" line="1110"/>
         <source>Тохиргоо</source>
         <translation type="unfinished"></translation>
@@ -14522,87 +14704,87 @@
 <context>
     <name>Plugin</name>
     <message>
-        <location filename="LM2Plugin.py" line="218"/>
+        <location filename="LM2Plugin.py" line="226"/>
         <source>LandManager 2</source>
         <translation>ЛэндМенежер2 </translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="105"/>
+        <location filename="LM2Plugin.py" line="106"/>
         <source>User Role Management</source>
         <translation>Хэрэглэгчийн менежмент</translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="106"/>
+        <location filename="LM2Plugin.py" line="107"/>
         <source>Administrative Settings</source>
         <translation>Удирдлагын үндсэн тохиргоо</translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="107"/>
+        <location filename="LM2Plugin.py" line="108"/>
         <source>Help</source>
         <translation>Тусламж</translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="136"/>
+        <location filename="LM2Plugin.py" line="137"/>
         <source>Show/Hide Navigator</source>
         <translation>Шүүлтийн цонхыг нуух/харуулах</translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="114"/>
+        <location filename="LM2Plugin.py" line="115"/>
         <source>Import Decision</source>
         <translation>Захирамж импортлох</translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="357"/>
+        <location filename="LM2Plugin.py" line="368"/>
         <source>&amp;LM2</source>
         <translation>&amp;ЛМ2</translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="268"/>
+        <location filename="LM2Plugin.py" line="277"/>
         <source>Cadastre</source>
         <translation>Кадастр</translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="282"/>
+        <location filename="LM2Plugin.py" line="291"/>
         <source>Applications/Decisions</source>
         <translation>Өргөдөл/Захирамж</translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="291"/>
+        <location filename="LM2Plugin.py" line="300"/>
         <source>Contract/Ownership</source>
         <translation>Газрын гэрээ/Газар өмчлөл</translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="104"/>
+        <location filename="LM2Plugin.py" line="105"/>
         <source>Set Connection To Main Database</source>
         <translation>Үндсэн мэдээллийн сантай холбогдох</translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="109"/>
+        <location filename="LM2Plugin.py" line="110"/>
         <source>Add Person</source>
         <translation>Иргэн, хуулийн этгээдийн бүртгэл оруулах</translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="111"/>
+        <location filename="LM2Plugin.py" line="112"/>
         <source>Add Application</source>
         <translation>Өргөдөл оруулах</translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="112"/>
+        <location filename="LM2Plugin.py" line="113"/>
         <source>Add Contract</source>
         <translation>Газрын гэрээ оруулах</translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="113"/>
+        <location filename="LM2Plugin.py" line="114"/>
         <source>Add Ownership Record</source>
         <translation>Газар өмчлөлийн бүртгэл оруулах</translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="115"/>
+        <location filename="LM2Plugin.py" line="116"/>
         <source>Mark Apps As Sent To Governor</source>
         <translation>Захирамжийн төсөлд оруулах өргөдлүүдийг тэмдэглэнэ үү</translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="108"/>
+        <location filename="LM2Plugin.py" line="109"/>
         <source>Create Maintenance Case</source>
         <translation>Кадастрын өөрчлөлтийг эхлүүлэх</translation>
     </message>
@@ -14617,54 +14799,54 @@
         <translation>Файл нээгдэхгүй/уншигдахгүй байна {0}</translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="116"/>
+        <location filename="LM2Plugin.py" line="117"/>
         <source>Print cadastre map</source>
         <translation>Кадастрын зураг хэвлэх</translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="1258"/>
+        <location filename="LM2Plugin.py" line="1363"/>
         <source>No &lt;parcel&gt; layer</source>
         <translation>&lt;parcel&gt;  давхарга байхгүй байна</translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="1258"/>
+        <location filename="LM2Plugin.py" line="1363"/>
         <source>Layer &lt;parcel&gt; must be added to the table of contents first!</source>
         <translation>&lt;parcel&gt; давхаргыг эхлээд давхаргын хэсэгт оруулна уу!</translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="1329"/>
+        <location filename="LM2Plugin.py" line="1434"/>
         <source>Layer / map units not set to &apos;Meters&apos;</source>
         <translation>Давхарга/газрын зургийн нэгжийг &apos;метрээр&apos; тохируулаагүй байна&apos;</translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="1329"/>
+        <location filename="LM2Plugin.py" line="1434"/>
         <source>Printing requires the layer units set to &apos;Meters&apos;. 
 (Settings-&gt;Project Properties-&gt;General-&gt;Layer units)</source>
         <translation>Хэвлэхийн тулд давхаргын нэгжийг &apos;Метр&apos;-ээр тохируулна. 
 (Settings-&gt;Project Properties-&gt;General-&gt;Layer units)</translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="123"/>
+        <location filename="LM2Plugin.py" line="124"/>
         <source>About</source>
         <translation>Програмын тухай</translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="124"/>
+        <location filename="LM2Plugin.py" line="125"/>
         <source>Official documents</source>
         <translation>Эрхзүйн баримт бичиг</translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="1432"/>
+        <location filename="LM2Plugin.py" line="1538"/>
         <source>Building</source>
         <translation>Барилга</translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="130"/>
+        <location filename="LM2Plugin.py" line="131"/>
         <source>Database Dump</source>
         <translation>Мэдээллийн сан нөөцлөх</translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="1422"/>
+        <location filename="LM2Plugin.py" line="1528"/>
         <source>Parcel</source>
         <translation>Нэгж талбар</translation>
     </message>
@@ -14679,27 +14861,27 @@
         <translation>Ажлын Барилга</translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="132"/>
+        <location filename="LM2Plugin.py" line="133"/>
         <source>WebGIS Utility</source>
         <translation>Веб сервэр</translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="152"/>
+        <location filename="LM2Plugin.py" line="159"/>
         <source>Parcel Info</source>
         <translation>Нэгж талбарын мэдээлэл</translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="141"/>
+        <location filename="LM2Plugin.py" line="148"/>
         <source>PUA / ER</source>
         <translation>БАХ / Зүй ёсны эрх</translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="1191"/>
+        <location filename="LM2Plugin.py" line="1296"/>
         <source>No &lt;ub_parcel&gt; layer</source>
         <translation>&lt;ub_parcel&gt;  давхарга байхгүй байна</translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="1191"/>
+        <location filename="LM2Plugin.py" line="1296"/>
         <source>Layer &lt;ub_parcel&gt; must be added to the table of contents first!</source>
         <translation>&lt;ub_parcel&gt; давхаргыг эхлээд давхаргын хэсэгт оруулна уу!</translation>
     </message>
@@ -14724,7 +14906,7 @@
         <translation>БАХ байшин</translation>
     </message>
     <message>
-        <location filename="controller/ParcelInfoDialog.py" line="3731"/>
+        <location filename="controller/ParcelInfoDialog.py" line="3735"/>
         <source>UbGISParcel</source>
         <translation>UbGISParcel</translation>
     </message>
@@ -14744,32 +14926,32 @@
         <translation>Байгалийн бүс, бүслүүр</translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="1320"/>
+        <location filename="LM2Plugin.py" line="1425"/>
         <source>No &lt;monitoring&gt; layer</source>
         <translation>Мониторингийн давхарга байхгүй байна</translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="1320"/>
+        <location filename="LM2Plugin.py" line="1425"/>
         <source>Layer &lt;monitoring&gt; must be added to the table of contents first!</source>
         <translation>Эхлээд мониторингийн давхаргыг нэмж оруулна уу!</translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="263"/>
+        <location filename="LM2Plugin.py" line="272"/>
         <source>&amp;LM2_MGIS</source>
         <translation>&amp;LM2_MGIS</translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="157"/>
+        <location filename="LM2Plugin.py" line="164"/>
         <source>Parcel Mpa Info</source>
         <translation>Тусгай хамгаалалтай газар нутгийн мэдээлэл</translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="173"/>
+        <location filename="LM2Plugin.py" line="180"/>
         <source>Land plan info</source>
         <translation>ГЗБТөлөвлөгөө</translation>
     </message>
     <message>
-        <location filename="controller/ParcelMpaDialog.py" line="2543"/>
+        <location filename="controller/ParcelMpaDialog.py" line="2539"/>
         <source>MpaParcelEdit</source>
         <translation>Улсын тусгай хамгаалалтай газар нутаг</translation>
     </message>
@@ -14779,88 +14961,183 @@
         <translation>Отрын газар</translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="117"/>
+        <location filename="LM2Plugin.py" line="118"/>
         <source>Show pasture monitroing point information</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="146"/>
+        <location filename="LM2Plugin.py" line="153"/>
         <source>Nature reserve</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="163"/>
+        <location filename="LM2Plugin.py" line="170"/>
         <source>SPA Parcel Info</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="169"/>
+        <location filename="LM2Plugin.py" line="176"/>
         <source>Land plan settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="1225"/>
+        <location filename="LM2Plugin.py" line="1330"/>
         <source>Warning</source>
         <translation>Анхааруулга</translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="1220"/>
+        <location filename="LM2Plugin.py" line="1325"/>
         <source>No layer has been selected. Please select only one printing parcel layer!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="1225"/>
+        <location filename="LM2Plugin.py" line="1330"/>
         <source>You might have chosen more than one layer. Please select only one printing parcel layer!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="1443"/>
+        <location filename="LM2Plugin.py" line="1549"/>
         <source>Sub Parcel</source>
-        <translation type="unfinished"></translation>
+        <translation>Дэд нэгж талбар</translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="1454"/>
+        <location filename="LM2Plugin.py" line="1560"/>
         <source>Parcel Line</source>
-        <translation type="unfinished"></translation>
+        <translation>Нэгж талбарын шугам</translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="1467"/>
+        <location filename="LM2Plugin.py" line="1596"/>
         <source>Address Entrance</source>
         <translation>Орц, гарц</translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="1478"/>
+        <location filename="LM2Plugin.py" line="1609"/>
         <source>Address Building</source>
         <translation>Хаягийн барилга</translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="1488"/>
+        <location filename="LM2Plugin.py" line="1621"/>
         <source> Address Parcel</source>
         <translation>Хаягийн нэгж талбар</translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="1509"/>
+        <location filename="LM2Plugin.py" line="1657"/>
         <source>Address Sub Street</source>
         <translation>Дэд гудамж</translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="1520"/>
+        <location filename="LM2Plugin.py" line="1669"/>
         <source>Address Street</source>
         <translation>Гудамж</translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="1532"/>
+        <location filename="LM2Plugin.py" line="1682"/>
         <source>Address Post Zone</source>
         <translation>Шуудангийн бүсчлэл</translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="1408"/>
+        <location filename="LM2Plugin.py" line="1513"/>
         <source>Safety Zone</source>
         <translation>Хамгаалалтын бүс</translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="1499"/>
-        <source>Address Line Street</source>
+        <location filename="LM2Plugin.py" line="143"/>
+        <source>Show/Hide Address Controller</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="LM2Plugin.py" line="1571"/>
+        <source>Temporary Parcel</source>
+        <translation>Түр нэгж талбар</translation>
+    </message>
+    <message>
+        <location filename="LM2Plugin.py" line="1584"/>
+        <source>Street Start Point</source>
+        <translation>Гудамжны эхлэлийн цэг</translation>
+    </message>
+    <message>
+        <location filename="LM2Plugin.py" line="1635"/>
+        <source>Road Line</source>
+        <translation>Зам</translation>
+    </message>
+    <message>
+        <location filename="LM2Plugin.py" line="1646"/>
+        <source>Street Line</source>
+        <translation>Гудамж</translation>
+    </message>
+    <message>
+        <location filename="LM2Plugin.py" line="1694"/>
+        <source>Settlement Zone</source>
+        <translation>Суурьшлын бүс</translation>
+    </message>
+    <message>
+        <location filename="controller/AddressNavigatorWidget.py" line="1296"/>
+        <source>GeoCad Building</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="controller/AddressNavigatorWidget.py" line="1307"/>
+        <source>GeoCad Parcel</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="controller/AddressNavigatorWidget.py" line="1317"/>
+        <source>GeoCad Street</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="controller/AddressNavigatorWidget.py" line="1327"/>
+        <source>GeoCad Street Point</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="controller/AddressNavigatorWidget.py" line="1341"/>
+        <source> Address BairZui Parcel</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="controller/AddressNavigatorWidget.py" line="1351"/>
+        <source> Address Cadastre Parcel</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="controller/AddressNavigatorWidget.py" line="1362"/>
+        <source> Address Temp Cadastre Parcel</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="controller/AddressNavigatorWidget.py" line="1372"/>
+        <source> Address Plan Parcel</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="controller/AddressNavigatorWidget.py" line="1382"/>
+        <source> Is New Address Parcel</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="controller/AddressNavigatorWidget.py" line="1393"/>
+        <source> Settlement Center</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="controller/AddressNavigatorWidget.py" line="1405"/>
+        <source> Address BairZui Building</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="controller/AddressNavigatorWidget.py" line="1416"/>
+        <source> Address Cadastre Building</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="controller/AddressNavigatorWidget.py" line="1427"/>
+        <source> Is New Address Building</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="controller/AddressNavigatorWidget.py" line="1438"/>
+        <source> Address Temp Cadastre Building</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -15085,47 +15362,47 @@
         <translation>Хэвлэх огноо</translation>
     </message>
     <message>
-        <location filename="controller/PrintDialog.py" line="1765"/>
+        <location filename="controller/PrintDialog.py" line="1778"/>
         <source>The cadastre page number is out of range. Change the Admin Settings.</source>
         <translation>Үнэт цаасны дугаар бүртгэлд байхгүй байна. Удирдлагын үндсэн тохиргооны хэсэгт засна уу.</translation>
     </message>
     <message>
-        <location filename="controller/PrintDialog.py" line="1865"/>
+        <location filename="controller/PrintDialog.py" line="1878"/>
         <source>The certificate number is out of range. Change the Admin Settings.</source>
         <translation>Гэрчилгээний дугаар таарахгүй байна. Удирдлагын үндсэн цонхны  Гэрчилгээ хэсэгт өөрчлөлт хийнэ үү.</translation>
     </message>
     <message>
-        <location filename="controller/PrintDialog.py" line="1871"/>
+        <location filename="controller/PrintDialog.py" line="1884"/>
         <source>Selection</source>
         <translation>Сонголт</translation>
     </message>
     <message>
-        <location filename="controller/PrintDialog.py" line="1871"/>
+        <location filename="controller/PrintDialog.py" line="1884"/>
         <source>No right holder information!!!</source>
         <translation>Хуулийн этгээдийн мэдээлэл байхгүй байна!!!</translation>
     </message>
     <message>
-        <location filename="controller/PrintDialog.py" line="1887"/>
+        <location filename="controller/PrintDialog.py" line="1900"/>
         <source>Value</source>
         <translation>Утга</translation>
     </message>
     <message>
-        <location filename="controller/PrintDialog.py" line="1875"/>
+        <location filename="controller/PrintDialog.py" line="1888"/>
         <source>Please enter cadasre page number!!!</source>
         <translation>Үнэт цаасны дугаар оруулна уу!!!</translation>
     </message>
     <message>
-        <location filename="controller/PrintDialog.py" line="1887"/>
+        <location filename="controller/PrintDialog.py" line="1900"/>
         <source>This cadastre page already saved!</source>
         <translation>Үнэт цаас бүртгэгдсэн байна!</translation>
     </message>
     <message>
-        <location filename="controller/PrintDialog.py" line="1909"/>
+        <location filename="controller/PrintDialog.py" line="1922"/>
         <source>Success</source>
         <translation>Амжилттай</translation>
     </message>
     <message>
-        <location filename="controller/PrintDialog.py" line="1909"/>
+        <location filename="controller/PrintDialog.py" line="1922"/>
         <source>Successfully save</source>
         <translation>Амжилттай хадгалагдлаа</translation>
     </message>
@@ -15140,12 +15417,12 @@
         <translation>НТ-н тодорхойлолт</translation>
     </message>
     <message>
-        <location filename="controller/PrintDialog.py" line="1985"/>
+        <location filename="controller/PrintDialog.py" line="1998"/>
         <source>Out error</source>
         <translation>Нээгдсэн байна</translation>
     </message>
     <message>
-        <location filename="controller/PrintDialog.py" line="1985"/>
+        <location filename="controller/PrintDialog.py" line="1998"/>
         <source>This file is already opened. Please close re-run</source>
         <translation>Энэ тайлан нээгдсэн байна. Хаагаад дахин ажиллуулна уу</translation>
     </message>
@@ -16923,7 +17200,7 @@
         <source>Name</source>
         <translation>Нэр</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/UserRoleManagementDialog.ui" line="1271"/>
         <source>Bank(Төрийн сан банк)</source>
         <translation>Банк(Төрийн сан банк)</translation>
@@ -16968,15 +17245,15 @@
         <source>Decision Catch Up Configuration</source>
         <translation type="unfinished"></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/UserRoleManagementDialog.ui" line="1545"/>
         <source>Хэлтэс/Байгууллага:</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/UserRoleManagementDialog.ui" line="1558"/>
         <source>Албан тушаал:</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="view/UserRoleManagementDialog.ui" line="1571"/>
@@ -16986,7 +17263,7 @@
     <message>
         <location filename="controller/UserRoleManagementDialog.py" line="2250"/>
         <source>Warning</source>
-        <translation type="unfinished">Анхааруулга</translation>
+        <translation>Анхааруулга</translation>
     </message>
     <message>
         <location filename="controller/UserRoleManagementDialog.py" line="2250"/>
@@ -17116,7 +17393,7 @@
         <source>This file is already opened. Please close re-run</source>
         <translation>Энэ тайлан нээгдсэн байна. Хаагаад дахин ажиллуулна уу</translation>
     </message>
-    <message utf8="true">
+    <message encoding="UTF-8">
         <location filename="view/WebgisUtilityDialog.ui" line="77"/>
         <source>Регистрийн дугаар:</source>
         <translation></translation>

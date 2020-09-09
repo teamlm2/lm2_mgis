@@ -44,6 +44,7 @@ SOURCES        += controller/PlanAttributeEditDialog.py
 SOURCES        += controller/PlanCaseDialog.py
 SOURCES        += controller/PlanDetailWidget.py
 SOURCES        += controller/PlanNavigatorWidget.py
+SOURCES        += controller/AddressNavigatorWidget.py
 
 SOURCES      += controller/qt_classes/ApplicantDocumentDelegate.py
 SOURCES      += controller/qt_classes/ApplicationComboBoxDelegate.py
@@ -113,5 +114,6 @@ FORMS        += view/PlanAttributeEditDialog.ui
 FORMS        += view/PlanCaseDialog.ui
 FORMS        += view/PlanDetailWidget.ui
 FORMS        += view/PlanNavigatorWidget.ui
+FORMS        += view/AddressNavigatorWidget.ui
 
 TRANSLATIONS += LM2Plugin_mn.ts
