@@ -26,3 +26,22 @@ from data_soums_union.ca_parcel_tbl p, data_address.ca_parcel_address pa
 where pa.parcel_id = p.parcel_id 
 --and substring(p.au2, 1, 3) = '048'
 --and p.parcel_id not in ( select parcel_id from data_address.ca_parcel_address)--substring(p.au2, 1, 3) = '048'
+
+
+--------------------
+
+insert into data_address.ca_parcel_address_history(parcel_id, is_active, in_source, zipcode_id, address_street_code, address_parcel_no, address_streetname, address_neighbourhood, geographic_name, au1, au2, au3, sort_value, created_at)
+select id, true, 2, null, street_code, address_parcel_no, address_streetname, address_neighbourhood, geographic_name, au1, au2, au3, 2, created_at from data_address.ca_parcel_address where parcel_type = 7
+
+--------------------
+insert into data_address.ca_parcel_address_history
+(parcel_id, is_active, in_source, zipcode_id, address_street_code, address_parcel_no, address_streetname, address_neighbourhood, geographic_name, au1, au2, au3, sort_value, created_at)
+
+select p.id, true, 2, null, bz.street_code, bz.address_parcel_no, bz.address_streetname, bz.address_neighbourhood, bz.geographic_name, bz.au1, bz.au2, bz.au3, 2, bz.created_at from (select * from data_address.ca_parcel_address
+where parcel_type = 7 and au2 = '04201') as bz, (select id, geometry from data_address.ca_parcel_address
+where parcel_type = 1 and au2 = '04201' and is_new_address = true and now() between '1900-01-01'::date and valid_till) p
+where st_within(st_centroid(bz.geometry), p.geometry)
+
+
+
+

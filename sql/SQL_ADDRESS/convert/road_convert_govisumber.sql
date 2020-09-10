@@ -40,8 +40,8 @@ ON CONFLICT (code, name, parent_id) DO nothing
 ----------update st_road street_id
 
 WITH s AS (
-select s.id as str_id, r.id as road_id, street_code, street_name, s.au2 from data_address.st_road r, data_address.st_street s 
-where substring(r.au2, 1, 3) = '011' and street_code || '-' || street_name = s.code || '-' || s.name and s.au1 = '011'
+select s.id as str_id, r.id as road_id, street_code, street_name, s.au2, r.street_name ||'-'||r.street_code, s.name ||'-'|| s.code  from data_address.st_road r, data_address.st_street s 
+where r.street_name ||'-'||r.street_code =  s.name ||'-'|| s.code and s.au2 = r.au2
 )
 UPDATE data_address.st_road
 SET street_id = s.str_id

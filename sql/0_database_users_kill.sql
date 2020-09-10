@@ -1,4 +1,4 @@
-SELECT
+﻿SELECT
 relname AS "table_name",
 pg_size_pretty(pg_table_size(C.oid)) AS "table_size"
 FROM

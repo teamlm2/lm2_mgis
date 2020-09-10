@@ -84,6 +84,6 @@ where project_parcel is not null
 ------
 
 select bz.address_parcel_no, bz.address_streetname, bz.street_code, p.address_parcel_no, p.address_streetname, p.street_code from (select * from data_address.ca_parcel_address
-where parcel_type = 10 and au2 = '04201') as bz, (select * from data_address.ca_parcel_address
-where parcel_type = 1 and au2 = '04201' and is_new_address = true) p
+where parcel_type = 7 and au2 = '04201') as bz, (select * from data_address.ca_parcel_address
+where parcel_type = 1 and au2 = '04201' and is_new_address = true and now() between '1900-01-01'::date and valid_till) p
 where st_within(st_centroid(bz.geometry), p.geometry) and bz.address_streetname || '-' || bz.street_code = p.address_streetname and bz.address_parcel_no = p.address_parcel_no
