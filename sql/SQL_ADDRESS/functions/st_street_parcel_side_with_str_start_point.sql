@@ -15,10 +15,10 @@ BEGIN
 execute 'select * from (
 select 
 case 
-	when degrees(ST_Azimuth(st_centroid(p.geometry), sp.geometry)) > 180 and (select unnest(string_to_array(base.st_street_line_parcel_side1($1, $2)::text, '','')))::int = 1 then 1
-	when degrees(ST_Azimuth(st_centroid(p.geometry), sp.geometry)) > 180 and (select unnest(string_to_array(base.st_street_line_parcel_side1($1, $2)::text, '','')))::int = -1 then -1
-	when degrees(ST_Azimuth(st_centroid(p.geometry), sp.geometry)) < 180 and (select unnest(string_to_array(base.st_street_line_parcel_side1($1, $2)::text, '','')))::int = -1 then 1
-	when degrees(ST_Azimuth(st_centroid(p.geometry), sp.geometry)) < 180 and (select unnest(string_to_array(base.st_street_line_parcel_side1($1, $2)::text, '','')))::int = 1 then -1	
+	when degrees(ST_Azimuth(st_centroid(p.geometry), sp.geometry)) < 180 and (select unnest(string_to_array(base.st_street_line_parcel_side1($1, $2)::text, '','')))::int = 1 then 1
+	when degrees(ST_Azimuth(st_centroid(p.geometry), sp.geometry)) < 180 and (select unnest(string_to_array(base.st_street_line_parcel_side1($1, $2)::text, '','')))::int = -1 then -1
+	when degrees(ST_Azimuth(st_centroid(p.geometry), sp.geometry)) > 180 and (select unnest(string_to_array(base.st_street_line_parcel_side1($1, $2)::text, '','')))::int = -1 then 1
+	when degrees(ST_Azimuth(st_centroid(p.geometry), sp.geometry)) > 180 and (select unnest(string_to_array(base.st_street_line_parcel_side1($1, $2)::text, '','')))::int = 1 then -1	
 	else 0
 end as side
 

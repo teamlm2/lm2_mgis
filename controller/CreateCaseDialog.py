@@ -1114,90 +1114,90 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
     def on_apply_button_clicked(self):
 
         # try:
-        root = self.result_twidget.invisibleRootItem()
-        self.result_twidget.topLevelItemCount()
-        child_count = root.childCount()
-
-        parent_item = root.child(0)
-        b_count = parent_item.childCount()
-
-        parent_item = root.child(1)
-        p_count = parent_item.childCount()
+        # root = self.result_twidget.invisibleRootItem()
+        # self.result_twidget.topLevelItemCount()
+        # child_count = root.childCount()
+        #
+        # parent_item = root.child(0)
+        # b_count = parent_item.childCount()
+        #
+        # parent_item = root.child(1)
+        # p_count = parent_item.childCount()
 
         if self.tab_index == 0:
-            if b_count > 0 and p_count > 0:
-                self.ca_maintenance_case.creation_date = PluginUtils.convert_qt_date_to_python(self.start_date.date())
+            # if b_count > 0 and p_count > 0:
+            self.ca_maintenance_case.creation_date = PluginUtils.convert_qt_date_to_python(self.start_date.date())
+            self.create_savepoint()
+
+            if self.connect_app_checkbox.isChecked():
+                count = self.applications_twidget.rowCount()
+                if count == 0:
+                    PluginUtils.show_error(self, self.tr("Maintenance case Error"), self.tr("Select an application to create an maintenance case"))
+                    return
+
+                for i in range(self.applications_twidget.rowCount()):
+
+                    item = self.applications_twidget.item(i, 0)
+
+                    if item is None:
+                        continue
+                    app_no = item.text()
+                    application_count = self.session.query(CtApplication).filter(CtApplication.app_no == app_no).count()
+                    if application_count != 0:
+                        application = self.session.query(CtApplication).filter(CtApplication.app_no == app_no).one()
+                        application.maintenance_case = self.ca_maintenance_case.id
+
+            for parcel_id in self.maintenance_parcels:
                 self.create_savepoint()
 
-                if self.connect_app_checkbox.isChecked():
-                    count = self.applications_twidget.rowCount()
-                    if count == 0:
-                        PluginUtils.show_error(self, self.tr("Maintenance case Error"), self.tr("Select an application to create an maintenance case"))
-                        return
+                parcel = self.session.query(CaParcel).filter(CaParcel.parcel_id == parcel_id).one()
+                if parcel in self.ca_maintenance_case.parcels:
+                    continue
+                soum = DatabaseUtils.working_l2_code()
+                self.ca_maintenance_case.parcels.append(parcel)
+                temp_parcel = CaTmpParcel()
+                temp_parcel.parcel_id = parcel.parcel_id
+                temp_parcel.old_parcel_id = parcel.old_parcel_id
+                temp_parcel.geo_id = parcel.geo_id
+                temp_parcel.landuse = parcel.landuse
+                temp_parcel.address_khashaa = parcel.address_khashaa
+                temp_parcel.address_streetname = parcel.address_streetname
+                temp_parcel.address_neighbourhood = parcel.address_neighbourhood
+                temp_parcel.valid_from = parcel.valid_from
+                temp_parcel.valid_till = parcel.valid_till
+                temp_parcel.documented_area_m2 = parcel.documented_area_m2
+                temp_parcel.area_m2 = parcel.area_m2
+                temp_parcel.geometry = parcel.geometry
+                temp_parcel.maintenance_case = self.ca_maintenance_case.id
+                temp_parcel.initial_insert = True
+                temp_parcel.au2 = soum
 
-                    for i in range(self.applications_twidget.rowCount()):
+                self.session.add(temp_parcel)
 
-                        item = self.applications_twidget.item(i, 0)
+            for building_id in self.maintenance_buildings:
 
-                        if item is None:
-                            continue
-                        app_no = item.text()
-                        application_count = self.session.query(CtApplication).filter(CtApplication.app_no == app_no).count()
-                        if application_count != 0:
-                            application = self.session.query(CtApplication).filter(CtApplication.app_no == app_no).one()
-                            application.maintenance_case = self.ca_maintenance_case.id
+                self.create_savepoint()
 
-                for parcel_id in self.maintenance_parcels:
-                    self.create_savepoint()
+                building = self.session.query(CaBuilding).filter(CaBuilding.building_id == building_id).one()
+                if building in self.ca_maintenance_case.buildings:
+                    continue
+                python_date = PluginUtils.convert_qt_date_to_python(QDateTime().currentDateTime())
+                self.ca_maintenance_case.buildings.append(building)
+                temp_building = CaTmpBuilding()
 
-                    parcel = self.session.query(CaParcel).filter(CaParcel.parcel_id == parcel_id).one()
-                    if parcel in self.ca_maintenance_case.parcels:
-                        continue
-                    soum = DatabaseUtils.working_l2_code()
-                    self.ca_maintenance_case.parcels.append(parcel)
-                    temp_parcel = CaTmpParcel()
-                    temp_parcel.parcel_id = parcel.parcel_id
-                    temp_parcel.old_parcel_id = parcel.old_parcel_id
-                    temp_parcel.geo_id = parcel.geo_id
-                    temp_parcel.landuse = parcel.landuse
-                    temp_parcel.address_khashaa = parcel.address_khashaa
-                    temp_parcel.address_streetname = parcel.address_streetname
-                    temp_parcel.address_neighbourhood = parcel.address_neighbourhood
-                    temp_parcel.valid_from = parcel.valid_from
-                    temp_parcel.valid_till = parcel.valid_till
-                    temp_parcel.documented_area_m2 = parcel.documented_area_m2
-                    temp_parcel.area_m2 = parcel.area_m2
-                    temp_parcel.geometry = parcel.geometry
-                    temp_parcel.maintenance_case = self.ca_maintenance_case.id
-                    temp_parcel.initial_insert = True
-                    temp_parcel.au2 = soum
+                temp_building.building_id = building.building_id
+                temp_building.geo_id = building.geo_id
+                temp_building.valid_from = building.valid_from
+                temp_building.valid_till = building.valid_till
+                temp_building.address_streetname = building.address_streetname
+                temp_building.address_neighbourhood = building.address_neighbourhood
+                temp_building.address_khashaa = building.address_khashaa
+                temp_building.area_m2 = building.area_m2
+                temp_building.geometry = building.geometry#.ST_SetSRID(32648)
+                temp_building.maintenance_case = self.ca_maintenance_case.id
+                temp_building.au2 = soum
 
-                    self.session.add(temp_parcel)
-
-                for building_id in self.maintenance_buildings:
-
-                    self.create_savepoint()
-
-                    building = self.session.query(CaBuilding).filter(CaBuilding.building_id == building_id).one()
-                    if building in self.ca_maintenance_case.buildings:
-                        continue
-                    python_date = PluginUtils.convert_qt_date_to_python(QDateTime().currentDateTime())
-                    self.ca_maintenance_case.buildings.append(building)
-                    temp_building = CaTmpBuilding()
-
-                    temp_building.building_id = building.building_id
-                    temp_building.geo_id = building.geo_id
-                    temp_building.valid_from = building.valid_from
-                    temp_building.valid_till = building.valid_till
-                    temp_building.address_streetname = building.address_streetname
-                    temp_building.address_neighbourhood = building.address_neighbourhood
-                    temp_building.address_khashaa = building.address_khashaa
-                    temp_building.area_m2 = building.area_m2
-                    temp_building.geometry = building.geometry#.ST_SetSRID(32648)
-                    temp_building.maintenance_case = self.ca_maintenance_case.id
-                    temp_building.au2 = soum
-
-                    self.session.add(temp_building)
+                self.session.add(temp_building)
 
             self.commit()
             self.__set_visible_layers()
