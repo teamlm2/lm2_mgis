@@ -427,7 +427,7 @@ DROP TABLE if exists data_address.st_map_street_point CASCADE ;
 CREATE TABLE data_address.st_map_street_point
 (
 id serial primary key,
-street_point_id int references data_address.st_street_point on update cascade on delete restrict not null,
+street_point_id int references data_address.st_street_point on update cascade on delete cascade not null,
 street_id int references data_address.st_street on update cascade on delete restrict not null,
 type int,
 unique(street_id, street_point_id, type)

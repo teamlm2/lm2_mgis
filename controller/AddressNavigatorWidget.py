@@ -222,7 +222,7 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
                 if geometry is not None:
                     count = self.session.query(StEntrance).filter(StEntrance.parcel_id == id).count()
                     if count == 0:
-                        print a_count
+
                         object = StEntrance()
                         object.type = entry_type
                         object.parcel_id = id
@@ -948,8 +948,9 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
                                      u'Гудамжинд нэгж талбарын ' + unicode(self.parcel_address_no) + u'q хаяг давхардаж байна.')
             return
 
+
         zipcode = self.session.query(AuZipCodeArea). \
-            filter(AuZipCodeArea.geometry.ST_Within(func.ST_Centroid(addrs_parcel.geometry))).first()
+            filter(func.ST_Centroid(addrs_parcel.geometry).ST_Within(AuZipCodeArea.geometry)).first()
         zip_addrs_count = self.session.query(AuZipCodeArea).\
             join(CaParcelAddress, AuZipCodeArea.id == CaParcelAddress.zipcode_id). \
             filter(CaParcelAddress.address_parcel_no == self.parcel_address_no).\
