@@ -1222,7 +1222,15 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
         selected_row = self.address_parcel_twidget.currentRow()
         id = self.address_parcel_twidget.item(selected_row, 0).data(Qt.UserRole + 1)
 
-        sql = "select unnest(string_to_array(base.st_street_parcel_side_with_str_start_point(" + str(str_id) + ", " + str(id) + ")::text, ','));"
+        str_start_point_count = self.session.query(StStreetPoint).\
+            filter(StStreetPoint.street_id == str_id).\
+            filter(StStreetPoint.point_type == 1).count()
+        if str_start_point_count == 0:
+            self.str_type_lbl.setText(u'Гудамжны хэлбэрийг тодорхойлоогүй байна. Гудамжны бүртгэлрүү орж засна уу!')
+            return
+        # sql = "select unnest(string_to_array(base.st_street_parcel_side_with_str_start_point(" + str(str_id) + ", " + str(id) + ")::text, ','));"
+        sql = "select unnest(string_to_array(base.st_street_line_parcel_side2(" + str(
+            str_id) + ", " + str(id) + ")::text, ','));"
         result = self.session.execute(sql)
 
         for row in result:
