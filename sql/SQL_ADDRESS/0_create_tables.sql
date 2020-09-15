@@ -401,6 +401,8 @@ CREATE TABLE data_address.st_street_point
   is_active boolean NOT NULL DEFAULT true,
   valid_from date DEFAULT ('now'::text)::date,
   valid_till date DEFAULT 'infinity'::date,
+  street_id int references data_address.st_street on update cascade on delete restrict,
+  point_type int,
   geometry geometry(Point,4326),
   created_by integer,
   updated_by integer,

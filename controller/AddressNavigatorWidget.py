@@ -161,13 +161,10 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
 
             geometry = WKTElement(geometry.exportToWkt(), srid=4326)
 
-            object_count = 0
-            map_point_count = self.session.query(StMapStreetPoint).filter(StMapStreetPoint.street_id == street_id).count()
-            if map_point_count != 0:
-                map_object = self.session.query(StMapStreetPoint).filter(StMapStreetPoint.street_id == street_id).first()
-                object_count = self.session.query(StStreetPoint).\
-                    filter(StStreetPoint.id == map_object.street_point_id).\
-                    filter(StStreetPoint.geometry.ST_Equals(geometry)).count()
+            object_count = self.session.query(StStreetPoint).\
+                filter(StStreetPoint.street_id == street_id). \
+                filter(StStreetPoint.geometry.ST_Equals(geometry)). \
+                filter(StStreetPoint.point_type == 1).count()
             count = self.str_nodes_twidget.rowCount()
             self.str_nodes_twidget.insertRow(count)
 
@@ -187,6 +184,16 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
             item = QTableWidgetItem(str(y))
             item.setData(Qt.UserRole, y)
             self.str_nodes_twidget.setItem(count, 2, item)
+
+            if object_count == 1:
+                item = QTableWidgetItem(u'Эхлэл')
+                item.setData(Qt.UserRole, 1)
+                self.str_nodes_twidget.setItem(count, 3, item)
+            else:
+                item = QTableWidgetItem(u'Төгсгөл')
+                item.setData(Qt.UserRole, 2)
+                self.str_nodes_twidget.setItem(count, 3, item)
+
 
     @pyqtSlot()
     def on_get_entry_parcels_button_clicked(self):
@@ -271,15 +278,18 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
 
                     geometry = WKTElement(geometry.exportToWkt(), srid=4326)
                 if geometry is not None:
-                    self.session.query(StMapStreetPoint).filter(StMapStreetPoint.street_id == street_id).delete()
+                    self.session.query(StStreetPoint).filter(StStreetPoint.street_id == street_id).delete()
 
                     count = self.session.query(StStreetPoint). \
-                        filter(StStreetPoint.geometry.ST_Equals(geometry)).count()
+                        filter(StStreetPoint.geometry.ST_Equals(geometry)). \
+                        filter(StStreetPoint.street_id == street_id).count()
 
                     if count == 0:
                         object = StStreetPoint()
                         object.is_active = True
                         object.geometry = geometry
+                        object.point_type = 1
+                        object.street_id = street_id
                         object.valid_from = DatabaseUtils.current_date_time()
                         object.created_at = DatabaseUtils.current_date_time()
                         object.updated_at = DatabaseUtils.current_date_time()
@@ -288,17 +298,9 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
                         self.session.add(object)
                         self.session.flush()
 
-                        map_object = StMapStreetPoint()
-                        map_object.street_point_id = object.id
-                        map_object.street_id = street_id
-                        self.session.add(map_object)
                     if count == 1:
                         object = self.session.query(StStreetPoint). \
                             filter(StStreetPoint.geometry.ST_Equals(geometry)).one()
-                        map_object = StMapStreetPoint()
-                        map_object.street_point_id = object.id
-                        map_object.street_id = street_id
-                        self.session.add(map_object)
 
                 a_count = a_count + 1
                 str_count_lbl = str_count + '/' + str(a_count)
@@ -316,47 +318,45 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
                 street_id = value.id
 
                 sql = "select * from base.st_street_line_view_start_end_nodes_auto(" + str(street_id) + ");"
-
+                self.session.query(StStreetPoint).filter(StStreetPoint.street_id == street_id).delete()
                 geometry = None
                 result = self.session.execute(sql)
                 for item_row in result:
-                    street_id = item_row[0]
-                    x = item_row[1]
-                    y = item_row[2]
+                    p_type = item_row[0]
+                    street_id = item_row[1]
+                    x = item_row[2]
+                    y = item_row[3]
 
                     geom_spot4 = QgsPoint(x, y)
                     geometry = QgsGeometry.fromPoint(geom_spot4)
 
                     geometry = WKTElement(geometry.exportToWkt(), srid=4326)
-                if geometry is not None:
-                    self.session.query(StMapStreetPoint).filter(StMapStreetPoint.street_id == street_id).delete()
+                    if geometry is not None:
+                        count = self.session.query(StStreetPoint). \
+                            filter(StStreetPoint.geometry.ST_Equals(geometry)). \
+                            filter(StStreetPoint.street_id == street_id).count()
 
-                    count = self.session.query(StStreetPoint). \
-                        filter(StStreetPoint.geometry.ST_Equals(geometry)).count()
+                        if count == 0:
+                            object = StStreetPoint()
+                            object.is_active = True
+                            object.geometry = geometry
+                            object.point_type = 1
+                            object.street_id = street_id
+                            if p_type == 1:
+                                object.point_type = 1
+                            else:
+                                object.point_type = 2
+                            object.valid_from = DatabaseUtils.current_date_time()
+                            object.created_at = DatabaseUtils.current_date_time()
+                            object.updated_at = DatabaseUtils.current_date_time()
+                            object.au1 = self.au1
+                            object.au2 = self.au2
+                            self.session.add(object)
+                            self.session.flush()
 
-                    if count == 0:
-                        object = StStreetPoint()
-                        object.is_active = True
-                        object.geometry = geometry
-                        object.valid_from = DatabaseUtils.current_date_time()
-                        object.created_at = DatabaseUtils.current_date_time()
-                        object.updated_at = DatabaseUtils.current_date_time()
-                        object.au1 = self.au1
-                        object.au2 = self.au2
-                        self.session.add(object)
-                        self.session.flush()
-
-                        map_object = StMapStreetPoint()
-                        map_object.street_point_id = object.id
-                        map_object.street_id = street_id
-                        self.session.add(map_object)
-                    if count == 1:
-                        object = self.session.query(StStreetPoint). \
-                            filter(StStreetPoint.geometry.ST_Equals(geometry)).one()
-                        map_object = StMapStreetPoint()
-                        map_object.street_point_id = object.id
-                        map_object.street_id = street_id
-                        self.session.add(map_object)
+                        if count == 1:
+                            object = self.session.query(StStreetPoint). \
+                                filter(StStreetPoint.geometry.ST_Equals(geometry)).one()
 
                 a_count = a_count + 1
                 str_count_lbl = str_count + '/' + str(a_count)
@@ -515,47 +515,48 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
 
         for row in range(self.str_nodes_twidget.rowCount()):
             item_main = self.str_nodes_twidget.item(row, 0)
-            if item_main.checkState() == Qt.Checked:
-                id = self.str_nodes_twidget.item(row, 0).data(Qt.UserRole)
-                street_id = self.str_nodes_twidget.item(row, 0).data(Qt.UserRole + 1)
-                x = self.str_nodes_twidget.item(row, 1).data(Qt.UserRole)
-                y = self.str_nodes_twidget.item(row, 2).data(Qt.UserRole)
 
-                geom_spot4 = QgsPoint(x, y)
-                geometry = QgsGeometry.fromPoint(geom_spot4)
+            id = self.str_nodes_twidget.item(row, 0).data(Qt.UserRole)
+            street_id = self.str_nodes_twidget.item(row, 0).data(Qt.UserRole + 1)
+            x = self.str_nodes_twidget.item(row, 1).data(Qt.UserRole)
+            y = self.str_nodes_twidget.item(row, 2).data(Qt.UserRole)
 
-                geometry = WKTElement(geometry.exportToWkt(), srid=4326)
+            geom_spot4 = QgsPoint(x, y)
+            geometry = QgsGeometry.fromPoint(geom_spot4)
 
-                self.session.query(StMapStreetPoint).filter(StMapStreetPoint.street_id == street_id).delete()
+            geometry = WKTElement(geometry.exportToWkt(), srid=4326)
 
-                count = self.session.query(StStreetPoint).\
-                    filter(StStreetPoint.geometry.ST_Equals(geometry)).count()
+            # self.session.query(StStreetPoint).filter(StStreetPoint.street_id == street_id).delete()
 
-                if count == 0:
-                    object = StStreetPoint()
-                    object.is_active = True
-                    object.geometry = geometry
-                    object.valid_from = DatabaseUtils.current_date_time()
-                    object.created_at = DatabaseUtils.current_date_time()
-                    object.updated_at = DatabaseUtils.current_date_time()
-                    object.au1 = self.au1
-                    object.au2 = self.au2
-                    self.session.add(object)
-                    self.session.flush()
+            count = self.session.query(StStreetPoint).\
+                filter(StStreetPoint.geometry.ST_Equals(geometry)). \
+                filter(StStreetPoint.street_id == street_id).count()
 
-                    map_object = StMapStreetPoint()
-                    map_object.street_point_id = object.id
-                    map_object.street_id = street_id
-                    self.session.add(map_object)
-                if count == 1:
-                    object = self.session.query(StStreetPoint). \
-                        filter(StStreetPoint.geometry.ST_Equals(geometry)).one()
-                    map_object = StMapStreetPoint()
-                    map_object.street_point_id = object.id
-                    map_object.street_id = street_id
-                    self.session.add(map_object)
+            if count == 0:
+                object = StStreetPoint()
+                object.is_active = True
+                object.geometry = geometry
+                object.valid_from = DatabaseUtils.current_date_time()
+                object.created_at = DatabaseUtils.current_date_time()
+                object.updated_at = DatabaseUtils.current_date_time()
+                object.au1 = self.au1
+                object.au2 = self.au2
+                object.street_id = street_id
+                if item_main.checkState() == Qt.Checked:
+                    object.point_type = 1
+                else:
+                    object.point_type = 2
+                self.session.add(object)
+                self.session.flush()
 
-            self.session.commit()
+            if count == 1:
+                object = self.session.query(StStreetPoint). \
+                    filter(StStreetPoint.geometry.ST_Equals(geometry)). \
+                    filter(StStreetPoint.street_id == street_id).one()
+                if item_main.checkState() == Qt.Checked:
+                    object.point_type = 1
+                else:
+                    object.point_type = 2
 
     @pyqtSlot()
     def on_selected_parcel_load_button_clicked(self):
@@ -1232,6 +1233,7 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
         else:
             self.str_type_lbl.setText(unicode(str_shape.description))
 
+        print self.side
         if self.side == '-1':
             self.str_txt_lbl.setText(u'Гудамжны зүүн гар талд байрлаж байгаа тул СОНДГОЙ дугаар авна')
 

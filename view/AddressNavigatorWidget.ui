@@ -627,11 +627,11 @@
            </rect>
           </property>
           <attribute name="horizontalHeaderDefaultSectionSize">
-           <number>133</number>
+           <number>100</number>
           </attribute>
           <column>
            <property name="text">
-            <string>ID</string>
+            <string>№</string>
            </property>
           </column>
           <column>
@@ -642,6 +642,11 @@
           <column>
            <property name="text">
             <string>Y</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Цэгийн төрөл</string>
            </property>
           </column>
          </widget>

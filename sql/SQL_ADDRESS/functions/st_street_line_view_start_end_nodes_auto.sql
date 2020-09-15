@@ -5,7 +5,7 @@ DROP FUNCTION if exists base.st_street_line_view_start_end_nodes_auto(integer);
 
 CREATE OR REPLACE FUNCTION base.st_street_line_view_start_end_nodes_auto(
     IN str_id integer)
-  RETURNS TABLE(street_id bigint, x float, y float) AS
+  RETURNS TABLE( gid bigint, street_id bigint, x float, y float, dist float) AS
 $BODY$
 
 DECLARE
@@ -13,7 +13,8 @@ DECLARE
 BEGIN
 
 	    RETURN  query 
-			select xxx.street_id, ST_X(xxx.geometry) as x, ST_Y(xxx.geometry) as y from (
+			select row_number() over() as gid , xxx.* from (
+			select xxx.street_id, ST_X(xxx.geometry) as x, ST_Y(xxx.geometry) as y, min(st_distance(xxx.geometry, sss.geometry)) from (
 			select sp.* from data_address.st_all_street_line_view s
 			join admin_units.au_settlement_zone_view st on st_intersects(s.geometry, st.geometry)
 			join data_address.au_settlement_zone_point sp on st_within(sp.geometry, st.geometry)
@@ -71,7 +72,7 @@ BEGIN
 				  GROUP BY st_road.street_id) r ON s.id = r.street_id where s.id = str_id
 				  )xxx
 			where xxx.id = str_id) As foo
-			)xxx group by xxx.gid, xxx.geom)xxx group by xxx.street_id, xxx.geometry order by min(st_distance(xxx.geometry, sss.geometry)) asc limit 1;
+			)xxx group by xxx.gid, xxx.geom)xxx group by xxx.street_id, xxx.geometry order by min(st_distance(xxx.geometry, sss.geometry)) asc)xxx;
 
 END;
 

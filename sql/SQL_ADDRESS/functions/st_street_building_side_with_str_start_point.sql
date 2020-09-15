@@ -22,9 +22,9 @@ case
 	else 0
 end as side
 
-from data_address.st_map_street_point ms, data_address.ca_building_address p, data_address.st_street_point sp
+from data_address.ca_building_address p, data_address.st_street_point sp
 
-where ms.street_point_id = sp.id and ms.street_id = $1 and p.id = $2) as h ' into side_value USING str_id, parcel_id;
+where sp.street_id = $1 and p.id = $2) as h ' into side_value USING str_id, parcel_id;
 
 return side_value;
 
