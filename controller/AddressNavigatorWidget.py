@@ -138,6 +138,7 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
         for feature in select_feature:
             attr = feature.attributes()
             str_id = attr[0]
+            self.str_id = str_id
 
         if str_id is None:
             return
@@ -513,6 +514,7 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
 
     def __save_street_point(self):
 
+        self.session.query(StStreetPoint).filter(StStreetPoint.street_id == self.str_id).delete()
         for row in range(self.str_nodes_twidget.rowCount()):
             item_main = self.str_nodes_twidget.item(row, 0)
 
@@ -525,8 +527,6 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
             geometry = QgsGeometry.fromPoint(geom_spot4)
 
             geometry = WKTElement(geometry.exportToWkt(), srid=4326)
-
-            # self.session.query(StStreetPoint).filter(StStreetPoint.street_id == street_id).delete()
 
             count = self.session.query(StStreetPoint).\
                 filter(StStreetPoint.geometry.ST_Equals(geometry)). \
@@ -1222,11 +1222,17 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
         selected_row = self.address_parcel_twidget.currentRow()
         id = self.address_parcel_twidget.item(selected_row, 0).data(Qt.UserRole + 1)
 
+        entry_count = self.session.query(StEntrance).\
+            filter(StEntrance.parcel_id == id).count()
+        if entry_count == 0:
+            self.str_type_lbl.setText(u'Энэ нэгж талбарын орц, гарцыг тодорхойлоогүй байна.')
+            return
+
         str_start_point_count = self.session.query(StStreetPoint).\
             filter(StStreetPoint.street_id == str_id).\
             filter(StStreetPoint.point_type == 1).count()
         if str_start_point_count == 0:
-            self.str_type_lbl.setText(u'Гудамжны хэлбэрийг тодорхойлоогүй байна. Гудамжны бүртгэлрүү орж засна уу!')
+            self.str_type_lbl.setText(u'Гудамжны эхлэлийг тодорхойлоогүй байна. Гудамжны бүртгэлрүү орж засна уу!')
             return
         # sql = "select unnest(string_to_array(base.st_street_parcel_side_with_str_start_point(" + str(str_id) + ", " + str(id) + ")::text, ','));"
         sql = "select unnest(string_to_array(base.st_street_line_parcel_side2(" + str(
