@@ -15,6 +15,9 @@ SELECT * FROM pg_stat_activity WHERE datname = 'lm_0003' and state = 'active';
 
 SELECT pg_cancel_backend(pid) FROM pg_stat_activity WHERE state = 'active' and pid <> pg_backend_pid();
 
+ALTER DATABASE lm_0003 CONNECTION LIMIT 0;
+
 ALTER DATABASE lm_0003 CONNECTION LIMIT -1;
 
+vacuum full data_soums_union.ct_application;
 vacuum full data_soums_union.ct_application;
