@@ -122,6 +122,16 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         self.main_parcels = []
         self.main_tree_widget.itemChanged.connect(self.__itemMainParcelCheckChanged)
 
+        if self.plan:
+            if self.plan.workrule_status_id == 15:
+                self.open_parcel_file_button.setEnabled(False)
+                self.add_button.setEnabled(False)
+                self.remove_button.setEnabled(False)
+                self.cad_add_button.setEnabled(False)
+                self.cad_remove_button.setEnabled(False)
+                self.monitoring_add_button.setEnabled(False)
+                self.monitoring_remove_button.setEnabled(False)
+
     def reject(self):
 
         self.rollback()
@@ -265,7 +275,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
     def on_zoom_to_monitoring_parcel_action_clicked(self):
 
         parcel_id = self.__selected_monitoring_parcel_id()
-        print parcel_id
+
         self.__zoom_to_monitoring_parcel_ids(parcel_id)
 
     def __selected_parcel_id(self):
@@ -1404,15 +1414,15 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
     def __get_attribute(self, parcel_feature, layer):
 
         column_name_parcel_id = "id"
-        column_name_plan_code = "plan_code"
+        column_name_plan_code = "code"
         column_name_landuse = "landuse"
-        column_name_landname = "gaz_add"
-        column_name_khashaa = "address_kh"
-        column_name_street = "address_st"
+        column_name_gaz_ner = "gaz_ner"
+        column_name_right_form = "right_form"
+        column_name_right_type = "right_type"
         column_name_comment = "comment"
 
         column_names = {column_name_parcel_id: "", column_name_plan_code: "", column_name_landuse: "",
-                        column_name_landname: "", column_name_khashaa: "", column_name_street: "",
+                        column_name_gaz_ner: "", column_name_right_form: "", column_name_right_type: "",
                         column_name_comment: ""}
 
         provider = layer.dataProvider()
@@ -1436,8 +1446,8 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
             if count == 1:
                 landuse = self.session.query(ClLanduseType).filter(ClLanduseType.code == landuse_code).one()
         landname = None
-        if column_names[column_name_landname] != None:
-            landname = column_names[column_name_landname]
+        if column_names[column_name_gaz_ner] != None:
+            landname = column_names[column_name_gaz_ner]
 
         return process_type, landuse, landname
 
@@ -1448,15 +1458,15 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         valid = True
 
         column_name_parcel_id = "id"
-        column_name_plan_code = "plan_code"
+        column_name_plan_code = "code"
         column_name_landuse = "landuse"
-        column_name_landname = "gaz_add"
-        column_name_khashaa = "address_kh"
-        column_name_street = "address_st"
+        column_name_gaz_ner = "gaz_ner"
+        column_name_right_form = "right_form"
+        column_name_right_type = "right_type"
         column_name_comment = "comment"
 
         column_names = {column_name_parcel_id: "", column_name_plan_code: "", column_name_landuse: "",
-                        column_name_landname: "", column_name_khashaa: "", column_name_street: "",
+                        column_name_gaz_ner: "", column_name_right_form: "", column_name_right_type: "",
                         column_name_comment: ""}
 
         # geom = parcel_feature.GetGeometryRef()
@@ -1645,15 +1655,15 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
     def __copy_parcel_attributes(self, parcel, new_parcel, parcel_shape_layer):
 
         column_name_parcel_id = "id"
-        column_name_plan_code = "plan_code"
+        column_name_plan_code = "code"
         column_name_landuse = "landuse"
-        column_name_landname = "gaz_add"
-        column_name_khashaa = "address_kh"
-        column_name_street = "address_st"
+        column_name_gaz_ner = "gaz_ner"
+        column_name_right_form = "right_form"
+        column_name_right_type = "right_type"
         column_name_comment = "comment"
 
         column_names = {column_name_parcel_id: "", column_name_plan_code: "", column_name_landuse: "",
-                        column_name_landname: "", column_name_khashaa: "", column_name_street: "",
+                        column_name_gaz_ner: "", column_name_right_form: "", column_name_right_type: "",
                         column_name_comment: ""}
 
         provider = parcel_shape_layer.dataProvider()
@@ -1667,8 +1677,8 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         plan_code = ''
         landuse = None
         landname = ''
-        address_khashaa = 0
-        address_streetname = ''
+        right_form_id = None
+        right_type_code = None
         comment = ''
         plan_zone_id = None
 
@@ -1678,12 +1688,12 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
             plan_code = str(column_names[column_name_plan_code])
         if column_names[column_name_landuse] != None:
             landuse = column_names[column_name_landuse]
-        if column_names[column_name_landname] != None:
-            landname = column_names[column_name_landname]
-        if column_names[column_name_khashaa] != None:
-            address_khashaa = column_names[column_name_khashaa]
-        if column_names[column_name_street] != None:
-            address_streetname = column_names[column_name_street]
+        if column_names[column_name_gaz_ner] != None:
+            landname = column_names[column_name_gaz_ner]
+        if column_names[column_name_right_form] != None:
+            right_form_id = column_names[column_name_right_form]
+        if column_names[column_name_right_type] != None:
+            right_type_code = column_names[column_name_right_type]
         if column_names[column_name_comment] != None:
             comment = column_names[column_name_comment]
 
@@ -1710,8 +1720,10 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
             new_parcel.plan_zone_id = plan_zone_id
             new_parcel.badedturl = plan_code
 
-            # new_parcel.landuse = landuse
+            new_parcel.landuse = landuse
             new_parcel.gazner = landname
+            new_parcel.right_type_code = right_type_code
+            new_parcel.right_form_id = right_form_id
 
         return new_parcel
 
