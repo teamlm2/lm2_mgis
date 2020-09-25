@@ -270,38 +270,42 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
                 geometry = None
                 result = self.session.execute(sql)
                 for item_row in result:
-                    street_id = item_row[0]
-                    x = item_row[1]
-                    y = item_row[2]
+                    p_type = item_row[0]
+                    street_id = item_row[1]
+                    x = item_row[2]
+                    y = item_row[3]
 
                     geom_spot4 = QgsPoint(x, y)
                     geometry = QgsGeometry.fromPoint(geom_spot4)
 
                     geometry = WKTElement(geometry.exportToWkt(), srid=4326)
-                if geometry is not None:
-                    self.session.query(StStreetPoint).filter(StStreetPoint.street_id == street_id).delete()
+                    if geometry is not None:
+                        self.session.query(StStreetPoint).filter(StStreetPoint.street_id == street_id).delete()
 
-                    count = self.session.query(StStreetPoint). \
-                        filter(StStreetPoint.geometry.ST_Equals(geometry)). \
-                        filter(StStreetPoint.street_id == street_id).count()
+                        count = self.session.query(StStreetPoint). \
+                            filter(StStreetPoint.geometry.ST_Equals(geometry)). \
+                            filter(StStreetPoint.street_id == street_id).count()
 
-                    if count == 0:
-                        object = StStreetPoint()
-                        object.is_active = True
-                        object.geometry = geometry
-                        object.point_type = 1
-                        object.street_id = street_id
-                        object.valid_from = DatabaseUtils.current_date_time()
-                        object.created_at = DatabaseUtils.current_date_time()
-                        object.updated_at = DatabaseUtils.current_date_time()
-                        object.au1 = self.au1
-                        object.au2 = self.au2
-                        self.session.add(object)
-                        self.session.flush()
+                        if count == 0:
+                            object = StStreetPoint()
+                            object.is_active = True
+                            object.geometry = geometry
+                            if p_type == 1:
+                                object.point_type = 1
+                            else:
+                                object.point_type = 2
+                            object.street_id = street_id
+                            object.valid_from = DatabaseUtils.current_date_time()
+                            object.created_at = DatabaseUtils.current_date_time()
+                            object.updated_at = DatabaseUtils.current_date_time()
+                            object.au1 = self.au1
+                            object.au2 = self.au2
+                            self.session.add(object)
+                            self.session.flush()
 
-                    if count == 1:
-                        object = self.session.query(StStreetPoint). \
-                            filter(StStreetPoint.geometry.ST_Equals(geometry)).one()
+                        if count == 1:
+                            object = self.session.query(StStreetPoint). \
+                                filter(StStreetPoint.geometry.ST_Equals(geometry)).one()
 
                 a_count = a_count + 1
                 str_count_lbl = str_count + '/' + str(a_count)
