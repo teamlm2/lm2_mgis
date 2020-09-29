@@ -4819,20 +4819,27 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
 
         if count > 0:
             try:
-                max_number_app = self.session.query(CtApplication)\
-                    .filter(CtApplication.app_id != self.application.app_id) \
-                    .filter(CtApplication.app_no.like("%-%"))\
-                    .filter(CtApplication.app_no.like(app_type_filter)) \
-                    .filter(CtApplication.app_no.like(soum_filter)) \
-                    .filter(CtApplication.app_no.like(year_filter)) \
-                    .order_by(func.substr(CtApplication.app_no, 10, 14).desc()).first()
+                sql = "select split_part(app_no, '-', 3)::int, app_no from data_soums_union.ct_application " \
+                      "where app_no like " + "'" + soum_filter + "'" + " and app_no like " + "'" + app_type_filter + "'" + " and app_no like " + "'" + year_filter + "'" + " " \
+                      "order by split_part(app_no, '-', 3)::int desc limit 1; "
+                result = self.session.execute(sql)
+                for item_row in result:
+                    max_number_app = item_row[0]
+                # max_number_app = self.session.query(CtApplication)\
+                #     .filter(CtApplication.app_id != self.application.app_id) \
+                #     .filter(CtApplication.app_no.like("%-%"))\
+                #     .filter(CtApplication.app_no.like(app_type_filter)) \
+                #     .filter(CtApplication.app_no.like(soum_filter)) \
+                #     .filter(CtApplication.app_no.like(year_filter)) \
+                #     .order_by(func.substr(CtApplication.app_no, 10, 14).desc()).first()
+                    app_no_numbers = max_number_app
+                    # app_no_numbers = max_number_app.app_no.split("-")
+
+                    # self.application_num_middle_edit.setText(str(int(app_no_numbers[2]) + 1).zfill(5))
+                    self.application_num_middle_edit.setText(str(int(app_no_numbers) + 1).zfill(5))
             except SQLAlchemyError, e:
                 PluginUtils.show_error(self, self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
                 return
-
-            app_no_numbers = max_number_app.app_no.split("-")
-
-            self.application_num_middle_edit.setText(str(int(app_no_numbers[2]) + 1).zfill(5))
 
         else:
             self.application_num_middle_edit.setText("00001")

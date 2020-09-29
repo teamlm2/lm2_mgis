@@ -2341,33 +2341,54 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
                         .filter(CtApplication.app_no.like(app_type_filter))  \
                         .filter(CtApplication.app_no.like(soum_filter)) \
                         .filter(CtApplication.app_no.like(year_filter)) \
-                    .order_by(func.substr(CtApplication.app_no, 10, 14).desc()).count()
+                    .order_by((func.substr(CtApplication.app_no, 10, 14)).desc()).count()
+
+            # count = self.session.query(CtApplication) \
+            #     .filter(CtApplication.app_no.like("%-%")) \
+            #     .filter(CtApplication.app_no.like(app_type_filter)) \
+            #     .filter(CtApplication.app_no.like(soum_filter)) \
+            #     .filter(CtApplication.app_no.like(year_filter)) \
+            #     .order_by((CtApplication.app_no).split('-')[2].desc()).first()
 
         except SQLAlchemyError, e:
             PluginUtils.show_error(self, self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
             return
 
         if count > 0:
-            try:
-                max_number_app = self.session.query(CtApplication)\
-                    .filter(CtApplication.app_no.like("%-%"))\
-                    .filter(CtApplication.app_no.like(app_type_filter)) \
-                    .filter(CtApplication.app_no.like(soum_filter)) \
-                    .filter(CtApplication.app_no.like(year_filter)) \
-                    .order_by(func.substr(CtApplication.app_no, 10, 14).desc()).first()
-            except SQLAlchemyError, e:
-                PluginUtils.show_error(self, self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
-                return
+            # try:
+            # max_number_app = self.session.query(CtApplication) \
+            #     .filter(CtApplication.app_no.like("%-%")) \
+            #     .filter(CtApplication.app_no.like(app_type_filter)) \
+            #     .filter(CtApplication.app_no.like(soum_filter)) \
+            #     .filter(CtApplication.app_no.like(year_filter)) \
+            #     .order_by((CtApplication.app_no).split  ('-')[2].desc()).first()
 
-            app_no_numbers = max_number_app.app_no.split("-")
+            sql = "select split_part(app_no, '-', 3)::int, app_no from data_soums_union.ct_application " \
+                    "where app_no like " + "'" + soum_filter + "'" + " and app_no like "+ "'" + app_type_filter + "'" +" and app_no like "+ "'" + year_filter + "'" +" " \
+                    "order by split_part(app_no, '-', 3)::int desc limit 1; "
+            result = self.session.execute(sql)
+            for item_row in result:
+                max_number_app = item_row[0]
+            # max_number_app = self.session.query(CtApplication)\
+            #     .filter(CtApplication.app_no.like("%-%"))\
+            #     .filter(CtApplication.app_no.like(app_type_filter)) \
+            #     .filter(CtApplication.app_no.like(soum_filter)) \
+            #     .filter(CtApplication.app_no.like(year_filter)) \
+            #     .order_by(int(func.substr(CtApplication.app_no, 10, 14)).desc()).first()
+            #     app_no_numbers = max_number_app.app_no.split("-")
+                app_no_numbers = max_number_app
 
-            app_no_part_2 = str(int(app_no_numbers[2]) + 1).zfill(5)
-
+                # app_no_part_2 = str(int(app_no_numbers[2]) + 1).zfill(5)
+                app_no_part_2 = str(int(app_no_numbers) + 1).zfill(5)
+            # except SQLAlchemyError, e:
+            #     PluginUtils.show_error(self, self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+            #     return
         else:
             app_no_part_2 = "00001"
 
         app_no_part_3 = (qt_date.toString("yy"))
         app_no = app_no_part_0 + '-' + app_no_part_1 + '-' + app_no_part_2 + '-' + app_no_part_3
+
         return app_no
 
 
@@ -2719,6 +2740,7 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
     def __generate_record_number(self):
 
         soum = DatabaseUtils.current_working_soum_schema()
+        soum_filter = soum + "-%"
         qt_date = self.own_date.date()
         try:
             record_number_filter = "%-{0}/%".format(str(qt_date.toString("yyyy")))
@@ -2734,17 +2756,24 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
                 cu_max_number = "00001"
 
             else:
-                cu_max_number = self.session.query(CtOwnershipRecord.record_no)\
-                                    .filter(CtOwnershipRecord.record_no.like("%-%")) \
-                                    .filter(CtOwnershipRecord.record_no.like(soum + "-%")) \
-                                    .filter(CtOwnershipRecord.record_no.like(record_number_filter)) \
-                                    .filter(CtOwnershipRecord.au2 == soum) \
-                    .order_by(func.substr(CtOwnershipRecord.record_no, 10, 16).desc()).first()
-
-                cu_max_number = cu_max_number[0]
-                minus_split_number = cu_max_number.split("-")
-                slash_split_number = minus_split_number[1].split("/")
-                cu_max_number = int(slash_split_number[1]) + 1
+                sql = "select split_part(record_no, '/', 2)::int, record_no from data_soums_union.ct_ownership_record " \
+                      "where record_no like " + "'" + soum_filter + "'" + " and record_no like " + "'" + record_number_filter + "'" + " " \
+                                     "order by split_part(record_no, '/', 2)::int desc limit 1; "
+                result = self.session.execute(sql)
+                for item_row in result:
+                    cu_max_number = item_row[0]
+                # cu_max_number = self.session.query(CtOwnershipRecord.record_no)\
+                #                     .filter(CtOwnershipRecord.record_no.like("%-%")) \
+                #                     .filter(CtOwnershipRecord.record_no.like(soum + "-%")) \
+                #                     .filter(CtOwnershipRecord.record_no.like(record_number_filter)) \
+                #                     .filter(CtOwnershipRecord.au2 == soum) \
+                #     .order_by(func.substr(CtOwnershipRecord.record_no, 10, 16).desc()).first()
+                #
+                # cu_max_number = cu_max_number[0]
+                # minus_split_number = cu_max_number.split("-")
+                # slash_split_number = minus_split_number[1].split("/")
+                # cu_max_number = int(slash_split_number[1]) + 1
+                    cu_max_number = int(cu_max_number) + 1
 
             year = qt_date.toString("yyyy")
             number = soum + "-" + year + "/" + str(cu_max_number).zfill(5)
@@ -2757,6 +2786,7 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
     def __generate_contract_number(self):
 
         soum = DatabaseUtils.current_working_soum_schema()
+        soum_filter = soum + "-%"
         qt_date = self.contract_date.date()
         try:
             contract_number_filter = "%-{0}/%".format(str(qt_date.toString("yyyy")))
@@ -2770,18 +2800,24 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
             if count == 0:
                 cu_max_number = "00001"
             else:
-                cu_max_number = self.session.query(CtContract.contract_no) \
-                    .filter(CtContract.contract_no.like("%-%")) \
-                    .filter(CtContract.contract_no.like(soum + "-%")) \
-                    .filter(CtContract.contract_no.like(contract_number_filter)) \
-                    .filter(CtContract.au2 == soum) \
-                    .order_by(func.substr(CtContract.contract_no, 10, 16).desc()).first()
-                cu_max_number = cu_max_number[0]
+                sql = "select split_part(contract_no, '/', 2)::int, contract_no from data_soums_union.ct_contract " \
+                        "where contract_no like " + "'" + soum_filter + "'" + " and contract_no like " + "'" + contract_number_filter + "'" + " " \
+                        "order by split_part(contract_no, '/', 2)::int desc limit 1; "
+                result = self.session.execute(sql)
+                for item_row in result:
+                    cu_max_number = item_row[0]
+                # cu_max_number = self.session.query(CtContract.contract_no) \
+                #     .filter(CtContract.contract_no.like("%-%")) \
+                #     .filter(CtContract.contract_no.like(soum + "-%")) \
+                #     .filter(CtContract.contract_no.like(contract_number_filter)) \
+                #     .filter(CtContract.au2 == soum) \
+                #     .order_by(func.substr(CtContract.contract_no, 10, 16).desc()).first()
+                #     cu_max_number = cu_max_number
 
-                minus_split_number = cu_max_number.split("-")
-                slash_split_number = minus_split_number[1].split("/")
-                cu_max_number = int(slash_split_number[1]) + 1
-
+                    # minus_split_number = cu_max_number.split("-")
+                    # slash_split_number = minus_split_number[1].split("/")
+                    # cu_max_number = int(slash_split_number[1]) + 1
+                    cu_max_number = int(cu_max_number) + 1
             soum = DatabaseUtils.current_working_soum_schema()
             year = qt_date.toString("yyyy")
             number = soum + "-" + year + "/" + str(cu_max_number).zfill(5)

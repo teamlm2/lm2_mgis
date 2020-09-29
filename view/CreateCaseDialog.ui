@@ -665,6 +665,11 @@
      </property>
     </widget>
    </widget>
+   <widget class="QWidget" name="tab_3">
+    <attribute name="title">
+     <string>Нэгдмэл сангийн өөрчлөлт</string>
+    </attribute>
+   </widget>
    <widget class="QWidget" name="tab_2">
     <attribute name="title">
      <string>Гудамжны өөрчлөлт</string>
