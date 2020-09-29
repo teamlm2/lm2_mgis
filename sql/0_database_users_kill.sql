@@ -21,3 +21,6 @@ ALTER DATABASE lm_0003 CONNECTION LIMIT -1;
 
 vacuum full data_soums_union.ct_application;
 vacuum full data_soums_union.ct_application;
+
+vacuum full data_landuse.ca_landuse_type_tbl;
+vacuum full data_soums_union."ca_parcel_tbl";

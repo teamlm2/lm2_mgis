@@ -1150,29 +1150,31 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
             for parcel_id in self.maintenance_parcels:
                 self.create_savepoint()
 
-                parcel = self.session.query(CaParcel).filter(CaParcel.parcel_id == parcel_id).one()
-                if parcel in self.ca_maintenance_case.parcels:
-                    continue
-                soum = DatabaseUtils.working_l2_code()
-                self.ca_maintenance_case.parcels.append(parcel)
-                temp_parcel = CaTmpParcel()
-                temp_parcel.parcel_id = parcel.parcel_id
-                temp_parcel.old_parcel_id = parcel.old_parcel_id
-                temp_parcel.geo_id = parcel.geo_id
-                temp_parcel.landuse = parcel.landuse
-                temp_parcel.address_khashaa = parcel.address_khashaa
-                temp_parcel.address_streetname = parcel.address_streetname
-                temp_parcel.address_neighbourhood = parcel.address_neighbourhood
-                temp_parcel.valid_from = parcel.valid_from
-                temp_parcel.valid_till = parcel.valid_till
-                temp_parcel.documented_area_m2 = parcel.documented_area_m2
-                temp_parcel.area_m2 = parcel.area_m2
-                temp_parcel.geometry = parcel.geometry
-                temp_parcel.maintenance_case = self.ca_maintenance_case.id
-                temp_parcel.initial_insert = True
-                temp_parcel.au2 = soum
+                p_count = self.session.query(CaParcel).filter(CaParcel.parcel_id == parcel_id).count()
+                if p_count == 0:
+                    parcel = self.session.query(CaParcel).filter(CaParcel.parcel_id == parcel_id).one()
+                    if parcel in self.ca_maintenance_case.parcels:
+                        continue
+                    soum = DatabaseUtils.working_l2_code()
+                    self.ca_maintenance_case.parcels.append(parcel)
+                    temp_parcel = CaTmpParcel()
+                    temp_parcel.parcel_id = parcel.parcel_id
+                    temp_parcel.old_parcel_id = parcel.old_parcel_id
+                    temp_parcel.geo_id = parcel.geo_id
+                    temp_parcel.landuse = parcel.landuse
+                    temp_parcel.address_khashaa = parcel.address_khashaa
+                    temp_parcel.address_streetname = parcel.address_streetname
+                    temp_parcel.address_neighbourhood = parcel.address_neighbourhood
+                    temp_parcel.valid_from = parcel.valid_from
+                    temp_parcel.valid_till = parcel.valid_till
+                    temp_parcel.documented_area_m2 = parcel.documented_area_m2
+                    temp_parcel.area_m2 = parcel.area_m2
+                    temp_parcel.geometry = parcel.geometry
+                    temp_parcel.maintenance_case = self.ca_maintenance_case.id
+                    temp_parcel.initial_insert = True
+                    temp_parcel.au2 = soum
 
-                self.session.add(temp_parcel)
+                    self.session.add(temp_parcel)
 
             for building_id in self.maintenance_buildings:
 
@@ -1181,23 +1183,26 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
                 building = self.session.query(CaBuilding).filter(CaBuilding.building_id == building_id).one()
                 if building in self.ca_maintenance_case.buildings:
                     continue
-                python_date = PluginUtils.convert_qt_date_to_python(QDateTime().currentDateTime())
-                self.ca_maintenance_case.buildings.append(building)
-                temp_building = CaTmpBuilding()
+                count = self.session.query(CaTmpBuilding).filter(
+                    CaTmpBuilding.building_id == building.building_id).count()
+                if count == 0:
+                    python_date = PluginUtils.convert_qt_date_to_python(QDateTime().currentDateTime())
+                    self.ca_maintenance_case.buildings.append(building)
+                    temp_building = CaTmpBuilding()
 
-                temp_building.building_id = building.building_id
-                temp_building.geo_id = building.geo_id
-                temp_building.valid_from = building.valid_from
-                temp_building.valid_till = building.valid_till
-                temp_building.address_streetname = building.address_streetname
-                temp_building.address_neighbourhood = building.address_neighbourhood
-                temp_building.address_khashaa = building.address_khashaa
-                temp_building.area_m2 = building.area_m2
-                temp_building.geometry = building.geometry#.ST_SetSRID(32648)
-                temp_building.maintenance_case = self.ca_maintenance_case.id
-                temp_building.au2 = soum
+                    temp_building.building_id = building.building_id
+                    temp_building.geo_id = building.geo_id
+                    temp_building.valid_from = building.valid_from
+                    temp_building.valid_till = building.valid_till
+                    temp_building.address_streetname = building.address_streetname
+                    temp_building.address_neighbourhood = building.address_neighbourhood
+                    temp_building.address_khashaa = building.address_khashaa
+                    temp_building.area_m2 = building.area_m2
+                    temp_building.geometry = building.geometry#.ST_SetSRID(32648)
+                    temp_building.maintenance_case = self.ca_maintenance_case.id
+                    temp_building.au2 = soum
 
-                self.session.add(temp_building)
+                    self.session.add(temp_building)
 
             self.commit()
             self.__set_visible_layers()
