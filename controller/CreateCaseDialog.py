@@ -32,6 +32,7 @@ from ..model.StStreetLineView import *
 from ..model.AuLevel3 import *
 from ..model.SetLanduseSafetyZone import *
 from ..model.SetOverlapsLanduse import *
+from ..model.CaTmpLanduseTypeTbl import *
 import urllib
 import urllib2
 import json
@@ -213,7 +214,15 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
         vlayer = LayerUtils.layer_by_data_source("data_soums_union", "ca_tmp_parcel_view")
         if vlayer is None:
             vlayer = LayerUtils.load_tmp_layer_by_name("ca_tmp_parcel_view", "parcel_id", "data_soums_union")
-        mygroup = root.findGroup(u"Кадастрын өөрчлөлт")
+        LayerUtils.refresh_layer()
+        mygroup = root.findGroup(u"Кадастр")
+        if mygroup is None:
+            group = root.insertGroup(3, u"Кадастр")
+            group.setExpanded(False)
+            mygroup = group.addGroup(u"Кадастрын өөрчлөлт")
+        else:
+            mygroup = mygroup.addGroup(u"Кадастрын өөрчлөлт")
+
         myalayer = root.findLayer(vlayer.id())
         vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) +"template\style/ca_tmp_parcel.qml")
         vlayer.setLayerName(QApplication.translate("Plugin", "Tmp_Parcel"))
@@ -622,8 +631,7 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
                 PluginUtils.show_error(self, self.tr("Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
                 return
 
-    @pyqtSlot()
-    def on_open_parcel_file_button_clicked(self):
+    def __default_path(self):
 
         default_path = r'D:/TM_LM2/cad_maintenance'
         default_parent_path = r'D:/TM_LM2'
@@ -643,6 +651,13 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
             os.makedirs('D:/TM_LM2/training')
         if not os.path.exists(default_path):
             os.makedirs(default_path)
+
+        return default_path
+
+    @pyqtSlot()
+    def on_open_parcel_file_button_clicked(self):
+
+        default_path = self.__default_path()
 
         file_dialog = QFileDialog()
         file_dialog.setModal(True)
@@ -1700,3 +1715,40 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
             id = attr[0]
 
             self.__add_road_to_street(id)
+
+    @pyqtSlot()
+    def on_open_landuse_parcel_file_button_clicked(self):
+
+        default_path = self.__default_path()
+
+        file_dialog = QFileDialog()
+        file_dialog.setModal(True)
+        file_dialog.setFileMode(QFileDialog.ExistingFile)
+        file_dialog.setFilter(self.tr("Shapefiles (*.shp)"))
+        file_dialog.setDirectory(default_path)
+
+        if file_dialog.exec_():
+            selected_file = file_dialog.selectedFiles()[0]
+            file_path = QFileInfo(selected_file).filePath()
+            self.landuse_parcel_shape_edit.setText(file_path)
+            self.__import_landuse_parcels(file_path)
+            self.open_parcel_file_button.setEnabled(False)
+
+    def __import_landuse_parcels(self, file_path):
+
+        parcel_shape_layer = QgsVectorLayer(file_path, "tmp_landuse_parcel_shape", "ogr")
+
+        if not parcel_shape_layer.isValid():
+            PluginUtils.show_error(self,  self.tr("Error loading layer"), self.tr("The layer is invalid."))
+            return
+
+        if parcel_shape_layer.crs().postgisSrid() != 4326:
+            PluginUtils.show_error(self, self.tr("Error loading layer"),
+                                   self.tr("The crs of the layer has to be 4326."))
+            return
+
+        iterator = parcel_shape_layer.getFeatures()
+        for parcel in iterator:
+            parcel_geometry = WKTElement(parcel.geometry().exportToWkt(), srid=4326)
+
+            new_parcel = CaTmpLanduseTypeTbl()
