@@ -32,7 +32,7 @@ from ..model.StStreetLineView import *
 from ..model.AuLevel3 import *
 from ..model.SetLanduseSafetyZone import *
 from ..model.SetOverlapsLanduse import *
-from ..model.CaTmpLanduseTypeTbl import *
+# from ..model.CaTmpLanduseTypeTbl import *
 import urllib
 import urllib2
 import json
@@ -1751,4 +1751,4 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
         for parcel in iterator:
             parcel_geometry = WKTElement(parcel.geometry().exportToWkt(), srid=4326)
 
-            new_parcel = CaTmpLanduseTypeTbl()
+            # new_parcel = CaTmpLanduseTypeTbl()

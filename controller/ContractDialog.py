@@ -2467,6 +2467,8 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         if data:
             if data['status']:
                 for value in data['data']:
+                    print '----------'
+                    print value['payment']
                     payment = payment + value['payment']
                     base_fee = round(float(value['base_fee_per_m2']))
         local_name = " "
@@ -2514,7 +2516,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
         if not officer:
             PluginUtils.show_message(self, self.tr(" Employee"), self.tr("Employee not found"))
-        return
+            return
 
         o_position = ''
         aimag_name = aimag.name
