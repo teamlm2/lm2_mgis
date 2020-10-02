@@ -63,6 +63,7 @@ from ..model.PsFormulaTypeLandForm import *
 from ..model.PsPastureComparisonFormula import *
 from ..model.PsPastureEvaluationFormula import *
 from ..model.PsPointDocument import *
+from ..model.SetNzPastureType import *
 from ..model.CtDocument import *
 from ..model.CtApplicationParcelPasture import *
 from ..model.CtContract import *
@@ -3733,10 +3734,18 @@ class PastureMonitoringValueDialog(QDialog, Ui_PastureMonitoringValueDialog, Dat
             duration = int(self.calc_duration_sbox.value())
         else:
             self.calc_duration_sbox.setValue(120)
-        nz_sheep_food = self.session.query(PsNZSheepFood).filter(PsNZSheepFood.natural_zone == self.zone_id).one()
-        sheep_unit_food = nz_sheep_food.current_value
 
-        duration_sheep_unit_food = round((float(sheep_unit_food) * float(duration) / 365), 2)
+        nz_sheep_food = self.session.query(SetNzPastureType).\
+            filter(SetNzPastureType.natural_zone == self.zone_id).\
+            filter(or_(SetNzPastureType.pasture_type == 19, SetNzPastureType.pasture_type == 20, SetNzPastureType.pasture_type == 21)).\
+            order_by(SetNzPastureType.pasture_type.desc()).first()
+        duration = (nz_sheep_food.duration_begin - nz_sheep_food.duration_end).days
+        sheep_unit_food = nz_sheep_food.sheep_unit
+        # nz_sheep_food = self.session.query(PsNZSheepFood).filter(PsNZSheepFood.natural_zone == self.zone_id).one()
+        # sheep_unit_food = nz_sheep_food.current_value
+
+        # duration_sheep_unit_food = round((float(sheep_unit_food) * float(duration) / 365), 2)
+        duration_sheep_unit_food = round((float(sheep_unit_food) * float(duration)), 2)
         return duration_sheep_unit_food
 
     def __load_live_stock_convert(self):
@@ -3862,7 +3871,8 @@ class PastureMonitoringValueDialog(QDialog, Ui_PastureMonitoringValueDialog, Dat
             self.calc_duration_sbox.setValue(daats_value.duration)
             self.calc_sheep_unit_sbox.setValue(daats_value.sheep_unit)
             self.calc_sheep_unit_plant_sbox.setValue(daats_value.sheep_unit_plant)
-            self.calc_date_edit.setDate(daats_value.register_date)
+            if daats_value.register_date:
+                self.calc_date_edit.setDate(daats_value.register_date)
             # self.biomass_present_edit.setText(str(daats_value.biomass_present))
 
             self.calc_d1_edit.setText(str(round(daats_value.d1, 2)))
