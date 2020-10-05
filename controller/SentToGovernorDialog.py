@@ -114,7 +114,7 @@ class SentToGovernorDialog(QDialog, Ui_SentToGovernorDialog, DatabaseHelper):
                 .filter(SetRole.user_name == user.user_name) \
                 .filter(SetRole.is_active == True).one()
 
-            application_types = self.session.query(ClApplicationType).all()
+            application_types = self.session.query(ClApplicationType).order_by(ClApplicationType.code.asc()).all()
 
             set_roles = self.session.query(SetRole).all()
             set_role = self.session.query(SetRole).filter(SetRole.user_name_real == officers.user_name_real).one()
@@ -1920,6 +1920,11 @@ class SentToGovernorDialog(QDialog, Ui_SentToGovernorDialog, DatabaseHelper):
 
         self.decision_level_cbox.clear()
         app_type = self.app_type_cbox.itemData(index)
+        if app_type == ApplicationType.extension_possession:
+            decision_level = self.session.query(ClDecisionLevel).filter(ClDecisionLevel.code == 80).all()
+            for item in decision_level:
+                self.decision_level_cbox.addItem(item.description, item.code)
+
         if app_type == ApplicationType.special_use:
             decision_level = self.session.query(ClDecisionLevel).filter(ClDecisionLevel.code == 80).all()
             for item in decision_level:

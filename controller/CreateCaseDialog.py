@@ -32,7 +32,7 @@ from ..model.StStreetLineView import *
 from ..model.AuLevel3 import *
 from ..model.SetLanduseSafetyZone import *
 from ..model.SetOverlapsLanduse import *
-# from ..model.CaTmpLanduseTypeTbl import *
+from ..model.CaTmpLanduseTypeTbl import *
 import urllib
 import urllib2
 import json
@@ -434,6 +434,7 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
     def __setup_file_import(self):
 
         self.import_groupbox.setEnabled(True)
+        self.import_landuse_groupbox.setEnabled(True)
         self.parcels_item = QTreeWidgetItem()
         parcels_caption = self.tr("Parcels")
         self.parcels_item.setText(0, parcels_caption)
@@ -1732,7 +1733,7 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
             file_path = QFileInfo(selected_file).filePath()
             self.landuse_parcel_shape_edit.setText(file_path)
             self.__import_landuse_parcels(file_path)
-            self.open_parcel_file_button.setEnabled(False)
+            self.open_landuse_parcel_file_button.setEnabled(False)
 
     def __import_landuse_parcels(self, file_path):
 
@@ -1751,4 +1752,4 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
         for parcel in iterator:
             parcel_geometry = WKTElement(parcel.geometry().exportToWkt(), srid=4326)
 
-            # new_parcel = CaTmpLanduseTypeTbl()
+            new_parcel = CaTmpLanduseTypeTbl()
