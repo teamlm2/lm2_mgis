@@ -1753,3 +1753,8 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
             parcel_geometry = WKTElement(parcel.geometry().exportToWkt(), srid=4326)
 
             new_parcel = CaTmpLanduseTypeTbl()
+
+            new_parcel.geometry = parcel_geometry
+            new_parcel = self.__copy_parcel_attributes(parcel, new_parcel, parcel_shape_layer)
+
+            self.session.add(new_parcel)
