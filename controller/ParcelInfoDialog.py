@@ -2391,7 +2391,6 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
 
         return app_no
 
-
     def __validaty_of_ubparcel(self):
 
         valid = True
