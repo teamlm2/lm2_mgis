@@ -34,7 +34,7 @@ BEGIN
 			update data_landuse.ca_landuse_type_tbl
 			  set is_active = false, valid_till = now(), is_overlaps_historiy = true
 			from new_numbers s
-			where data_landuse.ca_landuse_type_tbl.parcel_id = s.parcel_id;';		
+			where data_landuse.ca_landuse_type_tbl.parcel_id = s.parcel_id and not st_equals(data_landuse.ca_landuse_type_tbl.geometry, s.geometry);';		
 
 		EXECUTE 'insert into data_landuse.ca_landuse_type_tbl(is_active, landuse, landuse_level1, landuse_level2, address_khashaa, address_streetname, address_neighbourhood, geometry)			
 				WITH gns AS (
