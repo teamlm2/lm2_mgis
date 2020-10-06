@@ -211,6 +211,7 @@ class SentToGovernorDialog(QDialog, Ui_SentToGovernorDialog, DatabaseHelper):
                         CtApplicationPersonRole.application == app_id).all()
                 landuse_type = self.session.query(ClLanduseType).filter(ClLanduseType.code == application_instance.requested_landuse).one()
                 is_parcel = True
+
                 parcel_count = self.session.query(CaTmpParcel).filter(CaTmpParcel.parcel_id == application_instance.tmp_parcel).count()
 
                 if parcel_count == 0:
@@ -218,9 +219,9 @@ class SentToGovernorDialog(QDialog, Ui_SentToGovernorDialog, DatabaseHelper):
                     if parcel_count != 0:
                         parcel = self.session.query(CaParcel).filter(CaParcel.parcel_id == application_instance.parcel).one()
                     else:
-                        PluginUtils.show_message(self, self.tr("Warning"),
-                                              self.tr("The application {0} is not connect parcel. "                                          
-                                                      "the parcel.").format(application))
+                        # PluginUtils.show_message(self, self.tr("Warning"),
+                        #                       self.tr("The application {0} is not connect parcel. "
+                        #                               "the parcel.").format(application))
                         is_parcel = False
                         # return
                 else:
@@ -241,7 +242,7 @@ class SentToGovernorDialog(QDialog, Ui_SentToGovernorDialog, DatabaseHelper):
                         parcel_address = bag_name +', '+ streetname +', '+ khashaa
                     for p in app_person:
                         if p.main_applicant == True:
-                            print p.person
+
                             person = self.session.query(BsPerson).filter(BsPerson.person_id == p.person).one()
 
                     self.draft_detail_twidget.insertRow(count)
