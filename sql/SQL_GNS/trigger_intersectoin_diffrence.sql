@@ -20,7 +20,7 @@ BEGIN
 		EXECUTE 'with new_numbers as (
 				WITH gns AS (
 					select l.parcel_id, st_makevalid(l.geometry) as geometry from data_landuse.ca_landuse_type_tbl l
-					where l.is_active = true and st_overlaps(l.geometry, ST_GeomFromText('''||ST_AsText(NEW.geometry)||'''::text, 4326))
+					where l.is_active = true and st_intersects(l.geometry, ST_GeomFromText('''||ST_AsText(NEW.geometry)||'''::text, 4326))
 					)
 				SELECT parcel_id, 
 				(ST_DUMP(ST_Difference(

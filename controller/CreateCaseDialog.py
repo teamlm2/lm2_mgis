@@ -1167,10 +1167,12 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
                 self.create_savepoint()
 
                 p_count = self.session.query(CaParcel).filter(CaParcel.parcel_id == parcel_id).count()
-                if p_count == 0:
+
+                if p_count == 1:
                     parcel = self.session.query(CaParcel).filter(CaParcel.parcel_id == parcel_id).one()
                     if parcel in self.ca_maintenance_case.parcels:
                         continue
+
                     soum = DatabaseUtils.working_l2_code()
                     self.ca_maintenance_case.parcels.append(parcel)
                     temp_parcel = CaTmpParcel()
@@ -1220,7 +1222,7 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
 
                     self.session.add(temp_building)
 
-            self.commit()
+            # self.commit()
             self.__set_visible_layers()
 
             self.__delete_template_parcel_features()
@@ -1243,8 +1245,8 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
             #     if case_count == 0:
             #         self.session.query(CaMaintenanceCase).\
             #             filter(CaMaintenanceCase.id == case.id).delete()
-        else:
-            self.commit()
+        # else:
+        self.commit()
 
     def __set_visible_layers(self):
 

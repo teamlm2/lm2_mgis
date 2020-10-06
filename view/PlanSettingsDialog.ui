@@ -201,7 +201,7 @@
     <string/>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/plugins/lm2/help_button.png</normaloff>:/plugins/lm2/help_button.png</iconset>
    </property>
   </widget>
