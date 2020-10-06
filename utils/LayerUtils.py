@@ -113,9 +113,6 @@ class LayerUtils(object):
     @staticmethod
     def load_layer_by_name_report(layer_name, id, restrictions=[]):
 
-        print '---'
-        print restrictions
-        print '---'
         restrictions = restrictions.split(",")
 
         if len(restrictions) > 0:
@@ -191,11 +188,9 @@ class LayerUtils(object):
 
         is_value = False
         for lyr in QgsMapLayerRegistry.instance().mapLayers().values():
-            print lyr.name()
+
             if lyr.name() == layer_name:
-                print lyr.name()
-                print '---'
-                print layer_name
+
                 is_value = True
                 break
 

@@ -240,66 +240,70 @@ class SentToGovernorDialog(QDialog, Ui_SentToGovernorDialog, DatabaseHelper):
                         if parcel.address_khashaa != None:
                             khashaa = parcel.address_khashaa
                         parcel_address = bag_name +', '+ streetname +', '+ khashaa
+                    person = None
                     for p in app_person:
                         if p.main_applicant == True:
 
                             person = self.session.query(BsPerson).filter(BsPerson.person_id == p.person).one()
+                    if person == None:
+                        person = self.session.query(BsPerson).filter(BsPerson.person_id == p.person).first()
 
-                    self.draft_detail_twidget.insertRow(count)
+                    if person:
+                        self.draft_detail_twidget.insertRow(count)
 
-                    item = QTableWidgetItem(person.name)
-                    item.setData(Qt.UserRole, person.name)
-                    self.draft_detail_twidget.setItem(count, 0, item)
+                        item = QTableWidgetItem(person.name)
+                        item.setData(Qt.UserRole, person.name)
+                        self.draft_detail_twidget.setItem(count, 0, item)
 
-                    item = QTableWidgetItem(person.first_name)
-                    item.setData(Qt.UserRole, person.first_name)
-                    self.draft_detail_twidget.setItem(count, 1, item)
+                        item = QTableWidgetItem(person.first_name)
+                        item.setData(Qt.UserRole, person.first_name)
+                        self.draft_detail_twidget.setItem(count, 1, item)
 
-                    item = QTableWidgetItem(person.person_register)
-                    item.setData(Qt.UserRole, person.person_id)
-                    self.draft_detail_twidget.setItem(count, 2, item)
+                        item = QTableWidgetItem(person.person_register)
+                        item.setData(Qt.UserRole, person.person_id)
+                        self.draft_detail_twidget.setItem(count, 2, item)
 
-                    item = QTableWidgetItem(application_instance.app_no)
-                    item.setData(Qt.UserRole, application_instance.app_no)
-                    self.draft_detail_twidget.setItem(count, 3, item)
+                        item = QTableWidgetItem(application_instance.app_no)
+                        item.setData(Qt.UserRole, application_instance.app_no)
+                        self.draft_detail_twidget.setItem(count, 3, item)
 
-                    item = QTableWidgetItem(parcel.parcel_id)
-                    item.setData(Qt.UserRole, parcel.parcel_id)
-                    self.draft_detail_twidget.setItem(count, 4, item)
+                        item = QTableWidgetItem(parcel.parcel_id)
+                        item.setData(Qt.UserRole, parcel.parcel_id)
+                        self.draft_detail_twidget.setItem(count, 4, item)
 
-                    item = QTableWidgetItem(parcel_address)
-                    item.setData(Qt.UserRole, parcel_address)
-                    self.draft_detail_twidget.setItem(count, 5, item)
+                        item = QTableWidgetItem(parcel_address)
+                        item.setData(Qt.UserRole, parcel_address)
+                        self.draft_detail_twidget.setItem(count, 5, item)
 
-                    item = QTableWidgetItem(str(parcel.area_m2))
-                    item.setData(Qt.UserRole, parcel.area_m2)
-                    self.draft_detail_twidget.setItem(count, 6, item)
+                        item = QTableWidgetItem(str(parcel.area_m2))
+                        item.setData(Qt.UserRole, parcel.area_m2)
+                        self.draft_detail_twidget.setItem(count, 6, item)
 
-                    item = QTableWidgetItem(landuse_type.description)
-                    item.setData(Qt.UserRole, landuse_type.code)
-                    self.draft_detail_twidget.setItem(count, 7, item)
+                        item = QTableWidgetItem(landuse_type.description)
+                        item.setData(Qt.UserRole, landuse_type.code)
+                        self.draft_detail_twidget.setItem(count, 7, item)
 
-                    item = QTableWidgetItem(self.draft_no_edit.text())
-                    item.setData(Qt.UserRole, self.draft_no_edit.text())
-                    self.draft_detail_twidget.setItem(count, 8, item)
+                        item = QTableWidgetItem(self.draft_no_edit.text())
+                        item.setData(Qt.UserRole, self.draft_no_edit.text())
+                        self.draft_detail_twidget.setItem(count, 8, item)
 
-                    item = QTableWidgetItem(self.draft_date.text())
-                    item.setData(Qt.UserRole, self.draft_date.text())
-                    self.draft_detail_twidget.setItem(count, 9, item)
+                        item = QTableWidgetItem(self.draft_date.text())
+                        item.setData(Qt.UserRole, self.draft_date.text())
+                        self.draft_detail_twidget.setItem(count, 9, item)
 
-                    item = QTableWidgetItem(self.decision_level_cbox.itemText(self.decision_level_cbox.currentIndex()))
-                    item.setData(Qt.UserRole, self.decision_level_cbox.itemData(self.decision_level_cbox.currentIndex()))
-                    self.draft_detail_twidget.setItem(count, 10, item)
+                        item = QTableWidgetItem(self.decision_level_cbox.itemText(self.decision_level_cbox.currentIndex()))
+                        item.setData(Qt.UserRole, self.decision_level_cbox.itemData(self.decision_level_cbox.currentIndex()))
+                        self.draft_detail_twidget.setItem(count, 10, item)
 
-                    item = QTableWidgetItem(decision_result.description)
-                    item.setData(Qt.UserRole, decision_result.code)
-                    self.draft_detail_twidget.setItem(count, 11, item)
+                        item = QTableWidgetItem(decision_result.description)
+                        item.setData(Qt.UserRole, decision_result.code)
+                        self.draft_detail_twidget.setItem(count, 11, item)
 
-                    item = QTableWidgetItem(str(application_instance.requested_duration))
-                    item.setData(Qt.UserRole, application_instance.requested_duration)
-                    self.draft_detail_twidget.setItem(count, 12, item)
+                        item = QTableWidgetItem(str(application_instance.requested_duration))
+                        item.setData(Qt.UserRole, application_instance.requested_duration)
+                        self.draft_detail_twidget.setItem(count, 12, item)
 
-                    count += 1
+                        count += 1
         self.select_app_count.setText(str(count) + '/')
         if count != 0:
             self.sent_to_governor_button.setEnabled(True)
