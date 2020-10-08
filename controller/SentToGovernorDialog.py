@@ -1925,7 +1925,7 @@ class SentToGovernorDialog(QDialog, Ui_SentToGovernorDialog, DatabaseHelper):
 
         self.decision_level_cbox.clear()
         app_type = self.app_type_cbox.itemData(index)
-        if app_type == ApplicationType.extension_possession:
+        if app_type == ApplicationType.extension_possession or app_type == ApplicationType.change_of_area:
             decision_level = self.session.query(ClDecisionLevel).filter(ClDecisionLevel.code == 80).all()
             for item in decision_level:
                 self.decision_level_cbox.addItem(item.description, item.code)

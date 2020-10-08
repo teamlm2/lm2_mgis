@@ -6,7 +6,8 @@ CREATE TABLE cl_landsue_movement_status
   code integer NOT NULL primary key,
   description character varying(75) NOT NULL UNIQUE,
   description_en character varying(75),
-  is_confirm boolean
+  is_confirm boolean,
+  is_draft boolean
 );
 grant select, insert, update, delete on cl_landsue_movement_status to address_admin;
 grant select on cl_landsue_movement_status to address_view;
@@ -14,17 +15,18 @@ grant select on cl_landsue_movement_status to address_view, cadastre_view;
 COMMENT ON TABLE cl_landsue_movement_status
   IS 'Нэгдмэл сангийн шилжилт хөдөлгөөний төлөв';
 
-insert into data_landuse.cl_landsue_movement_status values (1, 'Үндэслэл', null, false);
-insert into data_landuse.cl_landsue_movement_status values (2, 'Дүгнэлт', null, false);
-insert into data_landuse.cl_landsue_movement_status values (3, 'Зураг бэлтгэх', null, false);
-insert into data_landuse.cl_landsue_movement_status values (4, 'Санал авах', null, false);
-insert into data_landuse.cl_landsue_movement_status values (5, 'Засгийн газарт хүргүүлэх', null, false);
-insert into data_landuse.cl_landsue_movement_status values (6, 'Засгийн газраас буцаасан', null, false);
-insert into data_landuse.cl_landsue_movement_status values (7, 'Засгийн газрын шийдвэр гарсан', null, true);
-insert into data_landuse.cl_landsue_movement_status values (8, 'Баталгаажуулах', null, false);
+insert into data_landuse.cl_landsue_movement_status values (1, 'Үндэслэл', null, false, false);
+insert into data_landuse.cl_landsue_movement_status values (2, 'Дүгнэлт', null, false, false);
+insert into data_landuse.cl_landsue_movement_status values (3, 'Зураг бэлтгэх', null, false, false);
+insert into data_landuse.cl_landsue_movement_status values (4, 'Санал авах', null, false, false);
+insert into data_landuse.cl_landsue_movement_status values (5, 'ГНС-н өөрчлөлтийн төсөлд оруулах', null, false, true);
+insert into data_landuse.cl_landsue_movement_status values (6, 'Засгийн газарт хүргүүлэх', null, false, false);
+insert into data_landuse.cl_landsue_movement_status values (7, 'Засгийн газраас буцаасан', null, false, false);
+insert into data_landuse.cl_landsue_movement_status values (8, 'Засгийн газрын шийдвэр гарсан', null, true, false);
+insert into data_landuse.cl_landsue_movement_status values (9, 'Баталгаажуулах', null, false, false);
 
 --------------------
-
+DROP TABLE if exists  data_landuse.st_workflow cascade;
 CREATE TABLE data_landuse.st_workflow
 (
   id serial NOT NULL,
@@ -56,7 +58,7 @@ insert into data_landuse.st_workflow values (8, '8', 'Усны сан бүхий
 insert into data_landuse.st_workflow values (9, '9', 'Бусад ангиллаас усны сан бүхий газарт шилжүүлэх', 'Газрын тухай хууль, усны тухай хууль- БХБЯ, БОАЖЯ');
 
 -----------------------
-
+DROP TABLE if exists  data_landuse.st_workflow_status cascade;
 CREATE TABLE data_landuse.st_workflow_status
 (
   workflow_id integer references data_landuse.st_workflow on update cascade on delete restrict,
@@ -75,7 +77,7 @@ GRANT SELECT, UPDATE, INSERT, DELETE ON TABLE data_landuse.st_workflow_status TO
 GRANT SELECT, UPDATE, INSERT, DELETE ON TABLE data_landuse.st_workflow_status TO role_management;
 
 -----------------------
-
+DROP TABLE if exists  data_landuse.st_workflow_status_landuse cascade;
 CREATE TABLE data_landuse.st_workflow_status_landuse
 (
   workflow_id integer references data_landuse.st_workflow on update cascade on delete restrict,

@@ -8,7 +8,7 @@ BEGIN
 	
  IF (NEW.geometry IS NOT NULL) THEN
         
-	SELECT code FROM admin_units.au_level4 INTO v_admin_unit_l4_code WHERE ST_Within(ST_Centroid(NEW.geometry), geometry);
+	SELECT code FROM admin_units.au_level4 INTO v_admin_unit_l4_code WHERE ST_Within(ST_PointOnSurface(NEW.geometry), geometry);
 		
 	NEW.au4 := v_admin_unit_l4_code;
  END IF;
