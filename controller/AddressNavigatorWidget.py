@@ -1231,7 +1231,7 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
         if entry_count == 0:
             self.str_type_lbl.setText(u'Энэ нэгж талбарын орц, гарцыг тодорхойлоогүй байна.')
             return
-
+        print str_id
         str_start_point_count = self.session.query(StStreetPoint).\
             filter(StStreetPoint.street_id == str_id).\
             filter(StStreetPoint.point_type == 1).count()

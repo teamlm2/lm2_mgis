@@ -135,4 +135,13 @@ $BODY$
   COST 100;
 ALTER FUNCTION base.st_street_line_parcel_side2(str_id integer, parcel_id integer) OWNER TO geodb_admin;
 
-select unnest(string_to_array(base.st_street_line_parcel_side2(62978, 846699)::text, ','));
+select unnest(string_to_array(base.st_street_line_parcel_side2(58794, 1528255)::text, ','));
+
+
+
+
+
+
+
+
+
