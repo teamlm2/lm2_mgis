@@ -1,4 +1,4 @@
-﻿start_line_x start_line_y
+start_line_x start_line_y
 entry_intersects_x entry_intersects_y
 end_line_x end_line_y
 entry_point_x entry_point_y
@@ -65,9 +65,9 @@ DECLARE
 	bbb text;
 BEGIN
 
-execute 'select geometry from data_address.st_entrance where parcel_id = $1 and type = 1 or type = 2 limit 1; ' into entry_point USING parcel_id; 
-execute 'select st_x(geometry) from data_address.st_entrance where parcel_id = $1 and type = 1 or type = 2 limit 1; ' into entry_point_x USING parcel_id;
-execute 'select st_y(geometry) from data_address.st_entrance where parcel_id = $1 and type = 1 or type = 2 limit 1; ' into entry_point_y USING parcel_id;
+execute 'select geometry from data_address.st_entrance where parcel_id = $1 order by type asc limit 1; ' into entry_point USING parcel_id; 
+execute 'select st_x(geometry) from data_address.st_entrance where parcel_id = $1 order by type asc limit 1; ' into entry_point_x USING parcel_id;
+execute 'select st_y(geometry) from data_address.st_entrance where parcel_id = $1 order by type asc limit 1; ' into entry_point_y USING parcel_id;
 
 execute 'select geometry from data_address.st_street_point where street_id = $1 and point_type = 1; ' into start_point USING str_id;
 execute 'select st_x(geometry) from data_address.st_street_point where street_id = $1 and point_type = 1; ' into start_point_x USING str_id;
@@ -78,8 +78,10 @@ execute 'select st_x(geometry) from data_address.st_street_point where street_id
 execute 'select st_y(geometry) from data_address.st_street_point where street_id = $1 and point_type = 2 limit 1; ' into end_point_y USING str_id;
 
 execute 'WITH ap AS (
-         SELECT point_1.entrance_id AS gid, point_1.geometry AS geom FROM (select * from data_address.st_entrance where parcel_id = $2 and type = 1 or type = 2 limit 1) point_1
-        ), street AS (SELECT line_1.line_geom AS geom FROM (select geometry as line_geom from data_address.st_all_street_line_view where id = $1) as line_1
+         SELECT point_1.entrance_id AS gid, point_1.geometry AS geom FROM (select * from data_address.st_entrance where parcel_id = $2 and type = 1 limit 1) point_1
+        ), street AS (SELECT line_1.line_geom AS geom FROM (select s.line_geom from data_address.st_entrance e,
+ (select (st_dump(geometry)).geom as line_geom from data_address.st_all_street_line_view where id = $1) s
+ where e.parcel_id = $2 group by s.line_geom order by min(st_distance(e.geometry, s.line_geom)) asc limit 1) as line_1
         ), cp AS (SELECT a.gid AS ap_id, a.geom AS ap,
 st_setsrid(st_addpoint(st_makeline(a.geom, st_closestpoint(b.geom, a.geom)), st_translate(a.geom, sin(st_azimuth(a.geom, st_closestpoint(b.geom, a.geom))) * st_distance(a.geom, st_closestpoint(b.geom, a.geom)) * 1.01::double precision, cos(st_azimuth(a.geom, st_closestpoint(b.geom, a.geom))) * st_distance(a.geom, st_closestpoint(b.geom, a.geom)) * 1.01::double precision)), 4326) AS vec,
 st_setsrid(st_addpoint(st_linemerge(b.geom), st_translate(st_pointn(st_linemerge(b.geom), ''-2''::integer), sin(st_azimuth(st_pointn(st_linemerge(b.geom), ''-2''::integer), st_pointn(st_linemerge(b.geom), ''-1''::integer))) * (st_distance(st_pointn(st_linemerge(b.geom), ''-1''::integer), st_pointn(st_linemerge(b.geom), ''-2''::integer)) * 1.1::double precision), cos(st_azimuth(st_pointn(st_linemerge(b.geom), ''-2''::integer), st_pointn(st_linemerge(b.geom), ''-1''::integer))) * (st_distance(st_pointn(st_linemerge(b.geom), ''-1''::integer), st_pointn(st_linemerge(b.geom), ''-2''::integer)) * 1.1::double precision))), 4326) AS line
@@ -90,8 +92,10 @@ st_setsrid(st_addpoint(st_linemerge(b.geom), st_translate(st_pointn(st_linemerge
  SELECT st_intersection(cp.vec, cp.line) as intersect_point FROM cp; ' into intersection_point USING str_id, parcel_id;
 
 execute 'WITH ap AS (
-         SELECT point_1.entrance_id AS gid, point_1.geometry AS geom FROM (select * from data_address.st_entrance where parcel_id = $2 and type = 1 or type = 2 limit 1) point_1
-        ), street AS (SELECT line_1.line_geom AS geom FROM (select geometry as line_geom from data_address.st_all_street_line_view where id = $1) as line_1
+         SELECT point_1.entrance_id AS gid, point_1.geometry AS geom FROM (select * from data_address.st_entrance where parcel_id = $2 and type = 1 limit 1) point_1
+        ), street AS (SELECT line_1.line_geom AS geom FROM (select s.line_geom from data_address.st_entrance e,
+ (select (st_dump(geometry)).geom as line_geom from data_address.st_all_street_line_view where id = $1) s
+ where e.parcel_id = $2 group by s.line_geom order by min(st_distance(e.geometry, s.line_geom)) asc limit 1) as line_1
         ), cp AS (SELECT a.gid AS ap_id, a.geom AS ap,
 st_setsrid(st_addpoint(st_makeline(a.geom, st_closestpoint(b.geom, a.geom)), st_translate(a.geom, sin(st_azimuth(a.geom, st_closestpoint(b.geom, a.geom))) * st_distance(a.geom, st_closestpoint(b.geom, a.geom)) * 1.01::double precision, cos(st_azimuth(a.geom, st_closestpoint(b.geom, a.geom))) * st_distance(a.geom, st_closestpoint(b.geom, a.geom)) * 1.01::double precision)), 4326) AS vec,
 st_setsrid(st_addpoint(st_linemerge(b.geom), st_translate(st_pointn(st_linemerge(b.geom), ''-2''::integer), sin(st_azimuth(st_pointn(st_linemerge(b.geom), ''-2''::integer), st_pointn(st_linemerge(b.geom), ''-1''::integer))) * (st_distance(st_pointn(st_linemerge(b.geom), ''-1''::integer), st_pointn(st_linemerge(b.geom), ''-2''::integer)) * 1.1::double precision), cos(st_azimuth(st_pointn(st_linemerge(b.geom), ''-2''::integer), st_pointn(st_linemerge(b.geom), ''-1''::integer))) * (st_distance(st_pointn(st_linemerge(b.geom), ''-1''::integer), st_pointn(st_linemerge(b.geom), ''-2''::integer)) * 1.1::double precision))), 4326) AS line
@@ -102,8 +106,10 @@ st_setsrid(st_addpoint(st_linemerge(b.geom), st_translate(st_pointn(st_linemerge
  SELECT st_x(st_intersection(cp.vec, cp.line)) as intersect_point FROM cp; ' into intersection_point_x USING str_id, parcel_id;
 
 execute 'WITH ap AS (
-         SELECT point_1.entrance_id AS gid, point_1.geometry AS geom FROM (select * from data_address.st_entrance where parcel_id = $2 and type = 1 or type = 2 limit 1) point_1
-        ), street AS (SELECT line_1.line_geom AS geom FROM (select geometry as line_geom from data_address.st_all_street_line_view where id = $1) as line_1
+         SELECT point_1.entrance_id AS gid, point_1.geometry AS geom FROM (select * from data_address.st_entrance where parcel_id = $2 and type = 1 limit 1) point_1
+        ), street AS (SELECT line_1.line_geom AS geom FROM (select s.line_geom from data_address.st_entrance e,
+ (select (st_dump(geometry)).geom as line_geom from data_address.st_all_street_line_view where id = $1) s
+ where e.parcel_id = $2 group by s.line_geom order by min(st_distance(e.geometry, s.line_geom)) asc limit 1) as line_1
         ), cp AS (SELECT a.gid AS ap_id, a.geom AS ap,
 st_setsrid(st_addpoint(st_makeline(a.geom, st_closestpoint(b.geom, a.geom)), st_translate(a.geom, sin(st_azimuth(a.geom, st_closestpoint(b.geom, a.geom))) * st_distance(a.geom, st_closestpoint(b.geom, a.geom)) * 1.01::double precision, cos(st_azimuth(a.geom, st_closestpoint(b.geom, a.geom))) * st_distance(a.geom, st_closestpoint(b.geom, a.geom)) * 1.01::double precision)), 4326) AS vec,
 st_setsrid(st_addpoint(st_linemerge(b.geom), st_translate(st_pointn(st_linemerge(b.geom), ''-2''::integer), sin(st_azimuth(st_pointn(st_linemerge(b.geom), ''-2''::integer), st_pointn(st_linemerge(b.geom), ''-1''::integer))) * (st_distance(st_pointn(st_linemerge(b.geom), ''-1''::integer), st_pointn(st_linemerge(b.geom), ''-2''::integer)) * 1.1::double precision), cos(st_azimuth(st_pointn(st_linemerge(b.geom), ''-2''::integer), st_pointn(st_linemerge(b.geom), ''-1''::integer))) * (st_distance(st_pointn(st_linemerge(b.geom), ''-1''::integer), st_pointn(st_linemerge(b.geom), ''-2''::integer)) * 1.1::double precision))), 4326) AS line
@@ -135,8 +141,37 @@ $BODY$
   COST 100;
 ALTER FUNCTION base.st_street_line_parcel_side2(str_id integer, parcel_id integer) OWNER TO geodb_admin;
 
-select unnest(string_to_array(base.st_street_line_parcel_side2(58794, 1528255)::text, ','));
+select unnest(string_to_array(base.st_street_line_parcel_side2(58794, 1293342)::text, ','));
 
+
+-----------------
+
+select * from (
+select xxx.aa from (
+select ST_EndPoint(s.line_geom) as aa from data_address.st_entrance e,
+ (select (st_dump(geometry)).geom as line_geom from data_address.st_all_street_line_view where id = 58794) s
+ where e.parcel_id = 1528255 group by s.line_geom order by min(st_distance(e.geometry, s.line_geom)) asc limit 1
+	)xxx
+ union all
+ select xxx.aa from (
+select ST_StartPoint(s.line_geom) as aa from data_address.st_entrance e,
+ (select (st_dump(geometry)).geom as line_geom from data_address.st_all_street_line_view where id = 58794) s
+ where e.parcel_id = 1528255 group by s.line_geom order by min(st_distance(e.geometry, s.line_geom)) asc limit 1
+	 )xxx
+	)xxx,
+ (select geometry from data_address.st_street_point where street_id = 58794 and point_type = 1) bbb
+ where not st_equals(xxx.aa, bbb.geometry)
+ 
+ ------------------
+ 
+ --entry
+select geometry from data_address.st_entrance where parcel_id = 1528255 order by type asc limit 1;
+select geometry from data_address.st_entrance where parcel_id = 1528255 and type = 1 limit 1; 
+--start
+select geometry from data_address.st_street_point where street_id = 58794 and point_type = 1;
+
+--end
+select geometry from data_address.st_street_point where street_id = 58794 and point_type = 2 limit 1;
 
 
 

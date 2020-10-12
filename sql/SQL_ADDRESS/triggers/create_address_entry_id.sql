@@ -72,10 +72,10 @@ BEGIN
 		order by min(st_distance(ST_MakeLine(sp,ep), ST_GeomFromText(pp.new_geometry, 4326))) asc limit 1; ' INTO point_geometry;
 
 	if NEW.parcel_id is null then
-		SELECT id FROM data_address.ca_parcel_address INTO a_parcel_id WHERE ST_COVERS(geometry, point_geometry);
+		SELECT id FROM data_address.ca_parcel_address INTO a_parcel_id WHERE ST_COVERS(geometry, point_geometry) and now() between valid_from and valid_till;
 	end if;
 	if NEW.building_id is null then
-		SELECT id FROM data_address.ca_building_address INTO a_building_id WHERE ST_COVERS(geometry, point_geometry);
+		SELECT id FROM data_address.ca_building_address INTO a_building_id WHERE ST_COVERS(geometry, point_geometry) and now() between valid_from and valid_till;
 	end if;
 
 	--entry no generate
