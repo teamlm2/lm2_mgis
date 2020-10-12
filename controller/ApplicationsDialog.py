@@ -2810,11 +2810,20 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
                 if self.is_tmp_parcel and max_status < '7':
                     self.application.tmp_parcel = self.parcel_edit.text()
                     parcel = self.session.query(CaTmpParcel).filter(CaTmpParcel.parcel_id == self.parcel_edit.text()).one()
-                    parcel.landuse = self.application.requested_landuse
+                    if self.application.requested_landuse:
+                        parcel.landuse = self.application.requested_landuse
+                    else:
+                        if self.application.approved_landuse:
+                            parcel.landuse = self.application.approved_landuse
                 else:
                     self.application.parcel = self.parcel_edit.text()
                     parcel = self.session.query(CaParcelTbl).filter(CaParcelTbl.parcel_id == self.parcel_edit.text()).one()
                     parcel.landuse = self.application.requested_landuse
+                    if self.application.requested_landuse:
+                        parcel.landuse = self.application.requested_landuse
+                    else:
+                        if self.application.approved_landuse:
+                            parcel.landuse = self.application.approved_landuse
 
         # except SQLAlchemyError, e:
         #     self.rollback_to_savepoint()
