@@ -674,7 +674,7 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
             filter(SetRole.working_au_level2 == soum_code). \
             filter(SetRole.is_active == True).all()
         mortgage_list = self.session.query(ClMortgageType).all()
-        # landuse_types = self.session.query(ClLanduseType).all()
+        landuse_types = self.session.query(ClLanduseType).all()
         mortgage_status = self.session.query(ClMortgageStatus).all()
         court_status = self.session.query(ClCourtStatus).all()
         monetary_unit_types = self.session.query(ClMonetaryUnitType).order_by(ClMonetaryUnitType.code.asc()).all()
@@ -715,8 +715,8 @@ class ApplicationsDialog(QDialog, Ui_ApplicationsDialog, DatabaseHelper):
         for item in mortgage_list:
             self.mortgage_type_cbox.addItem(item.description, item.code)
 
-        # for item in landuse_types:
-        #     self.approved_land_use_type_cbox.addItem(str(item.code) + ": " + item.description, item.code)
+        for item in landuse_types:
+            self.approved_land_use_type_cbox.addItem(str(item.code) + ": " + item.description, item.code)
         for item in monetary_unit_types:
             self.mortgage_unit_type_cbox.addItem('/' + item.short_name + '/' + item.description, item.code)
 
