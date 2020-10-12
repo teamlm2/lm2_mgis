@@ -146,7 +146,7 @@ select unnest(string_to_array(base.st_street_line_parcel_side2(58794, 1293342)::
 
 -----------------
 
-select * from (
+select xxx.aa from (
 select xxx.aa from (
 select ST_EndPoint(s.line_geom) as aa from data_address.st_entrance e,
  (select (st_dump(geometry)).geom as line_geom from data_address.st_all_street_line_view where id = 58794) s
@@ -160,7 +160,8 @@ select ST_StartPoint(s.line_geom) as aa from data_address.st_entrance e,
 	 )xxx
 	)xxx,
  (select geometry from data_address.st_street_point where street_id = 58794 and point_type = 1) bbb
- where not st_equals(xxx.aa, bbb.geometry)
+ group by xxx.aa
+order by min(st_distance(bbb.geometry, xxx.aa)) desc limit 1
  
  ------------------
  
