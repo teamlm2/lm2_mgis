@@ -18,6 +18,7 @@ class CaTmpLanduseTypeTbl(Base):
     valid_from = Column(Date)
     valid_till = Column(Date)
     geometry = Column(Geometry('POLYGON', 4326))
+    is_insert_cadastre = Column(Boolean)
 
     created_by = Column(Integer)
     updated_by = Column(Integer)

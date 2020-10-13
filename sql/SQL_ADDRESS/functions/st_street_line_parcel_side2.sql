@@ -28,11 +28,11 @@ FROM (
   ) As foo;
 
 
-select geometry from data_address.st_entrance where parcel_id = 846699
-select geometry as line_geom from data_address.st_all_street_line_view where id = 62978
+select geometry from data_address.st_entrance where parcel_id = 846699;
+select geometry as line_geom from data_address.st_all_street_line_view where id = 62978;
 
-select * from data_address.st_street_point where street_id = 62978
-select geometry from data_address.st_street_point where street_id = 62978 and point_type = 1
+select * from data_address.st_street_point where street_id = 62978;
+select geometry from data_address.st_street_point where street_id = 62978 and point_type = 1;
 ----------------
 
 -- DROP FUNCTION base.st_street_line_parcel_side2(integer, integer);
@@ -73,9 +73,56 @@ execute 'select geometry from data_address.st_street_point where street_id = $1 
 execute 'select st_x(geometry) from data_address.st_street_point where street_id = $1 and point_type = 1; ' into start_point_x USING str_id;
 execute 'select st_y(geometry) from data_address.st_street_point where street_id = $1 and point_type = 1; ' into start_point_y USING str_id;
 
-execute 'select geometry from data_address.st_street_point where street_id = $1 and point_type = 2 limit 1; ' into end_point USING str_id;
-execute 'select st_x(geometry) from data_address.st_street_point where street_id = $1 and point_type = 2 limit 1; ' into end_point_x USING str_id;
-execute 'select st_y(geometry) from data_address.st_street_point where street_id = $1 and point_type = 2 limit 1; ' into end_point_y USING str_id;
+execute 'select xxx.aa as geometry from (
+select xxx.aa from (
+select ST_EndPoint(s.line_geom) as aa from data_address.st_entrance e,
+ (select (st_dump(geometry)).geom as line_geom from data_address.st_all_street_line_view where id = $1) s
+ where e.parcel_id = $2 group by s.line_geom order by min(st_distance(e.geometry, s.line_geom)) asc limit 1
+	)xxx
+ union all
+ select xxx.aa from (
+select ST_StartPoint(s.line_geom) as aa from data_address.st_entrance e,
+ (select (st_dump(geometry)).geom as line_geom from data_address.st_all_street_line_view where id = $1) s
+ where e.parcel_id = $2 group by s.line_geom order by min(st_distance(e.geometry, s.line_geom)) asc limit 1
+	 )xxx
+	)xxx,
+ (select geometry from data_address.st_street_point where street_id = $1 and point_type = 1) bbb
+ group by xxx.aa
+order by min(st_distance(bbb.geometry, xxx.aa)) desc limit 1; ' into end_point USING str_id, parcel_id;
+
+execute 'select st_x(xxx.aa) from (
+select xxx.aa from (
+select ST_EndPoint(s.line_geom) as aa from data_address.st_entrance e,
+ (select (st_dump(geometry)).geom as line_geom from data_address.st_all_street_line_view where id = $1) s
+ where e.parcel_id = $2 group by s.line_geom order by min(st_distance(e.geometry, s.line_geom)) asc limit 1
+	)xxx
+ union all
+ select xxx.aa from (
+select ST_StartPoint(s.line_geom) as aa from data_address.st_entrance e,
+ (select (st_dump(geometry)).geom as line_geom from data_address.st_all_street_line_view where id = $1) s
+ where e.parcel_id = $2 group by s.line_geom order by min(st_distance(e.geometry, s.line_geom)) asc limit 1
+	 )xxx
+	)xxx,
+ (select geometry from data_address.st_street_point where street_id = $1 and point_type = 1) bbb
+ group by xxx.aa
+order by min(st_distance(bbb.geometry, xxx.aa)) desc limit 1; ' into end_point_x USING str_id, parcel_id;
+
+execute 'select st_y(xxx.aa) from (
+select xxx.aa from (
+select ST_EndPoint(s.line_geom) as aa from data_address.st_entrance e,
+ (select (st_dump(geometry)).geom as line_geom from data_address.st_all_street_line_view where id = $1) s
+ where e.parcel_id = $2 group by s.line_geom order by min(st_distance(e.geometry, s.line_geom)) asc limit 1
+	)xxx
+ union all
+ select xxx.aa from (
+select ST_StartPoint(s.line_geom) as aa from data_address.st_entrance e,
+ (select (st_dump(geometry)).geom as line_geom from data_address.st_all_street_line_view where id = $1) s
+ where e.parcel_id = $2 group by s.line_geom order by min(st_distance(e.geometry, s.line_geom)) asc limit 1
+	 )xxx
+	)xxx,
+ (select geometry from data_address.st_street_point where street_id = $1 and point_type = 1) bbb
+ group by xxx.aa
+order by min(st_distance(bbb.geometry, xxx.aa)) desc limit 1; ' into end_point_y USING str_id, parcel_id;
 
 execute 'WITH ap AS (
          SELECT point_1.entrance_id AS gid, point_1.geometry AS geom FROM (select * from data_address.st_entrance where parcel_id = $2 and type = 1 limit 1) point_1
@@ -149,17 +196,17 @@ select unnest(string_to_array(base.st_street_line_parcel_side2(58794, 1293342)::
 select xxx.aa from (
 select xxx.aa from (
 select ST_EndPoint(s.line_geom) as aa from data_address.st_entrance e,
- (select (st_dump(geometry)).geom as line_geom from data_address.st_all_street_line_view where id = 58794) s
- where e.parcel_id = 1528255 group by s.line_geom order by min(st_distance(e.geometry, s.line_geom)) asc limit 1
+ (select (st_dump(geometry)).geom as line_geom from data_address.st_all_street_line_view where id = $1) s
+ where e.parcel_id = $2 group by s.line_geom order by min(st_distance(e.geometry, s.line_geom)) asc limit 1
 	)xxx
  union all
  select xxx.aa from (
 select ST_StartPoint(s.line_geom) as aa from data_address.st_entrance e,
- (select (st_dump(geometry)).geom as line_geom from data_address.st_all_street_line_view where id = 58794) s
- where e.parcel_id = 1528255 group by s.line_geom order by min(st_distance(e.geometry, s.line_geom)) asc limit 1
+ (select (st_dump(geometry)).geom as line_geom from data_address.st_all_street_line_view where id = $1) s
+ where e.parcel_id = $2 group by s.line_geom order by min(st_distance(e.geometry, s.line_geom)) asc limit 1
 	 )xxx
 	)xxx,
- (select geometry from data_address.st_street_point where street_id = 58794 and point_type = 1) bbb
+ (select geometry from data_address.st_street_point where street_id = $1 and point_type = 1) bbb
  group by xxx.aa
 order by min(st_distance(bbb.geometry, xxx.aa)) desc limit 1
  

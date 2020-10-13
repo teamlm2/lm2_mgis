@@ -3,8 +3,10 @@
 $BODY$
 BEGIN        
         if (TG_OP = 'UPDATE') THEN
-                EXECUTE 'update data_soums_union.ct_application set approved_landuse = ' || NEW.landuse || ' where app_id =(select app_id from data_soums_union.ct_application
+		IF NEW.landuse is not null THEN
+			EXECUTE 'update data_soums_union.ct_application set approved_landuse = ' || NEW.landuse || ' where app_id =(select app_id from data_soums_union.ct_application
 																where parcel = '''|| NEW.parcel_id::text ||''' order by app_timestamp desc limit 1)';
+		END IF;
         END IF;
         RETURN NULL;
 END;

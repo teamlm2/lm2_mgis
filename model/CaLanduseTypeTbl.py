@@ -25,7 +25,12 @@ class CaLanduseTypeTbl(Base):
     created_at = Column(DateTime)
     updated_at = Column(DateTime)
 
+    case_id = Column(Integer)
+
     # foreign keys:
+    cad_parcel_id = Column(Integer, ForeignKey('ca_parcel_tbl.parcel_id'))
+    cad_parcel_id_ref = relationship("CaParcelTbl")
+
     landuse = Column(Integer, ForeignKey('cl_landuse_type.code'))
     landuse_ref = relationship("ClLanduseType")
 

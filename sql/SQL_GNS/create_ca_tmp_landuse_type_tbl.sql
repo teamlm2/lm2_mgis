@@ -69,8 +69,8 @@ CREATE TABLE data_landuse.ca_tmp_landuse_type_tbl
   created_at timestamp(0) without time zone NOT NULL DEFAULT now(),
   updated_at timestamp(0) without time zone NOT NULL DEFAULT now(),
   cad_parcel_id character varying(10) references data_soums_union.ca_parcel_tbl on update cascade on delete restrict,
-  case_id bigint references data_landuse.ca_landuse_maintenance_case on update cascade on delete restrict,
-  is_overlaps_historiy boolean
+  is_insert_cadastre boolean,
+  case_id bigint references data_landuse.ca_landuse_maintenance_case on update cascade on delete restrict
 )
 WITH (
   OIDS=FALSE

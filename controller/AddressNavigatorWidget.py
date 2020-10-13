@@ -849,7 +849,8 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
     def on_selected_parcel_remove_button_clicked(self):
 
         selected_row = self.address_parcel_twidget.currentRow()
-        id = self.address_parcel_twidget.item(selected_row, 0).data(Qt.UserRole + 1)
+        if self.address_parcel_twidget.item(selected_row, 0):
+            id = self.address_parcel_twidget.item(selected_row, 0).data(Qt.UserRole + 1)
         #
         # self.session.query(StEntrance).filter(StEntrance.parcel_id == id).delete()
         # self.session.query(CaParcelAddress).filter(CaParcelAddress.id == id).delete()

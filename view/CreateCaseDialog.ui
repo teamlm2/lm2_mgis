@@ -675,10 +675,10 @@
      </property>
      <property name="geometry">
       <rect>
-       <x>20</x>
+       <x>10</x>
        <y>10</y>
        <width>381</width>
-       <height>101</height>
+       <height>81</height>
       </rect>
      </property>
      <property name="title">
@@ -737,7 +737,7 @@
     <widget class="QTreeWidget" name="result_landuse_twidget">
      <property name="geometry">
       <rect>
-       <x>20</x>
+       <x>10</x>
        <y>120</y>
        <width>381</width>
        <height>321</height>
@@ -775,6 +775,22 @@
        <string>Maintenance Case Objects</string>
       </property>
      </column>
+    </widget>
+    <widget class="QProgressBar" name="main_load_pbar">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>100</y>
+       <width>381</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="value">
+      <number>0</number>
+     </property>
+     <property name="textDirection">
+      <enum>QProgressBar::TopToBottom</enum>
+     </property>
     </widget>
    </widget>
    <widget class="QWidget" name="tab_2">

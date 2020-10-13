@@ -33,6 +33,7 @@ from ..model.AuLevel3 import *
 from ..model.SetLanduseSafetyZone import *
 from ..model.SetOverlapsLanduse import *
 from ..model.CaTmpLanduseTypeTbl import *
+from ..model.StWorkflow import *
 import urllib
 import urllib2
 import json
@@ -221,7 +222,8 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
             group.setExpanded(False)
             mygroup = group.addGroup(u"Кадастрын өөрчлөлт")
         else:
-            mygroup = mygroup.addGroup(u"Кадастрын өөрчлөлт")
+            if root.findGroup(u"Кадастрын өөрчлөлт") is None:
+                mygroup = mygroup.addGroup(u"Кадастрын өөрчлөлт")
 
         myalayer = root.findLayer(vlayer.id())
         vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) +"template\style/ca_tmp_parcel.qml")
@@ -997,7 +999,8 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
         if column_names[column_name_neighbourhood] != None:
             address_neighbourhood = column_names[column_name_neighbourhood]
         parcel_object.old_parcel_id = old_parcel_id
-        parcel_object.geo_id = geo_id
+        if geo_id != 0:
+            parcel_object.geo_id = geo_id
         parcel_object.landuse = column_names[column_name_landuse]
         parcel_object.documented_area_m2 = documented_area_m2
         parcel_object.address_khashaa = address_khashaa
@@ -1751,12 +1754,23 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
             return
 
         iterator = parcel_shape_layer.getFeatures()
+        feature_count = parcel_shape_layer.featureCount()
+        self.main_load_pbar.setVisible(True)
+        self.main_load_pbar.setMinimum(1)
+        self.main_load_pbar.setValue(0)
+
+        self.main_load_pbar.setMaximum(feature_count)
         for parcel in iterator:
+            feature_id = parcel.id()
             parcel_geometry = WKTElement(parcel.geometry().exportToWkt(), srid=4326)
 
-            new_parcel = CaTmpLanduseTypeTbl()
+            validaty_result = self.__validaty_of_new_parcel(parcel, parcel_shape_layer, feature_id)
+            if validaty_result[0]:
+                new_parcel = CaTmpLanduseTypeTbl()
+                new_parcel.is_insert_cadastre = False
+                new_parcel.geometry = parcel_geometry
+                new_parcel = self.__copy_parcel_attributes(parcel, new_parcel, parcel_shape_layer)
+                self.session.add(new_parcel)
 
-            new_parcel.geometry = parcel_geometry
-            new_parcel = self.__copy_parcel_attributes(parcel, new_parcel, parcel_shape_layer)
-
-            self.session.add(new_parcel)
+            value_p = self.main_load_pbar.value() + 1
+            self.main_load_pbar.setValue(value_p)
