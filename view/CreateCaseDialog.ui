@@ -671,7 +671,7 @@
     </attribute>
     <widget class="QGroupBox" name="import_landuse_groupbox">
      <property name="enabled">
-      <bool>false</bool>
+      <bool>true</bool>
      </property>
      <property name="geometry">
       <rect>
@@ -712,7 +712,7 @@
      </widget>
      <widget class="QPushButton" name="open_landuse_parcel_file_button">
       <property name="enabled">
-       <bool>false</bool>
+       <bool>true</bool>
       </property>
       <property name="geometry">
        <rect>

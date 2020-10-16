@@ -65,6 +65,7 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
         self.maintenance_buildings = []
         self.tabWidget.currentChanged.connect(self.onChangetab)
         self.tab_index = 0
+        self.import_landuse_groupbox.setEnabled(True)
 
         self.__setup_street_table_widget()
         self.street_treewidget.itemClicked.connect(self.__onItemClickedStreetTreewidget)
@@ -436,7 +437,6 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
     def __setup_file_import(self):
 
         self.import_groupbox.setEnabled(True)
-        self.import_landuse_groupbox.setEnabled(True)
         self.parcels_item = QTreeWidgetItem()
         parcels_caption = self.tr("Parcels")
         self.parcels_item.setText(0, parcels_caption)
@@ -1762,6 +1762,7 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
         self.main_load_pbar.setMaximum(feature_count)
         for parcel in iterator:
             feature_id = parcel.id()
+            print feature_id
             parcel_geometry = WKTElement(parcel.geometry().exportToWkt(), srid=4326)
 
             validaty_result = self.__validaty_of_new_parcel(parcel, parcel_shape_layer, feature_id)
@@ -1770,7 +1771,23 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
                 new_parcel.is_insert_cadastre = False
                 new_parcel.geometry = parcel_geometry
                 new_parcel = self.__copy_parcel_attributes(parcel, new_parcel, parcel_shape_layer)
-                self.session.add(new_parcel)
+                # self.session.add(new_parcel)
 
             value_p = self.main_load_pbar.value() + 1
             self.main_load_pbar.setValue(value_p)
+
+    def __validaty_of_new_parcel(self, parcel, parcel_shape_layer, id):
+
+        valid = True
+        error_message = u'Гарсан зөрчил'
+
+        if not parcel.geometry():
+            valid = False
+
+        g = parcel.geometry()
+        if not g.isGeosValid():
+            valid = False
+        if g.isMultipart():
+            valid = False
+
+        return valid, error_message

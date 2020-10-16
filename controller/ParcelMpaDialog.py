@@ -2417,6 +2417,7 @@ class ParcelMpaDialog(QDockWidget, Ui_ParcelMpaDialog, DatabaseHelper):
         app_time = self.decision_date.date().toString(Constants.DATABASE_DATE_FORMAT)
         status_date = self.decision_date.date().toString(Constants.DATABASE_DATE_FORMAT)
         app_no = self.__generate_application_number()
+
         right_type = self.rigth_type_cbox.itemData(self.rigth_type_cbox.currentIndex())
 
         app_type = self.application_type_cbox.itemData(self.application_type_cbox.currentIndex())
