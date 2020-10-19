@@ -13563,6 +13563,17 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         root = QgsProject.instance().layerTreeRoot()
         mygroup = root.findGroup(u"ГНСТайлан")
 
+        table_name = "ca_tmp_landuse_type"
+        vlayer = LayerUtils.layer_by_data_source("data_landuse", table_name)
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer(table_name, "parcel_id", "data_landuse")
+        # vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/gt1_report.qml")
+        vlayer.setLayerName(self.tr("Temp Landuse Type"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            mygroup.addLayer(vlayer)
+        self.__load_layer_style(vlayer, column_name, table_name)
+
         table_name = "ca_landuse_type"
         vlayer = LayerUtils.layer_by_data_source("data_landuse", table_name)
         if vlayer is None:
