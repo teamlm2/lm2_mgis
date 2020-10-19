@@ -3,10 +3,12 @@
 CREATE TABLE data_landuse.ca_landuse_maintenance_case
 (
   id serial NOT NULL,
+  creation_date date default now(),
   completion_date date,
   completed_by integer,
   landuse int references codelists.cl_landuse_type on update cascade on delete restrict,
   workflow_id int references data_landuse.st_workflow on update cascade on delete restrict,
+  status_id int references data_landuse.cl_landuse_movement_status on update cascade on delete restrict,
   created_by integer NOT NULL,
   created_at date,
   updated_by integer,  
@@ -23,6 +25,67 @@ GRANT ALL ON TABLE data_landuse.ca_landuse_maintenance_case TO geodb_admin;
 GRANT SELECT, UPDATE, INSERT ON TABLE data_landuse.ca_landuse_maintenance_case TO cadastre_view;
 GRANT SELECT ON TABLE data_landuse.ca_landuse_maintenance_case TO reporting;
 GRANT SELECT, UPDATE, INSERT, DELETE ON TABLE data_landuse.ca_landuse_maintenance_case TO cadastre_update;
+
+GRANT ALL ON SEQUENCE data_landuse.ca_landuse_maintenance_case_id_seq TO geodb_admin;
+GRANT USAGE ON SEQUENCE data_landuse.ca_landuse_maintenance_case_id_seq TO contracting_update;
+GRANT USAGE ON SEQUENCE data_landuse.ca_landuse_maintenance_case_id_seq TO application_update;
+GRANT USAGE ON SEQUENCE data_landuse.ca_landuse_maintenance_case_id_seq TO cadastre_view;
+
+--------------
+DROP TABLE if exists data_landuse.ca_landuse_maintenance_status cascade;
+CREATE TABLE data_landuse.ca_landuse_maintenance_status
+(
+  id serial PRIMARY KEY,
+  case_id int references data_landuse.ca_landuse_maintenance_case on update cascade on delete restrict,
+  status_id int references data_landuse.cl_landuse_movement_status on update cascade on delete restrict,
+  status_date timestamp without time zone NOT NULL DEFAULT now(),
+  officer_in_charge integer NOT NULL,
+  next_officer_in_charge integer,
+  description text
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE data_landuse.ca_landuse_maintenance_status
+  OWNER TO geodb_admin;
+GRANT ALL ON TABLE data_landuse.ca_landuse_maintenance_status TO geodb_admin;
+GRANT SELECT ON TABLE data_landuse.ca_landuse_maintenance_status TO reporting;
+GRANT SELECT, UPDATE, INSERT, DELETE ON TABLE data_landuse.ca_landuse_maintenance_status TO application_update;
+GRANT SELECT ON TABLE data_landuse.ca_landuse_maintenance_status TO application_view;
+
+GRANT ALL ON SEQUENCE data_landuse.ca_landuse_maintenance_status_id_seq TO geodb_admin;
+GRANT USAGE ON SEQUENCE data_landuse.ca_landuse_maintenance_status_id_seq TO contracting_update;
+GRANT USAGE ON SEQUENCE data_landuse.ca_landuse_maintenance_status_id_seq TO application_update;
+GRANT USAGE ON SEQUENCE data_landuse.ca_landuse_maintenance_status_id_seq TO cadastre_view;
+---------------
+
+CREATE OR REPLACE FUNCTION base.ca_landuse_maintenance_case_last_status_changes()
+  RETURNS trigger AS
+$BODY$
+BEGIN        
+        if (TG_OP = 'INSERT') THEN
+                EXECUTE 'update data_landuse.ca_landuse_maintenance_case set status_id = ' || NEW.status || 'where id =' || NEW.case_id;
+        ELSIF (TG_OP = 'DELETE') THEN
+                EXECUTE 'update data_landuse.ca_landuse_maintenance_case set status_id = (select status_id from data_landuse.ca_landuse_maintenance_status
+                                                                                        where case_id = '|| OLD.case_id ||'
+                                                                                        group by case_id, status_id, id
+                                                                                        order by id desc limit 1) where case_id =' || OLD.case_id;
+        END IF;
+        RETURN NULL;
+END;
+$BODY$
+  LANGUAGE plpgsql VOLATILE SECURITY DEFINER
+  COST 100;
+ALTER FUNCTION base.ca_landuse_maintenance_case_last_status_changes()
+  OWNER TO geodb_admin;
+
+-- DROP TRIGGER app_last_status_change ON data_landuse.ca_landuse_maintenance_status;
+
+CREATE TRIGGER app_last_status_change
+  AFTER INSERT OR UPDATE OR DELETE
+  ON data_landuse.ca_landuse_maintenance_status
+  FOR EACH ROW
+  EXECUTE PROCEDURE base.ca_landuse_maintenance_case_last_status_changes();
 
 --------------
 
@@ -82,6 +145,10 @@ GRANT SELECT, UPDATE, INSERT, DELETE ON TABLE data_landuse.ca_tmp_landuse_type_t
 GRANT SELECT ON TABLE data_landuse.ca_tmp_landuse_type_tbl TO cadastre_view;
 GRANT SELECT ON TABLE data_landuse.ca_tmp_landuse_type_tbl TO reporting;
 
+GRANT ALL ON SEQUENCE data_landuse.ca_tmp_landuse_type_tbl_parcel_id_seq TO geodb_admin;
+GRANT USAGE ON SEQUENCE data_landuse.ca_tmp_landuse_type_tbl_parcel_id_seq TO contracting_update;
+GRANT USAGE ON SEQUENCE data_landuse.ca_tmp_landuse_type_tbl_parcel_id_seq TO application_update;
+GRANT USAGE ON SEQUENCE data_landuse.ca_tmp_landuse_type_tbl_parcel_id_seq TO cadastre_view;
 -- Index: data_landuse.idx_ca_landuse_type_landuse
 
 -- DROP INDEX data_landuse.idx_ca_landuse_type_landuse;

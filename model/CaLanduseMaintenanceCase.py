@@ -6,7 +6,7 @@ from geoalchemy2 import Geometry
 from ClLanduseType import *
 from SetRole import *
 from SetSurveyor import *
-from CtApplication import *
+from StWorkflow import *
 
 parcel_table = Table('ca_landuse_parcel_maintenance_case', Base.metadata,
                         Column('case_id', Integer, ForeignKey('ca_landuse_maintenance_case.id')),
@@ -22,8 +22,11 @@ class CaLanduseMaintenanceCase(Base):
     creation_date = Column(Date)
     completion_date = Column(Date)
     # foreign keys:
-    workflow_id = Column(Integer, ForeignKey('data_landuse.st_workflow'))
-    workflow_ref = relationship("SetWorkflow")
+    workflow_id = Column(Integer, ForeignKey('st_workflow.id'))
+    workflow_ref = relationship("StWorkflow")
+
+    status_id = Column(Integer, ForeignKey('cl_landuse_movement_status.code'))
+    status_ref = relationship("ClLanduseMovementStatus")
 
     completed_by = Column(Integer, ForeignKey('sd_user.user_id'))
     created_by = Column(Integer, ForeignKey('sd_user.user_id'))

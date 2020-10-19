@@ -634,6 +634,7 @@ class CamaNavigatorWidget(QDockWidget, Ui_CamaNavigatorWidget, DatabaseHelper):
     def __setup_analyze_cbox(self):
 
         self.land_use_type_cbox.clear()
+        self.valuation_level_status_cbox.clear()
 
         l2_code = DatabaseUtils.working_l2_code()
 

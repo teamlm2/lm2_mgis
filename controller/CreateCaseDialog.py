@@ -34,6 +34,11 @@ from ..model.SetLanduseSafetyZone import *
 from ..model.SetOverlapsLanduse import *
 from ..model.CaTmpLanduseTypeTbl import *
 from ..model.StWorkflow import *
+from ..model.CaLanduseMaintenanceCase import *
+from ..model.StWorkflow import *
+from ..model.StWorkflowStatusLanduse import *
+from ..model.ClLanduseMovementStatus import *
+from ..model.StWorkflowStatus import *
 import urllib
 import urllib2
 import json
@@ -54,6 +59,8 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
         self.attribute_update = attribute_update
         self.session = SessionHandler().session_instance()
         self.is_file_import = False
+        self.file_path = None
+        self.landuse_code = None
         self.buildings_item = None
         self.parcels_item = None
         self.filling = False
@@ -969,6 +976,8 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
                 PluginUtils.show_error(self, self.tr("Shapefile error"), self.tr("The landuse is not available in the database."))
                 column_names[column_name_landuse] = ""
                 landuse_invalid = True
+            else:
+                self.landuse_code = column_names[column_name_landuse]
 
         except SQLAlchemyError, e:
             landuse_invalid = True
@@ -1725,6 +1734,7 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
     @pyqtSlot()
     def on_open_landuse_parcel_file_button_clicked(self):
 
+
         default_path = self.__default_path()
 
         file_dialog = QFileDialog()
@@ -1736,9 +1746,12 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
         if file_dialog.exec_():
             selected_file = file_dialog.selectedFiles()[0]
             file_path = QFileInfo(selected_file).filePath()
+            self.file_path = file_path
             self.landuse_parcel_shape_edit.setText(file_path)
             self.__import_landuse_parcels(file_path)
             self.open_landuse_parcel_file_button.setEnabled(False)
+        self.__setup_landuse_combobox()
+        self.change_shp_landuse_type_cbox.setCurrentIndex(self.change_shp_landuse_type_cbox.findData(self.landuse_code))
 
     def __import_landuse_parcels(self, file_path):
 
@@ -1762,19 +1775,43 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
         self.main_load_pbar.setMaximum(feature_count)
         for parcel in iterator:
             feature_id = parcel.id()
-            print feature_id
             parcel_geometry = WKTElement(parcel.geometry().exportToWkt(), srid=4326)
 
             validaty_result = self.__validaty_of_new_parcel(parcel, parcel_shape_layer, feature_id)
             if validaty_result[0]:
                 new_parcel = CaTmpLanduseTypeTbl()
                 new_parcel.is_insert_cadastre = False
+                new_parcel.is_active = True
                 new_parcel.geometry = parcel_geometry
+
+                new_parcel.created_by = DatabaseUtils.current_sd_user().user_id
+                new_parcel.updated_by = DatabaseUtils.current_sd_user().user_id
+                new_parcel.created_at = date.today()
+                new_parcel.updated_at = date.today()
                 new_parcel = self.__copy_parcel_attributes(parcel, new_parcel, parcel_shape_layer)
-                # self.session.add(new_parcel)
+                if self.landuse_code:
+                    landuse_type = self.session.query(ClLanduseType).filter(ClLanduseType.code == self.landuse_code).one()
+                    landuse_code1 = landuse_type.code1
+                    landuse_code2 = landuse_type.code2
+                    new_parcel.landuse_level1 = landuse_code1
+                    new_parcel.landuse_level2 = landuse_code2
+                    self.__save_maintenance_case_parcel(self.landuse_code)
+                    case_id = self.landuse_maintenance_cbox.itemData(self.landuse_maintenance_cbox.currentIndex())
+                    new_parcel.case_id = case_id
+                    self.session.add(new_parcel)
 
             value_p = self.main_load_pbar.value() + 1
             self.main_load_pbar.setValue(value_p)
+
+    def __setup_landuse_combobox(self):
+
+        self.change_shp_landuse_type_cbox.clear()
+        cl_landusetype = self.session.query(ClLanduseType).order_by(ClLanduseType.code.asc()).all()
+        # self.change_shp_landuse_type_cbox.addItem("*", -1)
+        if cl_landusetype is not None:
+            for landuse in cl_landusetype:
+                if len(str(landuse.code)) == 4:
+                    self.change_shp_landuse_type_cbox.addItem(str(landuse.code) + ':' + landuse.description, landuse.code)
 
     def __validaty_of_new_parcel(self, parcel, parcel_shape_layer, id):
 
@@ -1791,3 +1828,105 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
             valid = False
 
         return valid, error_message
+
+    @pyqtSlot(int)
+    def on_change_landuse_chbox_stateChanged(self, state):
+
+        if state == Qt.Checked:
+            self.change_shp_landuse_type_cbox.setEnabled(True)
+
+    def __save_maintenance_case_parcel(self, landuse_type_code):
+
+        print landuse_type_code
+        case_landuse_count = self.session.query(StWorkflowStatusLanduse). \
+            filter(StWorkflowStatusLanduse.next_landuse == landuse_type_code).count()
+        if case_landuse_count == 0:
+            PluginUtils.show_error(self, u'Анхааруулга',
+                                   (u'/{0}/ ГНС-н ангилалд шилжилт хөдөлгөөний тохиргоо хийгээгүй байна!').format(
+                                       landuse_type_code))
+        else:
+            is_draft_status = self.session.query(ClLanduseMovementStatus). \
+                filter(ClLanduseMovementStatus.is_draft == True).first()
+
+            case_count = self.session.query(CaLanduseMaintenanceCase). \
+                join(StWorkflow, CaLanduseMaintenanceCase.workflow_id == StWorkflow.id). \
+                filter(StWorkflowStatusLanduse.workflow_id == StWorkflow.id). \
+                filter(StWorkflowStatusLanduse.next_landuse == landuse_type_code). \
+                filter(CaLanduseMaintenanceCase.status_id < is_draft_status.code).count()
+
+            if case_count == 0:
+                message_box = QMessageBox()
+                message_box.setWindowTitle(u'ГНС-н үндсэн ангилалын шилжилт хөдөлгөөн')
+                message_box.setWindowFlags(message_box.windowFlags() | Qt.WindowTitleHint)
+                message_box.setText(
+                    u'Өөрчлөлтйн бүртгэл үүсээгүй байна. Шинээр өөрчлөлтийн бүртгэл үүсгэх бол ТИЙМ товчийг дарна уу!')
+
+                yes_button = message_box.addButton(self.tr('Yes'), QMessageBox.ActionRole)
+
+                message_box.addButton(self.tr('No'), QMessageBox.ActionRole)
+                message_box.exec_()
+
+                if message_box.clickedButton() == yes_button:
+                    workflows = []
+                    values = self.session.query(StWorkflow).join(StWorkflowStatusLanduse,
+                                                                 StWorkflow.id == StWorkflowStatusLanduse.workflow_id). \
+                        filter(StWorkflowStatusLanduse.next_landuse == landuse_type_code).all()
+                    for value in values:
+                        desc = str(value.code) + ':-' + value.name
+                        workflows.append(desc)
+
+                    item, ok = QInputDialog.getItem(self, "select input dialog",
+                                                    "list of plan zones", workflows, 0, False)
+
+                    workflow_code, workflow_desc = item.split(':-')
+                    workflow = self.session.query(StWorkflow).filter(StWorkflow.code == workflow_code).first()
+                    status = self.session.query(ClLanduseMovementStatus).order_by(
+                        ClLanduseMovementStatus.code.asc()).first()
+                    print status.code
+                    if ok:
+                        print workflow_code
+                        print workflow_desc
+
+                    new_case = CaLanduseMaintenanceCase()
+                    new_case.workflow_id = workflow.id
+                    new_case.landuse = landuse_type_code
+                    new_case.au2 = self.working_soum
+                    new_case.status_id = status.code
+                    new_case.created_by = DatabaseUtils.current_sd_user().user_id
+                    new_case.updated_by = DatabaseUtils.current_sd_user().user_id
+                    new_case.creation_date = date.today()
+                    new_case.created_at = date.today()
+                    new_case.updated_at = date.today()
+                    self.session.add(new_case)
+                    self.session.flush()
+
+                else:
+                    return
+
+            cases = self.session.query(CaLanduseMaintenanceCase). \
+                join(StWorkflow, CaLanduseMaintenanceCase.workflow_id == StWorkflow.id). \
+                filter(StWorkflowStatusLanduse.workflow_id == StWorkflow.id). \
+                filter(StWorkflowStatusLanduse.next_landuse == landuse_type_code). \
+                filter(CaLanduseMaintenanceCase.status_id < is_draft_status.code).all()
+
+            self.landuse_maintenance_cbox.clear()
+            for case in cases:
+                self.landuse_maintenance_cbox.addItem(str(case.landuse) + ':' + str(case.creation_date), case.id)
+
+    @pyqtSlot(int)
+    def on_change_shp_landuse_type_cbox_currentIndexChanged(self, index):
+
+        self.change_shp_landuse_type_cbox.setToolTip(self.change_shp_landuse_type_cbox.currentText())
+
+        landuse_type_code = self.change_shp_landuse_type_cbox.itemData(self.change_shp_landuse_type_cbox.currentIndex())
+        print '**'
+        print landuse_type_code
+        print '***'
+        if landuse_type_code == self.landuse_code:
+            self.__import_template_data(self.file_path)
+            self.__save_maintenance_case_parcel(landuse_type_code)
+
+
+    def __import_template_data(self, file_path):
+
+        print 'import data'

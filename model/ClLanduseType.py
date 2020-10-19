@@ -12,4 +12,5 @@ class ClLanduseType(Base):
     description = Column(String)
     description_en = Column(String)
     code2 = Column(Integer)
+    code1 = Column(Integer)
     description2 = Column(String)

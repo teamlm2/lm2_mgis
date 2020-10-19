@@ -2062,28 +2062,27 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
                 self.shp_process_type_cbox.setItemData(index, self.shp_process_type_cbox.itemText(index),
                                                        Qt.ToolTipRole)
 
-    @pyqtSlot(int)
-    def on_shp_process_type_cbox_currentIndexChanged(self, index):
-
-        self.shp_process_type_cbox.clear()
-        rigth_form_id = self.shp_rigth_form_cbox.itemData(self.shp_rigth_form_cbox.currentIndex())
-
-        self.shp_process_type_cbox.setEnabled(True)
-        plan_type = self.plan.plan_type_ref
-        values = self.session.query(ClPlanZone.plan_zone_id, ClPlanZone.code, ClPlanZone.name). \
-            join(SetPlanZonePlanType, ClPlanZone.plan_zone_id == SetPlanZonePlanType.plan_zone_id). \
-            join(SetPlanZoneRightForm, ClPlanZone.plan_zone_id == SetPlanZoneRightForm.plan_zone_id). \
-            filter(SetPlanZoneRightForm.right_form_id == rigth_form_id). \
-            filter(SetPlanZonePlanType.plan_type_id == plan_type.plan_type_id). \
-            group_by(ClPlanZone.plan_zone_id, ClPlanZone.code, ClPlanZone.name). \
-            order_by(ClPlanZone.code)
-
-        for value in values:
-            self.shp_process_type_cbox.addItem(str(value.code) + ':' + value.name, value.code)
-
-        for index in range(self.shp_process_type_cbox.count()):
-            self.shp_process_type_cbox.setItemData(index, self.shp_process_type_cbox.itemText(index), Qt.ToolTipRole)
-
+    # @pyqtSlot(int)
+    # def on_shp_process_type_cbox_currentIndexChanged(self, index):
+    #
+    #     self.shp_process_type_cbox.clear()
+    #     rigth_form_id = self.shp_rigth_form_cbox.itemData(self.shp_rigth_form_cbox.currentIndex())
+    #
+    #     self.shp_process_type_cbox.setEnabled(True)
+    #     plan_type = self.plan.plan_type_ref
+    #     values = self.session.query(ClPlanZone.plan_zone_id, ClPlanZone.code, ClPlanZone.name). \
+    #         join(SetPlanZonePlanType, ClPlanZone.plan_zone_id == SetPlanZonePlanType.plan_zone_id). \
+    #         join(SetPlanZoneRightForm, ClPlanZone.plan_zone_id == SetPlanZoneRightForm.plan_zone_id). \
+    #         filter(SetPlanZoneRightForm.right_form_id == rigth_form_id). \
+    #         filter(SetPlanZonePlanType.plan_type_id == plan_type.plan_type_id). \
+    #         group_by(ClPlanZone.plan_zone_id, ClPlanZone.code, ClPlanZone.name). \
+    #         order_by(ClPlanZone.code)
+    #
+    #     for value in values:
+    #         self.shp_process_type_cbox.addItem(str(value.code) + ':' + value.name, value.code)
+    #
+    #     for index in range(self.shp_process_type_cbox.count()):
+    #         self.shp_process_type_cbox.setItemData(index, self.shp_process_type_cbox.itemText(index), Qt.ToolTipRole)
 
     @pyqtSlot(int)
     def on_shp_process_type_cbox_currentIndexChanged(self, index):

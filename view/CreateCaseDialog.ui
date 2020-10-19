@@ -678,7 +678,7 @@
        <x>10</x>
        <y>10</y>
        <width>381</width>
-       <height>81</height>
+       <height>181</height>
       </rect>
      </property>
      <property name="title">
@@ -688,7 +688,7 @@
       <property name="geometry">
        <rect>
         <x>126</x>
-        <y>32</y>
+        <y>22</y>
         <width>200</width>
         <height>21</height>
        </rect>
@@ -701,7 +701,7 @@
       <property name="geometry">
        <rect>
         <x>8</x>
-        <y>34</y>
+        <y>24</y>
         <width>101</width>
         <height>16</height>
        </rect>
@@ -717,7 +717,7 @@
       <property name="geometry">
        <rect>
         <x>330</x>
-        <y>30</y>
+        <y>20</y>
         <width>40</width>
         <height>25</height>
        </rect>
@@ -733,14 +733,50 @@
        <bool>true</bool>
       </property>
      </widget>
+     <widget class="QComboBox" name="change_shp_landuse_type_cbox">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>80</y>
+        <width>361</width>
+        <height>22</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="landuse_maintenance_cbox">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>110</y>
+        <width>361</width>
+        <height>22</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="change_landuse_chbox">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>60</y>
+        <width>231</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>ГНС-н ангилал солих</string>
+      </property>
+     </widget>
     </widget>
     <widget class="QTreeWidget" name="result_landuse_twidget">
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>120</y>
+       <y>220</y>
        <width>381</width>
-       <height>321</height>
+       <height>221</height>
       </rect>
      </property>
      <property name="verticalScrollBarPolicy">
@@ -780,7 +816,7 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>100</y>
+       <y>200</y>
        <width>381</width>
        <height>16</height>
       </rect>
