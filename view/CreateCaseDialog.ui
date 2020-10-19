@@ -678,7 +678,7 @@
        <x>10</x>
        <y>10</y>
        <width>381</width>
-       <height>181</height>
+       <height>151</height>
       </rect>
      </property>
      <property name="title">
@@ -770,34 +770,13 @@
       </property>
      </widget>
     </widget>
-    <widget class="QTreeWidget" name="result_landuse_twidget">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>220</y>
-       <width>381</width>
-       <height>221</height>
-      </rect>
-     </property>
-     <property name="verticalScrollBarPolicy">
-      <enum>Qt::ScrollBarAlwaysOn</enum>
-     </property>
-     <attribute name="headerDefaultSectionSize">
-      <number>100</number>
-     </attribute>
-     <column>
-      <property name="text">
-       <string>Maintenance Case Objects</string>
-      </property>
-     </column>
-    </widget>
     <widget class="QTreeWidget" name="check_landuse_twidget">
      <property name="geometry">
       <rect>
        <x>410</x>
        <y>10</y>
        <width>361</width>
-       <height>431</height>
+       <height>181</height>
       </rect>
      </property>
      <property name="verticalScrollBarPolicy">
@@ -826,6 +805,40 @@
      </property>
      <property name="textDirection">
       <enum>QProgressBar::TopToBottom</enum>
+     </property>
+    </widget>
+    <widget class="QTreeWidget" name="result_landuse_twidget">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>220</y>
+       <width>381</width>
+       <height>221</height>
+      </rect>
+     </property>
+     <property name="verticalScrollBarPolicy">
+      <enum>Qt::ScrollBarAlwaysOn</enum>
+     </property>
+     <attribute name="headerDefaultSectionSize">
+      <number>100</number>
+     </attribute>
+     <column>
+      <property name="text">
+       <string>Maintenance Case Objects</string>
+      </property>
+     </column>
+    </widget>
+    <widget class="QPlainTextEdit" name="message_txt_edit">
+     <property name="geometry">
+      <rect>
+       <x>410</x>
+       <y>220</y>
+       <width>361</width>
+       <height>221</height>
+      </rect>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
      </property>
     </widget>
    </widget>
