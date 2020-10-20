@@ -418,6 +418,11 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
         self.new_menu.addAction(self.new_zoom_to_selected)
         self.new_zoom_to_selected.triggered.connect(self.new_zoom_to_selected_clicked)
 
+        self.landuse_case_menu = QMenu()
+        self.landsue_case_zoom_to_selected = QAction(QIcon("zoom.png"), "New Parcel Zoom to item", self)
+        self.landuse_case_menu.addAction(self.landsue_case_zoom_to_selected)
+        self.landsue_case_zoom_to_selected.triggered.connect(self.landsue_case_zoom_to_selected_clicked)
+
     @pyqtSlot()
     def zoom_to_selected_clicked(self):
 
@@ -1883,6 +1888,11 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
         self.result_landuse_twidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.result_landuse_twidget.setContextMenuPolicy(Qt.CustomContextMenu)
 
+        self.case_parcels_treewidget.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.case_parcels_treewidget.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.case_parcels_treewidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.case_parcels_treewidget.setContextMenuPolicy(Qt.CustomContextMenu)
+
         self.approved_item = QTreeWidgetItem()
         self.approved_item.setExpanded(True)
         self.approved_item.setText(0, u"Зөрчилгүй")
@@ -2155,6 +2165,15 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
         point = self.result_landuse_twidget.viewport().mapToGlobal(point)
         self.new_menu.exec_(point)
 
+    @pyqtSlot(QPoint)
+    def on_case_parcels_treewidget_customContextMenuRequested(self, point):
+
+        # if self.is_file_import:
+        #     return
+
+        point = self.case_parcels_treewidget.viewport().mapToGlobal(point)
+        self.landuse_case_menu.exec_(point)
+
     @pyqtSlot()
     def new_zoom_to_selected_clicked(self):
 
@@ -2171,6 +2190,40 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
 
         parcel_shape_layer.select(feature_id)
         self.plugin.iface.mapCanvas().zoomToSelected(parcel_shape_layer)
+
+    @pyqtSlot()
+    def landsue_case_zoom_to_selected_clicked(self):
+
+        selected_item = self.case_parcels_treewidget.selectedItems()[0]
+
+        if selected_item is None:
+            return
+
+        layer = LayerUtils.layer_by_data_source("data_landuse", 'ca_tmp_landuse_type')
+
+        if len(self.case_parcels_treewidget.selectedItems()) > 0:
+            current_item = self.case_parcels_treewidget.selectedItems()[0]
+
+            code = current_item.data(0, Qt.UserRole)
+
+            self.__select_landuse_feature(str(code), layer)
+
+    def __select_landuse_feature(self, parcel_id, layer):
+
+        expression = " parcel_id = \'" + parcel_id + "\'"
+        request = QgsFeatureRequest()
+        request.setFilterExpression(expression)
+        feature_ids = []
+        if layer:
+            iterator = layer.getFeatures(request)
+
+            for feature in iterator:
+                feature_ids.append(feature.id())
+            if len(feature_ids) == 0:
+                self.error_label.setText(self.tr("No parcel assigned"))
+
+            layer.setSelectedFeatures(feature_ids)
+            self.plugin.iface.mapCanvas().zoomToSelected(layer)
 
     def __case_tab_widget_onChange(self, index):
 
