@@ -66,6 +66,7 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
         self.landuse_code = None
         self.approved_item = None
         self.refused_item = None
+        self.__setup_landuse_combobox()
         self.__result_twidget_setup()
         self.error_dic = {}
         self.buildings_item = None
@@ -411,6 +412,11 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
         self.zoom_to_selected = QAction(QIcon("zoom.png"), "Zoom to item", self)
         self.menu.addAction(self.zoom_to_selected)
         self.zoom_to_selected.triggered.connect(self.zoom_to_selected_clicked)
+
+        self.new_menu = QMenu()
+        self.new_zoom_to_selected = QAction(QIcon("zoom.png"), "New Parcel Zoom to item", self)
+        self.new_menu.addAction(self.new_zoom_to_selected)
+        self.new_zoom_to_selected.triggered.connect(self.new_zoom_to_selected_clicked)
 
     @pyqtSlot()
     def zoom_to_selected_clicked(self):
@@ -984,7 +990,8 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
                 column_names[column_name_landuse] = ""
                 landuse_invalid = True
             else:
-                self.landuse_code = column_names[column_name_landuse]
+                if not self.change_landuse_chbox.isChecked():
+                    self.landuse_code = column_names[column_name_landuse]
 
         except SQLAlchemyError, e:
             landuse_invalid = True
@@ -1757,13 +1764,15 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
             self.landuse_parcel_shape_edit.setText(file_path)
             self.__import_landuse_parcels(file_path)
             self.open_landuse_parcel_file_button.setEnabled(False)
-        self.__setup_landuse_combobox()
+
         self.change_shp_landuse_type_cbox.setCurrentIndex(self.change_shp_landuse_type_cbox.findData(self.landuse_code))
 
     def __import_landuse_parcels(self, file_path):
 
         self.result_landuse_twidget.clear()
         self.__result_twidget_setup()
+        self.session.close()
+        self.session = SessionHandler().session_instance()
         parcel_shape_layer = QgsVectorLayer(file_path, "tmp_landuse_parcel_shape", "ogr")
 
         if not parcel_shape_layer.isValid():
@@ -1776,11 +1785,13 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
             return
 
         iterator = parcel_shape_layer.getFeatures()
+        provider = parcel_shape_layer.dataProvider()
         feature_count = parcel_shape_layer.featureCount()
         self.main_load_pbar.setVisible(True)
         self.main_load_pbar.setMinimum(1)
         self.main_load_pbar.setValue(0)
 
+        updateMap = {}
         count = 0
         approved_count = 0
         refused_count = 0
@@ -1790,13 +1801,31 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
             feature_id = parcel.id()
             count += 1
             header = str(count)
+            landuse = self.__get_attribute(parcel, parcel_shape_layer)[0]
+            if self.change_landuse_chbox.isChecked():
+                header =  header + ':' + self.change_shp_landuse_type_cbox.currentText()
+                landuse_type_code = self.change_shp_landuse_type_cbox.itemData(
+                    self.change_shp_landuse_type_cbox.currentIndex())
+                self.landuse_code = landuse_type_code
+                ###
+                parcel_shape_layer.startEditing()
+                fieldIdx = parcel.fields().indexFromName('landuse')
+                updateMap[parcel.id()] = {fieldIdx: landuse_type_code}
+                provider.changeAttributeValues(updateMap)
+                parcel_shape_layer.commitChanges()
+                self.plugin.iface.vectorLayerTools().stopEditing(parcel_shape_layer)
+                self.plugin.iface.mapCanvas().refresh()
+                ###
+            if landuse:
+                header = header + ':' + '(' + str(landuse.code) + ')' + unicode(landuse.description)
+
             parcel_geometry = WKTElement(parcel.geometry().exportToWkt(), srid=4326)
 
             validaty_result = self.__validaty_of_new_parcel(parcel, parcel_shape_layer, feature_id)
 
             if validaty_result[0]:
                 landuse = self.__get_attribute(parcel, parcel_shape_layer)[0]
-                header = header + ':' + '(' + str(landuse.code) + ')' + unicode(landuse.description)
+                # header = header + ':' + '(' + str(landuse.code) + ')' + unicode(landuse.description)
 
                 new_parcel = CaTmpLanduseTypeTbl()
                 new_parcel.is_insert_cadastre = False
@@ -1814,7 +1843,9 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
                 landuse_code2 = landuse_type.code2
                 new_parcel.landuse_level1 = landuse_code1
                 new_parcel.landuse_level2 = landuse_code2
+
                 self.__save_maintenance_case_parcel(self.landuse_code)
+
                 case_id = self.landuse_maintenance_cbox.itemData(self.landuse_maintenance_cbox.currentIndex())
                 new_parcel.case_id = case_id
                 self.session.add(new_parcel)
@@ -1842,6 +1873,9 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
             value_p = self.main_load_pbar.value() + 1
             self.main_load_pbar.setValue(value_p)
 
+        self.approved_item.setText(0, self.tr("Approved") + ' (' + str(approved_count) + ')')
+        self.refused_item.setText(0, self.tr("Refused") + ' (' + str(refused_count) + ')')
+
     def __result_twidget_setup(self):
 
         self.result_landuse_twidget.setSelectionMode(QAbstractItemView.SingleSelection)
@@ -1859,6 +1893,33 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
 
         self.result_landuse_twidget.addTopLevelItem(self.approved_item)
         self.result_landuse_twidget.addTopLevelItem(self.refused_item)
+
+        self.case_parcel_tabwidget.currentChanged.connect(self.__case_tab_widget_onChange)
+        self.case_parcels_treewidget.itemChanged.connect(self.__itemCaseParcelsCheckChanged)
+        self.case_parcels = []
+
+    def __itemCaseParcelsCheckChanged(self, item, column):
+
+        self.main_load_pbar.setVisible(True)
+        self.main_load_pbar.setMinimum(1)
+        self.main_load_pbar.setValue(0)
+
+        if item.checkState(column) == QtCore.Qt.Checked:
+            code = item.data(0, Qt.UserRole)
+            if code not in self.case_parcels:
+                self.case_parcels.append(code)
+                # if self.settings_tab_widget.currentIndex() == 0:
+                #     self.__settings_add_save(code)
+                # if self.settings_tab_widget.currentIndex() == 1:
+                #     self.__zone_relation_save(code)
+        elif item.checkState(column) == QtCore.Qt.Unchecked:
+            code = item.data(0, Qt.UserRole)
+            if code in self.case_parcels:
+                self.case_parcels.remove(code)
+                # if self.settings_tab_widget.currentIndex() == 0:
+                #     self.__settings_remove_delete(code)
+                # if self.settings_tab_widget.currentIndex() == 1:
+                #     self.__zone_relation_delete(code)
 
     @pyqtSlot()
     def on_result_landuse_twidget_itemSelectionChanged(self):
@@ -1911,18 +1972,25 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
         temp_overlaps_count = self.session.query(CaTmpLanduseTypeTbl). \
             filter((parcel_geometry).ST_Overlaps(CaTmpLanduseTypeTbl.geometry)). \
             filter(or_(CaTmpLanduseTypeTbl.valid_till == None, CaTmpLanduseTypeTbl.valid_till == 'infinity')).count()
-        if temp_overlaps_count > 0:
+
+        temp_covers_count = self.session.query(CaTmpLanduseTypeTbl). \
+            filter((parcel_geometry).ST_Covers(CaTmpLanduseTypeTbl.geometry)). \
+            filter(or_(CaTmpLanduseTypeTbl.valid_till == None, CaTmpLanduseTypeTbl.valid_till == 'infinity')).count()
+
+        if temp_overlaps_count > 0 or temp_covers_count > 0:
             message = u'ГНС-н ажлын давхаргад байгаа нэгж талбартай давхардаж байна. Та давхардлыг арилган дахин оруулна уу!!!'
             error_message = error_message + "\n" + message
             valid = False
 
         landuse = self.__get_attribute(parcel, parcel_shape_layer)[0]
+
         if landuse is None:
             message = u'ГНС-н ангилал буруу байна!!!'
             error_message = error_message + "\n" + message
             valid = False
         else:
-            self.landuse_code = landuse.code
+            if not self.change_landuse_chbox.isChecked():
+                self.landuse_code = landuse.code
             landuse_type_code = landuse.code
             case_landuse_count = self.session.query(StWorkflowStatusLanduse). \
                 filter(StWorkflowStatusLanduse.next_landuse == landuse_type_code).count()
@@ -1952,6 +2020,7 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
         #                            (u'/{0}/ ГНС-н ангилалд шилжилт хөдөлгөөний тохиргоо хийгээгүй байна!').format(
         #                                landuse_type_code))
         # else:
+        new_case_id = None
         is_draft_status = self.session.query(ClLanduseMovementStatus). \
             filter(ClLanduseMovementStatus.is_draft == True).first()
 
@@ -1985,28 +2054,26 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
                 item, ok = QInputDialog.getItem(self, "select input dialog",
                                                 "list of plan zones", workflows, 0, False)
 
-                workflow_code, workflow_desc = item.split(':-')
-                workflow = self.session.query(StWorkflow).filter(StWorkflow.code == workflow_code).first()
-                status = self.session.query(ClLanduseMovementStatus).order_by(
-                    ClLanduseMovementStatus.code.asc()).first()
-                print status.code
                 if ok:
-                    print workflow_code
-                    print workflow_desc
+                    workflow_code, workflow_desc = item.split(':-')
 
-                new_case = CaLanduseMaintenanceCase()
-                new_case.workflow_id = workflow.id
-                new_case.landuse = landuse_type_code
-                new_case.au2 = self.working_soum
-                new_case.status_id = status.code
-                new_case.created_by = DatabaseUtils.current_sd_user().user_id
-                new_case.updated_by = DatabaseUtils.current_sd_user().user_id
-                new_case.creation_date = date.today()
-                new_case.created_at = date.today()
-                new_case.updated_at = date.today()
-                self.session.add(new_case)
-                self.session.flush()
+                    workflow = self.session.query(StWorkflow).filter(StWorkflow.code == workflow_code).first()
+                    status = self.session.query(ClLanduseMovementStatus).order_by(
+                        ClLanduseMovementStatus.code.asc()).first()
 
+                    new_case = CaLanduseMaintenanceCase()
+                    new_case.workflow_id = workflow.id
+                    new_case.landuse = landuse_type_code
+                    new_case.au2 = self.working_soum
+                    new_case.status_id = status.code
+                    new_case.created_by = DatabaseUtils.current_sd_user().user_id
+                    new_case.updated_by = DatabaseUtils.current_sd_user().user_id
+                    new_case.creation_date = date.today()
+                    new_case.created_at = date.today()
+                    new_case.updated_at = date.today()
+                    self.session.add(new_case)
+                    self.session.flush()
+                    new_case_id = new_case.id
             else:
                 return
 
@@ -2019,6 +2086,8 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
         self.landuse_maintenance_cbox.clear()
         for case in cases:
             self.landuse_maintenance_cbox.addItem(str(case.landuse) + ':' + str(case.creation_date), case.id)
+        if new_case_id:
+            self.landuse_maintenance_cbox.setCurrentIndex(self.landuse_maintenance_cbox.findData(new_case_id))
 
     @pyqtSlot(int)
     def on_change_shp_landuse_type_cbox_currentIndexChanged(self, index):
@@ -2026,17 +2095,31 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
         self.change_shp_landuse_type_cbox.setToolTip(self.change_shp_landuse_type_cbox.currentText())
 
         landuse_type_code = self.change_shp_landuse_type_cbox.itemData(self.change_shp_landuse_type_cbox.currentIndex())
-        print '**'
-        print landuse_type_code
-        print '***'
-        if landuse_type_code == self.landuse_code:
-            self.__import_template_data(self.file_path)
-            self.__save_maintenance_case_parcel(landuse_type_code)
 
+        if self.change_landuse_chbox.isChecked():
+            parcel_shape_layer = QgsVectorLayer(self.file_path, "tmp_landuse_parcel_shape", "ogr")
+            if parcel_shape_layer.isValid():
+                self.__import_landuse_parcels(self.file_path)
+            # self.__save_maintenance_case_parcel(landuse_type_code)
+            else:
+                self.landuse_maintenance_cbox.clear()
 
-    def __import_template_data(self, file_path):
+                is_draft_status = self.session.query(ClLanduseMovementStatus). \
+                    filter(ClLanduseMovementStatus.is_draft == True).first()
 
-        print 'import data'
+                cases = self.session.query(CaLanduseMaintenanceCase). \
+                    join(StWorkflow, CaLanduseMaintenanceCase.workflow_id == StWorkflow.id). \
+                    filter(StWorkflowStatusLanduse.workflow_id == StWorkflow.id). \
+                    filter(StWorkflowStatusLanduse.next_landuse == landuse_type_code). \
+                    filter(CaLanduseMaintenanceCase.status_id < is_draft_status.code).all()
+                for case in cases:
+                    self.landuse_maintenance_cbox.addItem(str(case.landuse) + ':' + str(case.creation_date), case.id)
+
+    @pyqtSlot(int)
+    def on_landuse_maintenance_cbox_currentIndexChanged(self, index):
+
+        case_id = self.landuse_maintenance_cbox.itemData(self.landuse_maintenance_cbox.currentIndex())
+        self.__case_parcels_mapping(case_id)
 
     def __get_attribute(self, parcel_feature, layer):
 
@@ -2051,12 +2134,91 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
                 value = parcel_feature.attributes()[index]
                 column_names[key] = value
 
-        landuse_code = column_names[column_name_landuse]
+
+        if not self.change_landuse_chbox.isChecked():
+            self.landuse_code = column_names[column_name_landuse]
 
         landuse = None
-        if landuse_code:
-            count = self.session.query(ClLanduseType).filter(ClLanduseType.code == landuse_code).count()
+        if self.landuse_code:
+            count = self.session.query(ClLanduseType).filter(ClLanduseType.code == self.landuse_code).count()
             if count == 1:
-                landuse = self.session.query(ClLanduseType).filter(ClLanduseType.code == landuse_code).one()
+                landuse = self.session.query(ClLanduseType).filter(ClLanduseType.code == self.landuse_code).one()
 
         return landuse,
+
+    @pyqtSlot(QPoint)
+    def on_result_landuse_twidget_customContextMenuRequested(self, point):
+
+        # if self.is_file_import:
+        #     return
+
+        point = self.result_landuse_twidget.viewport().mapToGlobal(point)
+        self.new_menu.exec_(point)
+
+    @pyqtSlot()
+    def new_zoom_to_selected_clicked(self):
+
+        selected_item = self.result_landuse_twidget.selectedItems()[0]
+
+        file_path = self.landuse_parcel_shape_edit.text()
+
+        if selected_item is None:
+            return
+
+        parcel_shape_layer = QgsVectorLayer(file_path, "tmp_parcel_shape", "ogr")
+
+        feature_id = self.result_landuse_twidget.currentItem().data(0, Qt.UserRole + 2)
+
+        parcel_shape_layer.select(feature_id)
+        self.plugin.iface.mapCanvas().zoomToSelected(parcel_shape_layer)
+
+    def __case_tab_widget_onChange(self, index):
+
+        is_change = False
+        if index:
+            if index == 1:
+                case_id = self.landuse_maintenance_cbox.itemData(self.landuse_maintenance_cbox.currentIndex())
+                self.__case_parcels_mapping(case_id)
+
+    def __case_parcels_mapping(self, case_id):
+
+        if not case_id:
+            return
+        self.case_parcels_treewidget.clear()
+        tree = self.case_parcels_treewidget
+
+        landuse_types = self.session.query(CaTmpLanduseTypeTbl.landuse).\
+            filter(CaTmpLanduseTypeTbl.case_id == case_id).group_by(CaTmpLanduseTypeTbl.landuse).all()
+
+        for parent_type in landuse_types:
+            parent_type = parent_type[0]
+            landuse = self.session.query(ClLanduseType).filter(ClLanduseType.code == parent_type).one()
+            parent = QTreeWidgetItem(tree)
+            parent.setText(0, str(landuse.code) + ': ' + unicode(landuse.description))
+            parent.setToolTip(0, str(landuse.code) + ': ' + unicode(landuse.description))
+            parent.setData(0, Qt.UserRole, parent_type)
+            parent.setFlags(parent.flags() | Qt.ItemIsTristate | Qt.ItemIsUserCheckable)
+
+            landuse_parcels = self.session.query(CaTmpLanduseTypeTbl).\
+                filter(CaTmpLanduseTypeTbl.case_id == case_id).\
+                filter(CaTmpLanduseTypeTbl.landuse == parent_type).all()
+
+            for sub_type in landuse_parcels:
+                child = QTreeWidgetItem(parent)
+                child.setFlags(child.flags() | Qt.ItemIsUserCheckable)
+                child.setText(0, str(sub_type.parcel_id) + ': ' + str(landuse.code) + ': ' + unicode(landuse.description))
+                child.setToolTip(0, str(sub_type.parcel_id) + ': ' + str(landuse.code) + ': ' + unicode(landuse.description))
+                child.setData(0, Qt.UserRole, sub_type.parcel_id)
+                child.setCheckState(0, Qt.Unchecked)
+
+        self.case_parcels_treewidget.itemChanged.connect(self.__itemCaseParcelsCheckChanged)
+        tree.show()
+
+    @pyqtSlot()
+    def on_case_parcels_treewidget_itemSelectionChanged(self):
+
+        if len(self.case_parcels_treewidget.selectedItems()) > 0:
+            current_item = self.case_parcels_treewidget.selectedItems()[0]
+
+            code = current_item.data(0, Qt.UserRole)
+            print code

@@ -676,9 +676,9 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>10</y>
+       <y>0</y>
        <width>381</width>
-       <height>151</height>
+       <height>141</height>
       </rect>
      </property>
      <property name="title">
@@ -687,9 +687,9 @@
      <widget class="QLineEdit" name="landuse_parcel_shape_edit">
       <property name="geometry">
        <rect>
-        <x>126</x>
-        <y>22</y>
-        <width>200</width>
+        <x>87</x>
+        <y>19</y>
+        <width>241</width>
         <height>21</height>
        </rect>
       </property>
@@ -701,7 +701,7 @@
       <property name="geometry">
        <rect>
         <x>8</x>
-        <y>24</y>
+        <y>21</y>
         <width>101</width>
         <height>16</height>
        </rect>
@@ -716,8 +716,8 @@
       </property>
       <property name="geometry">
        <rect>
-        <x>330</x>
-        <y>20</y>
+        <x>332</x>
+        <y>17</y>
         <width>40</width>
         <height>25</height>
        </rect>
@@ -740,7 +740,7 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>80</y>
+        <y>64</y>
         <width>361</width>
         <height>22</height>
        </rect>
@@ -750,7 +750,7 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>110</y>
+        <y>94</y>
         <width>361</width>
         <height>22</height>
        </rect>
@@ -760,7 +760,7 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>60</y>
+        <y>44</y>
         <width>231</width>
         <height>17</height>
        </rect>
@@ -769,33 +769,25 @@
        <string>ГНС-н ангилал солих</string>
       </property>
      </widget>
-    </widget>
-    <widget class="QTreeWidget" name="check_landuse_twidget">
-     <property name="geometry">
-      <rect>
-       <x>410</x>
-       <y>10</y>
-       <width>361</width>
-       <height>181</height>
-      </rect>
-     </property>
-     <property name="verticalScrollBarPolicy">
-      <enum>Qt::ScrollBarAlwaysOn</enum>
-     </property>
-     <attribute name="headerDefaultSectionSize">
-      <number>100</number>
-     </attribute>
-     <column>
-      <property name="text">
-       <string>Maintenance Case Objects</string>
+     <widget class="QLabel" name="workflow_label">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>120</y>
+        <width>361</width>
+        <height>16</height>
+       </rect>
       </property>
-     </column>
+      <property name="text">
+       <string>Parcel Shapefile</string>
+      </property>
+     </widget>
     </widget>
     <widget class="QProgressBar" name="main_load_pbar">
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>200</y>
+       <y>142</y>
        <width>381</width>
        <height>16</height>
       </rect>
@@ -807,39 +799,249 @@
       <enum>QProgressBar::TopToBottom</enum>
      </property>
     </widget>
-    <widget class="QTreeWidget" name="result_landuse_twidget">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>220</y>
-       <width>381</width>
-       <height>221</height>
-      </rect>
-     </property>
-     <property name="verticalScrollBarPolicy">
-      <enum>Qt::ScrollBarAlwaysOn</enum>
-     </property>
-     <attribute name="headerDefaultSectionSize">
-      <number>100</number>
-     </attribute>
-     <column>
-      <property name="text">
-       <string>Maintenance Case Objects</string>
-      </property>
-     </column>
-    </widget>
     <widget class="QPlainTextEdit" name="message_txt_edit">
      <property name="geometry">
       <rect>
-       <x>410</x>
-       <y>220</y>
-       <width>361</width>
-       <height>221</height>
+       <x>400</x>
+       <y>318</y>
+       <width>381</width>
+       <height>131</height>
       </rect>
      </property>
      <property name="readOnly">
       <bool>true</bool>
      </property>
+    </widget>
+    <widget class="QGroupBox" name="application_status_group_box">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>160</y>
+       <width>381</width>
+       <height>291</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>ГНС-н шилжилт хөдөлгөөний төлөв</string>
+     </property>
+     <widget class="QLabel" name="label_15">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>15</y>
+        <width>161</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Status</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_17">
+      <property name="geometry">
+       <rect>
+        <x>130</x>
+        <y>57</y>
+        <width>251</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Next Officer In Charge</string>
+      </property>
+     </widget>
+     <widget class="QDateEdit" name="status_date_date">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>72</y>
+        <width>91</width>
+        <height>22</height>
+       </rect>
+      </property>
+      <property name="displayFormat">
+       <string>yyyy-MM-dd</string>
+      </property>
+      <property name="calendarPopup">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_18">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>57</y>
+        <width>171</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Status Date</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="status_add_button">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>100</y>
+        <width>93</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Add</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="status_update_button">
+      <property name="geometry">
+       <rect>
+        <x>140</x>
+        <y>100</y>
+        <width>93</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Update</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="status_delete_button">
+      <property name="geometry">
+       <rect>
+        <x>250</x>
+        <y>100</y>
+        <width>93</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Delete</string>
+      </property>
+     </widget>
+     <widget class="QTableWidget" name="movement_status_twidget">
+      <property name="geometry">
+       <rect>
+        <x>5</x>
+        <y>127</y>
+        <width>371</width>
+        <height>161</height>
+       </rect>
+      </property>
+      <attribute name="horizontalHeaderDefaultSectionSize">
+       <number>105</number>
+      </attribute>
+      <column>
+       <property name="text">
+        <string>Status</string>
+       </property>
+       <property name="textAlignment">
+        <set>AlignLeft|AlignVCenter</set>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Date</string>
+       </property>
+       <property name="textAlignment">
+        <set>AlignLeft|AlignVCenter</set>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Officer in Charge</string>
+       </property>
+       <property name="textAlignment">
+        <set>AlignLeft|AlignVCenter</set>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Next Officer in Charge</string>
+       </property>
+       <property name="textAlignment">
+        <set>AlignLeft|AlignVCenter</set>
+       </property>
+      </column>
+     </widget>
+     <widget class="QComboBox" name="status_cbox">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>30</y>
+        <width>361</width>
+        <height>22</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="next_officer_in_charge_cbox">
+      <property name="geometry">
+       <rect>
+        <x>130</x>
+        <y>72</y>
+        <width>241</width>
+        <height>22</height>
+       </rect>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QTabWidget" name="case_parcel_tabwidget">
+     <property name="geometry">
+      <rect>
+       <x>400</x>
+       <y>5</y>
+       <width>381</width>
+       <height>311</height>
+      </rect>
+     </property>
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="import_parcels_tab">
+      <attribute name="title">
+       <string>Оруулах нэгж талбар</string>
+      </attribute>
+      <widget class="QTreeWidget" name="result_landuse_twidget">
+       <property name="geometry">
+        <rect>
+         <x>2</x>
+         <y>2</y>
+         <width>371</width>
+         <height>281</height>
+        </rect>
+       </property>
+       <property name="verticalScrollBarPolicy">
+        <enum>Qt::ScrollBarAlwaysOn</enum>
+       </property>
+       <attribute name="headerDefaultSectionSize">
+        <number>100</number>
+       </attribute>
+       <column>
+        <property name="text">
+         <string>Maintenance Case Objects</string>
+        </property>
+       </column>
+      </widget>
+     </widget>
+     <widget class="QWidget" name="case_parcels_tab">
+      <attribute name="title">
+       <string>Бүртгэлд байгаа нэгж талбар</string>
+      </attribute>
+      <widget class="QTreeWidget" name="case_parcels_treewidget">
+       <property name="geometry">
+        <rect>
+         <x>2</x>
+         <y>2</y>
+         <width>371</width>
+         <height>281</height>
+        </rect>
+       </property>
+       <column>
+        <property name="text">
+         <string>Maintenance Case Objects</string>
+        </property>
+       </column>
+      </widget>
+     </widget>
     </widget>
    </widget>
    <widget class="QWidget" name="tab_2">
