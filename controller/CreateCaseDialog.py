@@ -2275,3 +2275,9 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
 
             code = current_item.data(0, Qt.UserRole)
             print code
+
+            sql = "select * from base.calculate_set_plan_zone_relation(" + str(code) + ");"
+
+            result = self.session.execute(sql)
+            for item_row in result:
+                parcel_id = item_row[0]
