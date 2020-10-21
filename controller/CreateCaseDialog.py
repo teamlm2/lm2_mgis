@@ -2129,6 +2129,7 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
     def on_landuse_maintenance_cbox_currentIndexChanged(self, index):
 
         case_id = self.landuse_maintenance_cbox.itemData(self.landuse_maintenance_cbox.currentIndex())
+        print case_id
         self.__case_parcels_mapping(case_id)
 
     def __get_attribute(self, parcel_feature, layer):
@@ -2276,8 +2277,12 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
             code = current_item.data(0, Qt.UserRole)
             print code
 
-            sql = "select * from base.calculate_set_plan_zone_relation(" + str(code) + ");"
+            sql = "select * from base.landuse_temp_parcel_overlaps(" + str(code) + ");"
 
             result = self.session.execute(sql)
             for item_row in result:
                 parcel_id = item_row[0]
+                area_m2 = item_row[1]
+                landuse = item_row[2]
+                print parcel_id, area_m2, landuse
+
