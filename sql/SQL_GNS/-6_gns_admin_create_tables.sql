@@ -95,3 +95,25 @@ GRANT ALL ON TABLE data_landuse.st_workflow_status_landuse TO geodb_admin;
 GRANT SELECT, UPDATE, INSERT, DELETE ON TABLE data_landuse.st_workflow_status_landuse TO land_office_administration;
 GRANT SELECT, UPDATE, INSERT, DELETE ON TABLE data_landuse.st_workflow_status_landuse TO role_management;
 
+--
+
+DROP TABLE if exists  data_landuse.ca_landuse_static cascade;
+CREATE TABLE data_landuse.ca_landuse_static
+(
+  id serial NOT NULL PRIMARY KEY,
+  landuse integer references codelists.cl_landuse_type on update cascade on delete restrict,
+  current_year integer,
+  area_ga numeric,
+  parcel_count integer,
+  level_type integer
+  
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE data_landuse.ca_landuse_static
+  OWNER TO geodb_admin;
+GRANT ALL ON TABLE data_landuse.ca_landuse_static TO geodb_admin;
+GRANT SELECT, UPDATE, INSERT, DELETE ON TABLE data_landuse.ca_landuse_static TO land_office_administration, cadastre_update, contracting_update, application_update;
+GRANT SELECT, UPDATE, INSERT, DELETE ON TABLE data_landuse.ca_landuse_static TO role_management;
+
