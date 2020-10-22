@@ -117,3 +117,5 @@ GRANT ALL ON TABLE data_landuse.ca_landuse_static TO geodb_admin;
 GRANT SELECT, UPDATE, INSERT, DELETE ON TABLE data_landuse.ca_landuse_static TO land_office_administration, cadastre_update, contracting_update, application_update;
 GRANT SELECT, UPDATE, INSERT, DELETE ON TABLE data_landuse.ca_landuse_static TO role_management;
 
+alter table data_landuse.ca_landuse_static aDD CONSTRAINT ca_landuse_static_uq UNIQUE (current_year, landuse);
+
