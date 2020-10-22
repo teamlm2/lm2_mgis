@@ -13572,7 +13572,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         myalayer = root.findLayer(vlayer.id())
         if myalayer is None:
             mygroup.addLayer(vlayer)
-        self.__load_layer_style(vlayer, column_name, table_name)
+        # self.__load_layer_style(vlayer, column_name, table_name)
 
         table_name = "ca_landuse_type"
         vlayer = LayerUtils.layer_by_data_source("data_landuse", table_name)
