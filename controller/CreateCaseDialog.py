@@ -2137,12 +2137,15 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
     def on_landuse_maintenance_cbox_currentIndexChanged(self, index):
 
         case_id = self.landuse_maintenance_cbox.itemData(self.landuse_maintenance_cbox.currentIndex())
-        case = self.session.query(CaLanduseMaintenanceCase).filter(CaLanduseMaintenanceCase.id == case_id).one()
-        workflow = self.session.query(StWorkflow).filter(StWorkflow.id == case.workflow_id).one()
 
-        self.workflow_cbox.clear()
-        self.workflow_cbox.addItem(workflow.name, workflow.id)
-        self.__case_parcels_mapping(case_id)
+        if self.session.query(CaLanduseMaintenanceCase).filter(CaLanduseMaintenanceCase.id == case_id).count() == 1:
+
+            case = self.session.query(CaLanduseMaintenanceCase).filter(CaLanduseMaintenanceCase.id == case_id).one()
+            workflow = self.session.query(StWorkflow).filter(StWorkflow.id == case.workflow_id).one()
+
+            self.workflow_cbox.clear()
+            self.workflow_cbox.addItem(workflow.name, workflow.id)
+            self.__case_parcels_mapping(case_id)
 
     def __get_attribute(self, parcel_feature, layer):
 
@@ -2232,8 +2235,8 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
 
             for feature in iterator:
                 feature_ids.append(feature.id())
-            if len(feature_ids) == 0:
-                self.error_label.setText(self.tr("No parcel assigned"))
+            # if len(feature_ids) == 0:
+                # self.error_label.setText(self.tr("No parcel assigned"))
 
             layer.setSelectedFeatures(feature_ids)
             self.plugin.iface.mapCanvas().zoomToSelected(layer)

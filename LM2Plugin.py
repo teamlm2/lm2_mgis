@@ -1542,9 +1542,9 @@ class LM2Plugin:
             vlayer.setReadOnly(True)
 
         ####
-        vlayer = LayerUtils.layer_by_data_source("data_soums_union", "ca_sub_parcel_tbl")
+        vlayer = LayerUtils.layer_by_data_source("data_soums_union", "ca_sub_parcel")
         if vlayer is None:
-            vlayer = LayerUtils.load_layer_base_layer("ca_sub_parcel_tbl", "sub_parcel_id", "data_soums_union")
+            vlayer = LayerUtils.load_layer_base_layer("ca_sub_parcel", "sub_parcel_id", "data_soums_union")
         vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))) + "/template\style/ca_sub_parcel_tbl.qml")
         vlayer.setLayerName(QApplication.translate("Plugin", "Sub Parcel"))
         myalayer = root.findLayer(vlayer.id())
