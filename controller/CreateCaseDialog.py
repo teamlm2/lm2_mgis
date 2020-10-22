@@ -1908,6 +1908,11 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
         self.case_parcels_treewidget.itemChanged.connect(self.__itemCaseParcelsCheckChanged)
         self.case_parcels = []
 
+        self.overlap_parcels_twidget.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.overlap_parcels_twidget.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.overlap_parcels_twidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.overlap_parcels_twidget.setSortingEnabled(True)
+
     def __itemCaseParcelsCheckChanged(self, item, column):
 
         self.main_load_pbar.setVisible(True)
@@ -1933,6 +1938,9 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
 
     @pyqtSlot()
     def on_result_landuse_twidget_itemSelectionChanged(self):
+
+        self.overlap_parcels_twidget.setVisible(False)
+        self.message_txt_edit.setVisible(True)
 
         if len(self.result_landuse_twidget.selectedItems()) > 0:
             current_item = self.result_landuse_twidget.selectedItems()[0]
@@ -2129,7 +2137,11 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
     def on_landuse_maintenance_cbox_currentIndexChanged(self, index):
 
         case_id = self.landuse_maintenance_cbox.itemData(self.landuse_maintenance_cbox.currentIndex())
-        print case_id
+        case = self.session.query(CaLanduseMaintenanceCase).filter(CaLanduseMaintenanceCase.id == case_id).one()
+        workflow = self.session.query(StWorkflow).filter(StWorkflow.id == case.workflow_id).one()
+
+        self.workflow_cbox.clear()
+        self.workflow_cbox.addItem(workflow.name, workflow.id)
         self.__case_parcels_mapping(case_id)
 
     def __get_attribute(self, parcel_feature, layer):
@@ -2271,18 +2283,100 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
     @pyqtSlot()
     def on_case_parcels_treewidget_itemSelectionChanged(self):
 
+        self.message_txt_edit.setVisible(False)
+        self.overlap_parcels_twidget.setVisible(True)
+
+        self.overlap_parcels_twidget.setRowCount(0)
+
         if len(self.case_parcels_treewidget.selectedItems()) > 0:
             current_item = self.case_parcels_treewidget.selectedItems()[0]
 
             code = current_item.data(0, Qt.UserRole)
-            print code
 
             sql = "select * from base.landuse_temp_parcel_overlaps(" + str(code) + ");"
 
             result = self.session.execute(sql)
             for item_row in result:
-                parcel_id = item_row[0]
-                area_m2 = item_row[1]
-                landuse = item_row[2]
-                print parcel_id, area_m2, landuse
+                parcel_id = item_row[1]
+                overlaps_area_m2 = item_row[2]
+                landuse_code = item_row[3]
+
+                landuse = self.session.query(ClLanduseType).filter(ClLanduseType.code == landuse_code).one()
+                row = self.overlap_parcels_twidget.rowCount()
+                self.overlap_parcels_twidget.insertRow(row)
+
+                item = QTableWidgetItem()
+                item.setText(str(parcel_id))
+                item.setData(Qt.UserRole, parcel_id)
+                self.overlap_parcels_twidget.setItem(row, 0, item)
+
+                item = QTableWidgetItem()
+                item.setText(str(overlaps_area_m2))
+                item.setData(Qt.UserRole, overlaps_area_m2)
+                self.overlap_parcels_twidget.setItem(row, 1, item)
+
+                item = QTableWidgetItem()
+                item.setText(str(landuse.code) + ':' + unicode(landuse.description))
+                item.setToolTip(str(landuse.code) + ':' + unicode(landuse.description))
+                item.setData(Qt.UserRole, landuse.code)
+                self.overlap_parcels_twidget.setItem(row, 2, item)
+
+            self.overlap_parcels_twidget.resizeColumnsToContents()
+
+    @pyqtSlot(QTableWidgetItem)
+    def on_overlap_parcels_twidget_itemDoubleClicked(self, item):
+
+        soum = DatabaseUtils.working_l2_code()
+        if not soum:
+            PluginUtils.show_message(self, self.tr("Connection Error"), self.tr("Please connect to database!!!"))
+            return
+        layer = LayerUtils.layer_by_data_source("data_landuse", 'ca_landuse_type')
+
+        selected_row = self.overlap_parcels_twidget.currentRow()
+        parcel_id = self.overlap_parcels_twidget.item(selected_row, 0).data(Qt.UserRole)
+        column_name = 'parcel_id'
+
+        self.__select_feature_column(column_name, str(parcel_id), layer)
+
+    def __select_feature_column(self, column_name, id, layer):
+
+        expression = column_name +  "=\'" + id + "\'"
+        request = QgsFeatureRequest()
+        request.setFilterExpression(expression)
+        feature_ids = []
+        if layer:
+            iterator = layer.getFeatures(request)
+
+            for feature in iterator:
+                feature_ids.append(feature.id())
+
+            layer.setSelectedFeatures(feature_ids)
+            self.plugin.iface.mapCanvas().zoomToSelected(layer)
+
+    @pyqtSlot(int)
+    def on_workflow_cbox_currentIndexChanged(self, index):
+
+        workflow_id = self.workflow_cbox.itemData(self.workflow_cbox.currentIndex())
+        statuses = self.session.query(ClLanduseMovementStatus).\
+            join(StWorkflowStatus, ClLanduseMovementStatus.code == StWorkflowStatus.next_status_id).\
+            filter(StWorkflowStatus.workflow_id == workflow_id).all()
+        self.status_date_date.setDate(QDate().currentDate())
+        self.status_cbox.clear()
+        self.next_officer_in_charge_cbox.clear()
+
+        for value in statuses:
+            self.status_cbox.addItem(value.description, value.code)
+
+        set_roles = self.session.query(SetRole). \
+            filter(SetRole.working_au_level2 == self.working_soum). \
+            filter(SetRole.is_active == True).all()
+
+        for setRole in set_roles:
+            l2_code_list = setRole.restriction_au_level2.split(',')
+            if self.working_soum in l2_code_list:
+                sd_user = self.session.query(SdUser).filter(SdUser.gis_user_real == setRole.user_name_real).first()
+                if sd_user:
+                    lastname = sd_user.lastname
+                    firstname = sd_user.firstname
+                    self.next_officer_in_charge_cbox.addItem(lastname + ", " + firstname, sd_user.user_id)
 

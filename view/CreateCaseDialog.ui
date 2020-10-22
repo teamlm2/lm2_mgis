@@ -676,9 +676,9 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>0</y>
+       <y>-2</y>
        <width>381</width>
-       <height>141</height>
+       <height>145</height>
       </rect>
      </property>
      <property name="title">
@@ -688,7 +688,7 @@
       <property name="geometry">
        <rect>
         <x>87</x>
-        <y>19</y>
+        <y>17</y>
         <width>241</width>
         <height>21</height>
        </rect>
@@ -701,7 +701,7 @@
       <property name="geometry">
        <rect>
         <x>8</x>
-        <y>21</y>
+        <y>19</y>
         <width>101</width>
         <height>16</height>
        </rect>
@@ -717,7 +717,7 @@
       <property name="geometry">
        <rect>
         <x>332</x>
-        <y>17</y>
+        <y>15</y>
         <width>40</width>
         <height>25</height>
        </rect>
@@ -740,7 +740,7 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>64</y>
+        <y>62</y>
         <width>361</width>
         <height>22</height>
        </rect>
@@ -750,7 +750,7 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>94</y>
+        <y>89</y>
         <width>361</width>
         <height>22</height>
        </rect>
@@ -760,7 +760,7 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>44</y>
+        <y>42</y>
         <width>231</width>
         <height>17</height>
        </rect>
@@ -769,17 +769,14 @@
        <string>ГНС-н ангилал солих</string>
       </property>
      </widget>
-     <widget class="QLabel" name="workflow_label">
+     <widget class="QComboBox" name="workflow_cbox">
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>120</y>
+        <y>117</y>
         <width>361</width>
-        <height>16</height>
+        <height>22</height>
        </rect>
-      </property>
-      <property name="text">
-       <string>Parcel Shapefile</string>
       </property>
      </widget>
     </widget>
@@ -787,7 +784,7 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>142</y>
+       <y>145</y>
        <width>381</width>
        <height>16</height>
       </rect>
@@ -994,7 +991,7 @@
       </rect>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="import_parcels_tab">
       <attribute name="title">
@@ -1042,6 +1039,43 @@
        </column>
       </widget>
      </widget>
+    </widget>
+    <widget class="QTableWidget" name="overlap_parcels_twidget">
+     <property name="geometry">
+      <rect>
+       <x>400</x>
+       <y>318</y>
+       <width>381</width>
+       <height>131</height>
+      </rect>
+     </property>
+     <attribute name="horizontalHeaderDefaultSectionSize">
+      <number>105</number>
+     </attribute>
+     <column>
+      <property name="text">
+       <string>Parcel ID</string>
+      </property>
+      <property name="textAlignment">
+       <set>AlignLeft|AlignVCenter</set>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Overlaps Area</string>
+      </property>
+      <property name="textAlignment">
+       <set>AlignLeft|AlignVCenter</set>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Landuse Type</string>
+      </property>
+      <property name="textAlignment">
+       <set>AlignLeft|AlignVCenter</set>
+      </property>
+     </column>
     </widget>
    </widget>
    <widget class="QWidget" name="tab_2">
