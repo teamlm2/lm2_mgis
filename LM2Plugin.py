@@ -43,6 +43,7 @@ from model.SetUserGroupRole import *
 from controller.ManageParcelRecordsDialog import *
 from controller.DatabaseDump import *
 from controller.WebgisUtilityDialog import *
+from controller.PdfInsertDialog import *
 from view.resources_rc import *
 import qgis.core
 from qgis.core import QgsRasterLayer
@@ -107,6 +108,9 @@ class LM2Plugin:
         self.admin_settings_action = QAction(QIcon(":/plugins/lm2/land_office_admin.png"), QApplication.translate("Plugin", "Administrative Settings"), self.iface.mainWindow())
         self.help_action = QAction(QIcon(":/plugins/lm2/help_button.png"), QApplication.translate("Plugin", "Help"), self.iface.mainWindow())
         self.create_case_action = QAction(QIcon(":/plugins/lm2/case.png"), QApplication.translate("Plugin", "Create Maintenance Case"), self.iface.mainWindow())
+        self.import_data_action = QAction(QIcon(":/plugins/lm2/case.png"),
+                                          QApplication.translate("Plugin", "Convert Data"),
+                                          self.iface.mainWindow())
         self.person_action = QAction(QIcon(":/plugins/lm2/person.png"), QApplication.translate("Plugin", "Add Person"), self.iface.mainWindow())
 
         self.applications_action = QAction(QIcon(":/plugins/lm2/application.png"), QApplication.translate("Plugin", "Add Application"), self.iface.mainWindow())
@@ -199,6 +203,8 @@ class LM2Plugin:
         self.ownership_action.triggered.connect(self.__show_ownership_dialog)
         self.mark_apps_action.triggered.connect(self.__mark_apps_as_send_to_govenor)
         self.create_case_action.triggered.connect(self.__show_create_case_dialog)
+        self.import_data_action.triggered.connect(self.__show_import_data_dialog)
+
         self.import_decision_action.triggered.connect(self.__show_import_decision_dialog)
         self.document_action.triggered.connect(self.__show_documents_dialog)
         self.about_action.triggered.connect(self.__show_about_dialog)
@@ -278,6 +284,7 @@ class LM2Plugin:
         self.cadastre_menu.addAction(self.print_cadastre_map_action)
         self.cadastre_menu.addAction(self.create_case_action)
         self.cadastre_menu.addSeparator()
+        self.cadastre_menu.addAction(self.import_data_action)
 
         # self.toolButton = QToolButton()
         #
@@ -472,6 +479,12 @@ class LM2Plugin:
 
         dlg = WebgisUtilityDialog()
         dlg.exec_()
+
+    def __show_import_data_dialog(self):
+
+        dlg = PdfInsertDialog()
+        dlg.exec_()
+
 
     def __show_create_case_dialog(self):
 
