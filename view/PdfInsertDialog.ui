@@ -19,7 +19,7 @@
      <x>10</x>
      <y>5</y>
      <width>711</width>
-     <height>491</height>
+     <height>511</height>
     </rect>
    </property>
    <property name="currentIndex">
@@ -368,7 +368,7 @@
       <string/>
      </property>
      <property name="icon">
-      <iconset resource="../../lm2_mgis/view/resources.qrc">
+      <iconset resource="resources.qrc">
        <normaloff>:/plugins/lm2/open.png</normaloff>:/plugins/lm2/open.png</iconset>
      </property>
      <property name="autoDefault">
@@ -391,7 +391,7 @@
       <string/>
      </property>
      <property name="icon">
-      <iconset resource="../../lm2_mgis/view/resources.qrc">
+      <iconset resource="resources.qrc">
        <normaloff>:/plugins/lm2/open.png</normaloff>:/plugins/lm2/open.png</iconset>
      </property>
      <property name="autoDefault">
@@ -404,8 +404,91 @@
        <x>10</x>
        <y>70</y>
        <width>691</width>
-       <height>381</height>
+       <height>387</height>
       </rect>
+     </property>
+     <column>
+      <property name="text">
+       <string>Parcel ID</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Land Use</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Register</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>MiddleName</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Surname</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Name</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>HeID</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>GaID</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>ZovshBaig</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Zovshshiid</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>ZovshDate</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>GerchID</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>DuusDate</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>GerDate</string>
+      </property>
+     </column>
+    </widget>
+    <widget class="QPushButton" name="import_data_button">
+     <property name="geometry">
+      <rect>
+       <x>620</x>
+       <y>460</y>
+       <width>75</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Хөрвүүлэх</string>
      </property>
     </widget>
    </widget>
@@ -413,7 +496,7 @@
   <widget class="QPushButton" name="close_button">
    <property name="geometry">
     <rect>
-     <x>640</x>
+     <x>632</x>
      <y>520</y>
      <width>75</width>
      <height>23</height>
@@ -428,7 +511,7 @@
     <rect>
      <x>10</x>
      <y>527</y>
-     <width>621</width>
+     <width>611</width>
      <height>16</height>
     </rect>
    </property>
@@ -438,7 +521,7 @@
   </widget>
  </widget>
  <resources>
-  <include location="../../lm2_mgis/view/resources.qrc"/>
+  <include location="resources.qrc"/>
  </resources>
  <connections/>
 </ui>

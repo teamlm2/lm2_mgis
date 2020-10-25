@@ -37,6 +37,11 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
         self.progressBar.setMinimum(1)
         self.progressBar.setValue(0)
 
+        self.import_data_twidget.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.import_data_twidget.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.import_data_twidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.import_data_twidget.setSortingEnabled(True)
+
     @pyqtSlot()
     def on_select_file_button_clicked(self):
 
@@ -438,7 +443,7 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
             file_path = QFileInfo(selected_file).filePath()
             self.file_path = file_path
             self.load_shp_edit.setText(file_path)
-            self.__read_shp_file(file_path)
+            # self.__read_shp_file(file_path)
             self.load_shp_button.setEnabled(False)
 
     @pyqtSlot()
@@ -503,8 +508,102 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
         for curr_row in range(worksheet.nrows - 1):
             curr_row = curr_row + 1
             row = worksheet.row(curr_row)
-            surname = worksheet.cell_value(curr_row, 0)
-            print surname
+            parcel_id = worksheet.cell_value(curr_row, 1)
+            old_parcel_id = worksheet.cell_value(curr_row, 2)
+            landuse = worksheet.cell_value(curr_row, 3)
+            horoo = worksheet.cell_value(curr_row, 4)
+            gudamj = worksheet.cell_value(curr_row, 5)
+            hashaa = worksheet.cell_value(curr_row, 6)
+            register = worksheet.cell_value(curr_row, 7)
+            middlename = worksheet.cell_value(curr_row, 8)
+            ovog = worksheet.cell_value(curr_row, 9)
+            ner = worksheet.cell_value(curr_row, 10)
+            utas1 = worksheet.cell_value(curr_row, 11)
+            utas2 = worksheet.cell_value(curr_row, 12)
+            heid = worksheet.cell_value(curr_row, 13)
+            gaid = worksheet.cell_value(curr_row, 14)
+            zovshbaig = worksheet.cell_value(curr_row, 15)
+            shovshshiid = worksheet.cell_value(curr_row, 16)
+            zovshdate = worksheet.cell_value(curr_row, 17)
+            gerchid = worksheet.cell_value(curr_row, 18)
+            duusdate = worksheet.cell_value(curr_row, 19)
+            tailbar = worksheet.cell_value(curr_row, 20)
+            gerid = worksheet.cell_value(curr_row, 21)
+            gerdate = worksheet.cell_value(curr_row, 22)
+
+            self.import_data_twidget.insertRow(count)
+
+            item = QTableWidgetItem(str(parcel_id))
+            item.setData(Qt.UserRole, parcel_id)
+            item.setFlags(QtCore.Qt.ItemIsEnabled)
+            self.import_data_twidget.setItem(count, 0, item)
+
+            item = QTableWidgetItem(str(landuse))
+            item.setData(Qt.UserRole, landuse)
+            item.setFlags(QtCore.Qt.ItemIsEnabled)
+            self.import_data_twidget.setItem(count, 1, item)
+
+            item = QTableWidgetItem(unicode(register))
+            item.setData(Qt.UserRole, register)
+            item.setFlags(QtCore.Qt.ItemIsEnabled)
+            self.import_data_twidget.setItem(count, 2, item)
+
+            item = QTableWidgetItem(unicode(middlename))
+            item.setData(Qt.UserRole, middlename)
+            item.setFlags(QtCore.Qt.ItemIsEnabled)
+            self.import_data_twidget.setItem(count, 3, item)
+
+            item = QTableWidgetItem(unicode(ovog))
+            item.setData(Qt.UserRole, ovog)
+            item.setFlags(QtCore.Qt.ItemIsEnabled)
+            self.import_data_twidget.setItem(count, 4, item)
+
+            item = QTableWidgetItem(unicode(ner))
+            item.setData(Qt.UserRole, ner)
+            item.setFlags(QtCore.Qt.ItemIsEnabled)
+            self.import_data_twidget.setItem(count, 5, item)
+
+            item = QTableWidgetItem(unicode(heid))
+            item.setData(Qt.UserRole, heid)
+            item.setFlags(QtCore.Qt.ItemIsEnabled)
+            self.import_data_twidget.setItem(count, 6, item)
+
+            item = QTableWidgetItem(unicode(gaid))
+            item.setData(Qt.UserRole, gaid)
+            item.setFlags(QtCore.Qt.ItemIsEnabled)
+            self.import_data_twidget.setItem(count, 7, item)
+
+            item = QTableWidgetItem(unicode(zovshbaig))
+            item.setData(Qt.UserRole, zovshbaig)
+            item.setFlags(QtCore.Qt.ItemIsEnabled)
+            self.import_data_twidget.setItem(count, 8, item)
+
+            item = QTableWidgetItem(unicode(shovshshiid))
+            item.setData(Qt.UserRole, shovshshiid)
+            item.setFlags(QtCore.Qt.ItemIsEnabled)
+            self.import_data_twidget.setItem(count, 9, item)
+
+            item = QTableWidgetItem(unicode(zovshdate))
+            item.setData(Qt.UserRole, zovshdate)
+            item.setFlags(QtCore.Qt.ItemIsEnabled)
+            self.import_data_twidget.setItem(count, 10, item)
+
+            item = QTableWidgetItem(unicode(gerchid))
+            item.setData(Qt.UserRole, gerchid)
+            item.setFlags(QtCore.Qt.ItemIsEnabled)
+            self.import_data_twidget.setItem(count, 11, item)
+
+            item = QTableWidgetItem(unicode(duusdate))
+            item.setData(Qt.UserRole, duusdate)
+            item.setFlags(QtCore.Qt.ItemIsEnabled)
+            self.import_data_twidget.setItem(count, 12, item)
+
+            item = QTableWidgetItem(unicode(gerdate))
+            item.setData(Qt.UserRole, gerdate)
+            item.setFlags(QtCore.Qt.ItemIsEnabled)
+            self.import_data_twidget.setItem(count, 13, item)
+
+            count += 1
 
     def __get_attribute(self, parcel_feature, layer):
 
@@ -526,3 +625,12 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
         #     landuse = self.session.query(ClLanduseType).filter(ClLanduseType.code == column_names[column_name_landuse]).one()
         #
         return landuse
+
+    @pyqtSlot()
+    def on_import_data_button_clicked(self):
+
+        file_path = self.load_shp_edit.text()
+        self.__read_shp_file(file_path)
+
+
+
