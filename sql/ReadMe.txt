@@ -31,6 +31,7 @@ pg_dump -U geodb_admin -Fc -a -t settings.set_base* -t settings.set*zone darkhan
 
 
 pg_dump -U postgres -Fc -n data_plan lm_0003 > /home/administrator/data_plan_20191014.dump
+pg_dump -U postgres -h 192.168.15.6 -Fc -n data_address lm_0003 > D:/data_address.dump
 
 postgres -D D:\work\pg_data
 

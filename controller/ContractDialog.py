@@ -2726,11 +2726,11 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         }
 
         tpl.render(context)
-
+        contract_no = contract_no.replace('/', '')
         # try:
-        tpl.save(default_path + "/" + contract_no[:-6] + '-' + contract_no[-5:] + ".docx")
+        tpl.save(default_path + "/" +contract_no + ".docx")
         QDesktopServices.openUrl(
-            QUrl.fromLocalFile(default_path + "/" + contract_no[:-6] + '-' + contract_no[-5:] + ".docx"))
+            QUrl.fromLocalFile(default_path + "/" + contract_no + ".docx"))
         # except IOError, e:
         #     PluginUtils.show_error(self, self.tr("Out error"),
         #                            self.tr("This file is already opened. Please close re-run"))
