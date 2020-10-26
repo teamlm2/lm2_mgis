@@ -39,6 +39,7 @@ from ..model.StWorkflow import *
 from ..model.StWorkflowStatusLanduse import *
 from ..model.ClLanduseMovementStatus import *
 from ..model.StWorkflowStatus import *
+from ..model.CaLanduseMaintenanceStatus import *
 import urllib
 import urllib2
 import json
@@ -60,6 +61,7 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
         self.plugin = plugin
         self.ca_maintenance_case = m_case
         self.attribute_update = attribute_update
+
         self.session = SessionHandler().session_instance()
         self.is_file_import = False
         self.file_path = None
@@ -1766,6 +1768,7 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
             selected_file = file_dialog.selectedFiles()[0]
             file_path = QFileInfo(selected_file).filePath()
             self.file_path = file_path
+            self.landuse_parcel_shape_edit.clear()
             self.landuse_parcel_shape_edit.setText(file_path)
             self.__import_landuse_parcels(file_path)
             self.open_landuse_parcel_file_button.setEnabled(False)
@@ -2092,6 +2095,23 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
                     self.session.add(new_case)
                     self.session.flush()
                     new_case_id = new_case.id
+
+                    status_id = 1
+                    status = self.session.query(ClLanduseMovementStatus).filter(ClLanduseMovementStatus.code == status_id).one()
+                    status_new = CaLanduseMaintenanceStatus()
+                    status_new.case_id = new_case_id
+                    status_new.status_date = self.status_date_date.dateTime().toString(
+                        Constants.DATABASE_DATETIME_FORMAT)
+                    status_new.officer_in_charge_ref = DatabaseUtils.current_sd_user()
+                    status_new.officer_in_charge = DatabaseUtils.current_sd_user().user_id
+                    status_new.next_officer_in_charge = DatabaseUtils.current_sd_user().user_id
+                    status_new.next_officer_in_charge_ref = DatabaseUtils.current_sd_user()
+                    status_new.status_id = status_id
+                    status_new.status_ref = status
+                    self.session.add(status_new)
+                    self.session.flush()
+                    self.__case_status(status_new)
+
             else:
                 return
 
@@ -2146,6 +2166,30 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
             self.workflow_cbox.clear()
             self.workflow_cbox.addItem(workflow.name, workflow.id)
             self.__case_parcels_mapping(case_id)
+            values = self.session.query(CaLanduseMaintenanceStatus).filter(
+                CaLanduseMaintenanceStatus.case_id == case_id).all()
+            print len(values)
+            if len(values) == 0:
+                status_id = 1
+                status = self.session.query(ClLanduseMovementStatus).filter(
+                    ClLanduseMovementStatus.code == status_id).one()
+                status_new = CaLanduseMaintenanceStatus()
+                status_new.case_id = case_id
+                status_new.status_date = self.status_date_date.dateTime().toString(
+                    Constants.DATABASE_DATETIME_FORMAT)
+                status_new.officer_in_charge_ref = DatabaseUtils.current_sd_user()
+                status_new.officer_in_charge = DatabaseUtils.current_sd_user().user_id
+                status_new.next_officer_in_charge = DatabaseUtils.current_sd_user().user_id
+                status_new.next_officer_in_charge_ref = DatabaseUtils.current_sd_user()
+                status_new.status_id = status_id
+                status_new.status_ref = status
+                self.session.add(status_new)
+                self.session.flush()
+            self.movement_status_twidget.setRowCount(0)
+            values = self.session.query(CaLanduseMaintenanceStatus).filter(
+                CaLanduseMaintenanceStatus.case_id == case_id).all()
+            for value in values:
+                self.__case_status(value)
 
     def __get_attribute(self, parcel_feature, layer):
 
@@ -2383,3 +2427,66 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
                     firstname = sd_user.firstname
                     self.next_officer_in_charge_cbox.addItem(lastname + ", " + firstname, sd_user.user_id)
 
+    def __case_status(self, value):
+
+        # values = self.session.query(CaLanduseMaintenanceStatus).filter(CaLanduseMaintenanceStatus.case_id == case_id).all()
+        # for value in values:
+        status_count = self.session.query(ClLanduseMovementStatus).filter(ClLanduseMovementStatus.code == value.status_id).count()
+        if status_count == 1:
+            status = self.session.query(ClLanduseMovementStatus).filter(
+                ClLanduseMovementStatus.code == value.status_id).one()
+
+            row = self.movement_status_twidget.rowCount()
+            self.movement_status_twidget.insertRow(row)
+
+            item_status = QTableWidgetItem(unicode(status.description))
+            item_status.setData(Qt.UserRole, status.code)
+            item_status.setData(Qt.UserRole + 1, value.id)
+
+            item_date = QTableWidgetItem(str(value.status_date))
+            item_status.setData(Qt.UserRole, value.status_date)
+
+            if value.next_officer_in_charge_ref:
+                next_officer = value.next_officer_in_charge_ref.lastname + ", " + value.next_officer_in_charge_ref.firstname
+                officer = value.officer_in_charge_ref.lastname + ", " + value.officer_in_charge_ref.firstname
+
+                item_next_officer = QTableWidgetItem(next_officer)
+                item_next_officer.setData(Qt.UserRole, value.next_officer_in_charge)
+                # if value.status_ref.color:
+                #     item_next_officer.setBackground(QtGui.QColor(value.status_ref.color))
+
+                item_officer = QTableWidgetItem(officer)
+                item_officer.setData(Qt.UserRole, value.officer_in_charge)
+                # if value.status_ref.color:
+                #     item_officer.setBackground(QtGui.QColor(value.status_ref.color))
+
+                self.movement_status_twidget.setItem(row, 0, item_status)
+                self.movement_status_twidget.setItem(row, 1, item_date)
+                self.movement_status_twidget.setItem(row, 2, item_officer)
+                self.movement_status_twidget.setItem(row, 3, item_next_officer)
+
+    @pyqtSlot()
+    def on_status_add_button_clicked(self):
+
+        next_officer_username = self.next_officer_in_charge_cbox.itemData(
+            self.next_officer_in_charge_cbox.currentIndex(), Qt.UserRole)
+        sd_next_officer = self.session.query(SdUser).filter(SdUser.user_id == next_officer_username).one()
+
+        case_id = self.landuse_maintenance_cbox.itemData(self.landuse_maintenance_cbox.currentIndex())
+        status_id = self.status_cbox.itemData(self.status_cbox.currentIndex())
+        status = self.session.query(ClLanduseMovementStatus).filter(ClLanduseMovementStatus.code == status_id).one()
+
+        status_new = CaLanduseMaintenanceStatus()
+        status_new.case_id = case_id
+
+        status_new.officer_in_charge_ref = DatabaseUtils.current_sd_user()
+        status_new.officer_in_charge = DatabaseUtils.current_sd_user().user_id
+        status_new.next_officer_in_charge = sd_next_officer.user_id
+        status_new.next_officer_in_charge_ref = sd_next_officer
+
+        status_new.status_id = status_id
+        status_new.status_ref = status
+
+        self.session.add(status_new)
+        self.session.flush()
+        self.__case_status(status_new)

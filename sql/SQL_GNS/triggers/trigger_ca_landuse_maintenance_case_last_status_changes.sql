@@ -3,7 +3,7 @@
 $BODY$
 BEGIN        
         if (TG_OP = 'INSERT') THEN
-                EXECUTE 'update data_landuse.ca_landuse_maintenance_case set status_id = ' || NEW.status || 'where id =' || NEW.case_id;
+                EXECUTE 'update data_landuse.ca_landuse_maintenance_case set status_id = ' || NEW.status_id || 'where id =' || NEW.case_id;
         ELSIF (TG_OP = 'DELETE') THEN
                 EXECUTE 'update data_landuse.ca_landuse_maintenance_case set status_id = (select status_id from data_landuse.ca_landuse_maintenance_status
                                                                                         where case_id = '|| OLD.case_id ||'

@@ -6,13 +6,13 @@ from geoalchemy2 import Geometry
 from ClLanduseType import *
 from SetRole import *
 from SetSurveyor import *
+from CaLanduseMaintenanceStatus import *
 from StWorkflow import *
 
 parcel_table = Table('ca_landuse_parcel_maintenance_case', Base.metadata,
                         Column('case_id', Integer, ForeignKey('ca_landuse_maintenance_case.id')),
                         Column('landuse_parcel', String, ForeignKey('ca_landuse_type_tbl.parcel_id'))
                     )
-
 
 class CaLanduseMaintenanceCase(Base):
 
