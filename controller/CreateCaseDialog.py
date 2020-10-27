@@ -2078,7 +2078,15 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
                 if ok:
                     workflow_code, workflow_desc = item.split(':-')
 
+                    status_id = 1
                     workflow = self.session.query(StWorkflow).filter(StWorkflow.code == workflow_code).first()
+                    count = self.session.query(StWorkflowStatus). \
+                        filter(StWorkflowStatus.workflow_id == workflow.id).count()
+                    if count > 0:
+                        workflow_status = self.session.query(StWorkflowStatus).\
+                            filter(StWorkflowStatus.workflow_id == workflow.id).order_by(StWorkflowStatus.prev_status_id.asc()).first()
+                        status_id = workflow_status.prev_status_id
+
                     status = self.session.query(ClLanduseMovementStatus).order_by(
                         ClLanduseMovementStatus.code.asc()).first()
 
@@ -2096,7 +2104,7 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
                     self.session.flush()
                     new_case_id = new_case.id
 
-                    status_id = 1
+
                     status = self.session.query(ClLanduseMovementStatus).filter(ClLanduseMovementStatus.code == status_id).one()
                     status_new = CaLanduseMaintenanceStatus()
                     status_new.case_id = new_case_id
@@ -2168,9 +2176,17 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
             self.__case_parcels_mapping(case_id)
             values = self.session.query(CaLanduseMaintenanceStatus).filter(
                 CaLanduseMaintenanceStatus.case_id == case_id).all()
-            print len(values)
+
             if len(values) == 0:
                 status_id = 1
+                count = self.session.query(StWorkflowStatus). \
+                    filter(StWorkflowStatus.workflow_id == workflow.id).count()
+                if count > 0:
+                    workflow_status = self.session.query(StWorkflowStatus). \
+                        filter(StWorkflowStatus.workflow_id == workflow.id).order_by(
+                        StWorkflowStatus.prev_status_id.asc()).first()
+                    status_id = workflow_status.prev_status_id
+
                 status = self.session.query(ClLanduseMovementStatus).filter(
                     ClLanduseMovementStatus.code == status_id).one()
                 status_new = CaLanduseMaintenanceStatus()
@@ -2478,7 +2494,7 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
 
         status_new = CaLanduseMaintenanceStatus()
         status_new.case_id = case_id
-
+        status_new.status_date = self.status_date_date.dateTime().toString(Constants.DATABASE_DATETIME_FORMAT)
         status_new.officer_in_charge_ref = DatabaseUtils.current_sd_user()
         status_new.officer_in_charge = DatabaseUtils.current_sd_user().user_id
         status_new.next_officer_in_charge = sd_next_officer.user_id
