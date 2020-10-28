@@ -24,3 +24,10 @@ vacuum full data_soums_union.ct_application;
 
 vacuum full data_landuse.ca_landuse_type_tbl;
 vacuum full data_soums_union."ca_parcel_tbl";
+
+Select * from pg_stat_activity where state='idle';
+
+SELECT pg_terminate_backend(pid) FROM pg_stat_activity
+WHERE datname = 'lm_0003'
+AND pid <> pg_backend_pid()
+AND state in ('idle');
