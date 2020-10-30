@@ -14,7 +14,7 @@ DECLARE
     v_utmsrid integer;
     id text;
     value_array text array;
-    is_insert_count = integer;
+    is_insert_count integer;
 BEGIN
     IF (parcel_id is  null) THEN
       RAISE exception '%', 'parcel id is null!';
@@ -35,63 +35,69 @@ BEGIN
       RAISE EXCEPTION '%','SRID not found';
     END IF;
 
-    IF (geometry IS NOT NULL) THEN			
+    IF (geometry IS NOT NULL) THEN	
 
-	EXECUTE 'with new_numbers as (
-			WITH gns AS (
-				select l.parcel_id, st_makevalid(l.geometry) as geometry from data_landuse.ca_landuse_type_tbl l
-				where l.is_active = true and st_intersects(l.geometry, ST_GeomFromText('''||ST_AsText(geometry)||'''::text, 4326))
-				)
-			SELECT parcel_id, 
-			(ST_DUMP(ST_Difference(
-						f.geometry,        
-						(
-							select (ST_GeomFromText('''||ST_AsText(geometry)||'''::text, 4326)::geometry(Polygon, 4326))
-						)
-					))).geom::geometry(Polygon,4326) as geometry
-			FROM gns f
-		)
-		update data_landuse.ca_landuse_type_tbl
-		  set is_active = false, valid_till = now(), is_overlaps_historiy = true
-		from new_numbers s
-		where data_landuse.ca_landuse_type_tbl.parcel_id = s.parcel_id and not st_equals(data_landuse.ca_landuse_type_tbl.geometry, s.geometry);';		
+	EXECUTE 'select count(p.parcel_id) from data_landuse.ca_landuse_type_tbl p
+		where p.is_active = true and st_intersects((ST_GeomFromText('''||ST_AsText(geometry)||'''::text, 4326)), (p.geometry))
+		and base.calculate_area_utm(ST_intersection(ST_GeomFromText('''||ST_AsText(geometry)||'''::text, 4326), p.geometry)) = base.calculate_area_utm(ST_GeomFromText('''||ST_AsText(geometry)||'''::text, 4326)) 
+		and st_x(st_centroid(ST_GeomFromText('''||ST_AsText(geometry)||'''::text, 4326)))::text = st_x(st_centroid(p.geometry))::text; ' INTO is_insert_count;
+	
+	IF (is_insert_count = 0) THEN
+		EXECUTE 'with new_numbers as (
+				WITH gns AS (
+					select l.parcel_id, st_makevalid(l.geometry) as geometry from data_landuse.ca_landuse_type_tbl l
+					where l.is_active = true and st_intersects(l.geometry, ST_GeomFromText('''||ST_AsText(geometry)||'''::text, 4326))
+					)
+				SELECT parcel_id, 
+				(ST_DUMP(ST_Difference(
+							f.geometry,        
+							(
+								select (ST_GeomFromText('''||ST_AsText(geometry)||'''::text, 4326)::geometry(Polygon, 4326))
+							)
+						))).geom::geometry(Polygon,4326) as geometry
+				FROM gns f
+			)
+			update data_landuse.ca_landuse_type_tbl
+			  set is_active = false, valid_till = now(), is_overlaps_historiy = true
+			from new_numbers s
+			where data_landuse.ca_landuse_type_tbl.parcel_id = s.parcel_id and not st_equals(data_landuse.ca_landuse_type_tbl.geometry, s.geometry);';		
 
-	EXECUTE 'insert into data_landuse.ca_landuse_type_tbl(is_active, landuse, landuse_level1, landuse_level2, address_khashaa, address_streetname, address_neighbourhood, geometry)			
-			WITH gns AS (
-				select l.parcel_id, st_makevalid(l.geometry) as geometry, l.landuse, landuse_level1, landuse_level2, address_khashaa, address_streetname, address_neighbourhood from data_landuse.ca_landuse_type_tbl l
-				where l.is_overlaps_historiy = true and st_intersects(l.geometry, ST_GeomFromText('''||ST_AsText(geometry)||'''::text, 4326))
-				)
-			SELECT true, landuse, landuse_level1, landuse_level2, address_khashaa, address_streetname, address_neighbourhood, 
-			(ST_DUMP(ST_Difference(
-						f.geometry,        
-						(
-							select (ST_GeomFromText('''||ST_AsText(geometry)||'''::text, 4326)::geometry(Polygon, 4326))
-						)
-					))).geom::geometry(Polygon,4326) as geometry
-			FROM gns f;';
+		EXECUTE 'insert into data_landuse.ca_landuse_type_tbl(is_active, landuse, landuse_level1, landuse_level2, address_khashaa, address_streetname, address_neighbourhood, geometry)			
+				WITH gns AS (
+					select l.parcel_id, st_makevalid(l.geometry) as geometry, l.landuse, landuse_level1, landuse_level2, address_khashaa, address_streetname, address_neighbourhood from data_landuse.ca_landuse_type_tbl l
+					where l.is_overlaps_historiy = true and st_intersects(l.geometry, ST_GeomFromText('''||ST_AsText(geometry)||'''::text, 4326))
+					)
+				SELECT true, landuse, landuse_level1, landuse_level2, address_khashaa, address_streetname, address_neighbourhood, 
+				(ST_DUMP(ST_Difference(
+							f.geometry,        
+							(
+								select (ST_GeomFromText('''||ST_AsText(geometry)||'''::text, 4326)::geometry(Polygon, 4326))
+							)
+						))).geom::geometry(Polygon,4326) as geometry
+				FROM gns f;';
 
-	EXECUTE 'insert into data_landuse.ca_landuse_type_tbl (is_active, landuse, geometry) values(true, '''||landuse||''', ST_GeomFromText('''||ST_AsText(geometry)||'''::text, 4326));';
+		EXECUTE 'insert into data_landuse.ca_landuse_type_tbl (is_active, landuse, geometry) values(true, '''||landuse||''', ST_GeomFromText('''||ST_AsText(geometry)||'''::text, 4326));';
 
-	EXECUTE 'with new_numbers as (
-			WITH gns AS (
-				select l.parcel_id, st_makevalid(l.geometry) as geometry from data_landuse.ca_landuse_type_tbl l
-				where l.is_overlaps_historiy = true and st_intersects(l.geometry, ST_GeomFromText('''||ST_AsText(geometry)||'''::text, 4326))
-				)
-			SELECT parcel_id, 
-			(ST_DUMP(ST_Difference(
-						f.geometry,        
-						(
-							select (ST_GeomFromText('''||ST_AsText(geometry)||'''::text, 4326)::geometry(Polygon, 4326))
-						)
-					))).geom::geometry(Polygon,4326) as geometry
-			FROM gns f
-		)
-		update data_landuse.ca_landuse_type_tbl
-		  set is_overlaps_historiy = false
-		from new_numbers s
-		where data_landuse.ca_landuse_type_tbl.parcel_id = s.parcel_id;';	
+		EXECUTE 'with new_numbers as (
+				WITH gns AS (
+					select l.parcel_id, st_makevalid(l.geometry) as geometry from data_landuse.ca_landuse_type_tbl l
+					where l.is_overlaps_historiy = true and st_intersects(l.geometry, ST_GeomFromText('''||ST_AsText(geometry)||'''::text, 4326))
+					)
+				SELECT parcel_id, 
+				(ST_DUMP(ST_Difference(
+							f.geometry,        
+							(
+								select (ST_GeomFromText('''||ST_AsText(geometry)||'''::text, 4326)::geometry(Polygon, 4326))
+							)
+						))).geom::geometry(Polygon,4326) as geometry
+				FROM gns f
+			)
+			update data_landuse.ca_landuse_type_tbl
+			  set is_overlaps_historiy = false
+			from new_numbers s
+			where data_landuse.ca_landuse_type_tbl.parcel_id = s.parcel_id;';	
 
-				
+		END IF;			
 	END IF;
 	return landuse;
 END;
@@ -111,7 +117,7 @@ select p.* from data_landuse.ca_tmp_landuse_type_tbl t, data_landuse.ca_landuse_
 where st_equals(p.geometry, t.geometry) and t.parcel_id = 6 order by is_active
 
 select st_x(st_centroid(t.geometry)), st_x(st_centroid(p.geometry)) from data_landuse.ca_tmp_landuse_type_tbl t, data_landuse.ca_landuse_type_tbl p
-where p.is_active = true and st_intersects((t.geometry), (p.geometry)) and t.parcel_id = 5
+where p.is_active = true and st_intersects((t.geometry), (p.geometry)) and t.parcel_id = 6
 and base.calculate_area_utm(ST_intersection(t.geometry, p.geometry)) = base.calculate_area_utm(t.geometry) 
 and st_x(st_centroid(t.geometry))::text = st_x(st_centroid(p.geometry))::text
 
