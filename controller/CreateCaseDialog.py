@@ -2031,6 +2031,8 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
 
         if state == Qt.Checked:
             self.change_shp_landuse_type_cbox.setEnabled(True)
+        else:
+            self.change_shp_landuse_type_cbox.setEnabled(False)
 
     def __save_maintenance_case_parcel(self, landuse_type_code):
 
@@ -2103,7 +2105,6 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
                     self.session.add(new_case)
                     self.session.flush()
                     new_case_id = new_case.id
-
 
                     status = self.session.query(ClLanduseMovementStatus).filter(ClLanduseMovementStatus.code == status_id).one()
                     status_new = CaLanduseMaintenanceStatus()
@@ -2506,3 +2507,16 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
         self.session.add(status_new)
         self.session.flush()
         self.__case_status(status_new)
+        if status.is_confirm:
+            self.__finish_case_parcels(case_id)
+
+    def __finish_case_parcels(self, case_id):
+
+        parcels = self.session.query(CaTmpLanduseTypeTbl).filter(CaTmpLanduseTypeTbl.case_id == case_id).all()
+
+        for parcel in parcels:
+            parcel_id = parcel.parcel_id
+
+            sql = "select base.intersectoin_diffrence_case_tmp_parcels(" + str(parcel_id) + ");"
+            result = self.session.execute(sql)
+            # for item_row in result:

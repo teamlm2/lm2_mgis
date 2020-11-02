@@ -1475,6 +1475,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         #     layer.SetFeature(parcel_feature)  # <====== SetFeature
         #     assert parcel_feature.GetGeometryRef().IsValid()  # Doesn't fail
         if not parcel_feature.geometry():
+
             valid = False
             message = '*' + unicode(u' Геометр алдаатай.')
             error_message = error_message + "\n" + message
@@ -1483,6 +1484,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
             g = parcel_feature.geometry()
             if not g.isGeosValid():
                 valid = False
+
                 message = '*' + unicode(u' Геометр алдаатай.')
                 error_message = error_message + "\n" + message
                 self.message_label.setText(error_message)
@@ -1618,7 +1620,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
 
                         ca_ub_parcel_overlaps_count = self.session.query(CaUBParcelTbl). \
                             filter(or_(CaUBParcelTbl.valid_till == 'infinity', CaUBParcelTbl.valid_till == None)). \
-                            filter(parcel_geometry.ST_Overlaps(CaUBParcelTbl.geometry)).count()
+                            filter(parcel_geometry.ST_Intersects(CaUBParcelTbl.geometry)).count()
 
                         if ca_ub_parcel_overlaps_count > 0:
                             valid = False

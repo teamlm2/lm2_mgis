@@ -10,14 +10,14 @@ class StWorkflowStatus(Base):
     __tablename__ = 'st_workflow_status'
 
     id = Column(Integer, primary_key=True)
-    is_first = Column(Boolean)
+    # is_first = Column(Boolean)
 
     # foreign keys:
     workflow_id = Column(Integer, ForeignKey('st_workflow.id'))
     workflow_ref = relationship("StWorkflow")
 
-    prev_status_id = Column(Integer, ForeignKey('cl_landuse_movement_status.id'))
+    prev_status_id = Column(Integer, ForeignKey('cl_landuse_movement_status.code'))
     # landuse_ref = relationship("ClLanduseType")
-    next_status_id = Column(Integer, ForeignKey('cl_landuse_movement_status.id'))
+    next_status_id = Column(Integer, ForeignKey('cl_landuse_movement_status.code'))
 
 
