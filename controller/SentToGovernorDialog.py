@@ -116,7 +116,13 @@ class SentToGovernorDialog(QDialog, Ui_SentToGovernorDialog, DatabaseHelper):
 
             application_types = self.session.query(ClApplicationType).order_by(ClApplicationType.code.asc()).all()
 
-            set_roles = self.session.query(SetRole).all()
+            set_roles = None
+            organization = DatabaseUtils.current_user_organization()
+            if organization == 3:
+                set_roles = self.session.query(SetRole).order_by(SetRole.user_name)
+            else:
+                set_roles = self.session.query(SetRole).filter(SetRole.organization == organization).order_by(
+                    SetRole.user_name)
             set_role = self.session.query(SetRole).filter(SetRole.user_name_real == officers.user_name_real).one()
             aimag_code = set_role.working_au_level1
             aimag_code = aimag_code[:2]
@@ -138,16 +144,17 @@ class SentToGovernorDialog(QDialog, Ui_SentToGovernorDialog, DatabaseHelper):
             #             self.officer_cbox.addItem(role.surname + ", " + role.first_name, role)
 
             soum_code = DatabaseUtils.working_l2_code()
-            for setRole in set_roles:
-                l2_code_list = setRole.restriction_au_level2.split(',')
-                if soum_code in l2_code_list:
-                    sd_user = self.session.query(SdUser).filter(SdUser.gis_user_real == setRole.user_name_real).first()
-                    lastname = ''
-                    firstname = ''
-                    if sd_user:
-                        lastname = sd_user.lastname
-                        firstname = sd_user.firstname
-                        self.officer_cbox.addItem(lastname + ", " + firstname, sd_user.user_id)
+            if set_roles is not None:
+                for setRole in set_roles:
+                    l2_code_list = setRole.restriction_au_level2.split(',')
+                    if soum_code in l2_code_list:
+                        sd_user = self.session.query(SdUser).filter(SdUser.gis_user_real == setRole.user_name_real).first()
+                        lastname = ''
+                        firstname = ''
+                        if sd_user:
+                            lastname = sd_user.lastname
+                            firstname = sd_user.firstname
+                            self.officer_cbox.addItem(lastname + ", " + firstname, sd_user.user_id)
         except SQLAlchemyError, e:
             self.rollback_to_savepoint()
             raise LM2Exception(self.tr("Database Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
@@ -741,7 +748,9 @@ class SentToGovernorDialog(QDialog, Ui_SentToGovernorDialog, DatabaseHelper):
             PluginUtils.show_message(self, self.tr("Decision No"), self.tr("Please enter decision number!"))
             return
         au_level2 = DatabaseUtils.current_working_soum_schema()
-        year_filter = str(QDate().currentDate().toString("yyyy"))
+        # year_filter = str(QDate().currentDate().toString("yyyy"))
+        year_filter = str(self.decision_date.date().toString("yyyy"))
+        print year_filter
         num_rows, num_cols = self.draft_detail_twidget.rowCount(), self.draft_detail_twidget.columnCount()
 
         message_box = QMessageBox()

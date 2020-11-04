@@ -333,7 +333,12 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
 
         self.office_in_charge_cbox.clear()
         self.next_officer_in_charge_cbox.clear()
-        set_roles = self.session.query(SetRole).order_by(SetRole.user_name)
+        set_roles = None
+        organization = DatabaseUtils.current_user_organization()
+        if organization == 3:
+            set_roles = self.session.query(SetRole).order_by(SetRole.user_name)
+        else:
+            set_roles = self.session.query(SetRole).filter(SetRole.organization == organization).order_by(SetRole.user_name)
         soum_code = DatabaseUtils.working_l2_code()
         if set_roles is not None:
             for setRole in set_roles:

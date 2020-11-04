@@ -1035,6 +1035,7 @@ class PastureMonitoringValueDialog(QDialog, Ui_PastureMonitoringValueDialog, Dat
         ps_point_detail.land_form = land_form_code
         ps_point_detail.land_name = point_land_name
         ps_point_detail.elevation = elevation
+        ps_point_detail.au2 = DatabaseUtils.working_l2_code()
 
         self.session.add(ps_point_detail)
 

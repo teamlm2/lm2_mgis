@@ -1,7 +1,7 @@
 ﻿-- Table: data_landuse.ca_landuse_type_level2_tbl
 
 -- DROP TABLE data_landuse.ca_landuse_type_level2_tbl;
-
+set search_path to data_landuse, public;
 CREATE TABLE data_landuse.ca_landuse_type_level2_tbl
 (
   parcel_id serial NOT NULL,

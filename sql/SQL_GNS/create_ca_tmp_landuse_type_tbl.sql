@@ -1,4 +1,5 @@
-﻿DROP TABLE if exists data_landuse.ca_landuse_maintenance_case cascade;
+﻿set search_path to data_landuse, public;
+DROP TABLE if exists data_landuse.ca_landuse_maintenance_case cascade;
 
 CREATE TABLE data_landuse.ca_landuse_maintenance_case
 (

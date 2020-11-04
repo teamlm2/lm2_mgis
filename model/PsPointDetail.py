@@ -13,6 +13,7 @@ class PsPointDetail(Base):
     land_name = Column(String)
     elevation = Column(Numeric)
     scale = Column(Numeric)
+    au2 = Column(String)
 
     land_form = Column(Integer, ForeignKey('cl_land_form.code'))
     land_form_ref = relationship("ClLandForm")
