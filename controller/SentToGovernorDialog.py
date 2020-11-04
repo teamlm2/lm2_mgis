@@ -748,9 +748,9 @@ class SentToGovernorDialog(QDialog, Ui_SentToGovernorDialog, DatabaseHelper):
             PluginUtils.show_message(self, self.tr("Decision No"), self.tr("Please enter decision number!"))
             return
         au_level2 = DatabaseUtils.current_working_soum_schema()
-        # year_filter = str(QDate().currentDate().toString("yyyy"))
-        year_filter = str(self.decision_date.date().toString("yyyy"))
-        print year_filter
+        year_filter = str(QDate().currentDate().toString("yyyy"))
+        # year_filter = str(self.decision_date.date().toString("yyyy"))
+
         num_rows, num_cols = self.draft_detail_twidget.rowCount(), self.draft_detail_twidget.columnCount()
 
         message_box = QMessageBox()
@@ -771,9 +771,9 @@ class SentToGovernorDialog(QDialog, Ui_SentToGovernorDialog, DatabaseHelper):
                         PluginUtils.show_message(self, self.tr("Decision date"), self.tr("no this application: "+ app_no))
                         return
                     application = self.session.query(CtApplication).filter(CtApplication.app_no == app_no).one()
-                    if self.decision_date.date() < application.app_timestamp:
-                        PluginUtils.show_message(self, self.tr("Decision date"), self.tr("This application date "+ app_no + " must be before decision date"))
-                        return
+                    # if self.decision_date.date() < application.app_timestamp:
+                    #     PluginUtils.show_message(self, self.tr("Decision date"), self.tr("This application date "+ app_no + " must be before decision date"))
+                    #     return
                 except (DatabaseError, SQLAlchemyError), e:
                     PluginUtils.show_error(self,  self.tr("Database Error"), e.message)
                 decision_no = au_level2 + '-' + self.decision_number_edit.text() + '/' + year_filter
