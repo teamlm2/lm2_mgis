@@ -30,6 +30,8 @@ from ..model.CaParcelTbl import *
 from ..model.AuLevel1 import *
 from ..model.AuLevel2 import *
 from ..model.AuLevel3 import *
+from ..model.AuMpa import *
+from ..model.AuMpaZone import *
 from ..model.AuKhoroolol import *
 from ..model.AuZipCodeArea import *
 from ..model.StStreet import *
@@ -2358,6 +2360,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
         app_no = self.application_this_contract_based_edit.text()
         # try:
+        parcel_id = self.id_main_edit.text()
         pp = ""
         decision_date = ''
         decision_level = ''
@@ -2395,11 +2398,11 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         if not officer:
             officer = DatabaseUtils.current_employee()
 
-        if not officer:f
-        for p in app_status:
-            officer = DatabaseUtils.get_sd_employee(p.officer_in_charge);
-            if officer:
-                break
+        if not officer:
+            for p in app_status:
+                officer = DatabaseUtils.get_sd_employee(p.officer_in_charge);
+                if officer:
+                    break
 
         self.officer = officer
         app_no = self.application_this_contract_based_edit.text()
@@ -2467,8 +2470,6 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         if data:
             if data['status']:
                 for value in data['data']:
-                    print '----------'
-                    print value['payment']
                     payment = payment + value['payment']
                     base_fee = round(float(value['base_fee_per_m2']))
         local_name = " "
@@ -2477,6 +2478,8 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         address_building_no = ""
         address_entrance_no = ""
         address_apartment_no = ""
+        spa_name = ""
+        zone_type_name = ""
 
         # if person:
         if person.address_street_name != None:
@@ -2504,8 +2507,16 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         app_type = self.application_type_edit.text()[:2]
         path = FileUtils.map_file_path()
         default_path = r'D:/TM_LM2/contracts'
-        if app_type == '22':
-            tpl = DocxTemplate(path + 'geree_THGGA_DX.docx')
+        parcel = self.session.query(CaParcelTbl).filter(CaParcelTbl.parcel_id == parcel_id).one()
+        mpa_count = self.session.query(AuMpa.id) \
+            .filter(AuMpa.geometry.ST_Intersects(func.ST_Centroid(parcel.geometry))).count()
+        if mpa_count > 0:
+            mpa_zone = self.session.query(AuMpaZone) \
+                .filter(AuMpaZone.geometry.ST_Intersects(func.ST_Centroid(parcel.geometry))).one()
+            # tpl = DocxTemplate(path + 'geree_THGGA_DX.docx')
+            spa_name = mpa_zone.spa_name
+            zone_type_name = mpa_zone.zone_type_name
+            tpl = DocxTemplate(path + 'geree_spa_ashigluulah_DX.docx')
         else:
             if person.type == 10 or person.type == 20 or person.type == 30 or person.type == 40:
                 tpl = DocxTemplate(path + 'geree_ezemshix_DX.docx')
@@ -2519,11 +2530,14 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             return
 
         o_position = ''
+        contract_end_date = ''
         aimag_name = aimag.name
         soum_name = soum.name
         contract_no = self.contract_num_edit.text()
         cerificate_no = self.calculated_num_edit.text()
         contract_date = self.contract_date.text()
+        if self.contract_end_date.text():
+            contract_end_date = self.contract_end_date.text()
         contract_date_year = contract_date[0:-6]
         contract_date_month = contract_date[5:-3]
         contract_date_day = contract_date[-2:]
@@ -2535,6 +2549,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         if officer.position_ref:
             o_position = officer.position_ref.name
         company_name = ''
+        company_short_name = ''
         person_surname = ''
         person_firstname = ''
         contact_position = ''
@@ -2544,8 +2559,13 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             person_surname = person.name
             person_firstname = person.first_name
             person_full_name = person_surname + u' ' + u'овогтой'+ u' ' + person_firstname
+            company_short_name = person_surname + u' ' + u'овогтой' + u' ' + person_firstname
         elif person.type == 30 or person.type == 40 or person.type == 60 or person.type == 70:
             company_name = person.name
+            company_short_name = person.name
+            # if u"ххк" not in company_short_name.lower():
+            #     company_short_name = company_short_name + ' ' + u'ХХК'
+
             contact_position = person.contact_position
             person_surname = person.contact_surname
             person_firstname = person.contact_first_name
@@ -2588,10 +2608,12 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         department_address = ''
         head_surname = ''
         head_firstname = ''
+        department_name = ''
 
         if self.officer.department_ref:
             department = self.officer.department_ref
             department_id = department.department_id
+            department_name = department.name
 
             department_accounts = self.session.query(SdDepartmentAccount).filter(
                 SdDepartmentAccount.department_id == department_id).all()
@@ -2626,7 +2648,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
         person_email = person.email_address
         # office_phone = report_settings[Constants.REPORT_PHONE]
         # parcel_id = self.id_main_edit.text()[1:-9] + self.id_main_edit.text()[4:]
-        parcel_id = self.id_main_edit.text()
+
         sum_name_dec = ''
         sum_officer = ''
 
@@ -2635,6 +2657,9 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             sum_officer = soum.name + u' дүүрэг /сум/-ийн Газрын албаны '
         elif decision_level == 10 or decision_level == 30:
             sum_officer = u'ГХБХБГазрын газрын асуудал эрхэлсэн албан тушаалтан '
+        elif decision_level == 80:
+            sum_name_dec = soum.name + u' дүүрэг /сум/-ийн '
+            sum_officer = department_name
         if contact_position is None:
             contact_position = ''
         if company_name is None:
@@ -2670,6 +2695,7 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             'cert_no': self.calculated_num_edit.text(),
             'aimag_name': aimag_name,
             'contract_no': contract_no,
+            'contract_end_date': contract_end_date,
             'cert_no': cerificate_no,
             'c_year': time.strftime("%Y"),
             'c_month': time.strftime("%m"),
@@ -2685,10 +2711,13 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
             'o_surname': o_surname,
             'o_position': o_position,
             'company_name': company_name,
+            'company_short_name': company_short_name,
             'contact_position': contact_position,
             'person_full_name': person_full_name,
             'person_surname': person_surname,
             'person_firstname': person_firstname,
+            'spa_name': spa_name,
+            'zone_type_name': zone_type_name,
             'area_m2': area_m2,
             'landuse': landuse,
             'base_fee': base_fee,
@@ -2727,13 +2756,13 @@ class ContractDialog(QDialog, Ui_ContractDialog, DatabaseHelper):
 
         tpl.render(context)
         contract_no = contract_no.replace('/', '')
-        # try:
-        tpl.save(default_path + "/" +contract_no + ".docx")
-        QDesktopServices.openUrl(
-            QUrl.fromLocalFile(default_path + "/" + contract_no + ".docx"))
-        # except IOError, e:
-        #     PluginUtils.show_error(self, self.tr("Out error"),
-        #                            self.tr("This file is already opened. Please close re-run"))
+        try:
+            tpl.save(default_path + "/" +contract_no + ".docx")
+            QDesktopServices.openUrl(
+                QUrl.fromLocalFile(default_path + "/" + contract_no + ".docx"))
+        except IOError, e:
+            PluginUtils.show_error(self, self.tr("Out error"),
+                                   self.tr("This file is already opened. Please close re-run"))
 
     @pyqtSlot()
     def on_print_contract_button_clicked(self):

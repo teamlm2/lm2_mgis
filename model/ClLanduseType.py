@@ -14,3 +14,4 @@ class ClLanduseType(Base):
     code2 = Column(Integer)
     code1 = Column(Integer)
     description2 = Column(String)
+    parent_code = Column(Integer)

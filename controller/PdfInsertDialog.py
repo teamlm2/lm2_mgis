@@ -1,3 +1,4 @@
+# coding=utf8
 __author__ = 'ankhbold'
 
 import os
@@ -533,14 +534,21 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
 
             self.import_data_twidget.insertRow(count)
 
+
+            is_valid = self.__validate_import_data(landuse, register, middlename, ovog, ner, heid, gaid, zovshbaig, shovshshiid, zovshdate)
+            print is_valid
             item = QTableWidgetItem(str(parcel_id))
             item.setData(Qt.UserRole, parcel_id)
             item.setFlags(QtCore.Qt.ItemIsEnabled)
+            if not is_valid:
+                item.setBackground(Qt.yellow)
             self.import_data_twidget.setItem(count, 0, item)
 
             item = QTableWidgetItem(str(landuse))
             item.setData(Qt.UserRole, landuse)
             item.setFlags(QtCore.Qt.ItemIsEnabled)
+            if not is_valid:
+                item.setBackground(Qt.yellow)
             self.import_data_twidget.setItem(count, 1, item)
 
             item = QTableWidgetItem(unicode(register))
@@ -632,5 +640,80 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
         file_path = self.load_shp_edit.text()
         self.__read_shp_file(file_path)
 
+    def __validate_import_data(self, landuse, register, middlename, ovog, ner, heid, gaid, zovshbaig, shovshshiid, zovshdate):
 
+        is_valid = True
+        error_message = u''
+
+        if self.__is_number(heid):
+            heid = int(heid)
+            if heid not in [1, 2, 3, 4, 5]:
+                is_valid = False
+                message = u'Хуулийн этгээдийн төрөл буруу'
+                error_message = error_message + "\n" + message
+        else:
+            is_valid = False
+            message = u'Хуулийн этгээдийн төрөл буруу'
+            error_message = error_message + "\n" + message
+
+        if self.__is_number(gaid):
+            gaid = int(gaid)
+            if gaid not in [1, 2, 3]:
+                is_valid = False
+                message = u'Эрхийн төрөл буруу'
+                error_message = error_message + "\n" + message
+        else:
+            is_valid = False
+            message = u'Эрхийн төрөл буруу'
+            error_message = error_message + "\n" + message
+
+        if self.__is_number(landuse):
+            landuse = int(landuse)
+            count = self.session.query(ClLanduseType).\
+                filter(ClLanduseType.code == landuse).\
+                filter(ClLanduseType.parent_code == None).count()
+            if count == 0:
+                is_valid = False
+                message = u'Зориулалт буруу байна'
+                error_message = error_message + "\n" + message
+        else:
+            is_valid = False
+            message = u'Зориулалт буруу байна'
+            error_message = error_message + "\n" + message
+
+        if self.__is_number(zovshbaig):
+            zovshbaig = int(zovshbaig)
+            count = self.session.query(ClDecisionLevel).filter(ClDecisionLevel.code == zovshbaig).count()
+            if count == 0:
+                is_valid = False
+                message = u'Захирамжийн түвшин буруу байна'
+                error_message = error_message + "\n" + message
+        else:
+            is_valid = False
+            message = u'Захирамжийн түвшин буруу байна'
+            error_message = error_message + "\n" + message
+
+        if shovshshiid is None or shovshshiid == '':
+            is_valid = False
+            message = u'Захирамжийн дугаар оруулаагүй байна'
+            error_message = error_message + "\n" + message
+
+        if zovshdate is None or zovshdate == '':
+            is_valid = False
+            message = u'Захирамжийн огноо оруулаагүй байна'
+            error_message = error_message + "\n" + message
+
+        return is_valid
+
+    def __is_number(self, s):
+
+        try:
+            float(s)  # for int, long and float
+        except ValueError:
+            try:
+                complex(s)  # for complex
+            except ValueError:
+                return False
+
+        return True
 
