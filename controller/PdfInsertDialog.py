@@ -15,6 +15,7 @@ from sqlalchemy import func
 from xlrd import open_workbook
 from ..view.Ui_PdfInsertDialog import *
 from ..utils.PluginUtils import *
+from ..model.Enumerations import *
 from ..model.ClDocumentRole import *
 from ..model.CtContractApplicationRole import *
 from ..model.CtContractDocument import *
@@ -23,6 +24,7 @@ from ..model.CtRecordApplicationRole import *
 from ..model.CtRecordDocument import *
 from ..utils.FilePath import *
 from ..model.CtDecisionDocument import *
+from ..model.DatabaseHelper import *
 from ..utils.FileUtils import FileUtils
 
 class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
@@ -38,10 +40,20 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
         self.progressBar.setMinimum(1)
         self.progressBar.setValue(0)
 
+        self.__setup_validators()
         self.import_data_twidget.setSelectionMode(QAbstractItemView.SingleSelection)
         self.import_data_twidget.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.import_data_twidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.import_data_twidget.setSortingEnabled(True)
+
+    def __setup_validators(self):
+
+        self.capital_asci_letter_validator = QRegExpValidator(QRegExp("[A-Z]"), None)
+        self.lower_case_asci_letter_validator = QRegExpValidator(QRegExp("[a-z]"), None)
+
+        self.email_validator = QRegExpValidator(QRegExp("[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}"), None)
+
+        self.www_validator = QRegExpValidator(QRegExp("www\\.[a-z0-9._%+-]+\\.[a-z]{2,4}"), None)
 
     @pyqtSlot()
     def on_select_file_button_clicked(self):
@@ -535,8 +547,10 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
             self.import_data_twidget.insertRow(count)
 
 
-            is_valid = self.__validate_import_data(landuse, register, middlename, ovog, ner, heid, gaid, zovshbaig, shovshshiid, zovshdate)
+            is_valid = self.__validate_import_data(landuse, register, middlename, ovog, ner, heid, gaid, zovshbaig, shovshshiid, zovshdate)[0]
+            error_message = self.__validate_import_data(landuse, register, middlename, ovog, ner, heid, gaid, zovshbaig, shovshshiid, zovshdate)[1]
             print is_valid
+            print error_message
             item = QTableWidgetItem(str(parcel_id))
             item.setData(Qt.UserRole, parcel_id)
             item.setFlags(QtCore.Qt.ItemIsEnabled)
@@ -611,6 +625,9 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
             item.setFlags(QtCore.Qt.ItemIsEnabled)
             self.import_data_twidget.setItem(count, 13, item)
 
+            if is_valid:
+                self.__add_import_data_database(landuse, register, middlename, ovog, ner, heid, gaid, zovshbaig, shovshshiid, zovshdate)
+
             count += 1
 
     def __get_attribute(self, parcel_feature, layer):
@@ -639,6 +656,16 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
 
         file_path = self.load_shp_edit.text()
         self.__read_shp_file(file_path)
+
+    def __add_import_data_database(self, landuse, register, middlename, ovog, ner, heid, gaid, zovshbaig, shovshshiid,
+                               zovshdate):
+        heid = int(heid)
+        gaid = int(gaid)
+        landuse = int(landuse)
+        zovshbaig = int(zovshbaig)
+
+        self.__save_person(register, middlename, ovog, ner, heid)
+
 
     def __validate_import_data(self, landuse, register, middlename, ovog, ner, heid, gaid, zovshbaig, shovshshiid, zovshdate):
 
@@ -670,8 +697,7 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
         if self.__is_number(landuse):
             landuse = int(landuse)
             count = self.session.query(ClLanduseType).\
-                filter(ClLanduseType.code == landuse).\
-                filter(ClLanduseType.parent_code == None).count()
+                filter(ClLanduseType.code == landuse).count()
             if count == 0:
                 is_valid = False
                 message = u'Зориулалт буруу байна'
@@ -703,7 +729,88 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
             message = u'Захирамжийн огноо оруулаагүй байна'
             error_message = error_message + "\n" + message
 
-        return is_valid
+        self.__validate_person(register, middlename, ovog, ner, heid)
+
+        return is_valid, error_message
+
+    def __validate_person(self, register, middlename, ovog, ner, heid):
+
+        is_valid = True
+        error_message = u''
+
+        person_type = None
+
+        heid = str(heid)
+        if self.__is_number(heid):
+            if int(heid) == 1:
+                person_type = 10
+            elif int(heid) == 2:
+                person_type = 30
+            elif int(heid) == 3:
+                person_type = 40
+            elif int(heid) == 4:
+                person_type = 50
+            elif int(heid) == 5 or str(heid) == 5:
+                person_type = 60
+
+        text = register
+        if person_type:
+            if person_type == PersonType.legally_capable_mongolian or person_type == PersonType.legally_uncapable_mongolian:
+                if not self.__validate_private_person_id(text):
+                    valid = False
+                    street_error = self.tr("Person id error!.")
+                    error_message = error_message + "\n \n" + street_error
+
+            elif person_type == PersonType.mongolian_buisness or person_type == PersonType.mongolian_state_org:
+
+                if not self.__validate_entity_id(text):
+                    valid = False
+                    street_error = self.tr("Company id error!.")
+                    error_message = error_message + "\n \n" + street_error
+
+            text = middlename
+
+            # type of Company/state organisation:
+            if person_type == PersonType.mongolian_state_org \
+                    or person_type == PersonType.mongolian_buisness \
+                    or person_type == PersonType.legal_entity_foreign \
+                    or person_type == PersonType.foreign_citizen:
+
+                if not self.__validate_company_name(text):
+                    valid = False
+                    street_error = self.tr("Company contact Middle name error!.")
+                    error_message = error_message + "\n \n" + street_error
+
+            # type of private person
+            else:
+                if not self.__validate_person_name(text, person_type):
+                    valid = False
+                    street_error = self.tr("Person middle name error!.")
+                    error_message = error_message + "\n \n" + street_error
+
+            text = ner
+
+            # type of Company/state organisation:
+            if person_type == PersonType.mongolian_state_org \
+                    or person_type == PersonType.mongolian_buisness \
+                    or person_type == PersonType.legal_entity_foreign \
+                    or person_type == PersonType.foreign_citizen:
+
+                if not self.__validate_company_name(text):
+                    valid = False
+                    street_error = self.tr("Company name error!.")
+                    error_message = error_message + "\n \n" + street_error
+
+            # type of private person
+            else:
+                if not self.__validate_person_name(text, person_type):
+                    valid = False
+                    street_error = self.tr("Person name error!.")
+                    error_message = error_message + "\n \n" + street_error
+        else:
+            is_valid = False
+            message = u'Хуулийн этгээдийн төрөл буруу'
+            error_message = error_message + "\n" + message
 
     def __is_number(self, s):
 
@@ -717,3 +824,132 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
 
         return True
 
+    def __validate_person_name(self, text, person_type):
+
+        if person_type == 10 or person_type == 20 or person_type == 50:
+            if not text:
+                text = ''
+            if len(text) <= 0:
+                return False
+
+            first_letter = text[0]
+            rest = text[1:]
+            result_capital = self.capital_asci_letter_validator.regExp().indexIn(rest)
+            result_lower = self.lower_case_asci_letter_validator.regExp().indexIn(rest)
+
+            if first_letter not in Constants.CAPITAL_MONGOLIAN:
+                # self.error_label.setText(self.tr("The first letter and the letter after of a "
+                #                                  "name and the letter after a \"-\"  should be a capital letters."))
+                return False
+
+            if len(rest) > 0:
+
+                if result_capital != -1 or result_lower != -1:
+                    # self.error_label.setText(self.tr("Only mongolian characters are allowed."))
+                    return False
+
+                for i in range(len(rest)):
+                    if rest[i] not in Constants.LOWER_CASE_MONGOLIAN and rest[i] != "-":
+                        if len(rest) - 1 == i:
+                            return True
+
+                        if rest[i - 1] != "-":
+                            # self.error_label.setText(
+                            #     self.tr("Capital letters are only allowed at the beginning of a name or after a \"-\". "))
+                            return False
+
+        return True
+
+    def __validate_company_name(self, text):
+
+        # no validation so far
+        if text == "":
+            return False
+
+        return True
+
+    def __validate_entity_id(self, text):
+
+        valid = self.int_validator.regExp().exactMatch(text)
+
+        if not valid:
+            # self.error_label.setText(self.tr("Company id should be with numbers only."))
+            return False
+        if len(text) > 7:
+            cut = text[:7]
+            self.personal_id_edit.setText(cut)
+
+        return True
+
+    def __validate_private_person_id(self, text):
+
+        original_text = text
+        first_letters = text[:2]
+        rest = text[2:]
+        first_large_letters = first_letters.upper()
+
+        reg = QRegExp("[0-9][0-9]+")
+        is_valid = True
+
+        if first_large_letters[0:1] not in Constants.CAPITAL_MONGOLIAN \
+                and first_large_letters[1:2] not in Constants.CAPITAL_MONGOLIAN:
+            # self.error_label.setText(
+            #     self.tr("First letters of the person id should be capital letters and in mongolian."))
+            is_valid = False
+
+        if len(original_text) > 2:
+            if not reg.exactMatch(rest):
+                # self.error_label.setText(
+                #     self.tr("After the first two capital letters, the person id should contain only numbers."))
+                is_valid = False
+
+        if len(original_text) > 10:
+            # self.error_label.setText(self.tr("The person id shouldn't be longer than 10 characters."))
+            is_valid = False
+
+        return is_valid
+
+    def __save_person(self, register, middlename, ovog, ner, heid):
+
+        person_id = register
+        person_id = person_id.upper()
+        heid = str(heid)
+        person_type = None
+        if int(heid) == 1:
+            person_type = 10
+        elif int(heid) == 2:
+            person_type = 30
+        elif int(heid) == 3:
+            person_type = 40
+        elif int(heid) == 4:
+            person_type = 50
+        elif int(heid) == 5 or str(heid) == 5:
+            person_type = 60
+        # self.create_savepoint()
+        try:
+            person_count = self.session.query(BsPerson).filter(BsPerson.person_register == person_id).count()
+            if person_count > 0:
+                bs_person = self.session.query(BsPerson).filter(BsPerson.person_register == person_id).first()
+            else:
+                bs_person = BsPerson()
+
+                person_type = self.person_type_cbox.itemData(self.person_type_cbox.currentIndex())
+                bs_person.person_register = person_id
+                bs_person.type = person_type
+                if person_type == 10 or person_type == 20 or person_type == 50:
+                    bs_person.name = ner
+                    bs_person.first_name = ovog
+                    bs_person.middle_name = middlename
+                else:
+                    bs_person.name = ner
+                    bs_person.contact_surname = middlename
+                    bs_person.contact_first_name = ovog
+
+                # bs_person.date_of_birth = DatabaseUtils.convert_date(self.date_of_birth_date.date())
+
+                if person_count == 0:
+                    self.session.add(bs_person)
+        except SQLAlchemyError, e:
+            self.rollback_to_savepoint()
+            raise LM2Exception(self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+        # self.session.flush()
