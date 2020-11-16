@@ -175,6 +175,9 @@ class Ui_PdfInsertDialog(object):
         self.import_data_button = QtGui.QPushButton(self.tab_3)
         self.import_data_button.setGeometry(QtCore.QRect(620, 460, 75, 23))
         self.import_data_button.setObjectName(_fromUtf8("import_data_button"))
+        self.delete_data_button = QtGui.QPushButton(self.tab_3)
+        self.delete_data_button.setGeometry(QtCore.QRect(540, 460, 75, 23))
+        self.delete_data_button.setObjectName(_fromUtf8("delete_data_button"))
         self.import_data_tab_widget.addTab(self.tab_3, _fromUtf8(""))
         self.close_button = QtGui.QPushButton(PdfInsertDialog)
         self.close_button.setGeometry(QtCore.QRect(632, 520, 75, 23))
@@ -245,6 +248,7 @@ class Ui_PdfInsertDialog(object):
         item = self.import_data_twidget.horizontalHeaderItem(13)
         item.setText(_translate("PdfInsertDialog", "GerDate", None))
         self.import_data_button.setText(_translate("PdfInsertDialog", "Хөрвүүлэх", None))
+        self.delete_data_button.setText(_translate("PdfInsertDialog", "Устгах", None))
         self.import_data_tab_widget.setTabText(self.import_data_tab_widget.indexOf(self.tab_3), _translate("PdfInsertDialog", "Import XLS/SHP", None))
         self.close_button.setText(_translate("PdfInsertDialog", "Close", None))
 

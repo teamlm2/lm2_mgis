@@ -491,6 +491,19 @@
       <string>Хөрвүүлэх</string>
      </property>
     </widget>
+    <widget class="QPushButton" name="delete_data_button">
+     <property name="geometry">
+      <rect>
+       <x>540</x>
+       <y>460</y>
+       <width>75</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Устгах</string>
+     </property>
+    </widget>
    </widget>
   </widget>
   <widget class="QPushButton" name="close_button">
