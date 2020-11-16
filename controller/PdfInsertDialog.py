@@ -1191,6 +1191,18 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
             message = u'Захирамжийн огноо оруулаагүй байна'
             error_message = error_message + "\n" + message
 
+        column_name = 'pid'
+        layer = self.__get_shp_layer()
+        geometry = self.__get_geometry_by_parcel_id(column_name, str(parcel_id), layer)
+
+        ca_parcel_overlaps_count = self.session.query(CaParcelTbl). \
+            filter(or_(CaParcelTbl.valid_till == 'infinity', CaParcelTbl.valid_till == None)). \
+            filter(geometry.ST_Overlaps(CaParcelTbl.geometry)).count()
+        if ca_parcel_overlaps_count > 0:
+            is_valid = False
+            message = u'Кадастрын нэгж талбар давхардаж байна'
+            error_message = error_message + "\n" + message
+
         self.__validate_person(register, middlename, ovog, ner, heid)
 
         return is_valid, error_message
