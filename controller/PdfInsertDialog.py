@@ -741,7 +741,7 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
         if person_count > 0:
             bs_person = self.session.query(BsPerson).filter(BsPerson.person_register == person_id).first()
         else:
-            if len(person_id) > 10:
+            if len(person_id) < 11:
                 bs_person = BsPerson()
                 bs_person.person_register = person_id
                 bs_person.type = person_type
@@ -1261,6 +1261,16 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
             message = u'Нэгж талбарын дугаар алдаатай'
             error_message = error_message + "\n" + message
 
+        person_id = register
+
+        if self.__is_number(person_id):
+            person_id = str(int(person_id))
+        person_id = unicode(person_id).upper()
+
+        if len(person_id) > 10:
+            is_valid = False
+            message = u'Хуулийн этгээдийн регистрийн дугаар алдаатай байна'
+            error_message = error_message + "\n" + message
 
         self.__validate_person(register, middlename, ovog, ner, heid)
 
