@@ -14,6 +14,7 @@ from sqlalchemy import func, or_, and_, desc
 from sqlalchemy.sql.expression import cast
 from sqlalchemy import func
 from xlrd import open_workbook
+from decimal import Decimal
 from ..view.Ui_PdfInsertDialog import *
 from ..utils.PluginUtils import *
 from ..utils.DatabaseUtils import DatabaseUtils
@@ -25,10 +26,15 @@ from ..model.SetContractDocumentRole import *
 from ..model.CtRecordApplicationRole import *
 from ..model.CtRecordDocument import *
 from ..model.BsPerson import *
+from ..model.ClPersonRole import *
 from ..utils.FilePath import *
+from ..model.CtDecision import *
+from ..model.CtContract import *
+from ..model.CtOwnershipRecord import *
 from ..model.CtDecisionDocument import *
 from ..model.DatabaseHelper import *
 from ..utils.FileUtils import FileUtils
+import codecs
 
 class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
 
@@ -46,6 +52,10 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
         self.application = None
         self.contract = None
         self.record = None
+        self.right_type = None
+        self.app_type = None
+        self.app_no = None
+        self.zovshdate = None
         self.import_parcel_ids = []
 
         self.__setup_validators()
@@ -558,22 +568,14 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
             gerid = worksheet.cell_value(curr_row, 21)
             gerdate = worksheet.cell_value(curr_row, 22)
 
-            zovshdate = self.__convert_zovshdate_duusdate(zovshdate, duusdate)[0]
-            duusdate = self.__convert_zovshdate_duusdate(zovshdate, duusdate)[1]
 
-            duration = 0
-            if isinstance(zovshdate, datetime) and isinstance(duusdate, datetime):
-                duration = duusdate.year - zovshdate.year
 
             self.import_data_twidget.insertRow(count)
 
-            is_valid = self.__validate_import_data(parcel_id, landuse, register, middlename, ovog, ner, heid, gaid, zovshbaig, shovshshiid, zovshdate)[0]
-            error_message = self.__validate_import_data(parcel_id, landuse, register, middlename, ovog, ner, heid, gaid, zovshbaig, shovshshiid, zovshdate)[1]
+            is_valid = self.__validate_import_data(parcel_id, landuse, register, middlename, ovog, ner, heid, gaid, zovshbaig, shovshshiid, zovshdate, duusdate)[0]
+            error_message = self.__validate_import_data(parcel_id, landuse, register, middlename, ovog, ner, heid, gaid, zovshbaig, shovshshiid, zovshdate, duusdate)[1]
             print is_valid
             print error_message
-            column_name = 'pid'
-            layer = self.__get_shp_layer()
-            geometry = self.__get_geometry_by_parcel_id(column_name, str(parcel_id), layer)
 
             item = QTableWidgetItem(str(parcel_id))
             item.setData(Qt.UserRole, parcel_id)
@@ -650,6 +652,18 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
             self.import_data_twidget.setItem(count, 13, item)
 
             if is_valid:
+                zovshdate = self.__convert_zovshdate_duusdate(zovshdate, duusdate)[0]
+                print zovshdate
+                self.zovshdate = PluginUtils.convert_python_date_to_qt(zovshdate)
+                duusdate = self.__convert_zovshdate_duusdate(zovshdate, duusdate)[1]
+
+                duration = 0
+                if isinstance(zovshdate, datetime) and isinstance(duusdate, datetime):
+                    duration = duusdate.year - zovshdate.year
+                column_name = 'pid'
+                layer = self.__get_shp_layer()
+                geometry = self.__get_geometry_by_parcel_id(column_name, str(int(parcel_id)), layer)
+
                 self.__add_import_data_database(geometry, landuse, register, middlename, ovog, ner, heid, gaid, zovshbaig,
                                                 shovshshiid, zovshdate, duusdate, duration, gerchid)
 
@@ -681,6 +695,7 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
 
         file_path = self.load_shp_edit.text()
         self.__read_shp_file(file_path)
+        # self.commit()
 
     def __add_import_data_database(self, geometry, landuse, register, middlename, ovog, ner, heid, gaid, zovshbaig, shovshshiid,
                                zovshdate, duusdate, duration, gerchid):
@@ -688,22 +703,26 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
         gaid = int(gaid)
         landuse = int(landuse)
         zovshbaig = int(zovshbaig)
-        zovshdate = datetime.strptime(str(zovshdate), '%m.%d.%Y')
-        duusdate = datetime.strptime(str(duusdate), '%m.%d.%Y')
+        # zovshdate = datetime.strptime(str(zovshdate), '%m.%d.%Y')
+        # duusdate = datetime.strptime(str(duusdate), '%m.%d.%Y')
 
         self.__save_person(register, middlename, ovog, ner, heid)
         self.__save_parcel(geometry, landuse, gaid, zovshdate, duusdate, duration)
         self.__save_applicant(register)
-        self.__save_status()
+        self.__save_status(zovshdate)
         self.__save_decision(zovshbaig, shovshshiid, zovshdate)
         self.__save_contract_owner(gaid, zovshdate, duusdate, gerchid)
 
-        self.commit()
+        print self.import_parcel_ids
+        # self.commit()
 
     def __save_person(self, register, middlename, ovog, ner, heid):
 
         person_id = register
-        person_id = person_id.upper()
+
+        if self.__is_number(person_id):
+            person_id = str(int(person_id))
+        person_id = unicode(person_id).upper()
 
         person_type = None
         if int(heid) == 1:
@@ -717,11 +736,12 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
         elif int(heid) == 5 or str(heid) == 5:
             person_type = 60
         # self.create_savepoint()
-        try:
-            person_count = self.session.query(BsPerson).filter(BsPerson.person_register == person_id).count()
-            if person_count > 0:
-                bs_person = self.session.query(BsPerson).filter(BsPerson.person_register == person_id).first()
-            else:
+        # try:
+        person_count = self.session.query(BsPerson).filter(BsPerson.person_register == person_id).count()
+        if person_count > 0:
+            bs_person = self.session.query(BsPerson).filter(BsPerson.person_register == person_id).first()
+        else:
+            if len(person_id) > 10:
                 bs_person = BsPerson()
                 bs_person.person_register = person_id
                 bs_person.type = person_type
@@ -738,9 +758,9 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
 
                 if person_count == 0:
                     self.session.add(bs_person)
-        except SQLAlchemyError, e:
-            self.rollback_to_savepoint()
-            raise LM2Exception(self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+        # except SQLAlchemyError, e:
+        #     self.rollback_to_savepoint()
+        #     raise LM2Exception(self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
         # self.session.flush()
 
     def __save_parcel(self, geometry, landuse, gaid, decision_date, duusdate, duration):
@@ -761,12 +781,15 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
         self.import_parcel_ids.append(parcel.parcel_id)
 
         parcel_id = parcel.parcel_id
-        app_time = self.decision_date.date().toString(Constants.DATABASE_DATE_FORMAT)
-        status_date = self.decision_date.date().toString(Constants.DATABASE_DATE_FORMAT)
+        app_time = decision_date
+        status_date = decision_date
 
         right_type = self.__get_right_type(gaid)[0]
+        self.right_type = right_type
         app_type = self.__get_right_type(gaid)[1]
+        self.app_type = app_type
         app_no = self.__generate_application_number()
+        self.app_no = app_no
 
         self.application = CtApplication()
 
@@ -804,6 +827,10 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
 
     def __save_applicant(self, person_id):
 
+        if self.__is_number(person_id):
+            person_id = str(int(person_id))
+        person_id = unicode(person_id).upper()
+
         person = self.session.query(BsPerson).filter(BsPerson.person_register == person_id).\
             order_by(BsPerson.parent_id.asc()).first()
         role_ref = self.session.query(ClPersonRole).filter_by(
@@ -822,9 +849,9 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
 
         self.application.stakeholders.append(app_person_role)
 
-    def __save_status(self):
+    def __save_status(self, zovshdate):
 
-        status_date = self.decision_date.date().toString(Constants.DATABASE_DATE_FORMAT)
+        status_date = zovshdate
 
         statuses = self.session.query(ClApplicationStatus).\
             filter(ClApplicationStatus.code != 1). \
@@ -832,176 +859,185 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
             filter(ClApplicationStatus.code < 10).order_by(ClApplicationStatus.code.asc()).all()
 
         # self.create_savepoint()
-        try:
-            for status in statuses:
-                application_status = CtApplicationStatus()
-                application_status.ct_application = self.application
-                application_status.status = status.code
-                application_status.status_ref = status
-                application_status.status_date = status_date
+        # try:
+        for status in statuses:
+            application_status = CtApplicationStatus()
+            application_status.ct_application = self.application
+            application_status.status = status.code
+            application_status.status_ref = status
+            application_status.status_date = status_date
 
-                # current_user = QSettings().value(SettingsConstants.USER)
-                # officer = self.session.query(SetRole).filter_by(user_name=current_user).filter(SetRole.is_active == True).one()
-                application_status.next_officer_in_charge = DatabaseUtils.current_sd_user().user_id
-                application_status.next_officer_in_charge_ref = DatabaseUtils.current_sd_user()
-                application_status.officer_in_charge_ref = DatabaseUtils.current_sd_user()
-                application_status.officer_in_charge = DatabaseUtils.current_sd_user().user_id
-                self.application.statuses.append(application_status)
-        except SQLAlchemyError, e:
-            self.rollback_to_savepoint()
-            raise LM2Exception(self.tr("File Error"),
-                               self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+            # current_user = QSettings().value(SettingsConstants.USER)
+            # officer = self.session.query(SetRole).filter_by(user_name=current_user).filter(SetRole.is_active == True).one()
+            application_status.next_officer_in_charge = DatabaseUtils.current_sd_user().user_id
+            application_status.next_officer_in_charge_ref = DatabaseUtils.current_sd_user()
+            application_status.officer_in_charge_ref = DatabaseUtils.current_sd_user()
+            application_status.officer_in_charge = DatabaseUtils.current_sd_user().user_id
+            self.application.statuses.append(application_status)
+        # except SQLAlchemyError, e:
+        #     self.rollback_to_savepoint()
+        #     raise LM2Exception(self.tr("File Error"),
+        #                        self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
 
     def __save_decision(self, zovshbaig, shovshshiid, zovshdate):
 
         decision_level = zovshbaig
 
         au_level2 = DatabaseUtils.current_working_soum_schema()
-        year_filter = str(zovshdate.toString("yyyy"))
+        year_filter = str(self.zovshdate.toString("yyyy"))
+        if self.__is_number(shovshshiid):
+            shovshshiid = str(int(shovshshiid))
+        shovshshiid = codecs.encode(shovshshiid, 'utf-8')
+        f = codecs.decode(shovshshiid, 'utf-8')
+        shovshshiid = f.replace('A', '')
         decision_no = au_level2 + '-' + shovshshiid + '/' + year_filter
         print decision_no
         decision_count = self.session.query(CtDecision).filter(CtDecision.decision_no == decision_no). \
             filter(CtDecision.decision_level == decision_level).count()
         # self.create_savepoint()
-        try:
-            if decision_count == 1:
-                self.decision = self.session.query(CtDecision).filter(CtDecision.decision_no == decision_no). \
-                    filter(CtDecision.decision_level == decision_level).one()
+        # try:
+        if decision_count == 1:
+            self.decision = self.session.query(CtDecision).filter(CtDecision.decision_no == decision_no). \
+                filter(CtDecision.decision_level == decision_level).one()
 
-            else:
-                self.decision = CtDecision()
+        else:
+            self.decision = CtDecision()
 
-                self.decision.decision_date = zovshdate
-                self.decision.decision_no = decision_no
-                self.decision.decision_level = decision_level
-                self.decision.imported_by = DatabaseUtils.current_sd_user().user_id
-                self.decision.au2 = DatabaseUtils.working_l2_code()
-                self.session.add(self.decision)
+            self.decision.decision_date = zovshdate
+            self.decision.decision_no = decision_no
+            self.decision.decision_level = decision_level
+            self.decision.imported_by = DatabaseUtils.current_sd_user().user_id
+            self.decision.au2 = DatabaseUtils.working_l2_code()
+            self.session.add(self.decision)
 
-            decision_app = CtDecisionApplication()
-            decision_app.decision = self.decision.decision_id
-            decision_app.decision_result = 10
-            decision_app.application = self.application.app_id
-            self.decision.results.append(decision_app)
-        except SQLAlchemyError, e:
-            self.rollback_to_savepoint()
-            raise LM2Exception(self.tr("File Error"),
-                               self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+        decision_app = CtDecisionApplication()
+        decision_app.decision = self.decision.decision_id
+        decision_app.decision_result = 10
+        decision_app.application = self.application.app_id
+        self.decision.results.append(decision_app)
+        # except SQLAlchemyError, e:
+        #     self.rollback_to_savepoint()
+        #     raise LM2Exception(self.tr("File Error"),
+        #                        self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
             # self.session.flush()
 
     def __save_contract_owner(self, gaid, zovshdate, duusdate, gerchid):
+
+        cert_no = None
+        if self.__is_number(gerchid):
+            cert_no = int(gerchid)
 
         right_type = self.__get_right_type(gaid)[0]
         if right_type == 1 or right_type == 2:
             contract_no = self.__generate_contract_number()
             # self.create_savepoint()
-            try:
-                self.contract = CtContract()
-                self.contract.type = 1
-                self.contract.contract_no = contract_no
-                self.contract.contract_begin = zovshdate
-                self.contract.contract_date = zovshdate
-                self.contract.contract_end = duusdate
-                self.contract.certificate_no = int(gerchid)
-                self.contract.status = Constants.CONTRACT_STATUS_ACTIVE
-                self.contract.au2 = DatabaseUtils.working_l2_code()
+            # try:
 
-                self.session.add(self.contract)
+            self.contract = CtContract()
+            self.contract.type = 1
+            self.contract.contract_no = contract_no
+            self.contract.contract_begin = zovshdate
+            self.contract.contract_date = zovshdate
+            self.contract.contract_end = duusdate
+            self.contract.certificate_no = cert_no
+            self.contract.status = Constants.CONTRACT_STATUS_ACTIVE
+            self.contract.au2 = DatabaseUtils.working_l2_code()
 
+            self.session.add(self.contract)
 
-                app_type = None
-                obj_type = 'contract\Contract'
-                qt_date = self.contract_date.date()
-                # contract_number_filter = "%-{0}/%".format(str(qt_date.toString("yyyy")))
-                year = qt_date.toString("yyyy")
-                PluginUtils.generate_auto_app_no(str(year), app_type, DatabaseUtils.working_l2_code(), obj_type, self.session)
+            app_type = None
+            obj_type = 'contract\Contract'
+            qt_date = self.zovshdate
+            # contract_number_filter = "%-{0}/%".format(str(qt_date.toString("yyyy")))
+            year = qt_date.toString("yyyy")
+            PluginUtils.generate_auto_app_no(str(year), app_type, DatabaseUtils.working_l2_code(), obj_type, self.session)
 
-                contract_app = CtContractApplicationRole()
-                contract_app.application_ref = self.application
-                contract_app.application = self.application.app_id
-                contract_app.contract = self.contract.contract_id
-                contract_app.contract_ref = self.contract
+            contract_app = CtContractApplicationRole()
+            contract_app.application_ref = self.application
+            contract_app.application = self.application.app_id
+            contract_app.contract = self.contract.contract_id
+            contract_app.contract_ref = self.contract
 
-                contract_app.role = Constants.APPLICATION_ROLE_CREATES
-                self.contract.application_roles.append(contract_app)
-            except SQLAlchemyError, e:
-                self.rollback_to_savepoint()
-                raise LM2Exception(self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+            contract_app.role = Constants.APPLICATION_ROLE_CREATES
+            self.contract.application_roles.append(contract_app)
+            # except SQLAlchemyError, e:
+            #     self.rollback_to_savepoint()
+            #     raise LM2Exception(self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
         else:
             record_no = self.__generate_record_number()
             # self.create_savepoint()
-            try:
-                self.record = CtOwnershipRecord()
-                self.record.record_no = record_no
-                self.record.record_date = zovshdate
-                self.record.record_begin = zovshdate
-                self.record.certificate_no = int(gerchid)
-                self.record.status = Constants.RECORD_STATUS_ACTIVE
-                self.record.au2 = DatabaseUtils.working_l2_code()
+            # try:
+            self.record = CtOwnershipRecord()
+            self.record.record_no = record_no
+            self.record.record_date = zovshdate
+            self.record.record_begin = zovshdate
+            self.record.certificate_no = cert_no
+            self.record.status = Constants.RECORD_STATUS_ACTIVE
+            self.record.au2 = DatabaseUtils.working_l2_code()
 
-                self.session.add(self.record)
+            self.session.add(self.record)
 
-                app_type = None
-                obj_type = 'record\OwnershipRecord'
-                qt_date = self.own_date.date()
-                # contract_number_filter = "%-{0}/%".format(str(qt_date.toString("yyyy")))
-                year = qt_date.toString("yyyy")
-                PluginUtils.generate_auto_app_no(str(year), app_type, DatabaseUtils.working_l2_code(), obj_type, self.session)
+            app_type = None
+            obj_type = 'record\OwnershipRecord'
+            qt_date = self.zovshdate
+            # contract_number_filter = "%-{0}/%".format(str(qt_date.toString("yyyy")))
+            year = qt_date.toString("yyyy")
+            PluginUtils.generate_auto_app_no(str(year), app_type, DatabaseUtils.working_l2_code(), obj_type, self.session)
 
-                record_app = CtRecordApplicationRole()
-                record_app.application_ref = self.application
-                record_app.application = self.application.app_id
-                record_app.record = self.record.record_id
+            record_app = CtRecordApplicationRole()
+            record_app.application_ref = self.application
+            record_app.application = self.application.app_id
+            record_app.record = self.record.record_id
 
-                record_app.role = Constants.APPLICATION_ROLE_CREATES
-                self.record.application_roles.append(record_app)
-            except SQLAlchemyError, e:
-                self.rollback_to_savepoint()
-                raise LM2Exception(self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+            record_app.role = Constants.APPLICATION_ROLE_CREATES
+            self.record.application_roles.append(record_app)
+            # except SQLAlchemyError, e:
+            #     self.rollback_to_savepoint()
+            #     raise LM2Exception(self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
 
     def __generate_record_number(self):
 
         soum = DatabaseUtils.current_working_soum_schema()
         soum_filter = soum + "-%"
-        qt_date = self.own_date.date()
-        try:
-            record_number_filter = "%-{0}/%".format(str(qt_date.toString("yyyy")))
+        qt_date = self.zovshdate
+        # try:
+        record_number_filter = "%-{0}/%".format(str(qt_date.toString("yyyy")))
 
-            # return
-            count = self.session.query(CtOwnershipRecord) \
-                        .filter(CtOwnershipRecord.record_no.like("%-%")) \
-                        .filter(CtOwnershipRecord.record_no.like(soum + "-%")) \
-                        .filter(CtOwnershipRecord.record_no.like(record_number_filter))  \
-                        .filter(CtOwnershipRecord.au2 == soum) \
-                        .order_by(func.substr(CtOwnershipRecord.record_no, 10, 16).desc()).count()
-            if count == 0:
-                cu_max_number = "00001"
+        # return
+        count = self.session.query(CtOwnershipRecord) \
+                    .filter(CtOwnershipRecord.record_no.like("%-%")) \
+                    .filter(CtOwnershipRecord.record_no.like(soum + "-%")) \
+                    .filter(CtOwnershipRecord.record_no.like(record_number_filter))  \
+                    .filter(CtOwnershipRecord.au2 == soum) \
+                    .order_by(func.substr(CtOwnershipRecord.record_no, 10, 16).desc()).count()
+        if count == 0:
+            cu_max_number = "00001"
 
-            else:
-                sql = "select split_part(record_no, '/', 2)::int, record_no from data_soums_union.ct_ownership_record " \
-                      "where record_no like " + "'" + soum_filter + "'" + " and record_no like " + "'" + record_number_filter + "'" + " " \
-                                     "order by split_part(record_no, '/', 2)::int desc limit 1; "
-                result = self.session.execute(sql)
-                for item_row in result:
-                    cu_max_number = item_row[0]
-                # cu_max_number = self.session.query(CtOwnershipRecord.record_no)\
-                #                     .filter(CtOwnershipRecord.record_no.like("%-%")) \
-                #                     .filter(CtOwnershipRecord.record_no.like(soum + "-%")) \
-                #                     .filter(CtOwnershipRecord.record_no.like(record_number_filter)) \
-                #                     .filter(CtOwnershipRecord.au2 == soum) \
-                #     .order_by(func.substr(CtOwnershipRecord.record_no, 10, 16).desc()).first()
-                #
-                # cu_max_number = cu_max_number[0]
-                # minus_split_number = cu_max_number.split("-")
-                # slash_split_number = minus_split_number[1].split("/")
-                # cu_max_number = int(slash_split_number[1]) + 1
-                    cu_max_number = int(cu_max_number) + 1
+        else:
+            sql = "select split_part(record_no, '/', 2)::int, record_no from data_soums_union.ct_ownership_record " \
+                  "where record_no like " + "'" + soum_filter + "'" + " and record_no like " + "'" + record_number_filter + "'" + " " \
+                                 "order by split_part(record_no, '/', 2)::int desc limit 1; "
+            result = self.session.execute(sql)
+            for item_row in result:
+                cu_max_number = item_row[0]
+            # cu_max_number = self.session.query(CtOwnershipRecord.record_no)\
+            #                     .filter(CtOwnershipRecord.record_no.like("%-%")) \
+            #                     .filter(CtOwnershipRecord.record_no.like(soum + "-%")) \
+            #                     .filter(CtOwnershipRecord.record_no.like(record_number_filter)) \
+            #                     .filter(CtOwnershipRecord.au2 == soum) \
+            #     .order_by(func.substr(CtOwnershipRecord.record_no, 10, 16).desc()).first()
+            #
+            # cu_max_number = cu_max_number[0]
+            # minus_split_number = cu_max_number.split("-")
+            # slash_split_number = minus_split_number[1].split("/")
+            # cu_max_number = int(slash_split_number[1]) + 1
+                cu_max_number = int(cu_max_number) + 1
 
-            year = qt_date.toString("yyyy")
-            number = soum + "-" + year + "/" + str(cu_max_number).zfill(5)
+        year = qt_date.toString("yyyy")
+        number = soum + "-" + year + "/" + str(cu_max_number).zfill(5)
 
-        except SQLAlchemyError, e:
-            PluginUtils.show_error(self, self.tr("Database Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+        # except SQLAlchemyError, e:
+        #     PluginUtils.show_error(self, self.tr("Database Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
 
         return number
 
@@ -1009,53 +1045,53 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
 
         soum = DatabaseUtils.current_working_soum_schema()
         soum_filter = soum + "-%"
-        qt_date = self.contract_date.date()
-        try:
-            contract_number_filter = "%-{0}/%".format(str(qt_date.toString("yyyy")))
+        qt_date = self.zovshdate
+        # try:
+        contract_number_filter = "%-{0}/%".format(str(qt_date.toString("yyyy")))
 
-            count = self.session.query(CtContract) \
-                .filter(CtContract.contract_no.like("%-%")) \
-                .filter(CtContract.contract_no.like(soum+"-%")) \
-                .filter(CtContract.contract_no.like(contract_number_filter)) \
-                .filter(CtContract.au2 == soum) \
-                .order_by(func.substr(CtContract.contract_no, 10, 16).desc()).count()
-            if count == 0:
-                cu_max_number = "00001"
-            else:
-                sql = "select split_part(contract_no, '/', 2)::int, contract_no from data_soums_union.ct_contract " \
-                        "where contract_no like " + "'" + soum_filter + "'" + " and contract_no like " + "'" + contract_number_filter + "'" + " " \
-                        "order by split_part(contract_no, '/', 2)::int desc limit 1; "
-                result = self.session.execute(sql)
-                for item_row in result:
-                    cu_max_number = item_row[0]
-                # cu_max_number = self.session.query(CtContract.contract_no) \
-                #     .filter(CtContract.contract_no.like("%-%")) \
-                #     .filter(CtContract.contract_no.like(soum + "-%")) \
-                #     .filter(CtContract.contract_no.like(contract_number_filter)) \
-                #     .filter(CtContract.au2 == soum) \
-                #     .order_by(func.substr(CtContract.contract_no, 10, 16).desc()).first()
-                #     cu_max_number = cu_max_number
+        count = self.session.query(CtContract) \
+            .filter(CtContract.contract_no.like("%-%")) \
+            .filter(CtContract.contract_no.like(soum+"-%")) \
+            .filter(CtContract.contract_no.like(contract_number_filter)) \
+            .filter(CtContract.au2 == soum) \
+            .order_by(func.substr(CtContract.contract_no, 10, 16).desc()).count()
+        if count == 0:
+            cu_max_number = "00001"
+        else:
+            sql = "select split_part(contract_no, '/', 2)::int, contract_no from data_soums_union.ct_contract " \
+                    "where contract_no like " + "'" + soum_filter + "'" + " and contract_no like " + "'" + contract_number_filter + "'" + " " \
+                    "order by split_part(contract_no, '/', 2)::int desc limit 1; "
+            result = self.session.execute(sql)
+            for item_row in result:
+                cu_max_number = item_row[0]
+            # cu_max_number = self.session.query(CtContract.contract_no) \
+            #     .filter(CtContract.contract_no.like("%-%")) \
+            #     .filter(CtContract.contract_no.like(soum + "-%")) \
+            #     .filter(CtContract.contract_no.like(contract_number_filter)) \
+            #     .filter(CtContract.au2 == soum) \
+            #     .order_by(func.substr(CtContract.contract_no, 10, 16).desc()).first()
+            #     cu_max_number = cu_max_number
 
-                    # minus_split_number = cu_max_number.split("-")
-                    # slash_split_number = minus_split_number[1].split("/")
-                    # cu_max_number = int(slash_split_number[1]) + 1
-                    cu_max_number = int(cu_max_number) + 1
-            soum = DatabaseUtils.current_working_soum_schema()
-            year = qt_date.toString("yyyy")
-            number = soum + "-" + year + "/" + str(cu_max_number).zfill(5)
+                # minus_split_number = cu_max_number.split("-")
+                # slash_split_number = minus_split_number[1].split("/")
+                # cu_max_number = int(slash_split_number[1]) + 1
+                cu_max_number = int(cu_max_number) + 1
+        soum = DatabaseUtils.current_working_soum_schema()
+        year = qt_date.toString("yyyy")
+        number = soum + "-" + year + "/" + str(cu_max_number).zfill(5)
 
-        except SQLAlchemyError, e:
-            raise LM2Exception(self.tr("Database Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+        # except SQLAlchemyError, e:
+        #     raise LM2Exception(self.tr("Database Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
 
         return number
 
     def __generate_application_number(self):
 
         au_level2 = DatabaseUtils.current_working_soum_schema()
-        right_type = self.rigth_type_cbox.itemData(self.rigth_type_cbox.currentIndex())
+        # right_type = self.rigth_type_cbox.itemData(self.rigth_type_cbox.currentIndex())
 
-        app_type = self.application_type_cbox.itemData(self.application_type_cbox.currentIndex())
-
+        # app_type = self.application_type_cbox.itemData(self.application_type_cbox.currentIndex())
+        app_type = self.app_type
         # app_type = 1
         # if right_type == 1:
         #     app_type = 6
@@ -1068,28 +1104,29 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
         app_no_part_1 = (str(app_type).zfill(2))
         app_type_filter = "%-" + str(app_type).zfill(2) + "-%"
         soum_filter = str(au_level2) + "-%"
-        qt_date = self.decision_date.date()
+        # qt_date = self.decision_date.date()
+        qt_date = self.zovshdate
         year_filter = "%-" + str(qt_date.toString("yy"))
 
-        try:
+        # try:
 
-            count = self.session.query(CtApplication) \
-                        .filter(CtApplication.app_no.like("%-%"))\
-                        .filter(CtApplication.app_no.like(app_type_filter))  \
-                        .filter(CtApplication.app_no.like(soum_filter)) \
-                        .filter(CtApplication.app_no.like(year_filter)) \
-                    .order_by((func.substr(CtApplication.app_no, 10, 14)).desc()).count()
+        count = self.session.query(CtApplication) \
+                    .filter(CtApplication.app_no.like("%-%"))\
+                    .filter(CtApplication.app_no.like(app_type_filter))  \
+                    .filter(CtApplication.app_no.like(soum_filter)) \
+                    .filter(CtApplication.app_no.like(year_filter)) \
+                .order_by((func.substr(CtApplication.app_no, 10, 14)).desc()).count()
 
-            # count = self.session.query(CtApplication) \
-            #     .filter(CtApplication.app_no.like("%-%")) \
-            #     .filter(CtApplication.app_no.like(app_type_filter)) \
-            #     .filter(CtApplication.app_no.like(soum_filter)) \
-            #     .filter(CtApplication.app_no.like(year_filter)) \
-            #     .order_by((CtApplication.app_no).split('-')[2].desc()).first()
+        # count = self.session.query(CtApplication) \
+        #     .filter(CtApplication.app_no.like("%-%")) \
+        #     .filter(CtApplication.app_no.like(app_type_filter)) \
+        #     .filter(CtApplication.app_no.like(soum_filter)) \
+        #     .filter(CtApplication.app_no.like(year_filter)) \
+        #     .order_by((CtApplication.app_no).split('-')[2].desc()).first()
 
-        except SQLAlchemyError, e:
-            PluginUtils.show_error(self, self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
-            return
+        # except SQLAlchemyError, e:
+        #     PluginUtils.show_error(self, self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
+        #     return
 
         if count > 0:
             # try:
@@ -1129,7 +1166,7 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
         return app_no
 
     def __validate_import_data(self, parcel_id, landuse, register, middlename, ovog, ner, heid, gaid, zovshbaig,
-                               shovshshiid, zovshdate):
+                               shovshshiid, zovshdate, duusdate):
 
         is_valid = True
         error_message = u''
@@ -1190,18 +1227,40 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
             is_valid = False
             message = u'Захирамжийн огноо оруулаагүй байна'
             error_message = error_message + "\n" + message
+        if not self.__validate_zovshdate(zovshdate):
+            is_valid = False
+            message = u'Захирамжийн огноо алдаатай байна'
+            error_message = error_message + "\n" + message
 
+        right_type = self.__get_right_type(gaid)[0]
+        if right_type != 3:
+            if duusdate is not None:
+                if not self.__validate_duusdate(duusdate):
+                    is_valid = False
+                    message = u'Гэрээний дуусах огноо алдаатай байна'
+                    error_message = error_message + "\n" + message
         column_name = 'pid'
         layer = self.__get_shp_layer()
-        geometry = self.__get_geometry_by_parcel_id(column_name, str(parcel_id), layer)
-
-        ca_parcel_overlaps_count = self.session.query(CaParcelTbl). \
-            filter(or_(CaParcelTbl.valid_till == 'infinity', CaParcelTbl.valid_till == None)). \
-            filter(geometry.ST_Overlaps(CaParcelTbl.geometry)).count()
-        if ca_parcel_overlaps_count > 0:
+        if self.__is_number(parcel_id):
+            parcel_id = int(parcel_id)
+            geometry = self.__get_geometry_by_parcel_id(column_name, str(int(parcel_id)), layer)
+            if geometry is None:
+                is_valid = False
+                message = u'Геометр утга олдсонгүй'
+                error_message = error_message + "\n" + message
+            if geometry is not None:
+                ca_parcel_overlaps_count = self.session.query(CaParcelTbl). \
+                    filter(or_(CaParcelTbl.valid_till == 'infinity', CaParcelTbl.valid_till == None)). \
+                    filter(geometry.ST_Overlaps(CaParcelTbl.geometry)).count()
+                if ca_parcel_overlaps_count > 0:
+                    is_valid = False
+                    message = u'Кадастрын нэгж талбар давхардаж байна'
+                    error_message = error_message + "\n" + message
+        else:
             is_valid = False
-            message = u'Кадастрын нэгж талбар давхардаж байна'
+            message = u'Нэгж талбарын дугаар алдаатай'
             error_message = error_message + "\n" + message
+
 
         self.__validate_person(register, middlename, ovog, ner, heid)
 
@@ -1383,7 +1442,7 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
 
         return is_valid
 
-    def __convert_zovshdate_duusdate(self, zovshdate, duusdate):
+    def __validate_zovshdate(self, zovshdate):
 
         is_zovshdate = True
         try:
@@ -1416,7 +1475,10 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
                 is_zovshdate = False
                 print "zovshdate after: ", 'aldaatai'
 
-        #############
+        return is_zovshdate
+
+    def __validate_duusdate(self, duusdate):
+
         is_duusate = True
         try:
             duusdate = datetime.strptime(str(duusdate), '%Y.%m.%d')
@@ -1447,6 +1509,75 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
             except:
                 is_duusate = False
                 print "duusdate after: ", 'aldaatai'
+
+        return is_duusate
+
+    def __convert_zovshdate_duusdate(self, zovshdate, duusdate):
+
+        is_zovshdate = True
+        if zovshdate is not None:
+            try:
+                zovshdate = datetime.strptime(str(zovshdate), '%Y.%m.%d')
+            except:
+                is_zovshdate = False
+                print "zovshdate after: ", 'aldaatai'
+
+            if not is_zovshdate:
+                try:
+                    zovshdate = datetime.strptime(str(zovshdate), '%Y-%m-%d')
+                    is_zovshdate = True
+                except:
+                    is_zovshdate = False
+                    print "zovshdate after: ", 'aldaatai'
+
+            if not is_zovshdate:
+                try:
+                    zovshdate = datetime.strptime(str(zovshdate), '%Y/%m/%d')
+                    is_zovshdate = True
+                except:
+                    is_zovshdate = False
+                    print "zovshdate after: ", 'aldaatai'
+
+            if not is_zovshdate:
+                try:
+                    zovshdate = datetime.strptime(str(zovshdate), '%m/%d/%y')
+                    is_zovshdate = True
+                except:
+                    is_zovshdate = False
+                    print "zovshdate after: ", 'aldaatai'
+
+        #############
+        is_duusate = True
+        if duusdate is not None:
+            try:
+                duusdate = datetime.strptime(str(duusdate), '%Y.%m.%d')
+            except:
+                is_duusate = False
+                print "duusdate after: ", 'aldaatai'
+
+            if not is_duusate:
+                try:
+                    duusdate = datetime.strptime(str(duusdate), '%Y-%m-%d')
+                    is_duusate = True
+                except:
+                    is_duusate = False
+                    print "duusdate after: ", 'aldaatai'
+
+            if not is_duusate:
+                try:
+                    duusdate = datetime.strptime(str(duusdate), '%Y/%m/%d')
+                    is_duusate = True
+                except:
+                    is_duusate = False
+                    print "duusdate after: ", 'aldaatai'
+
+            if not is_duusate:
+                try:
+                    duusdate = datetime.strptime(str(duusdate), '%m/%d/%y')
+                    is_duusate = True
+                except:
+                    is_duusate = False
+                    print "duusdate after: ", 'aldaatai'
 
         return zovshdate, duusdate
 
@@ -1489,6 +1620,7 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
     def __get_geometry_by_parcel_id(self, column_name, parcel_id, layer):
 
         parcel_geometry = None
+        print str(parcel_id)
         expression = column_name + " = \'" + str(parcel_id) + "\'"
 
         request = QgsFeatureRequest()
