@@ -1,4 +1,8 @@
-﻿CREATE OR REPLACE VIEW data_address.st_all_street_line_view AS 
+﻿-- View: data_address.st_all_street_line_view
+
+-- DROP VIEW data_address.st_all_street_line_view;
+
+CREATE OR REPLACE VIEW data_address.st_all_street_line_view AS 
  SELECT s.id,
     s.code,
     s.name,

@@ -13,7 +13,7 @@ from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy import func, or_, and_, desc
 from sqlalchemy.sql.expression import cast
 from sqlalchemy import func
-from xlrd import open_workbook
+from xlrd import *
 from decimal import Decimal
 from ..view.Ui_PdfInsertDialog import *
 from ..utils.PluginUtils import *
@@ -400,7 +400,7 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
 
         if file_dialog.exec_():
             selected_directory = file_dialog.getExistingDirectory()
-            print selected_directory
+
             # selected_file = file_dialog.selectedFiles()[0]
             #
             # file_path = QFileInfo(selected_file).path()
@@ -410,9 +410,9 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
                 count = 0
                 for file in files:
                     if file.endswith('.png'):
-                        print root
-                        print dirs
-                        print file
+                        # print root
+                        # print dirs
+                        # print file
                         self.files_twidget.insertRow(count)
 
                         item = QTableWidgetItem(str(root))
@@ -522,7 +522,7 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
         for parcel in iterator:
             feature_id = parcel.id()
             landuse = self.__get_attribute(parcel, parcel_shape_layer)
-            print landuse
+            # print landuse
 
     def __read_xls_file(self, file_name):
 
@@ -572,6 +572,9 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
 
             self.import_data_twidget.insertRow(count)
 
+            if self.__is_number(zovshdate)        :
+                zovshdate = datetime.fromordinal(datetime(1900, 1, 1).toordinal() + int(zovshdate) - 2)
+                zovshdate = str(datetime.date(zovshdate))
             is_valid = self.__validate_import_data(parcel_id, landuse, register, middlename, ovog, ner, heid, gaid, zovshbaig, shovshshiid, zovshdate, duusdate)[0]
             error_message = self.__validate_import_data(parcel_id, landuse, register, middlename, ovog, ner, heid, gaid, zovshbaig, shovshshiid, zovshdate, duusdate)[1]
             print is_valid
@@ -653,7 +656,7 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
 
             if is_valid:
                 zovshdate = self.__convert_zovshdate_duusdate(zovshdate, duusdate)[0]
-                print zovshdate
+
                 self.zovshdate = PluginUtils.convert_python_date_to_qt(zovshdate)
                 duusdate = self.__convert_zovshdate_duusdate(zovshdate, duusdate)[1]
 
@@ -891,6 +894,7 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
         f = codecs.decode(shovshshiid, 'utf-8')
         shovshshiid = f.replace('A', '')
         decision_no = au_level2 + '-' + shovshshiid + '/' + year_filter
+        print zovshdate
         print decision_no
         decision_count = self.session.query(CtDecision).filter(CtDecision.decision_no == decision_no). \
             filter(CtDecision.decision_level == decision_level).count()
@@ -1455,11 +1459,15 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
     def __validate_zovshdate(self, zovshdate):
 
         is_zovshdate = True
+
+        if self.__is_number(str(zovshdate)):
+            zovshdate = datetime.fromordinal(datetime(1900, 1, 1).toordinal() + int(zovshdate) - 2)
+
         try:
             zovshdate = datetime.strptime(str(zovshdate), '%Y.%m.%d')
         except:
             is_zovshdate = False
-            print "zovshdate after: ", 'aldaatai'
+            # print "zovshdate after: ", 'aldaatai'
 
         if not is_zovshdate:
             try:
@@ -1467,7 +1475,7 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
                 is_zovshdate = True
             except:
                 is_zovshdate = False
-                print "zovshdate after: ", 'aldaatai'
+                # print "zovshdate after: ", 'aldaatai'
 
         if not is_zovshdate:
             try:
@@ -1483,17 +1491,21 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
                 is_zovshdate = True
             except:
                 is_zovshdate = False
-                print "zovshdate after: ", 'aldaatai'
+                # print "zovshdate after: ", 'aldaatai'
 
         return is_zovshdate
 
     def __validate_duusdate(self, duusdate):
 
         is_duusate = True
+
+        if self.__is_number(str(duusdate)):
+            duusdate = datetime.fromordinal(datetime(1900, 1, 1).toordinal() + int(duusdate) - 2)
+
         try:
             duusdate = datetime.strptime(str(duusdate), '%Y.%m.%d')
         except:
-            is_duusate = False
+            # is_duusate = False
             print "duusdate after: ", 'aldaatai'
 
         if not is_duusate:
@@ -1502,7 +1514,7 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
                 is_duusate = True
             except:
                 is_duusate = False
-                print "duusdate after: ", 'aldaatai'
+                # print "duusdate after: ", 'aldaatai'
 
         if not is_duusate:
             try:
@@ -1510,7 +1522,7 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
                 is_duusate = True
             except:
                 is_duusate = False
-                print "duusdate after: ", 'aldaatai'
+                # print "duusdate after: ", 'aldaatai'
 
         if not is_duusate:
             try:
@@ -1518,19 +1530,23 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
                 is_duusate = True
             except:
                 is_duusate = False
-                print "duusdate after: ", 'aldaatai'
+                # print "duusdate after: ", 'aldaatai'
 
         return is_duusate
 
     def __convert_zovshdate_duusdate(self, zovshdate, duusdate):
 
         is_zovshdate = True
+
+        if self.__is_number(str(zovshdate)):
+            zovshdate = datetime.fromordinal(datetime(1900, 1, 1).toordinal() + int(zovshdate) - 2)
+
         if zovshdate is not None:
             try:
                 zovshdate = datetime.strptime(str(zovshdate), '%Y.%m.%d')
             except:
                 is_zovshdate = False
-                print "zovshdate after: ", 'aldaatai'
+                # print "zovshdate after: ", 'aldaatai'
 
             if not is_zovshdate:
                 try:
@@ -1538,7 +1554,7 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
                     is_zovshdate = True
                 except:
                     is_zovshdate = False
-                    print "zovshdate after: ", 'aldaatai'
+                    # print "zovshdate after: ", 'aldaatai'
 
             if not is_zovshdate:
                 try:
@@ -1546,7 +1562,7 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
                     is_zovshdate = True
                 except:
                     is_zovshdate = False
-                    print "zovshdate after: ", 'aldaatai'
+                    # print "zovshdate after: ", 'aldaatai'
 
             if not is_zovshdate:
                 try:
@@ -1554,16 +1570,18 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
                     is_zovshdate = True
                 except:
                     is_zovshdate = False
-                    print "zovshdate after: ", 'aldaatai'
+                    # print "zovshdate after: ", 'aldaatai'
 
         #############
         is_duusate = True
+        if self.__is_number(str(duusdate)):
+            duusdate = datetime.fromordinal(datetime(1900, 1, 1).toordinal() + int(duusdate) - 2)
         if duusdate is not None:
             try:
                 duusdate = datetime.strptime(str(duusdate), '%Y.%m.%d')
             except:
                 is_duusate = False
-                print "duusdate after: ", 'aldaatai'
+                # print "duusdate after: ", 'aldaatai'
 
             if not is_duusate:
                 try:
@@ -1571,7 +1589,7 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
                     is_duusate = True
                 except:
                     is_duusate = False
-                    print "duusdate after: ", 'aldaatai'
+                    # print "duusdate after: ", 'aldaatai'
 
             if not is_duusate:
                 try:
@@ -1579,7 +1597,7 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
                     is_duusate = True
                 except:
                     is_duusate = False
-                    print "duusdate after: ", 'aldaatai'
+                    # print "duusdate after: ", 'aldaatai'
 
             if not is_duusate:
                 try:
@@ -1587,7 +1605,7 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
                     is_duusate = True
                 except:
                     is_duusate = False
-                    print "duusdate after: ", 'aldaatai'
+                    # print "duusdate after: ", 'aldaatai'
 
         return zovshdate, duusdate
 
@@ -1630,7 +1648,7 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
     def __get_geometry_by_parcel_id(self, column_name, parcel_id, layer):
 
         parcel_geometry = None
-        print str(parcel_id)
+
         expression = column_name + " = \'" + str(parcel_id) + "\'"
 
         request = QgsFeatureRequest()
