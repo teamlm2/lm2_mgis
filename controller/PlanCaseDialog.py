@@ -63,6 +63,8 @@ from ..model.PlProjectParcelRefPastureParcel import *
 from ..model.SetPlanZoneRigthType import *
 from ..model.CaUBParcel import *
 from ..model.CaUBParcelTbl import *
+from ..model.PlProjectAuLevel2 import *
+from ..model.PlProjectAuLevel1 import *
 from ..view.Ui_PlanCaseDialog import *
 from .qt_classes.ApplicantDocumentDelegate import ApplicationDocumentDelegate
 from .qt_classes.DocumentsTableWidget import DocumentsTableWidget
