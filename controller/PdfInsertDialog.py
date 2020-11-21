@@ -698,7 +698,7 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
 
         file_path = self.load_shp_edit.text()
         self.__read_shp_file(file_path)
-        # self.commit()
+        self.commit()
 
     def __add_import_data_database(self, geometry, landuse, register, middlename, ovog, ner, heid, gaid, zovshbaig, shovshshiid,
                                zovshdate, duusdate, duration, gerchid):
@@ -1483,7 +1483,7 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
                 is_zovshdate = True
             except:
                 is_zovshdate = False
-                print "zovshdate after: ", 'aldaatai'
+                # print "zovshdate after: ", 'aldaatai'
 
         if not is_zovshdate:
             try:

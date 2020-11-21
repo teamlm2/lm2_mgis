@@ -676,9 +676,14 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         l1_code = DatabaseUtils.working_l1_code()
         l2_code = DatabaseUtils.working_l2_code()
 
-        values = values.filter(or_(PlProject.au2 == l2_code, PlProject.au2 == None)). \
-            filter(or_(PlProject.au1 == l1_code, PlProject.au1 == None)). \
-            filter(PlProject.project_id != self.plan.project_id)
+        # values = values.filter(or_(PlProject.au2 == l2_code, PlProject.au2 == None)). \
+        #     filter(or_(PlProject.au1 == l1_code, PlProject.au1 == None)). \
+        #     filter(PlProject.project_id != self.plan.project_id)
+
+        values = values. \
+            join(PlProjectAuLevel2, PlProject.project_id == PlProjectAuLevel2.project_id). \
+            filter(PlProjectAuLevel2.au2_code == l2_code). \
+            filter(PlProjectAuLevel1.au1_code == l1_code)
 
         for value in values.order_by(PlProject.code).all():
 
