@@ -696,9 +696,9 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
     @pyqtSlot()
     def on_import_data_button_clicked(self):
 
-        file_path = self.load_shp_edit.text()
-        self.__read_shp_file(file_path)
-        self.commit()
+        # file_path = self.load_shp_edit.text()
+        # self.__read_shp_file(file_path)
+        self.session.commit()
 
     def __add_import_data_database(self, geometry, landuse, register, middlename, ovog, ner, heid, gaid, zovshbaig, shovshshiid,
                                zovshdate, duusdate, duration, gerchid):
@@ -717,7 +717,6 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
         self.__save_contract_owner(gaid, zovshdate, duusdate, gerchid)
 
         print self.import_parcel_ids
-        # self.commit()
 
     def __save_person(self, register, middlename, ovog, ner, heid):
 
