@@ -1674,7 +1674,8 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
 
         for feature in iterator:
             feature_ids.append(feature.id())
-            parcel_geometry = WKTElement(feature.geometry().exportToWkt(), srid=4326)
+            if feature.geometry():
+                parcel_geometry = WKTElement(feature.geometry().exportToWkt(), srid=4326)
 
         return parcel_geometry
 
