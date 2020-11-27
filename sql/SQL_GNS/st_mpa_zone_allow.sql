@@ -1,7 +1,7 @@
-DROP TABLE if exists  data_landuse.st_mpa_zone_allow cascade;
+﻿DROP TABLE if exists  data_landuse.st_mpa_zone_allow cascade;
 CREATE TABLE data_landuse.st_mpa_zone_allow
 (
-  mpa_zone_id integer references admin_units.au_mpa_zone on update cascade on delete restrict,
+  mpa_zone_id integer references codelists.cl_mpa_zone_type on update cascade on delete restrict,
   spa_type_id integer references codelists.cl_mpa_spa_type on update cascade on delete restrict,  
   description text,
   allow_type integer,
@@ -17,6 +17,26 @@ GRANT ALL ON TABLE data_landuse.st_mpa_zone_allow TO geodb_admin;
 GRANT SELECT, UPDATE, INSERT, DELETE ON TABLE data_landuse.st_mpa_zone_allow TO land_office_administration;
 GRANT SELECT, UPDATE, INSERT, DELETE ON TABLE data_landuse.st_mpa_zone_allow TO role_management;
 
+---------------
+
+DROP TABLE if exists  data_landuse.set_mpa_zone_allow_landuse cascade;
+CREATE TABLE data_landuse.set_mpa_zone_allow_landuse
+(
+  mpa_zone_allow_id integer references data_landuse.st_mpa_zone_allow on update cascade on delete restrict,
+  landuse integer references codelists.cl_landuse_type on update cascade on delete restrict,  
+  id serial PRIMARY KEY,  
+  is_active boolean NOT NULL DEFAULT true
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE data_landuse.set_mpa_zone_allow_landuse
+  OWNER TO geodb_admin;
+GRANT ALL ON TABLE data_landuse.set_mpa_zone_allow_landuse TO geodb_admin;
+GRANT SELECT, UPDATE, INSERT, DELETE ON TABLE data_landuse.set_mpa_zone_allow_landuse TO land_office_administration;
+GRANT SELECT, UPDATE, INSERT, DELETE ON TABLE data_landuse.set_mpa_zone_allow_landuse TO role_management;
+
+-----------------------
 insert into data_landuse.st_mpa_zone_allow(spa_type_id, mpa_zone_id, allow_type, description) values(1, 1, 1, 'Онгон бүсэд байгалийн унаган төрх, хэв шинжийг нь хадгалах шаардлагад нийцүүлж зөвхөн хамгаалалтын арга хэмжээ хэрэгжүүлнэ;');
 insert into data_landuse.st_mpa_zone_allow(spa_type_id, mpa_zone_id, allow_type, description) values(1, 1, 1, 'Онгон бүсэд байгалийн төлөв байдлыг нь хөндөхгүйгээр зөвхөн ажиглах хэлбэрээр судалгаа, шинжилгээний ажил явуулж болох бөгөөд үүнээс бусад үйл ажиллагаа явуулахыг хориглоно;');
 insert into data_landuse.st_mpa_zone_allow(spa_type_id, mpa_zone_id, allow_type, description) values(1, 2, 1, 'Хамгаалалтын бүсэд энэ хуулийн 9 дүгээр зүйлд зааснаас гадна ургамал, амьтны аймгийн өсч  үржих нөхцөлийг хангах, гамшгийн хор уршгийг арилгахтай холбогдсон биотехникийн арга хэмжээг байгаль орчинд сөрөг нөлөөгүй арга хэлбэрээр хэрэгжүүлнэ;');

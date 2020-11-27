@@ -72,6 +72,8 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
         self.email_validator = QRegExpValidator(QRegExp("[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}"), None)
 
         self.www_validator = QRegExpValidator(QRegExp("www\\.[a-z0-9._%+-]+\\.[a-z]{2,4}"), None)
+        self.numbers_validator = QRegExpValidator(QRegExp("[1-9][0-9]+( *,*[1-9][0-9]+)*"), None)
+        self.int_validator = QRegExpValidator(QRegExp("[0-9]+"), None)
 
     @pyqtSlot()
     def on_select_file_button_clicked(self):
