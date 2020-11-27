@@ -1521,8 +1521,8 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
         try:
             duusdate = datetime.strptime(str(duusdate), '%Y.%m.%d')
         except:
-            # is_duusate = False
-            print "duusdate after: ", 'aldaatai'
+            is_duusate = False
+            # print "duusdate after: ", 'aldaatai'
 
         if not is_duusate:
             try:
