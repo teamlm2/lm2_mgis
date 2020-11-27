@@ -2919,6 +2919,7 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
                 self.decision.imported_by = DatabaseUtils.current_sd_user().user_id
                 self.decision.au2 = DatabaseUtils.working_l2_code()
                 self.session.add(self.decision)
+                self.session.flush()
 
             decision_app = CtDecisionApplication()
             decision_app.decision = self.decision.decision_id
