@@ -900,13 +900,12 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
         f = codecs.decode(shovshshiid, 'utf-8')
         shovshshiid = f.replace('A', '')
         decision_no = au_level2 + '-' + shovshshiid + '/' + year_filter
-        print zovshdate
-        print decision_no
+
         decision_count = self.session.query(CtDecision).filter(CtDecision.decision_no == decision_no). \
             filter(CtDecision.decision_level == decision_level).count()
         # self.create_savepoint()
         # try:
-        print decision_count
+
         if decision_count == 1:
             self.decision = self.session.query(CtDecision).filter(CtDecision.decision_no == decision_no). \
                 filter(CtDecision.decision_level == decision_level).one()
@@ -921,7 +920,7 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
             self.decision.au2 = DatabaseUtils.working_l2_code()
             self.session.add(self.decision)
             self.session.flush()
-        print self.decision.decision_id
+
         decision_app = CtDecisionApplication()
         decision_app.decision = self.decision.decision_id
         decision_app.decision_result = 10
@@ -964,8 +963,6 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
             year = qt_date.toString("yyyy")
             PluginUtils.generate_auto_app_no(str(year), app_type, DatabaseUtils.working_l2_code(), obj_type, self.session)
 
-            print '*******'
-            print self.application.app_id
             contract_app = CtContractApplicationRole()
             contract_app.application_ref = self.application
             contract_app.application = self.application.app_id
@@ -1477,7 +1474,7 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
     def __validate_zovshdate(self, zovshdate):
 
         is_zovshdate = True
-        print zovshdate
+
         if self.__is_number(str(zovshdate)):
             zovshdate = datetime.fromordinal(datetime(1900, 1, 1).toordinal() + int(zovshdate) - 2)
 
