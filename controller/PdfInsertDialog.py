@@ -724,6 +724,7 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
         self.__save_contract_owner(gaid, zovshdate, duusdate, gerchid)
 
         print self.import_parcel_ids
+        print 'niit orson negj talbar: ' + str(len(self.import_parcel_ids))
 
     def __save_person(self, register, middlename, ovog, ner, heid):
 
