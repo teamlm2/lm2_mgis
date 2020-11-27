@@ -577,6 +577,11 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
             if self.__is_number(zovshdate)        :
                 zovshdate = datetime.fromordinal(datetime(1900, 1, 1).toordinal() + int(zovshdate) - 2)
                 zovshdate = str(datetime.date(zovshdate))
+
+            if self.__is_number(duusdate)        :
+                duusdate = datetime.fromordinal(datetime(1900, 1, 1).toordinal() + int(duusdate) - 2)
+                duusdate = str(datetime.date(duusdate))
+
             is_valid = self.__validate_import_data(parcel_id, landuse, register, middlename, ovog, ner, heid, gaid, zovshbaig, shovshshiid, zovshdate, duusdate)[0]
             error_message = self.__validate_import_data(parcel_id, landuse, register, middlename, ovog, ner, heid, gaid, zovshbaig, shovshshiid, zovshdate, duusdate)[1]
             print is_valid
@@ -589,7 +594,7 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
                 item.setBackground(Qt.yellow)
             self.import_data_twidget.setItem(count, 0, item)
 
-            item = QTableWidgetItem(str(landuse))
+            item = QTableWidgetItem(unicode(landuse))
             item.setData(Qt.UserRole, landuse)
             item.setFlags(QtCore.Qt.ItemIsEnabled)
             if not is_valid:
@@ -901,6 +906,7 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
             filter(CtDecision.decision_level == decision_level).count()
         # self.create_savepoint()
         # try:
+        print decision_count
         if decision_count == 1:
             self.decision = self.session.query(CtDecision).filter(CtDecision.decision_no == decision_no). \
                 filter(CtDecision.decision_level == decision_level).one()
@@ -914,7 +920,8 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
             self.decision.imported_by = DatabaseUtils.current_sd_user().user_id
             self.decision.au2 = DatabaseUtils.working_l2_code()
             self.session.add(self.decision)
-
+            self.session.flush()
+        print self.decision.decision_id
         decision_app = CtDecisionApplication()
         decision_app.decision = self.decision.decision_id
         decision_app.decision_result = 10
@@ -957,6 +964,8 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
             year = qt_date.toString("yyyy")
             PluginUtils.generate_auto_app_no(str(year), app_type, DatabaseUtils.working_l2_code(), obj_type, self.session)
 
+            print '*******'
+            print self.application.app_id
             contract_app = CtContractApplicationRole()
             contract_app.application_ref = self.application
             contract_app.application = self.application.app_id
@@ -1261,6 +1270,14 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
                     is_valid = False
                     message = u'Кадастрын нэгж талбар давхардаж байна'
                     error_message = error_message + "\n" + message
+
+                ca_parcel_overlaps_count = self.session.query(CaParcelTbl). \
+                    filter(or_(CaParcelTbl.valid_till == 'infinity', CaParcelTbl.valid_till == None)). \
+                    filter(geometry.ST_Covers(CaParcelTbl.geometry)).count()
+                if ca_parcel_overlaps_count > 0:
+                    is_valid = False
+                    message = u'Кадастрын нэгж талбар давхардаж байна'
+                    error_message = error_message + "\n" + message
         else:
             is_valid = False
             message = u'Нэгж талбарын дугаар алдаатай'
@@ -1460,7 +1477,7 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
     def __validate_zovshdate(self, zovshdate):
 
         is_zovshdate = True
-
+        print zovshdate
         if self.__is_number(str(zovshdate)):
             zovshdate = datetime.fromordinal(datetime(1900, 1, 1).toordinal() + int(zovshdate) - 2)
 
