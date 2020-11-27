@@ -1311,7 +1311,7 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
 
             elif person_type == PersonType.mongolian_buisness or person_type == PersonType.mongolian_state_org:
 
-                if not self.__validate_entity_id(text):
+                if not self.__validate_entity_id(str(text)):
                     valid = False
                     street_error = self.tr("Company id error!.")
                     error_message = error_message + "\n \n" + street_error
