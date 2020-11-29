@@ -706,7 +706,10 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
         # file_path = self.load_shp_edit.text()
         # self.__read_shp_file(file_path)
         self.session.commit()
-
+        message_box = QMessageBox()
+        message_box.setText(self.tr('niit orson negj talbar: '+ str(len(self.import_parcel_ids))))
+        yes_button = message_box.addButton(self.tr("Oilgoloo"), QMessageBox.ActionRole)
+        message_box.exec_()
     def __add_import_data_database(self, geometry, landuse, register, middlename, ovog, ner, heid, gaid, zovshbaig, shovshshiid,
                                zovshdate, duusdate, duration, gerchid):
         heid = int(heid)
@@ -725,7 +728,6 @@ class PdfInsertDialog(QDialog, Ui_PdfInsertDialog):
 
         print self.import_parcel_ids
         print 'niit orson negj talbar: ' + str(len(self.import_parcel_ids))
-
     def __save_person(self, register, middlename, ovog, ner, heid):
 
         person_id = register

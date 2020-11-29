@@ -501,13 +501,13 @@ class LM2Plugin:
                                                           "If you going to chagne base parcel, Please choose the Base Parcel"))
 
         new_parcel_button = message_box.addButton(QApplication.translate("LM2", "New Parcel"), QMessageBox.ActionRole)
-        new_parcel_button.setDisabled(True)
+        new_parcel_button.setDisabled(false)
 
         user_name = QSettings().value(SettingsConstants.USER)
         user_right = DatabaseUtils.userright_by_name(user_name)
         if user_right:
-            if UserRight.cadastre_update in user_right:
-                new_parcel_button.setDisabled(False)
+            if UserRight.db_creation in user_right:
+                new_parcel_button.setDisabled(True)
         message_box.addButton(QApplication.translate("LM2", "Base Parcel"), QMessageBox.ActionRole)
         message_box.exec_()
         restrictions = DatabaseUtils.working_l2_code()
