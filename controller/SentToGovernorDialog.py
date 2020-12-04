@@ -50,6 +50,7 @@ class SentToGovernorDialog(QDialog, Ui_SentToGovernorDialog, DatabaseHelper):
 
         self.setWindowTitle(self.tr("Sent and prepare governor decision Dialog"))
         self.session = SessionHandler().session_instance()
+        self.current_user = DatabaseUtils.current_user()
         self.__setup_validators()
         self.__app_status_count()
         self.close_button.clicked.connect(self.reject)
@@ -1934,41 +1935,46 @@ class SentToGovernorDialog(QDialog, Ui_SentToGovernorDialog, DatabaseHelper):
 
         self.decision_level_cbox.clear()
         app_type = self.app_type_cbox.itemData(index)
-        if app_type == ApplicationType.extension_possession or app_type == ApplicationType.change_of_area:
-            decision_level = self.session.query(ClDecisionLevel).filter(ClDecisionLevel.code == 80).all()
-            for item in decision_level:
-                self.decision_level_cbox.addItem(item.description, item.code)
-
-        if app_type == ApplicationType.special_use:
+        if self.current_user.organization == 3:
             decision_level = self.session.query(ClDecisionLevel).filter(ClDecisionLevel.code == 80).all()
             for item in decision_level:
                 self.decision_level_cbox.addItem(item.description, item.code)
         else:
-            soum_code = ''
-            au_level2 = DatabaseUtils.current_working_soum_schema()
-            soum_code = str(au_level2)[3:]
-            set_roles = self.session.query(SetRole).all()
-            set_role = self.session.query(SetRole).filter(
-                SetRole.user_name == DatabaseUtils.current_user().user_name).filter(SetRole.is_active == True).one()
-            aimag_code = set_role.working_au_level1
-            aimag_code = aimag_code[:2]
-            if aimag_code == '01' or aimag_code == '12':
-                decision_level = self.session.query(ClDecisionLevel).filter(
-                    or_(ClDecisionLevel.code == 10, ClDecisionLevel.code == 20)).all()
+            if app_type == ApplicationType.extension_possession or app_type == ApplicationType.change_of_area:
+                decision_level = self.session.query(ClDecisionLevel).filter(ClDecisionLevel.code == 80).all()
+                for item in decision_level:
+                    self.decision_level_cbox.addItem(item.description, item.code)
+
+            if app_type == ApplicationType.special_use:
+                decision_level = self.session.query(ClDecisionLevel).filter(ClDecisionLevel.code == 80).all()
                 for item in decision_level:
                     self.decision_level_cbox.addItem(item.description, item.code)
             else:
-                if soum_code == '01':
+                soum_code = ''
+                au_level2 = DatabaseUtils.current_working_soum_schema()
+                soum_code = str(au_level2)[3:]
+                set_roles = self.session.query(SetRole).all()
+                set_role = self.session.query(SetRole).filter(
+                    SetRole.user_name == DatabaseUtils.current_user().user_name).filter(SetRole.is_active == True).one()
+                aimag_code = set_role.working_au_level1
+                aimag_code = aimag_code[:2]
+                if aimag_code == '01' or aimag_code == '12':
                     decision_level = self.session.query(ClDecisionLevel).filter(
-                        or_(ClDecisionLevel.code == 30, ClDecisionLevel.code == 40, ClDecisionLevel.code == 50, ClDecisionLevel.code == 60)).all()
+                        or_(ClDecisionLevel.code == 10, ClDecisionLevel.code == 20)).all()
                     for item in decision_level:
                         self.decision_level_cbox.addItem(item.description, item.code)
-                        # self.decision_level_cbox.setCurrentIndex(2)
                 else:
-                    decision_level = self.session.query(ClDecisionLevel).filter(or_(ClDecisionLevel.code == 40, ClDecisionLevel.code == 50, ClDecisionLevel.code == 60)).all()
-                    for item in decision_level:
-                        self.decision_level_cbox.addItem(item.description, item.code)
-                        # self.decision_level_cbox.setCurrentIndex(3)
+                    if soum_code == '01':
+                        decision_level = self.session.query(ClDecisionLevel).filter(
+                            or_(ClDecisionLevel.code == 30, ClDecisionLevel.code == 40, ClDecisionLevel.code == 50, ClDecisionLevel.code == 60)).all()
+                        for item in decision_level:
+                            self.decision_level_cbox.addItem(item.description, item.code)
+                            # self.decision_level_cbox.setCurrentIndex(2)
+                    else:
+                        decision_level = self.session.query(ClDecisionLevel).filter(or_(ClDecisionLevel.code == 40, ClDecisionLevel.code == 50, ClDecisionLevel.code == 60)).all()
+                        for item in decision_level:
+                            self.decision_level_cbox.addItem(item.description, item.code)
+                            # self.decision_level_cbox.setCurrentIndex(3)
 
     @pyqtSlot()
     def on_help_button_clicked(self):

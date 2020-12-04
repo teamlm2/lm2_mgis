@@ -194,7 +194,7 @@
      <widget class="QLabel" name="label_15">
       <property name="geometry">
        <rect>
-        <x>221</x>
+        <x>203</x>
         <y>17</y>
         <width>191</width>
         <height>16</height>
@@ -207,7 +207,7 @@
      <widget class="QLineEdit" name="draft_no_edit">
       <property name="geometry">
        <rect>
-        <x>19</x>
+        <x>9</x>
         <y>35</y>
         <width>90</width>
         <height>20</height>
@@ -230,9 +230,9 @@
      <widget class="QComboBox" name="decision_level_cbox">
       <property name="geometry">
        <rect>
-        <x>220</x>
+        <x>202</x>
         <y>35</y>
-        <width>251</width>
+        <width>271</width>
         <height>22</height>
        </rect>
       </property>
@@ -253,7 +253,7 @@
      <widget class="QLabel" name="label_14">
       <property name="geometry">
        <rect>
-        <x>115</x>
+        <x>105</x>
         <y>17</y>
         <width>91</width>
         <height>16</height>
@@ -279,7 +279,7 @@
      <widget class="QLabel" name="label_13">
       <property name="geometry">
        <rect>
-        <x>20</x>
+        <x>10</x>
         <y>17</y>
         <width>101</width>
         <height>16</height>
@@ -292,7 +292,7 @@
      <widget class="QDateEdit" name="draft_date">
       <property name="geometry">
        <rect>
-        <x>115</x>
+        <x>105</x>
         <y>35</y>
         <width>90</width>
         <height>22</height>
@@ -321,7 +321,7 @@
      <widget class="QPushButton" name="search_button">
       <property name="geometry">
        <rect>
-        <x>340</x>
+        <x>330</x>
         <y>78</y>
         <width>132</width>
         <height>23</height>
@@ -334,7 +334,7 @@
      <widget class="QDateEdit" name="begin_date">
       <property name="geometry">
        <rect>
-        <x>20</x>
+        <x>10</x>
         <y>35</y>
         <width>90</width>
         <height>22</height>
@@ -350,7 +350,7 @@
      <widget class="QDateEdit" name="end_date">
       <property name="geometry">
        <rect>
-        <x>20</x>
+        <x>10</x>
         <y>78</y>
         <width>90</width>
         <height>22</height>
@@ -366,7 +366,7 @@
      <widget class="QComboBox" name="app_type_cbox">
       <property name="geometry">
        <rect>
-        <x>130</x>
+        <x>120</x>
         <y>35</y>
         <width>341</width>
         <height>22</height>
@@ -376,7 +376,7 @@
      <widget class="QLabel" name="label_6">
       <property name="geometry">
        <rect>
-        <x>20</x>
+        <x>10</x>
         <y>17</y>
         <width>96</width>
         <height>16</height>
@@ -389,7 +389,7 @@
      <widget class="QLabel" name="label_7">
       <property name="geometry">
        <rect>
-        <x>20</x>
+        <x>10</x>
         <y>60</y>
         <width>91</width>
         <height>16</height>
@@ -402,7 +402,7 @@
      <widget class="QLabel" name="label_11">
       <property name="geometry">
        <rect>
-        <x>130</x>
+        <x>120</x>
         <y>17</y>
         <width>226</width>
         <height>16</height>
@@ -415,7 +415,7 @@
      <widget class="QComboBox" name="officer_cbox">
       <property name="geometry">
        <rect>
-        <x>130</x>
+        <x>120</x>
         <y>78</y>
         <width>195</width>
         <height>22</height>
@@ -425,7 +425,7 @@
      <widget class="QLabel" name="label_17">
       <property name="geometry">
        <rect>
-        <x>130</x>
+        <x>120</x>
         <y>60</y>
         <width>226</width>
         <height>16</height>
