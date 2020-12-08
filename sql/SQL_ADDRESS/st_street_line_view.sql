@@ -1,11 +1,11 @@
-﻿CREATE OR REPLACE VIEW data_address.st_street_line_view AS
+﻿DROP VIEW data_address.st_street_line_view;
+CREATE OR REPLACE VIEW data_address.st_street_line_view AS
 
-select s.id, s.code, s.name, s.description, s.decision_date, s.decision_no, s.decision_level_id, dl.description as decision_level_desc, s.is_active, street_type_id, st.description as street_type_desc, s.length, r.geometry::geometry(MultiLineString,4326) from data_address.st_street s
+select row_number() over() as id, s.id as street_id, s.code, s.name, s.description, s.decision_date, s.decision_no, s.decision_level_id, dl.description as decision_level_desc, s.is_active, street_type_id, st.description as street_type_desc, s.length, r.geometry::geometry(LineString,4326) from data_address.st_street s
 join data_address.cl_street_type st on s.street_type_id = st.code
 left join data_plan.cl_plan_decision_level dl on s.decision_level_id = dl.plan_decision_level_id
-join (select row_number() over() as gid, ST_Union(st_multi(line_geom)) geometry, street_id from data_address.st_road
-where street_id is not null
-group by street_id) r on s.id = r.street_id
+join (select row_number() over() as gid, ((line_geom)) geometry, street_id from data_address.st_road
+where street_id is not null ) r on s.id = r.street_id
 
 WHERE s.au2::text = (( SELECT set_role_user.working_au_level2::text AS au2
            FROM settings.set_role_user

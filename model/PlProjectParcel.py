@@ -24,6 +24,9 @@ class PlProjectParcel(Base):
     line_geom = Column(Geometry('LINESTRING', 4326))
     point_geom = Column(Geometry('POINT', 4326))
 
+    start_date = Column(Date)
+    end_date = Column(Date)
+
     created_at = Column(DateTime)
     created_by = Column(Integer)
     updated_at = Column(DateTime)

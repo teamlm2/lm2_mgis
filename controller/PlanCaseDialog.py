@@ -1260,6 +1260,8 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         new_parcel.project_id = self.plan.project_id
         new_parcel.project_ref = self.plan
         new_parcel.valid_from = PluginUtils.convert_qt_date_to_python(QDateTime().currentDateTime())
+        new_parcel.start_date = self.plan.start_date
+        new_parcel.end_date = self.plan.end_date
         new_parcel.au1 = self.au1
         new_parcel.au2 = self.au2
         new_parcel.is_active = True
@@ -1686,7 +1688,7 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         plan_code = ''
         landuse = None
         landname = ''
-        right_form_id = None
+        right_form_code = None
         right_type_code = None
         comment = ''
         plan_zone_id = None
@@ -1700,12 +1702,17 @@ class PlanCaseDialog(QDialog, Ui_PlanCaseDialog, DatabaseHelper):
         if column_names[column_name_gaz_ner] != None:
             landname = column_names[column_name_gaz_ner]
         if column_names[column_name_right_form] != None:
-            right_form_id = column_names[column_name_right_form]
+            right_form_code = column_names[column_name_right_form]
         if column_names[column_name_right_type] != None:
             right_type_code = column_names[column_name_right_type]
         if column_names[column_name_comment] != None:
             comment = column_names[column_name_comment]
 
+        right_form_id = None
+        right_form_count = self.session.query(ClRightForm).filter(ClRightForm.code == right_form_code).count()
+        if right_form_count > 0:
+            right_form = self.session.query(ClRightForm).filter(ClRightForm.code == right_form_code).first()
+            right_form_id = right_form.right_form_id
         if self.if_single_type_chbox.isChecked():
             code = self.shp_process_type_cbox.itemData(self.shp_process_type_cbox.currentIndex())
             plan_zone_count = self.session.query(ClPlanZone).filter(ClPlanZone.code == code).count()
