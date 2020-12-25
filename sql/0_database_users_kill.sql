@@ -31,3 +31,17 @@ SELECT pg_terminate_backend(pid) FROM pg_stat_activity
 WHERE datname = 'lm_0003'
 AND pid <> pg_backend_pid()
 AND state in ('idle');
+
+SELECT * FROM pg_stat_activity WHERE datname = 'lm_0003' and state = 'active';
+
+SELECT
+  pid,
+  application_name,
+  now() - pg_stat_activity.query_start AS duration,
+  query,
+  state
+FROM pg_stat_activity
+WHERE datname = 'lm_0003' 
+--and state = 'idle' 
+and (now() - pg_stat_activity.query_start) > interval '5 minutes'
+order by now() - pg_stat_activity.query_start;

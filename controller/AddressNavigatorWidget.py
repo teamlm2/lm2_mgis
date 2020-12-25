@@ -137,11 +137,12 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
         str_id = None
         for feature in select_feature:
             attr = feature.attributes()
-            str_id = attr[0]
+            str_id = attr[1]
             self.str_id = str_id
 
         if str_id is None:
             return
+        print str_id
         street = self.session.query(StStreet).filter(StStreet.id == str_id).one()
 
         self.str_id_lbl.setText(str(str_id))
@@ -264,14 +265,18 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
 
             for feature in select_feature:
                 attr = feature.attributes()
-                street_id = attr[0]
+                street_id = attr[1]
+                print street_id
                 sql = "select * from base.st_street_line_view_start_end_nodes_auto(" + str(street_id) + ");"
 
                 geometry = None
+                self.session.query(StStreetPoint).filter(StStreetPoint.street_id == street_id).delete()
                 result = self.session.execute(sql)
                 for item_row in result:
                     p_type = item_row[0]
                     street_id = item_row[1]
+                    print '-----'
+                    print street_id
                     x = item_row[2]
                     y = item_row[3]
 
@@ -280,12 +285,12 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
 
                     geometry = WKTElement(geometry.exportToWkt(), srid=4326)
                     if geometry is not None:
-                        self.session.query(StStreetPoint).filter(StStreetPoint.street_id == street_id).delete()
+
 
                         count = self.session.query(StStreetPoint). \
                             filter(StStreetPoint.geometry.ST_Equals(geometry)). \
                             filter(StStreetPoint.street_id == street_id).count()
-
+                        print count
                         if count == 0:
                             object = StStreetPoint()
                             object.is_active = True
