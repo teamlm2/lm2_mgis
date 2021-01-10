@@ -142,7 +142,7 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
 
         if str_id is None:
             return
-        print str_id
+
         street = self.session.query(StStreet).filter(StStreet.id == str_id).one()
 
         self.str_id_lbl.setText(str(str_id))
@@ -266,7 +266,7 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
             for feature in select_feature:
                 attr = feature.attributes()
                 street_id = attr[1]
-                print street_id
+
                 sql = "select * from base.st_street_line_view_start_end_nodes_auto(" + str(street_id) + ");"
 
                 geometry = None
@@ -275,8 +275,7 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
                 for item_row in result:
                     p_type = item_row[0]
                     street_id = item_row[1]
-                    print '-----'
-                    print street_id
+
                     x = item_row[2]
                     y = item_row[3]
 
@@ -290,7 +289,7 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
                         count = self.session.query(StStreetPoint). \
                             filter(StStreetPoint.geometry.ST_Equals(geometry)). \
                             filter(StStreetPoint.street_id == street_id).count()
-                        print count
+
                         if count == 0:
                             object = StStreetPoint()
                             object.is_active = True
@@ -1237,7 +1236,7 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
         if entry_count == 0:
             self.str_type_lbl.setText(u'Энэ нэгж талбарын орц, гарцыг тодорхойлоогүй байна.')
             return
-        print str_id
+
         str_start_point_count = self.session.query(StStreetPoint).\
             filter(StStreetPoint.street_id == str_id).\
             filter(StStreetPoint.point_type == 1).count()
@@ -1257,7 +1256,6 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
         else:
             self.str_type_lbl.setText(unicode(str_shape.description))
 
-        print self.side
         if self.side == '-1':
             self.str_txt_lbl.setText(u'Гудамжны зүүн гар талд байрлаж байгаа тул СОНДГОЙ дугаар авна')
 
