@@ -32,8 +32,8 @@ BEGIN
 		
         SELECT code FROM admin_units.au_level1 INTO v_admin_unit_l1_code WHERE ST_COVERS(ST_Transform(geometry::geography::geometry, base.find_utm_srid(st_centroid(geometry))), ST_Transform(NEW.line_geom::geography::geometry, base.find_utm_srid(st_centroid(geometry))));
 	SELECT code FROM admin_units.au_level2 INTO v_admin_unit_l2_code WHERE ST_COVERS(ST_Transform(geometry::geography::geometry, base.find_utm_srid(st_centroid(geometry))), ST_Transform(NEW.line_geom::geography::geometry, base.find_utm_srid(st_centroid(geometry))));
-	SELECT parcel_id FROM data_soums_union.ca_parcel_tbl INTO parcel_no WHERE ST_COVERS(ST_Transform(geometry::geography::geometry, base.find_utm_srid(st_centroid(geometry))), st_centroid(ST_Transform(NEW.line_geom::geography::geometry, base.find_utm_srid(st_centroid(geometry))))) and (valid_till = 'infinity' or valid_till is null) ;
-	
+	--SELECT parcel_id FROM data_soums_union.ca_parcel_tbl INTO parcel_no WHERE ST_COVERS(ST_Transform(geometry::geography::geometry, base.find_utm_srid(st_centroid(st_makevalid(geometry)))), st_centroid(ST_Transform(NEW.line_geom::geography::geometry, base.find_utm_srid(st_centroid(geometry))))) and (valid_till = 'infinity' or valid_till is null) ;
+	SELECT parcel_id FROM data_soums_union.ca_parcel_tbl INTO parcel_no WHERE ST_COVERS(geometry, ST_PointOnSurface(ST_Makevalid(NEW.line_geom)));
 	IF (parcel_no IS NULL) THEN
 		execute 'SELECT max(substring(parcel_id, 3, 8)::int) FROM data_soums_union.ca_parcel_line_tbl WHERE parcel_id LIKE $1' into v_error_counter using 'ER%';
 		IF v_error_counter IS NULL THEN

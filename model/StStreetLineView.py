@@ -12,6 +12,7 @@ class StStreetLineView(Base):
     __tablename__ = 'st_street_line_view'
 
     id = Column(Integer, primary_key=True)
+    street_id = Column(Integer)
     code = Column(String)
     name = Column(String)
     decision_date = Column(Date)

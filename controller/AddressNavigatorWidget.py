@@ -324,7 +324,7 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
             str_count_lbl = str_count + '/' +  str(a_count)
             self.str_count_lbl.setText(str_count_lbl)
             for value in strs:
-                street_id = value.id
+                street_id = value.street_id
 
                 sql = "select * from base.st_street_line_view_start_end_nodes_auto(" + str(street_id) + ");"
                 self.session.query(StStreetPoint).filter(StStreetPoint.street_id == street_id).delete()
@@ -338,7 +338,6 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
 
                     geom_spot4 = QgsPoint(x, y)
                     geometry = QgsGeometry.fromPoint(geom_spot4)
-
                     geometry = WKTElement(geometry.exportToWkt(), srid=4326)
                     if geometry is not None:
                         count = self.session.query(StStreetPoint). \
