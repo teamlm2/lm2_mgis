@@ -11,59 +11,11 @@ DECLARE
 BEGIN
 
 	    RETURN  query 
-			select row_number() over() as gid, xxx.gid as street_id, ST_X(xxx.geom) as x, ST_Y(xxx.geom) as y from (
-			SELECT foo.gid, ST_StartPoint(the_geom) as geom
-			FROM (select xxx.id as gid, (ST_Dump(geometry)).geom As the_geom, geometry from 
-				  (
-					SELECT s.id,
-			    s.code,
-			    s.name,
-			    s.description,
-			    s.decision_date,
-			    s.decision_no,
-			    s.decision_level_id,
-			    dl.description AS decision_level_desc,
-			    s.is_active,
-			    s.street_type_id,
-			    s.length,
-			    r.geometry::geometry(MultiLineString,4326) AS geometry
-			   FROM data_address.st_street s
-			     LEFT JOIN data_plan.cl_plan_decision_level dl ON s.decision_level_id = dl.plan_decision_level_id
-			     JOIN ( SELECT row_number() OVER () AS gid,
-				    st_union(st_multi(st_road.line_geom)) AS geometry,
-				    st_road.street_id
-				   FROM data_address.st_road
-				  WHERE st_road.street_id IS NOT NULL
-				  GROUP BY st_road.street_id) r ON s.id = r.street_id where s.id = str_id
-				  )xxx
-			where xxx.id = str_id) As foo
+			SELECT row_number() over() as gid, * FROM (
+			select  s.street_id, ST_X(ST_StartPoint((ST_Dump(geometry)).geom)) as x, ST_Y(ST_StartPoint((ST_Dump(geometry)).geom)) as y from data_address.st_mat_street_line_view s where s.street_id = 128888
 			union all
-			SELECT foo.gid, ST_EndPoint(the_geom) as geom
-			FROM (select xxx.id as gid, (ST_Dump(geometry)).geom As the_geom, geometry from 
-				  (
-					SELECT s.id,
-			    s.code,
-			    s.name,
-			    s.description,
-			    s.decision_date,
-			    s.decision_no,
-			    s.decision_level_id,
-			    dl.description AS decision_level_desc,
-			    s.is_active,
-			    s.street_type_id,
-			    s.length,
-			    r.geometry::geometry(MultiLineString,4326) AS geometry
-			   FROM data_address.st_street s
-			     LEFT JOIN data_plan.cl_plan_decision_level dl ON s.decision_level_id = dl.plan_decision_level_id
-			     JOIN ( SELECT row_number() OVER () AS gid,
-				    st_union(st_multi(st_road.line_geom)) AS geometry,
-				    st_road.street_id
-				   FROM data_address.st_road
-				  WHERE st_road.street_id IS NOT NULL
-				  GROUP BY st_road.street_id) r ON s.id = r.street_id where s.id = str_id
-				  )xxx
-			where xxx.id = str_id) As foo
-			)xxx group by xxx.gid, xxx.geom;
+			select  s.street_id, ST_X(ST_EndPoint((ST_Dump(geometry)).geom)) as x, ST_Y(ST_EndPoint((ST_Dump(geometry)).geom)) as y from data_address.st_mat_street_line_view s where s.street_id = 128888
+)XXX group by xxx.street_id, xxx.x, xxx.y
 
 END;
 
@@ -76,3 +28,21 @@ ALTER FUNCTION base.st_street_line_view_start_end_nodes(integer)
 GRANT EXECUTE ON FUNCTION base.st_street_line_view_start_end_nodes(integer) TO public;
 GRANT EXECUTE ON FUNCTION base.st_street_line_view_start_end_nodes(integer) TO geodb_admin;
 GRANT EXECUTE ON FUNCTION base.st_street_line_view_start_end_nodes(integer) TO application_update;
+
+select * from base.st_street_line_view_start_end_nodes(128888)
+
+
+SELECT foo.gid, ST_StartPoint(the_geom) as geom
+			FROM (select s.street_id as gid, (ST_Dump(geometry)).geom As the_geom, geometry from data_address.st_mat_street_line_view s where s.street_id = str_id
+
+select ST_StartPoint((ST_Dump(geometry)).geom) from data_address.st_mat_street_line_view where street_id = 128888
+
+select ST_EndPoint((ST_Dump(geometry)).geom) from data_address.st_mat_street_line_view where street_id = 128888
+
+select * from (
+SELECT foo.gid, ST_StartPoint(the_geom) as geom
+FROM (select s.street_id as gid, (ST_Dump(geometry)).geom As the_geom, geometry from data_address.st_mat_street_line_view s where s.street_id = 128888) As foo
+union all
+SELECT foo.gid, ST_EndPoint(the_geom) as geom
+FROM (select s.street_id as gid, (ST_Dump(geometry)).geom As the_geom, geometry from data_address.st_mat_street_line_view s where s.street_id = 128888) As foo
+)xxx group by gid, geom
