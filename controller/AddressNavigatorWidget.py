@@ -152,8 +152,10 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
         sql = "select * from base.st_street_line_view_start_end_nodes("+ str(str_id) +");"
 
         result = self.session.execute(sql)
+        print sql
         for item_row in result:
             id = item_row[0]
+            print id
             street_id = item_row[1]
             x = item_row[2]
             y = item_row[3]
@@ -289,8 +291,9 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
                         count = self.session.query(StStreetPoint). \
                             filter(StStreetPoint.geometry.ST_Equals(geometry)). \
                             filter(StStreetPoint.street_id == street_id).count()
-
+                        print count
                         if count == 0:
+                            print p_type
                             object = StStreetPoint()
                             object.is_active = True
                             object.geometry = geometry
@@ -348,7 +351,7 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
                             object = StStreetPoint()
                             object.is_active = True
                             object.geometry = geometry
-                            object.point_type = 1
+                            # object.point_type = 1
                             object.street_id = street_id
                             if p_type == 1:
                                 object.point_type = 1

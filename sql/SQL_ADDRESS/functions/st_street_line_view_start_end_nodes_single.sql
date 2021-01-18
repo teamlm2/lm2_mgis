@@ -12,10 +12,9 @@ BEGIN
 
 	    RETURN  query 
 			SELECT row_number() over() as gid, * FROM (
-			select  s.street_id, ST_X(ST_StartPoint((ST_Dump(geometry)).geom)) as x, ST_Y(ST_StartPoint((ST_Dump(geometry)).geom)) as y from data_address.st_mat_street_line_view s where s.street_id = 128888
-			union all
-			select  s.street_id, ST_X(ST_EndPoint((ST_Dump(geometry)).geom)) as x, ST_Y(ST_EndPoint((ST_Dump(geometry)).geom)) as y from data_address.st_mat_street_line_view s where s.street_id = 128888
-)XXX group by xxx.street_id, xxx.x, xxx.y
+			select  s.id as street_id, ST_X(ST_StartPoint((ST_Dump(line_geom)).geom)) as x, ST_Y(ST_StartPoint((ST_Dump(line_geom)).geom)) as y from data_address.st_street s where s.id = str_id
+		
+)XXX group by xxx.street_id, xxx.x, xxx.y;
 
 END;
 
@@ -29,7 +28,9 @@ GRANT EXECUTE ON FUNCTION base.st_street_line_view_start_end_nodes(integer) TO p
 GRANT EXECUTE ON FUNCTION base.st_street_line_view_start_end_nodes(integer) TO geodb_admin;
 GRANT EXECUTE ON FUNCTION base.st_street_line_view_start_end_nodes(integer) TO application_update;
 
-select * from base.st_street_line_view_start_end_nodes(128888)
+select * from base.st_street_line_view_start_end_nodes(128886)
+
+select  s.id as street_id, ST_X(ST_StartPoint((ST_Dump(line_geom)).geom)) as x, ST_Y(ST_StartPoint((ST_Dump(line_geom)).geom)) as y from data_address.st_street s where s.id = 128886
 
 
 SELECT foo.gid, ST_StartPoint(the_geom) as geom
