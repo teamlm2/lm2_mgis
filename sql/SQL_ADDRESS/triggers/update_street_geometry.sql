@@ -12,24 +12,30 @@ BEGIN
 	
 	--insert
 	IF (NEW.street_id IS NOT NULL) THEN
-		RAISE NOTICE 'insert x (%)',  NEW.street_id;		
-		execute 'SELECT st_multi(st_union(r.line_geom))::geometry(MultiLineString,4326) AS geometry FROM data_address.st_road r WHERE r.street_id = ''' || NEW.street_id || ''' GROUP BY r.street_id ' into new_geometry ;
-	
-		--RAISE NOTICE 'geom x (%)', new_geometry;
-		execute 'update data_address.st_street set line_geom = st_setsrid(ST_GeomFromText('''||ST_AsText(new_geometry)||'''), 4326) where id = ''' || NEW.street_id || '''';
+		IF (OLD.street_id IS NULL) THEN
+			RAISE NOTICE 'insert x (%)',  NEW.street_id;				
+			execute 'select st_multi(st_union(xxx.line_geom))::geometry(MultiLineString,4326) AS geometry from(
+				select line_geom from data_address.st_street where id = ''' || NEW.street_id || '''
+				union all
+				select line_geom from data_address.st_road where id = ''' || OLD.id || ''')xxx ' into new_geometry ;
+
+			RAISE NOTICE 'geom x (%)', new_geometry;
+			execute 'update data_address.st_street set line_geom = st_setsrid(ST_GeomFromText('''||ST_AsText(new_geometry)||'''), 4326) where id = ''' || NEW.street_id || '''';
+		END IF;
+		
 		--NEW.street_id = NEW.street_id;
 
 	--delete
 	ELSIF (NEW.street_id IS NULL) THEN
 		IF (OLD.street_id IS NOT NULL) THEN
-		RAISE NOTICE 'delete x (%)',  old.street_id;		
-		execute 'SELECT st_multi(st_union(r.line_geom))::geometry(MultiLineString,4326) AS geometry FROM data_address.st_road r WHERE r.id != ''' || OLD.id || ''' and r.street_id = ''' || OLD.street_id || ''' GROUP BY r.street_id ' into new_geometry ; 
-		execute 'update data_address.st_street set line_geom = st_setsrid(ST_GeomFromText('''||ST_AsText(new_geometry)||'''), 4326) where id = ''' || OLD.street_id || '''';
-		--NEW.street_id = null;
+			RAISE NOTICE 'delete x (%)',  old.street_id;		
+			execute 'SELECT st_multi(st_union(r.line_geom))::geometry(MultiLineString,4326) AS geometry FROM data_address.st_road r WHERE r.id != ''' || OLD.id || ''' and r.street_id = ''' || OLD.street_id || ''' GROUP BY r.street_id ' into new_geometry ; 
+			execute 'update data_address.st_street set line_geom = st_setsrid(ST_GeomFromText('''||ST_AsText(new_geometry)||'''), 4326) where id = ''' || OLD.street_id || '''';
+			--NEW.street_id = null;
 		END IF;
 	END IF;
-	
-	NEW.street_id := NEW.street_id;
+
+	--NEW.street_id := NEW.street_id;
     RETURN new;
 END;
 $BODY$
