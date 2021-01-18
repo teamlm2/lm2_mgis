@@ -2013,8 +2013,10 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
             if not self.change_landuse_chbox.isChecked():
                 self.landuse_code = landuse.code
             landuse_type_code = landuse.code
+            print landuse_type_code
             case_landuse_count = self.session.query(StWorkflowStatusLanduse). \
                 filter(StWorkflowStatusLanduse.next_landuse == landuse_type_code).count()
+            print case_landuse_count
             if case_landuse_count == 0:
                 message = (u'/{0}/ ГНС-н ангилалд шилжилт хөдөлгөөний тохиргоо хийгээгүй байна!').format(
                                            landuse_type_code)

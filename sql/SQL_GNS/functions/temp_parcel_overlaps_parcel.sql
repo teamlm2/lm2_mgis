@@ -36,5 +36,5 @@ $BODY$;
 ALTER FUNCTION base.landuse_temp_parcel_overlaps(integer)
     OWNER TO geodb_admin;
 
-select base.landuse_temp_parcel_overlaps(8)
+select base.landuse_temp_parcel_overlaps(1)
 
