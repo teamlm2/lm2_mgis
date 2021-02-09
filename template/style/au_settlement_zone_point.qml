@@ -34,6 +34,18 @@
     <edittype widgetv2type="TextEdit" name="au3">
       <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
     </edittype>
+    <edittype widgetv2type="TextEdit" name="name">
+      <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
+    </edittype>
+    <edittype widgetv2type="ValueMap" name="type">
+      <widgetv2config fieldEditable="1" constraint="&quot;type&quot;" labelOnTop="0" constraintDescription="" notNull="0">
+        <value key="Аймаг/Нийслэлийн төв цэг" value="1"/>
+        <value key="Багийн төв цэг" value="3"/>
+        <value key="Сум/Дүүргийн төв цэг" value="2"/>
+        <value key="Тосгоны төв цэг" value="4"/>
+        <value key="Чөлөөт бүсийн төв цэг" value="5"/>
+      </widgetv2config>
+    </edittype>
   </edittypes>
   <renderer-v2 forceraster="0" symbollevels="0" type="singleSymbol" enableorderby="0">
     <symbols>
@@ -294,6 +306,8 @@
     <alias field="au1" index="8" name=""/>
     <alias field="au2" index="9" name=""/>
     <alias field="au3" index="10" name=""/>
+    <alias field="name" index="11" name=""/>
+    <alias field="type" index="12" name=""/>
   </aliases>
   <excludeAttributesWMS/>
   <excludeAttributesWFS/>
@@ -312,6 +326,8 @@
       <column width="-1" hidden="0" type="field" name="au2"/>
       <column width="-1" hidden="0" type="field" name="au3"/>
       <column width="-1" hidden="1" type="actions"/>
+      <column width="-1" hidden="0" type="field" name="name"/>
+      <column width="-1" hidden="0" type="field" name="type"/>
     </columns>
   </attributetableconfig>
   <editform>.</editform>
