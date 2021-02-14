@@ -1,4 +1,4 @@
-﻿-- Function: base.update_street_geometry()
+﻿
 
 -- DROP FUNCTION base.update_street_geometry();
 
