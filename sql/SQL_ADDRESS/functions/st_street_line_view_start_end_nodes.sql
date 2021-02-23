@@ -1,80 +1,80 @@
-﻿-- Function: base.st_street_line_view_start_end_nodes(integer, geometry, geometry, geometry, integer)
+﻿-- Function: base.st_street_line_view_start_end_nodes(integer)
 
--- DROP FUNCTION base.st_street_line_view_start_end_nodes(integer, geometry, geometry, geometry, integer);
-DROP FUNCTION if exists base.st_street_line_view_start_end_nodes(integer);
+-- DROP FUNCTION base.st_street_line_view_start_end_nodes(integer);
 
-CREATE OR REPLACE FUNCTION base.st_street_line_view_start_end_nodes(
-    IN str_id integer)
-  RETURNS TABLE(id bigint, street_id bigint, x float, y float) AS
+CREATE OR REPLACE FUNCTION base.st_street_line_view_start_end_nodes(IN str_id integer)
+  RETURNS TABLE(gid integer, street_id bigint, x double precision, y double precision, dist double precision) AS
 $BODY$
 
 DECLARE
-	v_utmsrid integer;
-BEGIN
-
-	    RETURN  query 
-			select row_number() over() as gid, xxx.gid as street_id, ST_X(xxx.geom) as x, ST_Y(xxx.geom) as y from (
-			SELECT foo.gid, ST_StartPoint(the_geom) as geom
-			FROM (select xxx.id as gid, (ST_Dump(geometry)).geom As the_geom, geometry from 
-				  (
-					SELECT s.id,
-			    s.code,
-			    s.name,
-			    s.description,
-			    s.decision_date,
-			    s.decision_no,
-			    s.decision_level_id,
-			    dl.description AS decision_level_desc,
-			    s.is_active,
-			    s.street_type_id,
-			    s.length,
-			    r.geometry::geometry(MultiLineString,4326) AS geometry
-			   FROM data_address.st_street s
-			     LEFT JOIN data_plan.cl_plan_decision_level dl ON s.decision_level_id = dl.plan_decision_level_id
-			     JOIN ( SELECT row_number() OVER () AS gid,
-				    st_union(st_multi(st_road.line_geom)) AS geometry,
-				    st_road.street_id
-				   FROM data_address.st_road
-				  WHERE st_road.street_id IS NOT NULL
-				  GROUP BY st_road.street_id) r ON s.id = r.street_id where s.id = str_id
-				  )xxx
-			where xxx.id = str_id) As foo
-			union all
-			SELECT foo.gid, ST_EndPoint(the_geom) as geom
-			FROM (select xxx.id as gid, (ST_Dump(geometry)).geom As the_geom, geometry from 
-				  (
-					SELECT s.id,
-			    s.code,
-			    s.name,
-			    s.description,
-			    s.decision_date,
-			    s.decision_no,
-			    s.decision_level_id,
-			    dl.description AS decision_level_desc,
-			    s.is_active,
-			    s.street_type_id,
-			    s.length,
-			    r.geometry::geometry(MultiLineString,4326) AS geometry
-			   FROM data_address.st_street s
-			     LEFT JOIN data_plan.cl_plan_decision_level dl ON s.decision_level_id = dl.plan_decision_level_id
-			     JOIN ( SELECT row_number() OVER () AS gid,
-				    st_union(st_multi(st_road.line_geom)) AS geometry,
-				    st_road.street_id
-				   FROM data_address.st_road
-				  WHERE st_road.street_id IS NOT NULL
-				  GROUP BY st_road.street_id) r ON s.id = r.street_id where s.id = str_id
-				  )xxx
-			where xxx.id = str_id) As foo
-			)xxx group by xxx.gid, xxx.geom;
-
+	ub_str_count integer;
+BEGIN		
+		EXECUTE 'select count(au2) from data_address.st_street s where s.id = ''' || str_id || ''' and au2 in (''01107'', ''01110'', ''01116'', ''01119'', ''01122'', ''01125'');' INTO ub_str_count;
+		RAISE NOTICE 'ub_str_count (%)',  ub_str_count;	
+		IF (ub_str_count = 0) THEN
+		  	--RAISE NOTICE 'str_id 1 (%)',  str_id;		
+			RETURN  query 
+				select * from (
+				select 1 as gid, xxx.id street_id, ST_X(xxx.geom) as x, ST_Y(xxx.geom) as y, min(st_distance(xxx.geom, sp.geometry)) as dist from data_address.au_settlement_zone_point sp , 
+				(select * from (
+select * from
+(select * from (
+				select s.id, ST_StartPoint((ST_Dump(line_geom)).geom) as geom, s.au2 from data_address.st_street s where s.id = str_id
+				union all
+				select s.id, ST_EndPoint((ST_Dump(line_geom)).geom) as geom, s.au2 from data_address.st_street s where s.id = str_id
+				)xxx group by id, geom, au2)xxx,(select s.line_geom from data_address.st_street s where s.id = str_id) a where st_touches(a.line_geom, xxx.geom))xxx)xxx where sp.au2 = xxx.au2 and sp.is_address is true
+				group by xxx.id, xxx.geom, xxx.au2
+				order by min(st_distance(xxx.geom, sp.geometry)) asc limit 1)xxx
+				union all
+				select * from (
+				select 2 as gid, xxx.id street_id, ST_X(xxx.geom) as x, ST_Y(xxx.geom) as y, max(st_distance(xxx.geom, sp.geometry)) as dist from data_address.au_settlement_zone_point sp , 
+				(select * from (
+select * from
+(select * from (
+				select s.id, ST_StartPoint((ST_Dump(line_geom)).geom) as geom, s.au2 from data_address.st_street s where s.id = str_id
+				union all
+				select s.id, ST_EndPoint((ST_Dump(line_geom)).geom) as geom, s.au2 from data_address.st_street s where s.id = str_id
+				)xxx group by id, geom, au2)xxx,(select s.line_geom from data_address.st_street s where s.id = str_id) a where st_touches(a.line_geom, xxx.geom))xxx)xxx where sp.au2 = xxx.au2 and sp.is_address is true
+				group by xxx.id, xxx.geom, xxx.au2
+				order by max(st_distance(xxx.geom, sp.geometry)) desc limit 1)xxx;
+		ELSE
+			--RAISE NOTICE 'str_id 2 (%)',  str_id;
+			RETURN  query 
+				select * from (
+				select 1 as gid, xxx.id street_id, ST_X(xxx.geom) as x, ST_Y(xxx.geom) as y, min(st_distance(xxx.geom, sp.geometry)) as dist from 
+					(select sp.* from data_address.au_settlement_zone_point sp, admin_units.au_level2 au2 where st_within(sp.geometry, au2.geometry) and au2.code in ('01107', '01110', '01116', '01119', '01122', '01125')) sp , 
+				(select * from (
+				select * from
+				(select * from (
+				select s.id, ST_StartPoint((ST_Dump(line_geom)).geom) as geom, s.au2 from data_address.st_street s where s.id = str_id
+				union all
+				select s.id, ST_EndPoint((ST_Dump(line_geom)).geom) as geom, s.au2 from data_address.st_street s where s.id = str_id
+				)xxx group by id, geom, au2)xxx,(select s.line_geom from data_address.st_street s where s.id = str_id) a where st_touches(a.line_geom, xxx.geom))xxx)xxx --where sp.au2 = xxx.au2
+				group by xxx.id, xxx.geom, xxx.au2
+				order by min(st_distance(xxx.geom, sp.geometry)) asc limit 1)xxx
+				union all
+				select * from (
+				select 2 as gid, xxx.id street_id, ST_X(xxx.geom) as x, ST_Y(xxx.geom) as y, max(st_distance(xxx.geom, sp.geometry)) as dist from 
+					(select sp.* from data_address.au_settlement_zone_point sp, admin_units.au_level2 au2 where st_within(sp.geometry, au2.geometry) and au2.code in ('01107', '01110', '01116', '01119', '01122', '01125')) sp , 
+				(select * from (
+				select * from
+				(select * from (
+				select s.id, ST_StartPoint((ST_Dump(line_geom)).geom) as geom, s.au2 from data_address.st_street s where s.id = str_id
+				union all
+				select s.id, ST_EndPoint((ST_Dump(line_geom)).geom) as geom, s.au2 from data_address.st_street s where s.id = str_id
+				)xxx group by id, geom, au2)xxx,(select s.line_geom from data_address.st_street s where s.id = str_id) a where st_touches(a.line_geom, xxx.geom))xxx)xxx --where sp.au2 = xxx.au2
+				group by xxx.id, xxx.geom, xxx.au2
+				order by max(st_distance(xxx.geom, sp.geometry)) desc limit 1)xxx;
+		END IF;
+			
 END;
 
 $BODY$
   LANGUAGE plpgsql VOLATILE
   COST 100
   ROWS 1000;
-ALTER FUNCTION base.st_street_line_view_start_end_nodes(str_id integer)
+ALTER FUNCTION base.st_street_line_view_start_end_nodes(integer)
   OWNER TO geodb_admin;
-
-GRANT EXECUTE ON FUNCTION base.st_street_line_view_start_end_nodes(id integer) TO geodb_admin;
+GRANT EXECUTE ON FUNCTION base.st_street_line_view_start_end_nodes(integer) TO public;
+GRANT EXECUTE ON FUNCTION base.st_street_line_view_start_end_nodes(integer) TO geodb_admin;
 GRANT EXECUTE ON FUNCTION base.st_street_line_view_start_end_nodes(integer) TO application_update;
