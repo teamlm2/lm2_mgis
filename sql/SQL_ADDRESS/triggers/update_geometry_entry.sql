@@ -37,11 +37,13 @@ BEGIN
 	new_geometry := NEW.geometry;
 	
 	entry_no := 1;
+        a_parcel_id:= NULL;
+        a_building_id:= NULL;
 	if NEW.name IS NULL THEN
 		SELECT description FROM data_address.cl_entry_type INTO entry_name WHERE code = NEW.type;
 	END IF;
 	SELECT code FROM admin_units.au_level2 INTO v_admin_unit_l2_code WHERE ST_COVERS(geometry, new_geometry);
-	IF (NEW.parcel_id IS NULL) THEN
+
 
 	EXECUTE 'SELECT l_type, id, ST_ClosestPoint(ST_MakeLine(sp,ep), ST_GeomFromText(pp.new_geometry, 4326))::geometry(Point,4326) as p_geom FROM
 	   (SELECT l_type, id,
@@ -94,8 +96,6 @@ BEGIN
 	NEW.address_building_no := v_address_building_no;
 	NEW.updated_at := now();
 
-	END IF;
-
 	NEW.au1 := v_admin_unit_l1_code;
 	NEW.au2 := v_admin_unit_l2_code;
 	NEW.au3 := v_admin_unit_l3_code;
@@ -109,11 +109,3 @@ $BODY$
   COST 100;
 ALTER FUNCTION base.update_geometry_entry()
   OWNER TO geodb_admin;
-
-------
-
-CREATE TRIGGER a_update_geometry_entry
-  BEFORE INSERT OR UPDATE
-  ON data_address.st_entrance
-  FOR EACH ROW
-  EXECUTE PROCEDURE base.update_geometry_entry();
