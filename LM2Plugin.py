@@ -1651,6 +1651,7 @@ class LM2Plugin:
             addrs_group.addLayer(vlayer)
         # root.findLayer(vlayer.id()).setVisible(0)
 
+
         vlayer = LayerUtils.layer_by_data_source("data_address", "st_street_line_view")
         if vlayer is None:
             vlayer = LayerUtils.load_layer_base_layer("st_street_line_view", "id", "data_address")
@@ -1661,6 +1662,17 @@ class LM2Plugin:
         if myalayer is None:
             addrs_group.addLayer(vlayer)
         # root.findLayer(vlayer.id()).setVisible(0)
+
+        vlayer = LayerUtils.layer_by_data_source("data_address", "st_sub_street_line_view")
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer("st_sub_street_line_view", "id", "data_address")
+        vlayer.loadNamedStyle(
+            str(os.path.dirname(os.path.realpath(__file__))) + "/template\style/st_sub_street_line.qml")
+        vlayer.setLayerName(QApplication.translate("Plugin", "Sub Street Line"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            addrs_group.addLayer(vlayer)
+            # root.findLayer(vlayer.id()).setVisible(0)
 
         vlayer = LayerUtils.layer_by_data_source("data_address", "st_street_sub_polygon_view")
         if vlayer is None:

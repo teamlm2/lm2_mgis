@@ -192,8 +192,6 @@
         </layer>
       </symbol>
     </source-symbol>
-    <colorramp type="randomcolors" name="[source]"/>
-    <invertedcolorramp value="0"/>
     <rotation/>
     <sizescale scalemethod="diameter"/>
   </renderer-v2>
@@ -220,7 +218,7 @@
     <property key="labeling/centroidWhole" value="false"/>
     <property key="labeling/decimals" value="3"/>
     <property key="labeling/displayAll" value="false"/>
-    <property key="labeling/dist" value="0"/>
+    <property key="labeling/dist" value="1.5"/>
     <property key="labeling/distInMapUnits" value="false"/>
     <property key="labeling/distMapUnitScale" value="0,0,0,0,0,0"/>
     <property key="labeling/drawLabels" value="true"/>
@@ -228,7 +226,7 @@
     <property key="labeling/fieldName" value="name + '-' + code"/>
     <property key="labeling/fitInPolygonOnly" value="false"/>
     <property key="labeling/fontCapitals" value="0"/>
-    <property key="labeling/fontFamily" value="Georgia"/>
+    <property key="labeling/fontFamily" value="Arial"/>
     <property key="labeling/fontItalic" value="false"/>
     <property key="labeling/fontLetterSpacing" value="0"/>
     <property key="labeling/fontLimitPixelSize" value="false"/>
@@ -328,9 +326,9 @@
     <property key="labeling/shapeType" value="0"/>
     <property key="labeling/substitutions" value="&lt;substitutions/>"/>
     <property key="labeling/textColorA" value="255"/>
-    <property key="labeling/textColorB" value="64"/>
-    <property key="labeling/textColorG" value="64"/>
-    <property key="labeling/textColorR" value="127"/>
+    <property key="labeling/textColorB" value="28"/>
+    <property key="labeling/textColorG" value="26"/>
+    <property key="labeling/textColorR" value="227"/>
     <property key="labeling/textTransp" value="0"/>
     <property key="labeling/upsidedownLabels" value="0"/>
     <property key="labeling/useSubstitutions" value="false"/>
