@@ -239,7 +239,7 @@ color: rgb(255, 255, 255);</string>
     </rect>
    </property>
    <property name="text">
-    <string>Detail Pring</string>
+    <string>Detail Print</string>
    </property>
   </widget>
   <widget class="QPushButton" name="close_button">

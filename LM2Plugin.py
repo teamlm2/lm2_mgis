@@ -1528,7 +1528,7 @@ class LM2Plugin:
         if myalayer is None:
             saf_group.addLayer(vlayer)
             vlayer.setReadOnly(True)
-        root.findLayer(vlayer.id()).setVisible(0)
+            # root.findLayer(vlayer.id()).setVisible(0)
         ###
 
         mygroup = root.findGroup(u"Кадастр")
