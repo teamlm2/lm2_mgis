@@ -78,6 +78,7 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
         self.application_list = list()
         self.start_date.setDateTime(QDateTime().currentDateTime())
         self.working_soum = DatabaseUtils.working_l2_code()
+        self.au1 = DatabaseUtils.working_l1_code()
         self.maintenance_parcels = []
         self.maintenance_buildings = []
         self.tabWidget.currentChanged.connect(self.onChangetab)
@@ -723,7 +724,18 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
                 parcel_error = '"' + landuse.description + '"' + u' -т бүртгэл хийх эрхгүй байна!'
                 error_message = error_message + "\n \n" + parcel_error
 
-        # if organization == 1:
+        parcel_plan_c = self.session.query(PlProjectParcel). \
+            join(PlProject, PlProjectParcel.project_id == PlProject.project_id). \
+            filter(PlProjectParcel.is_active == True). \
+            filter(PlProjectParcel.au2 == self.working_soum). \
+            filter(PlProject.workrule_status_id == 15).count()
+
+        if parcel_plan_c == 0:
+            valid = False
+            parcel_error = u'Батлагдсан ГЗБТөлөвлөгөөтэй давхардаж байна.'
+            error_message = error_message + "\n \n" + parcel_error
+
+            # if organization == 1:
         #     # Тусгай хамгаалалтай болон чөлөөт бүсд нэгж талбар оруулж болохгүй
         #     count = self.session.query(AuMpa.id) \
         #         .filter(geometry.ST_Intersects(AuMpa.geometry)).count()
@@ -797,7 +809,7 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
             return
 
         working_soum_code = DatabaseUtils.working_l2_code()
-        au1 = DatabaseUtils.working_l1_code()
+
         iterator = parcel_shape_layer.getFeatures()
         count = 0
         # try:
@@ -870,7 +882,7 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
             # if parcel_plan_c == 0:
             #     PluginUtils.show_message(self, self.tr("Error"), self.tr("This parcel not in cadastre plan!!!"))
             #     return
-            if au1 == '011':
+            if self.au1 == '011':
                 plan_type = self.session.query(ClPlanType).filter(ClPlanType.code == '05').one()
             else:
                 plan_type = self.session.query(ClPlanType).filter(ClPlanType.code == '07').one()
