@@ -726,11 +726,14 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
 
         parcel_plan_c = self.session.query(PlProjectParcel). \
             join(PlProject, PlProjectParcel.project_id == PlProject.project_id). \
+            join(ClPlanType, PlProject.plan_type_id == ClPlanType.plan_type_id). \
+            filter(or_(ClPlanType.code == '04', ClPlanType.code == '05', ClPlanType.code == '07', ClPlanType.code == '12')). \
+            filter(geometry.ST_Intersects(PlProjectParcel.polygon_geom)). \
             filter(PlProjectParcel.is_active == True). \
             filter(PlProjectParcel.au2 == self.working_soum). \
             filter(PlProject.workrule_status_id == 15).count()
 
-        if parcel_plan_c == 0:
+        if parcel_plan_c > 0:
             valid = False
             parcel_error = u'Батлагдсан ГЗБТөлөвлөгөөтэй давхардаж байна.'
             error_message = error_message + "\n \n" + parcel_error
