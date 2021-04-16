@@ -363,6 +363,27 @@ class DatabaseUtils():
                 return
 
     @staticmethod
+    def working_l3_code():
+
+        is_session = True
+        try:
+            role = DatabaseUtils.current_user()
+            if role:
+                return role.working_au_level3
+            else:
+                QMessageBox.information(None, QApplication.translate("LM2", "Database disconnect"),
+                                        QApplication.translate("LM2",
+                                                               "Please connect to database!!!"))
+                is_session = False
+
+        except DatabaseError, e:
+            raise LM2Exception(QApplication.translate("Connection Error"),
+                               QApplication.translate("Plugin", "Database disconnected!"))
+
+        if not is_session:
+            return
+
+    @staticmethod
     def current_working_soum_schema():
 
         w_au_level2 = DatabaseUtils.working_l2_code()

@@ -41,6 +41,9 @@ class SetRole(Base):
     working_au_level2 = Column(String, ForeignKey('au_level2.code'))
     working_au_level2_ref = relationship("AuLevel2")
 
+    working_au_level3 = Column(String, ForeignKey('au_level3.code'))
+    working_au_level3_ref = relationship("AuLevel3")
+
     organization = Column(Integer, ForeignKey('sd_organization.id'))
     organization_ref = relationship("SdOrganization")
 

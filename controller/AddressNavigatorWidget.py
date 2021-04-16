@@ -80,6 +80,133 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
         self.__boundaryPointsLayer = None
         self.__setup_table_widget()
         self.__combobox_setup()
+        self.__setup_combo_boxes()
+        self.working_l1_cbox.currentIndexChanged.connect(self.__working_l1_changed)
+        self.working_l2_cbox.currentIndexChanged.connect(self.__working_l2_changed)
+        self.working_l3_cbox.currentIndexChanged.connect(self.__working_l3_changed)
+
+    def __working_l1_changed(self, index):
+
+        l1_code = self.working_l1_cbox.itemData(index)
+        try:
+            role = DatabaseUtils.current_user()
+            if l1_code == -1 or not l1_code:
+                return
+            self.create_savepoint()
+            role.working_au_level1 = l1_code
+            self.commit()
+            PluginUtils.populate_au_level2_cbox(self.working_l2_cbox, l1_code, False, True, False)
+        except SQLAlchemyError, e:
+            self.rollback_to_savepoint()
+            PluginUtils.show_message(self,  self.tr("Sql Error"), e.message)
+            return
+
+    def __working_l2_changed(self, index):
+
+        l2_code = self.working_l2_cbox.itemData(index)
+
+        self.create_savepoint()
+
+        try:
+            role = DatabaseUtils.current_user()
+            if role:
+                if not l2_code:
+                    role.working_au_level2 = None
+                else:
+                    role.working_au_level2 = l2_code
+
+                DatabaseUtils.set_working_schema(l2_code)
+                self.commit()
+                PluginUtils.populate_au_level3_cbox(self.working_l3_cbox, l2_code, False)
+
+        except SQLAlchemyError, e:
+            self.rollback_to_savepoint()
+            PluginUtils.show_message(self,  self.tr("Sql Error"), e.message)
+            return
+        self.__zoom_to_soum(l2_code)
+
+    def __working_l3_changed(self, index):
+
+        l3_code = self.working_l3_cbox.itemData(index)
+
+        self.create_savepoint()
+
+        try:
+            role = DatabaseUtils.current_user()
+            if role:
+                if not l3_code:
+                    role.working_au_level3 = None
+                else:
+                    role.working_au_level3 = l3_code
+
+                # DatabaseUtils.set_working_schema(l3_code)
+                self.commit()
+
+        except SQLAlchemyError, e:
+            self.rollback_to_savepoint()
+            PluginUtils.show_message(self,  self.tr("Sql Error"), e.message)
+            return
+        self.__zoom_to_bag(l3_code)
+
+    def __zoom_to_soum(self, soum_code):
+
+        layer = LayerUtils.layer_by_data_source("admin_units", "au_level2")
+        if layer is None:
+            layer = LayerUtils.load_layer_by_name_admin_units("au_level2", "code", "admin_units")
+        if soum_code:
+            expression = " code = \'" + soum_code + "\'"
+            request = QgsFeatureRequest()
+            request.setFilterExpression(expression)
+            feature_ids = []
+            iterator = layer.getFeatures(request)
+
+            for feature in iterator:
+                feature_ids.append(feature.id())
+            if len(feature_ids) == 0:
+                self.error_label.setText(self.tr("No soum assigned"))
+
+            layer.setSelectedFeatures(feature_ids)
+            self.plugin.iface.mapCanvas().zoomToSelected(layer)
+
+    def __zoom_to_bag(self, bag_code):
+
+        layer = LayerUtils.layer_by_data_source("admin_units", "au_level3")
+        if layer is None:
+            layer = LayerUtils.load_layer_by_name_admin_units("au_level3", "code", "admin_units")
+        if bag_code:
+            expression = " code = \'" + bag_code + "\'"
+            request = QgsFeatureRequest()
+            request.setFilterExpression(expression)
+            feature_ids = []
+            iterator = layer.getFeatures(request)
+
+            for feature in iterator:
+                feature_ids.append(feature.id())
+            if len(feature_ids) == 0:
+                self.error_label.setText(self.tr("No soum assigned"))
+
+            layer.setSelectedFeatures(feature_ids)
+            self.plugin.iface.mapCanvas().zoomToSelected(layer)
+
+    def __setup_combo_boxes(self):
+
+        try:
+            PluginUtils.populate_au_level1_cbox(self.working_l1_cbox, False)
+
+            l1_code = self.working_l1_cbox.itemData(self.working_l1_cbox.currentIndex(), Qt.UserRole)
+            PluginUtils.populate_au_level2_cbox(self.working_l2_cbox, l1_code, False)
+
+            self.working_l1_cbox.setCurrentIndex(self.working_l1_cbox.findData(DatabaseUtils.working_l1_code()))
+
+            if self.working_l2_cbox.currentIndex():
+                l2_code = self.working_l2_cbox.itemData(self.working_l2_cbox.currentIndex(), Qt.UserRole)
+                PluginUtils.populate_au_level3_cbox(self.working_l3_cbox, l2_code, False)
+            self.working_l2_cbox.setCurrentIndex(self.working_l2_cbox.findData(DatabaseUtils.working_l2_code()))
+            self.working_l3_cbox.setCurrentIndex(self.working_l3_cbox.findData(DatabaseUtils.working_l3_code()))
+
+        except SQLAlchemyError, e:
+            PluginUtils.show_message(self, self.tr("Sql Error"), e.message)
+            return
 
     def __combobox_setup(self):
 
@@ -152,10 +279,9 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
         sql = "select * from base.st_street_line_view_start_end_nodes("+ str(str_id) +");"
 
         result = self.session.execute(sql)
-        print sql
+
         for item_row in result:
             id = item_row[0]
-            print id
             street_id = item_row[1]
             x = item_row[2]
             y = item_row[3]
@@ -198,6 +324,198 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
                 item.setData(Qt.UserRole, 2)
                 self.str_nodes_twidget.setItem(count, 3, item)
 
+    # @pyqtSlot(int)
+    # def on_is_selected_parcels_chbox_stateChanged(self, state):
+    #
+    #     if state == Qt.Checked:
+    #         self.is_selected_bag_chbox.setCheckable(False)
+    #
+    # @pyqtSlot(int)
+    # def on_is_selected_bag_chbox_stateChanged(self, state):
+    #
+    #     if state == Qt.Checked:
+    #         self.is_selected_parcels_chbox.setCheckable(False)
+
+    @pyqtSlot()
+    def on_get_street_parcels_button_clicked(self):
+
+        str_calc_count = 10
+        str_select_count = 1
+
+        if self.is_selected_parcels_chbox.isChecked():
+            layer_name = "ca_parcel_address_view"
+            schema_name = "data_address"
+            parcelLayer = LayerUtils.layer_by_data_source(schema_name, layer_name)
+            select_feature = parcelLayer.selectedFeatures()
+            id = None
+            for feature in select_feature:
+                attr = feature.attributes()
+
+                if len(attr) > 0:
+                    id = attr[0]
+
+                    sql = "select base.st_auto_street_select("+ str(str_calc_count) +", "+ str(str_select_count) +", "+ str(id) +"::bigint)"
+                    result = self.session.execute(sql)
+                    street_id = None
+                    for row in result:
+                        street_id = row[0]
+
+                    if street_id is not None and id is not None:
+                        parcel = self.session.query(CaParcelAddress).filter(CaParcelAddress.id == id).one()
+                        parcel.street_id = street_id
+
+        if self.is_selected_bag_chbox.isChecked():
+            l3_code = self.working_l3_cbox.itemData(self.working_l3_cbox.currentIndex())
+            parcels = self.session.query(CaParcelAddress).filter(CaParcelAddress.au3 == l3_code).all()
+            id = None
+            for parcel in parcels:
+                id = parcel.id
+                sql = "select base.st_auto_street_select("+ str(str_calc_count) + ", " + str(str_select_count) + ", " + str(id) + "::bigint)"
+                print sql
+                result = self.session.execute(sql)
+                street_id = None
+                for row in result:
+                    street_id = row[0]
+
+                if street_id is not None and id is not None:
+                    parcel = self.session.query(CaParcelAddress).filter(CaParcelAddress.id == id).one()
+                    parcel.street_id = street_id
+
+    @pyqtSlot()
+    def on_load_street_parcels_button_clicked(self):
+
+        if self.str_id:
+            sql = "(select id as gid, geometry from data_address.ca_parcel_address where street_id = "+ str(self.str_id) +") "
+            print sql
+            root = QgsProject.instance().layerTreeRoot()
+            mygroup = root.findGroup(U"Хаяг")
+            layer_list = []
+            layers = QgsMapLayerRegistry.instance().mapLayers()
+            layer_name = "ParcelByStreet"
+            column_name = "gid"
+            for id, layer in layers.iteritems():
+                if layer.type() == QgsMapLayer.VectorLayer:
+                    if layer.name() == layer_name:
+                        layer_list.append(id)
+
+            vlayer_parcel = LayerUtils.layer_by_data_source("", sql)
+            if vlayer_parcel:
+                QgsMapLayerRegistry.instance().removeMapLayers(layer_list)
+            vlayer_parcel = LayerUtils.load_temp_table(sql, layer_name)
+
+            myalayer = root.findLayer(vlayer_parcel.id())
+            # if myalayer is None:
+            mygroup.addLayer(vlayer_parcel)
+            self.__load_layer_style_parcel(vlayer_parcel, column_name, sql)
+
+    @pyqtSlot()
+    def on_load_parcel_street_button_clicked(self):
+
+        selected_row = self.address_parcel_twidget.currentRow()
+        id = self.address_parcel_twidget.item(selected_row, 0).data(Qt.UserRole + 1)
+
+        sql = "(select row_number() over() as gid, str_type, line_geom as geometry from ( " \
+                "select 1 as str_type, ss.line_geom from data_address.st_street ss  " \
+                "where ss.id in  " \
+                "(select street_id from data_address.ca_parcel_address cpa  " \
+                "where cpa.id = " + str(id) + ") " \
+                "union all " \
+                "select 2 as str_type, ss.line_geom from data_address.st_road ss  " \
+                "where ss.belong_street_id in  " \
+                "(select street_id from data_address.ca_parcel_address cpa  " \
+                "where cpa.id = " + str(id) + "))xxx)"
+
+        root = QgsProject.instance().layerTreeRoot()
+        mygroup = root.findGroup(U"Хаяг")
+        layer_list = []
+        layers = QgsMapLayerRegistry.instance().mapLayers()
+        layer_name = "StreetByParcel"
+        column_name = "str_type"
+        for id, layer in layers.iteritems():
+            if layer.type() == QgsMapLayer.VectorLayer:
+                if layer.name() == layer_name:
+                    layer_list.append(id)
+
+        vlayer_parcel = LayerUtils.layer_by_data_source("", sql)
+        if vlayer_parcel:
+            QgsMapLayerRegistry.instance().removeMapLayers(layer_list)
+        vlayer_parcel = LayerUtils.load_temp_table(sql, layer_name)
+
+        myalayer = root.findLayer(vlayer_parcel.id())
+        # if myalayer is None:
+        mygroup.addLayer(vlayer_parcel)
+        self.__load_layer_style_parcel(vlayer_parcel, column_name, sql)
+
+    def __load_layer_style_parcel(self, vlayer_parcel, column_name, sql):
+
+        sql = "select gid from (" + sql + " )xxx group by gid order by gid"
+
+        categories = []
+        parcels = self.session.execute(sql).fetchall()
+        for row in parcels:
+            gid = row[0]
+
+            fill_color = "#009732"
+            boundary_color = "#009732"
+            opacity = 0.5
+            description = u"Гудамжинд холбогдсон нэгж талбар"
+
+            self.__categorized_style(categories, vlayer_parcel, fill_color, boundary_color, opacity, gid,
+                                     description)
+
+        expression = column_name  # field name
+        renderer = QgsCategorizedSymbolRendererV2(expression, categories)
+        vlayer_parcel.setRendererV2(renderer)
+
+    def __load_layer_style(self, vlayer_parcel, column_name, sql):
+
+        sql = "select str_type from (" + sql + " )xxx group by str_type order by str_type"
+
+        categories = []
+        parcels = self.session.execute(sql).fetchall()
+        for row in parcels:
+            str_type = row[0]
+
+            fill_color = "#009732"
+            boundary_color = "#009732"
+            opacity = 0.5
+            description = u"Үндсэн гудамж"
+            if str_type == 2:
+                fill_color = "#ff0730"
+                boundary_color = "#ff0730"
+                description = u"Дэд гудамж"
+
+            self.__categorized_style(categories, vlayer_parcel, fill_color, boundary_color, opacity, str_type,
+                                     description)
+
+        expression = column_name  # field name
+        renderer = QgsCategorizedSymbolRendererV2(expression, categories)
+        vlayer_parcel.setRendererV2(renderer)
+
+    def __categorized_style(self, categories, layer, fill_color, boundary_color, opacity, code, description):
+
+        symbol = QgsSymbolV2.defaultSymbol(layer.geometryType())
+        if symbol:
+            if fill_color:
+                fill_color = self.__hex_to_rgb(fill_color)
+                symbol.setColor(QColor(fill_color[0], fill_color[1], fill_color[2]))
+            if boundary_color:
+                boundary_color = self.__hex_to_rgb(boundary_color)
+                symbol.symbolLayer(0).setOutlineColor(QColor(boundary_color[0], boundary_color[1], boundary_color[2]))
+            symbol.setAlpha(opacity)
+
+            category = QgsRendererCategoryV2(code, symbol, description)
+            categories.append(category)
+
+    def __hex_to_rgb(self, value):
+        """Return (red, green, blue) for the color given as #rrggbb."""
+        value = value.lstrip('#')
+        lv = len(value)
+        return list(int(value[i:i + lv // 3], 16) for i in range(0, lv, lv // 3))
+
+    def __rgb_to_hex(self, red, green, blue):
+        """Return color as #rrggbb for the given color values."""
+        return '#%02x%02x%02x' % (red, green, blue)
 
     @pyqtSlot()
     def on_get_entry_parcels_button_clicked(self):
@@ -287,13 +605,11 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
                     geometry = WKTElement(geometry.exportToWkt(), srid=4326)
                     if geometry is not None:
 
-
                         count = self.session.query(StStreetPoint). \
                             filter(StStreetPoint.geometry.ST_Equals(geometry)). \
                             filter(StStreetPoint.street_id == street_id).count()
-                        print count
+
                         if count == 0:
-                            print p_type
                             object = StStreetPoint()
                             object.is_active = True
                             object.geometry = geometry
