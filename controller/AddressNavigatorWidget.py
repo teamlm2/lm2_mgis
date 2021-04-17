@@ -341,6 +341,7 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
 
         str_calc_count = 10
         str_select_count = 1
+        self.parcel_progressBar.setValue(0)
 
         if self.is_selected_parcels_chbox.isChecked():
             layer_name = "ca_parcel_address_view"
@@ -348,6 +349,7 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
             parcelLayer = LayerUtils.layer_by_data_source(schema_name, layer_name)
             select_feature = parcelLayer.selectedFeatures()
             id = None
+            self.parcel_progressBar.setMaximum(len(select_feature))
             for feature in select_feature:
                 attr = feature.attributes()
 
@@ -363,15 +365,17 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
                     if street_id is not None and id is not None:
                         parcel = self.session.query(CaParcelAddress).filter(CaParcelAddress.id == id).one()
                         parcel.street_id = street_id
-
+                value_p = self.parcel_progressBar.value() + 1
+                self.parcel_progressBar.setValue(value_p)
         if self.is_selected_bag_chbox.isChecked():
             l3_code = self.working_l3_cbox.itemData(self.working_l3_cbox.currentIndex())
             parcels = self.session.query(CaParcelAddress).filter(CaParcelAddress.au3 == l3_code).all()
             id = None
+            self.parcel_progressBar.setMaximum(len(parcels))
             for parcel in parcels:
                 id = parcel.id
                 sql = "select base.st_auto_street_select("+ str(str_calc_count) + ", " + str(str_select_count) + ", " + str(id) + "::bigint)"
-                print sql
+
                 result = self.session.execute(sql)
                 street_id = None
                 for row in result:
@@ -380,19 +384,21 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
                 if street_id is not None and id is not None:
                     parcel = self.session.query(CaParcelAddress).filter(CaParcelAddress.id == id).one()
                     parcel.street_id = street_id
+                value_p = self.parcel_progressBar.value() + 1
+                self.parcel_progressBar.setValue(value_p)
 
     @pyqtSlot()
     def on_load_street_parcels_button_clicked(self):
 
         if self.str_id:
-            sql = "(select id as gid, geometry from data_address.ca_parcel_address where street_id = "+ str(self.str_id) +") "
-            print sql
+            sql = "(select row_number() over() as gid, id, parcel_id, street_id, geometry from data_address.ca_parcel_address where street_id = "+ str(self.str_id) +")"
+
             root = QgsProject.instance().layerTreeRoot()
             mygroup = root.findGroup(U"Хаяг")
             layer_list = []
             layers = QgsMapLayerRegistry.instance().mapLayers()
-            layer_name = "ParcelByStreet"
-            column_name = "gid"
+            layer_name = "Testssssssssss"
+
             for id, layer in layers.iteritems():
                 if layer.type() == QgsMapLayer.VectorLayer:
                     if layer.name() == layer_name:
@@ -406,7 +412,11 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
             myalayer = root.findLayer(vlayer_parcel.id())
             # if myalayer is None:
             mygroup.addLayer(vlayer_parcel)
-            self.__load_layer_style_parcel(vlayer_parcel, column_name, sql)
+
+            symbol = QgsSymbolV2.defaultSymbol(vlayer_parcel.geometryType())
+
+            symbol.setColor(QColor.fromRgb(255, 0, 0))
+            vlayer_parcel.triggerRepaint()
 
     @pyqtSlot()
     def on_load_parcel_street_button_clicked(self):
@@ -445,27 +455,6 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
         # if myalayer is None:
         mygroup.addLayer(vlayer_parcel)
         self.__load_layer_style_parcel(vlayer_parcel, column_name, sql)
-
-    def __load_layer_style_parcel(self, vlayer_parcel, column_name, sql):
-
-        sql = "select gid from (" + sql + " )xxx group by gid order by gid"
-
-        categories = []
-        parcels = self.session.execute(sql).fetchall()
-        for row in parcels:
-            gid = row[0]
-
-            fill_color = "#009732"
-            boundary_color = "#009732"
-            opacity = 0.5
-            description = u"Гудамжинд холбогдсон нэгж талбар"
-
-            self.__categorized_style(categories, vlayer_parcel, fill_color, boundary_color, opacity, gid,
-                                     description)
-
-        expression = column_name  # field name
-        renderer = QgsCategorizedSymbolRendererV2(expression, categories)
-        vlayer_parcel.setRendererV2(renderer)
 
     def __load_layer_style(self, vlayer_parcel, column_name, sql):
 
@@ -1630,6 +1619,16 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
             group.setExpanded(False)
             if myNewGroup is None:
                 myNewGroup = group.addGroup(u"Хаяг засварлалт")
+
+        vlayer = LayerUtils.layer_by_data_source("data_address", "ca_parcel_address_no_entry_view")
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer("ca_parcel_address_no_entry_view", "id", "data_address")
+        vlayer.loadNamedStyle(
+            str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "template\style/geocad_building_view.qml")
+        vlayer.setLayerName(QApplication.translate("Plugin", "No Entry Parcel"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            myNewGroup.addLayer(vlayer)
 
         vlayer = LayerUtils.layer_by_data_source("data_address", "geocad_building_view")
         if vlayer is None:

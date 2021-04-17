@@ -146,6 +146,6 @@ GRANT EXECUTE ON FUNCTION base.st_auto_street_select(integer, integer, bigint) T
 GRANT EXECUTE ON FUNCTION base.st_auto_street_select(integer, integer, bigint) TO geodb_admin;
 GRANT EXECUTE ON FUNCTION base.st_auto_street_select(integer, integer, bigint) TO application_update;
 
-select base.st_auto_street_select(10, 10, 234132::bigint)
+select base.st_auto_street_select(10, 10, 709097::bigint)
 
 select base.st_street_line_parcel_side2((select base.st_auto_street_select(10, 1, 795369::bigint)::int), 795369)
