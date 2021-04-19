@@ -397,7 +397,7 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
             mygroup = root.findGroup(U"Хаяг")
             layer_list = []
             layers = QgsMapLayerRegistry.instance().mapLayers()
-            layer_name = "Testssssssssss"
+            layer_name = "ParcelByStreet"
 
             for id, layer in layers.iteritems():
                 if layer.type() == QgsMapLayer.VectorLayer:
@@ -1606,6 +1606,27 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
 
         layer = LayerUtils.layer_by_data_source("data_address", 'st_street_line_view')
         self.__select_feature(str(str_id), layer)
+
+    @pyqtSlot()
+    def on_address_raster_layer_button_clicked(self):
+
+        root = QgsProject.instance().layerTreeRoot()
+
+        mygroup = root.findGroup(U"Хаяг")
+        myNewGroup = root.findGroup(U"Хаяг засварлалт")
+        if mygroup is None:
+            group = root.insertGroup(8, u"Хаяг")
+            group.setExpanded(False)
+            if myNewGroup is None:
+                myNewGroup = group.addGroup(u"Хаяг засварлалт")
+
+        urlWithParams = 'url=http://nsdi.gov.mn:8080/geoserver/wms?service=WMS&version=1.1.0&request=GetMap&layers=BaseMap&bbox=-181.8000030517578%2C-90.86817169189453%2C181.80001831054688%2C90.00000000000006&width=768&height=382&srs=EPSG%3A4326&styles=&format=application/openlayers'
+        rlayer = QgsRasterLayer(urlWithParams, 'Base Layer', 'wms')
+        rlayer.isValid()
+        vlayer = QgsMapLayerRegistry.instance().addMapLayer(rlayer)
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            myNewGroup.addLayer(vlayer)
 
     @pyqtSlot()
     def on_address_layer_button_clicked(self):
