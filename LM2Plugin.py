@@ -505,6 +505,7 @@ class LM2Plugin:
 
         user_name = QSettings().value(SettingsConstants.USER)
         user_right = DatabaseUtils.userright_by_name(user_name)
+
         if user_right:
             if UserRight in user_right:
                 new_parcel_button.setDisabled(True)
