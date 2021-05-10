@@ -501,14 +501,15 @@ class LM2Plugin:
                                                           "If you going to chagne base parcel, Please choose the Base Parcel"))
 
         new_parcel_button = message_box.addButton(QApplication.translate("LM2", "New Parcel"), QMessageBox.ActionRole)
-        new_parcel_button.setDisabled(False)
+        new_parcel_button.setDisabled(True)
 
         user_name = QSettings().value(SettingsConstants.USER)
         user_right = DatabaseUtils.userright_by_name(user_name)
 
         if user_right:
-            if UserRight in user_right:
-                new_parcel_button.setDisabled(True)
+            if UserRight.cadastre_update in user_right:
+
+                new_parcel_button.setDisabled(False)
         message_box.addButton(QApplication.translate("LM2", "Base Parcel"), QMessageBox.ActionRole)
         message_box.exec_()
         restrictions = DatabaseUtils.working_l2_code()
@@ -1674,29 +1675,6 @@ class LM2Plugin:
         if myalayer is None:
             addrs_group.addLayer(vlayer)
             # root.findLayer(vlayer.id()).setVisible(0)
-        #
-        # vlayer = LayerUtils.layer_by_data_source("data_address", "st_street_sub_polygon_view")
-        # if vlayer is None:
-        #     vlayer = LayerUtils.load_layer_base_layer("st_street_sub_polygon_view", "id", "data_address")
-        # vlayer.loadNamedStyle(
-        #     str(os.path.dirname(os.path.realpath(__file__))) + "/template\style/st_street_sub.qml")
-        # vlayer.setLayerName(QApplication.translate("Plugin", "Address Sub Street"))
-        # myalayer = root.findLayer(vlayer.id())
-        # if myalayer is None:
-        #     addrs_group.addLayer(vlayer)
-        # root.findLayer(vlayer.id()).setVisible(0)
-
-        ######
-        # vlayer = LayerUtils.layer_by_data_source("data_address", "st_street_polygon_view")
-        # if vlayer is None:
-        #     vlayer = LayerUtils.load_layer_base_layer("st_street_polygon_view", "id", "data_address")
-        # vlayer.loadNamedStyle(
-        #     str(os.path.dirname(os.path.realpath(__file__))) + "/template\style/st_street.qml")
-        # vlayer.setLayerName(QApplication.translate("Plugin", "Address Street"))
-        # myalayer = root.findLayer(vlayer.id())
-        # if myalayer is None:
-        #     addrs_group.addLayer(vlayer)
-        # root.findLayer(vlayer.id()).setVisible(0)
 
         self.iface.mapCanvas().refresh()
 

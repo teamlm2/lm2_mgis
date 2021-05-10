@@ -459,24 +459,24 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
 
     def __setup_combo_boxes(self):
 
-        try:
-            PluginUtils.populate_au_level1_cbox(self.aimag_cbox)
-            PluginUtils.populate_au_level1_cbox(self.working_l1_cbox, False)
+        # try:
+        PluginUtils.populate_au_level1_cbox(self.aimag_cbox)
+        PluginUtils.populate_au_level1_cbox(self.working_l1_cbox, False)
 
-            l1_code = self.working_l1_cbox.itemData(self.working_l1_cbox.currentIndex(), Qt.UserRole)
-            PluginUtils.populate_au_level2_cbox(self.working_l2_cbox, l1_code, False)
+        l1_code = self.working_l1_cbox.itemData(self.working_l1_cbox.currentIndex(), Qt.UserRole)
+        PluginUtils.populate_au_level2_cbox(self.working_l2_cbox, l1_code, False)
 
-            cl_landofficer = self.session.query(SetRole).all()
+        cl_landofficer = self.session.query(SetRole).all()
 
-            cl_contract_status = self.session.query(ClContractStatus).all()
-            cl_record_status = self.session.query(ClRecordStatus).all()
+        cl_contract_status = self.session.query(ClContractStatus).all()
+        cl_record_status = self.session.query(ClRecordStatus).all()
 
-            self.working_l1_cbox.setCurrentIndex(self.working_l1_cbox.findData(DatabaseUtils.working_l1_code()))
-            self.working_l2_cbox.setCurrentIndex(self.working_l2_cbox.findData(DatabaseUtils.working_l2_code()))
+        self.working_l1_cbox.setCurrentIndex(self.working_l1_cbox.findData(DatabaseUtils.working_l1_code()))
+        self.working_l2_cbox.setCurrentIndex(self.working_l2_cbox.findData(DatabaseUtils.working_l2_code()))
 
-        except SQLAlchemyError, e:
-            PluginUtils.show_message(self, self.tr("Sql Error"), e.message)
-            return
+        # except SQLAlchemyError, e:
+        #     PluginUtils.show_message(self, self.tr("Sql Error"), e.message)
+        #     return
 
         self.contract_status_cbox.addItem("*", -1)
         self.record_status_cbox.addItem("*", -1)
