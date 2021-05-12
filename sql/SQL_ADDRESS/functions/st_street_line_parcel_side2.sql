@@ -1,7 +1,7 @@
 ﻿DROP FUNCTION if exists base.st_street_line_parcel_side2(integer, integer);
 
 CREATE OR REPLACE FUNCTION base.st_street_line_parcel_side2(
-    IN str_id integer, parcel_id integer)
+    IN str_id bigint, parcel_id bigint)
   RETURNS integer AS
 $BODY$
 
@@ -134,16 +134,14 @@ bbb := 'LINESTRING(' ||(start_point_x)::text || ' ' || (start_point_y)::text ||'
 RAISE NOTICE 'test x (%)',  end_point_x;
 RAISE NOTICE 'test y (%)',  entry_point_y;
 
-execute 'SELECT
+execute 'select case when l1_cross_l2 in (1, -3, 2) then 1 else -1 end side from (
+	SELECT
 	ST_LineCrossingDirection(foo.line2, foo.line1) As l1_cross_l2
 	FROM (
 	 SELECT
-	  ST_GeomFromText('''||aaa||''') As line2,
-	  ST_GeomFromText('''||bbb||''') As line1
-	  ) As foo;' into st_street_line_parcel_side2;
-
-
-
+	  base.line_extend_straight('''||aaa||''') As line2,
+	  st_setsrid(ST_GeomFromText('''||bbb||'''), 4326) As line1
+	  ) As foo)xxx;' into st_street_line_parcel_side2;
 return st_street_line_parcel_side2;
 
 END;
@@ -151,4 +149,7 @@ END;
 $BODY$
   LANGUAGE plpgsql VOLATILE
   COST 100;
-ALTER FUNCTION base.st_street_line_parcel_side2(str_id integer, parcel_id integer) OWNER TO geodb_admin;
+ALTER FUNCTION base.st_street_line_parcel_side2(str_id bigint, parcel_id bigint) OWNER TO geodb_admin;
+
+select * from base.st_street_line_parcel_side2(137710, 732471);
+select * from base.st_street_line_parcel_side2(137710, 423569);
