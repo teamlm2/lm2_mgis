@@ -1396,7 +1396,7 @@ class LM2Plugin:
         if layer_name == u'Нэгж талбар' or layer_name == 'Parcel':
             table_name = 'ca_parcel'
             mapTool = PrintCadastreExtractMapTool(self, table_name, False)
-        elif layer_name == u'БН-н Нэгж талбар' or layer_name == 'Reserve Parcel':
+        elif layer_name == u'БН-н Нэгж талбар' or layer_name == 'Reserve Person Parcel':
             table_name = 'ca_person_group_parcel'
             mapTool = PrintCadastreExtractMapTool(self, table_name, True)
         elif layer_name == u'БАХ нэгж талбар' or layer_name == 'PUGParcel':
@@ -1699,7 +1699,6 @@ class LM2Plugin:
         myalayer = root.findLayer(vlayer.id())
         if myalayer is None:
             au_group.addLayer(vlayer)
-        root.findLayer(vlayer.id()).setVisible(0)
 
         self.iface.mapCanvas().refresh()
 
