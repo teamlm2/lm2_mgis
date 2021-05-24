@@ -2,7 +2,7 @@
 status, parcel_type, geometry, valid_from, valid_till)
 
 select p.parcel_id, true, 1, null, null, address_khashaa, address_streetname, address_neighbourhood, null, substring(au2, 1, 3), au2, au3, 1, 1, 1, geometry, valid_from, valid_till from data_soums_union.ca_parcel_tbl p
-where now() between p.valid_from and p.valid_till and p.parcel_id not in ( select parcel_id from data_address.ca_parcel_address p where substring(p.au2, 1, 3) = '085') and substring(p.au2, 1, 3) = '085'
+where now() between p.valid_from and p.valid_till and p.parcel_id not in ( select parcel_id from data_address.ca_parcel_address p where substring(p.au2, 1, 3) = '021') and substring(p.au2, 1, 3) = '021'
 --ON CONFLICT (parcel_id) DO NOTHING;
 
 
@@ -10,8 +10,18 @@ where now() between p.valid_from and p.valid_till and p.parcel_id not in ( selec
 ------history
 insert into data_address.ca_parcel_address_history(parcel_id, is_active, in_source, zipcode_id, street_id, address_parcel_no, address_streetname, address_neighbourhood, geographic_name, au1, au2, au3, sort_value, valid_from, valid_till,created_at,updated_at)
 
-select p.id, true, 1, null, null, p.address_parcel_no, p.address_streetname, p.address_neighbourhood, null, substring(p.au2, 1, 3), p.au2, p.au3, 1, p.valid_from, p.valid_till, p.created_at,updated_at from data_address.ca_parcel_address p
-where created_at::date = now()::date
+select pp.id, true, 1, null, null, pp.address_parcel_no, pp.address_streetname, pp.address_neighbourhood, null, substring(pp.au2, 1, 3), pp.au2, pp.au3, 1, pp.valid_from, pp.valid_till, pp.created_at,updated_at from data_address.ca_parcel_address pp
+join (select pp.* from
+(select pa.id,hist.parcel_id, pa.au2
+from data_address.ca_parcel_address pa
+left join data_address.ca_parcel_address_history hist on pa.id = hist.parcel_id) as pp
+where pp.parcel_id is null and au2 like '021%'
+--group by au2
+order by au2) fff on pp.id = fff.id
+
+select pp.id, true, 1, null, null, pp.address_parcel_no, pp.address_streetname, pp.address_neighbourhood, null, substring(pp.au2, 1, 3), pp.au2, pp.au3, 1, pp.valid_from, pp.valid_till, pp.created_at,updated_at from data_address.ca_parcel_address pp
+where pp.id not in (select parcel_id from data_address.ca_parcel_address_history p where substring(p.au2, 1, 3) = '021') and substring(pp.au2, 1, 3) = '021'
+--where created_at::date = now()::date
 --join data_address.ca_parcel_address pp on p.parcel_id = pp.parcel_id
 --ON CONFLICT ON CONSTRAINT ca_parcel_address_history_parcel_id_fkey DO NOTHING;
 
