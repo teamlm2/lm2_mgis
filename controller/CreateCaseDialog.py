@@ -730,6 +730,8 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
             filter(or_(ClPlanType.code == '04', ClPlanType.code == '05', ClPlanType.code == '07', ClPlanType.code == '12')). \
             filter(geometry.ST_Intersects(PlProjectParcel.polygon_geom)). \
             filter(PlProjectParcel.is_active == True). \
+            filter(PlProject.is_active == True). \
+            filter(PlProjectParcel.parcel_id != 1742493). \
             filter(PlProjectParcel.au2 == self.working_soum). \
             filter(PlProject.workrule_status_id == 15).count()
 
