@@ -76,12 +76,26 @@
     <edittype widgetv2type="TextEdit" name="valid_till">
       <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
     </edittype>
+    <edittype widgetv2type="TextEdit" name="address_au_khoroolol_id">
+      <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
+    </edittype>
+    <edittype widgetv2type="TextEdit" name="area_m2">
+      <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
+    </edittype>
+    <edittype widgetv2type="TextEdit" name="is_marked">
+      <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
+    </edittype>
+    <edittype widgetv2type="TextEdit" name="is_new_address">
+      <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
+    </edittype>
   </edittypes>
   <renderer-v2 attr="parcel_type" forceraster="0" symbollevels="0" type="categorizedSymbol" enableorderby="0">
     <categories>
       <category render="true" symbol="0" value="8" label="Кадастрын үндсэн давхарга барилга"/>
       <category render="true" symbol="1" value="9" label="Кадастрын ажлын давхарга барилга"/>
       <category render="true" symbol="2" value="10" label="Байр зүйн зургийн давхарга барилга"/>
+      <category render="true" symbol="3" value="14" label="Хот байгуулалтын кадастр"/>
+      <category render="true" symbol="4" value="" label=""/>
     </categories>
     <symbols>
       <symbol alpha="1" clip_to_extent="1" type="fill" name="0">
@@ -125,6 +139,36 @@
           <prop k="outline_color" v="208,0,0,255"/>
           <prop k="outline_style" v="solid"/>
           <prop k="outline_width" v="0.46"/>
+          <prop k="outline_width_unit" v="MM"/>
+          <prop k="style" v="solid"/>
+        </layer>
+      </symbol>
+      <symbol alpha="1" clip_to_extent="1" type="fill" name="3">
+        <layer pass="0" class="SimpleFill" locked="0">
+          <prop k="border_width_map_unit_scale" v="0,0,0,0,0,0"/>
+          <prop k="color" v="61,195,199,255"/>
+          <prop k="joinstyle" v="bevel"/>
+          <prop k="offset" v="0,0"/>
+          <prop k="offset_map_unit_scale" v="0,0,0,0,0,0"/>
+          <prop k="offset_unit" v="MM"/>
+          <prop k="outline_color" v="0,0,0,255"/>
+          <prop k="outline_style" v="solid"/>
+          <prop k="outline_width" v="0.26"/>
+          <prop k="outline_width_unit" v="MM"/>
+          <prop k="style" v="solid"/>
+        </layer>
+      </symbol>
+      <symbol alpha="1" clip_to_extent="1" type="fill" name="4">
+        <layer pass="0" class="SimpleFill" locked="0">
+          <prop k="border_width_map_unit_scale" v="0,0,0,0,0,0"/>
+          <prop k="color" v="61,195,199,255"/>
+          <prop k="joinstyle" v="bevel"/>
+          <prop k="offset" v="0,0"/>
+          <prop k="offset_map_unit_scale" v="0,0,0,0,0,0"/>
+          <prop k="offset_unit" v="MM"/>
+          <prop k="outline_color" v="0,0,0,255"/>
+          <prop k="outline_style" v="solid"/>
+          <prop k="outline_width" v="0.26"/>
           <prop k="outline_width_unit" v="MM"/>
           <prop k="style" v="solid"/>
         </layer>
@@ -377,6 +421,10 @@
     <alias field="parcel_type" index="22" name=""/>
     <alias field="valid_from" index="23" name=""/>
     <alias field="valid_till" index="24" name=""/>
+    <alias field="address_au_khoroolol_id" index="25" name=""/>
+    <alias field="area_m2" index="26" name=""/>
+    <alias field="is_marked" index="27" name=""/>
+    <alias field="is_new_address" index="28" name=""/>
   </aliases>
   <excludeAttributesWMS/>
   <excludeAttributesWFS/>
@@ -409,6 +457,10 @@
       <column width="-1" hidden="0" type="field" name="valid_from"/>
       <column width="-1" hidden="0" type="field" name="valid_till"/>
       <column width="-1" hidden="1" type="actions"/>
+      <column width="-1" hidden="0" type="field" name="address_au_khoroolol_id"/>
+      <column width="-1" hidden="0" type="field" name="area_m2"/>
+      <column width="-1" hidden="0" type="field" name="is_marked"/>
+      <column width="-1" hidden="0" type="field" name="is_new_address"/>
     </columns>
   </attributetableconfig>
   <editform>.</editform>
