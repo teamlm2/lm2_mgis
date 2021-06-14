@@ -732,6 +732,7 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
             filter(PlProjectParcel.is_active == True). \
             filter(PlProject.is_active == True). \
             filter(PlProjectParcel.parcel_id != 1742493). \
+            filter(PlProjectParcel.parcel_id != 1742498). \
             filter(PlProjectParcel.au2 == self.working_soum). \
             filter(PlProject.workrule_status_id == 15).count()
 
