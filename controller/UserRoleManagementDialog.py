@@ -1100,6 +1100,7 @@ class UserRoleManagementDialog(QDialog, Ui_UserRoleManagementDialog):
         #         self.group_lwidget.takeItem(self.group_lwidget.row(cadastre_update_item))
         #         self.member_lwidget.addItem(cadastre_update_item.text())
 
+
     @pyqtSlot()
     def on_up_groups_button_clicked(self):
 
@@ -1126,6 +1127,10 @@ class UserRoleManagementDialog(QDialog, Ui_UserRoleManagementDialog):
         #         contracting_update_item = self.member_lwidget.findItems('contracting_update', Qt.MatchExactly)[0]
         #         self.member_lwidget.takeItem(self.member_lwidget.row(contracting_update_item))
         #         self.group_lwidget.addItem(contracting_update_item.text())
+        user_name = self.username_edit.text().strip()
+
+        self.db_session.execute("SET ROLE role_management")
+        self.db_session.execute(u"REVOKE {0} FROM {1}".format(group, user_name))
 
     @pyqtSlot()
     def on_down_aimag_button_clicked(self):

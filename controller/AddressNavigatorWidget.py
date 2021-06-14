@@ -361,10 +361,16 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
                     street_id = None
                     for row in result:
                         street_id = row[0]
-
                     if street_id is not None and id is not None:
                         parcel = self.session.query(CaParcelAddress).filter(CaParcelAddress.id == id).one()
+                        sql_side = "select base.st_street_line_parcel_side2(" + str(street_id) + ", " + str(id) + "::bigint)"
+                        result_side = self.session.execute(sql_side)
+                        str_side = None
+                        for row in result_side:
+                            str_side = row[0]
                         parcel.street_id = street_id
+                        if str_side:
+                            parcel.street_side = str_side
                 value_p = self.parcel_progressBar.value() + 1
                 self.parcel_progressBar.setValue(value_p)
         if self.is_selected_bag_chbox.isChecked():
@@ -374,16 +380,22 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
             self.parcel_progressBar.setMaximum(len(parcels))
             for parcel in parcels:
                 id = parcel.id
-                sql = "select base.st_auto_street_select("+ str(str_calc_count) + ", " + str(str_select_count) + ", " + str(id) + "::bigint)"
+                sql = "select * from base.st_auto_street_select("+ str(str_calc_count) + ", " + str(str_select_count) + ", " + str(id) + "::bigint)"
 
                 result = self.session.execute(sql)
                 street_id = None
                 for row in result:
                     street_id = row[0]
-
                 if street_id is not None and id is not None:
                     parcel = self.session.query(CaParcelAddress).filter(CaParcelAddress.id == id).one()
+                    sql_side = "select * from base.st_street_line_parcel_side2(" + str(street_id) + ", " + str(id) + "::bigint)"
+                    result_side = self.session.execute(sql_side)
+                    str_side = None
+                    for row in result_side:
+                        str_side = row[0]
                     parcel.street_id = street_id
+                    if str_side:
+                        parcel.street_side = str_side
                 value_p = self.parcel_progressBar.value() + 1
                 self.parcel_progressBar.setValue(value_p)
 

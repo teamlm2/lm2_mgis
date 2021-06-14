@@ -863,7 +863,7 @@ class PastureWidget(QDockWidget, Ui_PastureWidget, DatabaseHelper):
         if not is_person_group_layer:
             mygroup.addLayer(vlayer_parcel)
 
-        vlayer_parcel.setLayerName(QApplication.translate("Plugin", "Reserve Parcel"))
+        vlayer_parcel.setLayerName(QApplication.translate("Plugin", "Reserve Person Parcel"))
         vlayer_parcel.loadNamedStyle(
             str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "template\style/tnc_boundary.qml")
 
