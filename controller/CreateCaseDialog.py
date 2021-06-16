@@ -40,6 +40,7 @@ from ..model.StWorkflowStatusLanduse import *
 from ..model.ClLanduseMovementStatus import *
 from ..model.StWorkflowStatus import *
 from ..model.CaLanduseMaintenanceStatus import *
+from ..model.SetCheckPlanTypeCadastre import *
 import urllib
 import urllib2
 import json
@@ -727,12 +728,11 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
         parcel_plan_c = self.session.query(PlProjectParcel). \
             join(PlProject, PlProjectParcel.project_id == PlProject.project_id). \
             join(ClPlanType, PlProject.plan_type_id == ClPlanType.plan_type_id). \
-            filter(or_(ClPlanType.code == '04', ClPlanType.code == '05', ClPlanType.code == '07', ClPlanType.code == '12')). \
-            filter(geometry.ST_Intersects(PlProjectParcel.polygon_geom)). \
+            join(SetCheckPlanTypeCadastre, ClPlanType.plan_type_id == SetCheckPlanTypeCadastre.plan_type_id). \
+            filter(PlProjectParcel.right_form_id == SetCheckPlanTypeCadastre.right_form_id). \
+            filter(or_(geometry.ST_Overlaps(PlProjectParcel.polygon_geom, geometry.ST_Covers(PlProjectParcel.polygon_geom)))). \
             filter(PlProjectParcel.is_active == True). \
             filter(PlProject.is_active == True). \
-            filter(PlProjectParcel.parcel_id != 1742493). \
-            filter(PlProjectParcel.parcel_id != 1742498). \
             filter(PlProjectParcel.au2 == self.working_soum). \
             filter(PlProject.workrule_status_id == 15).count()
 
