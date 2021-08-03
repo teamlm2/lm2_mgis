@@ -119,7 +119,7 @@
        </rect>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>3</number>
       </property>
       <widget class="QWidget" name="parcel_tab">
        <attribute name="title">
@@ -884,6 +884,117 @@
         </property>
         <property name="text">
          <string>Гудамжин хамаарах нэгж талбаруудыг харах</string>
+        </property>
+       </widget>
+      </widget>
+      <widget class="QWidget" name="tab">
+       <attribute name="title">
+        <string>Гудамж үүсгэх</string>
+       </attribute>
+       <widget class="QPushButton" name="selected_road_load_button">
+        <property name="geometry">
+         <rect>
+          <x>9</x>
+          <y>10</y>
+          <width>181</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Зам оруулах</string>
+        </property>
+       </widget>
+       <widget class="QTableWidget" name="str_road_twidget">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>50</y>
+          <width>431</width>
+          <height>201</height>
+         </rect>
+        </property>
+        <attribute name="horizontalHeaderDefaultSectionSize">
+         <number>100</number>
+        </attribute>
+        <column>
+         <property name="text">
+          <string>ID</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Урт</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Нэр</string>
+         </property>
+        </column>
+       </widget>
+       <widget class="QPushButton" name="selected_road_remove_button">
+        <property name="geometry">
+         <rect>
+          <x>260</x>
+          <y>10</y>
+          <width>181</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Хасах</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="create_single_str_button">
+        <property name="geometry">
+         <rect>
+          <x>30</x>
+          <y>260</y>
+          <width>221</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Нэг гудамж үүсгэх</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="create_single_name_str_button">
+        <property name="geometry">
+         <rect>
+          <x>30</x>
+          <y>290</y>
+          <width>221</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Нэг ижил нэртэй олон гудамж үүсгэх</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="create_multi_str_button">
+        <property name="geometry">
+         <rect>
+          <x>30</x>
+          <y>320</y>
+          <width>221</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Жагсаалт тус бүрээр олон гудамж үүсгэх</string>
+        </property>
+       </widget>
+       <widget class="QProgressBar" name="parcel_progressBar_2">
+        <property name="geometry">
+         <rect>
+          <x>2</x>
+          <y>470</y>
+          <width>441</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="value">
+         <number>0</number>
         </property>
        </widget>
       </widget>

@@ -730,7 +730,7 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
             join(ClPlanType, PlProject.plan_type_id == ClPlanType.plan_type_id). \
             join(SetCheckPlanTypeCadastre, ClPlanType.plan_type_id == SetCheckPlanTypeCadastre.plan_type_id). \
             filter(PlProjectParcel.right_form_id == SetCheckPlanTypeCadastre.right_form_id). \
-            filter(or_(geometry.ST_Overlaps(PlProjectParcel.polygon_geom, geometry.ST_Covers(PlProjectParcel.polygon_geom)))). \
+            filter(or_(geometry.ST_Overlaps(PlProjectParcel.polygon_geom), geometry.ST_Covers(PlProjectParcel.polygon_geom))). \
             filter(PlProjectParcel.is_active == True). \
             filter(PlProject.is_active == True). \
             filter(PlProjectParcel.au2 == self.working_soum). \

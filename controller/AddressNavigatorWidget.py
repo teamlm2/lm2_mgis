@@ -27,7 +27,9 @@ from ..utils.DatabaseUtils import *
 from ..utils.PluginUtils import *
 from ..utils.LayerUtils import *
 from ..model.DatabaseHelper import *
+from ..model.StRoad import *
 from ..model.StStreet import *
+from ..model.StStreetAu2 import *
 from ..model.StStreetPoint import *
 from ..model.StMapStreetPoint import *
 from ..model.StStreetLineView import *
@@ -248,6 +250,11 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
         self.address_parcel_twidget.setEditTriggers(QTableWidget.NoEditTriggers)
         self.address_parcel_twidget.setSelectionBehavior(QTableWidget.SelectRows)
         self.address_parcel_twidget.setSelectionMode(QTableWidget.SingleSelection)
+
+        self.str_road_twidget.setAlternatingRowColors(True)
+        self.str_road_twidget.setEditTriggers(QTableWidget.NoEditTriggers)
+        self.str_road_twidget.setSelectionBehavior(QTableWidget.SelectRows)
+        self.str_road_twidget.setSelectionMode(QTableWidget.SingleSelection)
 
         self.address_building_twidget.setAlternatingRowColors(True)
         self.address_building_twidget.setEditTriggers(QTableWidget.NoEditTriggers)
@@ -1814,3 +1821,126 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
         myalayer = root.findLayer(vlayer.id())
         if myalayer is None:
             addrs_building_group.addLayer(vlayer)
+
+    @pyqtSlot()
+    def on_selected_road_load_button_clicked(self):
+
+        self.str_road_twidget.setRowCount(0)
+        parcelLayer = LayerUtils.layer_by_data_source("data_address", "st_road_line_view")
+        select_feature = parcelLayer.selectedFeatures()
+
+        id = None
+        for feature in select_feature:
+            attr = feature.attributes()
+            id = attr[0]
+            code = attr[1]
+            name = attr[2]
+            road_len = None
+
+            sql = "select sr.id, st_length(st_transform(sr.line_geom, base.find_utm_srid(st_centroid(sr.line_geom)))) as road_len from data_address.st_road sr where id = (" + str(id) + ");"
+
+            result = self.session.execute(sql)
+
+            for item_row in result:
+                id = item_row[0]
+                road_len = item_row[1]
+
+            count = self.str_road_twidget.rowCount()
+            self.str_road_twidget.insertRow(count)
+
+            item = QTableWidgetItem(str(id))
+            item.setData(Qt.UserRole, id)
+            self.str_road_twidget.setItem(count, 0, item)
+
+            item = QTableWidgetItem(str(road_len))
+            item.setData(Qt.UserRole, road_len)
+            self.str_road_twidget.setItem(count, 1, item)
+
+    @pyqtSlot()
+    def on_selected_road_remove_button_clicked(self):
+
+        selected_row = self.str_road_twidget.currentRow()
+        id = self.str_road_twidget.item(selected_row, 0).data(Qt.UserRole)
+
+        self.str_road_twidget.removeRow(selected_row)
+
+    @pyqtSlot(QTableWidgetItem)
+    def on_str_road_twidget_itemClicked(self, item):
+
+        selected_row = self.str_road_twidget.currentRow()
+        id = self.str_road_twidget.item(selected_row, 0).data(Qt.UserRole)
+
+        zoom_layer = LayerUtils.layer_by_data_source("data_address", "st_road_line_view")
+        self.__select_feature(str(id), zoom_layer)
+
+    @pyqtSlot()
+    def on_create_single_str_button_clicked(self):
+
+        ids = []
+        for row in range(self.str_road_twidget.rowCount()):
+            item_id = self.str_road_twidget.item(row, 0)
+            id = item_id.data(Qt.UserRole)
+            ids.append(id)
+
+        ids = str(ids).strip('[]')
+        print ids
+        count = self.session.query(StStreet).\
+            filter(StStreet.street_status == 10).\
+            filter(StStreet.au2 == self.au2).count()
+        result = None
+        if count == 0:
+            sql = "select row_number() over() as street_code, sr.au2 || lpad((row_number() over(partition by sr.au2))::text, 5, '0') as street_name, " \
+                   "st_union(line_geom) from data_address.st_road sr  where id in (" + str(ids) + ") group by sr.au2; "
+            result = self.session.execute(sql)
+        else:
+            sql = "select row_number() over() as street_code, " \
+                  "sr.au2 || (select lpad((max((substring(name, 6, 5))::int) + row_number() over())::text, 5, '0') from data_address.st_street ss " \
+                  "where ss.au2 = " + "'" + str(self.au2) + "'" + " and ss.street_status = 10) as street_name, st_union(line_geom) from data_address.st_road sr " \
+                  "where id in (" + str(ids) + ") "\
+                  "group by sr.au2; "
+
+            result = self.session.execute(sql)
+
+        if result:
+            for item_row in result:
+                str_code = item_row[0]
+                str_name = item_row[1]
+                print str_name
+
+                street = StStreet()
+                street.code = str_code
+                street.name = str_name
+                street.is_active = True
+                street.status = 1
+                street.street_status = 10
+                street.created_at = DatabaseUtils.current_date_time()
+                street.valid_from = DatabaseUtils.current_date_time()
+                street.updated_at = DatabaseUtils.current_date_time()
+                street.au1 = self.au1
+                street.au2 = self.au2
+
+                self.session.add(street)
+                self.session.flush()
+
+                str_id = street.id
+                print str_id
+
+                street_au2 = StStreetAu2()
+                street_au2.street_id = str_id
+                street_au2.au2 = self.au2
+                street_au2.created_at = DatabaseUtils.current_date_time()
+                self.session.add(street_au2)
+
+                for row in range(self.str_road_twidget.rowCount()):
+                    item_id = self.str_road_twidget.item(row, 0)
+                    id = item_id.data(Qt.UserRole)
+
+                    road = self.session.query(StRoad).filter(StRoad.id == id).one()
+                    road.street_id = str_id
+
+        self.session.commit()
+
+
+
+
+
