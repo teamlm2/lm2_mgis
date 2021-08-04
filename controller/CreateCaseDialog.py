@@ -912,13 +912,21 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
                 parcel_overlaps = self.session.query(CaParcel) \
                     .filter(WKTElement(parcel.geometry().exportToWkt(), srid=4326).ST_Overlaps(CaParcel.geometry)) \
                     .filter(CaParcel.valid_till == "infinity").all()
+                o_parcels = []
+                is_overlaps_parcels = False
                 for value in parcel_overlaps:
                     landuse_count = self.session.query(SetOverlapsLanduse). \
                         filter(SetOverlapsLanduse.in_landuse == landuse_code). \
                         filter(SetOverlapsLanduse.ch_landuse == value.landuse).count()
                     if landuse_count == 0:
-                        PluginUtils.show_message(self, self.tr("Error"), self.tr("Ca_Parcel layer parcel overlap!!!"))
-                        return
+                        is_overlaps_parcels = True
+                        o_parcels.append(value.parcel_id)
+
+                o_parcels = str(o_parcels).strip('[]')
+                if is_overlaps_parcels:
+                    PluginUtils.show_message(self, u'Анхааруулга', u'Дараах нэгж талбаруудтай давхардаж байна:' + o_parcels)
+
+                    return
 
             if tmp_parcel_overlap_c != 0:
                 PluginUtils.show_message(self, self.tr("Error"), self.tr("Ca_Tmp_Parcel layer parcel overlap!!!"))
@@ -2031,10 +2039,10 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
             if not self.change_landuse_chbox.isChecked():
                 self.landuse_code = landuse.code
             landuse_type_code = landuse.code
-            print landuse_type_code
+
             case_landuse_count = self.session.query(StWorkflowStatusLanduse). \
                 filter(StWorkflowStatusLanduse.next_landuse == landuse_type_code).count()
-            print case_landuse_count
+
             if case_landuse_count == 0:
                 message = (u'/{0}/ ГНС-н ангилалд шилжилт хөдөлгөөний тохиргоо хийгээгүй байна!').format(
                                            landuse_type_code)
