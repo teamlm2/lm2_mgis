@@ -616,25 +616,26 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
                         count = self.session.query(StStreetPoint). \
                             filter(StStreetPoint.geometry.ST_Equals(geometry)). \
                             filter(StStreetPoint.street_id == street_id).count()
-                        print count
-                        # if count == 0:
-                        object = StStreetPoint()
-                        object.is_active = True
-                        object.geometry = geometry
-                        if p_type == 1:
-                            object.point_type = 1
-                        else:
-                            object.point_type = 2
-                        object.street_id = street_id
-                        object.valid_from = DatabaseUtils.current_date_time()
-                        object.created_at = DatabaseUtils.current_date_time()
-                        object.updated_at = DatabaseUtils.current_date_time()
-                        object.au1 = self.au1
-                        object.au2 = self.au2
-                        print '---'
-                        print p_type
-                        self.session.add(object)
-                        self.session.flush()
+
+                        if count == 0:
+                            print geometry
+                            print p_type
+                            print count
+                            object = StStreetPoint()
+                            object.is_active = True
+                            object.geometry = geometry
+                            if p_type == 1:
+                                object.point_type = 1
+                            else:
+                                object.point_type = 2
+                            object.street_id = street_id
+                            object.valid_from = DatabaseUtils.current_date_time()
+                            object.created_at = DatabaseUtils.current_date_time()
+                            object.updated_at = DatabaseUtils.current_date_time()
+                            object.au1 = self.au1
+                            object.au2 = self.au2
+                            self.session.add(object)
+                            self.session.commit()
 
                         # if count == 1:
                         #     object = self.session.query(StStreetPoint). \
@@ -689,7 +690,7 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
                             object.au1 = self.au1
                             object.au2 = self.au2
                             self.session.add(object)
-                            self.session.flush()
+                            self.session.commit()
 
                         if count == 1:
                             object = self.session.query(StStreetPoint). \
@@ -1437,12 +1438,14 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
 
         if self.tabWidget.currentIndex() == 0:
             self.__save_parcel_address()
+            self.session.commit()
         if self.tabWidget.currentIndex() == 1:
             self.__save_building_address()
+            self.session.commit()
         if self.tabWidget.currentIndex() == 2:
             self.__save_street_point()
-        self.session.commit()
-        print '555'
+        if self.tabWidget.currentIndex() == 3:
+            self.session.commit()
 
     @pyqtSlot(QTableWidgetItem)
     def on_address_parcel_twidget_itemClicked(self, item):
@@ -1840,27 +1843,43 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
             name = attr[2]
             road_len = None
 
-            count = self.session.query(StRoad).filter(StRoad.id == id).count()
+            road = self.session.query(StRoad).filter(StRoad.id == id).one()
+            if not road.street_id:
+                sql = "select sr.id, st_length(st_transform(sr.line_geom, base.find_utm_srid(st_centroid(sr.line_geom)))) as road_len from data_address.st_road sr where id = (" + str(id) + ");"
 
+                result = self.session.execute(sql)
 
-            sql = "select sr.id, st_length(st_transform(sr.line_geom, base.find_utm_srid(st_centroid(sr.line_geom)))) as road_len from data_address.st_road sr where id = (" + str(id) + ");"
+                for item_row in result:
+                    id = item_row[0]
+                    road_len = item_row[1]
 
-            result = self.session.execute(sql)
+                count = self.str_road_twidget.rowCount()
+                self.str_road_twidget.insertRow(count)
 
-            for item_row in result:
-                id = item_row[0]
-                road_len = item_row[1]
+                item = QTableWidgetItem(str(id))
+                item.setData(Qt.UserRole, id)
+                self.str_road_twidget.setItem(count, 0, item)
 
-            count = self.str_road_twidget.rowCount()
-            self.str_road_twidget.insertRow(count)
+                item = QTableWidgetItem(str(road_len))
+                item.setData(Qt.UserRole, road_len)
+                self.str_road_twidget.setItem(count, 1, item)
 
-            item = QTableWidgetItem(str(id))
-            item.setData(Qt.UserRole, id)
-            self.str_road_twidget.setItem(count, 0, item)
+        if self.str_road_twidget.rowCount() == 1:
+            self.create_single_str_button.setDisabled(False)
+        if self.str_road_twidget.rowCount() > 1:
+            self.create_single_str_button.setDisabled(False)
+            self.create_single_name_str_button.setDisabled(False)
+            self.create_multi_str_button.setDisabled(False)
 
-            item = QTableWidgetItem(str(road_len))
-            item.setData(Qt.UserRole, road_len)
-            self.str_road_twidget.setItem(count, 1, item)
+    @pyqtSlot()
+    def on_selected_road_remove_button_clicked(self):
+
+        if self.str_road_twidget.rowCount() == 1:
+            self.create_single_str_button.setDisabled(False)
+        if self.str_road_twidget.rowCount() > 1:
+            self.create_single_str_button.setDisabled(False)
+            self.create_single_name_str_button.setDisabled(False)
+            self.create_multi_str_button.setDisabled(False)
 
     @pyqtSlot()
     def on_selected_road_remove_button_clicked(self):
@@ -1883,7 +1902,7 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
     def on_create_single_str_button_clicked(self):
 
         if self.str_road_twidget.rowCount() == 0:
-            PluginUtils.show_message(self, u'Анхааруулга', u'Гудамж сонгоогүй байна.')
+            PluginUtils.show_message(self, u'Анхааруулга', u'Гудамж үүсгэх зам сонгоогүй байна.')
             return
         message_box = QMessageBox()
         message_box.setText(u'Гудамж үүсгэхдээ итгэлтэй байна уу?')
@@ -1896,10 +1915,10 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
             for row in range(self.str_road_twidget.rowCount()):
                 item_id = self.str_road_twidget.item(row, 0)
                 id = item_id.data(Qt.UserRole)
+                id = str(id)
                 ids.append(id)
 
             ids = str(ids).strip('[]')
-            print ids
             count = self.session.query(StStreet).\
                 filter(StStreet.street_status == 10).\
                 filter(StStreet.au2 == self.au2).count()
@@ -1909,8 +1928,7 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
                        "st_union(line_geom) from data_address.st_road sr  where id in (" + str(ids) + ") group by sr.au2; "
                 result = self.session.execute(sql)
             else:
-                sql = "select row_number() over() as street_code, " \
-                      "sr.au2 || (select lpad((max((substring(name, 6, 5))::int) + row_number() over())::text, 5, '0') from data_address.st_street ss " \
+                sql = "select row_number() over() as street_code, " + "'" + str(self.au2) + "'" + " || (select lpad((max((substring(name, 6, 5))::int) + row_number() over())::text, 5, '0') from data_address.st_street ss " \
                       "where ss.au2 = " + "'" + str(self.au2) + "'" + " and ss.street_status = 10) as street_name, st_union(line_geom) from data_address.st_road sr " \
                       "where id in (" + str(ids) + ") "\
                       "group by sr.au2; "
@@ -1921,7 +1939,6 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
                 for item_row in result:
                     str_code = item_row[0]
                     str_name = item_row[1]
-                    print str_name
 
                     street = StStreet()
                     street.code = str_code
@@ -1939,7 +1956,6 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
                     self.session.flush()
 
                     str_id = street.id
-                    print str_id
 
                     street_au2 = StStreetAu2()
                     street_au2.street_id = str_id
@@ -1956,7 +1972,149 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
 
             self.session.commit()
 
+    @pyqtSlot()
+    def on_create_single_name_str_button_clicked(self):
 
+        if self.str_road_twidget.rowCount() == 0:
+            PluginUtils.show_message(self, u'Анхааруулга', u'Гудамж үүсгэх зам сонгоогүй байна.')
+            return
+        message_box = QMessageBox()
+        message_box.setText(u'Гудамж үүсгэхдээ итгэлтэй байна уу?')
 
+        yes_button = message_box.addButton(u'Тийм', QMessageBox.ActionRole)
+        message_box.addButton(u'Үгүй', QMessageBox.ActionRole)
+        message_box.exec_()
+        if message_box.clickedButton() == yes_button:
+            ids = []
+            for row in range(self.str_road_twidget.rowCount()):
+                item_id = self.str_road_twidget.item(row, 0)
+                id = item_id.data(Qt.UserRole)
+                ids.append(id)
 
+            ids = str(ids).strip('[]')
+            count = self.session.query(StStreet). \
+                filter(StStreet.street_status == 10). \
+                filter(StStreet.au2 == self.au2).count()
+            result = None
+            if count == 0:
+                sql = "select row_number() over() as street_code, sr.au2 || '00001' as street_name, " \
+                       "line_geom, sr.id from data_address.st_road sr  where id in (" + str(ids) + ") group by sr.au2, sr.line_geom, sr.id; "
+                result = self.session.execute(sql)
+            else:
+                sql = "select row_number() over() as street_code, " \
+                      "sr.au2 || (select lpad((max((substring(name, 6, 5))::int) + row_number() over())::text, 5, '0') from data_address.st_street ss " \
+                      "where ss.au2 = " + "'" + str(self.au2) + "'" + " and ss.street_status = 10) as street_name, line_geom, sr.id from data_address.st_road sr " \
+                      "where id in (" + str(ids) + ") "\
+                      "group by sr.au2, sr.line_geom, sr.id; "
 
+                result = self.session.execute(sql)
+
+            if result:
+                for item_row in result:
+                    str_code = item_row[0]
+                    str_name = item_row[1]
+                    road_id = item_row[3]
+
+                    street = StStreet()
+                    street.code = str_code
+                    street.name = str_name
+                    street.is_active = True
+                    street.status = 1
+                    street.street_status = 10
+                    street.created_at = DatabaseUtils.current_date_time()
+                    street.valid_from = DatabaseUtils.current_date_time()
+                    street.updated_at = DatabaseUtils.current_date_time()
+                    street.au1 = self.au1
+                    street.au2 = self.au2
+
+                    self.session.add(street)
+                    self.session.flush()
+
+                    str_id = street.id
+
+                    street_au2 = StStreetAu2()
+                    street_au2.street_id = str_id
+                    street_au2.au2 = self.au2
+                    street_au2.created_at = DatabaseUtils.current_date_time()
+                    self.session.add(street_au2)
+
+                    road = self.session.query(StRoad).filter(StRoad.id == road_id).one()
+                    road.street_id = str_id
+
+                self.session.commit()
+
+    @pyqtSlot()
+    def on_create_multi_str_button_clicked(self):
+
+        if self.str_road_twidget.rowCount() == 0:
+            PluginUtils.show_message(self, u'Анхааруулга', u'Гудамж үүсгэх зам сонгоогүй байна.')
+            return
+        message_box = QMessageBox()
+        message_box.setText(u'Гудамж үүсгэхдээ итгэлтэй байна уу?')
+
+        yes_button = message_box.addButton(u'Тийм', QMessageBox.ActionRole)
+        message_box.addButton(u'Үгүй', QMessageBox.ActionRole)
+        message_box.exec_()
+        if message_box.clickedButton() == yes_button:
+            ids = []
+            for row in range(self.str_road_twidget.rowCount()):
+                item_id = self.str_road_twidget.item(row, 0)
+                id = item_id.data(Qt.UserRole)
+                ids.append(id)
+
+            ids = str(ids).strip('[]')
+            count = self.session.query(StStreet). \
+                filter(StStreet.street_status == 10). \
+                filter(StStreet.au2 == self.au2).count()
+            result = None
+            if count == 0:
+                sql = "select row_number() over() as street_code, sr.au2 || lpad((row_number() over(partition by sr.au2))::text, 5, '0') as street_name, " \
+                      "line_geom, sr.id from data_address.st_road sr  where id in (" + str(ids) + ") group by sr.au2, sr.line_geom, sr.id; "
+                result = self.session.execute(sql)
+            else:
+                sql = "select row_number() over() as street_code, " \
+                      "sr.au2 || lpad(((select (max((substring(name, 6, 5))::int))::text from data_address.st_street ss " \
+                      "where ss.au2 = '01104' and ss.street_status = 10)::int + row_number() over())::text, 5, '0') as street_name, line_geom, sr.id from data_address.st_road sr " \
+                                      "where id in (" + str(ids) + ") " \
+                                                                   "group by sr.au2, sr.line_geom, sr.id; "
+
+                result = self.session.execute(sql)
+
+            if result:
+                for item_row in result:
+                    str_code = item_row[0]
+                    str_name = item_row[1]
+                    road_id = item_row[3]
+
+                    street = StStreet()
+                    street.code = str_code
+                    street.name = str_name
+                    street.is_active = True
+                    street.status = 1
+                    street.street_status = 10
+                    street.created_at = DatabaseUtils.current_date_time()
+                    street.valid_from = DatabaseUtils.current_date_time()
+                    street.updated_at = DatabaseUtils.current_date_time()
+                    street.au1 = self.au1
+                    street.au2 = self.au2
+
+                    self.session.add(street)
+                    self.session.flush()
+
+                    str_id = street.id
+
+                    street_au2 = StStreetAu2()
+                    street_au2.street_id = str_id
+                    street_au2.au2 = self.au2
+                    street_au2.created_at = DatabaseUtils.current_date_time()
+                    self.session.add(street_au2)
+
+                    road = self.session.query(StRoad).filter(StRoad.id == road_id).one()
+                    road.street_id = str_id
+
+                self.session.commit()
+
+    @pyqtSlot()
+    def on_delete_selected_str_button_clicked(self):
+
+        print ''

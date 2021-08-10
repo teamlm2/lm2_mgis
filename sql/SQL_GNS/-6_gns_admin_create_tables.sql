@@ -119,3 +119,80 @@ GRANT SELECT, UPDATE, INSERT, DELETE ON TABLE data_landuse.ca_landuse_static TO 
 
 alter table data_landuse.ca_landuse_static aDD CONSTRAINT ca_landuse_static_uq UNIQUE (current_year, landuse);
 
+---------
+
+DROP TABLE if exists  codelists.cl_maintenance_case_type cascade;
+CREATE TABLE codelists.cl_maintenance_case_type
+(
+  code integer NOT NULL primary key,
+  description character varying(75) NOT NULL UNIQUE,
+  description_en character varying(75)
+);
+grant select, insert, update, delete on codelists.cl_maintenance_case_type to address_admin;
+grant select on codelists.cl_maintenance_case_type to address_view;
+grant select on codelists.cl_maintenance_case_type to address_view, cadastre_view;
+COMMENT ON TABLE codelists.cl_maintenance_case_type
+  IS 'Талбайн өөрчлөлтийн төрөл';
+
+insert into codelists.cl_maintenance_case_type values (1, 'Талбай өөрчлөгдөх', null);
+insert into codelists.cl_maintenance_case_type values (2, 'Талбай хуваагдах', null);
+insert into codelists.cl_maintenance_case_type values (3, 'Талбай нэгдэх', null);
+insert into codelists.cl_maintenance_case_type values (4, 'Талбай шинээр орох', null);
+insert into codelists.cl_maintenance_case_type values (5, 'Талбай устах', null);
+
+--------------
+
+-- Table: data_landuse.ca_landuse_type_historical
+
+-- DROP TABLE data_landuse.ca_landuse_type_historical;
+
+CREATE TABLE data_landuse.ca_landuse_type_historical
+(
+  id bigserial PRIMARY KEY,
+  new_id bigint references data_landuse.ca_landuse_type_tbl on update cascade on delete restrict,
+  old_id bigint references data_landuse.ca_landuse_type_tbl on update cascade on delete restrict,
+  new_lcode3 integer,
+  old_lcode3 integer,
+  valid_from date DEFAULT ('now'::text)::date,
+  valid_till date DEFAULT 'infinity'::date,
+  area_m2 numeric,
+  old_area_m2 numeric,
+  cad_parcel_id character varying(10) references data_soums_union.ca_parcel_tbl on update cascade on delete restrict,
+  new_geometry geometry(Polygon,4326),
+  old_geometry geometry(Polygon,4326),
+  au1 character varying(3),
+  au2 character varying(5),
+  au3 character varying(8),
+  created_by integer,
+  updated_by integer,
+  created_at timestamp(0) without time zone NOT NULL DEFAULT now(),
+  updated_at timestamp(0) without time zone NOT NULL DEFAULT now(),
+  CONSTRAINT ca_landuse_type_historical_au1_fkey FOREIGN KEY (au1)
+      REFERENCES admin_units.au_level1 (code) MATCH SIMPLE
+      ON UPDATE CASCADE ON DELETE RESTRICT,
+  CONSTRAINT ca_landuse_type_historical_au2_fkey FOREIGN KEY (au2)
+      REFERENCES admin_units.au_level2 (code) MATCH SIMPLE
+      ON UPDATE CASCADE ON DELETE RESTRICT,
+  CONSTRAINT ca_landuse_type_historical_au3_fkey FOREIGN KEY (au3)
+      REFERENCES admin_units.au_level3 (code) MATCH SIMPLE
+      ON UPDATE CASCADE ON DELETE RESTRICT
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE data_landuse.ca_landuse_type_historical
+  OWNER TO geodb_admin;
+
+-- Index: data_landuse."sidx_Single parts_geom"
+
+-- DROP INDEX data_landuse."sidx_Single parts_geom";
+
+CREATE INDEX sidx_ca_landuse_type_historical_geom
+  ON data_landuse.ca_landuse_type_historical
+  USING gist
+  (new_geometry);
+  
+  
+
+
+
