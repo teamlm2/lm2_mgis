@@ -13656,6 +13656,26 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
             mygroup.addLayer(vlayer)
         self.__load_layer_style(vlayer, column_name, table_name)
 
+    def __load_new_landise_layer_style(self, vlayer, column_name, table_name):
+
+        sql = "select p.landuse, t.lcode3_desc, t.fill_color, t.boundary_color from data_landuse."+ table_name +" p " \
+              "join codelists.cl_landuse_type_new t on p.landuse = t.lcode3 group by p.landuse, t.lcode3_desc, t.fill_color, t.boundary_color order by p.landuse "
+
+        # sql = "select * from data_landuse.landuse_color c "
+        categories = []
+        values = self.session.execute(sql)
+        # print len(values)
+        for row in values:
+            code = row[0]
+            description = str(int(code)) + ': ' + row[1]
+            fill_color = row[2]
+            boundary_color = row[3]
+            self.__categorized_style(categories, vlayer, fill_color, boundary_color, 0.5, code,
+                                  description)
+        expression = column_name  # field name
+        renderer = QgsCategorizedSymbolRendererV2(expression, categories)
+        vlayer.setRendererV2(renderer)
+
     def __load_layer_style(self, vlayer, column_name, table_name):
 
         sql = "select p.landuse, t.description, c.fill_color, t.boundary_color from data_landuse."+ table_name +" p " \
