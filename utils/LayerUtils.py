@@ -394,9 +394,13 @@ class LayerUtils(object):
             group = root.insertGroup(1, u"Тайлан")
             myNewGroup = group.addGroup(u"Газрын улсын бүртгэл")
 
-        mygroup = root.findGroup(u"ГНСТайлан")
+        mygroup = root.findGroup(u"Тухайн жилиййн ГНСТайлан")
         if mygroup is None:
-            group = root.insertGroup(2, u"ГНСТайлан")
+            group = root.insertGroup(2, u"Тухайн жилиййн ГНСТайлан")
+
+        mygroup = root.findGroup(u"2020 оны ГНСТайлан")
+        if mygroup is None:
+            group = root.insertGroup(2, u"2020 оны ГНСТайлан")
 
         mygroup = root.findGroup(u"Кадастр")
         if mygroup is None:

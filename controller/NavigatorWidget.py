@@ -13566,7 +13566,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
 
         column_name = 'landuse'
         root = QgsProject.instance().layerTreeRoot()
-        mygroup = root.findGroup(u"ГНСТайлан")
+        mygroup = root.findGroup(u"Тухайн жилиййн ГНСТайлан")
 
         table_name = "ca_tmp_landuse_type"
         vlayer = LayerUtils.layer_by_data_source("data_landuse", table_name)
@@ -13579,16 +13579,74 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
             mygroup.addLayer(vlayer)
         # self.__load_layer_style(vlayer, column_name, table_name)
 
-        table_name = "ca_landuse_type"
+        table_name = "ca_new_landuse_type1"
         vlayer = LayerUtils.layer_by_data_source("data_landuse", table_name)
         if vlayer is None:
             vlayer = LayerUtils.load_layer_base_layer(table_name, "parcel_id", "data_landuse")
         # vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/gt1_report.qml")
-        vlayer.setLayerName(self.tr("Landuse Type"))
+        vlayer.setLayerName(self.tr("Landuse Type 1"))
         myalayer = root.findLayer(vlayer.id())
         if myalayer is None:
             mygroup.addLayer(vlayer)
         self.__load_new_landuse_layer_style(vlayer, column_name, table_name)
+
+        table_name = "ca_new_landuse_type2"
+        vlayer = LayerUtils.layer_by_data_source("data_landuse", table_name)
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer(table_name, "parcel_id", "data_landuse")
+        # vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/gt1_report.qml")
+        vlayer.setLayerName(self.tr("Landuse Type 2"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            mygroup.addLayer(vlayer)
+        self.__load_new_landuse_layer_style(vlayer, column_name, table_name)
+
+        table_name = "ca_new_landuse_type3"
+        vlayer = LayerUtils.layer_by_data_source("data_landuse", table_name)
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer(table_name, "parcel_id", "data_landuse")
+        # vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/gt1_report.qml")
+        vlayer.setLayerName(self.tr("Landuse Type 3"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            mygroup.addLayer(vlayer)
+        self.__load_new_landuse_layer_style(vlayer, column_name, table_name)
+
+        table_name = "ca_new_landuse_type4"
+        vlayer = LayerUtils.layer_by_data_source("data_landuse", table_name)
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer(table_name, "parcel_id", "data_landuse")
+        # vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/gt1_report.qml")
+        vlayer.setLayerName(self.tr("Landuse Type 4"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            mygroup.addLayer(vlayer)
+        self.__load_new_landuse_layer_style(vlayer, column_name, table_name)
+
+        table_name = "ca_new_landuse_type5"
+        vlayer = LayerUtils.layer_by_data_source("data_landuse", table_name)
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer(table_name, "parcel_id", "data_landuse")
+        # vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/gt1_report.qml")
+        vlayer.setLayerName(self.tr("Landuse Type 5"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            mygroup.addLayer(vlayer)
+        self.__load_new_landuse_layer_style(vlayer, column_name, table_name)
+
+        table_name = "ca_new_landuse_type6"
+        vlayer = LayerUtils.layer_by_data_source("data_landuse", table_name)
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer(table_name, "parcel_id", "data_landuse")
+        # vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/gt1_report.qml")
+        vlayer.setLayerName(self.tr("Landuse Type 6"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            mygroup.addLayer(vlayer)
+        self.__load_new_landuse_layer_style(vlayer, column_name, table_name)
+
+        root = QgsProject.instance().layerTreeRoot()
+        mygroup = root.findGroup(u"2020 оны ГНСТайлан")
 
         table_name = "ca_landuse_type1"
         vlayer = LayerUtils.layer_by_data_source("data_landuse", table_name)
@@ -13659,7 +13717,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
     def __load_new_landuse_layer_style(self, vlayer, column_name, table_name):
 
         sql = "select p.landuse, t.lcode3_desc, t.fill_color, t.boundary_color from data_landuse."+ table_name +" p " \
-              "join codelists.cl_landuse_type_new t on p.landuse = t.lcode3 group by p.landuse, t.lcode3_desc, t.fill_color, t.boundary_color order by p.landuse "
+              "join codelists.cl_landuse_type_new t on p.landuse = t.lcode3 where t.fill_color is not null group by p.landuse, t.lcode3_desc, t.fill_color, t.boundary_color order by p.landuse "
 
         # sql = "select * from data_landuse.landuse_color c "
         categories = []
