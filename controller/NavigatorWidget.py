@@ -13588,7 +13588,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         myalayer = root.findLayer(vlayer.id())
         if myalayer is None:
             mygroup.addLayer(vlayer)
-        self.__load_layer_style(vlayer, column_name, table_name)
+        self.__load_new_landuse_layer_style(vlayer, column_name, table_name)
 
         table_name = "ca_landuse_type1"
         vlayer = LayerUtils.layer_by_data_source("data_landuse", table_name)
@@ -13656,7 +13656,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
             mygroup.addLayer(vlayer)
         self.__load_layer_style(vlayer, column_name, table_name)
 
-    def __load_new_landise_layer_style(self, vlayer, column_name, table_name):
+    def __load_new_landuse_layer_style(self, vlayer, column_name, table_name):
 
         sql = "select p.landuse, t.lcode3_desc, t.fill_color, t.boundary_color from data_landuse."+ table_name +" p " \
               "join codelists.cl_landuse_type_new t on p.landuse = t.lcode3 group by p.landuse, t.lcode3_desc, t.fill_color, t.boundary_color order by p.landuse "
