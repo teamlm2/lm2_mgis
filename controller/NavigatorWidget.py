@@ -13568,6 +13568,16 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         root = QgsProject.instance().layerTreeRoot()
         mygroup = root.findGroup(u"Тухайн жилиййн ГНСТайлан")
 
+        table_name = "ca_landuse_check_point_view"
+        vlayer = LayerUtils.layer_by_data_source("data_landuse", table_name)
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer(table_name, "id", "data_landuse")
+        vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/ca_landuse_check_point_view.qml")
+        vlayer.setLayerName(self.tr("Landuse Check Point"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            mygroup.addLayer(vlayer)
+
         table_name = "ca_tmp_landuse_type"
         vlayer = LayerUtils.layer_by_data_source("data_landuse", table_name)
         if vlayer is None:

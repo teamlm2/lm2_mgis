@@ -1295,10 +1295,10 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
             filter(CaParcelAddress.address_parcel_no == self.parcel_address_no).\
             filter(AuZipCodeArea.id == zipcode.id). \
             filter(CaParcelAddress.id != addrs_parcel.id).count()
-        if zip_addrs_count > 0:
-            PluginUtils.show_message(self, u'Анхааруулга',
-                                     u'Шуудангийн бүсчлэлд нэгж талбарын ' + unicode(self.parcel_address_no) + u' хаяг давхардаж байна.')
-            return
+        # if zip_addrs_count > 0:
+        #     PluginUtils.show_message(self, u'Анхааруулга',
+        #                              u'Шуудангийн бүсчлэлд нэгж талбарын ' + unicode(self.parcel_address_no) + u' хаяг давхардаж байна.')
+        #     return
 
         if self.khashaa_no_edit.text() != self.parcel_address_no:
             self.khashaa_no_edit.setText(self.parcel_address_no)
