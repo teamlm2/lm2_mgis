@@ -730,15 +730,31 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
             join(ClPlanType, PlProject.plan_type_id == ClPlanType.plan_type_id). \
             join(SetCheckPlanTypeCadastre, ClPlanType.plan_type_id == SetCheckPlanTypeCadastre.plan_type_id). \
             filter(PlProjectParcel.right_form_id == SetCheckPlanTypeCadastre.right_form_id). \
-            filter(or_(geometry.ST_Overlaps(PlProjectParcel.polygon_geom), geometry.ST_Covers(PlProjectParcel.polygon_geom))). \
+            filter(or_(geometry.ST_Overlaps(PlProjectParcel.polygon_geom), geometry.ST_Covers(PlProjectParcel.polygon_geom), PlProjectParcel.polygon_geom.ST_Covers(geometry))). \
             filter(PlProjectParcel.is_active == True). \
             filter(PlProject.is_active == True). \
             filter(PlProjectParcel.au2 == self.working_soum). \
             filter(PlProject.workrule_status_id == 15).count()
 
         if parcel_plan_c > 0:
+            parcel_plan = self.session.query(PlProjectParcel). \
+                join(PlProject, PlProjectParcel.project_id == PlProject.project_id). \
+                join(ClPlanType, PlProject.plan_type_id == ClPlanType.plan_type_id). \
+                join(SetCheckPlanTypeCadastre, ClPlanType.plan_type_id == SetCheckPlanTypeCadastre.plan_type_id). \
+                filter(PlProjectParcel.right_form_id == SetCheckPlanTypeCadastre.right_form_id). \
+                filter(or_(geometry.ST_Overlaps(PlProjectParcel.polygon_geom),
+                           geometry.ST_Covers(PlProjectParcel.polygon_geom),
+                           PlProjectParcel.polygon_geom.ST_Covers(geometry))). \
+                filter(PlProjectParcel.is_active == True). \
+                filter(PlProject.is_active == True). \
+                filter(PlProjectParcel.au2 == self.working_soum). \
+                filter(PlProject.workrule_status_id == 15).first()
+
+            project = parcel_plan.project_ref
+            project_no = project.code
+
             valid = False
-            parcel_error = u'Батлагдсан ГЗБТөлөвлөгөөтэй давхардаж байна.'
+            parcel_error =  unicode(project_no) + u' дугаартай батлагдсан ГЗБТөлөвлөгөөтэй давхардаж байна.'
             error_message = error_message + "\n \n" + parcel_error
 
             # if organization == 1:
