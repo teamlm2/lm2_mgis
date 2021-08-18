@@ -4013,7 +4013,7 @@
         <translation>Барилга</translation>
     </message>
     <message>
-        <location filename="controller/CreateCaseDialog.py" line="940"/>
+        <location filename="controller/CreateCaseDialog.py" line="956"/>
         <source>Error</source>
         <translation>Алдаа</translation>
     </message>
@@ -4038,22 +4038,22 @@
         <translation>Өөрчлөлтийн горимд сонгогдсон нэгж талбаруудаас байна.Иймд эхлээд өөрчлөлтийн горимд байгаа тус нэгж талбаруудын өөрчлөлтийг буцаах эсвэл дуусгавар болгоно уу. Харилцах цонхыг хаана уу</translation>
     </message>
     <message>
-        <location filename="controller/CreateCaseDialog.py" line="1808"/>
+        <location filename="controller/CreateCaseDialog.py" line="1824"/>
         <source>Shapefiles (*.shp)</source>
         <translation>Шэйффайл (*.shp)</translation>
     </message>
     <message>
-        <location filename="controller/CreateCaseDialog.py" line="1835"/>
+        <location filename="controller/CreateCaseDialog.py" line="1851"/>
         <source>Error loading layer</source>
         <translation>Давхарга оруулахад алдаа гарлаа</translation>
     </message>
     <message>
-        <location filename="controller/CreateCaseDialog.py" line="1831"/>
+        <location filename="controller/CreateCaseDialog.py" line="1847"/>
         <source>The layer is invalid.</source>
         <translation>Тус давхарга буруу давхарга байна.</translation>
     </message>
     <message>
-        <location filename="controller/CreateCaseDialog.py" line="1129"/>
+        <location filename="controller/CreateCaseDialog.py" line="1145"/>
         <source>The crs of the has to be 32648.</source>
         <translation> crs нь 32648 байх ёстой.</translation>
     </message>
@@ -4123,32 +4123,32 @@
         <translation>{0} мөрөн дэх алдаа: {1}</translation>
     </message>
     <message>
-        <location filename="controller/CreateCaseDialog.py" line="1835"/>
+        <location filename="controller/CreateCaseDialog.py" line="1851"/>
         <source>The crs of the layer has to be 4326.</source>
         <translation>Давхаргийн crs нь 4326 байх ёстой.</translation>
     </message>
     <message>
-        <location filename="controller/CreateCaseDialog.py" line="1221"/>
+        <location filename="controller/CreateCaseDialog.py" line="1237"/>
         <source>Maintenance case Error</source>
         <translation>Кадастрын өөрчлөлт АЛДАА</translation>
     </message>
     <message>
-        <location filename="controller/CreateCaseDialog.py" line="1221"/>
+        <location filename="controller/CreateCaseDialog.py" line="1237"/>
         <source>Select an application to create an maintenance case</source>
         <translation>Кадастрын өөрчлөлт хийх өргөдлийг сонгоно уу</translation>
     </message>
     <message>
-        <location filename="controller/CreateCaseDialog.py" line="1037"/>
+        <location filename="controller/CreateCaseDialog.py" line="1053"/>
         <source>Shapefile error</source>
         <translation>*.shp файл алдаатай байна</translation>
     </message>
     <message>
-        <location filename="controller/CreateCaseDialog.py" line="1037"/>
+        <location filename="controller/CreateCaseDialog.py" line="1053"/>
         <source>The landuse is not available in the database.</source>
         <translation>ГНС-ийн ангилалд байхгүй код оруулсан байна.</translation>
     </message>
     <message>
-        <location filename="controller/CreateCaseDialog.py" line="1406"/>
+        <location filename="controller/CreateCaseDialog.py" line="1422"/>
         <source>Changes applied successfully.</source>
         <translation>Өөрчлөлт амжилттай хадгалагдлаа.</translation>
     </message>
@@ -4173,12 +4173,12 @@
         <translation>Өргөдөлтэй холбохгүй бол тэмдэглэ</translation>
     </message>
     <message>
-        <location filename="controller/CreateCaseDialog.py" line="1459"/>
+        <location filename="controller/CreateCaseDialog.py" line="1475"/>
         <source>Database Query Error</source>
         <translation>Мэдээллийн сангийн алдаа</translation>
     </message>
     <message>
-        <location filename="controller/CreateCaseDialog.py" line="1459"/>
+        <location filename="controller/CreateCaseDialog.py" line="1475"/>
         <source>Could not execute: {0}</source>
         <translation>Гүйцэтгэл амжилтгүй: {0}</translation>
     </message>
@@ -4188,22 +4188,22 @@
         <translation>Регистийн дугаар</translation>
     </message>
     <message>
-        <location filename="controller/CreateCaseDialog.py" line="1145"/>
+        <location filename="controller/CreateCaseDialog.py" line="1161"/>
         <source>No parcel</source>
         <translation>Нэгж талбар байхгүй</translation>
     </message>
     <message>
-        <location filename="controller/CreateCaseDialog.py" line="1145"/>
+        <location filename="controller/CreateCaseDialog.py" line="1161"/>
         <source>This building no parcel.</source>
         <translation>Нэгж талбаргүй барилга.</translation>
     </message>
     <message>
-        <location filename="controller/CreateCaseDialog.py" line="940"/>
+        <location filename="controller/CreateCaseDialog.py" line="956"/>
         <source>Ca_Tmp_Parcel layer parcel duplicate!!!</source>
         <translation>Ажлын нэгж талбар давхаргад энэ нэгж талбар орсон байна!!! </translation>
     </message>
     <message>
-        <location filename="controller/CreateCaseDialog.py" line="936"/>
+        <location filename="controller/CreateCaseDialog.py" line="952"/>
         <source>Ca_Tmp_Parcel layer parcel overlap!!!</source>
         <translation>Ажлын давхарга дээрх нэгж талбартай давхардаж байна!!!</translation>
     </message>
@@ -4218,17 +4218,17 @@
         <translation>Гэрээг шүүхээс идэхгүй болгосон байна!</translation>
     </message>
     <message>
-        <location filename="controller/CreateCaseDialog.py" line="957"/>
+        <location filename="controller/CreateCaseDialog.py" line="973"/>
         <source>Error Parcel</source>
         <translation>Нэгж талбар буруу байна</translation>
     </message>
     <message>
-        <location filename="controller/CreateCaseDialog.py" line="957"/>
+        <location filename="controller/CreateCaseDialog.py" line="973"/>
         <source>This parcel out current soum boundary.</source>
         <translation>Нэгж талбар сумын хилийн гадна байна.</translation>
     </message>
     <message>
-        <location filename="controller/CreateCaseDialog.py" line="837"/>
+        <location filename="controller/CreateCaseDialog.py" line="853"/>
         <source>Invalid parcel info</source>
         <translation>Идэвхгүй нэгж талбарын мэдээлэл</translation>
     </message>
@@ -4288,7 +4288,7 @@
         <translation></translation>
     </message>
     <message>
-        <location filename="controller/CreateCaseDialog.py" line="912"/>
+        <location filename="controller/CreateCaseDialog.py" line="928"/>
         <source>Safety zone layer parcel overlap!!!</source>
         <translation></translation>
     </message>
@@ -4373,32 +4373,32 @@
         <translation type="unfinished">ГНС-н дэлгэрэнгүй ангилал</translation>
     </message>
     <message>
-        <location filename="controller/CreateCaseDialog.py" line="1928"/>
+        <location filename="controller/CreateCaseDialog.py" line="1944"/>
         <source>Approved</source>
         <translation>Захирамж гарсан</translation>
     </message>
     <message>
-        <location filename="controller/CreateCaseDialog.py" line="1929"/>
+        <location filename="controller/CreateCaseDialog.py" line="1945"/>
         <source>Refused</source>
         <translation>Захирамж гараагүй</translation>
     </message>
     <message>
-        <location filename="controller/CreateCaseDialog.py" line="2109"/>
+        <location filename="controller/CreateCaseDialog.py" line="2125"/>
         <source>Yes</source>
         <translation>Тийм</translation>
     </message>
     <message>
-        <location filename="controller/CreateCaseDialog.py" line="2111"/>
+        <location filename="controller/CreateCaseDialog.py" line="2127"/>
         <source>No</source>
         <translation>Үгүй</translation>
     </message>
     <message>
-        <location filename="controller/CreateCaseDialog.py" line="2441"/>
+        <location filename="controller/CreateCaseDialog.py" line="2457"/>
         <source>Connection Error</source>
         <translation>Холболтын алдаа</translation>
     </message>
     <message>
-        <location filename="controller/CreateCaseDialog.py" line="2441"/>
+        <location filename="controller/CreateCaseDialog.py" line="2457"/>
         <source>Please connect to database!!!</source>
         <translation>Мэдээллийн сантай холбогдоно уу!!!</translation>
     </message>
@@ -15217,22 +15217,22 @@
         <translation>Нэгж талбарын шугам</translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="1611"/>
+        <location filename="LM2Plugin.py" line="1621"/>
         <source>Address Entrance</source>
         <translation>Орц, гарц</translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="1624"/>
+        <location filename="LM2Plugin.py" line="1634"/>
         <source>Address Building</source>
         <translation>Хаягийн барилга</translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="1636"/>
+        <location filename="LM2Plugin.py" line="1646"/>
         <source> Address Parcel</source>
         <translation>Хаягийн нэгж талбар</translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="1686"/>
+        <location filename="LM2Plugin.py" line="1696"/>
         <source>Address Post Zone</source>
         <translation>Шуудангийн бүсчлэл</translation>
     </message>
@@ -15252,92 +15252,92 @@
         <translation>Түр нэгж талбар</translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="1599"/>
+        <location filename="LM2Plugin.py" line="1609"/>
         <source>Street Start Point</source>
         <translation>Гудамжны эхлэлийн цэг</translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="1650"/>
+        <location filename="LM2Plugin.py" line="1660"/>
         <source>Road Line</source>
         <translation>Зам</translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="1662"/>
+        <location filename="LM2Plugin.py" line="1672"/>
         <source>Street Line</source>
         <translation>Гудамж</translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="1698"/>
+        <location filename="LM2Plugin.py" line="1708"/>
         <source>Settlement Zone</source>
         <translation>Суурьшлын бүс</translation>
     </message>
     <message>
-        <location filename="controller/AddressNavigatorWidget.py" line="1684"/>
+        <location filename="controller/AddressNavigatorWidget.py" line="1685"/>
         <source>GeoCad Building</source>
         <translation>ГеоКад Барилга</translation>
     </message>
     <message>
-        <location filename="controller/AddressNavigatorWidget.py" line="1695"/>
+        <location filename="controller/AddressNavigatorWidget.py" line="1696"/>
         <source>GeoCad Parcel</source>
         <translation>ГеоКад Нэгж талбар</translation>
     </message>
     <message>
-        <location filename="controller/AddressNavigatorWidget.py" line="1705"/>
+        <location filename="controller/AddressNavigatorWidget.py" line="1706"/>
         <source>GeoCad Street</source>
         <translation>ГеоКад Гудамж</translation>
     </message>
     <message>
-        <location filename="controller/AddressNavigatorWidget.py" line="1715"/>
+        <location filename="controller/AddressNavigatorWidget.py" line="1716"/>
         <source>GeoCad Street Point</source>
         <translation>ГеоКад Гудамжны эхлэл</translation>
     </message>
     <message>
-        <location filename="controller/AddressNavigatorWidget.py" line="1729"/>
+        <location filename="controller/AddressNavigatorWidget.py" line="1730"/>
         <source> Address BairZui Parcel</source>
         <translation>Хаяг Байр зүйн нэгж талбар</translation>
     </message>
     <message>
-        <location filename="controller/AddressNavigatorWidget.py" line="1739"/>
+        <location filename="controller/AddressNavigatorWidget.py" line="1740"/>
         <source> Address Cadastre Parcel</source>
         <translation>Хаяг Кадастрын нэгж талбар</translation>
     </message>
     <message>
-        <location filename="controller/AddressNavigatorWidget.py" line="1750"/>
+        <location filename="controller/AddressNavigatorWidget.py" line="1751"/>
         <source> Address Temp Cadastre Parcel</source>
         <translation>Хаяг Кадастрын ажлын нэгж талбар</translation>
     </message>
     <message>
-        <location filename="controller/AddressNavigatorWidget.py" line="1760"/>
+        <location filename="controller/AddressNavigatorWidget.py" line="1761"/>
         <source> Address Plan Parcel</source>
         <translation>Хаяг ГЗБТ-ны нэгж талбар</translation>
     </message>
     <message>
-        <location filename="controller/AddressNavigatorWidget.py" line="1770"/>
+        <location filename="controller/AddressNavigatorWidget.py" line="1771"/>
         <source> Is New Address Parcel</source>
         <translation>Шинэ хаяг авсан нэгж талбар</translation>
     </message>
     <message>
-        <location filename="controller/AddressNavigatorWidget.py" line="1781"/>
+        <location filename="controller/AddressNavigatorWidget.py" line="1782"/>
         <source> Settlement Center</source>
         <translation>Суурьшлын төв цэг</translation>
     </message>
     <message>
-        <location filename="controller/AddressNavigatorWidget.py" line="1793"/>
+        <location filename="controller/AddressNavigatorWidget.py" line="1794"/>
         <source> Address BairZui Building</source>
         <translation>Хаяг Байр зүйн барилга</translation>
     </message>
     <message>
-        <location filename="controller/AddressNavigatorWidget.py" line="1804"/>
+        <location filename="controller/AddressNavigatorWidget.py" line="1805"/>
         <source> Address Cadastre Building</source>
         <translation>Хаяг Кадастрын барилга</translation>
     </message>
     <message>
-        <location filename="controller/AddressNavigatorWidget.py" line="1815"/>
+        <location filename="controller/AddressNavigatorWidget.py" line="1816"/>
         <source> Is New Address Building</source>
         <translation>Шинэ хаяг авсан барилга</translation>
     </message>
     <message>
-        <location filename="controller/AddressNavigatorWidget.py" line="1826"/>
+        <location filename="controller/AddressNavigatorWidget.py" line="1827"/>
         <source> Address Temp Cadastre Building</source>
         <translation>Хаяг Кадастрын ажлын барилга</translation>
     </message>
@@ -15347,14 +15347,19 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="LM2Plugin.py" line="1673"/>
+        <location filename="LM2Plugin.py" line="1683"/>
         <source>Sub Street Line</source>
         <translation>Дэд гудамж</translation>
     </message>
     <message>
-        <location filename="controller/AddressNavigatorWidget.py" line="1674"/>
+        <location filename="controller/AddressNavigatorWidget.py" line="1675"/>
         <source>No Entry Parcel</source>
         <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="LM2Plugin.py" line="1596"/>
+        <source>Warning Parcel</source>
+        <translation>Зөрчилтэй талбай</translation>
     </message>
 </context>
 <context>

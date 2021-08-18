@@ -1588,6 +1588,16 @@ class LM2Plugin:
         if myalayer is None:
             mygroup.addLayer(vlayer)
 
+        vlayer = LayerUtils.layer_by_data_source("data_landuse", "ca_warning_cad_parcel_area_view")
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer("ca_warning_cad_parcel_area_view", "gid", "data_landuse")
+        vlayer.loadNamedStyle(
+            str(os.path.dirname(os.path.realpath(__file__))) + "/template\style/ca_warning_cad_parcel_area_view.qml")
+        vlayer.setLayerName(QApplication.translate("Plugin", "Warning Parcel"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            mygroup.addLayer(vlayer)
+
         ######
         addrs_group = root.findGroup(u"Хаяг")
 

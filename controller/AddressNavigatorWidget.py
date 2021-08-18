@@ -283,7 +283,8 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
         self.str_code_lbl.setText(str(street.code))
         self.str_name_lbl.setText(street.name)
 
-        sql = "select * from base.st_street_line_view_start_end_nodes("+ str(str_id) +");"
+        # sql = "select * from base.st_street_line_view_start_end_nodes("+ str(str_id) +");"
+        sql = "select * from base.st_street_line_view_start_end_nodes_auto(" + str(str_id) + ");"
 
         result = self.session.execute(sql)
 
