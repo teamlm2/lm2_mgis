@@ -285,6 +285,7 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
 
         # sql = "select * from base.st_street_line_view_start_end_nodes("+ str(str_id) +");"
         sql = "select * from base.st_street_line_view_start_end_nodes_auto(" + str(str_id) + ");"
+        sql = "select * from base.st_street_line_view_start_end_points(" + str(str_id) + ");"
 
         result = self.session.execute(sql)
 
@@ -1445,6 +1446,7 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
             self.session.commit()
         if self.tabWidget.currentIndex() == 2:
             self.__save_street_point()
+            self.session.commit()
         if self.tabWidget.currentIndex() == 3:
             self.session.commit()
 
