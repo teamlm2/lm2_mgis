@@ -214,97 +214,97 @@
     <message utf8="true">
         <location filename="view/AddressNavigatorWidget.ui" line="702"/>
         <source>№</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message utf8="true">
         <location filename="view/AddressNavigatorWidget.ui" line="717"/>
         <source>Цэгийн төрөл</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message utf8="true">
         <location filename="view/AddressNavigatorWidget.ui" line="371"/>
         <source>Сонгосон нэгж талбарууд</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message utf8="true">
         <location filename="view/AddressNavigatorWidget.ui" line="397"/>
         <source>Гудамжинд хувиарлах</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message utf8="true">
         <location filename="view/AddressNavigatorWidget.ui" line="423"/>
         <source>Сонгосон багаар</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message utf8="true">
         <location filename="view/AddressNavigatorWidget.ui" line="452"/>
         <source>Гудамж харах</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message utf8="true">
         <location filename="view/AddressNavigatorWidget.ui" line="886"/>
         <source>Гудамжин хамаарах нэгж талбаруудыг харах</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message utf8="true">
         <location filename="view/AddressNavigatorWidget.ui" line="1073"/>
         <source>Суурь Давхарга</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="controller/AddressNavigatorWidget.py" line="210"/>
         <source>Sql Error</source>
-        <translation type="unfinished">Sql алдаа</translation>
+        <translation>Sql алдаа</translation>
     </message>
     <message>
         <location filename="controller/AddressNavigatorWidget.py" line="188"/>
         <source>No soum assigned</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message utf8="true">
         <location filename="view/AddressNavigatorWidget.ui" line="892"/>
         <source>Гудамж үүсгэх</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message utf8="true">
         <location filename="view/AddressNavigatorWidget.ui" line="904"/>
         <source>Зам оруулах</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="view/AddressNavigatorWidget.ui" line="921"/>
         <source>ID</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message utf8="true">
         <location filename="view/AddressNavigatorWidget.ui" line="926"/>
         <source>Урт</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message utf8="true">
         <location filename="view/AddressNavigatorWidget.ui" line="931"/>
         <source>Нэр</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message utf8="true">
         <location filename="view/AddressNavigatorWidget.ui" line="945"/>
         <source>Хасах</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message utf8="true">
         <location filename="view/AddressNavigatorWidget.ui" line="961"/>
         <source>Нэг гудамж үүсгэх</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message utf8="true">
         <location filename="view/AddressNavigatorWidget.ui" line="977"/>
         <source>Нэг ижил нэртэй олон гудамж үүсгэх</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message utf8="true">
         <location filename="view/AddressNavigatorWidget.ui" line="1022"/>
         <source>Жагсаалт тус бүрээр олон гудамж үүсгэх</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
 </context>
 <context>
