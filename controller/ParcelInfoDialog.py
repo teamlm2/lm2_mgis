@@ -50,6 +50,7 @@ from ..utils.SessionHandler import SessionHandler
 from ..utils.FilePath import *
 from ..utils.FtpConnection import *
 from ..model.SdConfiguration import *
+from ..model.ClUbParcelType import *
 from .qt_classes.UbDocumentViewDelegate import UbDocumentViewDelegate
 from .qt_classes.UbNewDocumentViewDelegate import UbNewDocumentViewDelegate
 import math
@@ -345,6 +346,11 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
         contract_statuses = self.session.query(ClContractStatus).all()
         right_types = self.session.query(ClRightType).all()
         edit_statuses = self.session.query(ClUbEditStatus).filter(ClUbEditStatus.code != DELETE_STATUS).all()
+
+        ub_parcel_types = self.session.query(ClUbParcelType).all()
+
+        for item in ub_parcel_types:
+            self.ub_parcel_type_cbox.addItem(item.description, item.code)
 
         # except SQLAlchemyError, e:
         #     PluginUtils.show_error(self, self.tr("File Error"),
@@ -1908,7 +1914,6 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
 
     def __save_subject(self, objectid):
 
-
         subject = self.session.query(UbGisSubject).filter(UbGisSubject.objectid == objectid).one()
 
         # Parcel
@@ -2009,6 +2014,13 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
         old_parcel_id = self.old_parcel_id_edit.text()
         ub_parcel = self.session.query(CaUBParcelTbl).filter(CaUBParcelTbl.old_parcel_id == old_parcel_id).one()
         edit_status = self.edit_status_cbox.itemData(self.edit_status_cbox.currentIndex())
+        ub_parcel_type = self.ub_parcel_type_cbox.itemData(self.ub_parcel_type_cbox.currentIndex())
+
+        ub_parcel.ub_parcel_type = ub_parcel_type
+        ub_parcel.type_created_by = self.__current_sd_user().user_id
+        ub_parcel.type_updated_by = self.__current_sd_user().user_id
+        ub_parcel.type_created_at = PluginUtils.convert_qt_date_to_python(QDate.currentDate())
+        ub_parcel.type_updated_at = PluginUtils.convert_qt_date_to_python(QDate.currentDate())
 
         if ub_parcel.edit_status != 10:
             subject.status_date = PluginUtils.convert_qt_date_to_python(QDate.currentDate())
@@ -2019,6 +2031,15 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
             ub_parcel.edit_status = 30
         else:
             ub_parcel.edit_status = edit_status
+
+    def __current_sd_user(self):
+
+        officer = self.session.query(SetRole) \
+            .filter(SetRole.user_name == QSettings().value(SettingsConstants.USER)) \
+            .filter(SetRole.is_active == True).one()
+
+        sd_user = self.session.query(SdUser).filter(SdUser.gis_user_real == officer.user_name_real).first()
+        return sd_user
 
     @pyqtSlot()
     def on_save_button_clicked(self):

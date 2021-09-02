@@ -13872,7 +13872,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
 
         root = QgsProject.instance().layerTreeRoot()
         mygroup = root.findGroup(u"Үнэлгээ, төлбөрийн бүс")
-        vlayer = LayerUtils.layer_by_data_source("data_estimate", "pa_valuation_level_view")
+        vlayer = sec_zone_button("data_estimate", "pa_valuation_level_view")
         if vlayer is None:
             vlayer = LayerUtils.load_layer_base_layer("pa_valuation_level_view", "id", "data_estimate")
         vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/pa_valuation_level.qml")
@@ -13883,7 +13883,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
 
         root = QgsProject.instance().layerTreeRoot()
         mygroup = root.findGroup(u"Үнэлгээ, төлбөрийн бүс")
-        vlayer = LayerUtils.layer_by_data_source("data_estimate", "pa_valuation_level_agriculture_view")
+        vlayer = sec_zone_button("data_estimate", "pa_valuation_level_agriculture_view")
         if vlayer is None:
             vlayer = LayerUtils.load_layer_base_layer("pa_valuation_level_agriculture_view", "id", "data_estimate")
         vlayer.loadNamedStyle(
@@ -13898,7 +13898,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
 
         root = QgsProject.instance().layerTreeRoot()
         mygroup = root.findGroup(u"Мэдээний хяналт")
-        vlayer = LayerUtils.layer_by_data_source("data_landuse", "to_cancel_view")
+        vlayer = sec_zone_button("data_landuse", "to_cancel_view")
         if vlayer is None:
             vlayer = LayerUtils.load_layer_base_layer("to_cancel_view", "gid", "data_landuse")
         vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/to_cancel.qml")
@@ -13912,7 +13912,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
 
         root = QgsProject.instance().layerTreeRoot()
         mygroup = root.findGroup(u"Мэдээний хяналт")
-        vlayer = LayerUtils.layer_by_data_source("data_landuse", "ca_public_parcel_view")
+        vlayer = sec_zone_button("data_landuse", "ca_public_parcel_view")
         if vlayer is None:
             vlayer = LayerUtils.load_layer_base_layer("ca_public_parcel_view", "gid", "data_landuse")
         vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/to_cancel.qml")

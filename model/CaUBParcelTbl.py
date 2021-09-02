@@ -32,8 +32,17 @@ class CaUBParcelTbl(Base):
     au2 = Column(String, ForeignKey('au_level2.code'))
     au2_ref = relationship("AuLevel2")
 
+    ub_parcel_type = Column(String, ForeignKey('cl_ub_parcel_type.code'))
+    ub_parcel_type_ref = relationship("ClUbParcelType")
+
     deleted_status_date = Column(Date)
     deleted_status_decision_date = Column(Date)
     deleted_status_decision_no = Column(String)
     deleted_status_comment = Column(String)
     deleted_status_user = Column(String)
+
+    type_created_by = Column(Integer)
+    type_updated_by = Column(Integer)
+
+    type_created_at = Column(Date)
+    type_updated_at = Column(Date)
