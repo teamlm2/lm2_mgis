@@ -32,6 +32,8 @@ class UserRight_code:
     ownership_update = 11
     person_update = 12
     ub_parcel = 13
+    top_cadastre_view = 14
+    top_cadastre_update = 15
 
 class ApplicationType:
 

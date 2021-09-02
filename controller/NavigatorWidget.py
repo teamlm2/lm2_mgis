@@ -3581,6 +3581,24 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
                 if user_right.r_update:
                     self.till_date_edit.setEnabled(True)
                     self.infinity_check_box.setEnabled(True)
+            if user_right.group_role == UserRight_code.top_cadastre_view:
+                if user_right.r_view:
+                    self.secret_parcel_button.setVisible(True)
+                if user_right.r_add:
+                    self.secret_parcel_button.setVisible(True)
+                if user_right.r_remove:
+                    self.secret_parcel_button.setVisible(True)
+                if user_right.r_update:
+                    self.secret_parcel_button.setVisible(True)
+            if user_right.group_role == UserRight_code.top_cadastre_update:
+                if user_right.r_view:
+                    self.secret_parcel_button.setVisible(True)
+                if user_right.r_add:
+                    self.secret_parcel_button.setVisible(True)
+                if user_right.r_remove:
+                    self.secret_parcel_button.setVisible(True)
+                if user_right.r_update:
+                    self.secret_parcel_button.setVisible(True)
 
     def __setup_permissions(self):
 
@@ -3701,6 +3719,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
 
     def __disable_all(self):
 
+        self.secret_parcel_button.setVisible(False)
         self.contract_add_button.setEnabled(False)
         self.contract_delete_button.setEnabled(False)
         self.record_add_button.setEnabled(False)
