@@ -620,9 +620,6 @@ class AddressNavigatorWidget(QDockWidget, Ui_AddressNavigatorWidget, DatabaseHel
                             filter(StStreetPoint.street_id == street_id).count()
 
                         if count == 0:
-                            print geometry
-                            print p_type
-                            print count
                             object = StStreetPoint()
                             object.is_active = True
                             object.geometry = geometry
