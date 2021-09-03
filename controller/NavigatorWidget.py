@@ -3581,6 +3581,15 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
                 if user_right.r_update:
                     self.till_date_edit.setEnabled(True)
                     self.infinity_check_box.setEnabled(True)
+
+            groups = self.__groupsByUser(user_name)
+            for group in groups:
+                group_name = group[0]
+                if group_name == UserRight_code.top_cadastre_view:
+                    self.secret_parcel_button.setVisible(True)
+                if group_name == UserRight_code.top_cadastre_update:
+                    self.secret_parcel_button.setVisible(True)
+
             if user_right.group_role == UserRight_code.top_cadastre_view:
                 if user_right.r_view:
                     self.secret_parcel_button.setVisible(True)
@@ -3590,6 +3599,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
                     self.secret_parcel_button.setVisible(True)
                 if user_right.r_update:
                     self.secret_parcel_button.setVisible(True)
+
             if user_right.group_role == UserRight_code.top_cadastre_update:
                 if user_right.r_view:
                     self.secret_parcel_button.setVisible(True)
@@ -3599,6 +3609,14 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
                     self.secret_parcel_button.setVisible(True)
                 if user_right.r_update:
                     self.secret_parcel_button.setVisible(True)
+
+    def __groupsByUser(self, user_name):
+
+        sql = "select rolname from pg_user join pg_auth_members on (pg_user.usesysid=pg_auth_members.member) " \
+              "join pg_roles on (pg_roles.oid=pg_auth_members.roleid) where pg_user.usename=:bindName"
+        result = self.session.execute(sql, {'bindName': user_name}).fetchall()
+
+        return result
 
     def __setup_permissions(self):
 

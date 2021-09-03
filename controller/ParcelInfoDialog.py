@@ -3771,6 +3771,17 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
         vlayer_parcel.loadNamedStyle(
             str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "template\style/ub_parcel.qml")
 
+        table_name = "ca_ub_desicion"
+        vlayer = LayerUtils.layer_by_data_source("data_ub", table_name)
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer(table_name, "row_number", "data_ub")
+        vlayer.loadNamedStyle(
+            str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/ca_ub_desicion.qml")
+        vlayer.setLayerName(self.tr("Ub Decision Type"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            mygroup.addLayer(vlayer)
+
     @pyqtSlot(QTableWidgetItem)
     def on_landuk_info_twidget_itemClicked(self, item):
 
