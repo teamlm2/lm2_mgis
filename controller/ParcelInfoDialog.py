@@ -3758,6 +3758,7 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
 
         vlayer_parcel = LayerUtils.load_ub_data_layer_by_name("ca_ub_parcel", "old_parcel_id")
 
+
         layers = self.plugin.iface.legendInterface().layers()
 
         for layer in layers:
