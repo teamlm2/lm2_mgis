@@ -46,5 +46,18 @@ SELECT
 FROM pg_stat_activity
 WHERE datname = 'lm_0003' 
 and state = 'active' 
-and (now() - pg_stat_activity.query_start) > interval '5 minutes'
+and (now() - pg_stat_activity.query_start) > interval '0 minutes'
 order by now() - pg_stat_activity.query_start;
+
+-----
+
+select R.*
+	from INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE u
+	inner join INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS FK
+	    on  U.CONSTRAINT_SCHEMA = FK.UNIQUE_CONSTRAINT_SCHEMA
+	    and U.CONSTRAINT_NAME = FK.UNIQUE_CONSTRAINT_NAME
+	inner join INFORMATION_SCHEMA.KEY_COLUMN_USAGE R
+	    ON R.CONSTRAINT_SCHEMA = FK.CONSTRAINT_SCHEMA
+	    AND R.CONSTRAINT_NAME = FK.CONSTRAINT_NAME
+	WHERE U.TABLE_SCHEMA = 'data_soums_union'
+	  AND U.TABLE_NAME = 'ct_contract'
