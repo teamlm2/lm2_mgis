@@ -707,7 +707,7 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
     def __check_parcel_correct(self, geometry, error_message):
 
         organization = DatabaseUtils.current_user_organization()
-
+        current_date = PluginUtils.convert_qt_date_to_python(QDateTime().currentDateTime())
         valid = True
         if not organization:
             return
@@ -734,6 +734,7 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
             filter(PlProjectParcel.is_active == True). \
             filter(PlProject.is_active == True). \
             filter(PlProjectParcel.au2 == self.working_soum). \
+            filter(PlProject.end_date > current_date). \
             filter(PlProject.workrule_status_id == 15).count()
 
         if parcel_plan_c > 0:
@@ -748,6 +749,7 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
                 filter(PlProjectParcel.is_active == True). \
                 filter(PlProject.is_active == True). \
                 filter(PlProjectParcel.au2 == self.working_soum). \
+                filter(PlProject.end_date > current_date). \
                 filter(PlProject.workrule_status_id == 15).first()
 
             project = parcel_plan.project_ref
@@ -821,6 +823,8 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
 
         parcel_shape_layer = QgsVectorLayer(file_path, "tmp_parcel_shape", "ogr")
 
+        current_date = PluginUtils.convert_qt_date_to_python(QDateTime().currentDateTime())
+
         if not parcel_shape_layer.isValid():
             PluginUtils.show_error(self,  self.tr("Error loading layer"), self.tr("The layer is invalid."))
             return
@@ -840,6 +844,7 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
         for parcel in iterator:
 
             parcel_geometry = WKTElement(parcel.geometry().exportToWkt(), srid=4326)
+            print parcel_geometry
 
             validaty_result = self.__check_parcel_correct(parcel_geometry, error_message)
 
@@ -881,13 +886,13 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
             new_parcel = self.__copy_parcel_attributes(parcel, new_parcel, parcel_shape_layer)
 
             parcel_overlap_c = self.session.query(CaParcel.parcel_id) \
-                .filter(WKTElement(parcel.geometry().exportToWkt(), srid=4326).ST_Overlaps(CaParcel.geometry)) \
-                .filter(CaParcel.valid_till == "infinity").count()
+                .filter(or_(WKTElement(parcel.geometry().exportToWkt(), srid=4326).ST_Overlaps(CaParcel.geometry), WKTElement(parcel.geometry().exportToWkt(), srid=4326).ST_Covers(CaParcel.geometry), CaParcel.geometry.ST_Covers(WKTElement(parcel.geometry().exportToWkt(), srid=4326)))) \
+                .filter(CaParcel.valid_till > current_date).count()
 
             tmp_parcel_overlap_c = self.session.query(CaTmpParcel.parcel_id) \
                 .filter(
                 WKTElement(parcel.geometry().exportToWkt(), srid=4326).ST_Overlaps(CaTmpParcel.geometry)) \
-                .filter(CaTmpParcel.valid_till == "infinity").count()
+                .filter(CaTmpParcel.valid_till > current_date).count()
 
             safety_zone_overlap_c = self.session.query(SetLanduseSafetyZone) \
                 .filter(WKTElement(parcel.geometry().exportToWkt(), srid=4326).ST_Overlaps(SetLanduseSafetyZone.geometry)).count()
@@ -926,7 +931,7 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
 
             if parcel_overlap_c != 0:
                 parcel_overlaps = self.session.query(CaParcel) \
-                    .filter(WKTElement(parcel.geometry().exportToWkt(), srid=4326).ST_Overlaps(CaParcel.geometry)) \
+                    .filter(or_(WKTElement(parcel.geometry().exportToWkt(), srid=4326).ST_Overlaps(CaParcel.geometry), WKTElement(parcel.geometry().exportToWkt(), srid=4326).ST_Covers(CaParcel.geometry), CaParcel.geometry.ST_Covers(WKTElement(parcel.geometry().exportToWkt(), srid=4326)))) \
                     .filter(CaParcel.valid_till == "infinity").all()
                 o_parcels = []
                 is_overlaps_parcels = False

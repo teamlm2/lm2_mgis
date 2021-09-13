@@ -51,7 +51,8 @@ left join data_soums_union.ct_record_application_role crar on ca.app_id = crar.a
 left join data_soums_union.ct_ownership_record cor on crar.record = cor.record_id 
 left join codelists.cl_record_status crs2 on cor.status = crs2.code 
 where satpr.is_owner is true 
-and now() between cpt.valid_from and cpt.valid_till --and cpt.au2 = '06701' and cpt.parcel_id = '6712016523'
+and now() between cpt.valid_from and cpt.valid_till --and cpt.au2 = '06701' 
+and cpt.parcel_id = '6712016523'
 order by cd.decision_date desc 
 )fff order by fff.decision_date desc, fff.contract_date desc
 )ddd where ppp_rank = 1

@@ -1,16 +1,19 @@
--- Function: base.check_cadastre_case_overlapas(geometry)
+﻿-- Function: base.check_cadastre_case_overlapas(geometry, text)
 
--- DROP FUNCTION base.check_cadastre_case_overlapas(geometry);
+-- DROP FUNCTION base.check_cadastre_case_overlapas(geometry, text);
 
-CREATE OR REPLACE FUNCTION base.check_cadastre_case_overlapas(IN input_polgyon_geometry geometry)
+CREATE OR REPLACE FUNCTION base.check_cadastre_case_overlapas(
+    IN input_polgyon_geometry geometry,
+    IN input_parcels text)
   RETURNS TABLE(mc_type_txt text, mc_type integer, area_type_txt text, is_true boolean, insert_geom geometry, over_geom geometry, parcel_id character varying, au2 character varying, area_m2 double precision) AS
 $BODY$
 
 DECLARE
 	spa_count integer;
 	v_utmsrid integer;
+	input_parcels_p text;
 BEGIN 
-    
+	RAISE NOTICE 'parcels (%)',  input_parcels;
 	IF (input_polgyon_geometry is null) THEN
 	  RAISE exception '%', 'Polygon Geometry is null!';
 	END IF;
@@ -23,6 +26,11 @@ BEGIN
 	IF NOT FOUND THEN
 	  RAISE EXCEPTION '%','SRID not found';
 	END IF;
+	IF (input_parcels IS NULL) THEN
+		input_parcels_p := '()';
+	ELSE
+		input_parcels_p := input_parcels;
+	END IF;
 
 	RETURN query select 'Кадастрын мэдээллийн сан' as mc_type_txt, 1 as mc_type, aa.code::text ||':'|| aa.description as landuse_type, true, dd.geom, cpt.geometry, cpt.parcel_id, cpt.au2, base.calculate_area_utm_decimal(st_intersection(dd.geom, cpt.geometry)) from data_soums_union.ca_parcel_tbl cpt 
 			left join codelists.cl_landuse_type aa on cpt.landuse = aa.code
@@ -30,7 +38,7 @@ BEGIN
 			select 
 			input_polgyon_geometry as geom
 			)xxx) dd on st_overlaps(cpt.geometry, dd.geom) or st_covers(cpt.geometry, dd.geom) or st_covers(dd.geom, cpt.geometry) 
-			where now() between cpt.valid_from and cpt.valid_till 
+			where (now() between cpt.valid_from and cpt.valid_till or cpt.valid_till is null) and cpt.parcel_id not in (select replace(unnest(string_to_array(input_parcels_p, ',')), ' ', ''))
 			union all
 			select 'ГЗБТ-н мэдээллийн сан' ||' ('|| ss.short_name ||')' as mc_type_txt, 2 as mc_type, aa.code ||':'|| aa.name as plan_zone_type, cpt.is_active, dd.geom, cpt.polygon_geom, cpt.parcel_id::text, cpt.au2, base.calculate_area_utm_decimal(st_intersection(dd.geom, cpt.polygon_geom)) from data_plan.pl_project_parcel cpt 
 			left join data_plan.cl_plan_zone aa on cpt.plan_zone_id = aa.plan_zone_id
@@ -48,7 +56,15 @@ BEGIN
 			select 
 			input_polgyon_geometry as geom
 			)xxx) dd on st_overlaps(cpt.geometry, dd.geom) or st_covers(cpt.geometry, dd.geom) or st_covers(dd.geom, cpt.geometry) 
-			where edit_status = 40;
+			where edit_status != 40
+			union all
+			select 'Нууцын мэдээллийн сан' as mc_type_txt, 4 as mc_type, 'нэгж талбар' as landuse_type, true, dd.geom, cpt.geometry, cpt.parcel_id, cpt.au2, base.calculate_area_utm_decimal(st_intersection(dd.geom, cpt.geometry)) from data_soums_union.secret_parcel_view cpt 
+			left join codelists.cl_landuse_type aa on cpt.landuse = aa.code
+			join (select st_geometrytype(geom), st_srid(geom), geom  from (
+			select 
+			input_polgyon_geometry as geom
+			)xxx) dd on st_overlaps(cpt.geometry, dd.geom) or st_covers(cpt.geometry, dd.geom) or st_covers(dd.geom, cpt.geometry) 
+			where (now() between cpt.valid_from and cpt.valid_till or cpt.valid_till is null);
 
 END;
 
@@ -56,5 +72,5 @@ $BODY$
   LANGUAGE plpgsql VOLATILE
   COST 100
   ROWS 1000;
-ALTER FUNCTION base.check_cadastre_case_overlapas(geometry)
+ALTER FUNCTION base.check_cadastre_case_overlapas(geometry, text)
   OWNER TO geodb_admin;

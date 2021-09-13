@@ -2855,7 +2855,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
                 PluginUtils.show_message(self, self.tr("Maintenance Case"), self.tr("The maintenance case is already finalized."))
                 return
 
-        self.__search_cases()
+        # self.__search_cases()
 
         self.plugin.iface.mapCanvas().refresh()
 

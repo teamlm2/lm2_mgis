@@ -1637,28 +1637,34 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
                 # try:
 
                 application = self.session.query(CtApplication).filter(CtApplication.app_id == app_id).one()
+                if application.tmp_parcel == None and application.parcel == None:
+                    PluginUtils.show_message(self, self.tr("parcel"), self.tr("No parcel!"))
+                    return
 
                 if application.tmp_parcel != None:
                     parcel = self.session.query(CaTmpParcel).filter(CaTmpParcel.parcel_id == application.tmp_parcel).one()
                     tmp_parcel_id = parcel.parcel_id
                     maintenance_case_id = parcel.maintenance_case
 
-                    self.__write_changes(maintenance_case_id,tmp_parcel_id, application.app_id)
+                    validaty_result = self.__overlaps_check_case(self, tmp_parcel_id)
+                    if not validaty_result[0]:
+                        log_measage = validaty_result[1]
+                        PluginUtils.show_error(self, self.tr("Invalid parcel info"), log_measage)
+                    else:
+                        self.__write_changes(maintenance_case_id,tmp_parcel_id, application.app_id)
+                else:
 
-                if application.tmp_parcel == None and application.parcel == None:
-                    PluginUtils.show_message(self, self.tr("parcel"), self.tr("No parcel!"))
-                    return
-                application.approved_duration = application.requested_duration
-                self.session.add(application)
+                    application.approved_duration = application.requested_duration
+                    # self.session.add(application)
 
-                new_status = CtApplicationStatus()
-                new_status.application = application.app_id
-                new_status.next_officer_in_charge = DatabaseUtils.current_sd_user().user_id
-                new_status.officer_in_charge = DatabaseUtils.current_sd_user().user_id
-                new_status.status = Constants.APP_STATUS_APPROVED
-                new_status.status_date = datetime.now().strftime(Constants.PYTHON_DATETIME_FORMAT)
-                self.session.add(new_status)
-                row +=1
+                    new_status = CtApplicationStatus()
+                    new_status.application = application.app_id
+                    new_status.next_officer_in_charge = DatabaseUtils.current_sd_user().user_id
+                    new_status.officer_in_charge = DatabaseUtils.current_sd_user().user_id
+                    new_status.status = Constants.APP_STATUS_APPROVED
+                    new_status.status_date = datetime.now().strftime(Constants.PYTHON_DATETIME_FORMAT)
+                    self.session.add(new_status)
+                    row +=1
                 # except SQLAlchemyError, e:
                 #     PluginUtils.show_error(self, self.tr("Database Query Error"), self.tr("Could not execute: {0}").format(e.message))
                 #     return
@@ -1711,3 +1717,30 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
                         # applications = applications.select_entity_from(sub).filter(sub.c.row_number == 1)
                         #
                         # applications = applications.filter(ApplicationSearch.status == status)
+
+    def __overlaps_check_case(self, object_id):
+
+        valid = True
+        error_message = u'Дараах нэгж талбар нь давхцалтай тул үндсэн мэдээллийн санд бүртгэх боломжгүй!!!'
+        error_message = error_message + "\n \n"
+
+        tmp_parcel = self.session.query(CaTmpParcel).filter(CaTmpParcel.parcel_id == object_id).one()
+        geom = "st_setsrid(ST_GeomFromGeoJSON(ST_AsGeoJSON(" + "'" + str(tmp_parcel.geometry) + "'" + ")), 4326)"
+
+        sql = "select * from base.check_cadastre_case_overlapas(" + str(geom) + ", null);"
+
+        result = self.session.execute(sql)
+
+        for item_row in result:
+            aaa = item_row[0]
+
+            valid = False
+            if item_row[1] == 4:
+                parcel_error = unicode(object_id) + u' нэгж талбар нь ' + unicode(item_row[0]) + u' '
+                error_message = error_message + "\n \n" + parcel_error
+            else:
+                parcel_error = unicode(object_id) + u' нэгж талбар нь ' + unicode(item_row[0]) + ' (' + unicode(
+                    item_row[6]) + ')' + unicode(item_row[2])
+                error_message = error_message + "\n \n" + parcel_error
+
+        return valid, error_message
