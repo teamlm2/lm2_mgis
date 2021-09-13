@@ -176,7 +176,7 @@ class PluginUtils(object):
         if with_star_entry:
             cbox.addItem("*", -1)
 
-        for code, name in session.query(AuLevel3.code, AuLevel3.name).filter(
+        for code, name in session.query(AuLevel3.code, AuLevel3.code +':'+ AuLevel3.name).filter(
                 AuLevel3.code.startswith(l1_or_l2_code)).order_by(AuLevel3.name):
             cbox.addItem(name, code)
 

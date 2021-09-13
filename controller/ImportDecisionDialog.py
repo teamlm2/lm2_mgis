@@ -373,7 +373,13 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
                 maintenance_case_id = parcel.maintenance_case
 
                 parcel.landuse = landuse
-                self.__write_changes(maintenance_case_id, tmp_parcel_id, app_no)
+
+                validaty_result = self.__overlaps_check_case(self, tmp_parcel_id)
+                if not validaty_result[0]:
+                    log_measage = validaty_result[1]
+                    PluginUtils.show_error(self, self.tr("Invalid parcel info"), log_measage)
+                else:
+                    self.__write_changes(maintenance_case_id, tmp_parcel_id, app_no)
 
                 if decision_app.decision_result == Constants.DECISION_RESULT_APPROVED:
 
@@ -1111,8 +1117,13 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
                 tmp_parcel_id = parcel.parcel_id
                 maintenance_case_id = parcel.maintenance_case
 
-                self.__write_changes(maintenance_case_id, tmp_parcel_id, application.app_id)
-            self.session.add(app_status)
+                validaty_result = self.__overlaps_check_case(self, tmp_parcel_id)
+                if not validaty_result[0]:
+                    log_measage = validaty_result[1]
+                    PluginUtils.show_error(self, self.tr("Invalid parcel info"), log_measage)
+                else:
+                    self.__write_changes(maintenance_case_id, tmp_parcel_id, application.app_id)
+                    self.session.add(app_status)
 
         # except SQLAlchemyError, e:
         #     self.rollback()
@@ -1652,19 +1663,18 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
                         PluginUtils.show_error(self, self.tr("Invalid parcel info"), log_measage)
                     else:
                         self.__write_changes(maintenance_case_id,tmp_parcel_id, application.app_id)
-                else:
 
-                    application.approved_duration = application.requested_duration
-                    # self.session.add(application)
+                        application.approved_duration = application.requested_duration
+                        # self.session.add(application)
 
-                    new_status = CtApplicationStatus()
-                    new_status.application = application.app_id
-                    new_status.next_officer_in_charge = DatabaseUtils.current_sd_user().user_id
-                    new_status.officer_in_charge = DatabaseUtils.current_sd_user().user_id
-                    new_status.status = Constants.APP_STATUS_APPROVED
-                    new_status.status_date = datetime.now().strftime(Constants.PYTHON_DATETIME_FORMAT)
-                    self.session.add(new_status)
-                    row +=1
+                        new_status = CtApplicationStatus()
+                        new_status.application = application.app_id
+                        new_status.next_officer_in_charge = DatabaseUtils.current_sd_user().user_id
+                        new_status.officer_in_charge = DatabaseUtils.current_sd_user().user_id
+                        new_status.status = Constants.APP_STATUS_APPROVED
+                        new_status.status_date = datetime.now().strftime(Constants.PYTHON_DATETIME_FORMAT)
+                        self.session.add(new_status)
+                        row +=1
                 # except SQLAlchemyError, e:
                 #     PluginUtils.show_error(self, self.tr("Database Query Error"), self.tr("Could not execute: {0}").format(e.message))
                 #     return
