@@ -282,6 +282,23 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
             for item in edit_statuses:
                 self.edit_status_cbox.addItem(str(item.code) + ": " + item.description, item.code)
 
+        if officer.position == 10:
+            self.finish_button.setVisible(True)
+            self.edit_status_cbox.clear()
+            edit_statuses = self.session.query(ClUbEditStatus).all()
+            self.edit_status_cbox.addItem("*", -1)
+            for item in edit_statuses:
+                self.edit_status_cbox.addItem(str(item.code) + ": " + item.description, item.code)
+
+        if officer.position == 17:
+            self.finish_button.setVisible(True)
+            self.edit_status_cbox.clear()
+            edit_statuses = self.session.query(ClUbEditStatus).all()
+            self.edit_status_cbox.addItem("*", -1)
+            for item in edit_statuses:
+                self.edit_status_cbox.addItem(str(item.code) + ": " + item.description, item.code)
+
+
         # else:
         #     self.finish_button.setVisible(False)
 
@@ -3771,13 +3788,24 @@ class ParcelInfoDialog(QDockWidget, Ui_ParcelInfoDialog, DatabaseHelper):
         vlayer_parcel.loadNamedStyle(
             str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "template\style/ub_parcel.qml")
 
-        table_name = "ca_ub_desicion"
+        table_name = "ca_ub_decision"
         vlayer = LayerUtils.layer_by_data_source("data_ub", table_name)
         if vlayer is None:
             vlayer = LayerUtils.load_layer_base_layer(table_name, "row_number", "data_ub")
         vlayer.loadNamedStyle(
             str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/ca_ub_desicion.qml")
         vlayer.setLayerName(self.tr("Ub Decision Type"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            mygroup.addLayer(vlayer)
+
+        table_name = "ub_sort"
+        vlayer = LayerUtils.layer_by_data_source("report", table_name)
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer(table_name, "row_number", "report")
+        vlayer.loadNamedStyle(
+            str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/ca_ub_sort.qml")
+        vlayer.setLayerName(self.tr("Ub Sort"))
         myalayer = root.findLayer(vlayer.id())
         if myalayer is None:
             mygroup.addLayer(vlayer)
