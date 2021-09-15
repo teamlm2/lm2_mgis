@@ -56,7 +56,7 @@
       <category render="true" symbol="1" value="20" label="Засвар хийгдэж байгаа"/>
       <category render="true" symbol="2" value="10" label="Засвар дууссан"/>
       <category render="true" symbol="3" value="40" label="Устгагдсан"/>
-      <category render="true" symbol="4" value="50" label="Эрх бүхий бүхий этгээдийн шийдвэргүй"/>
+      <category render="true" symbol="4" value="50" label="Зөрчилтэй нэгж талбар"/>
     </categories>
     <symbols>
       <symbol alpha="1" clip_to_extent="1" type="fill" name="0">
