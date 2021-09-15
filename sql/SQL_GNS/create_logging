@@ -1,0 +1,16 @@
+
+set search_path to data_landuse, base, public;
+CREATE TABLE logging.ca_landuse_type_tbl as select 'xxx'::varchar(20) as schema, 'DEL'::varchar(3) as operation, '2011-01-01'::timestamp without time zone as stamp, 'ankhbold'::text, * from data_landuse.ca_landuse_type_tbl
+ with no data;
+GRANT SELECT, INSERT ON TABLE logging.ca_landuse_type_tbl TO geodb_admin;
+
+set search_path to data_landuse, base, public;
+DROP TRIGGER IF EXISTS landuse_type_log ON data_landuse.ca_landuse_type_tbl;
+CREATE TRIGGER landuse_type_log
+  AFTER INSERT OR UPDATE OR DELETE
+  ON ca_landuse_type_tbl
+  FOR EACH ROW
+  EXECUTE PROCEDURE log_changes();
+  
+
+

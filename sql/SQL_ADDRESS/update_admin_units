@@ -1,0 +1,41 @@
+with new_numbers as (
+select id, au2.code au2 from data_address.st_street s
+join admin_units.au_level2 au2 on st_within(st_centroid(s.geometry), au2.geometry)
+)
+update data_address.st_street
+  set au2 = s.au2
+from new_numbers s
+where data_address.st_street.id = s.id;
+
+--------------
+
+with new_numbers as (
+select id, au3.code au3 from data_address.st_street s
+join admin_units.au_level3 au3 on st_within(st_centroid(s.geometry), au3.geometry)
+)
+update data_address.st_street
+  set au3 = s.au3
+from new_numbers s
+where data_address.st_street.id = s.id;
+
+--------------
+
+with new_numbers as (
+select id, au2.code au2 from data_address.st_street_sub s
+join admin_units.au_level2 au2 on st_within(st_centroid(s.geometry), au2.geometry)
+)
+update data_address.st_street_sub
+  set au2 = s.au2
+from new_numbers s
+where data_address.st_street_sub.id = s.id;
+
+--------------
+
+with new_numbers as (
+select id, au3.code au3 from data_address.st_street_sub s
+join admin_units.au_level3 au3 on st_within(st_centroid(s.geometry), au3.geometry)
+)
+update data_address.st_street_sub
+  set au3 = s.au3
+from new_numbers s
+where data_address.st_street_sub.id = s.id;

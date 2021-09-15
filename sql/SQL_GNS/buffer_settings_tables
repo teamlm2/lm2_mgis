@@ -1,0 +1,50 @@
+set search_path to data_landuse, codelists, admin_units, public;
+
+drop table if exists set_degrees_to_meters;
+create table set_degrees_to_meters
+(
+  id serial PRIMARY KEY,
+  degrees_value numeric,
+  meters_value numeric,
+  CONSTRAINT value_unique UNIQUE (degrees_value, meters_value)
+);
+grant select, insert, update, delete on set_degrees_to_meters to land_office_administration;
+grant select on set_degrees_to_meters to cadastre_view, cadastre_update, contracting_view, contracting_update, reporting;
+
+----insert values
+set search_path to data_landuse, codelists, admin_units, public;
+insert into set_degrees_to_meters(degrees_value, meters_value) values(1, 111000);
+insert into set_degrees_to_meters(degrees_value, meters_value) values(0.1, 11100);
+insert into set_degrees_to_meters(degrees_value, meters_value) values(0.01, 1110);
+insert into set_degrees_to_meters(degrees_value, meters_value) values(0.001, 111);
+insert into set_degrees_to_meters(degrees_value, meters_value) values(0.0001, 11.1);
+insert into set_degrees_to_meters(degrees_value, meters_value) values(0.00001, 1.11);
+insert into set_degrees_to_meters(degrees_value, meters_value) values(0.000001, 0.111);
+insert into set_degrees_to_meters(degrees_value, meters_value) values(0.0000001, 0.0111);
+insert into set_degrees_to_meters(degrees_value, meters_value) values(0.00000001, 0.00111);
+
+------------
+
+set search_path to data_landuse, codelists, admin_units, public;
+drop table if exists set_buffer_au2_landuse cascade;
+create table set_buffer_au2_landuse
+(
+  landuse integer references cl_landuse_type on update cascade on delete restrict not null,
+  au2 varchar(5) references au_level2 on update cascade on delete restrict not null,
+  buffer_value numeric,
+  CONSTRAINT set_buffer_au2_landuse_unique UNIQUE (landuse, au2)
+);
+grant select, insert, update, delete on set_buffer_au2_landuse to land_office_administration;
+grant select on set_buffer_au2_landuse to cadastre_view, cadastre_update, contracting_view, contracting_update, reporting;
+
+--------------
+
+set search_path to data_landuse, codelists, admin_units, public;
+drop table if exists set_buffer_parcel cascade;
+create table set_buffer_parcel
+(
+  parcel_id varchar(10) PRIMARY KEY,
+  buffer_value numeric
+);
+grant select, insert, update, delete on set_buffer_parcel to land_office_administration;
+grant select on set_buffer_parcel to cadastre_view, cadastre_update, contracting_view, contracting_update, reporting;
