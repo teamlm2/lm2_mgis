@@ -18,7 +18,6 @@ from ..model.DialogInspector import DialogInspector
 from ..utils.SessionHandler import SessionHandler
 from ..utils.PluginUtils import PluginUtils
 
-
 class LogOnDialog(QDialog, Ui_LogOnDialog):
 
     def __init__(self, protected_dialog, parent=None):

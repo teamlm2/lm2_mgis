@@ -356,7 +356,6 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
             decision_app = CtDecisionApplication()
             decision_app.decision_result = decision_result
             decision_app.application = app_no
-            self.decision.results.append(decision_app)
 
             application = self.session.query(CtApplication).filter_by(app_id=app_no).one()
             application_result_exists = False
@@ -380,6 +379,7 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
                     PluginUtils.show_error(self, self.tr("Invalid parcel info"), log_measage)
                 else:
                     self.__write_changes(maintenance_case_id, tmp_parcel_id, app_no)
+                    self.decision.results.append(decision_app)
 
                 if decision_app.decision_result == Constants.DECISION_RESULT_APPROVED:
 
@@ -1094,7 +1094,6 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
                 decision_app.decision = self.decision.decision_id
                 decision_app.decision_result = 10
                 decision_app.application = app_id
-                self.decision.results.append(decision_app)
 
                 self.add_document_button.setEnabled(True)
                 self.load_document_button.setEnabled(True)
@@ -1123,6 +1122,7 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
                     PluginUtils.show_error(self, self.tr("Invalid parcel info"), log_measage)
                 else:
                     self.__write_changes(maintenance_case_id, tmp_parcel_id, application.app_id)
+                    self.decision.results.append(decision_app)
                     self.session.add(app_status)
 
         # except SQLAlchemyError, e:
@@ -1546,30 +1546,40 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
             PluginUtils.show_message(self, self.tr("Application Type"), self.tr("This application type do not match."))
             return
 
-        selected_row = self.result_app_twidget.currentRow()
-        self.result_app_twidget.removeRow(selected_row)
+        if app_instance.tmp_parcel != None:
+            parcel = self.session.query(CaTmpParcel).filter(CaTmpParcel.parcel_id == app_instance.tmp_parcel).one()
+            tmp_parcel_id = parcel.parcel_id
+            maintenance_case_id = parcel.maintenance_case
 
-        item = QTableWidgetItem(str(app_instance.app_no))
-        item.setIcon(QIcon(QPixmap(":/plugins/lm2/application.png")))
-        item.setData(Qt.UserRole, app_instance.app_no)
-        item.setData(Qt.UserRole+1, app_instance.app_id)
-        row = self.join_app_twidget.rowCount()
-        self.join_app_twidget.insertRow(row)
-        self.join_app_twidget.setItem(row, 0, item)
+            validaty_result = self.__overlaps_check_case(tmp_parcel_id)
+            if not validaty_result[0]:
+                log_measage = validaty_result[1]
+                PluginUtils.show_error(self, self.tr("Invalid parcel info"), log_measage)
+            else:
+                selected_row = self.result_app_twidget.currentRow()
+                self.result_app_twidget.removeRow(selected_row)
 
-        decision_app_count = self.session.query(CtDecisionApplication).\
-            filter(CtDecisionApplication.application == app_instance.app_id).\
-            filter(CtDecisionApplication.decision == self.decision.decision_id).all()
-        try:
-            # decision_app = self.session.query(CtDecisionApplication).filter(CtDecisionApplication.decision == self.decision.decision_no).all()
-            decision_app = CtDecisionApplication()
-            decision_app.decision = self.decision.decision_id
-            decision_app.application = app_instance.app_id
-            decision_app.decision_result = 10
-            self.session.add(decision_app)
-        except SQLAlchemyError, e:
-            PluginUtils.show_error(self, self.tr("Database Query Error"), self.tr("Could not execute: {0}").format(e.message))
-            return
+                item = QTableWidgetItem(str(app_instance.app_no))
+                item.setIcon(QIcon(QPixmap(":/plugins/lm2/application.png")))
+                item.setData(Qt.UserRole, app_instance.app_no)
+                item.setData(Qt.UserRole+1, app_instance.app_id)
+                row = self.join_app_twidget.rowCount()
+                self.join_app_twidget.insertRow(row)
+                self.join_app_twidget.setItem(row, 0, item)
+
+                decision_app_count = self.session.query(CtDecisionApplication).\
+                    filter(CtDecisionApplication.application == app_instance.app_id).\
+                    filter(CtDecisionApplication.decision == self.decision.decision_id).all()
+                try:
+                    # decision_app = self.session.query(CtDecisionApplication).filter(CtDecisionApplication.decision == self.decision.decision_no).all()
+                    decision_app = CtDecisionApplication()
+                    decision_app.decision = self.decision.decision_id
+                    decision_app.application = app_instance.app_id
+                    decision_app.decision_result = 10
+                    self.session.add(decision_app)
+                except SQLAlchemyError, e:
+                    PluginUtils.show_error(self, self.tr("Database Query Error"), self.tr("Could not execute: {0}").format(e.message))
+                    return
 
     @pyqtSlot()
     def on_app_cancel_button_clicked(self):
@@ -1735,7 +1745,7 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
         error_message = error_message + "\n \n"
 
         tmp_parcel = self.session.query(CaTmpParcel).filter(CaTmpParcel.parcel_id == object_id).one()
-        geom = "st_setsrid(ST_GeomFromGeoJSON(ST_AsGeoJSON(" + "'" + str(tmp_parcel.geometry) + "'" + ")), 4326)"
+        geom = "st_setsrid(" + "'" + str(tmp_parcel.geometry) + "'::geometry" + ", 4326)"
 
         sql = "select * from base.check_cadastre_case_overlapas(" + str(geom) + ", null);"
 

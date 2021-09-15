@@ -213,7 +213,7 @@ class FinalizeCaseDialog(QDialog, Ui_FinalizeCaseDialog, DatabaseHelper):
                 if object_id != None:
                     # if len(object_id) == 12:
                     tmp_parcel = self.session.query(CaTmpParcel).filter(CaTmpParcel.parcel_id == object_id).one()
-                    geom =  "st_setsrid(ST_GeomFromGeoJSON(ST_AsGeoJSON(" + "'" + str(tmp_parcel.geometry) + "'" + ")), 4326)"
+                    geom =  "st_setsrid(" + "'" + str(tmp_parcel.geometry) + "'::geometry" + ", 4326)"
 
                     sql = "select * from base.check_cadastre_case_overlapas(" + str(geom) + ", null);"
 
