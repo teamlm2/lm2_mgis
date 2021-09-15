@@ -13909,7 +13909,7 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
 
         root = QgsProject.instance().layerTreeRoot()
         mygroup = root.findGroup(u"Үнэлгээ, төлбөрийн бүс")
-        vlayer = sec_zone_button("data_estimate", "pa_valuation_level_view")
+        vlayer = LayerUtils.layer_by_data_source("data_estimate", "pa_valuation_level_view")
         if vlayer is None:
             vlayer = LayerUtils.load_layer_base_layer("pa_valuation_level_view", "id", "data_estimate")
         vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/pa_valuation_level.qml")
@@ -13918,9 +13918,8 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         if myalayer is None:
             mygroup.addLayer(vlayer)
 
-        root = QgsProject.instance().layerTreeRoot()
         mygroup = root.findGroup(u"Үнэлгээ, төлбөрийн бүс")
-        vlayer = sec_zone_button("data_estimate", "pa_valuation_level_agriculture_view")
+        vlayer = LayerUtils.layer_by_data_source("data_estimate", "pa_valuation_level_agriculture_view")
         if vlayer is None:
             vlayer = LayerUtils.load_layer_base_layer("pa_valuation_level_agriculture_view", "id", "data_estimate")
         vlayer.loadNamedStyle(

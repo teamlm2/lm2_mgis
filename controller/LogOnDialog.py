@@ -76,6 +76,7 @@ class LogOnDialog(QDialog, Ui_LogOnDialog):
         session = SessionHandler().session_instance()
         groups = self.__groupsByUser(user)
         is_role_manager = False
+
         for group in groups:
             group_name = group[0]
             if group_name == 'role_management':

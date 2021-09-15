@@ -374,7 +374,7 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
 
                 parcel.landuse = landuse
 
-                validaty_result = self.__overlaps_check_case(self, tmp_parcel_id)
+                validaty_result = self.__overlaps_check_case(tmp_parcel_id)
                 if not validaty_result[0]:
                     log_measage = validaty_result[1]
                     PluginUtils.show_error(self, self.tr("Invalid parcel info"), log_measage)
@@ -1117,7 +1117,7 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
                 tmp_parcel_id = parcel.parcel_id
                 maintenance_case_id = parcel.maintenance_case
 
-                validaty_result = self.__overlaps_check_case(self, tmp_parcel_id)
+                validaty_result = self.__overlaps_check_case(tmp_parcel_id)
                 if not validaty_result[0]:
                     log_measage = validaty_result[1]
                     PluginUtils.show_error(self, self.tr("Invalid parcel info"), log_measage)
@@ -1657,7 +1657,7 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
                     tmp_parcel_id = parcel.parcel_id
                     maintenance_case_id = parcel.maintenance_case
 
-                    validaty_result = self.__overlaps_check_case(self, tmp_parcel_id)
+                    validaty_result = self.__overlaps_check_case(tmp_parcel_id)
                     if not validaty_result[0]:
                         log_measage = validaty_result[1]
                         PluginUtils.show_error(self, self.tr("Invalid parcel info"), log_measage)
