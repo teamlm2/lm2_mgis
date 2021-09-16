@@ -196,6 +196,7 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
             touch_item.setIcon(0, QIcon(QPixmap(":/plugins/lm2/parcel_grey.png")))
             touch_item.setData(0, Qt.UserRole, parcel.parcel_id)
             touch_item.setData(0, Qt.UserRole + 1, Constants.CASE_PARCEL_IDENTIFIER)
+            touch_item.setData(0, Qt.UserRole + 3, Constants.CASE_PARCEL_BASE)
             self.parcels_item.addChild(touch_item)
             parcel_count += 1
 
@@ -533,7 +534,7 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
             main_parcel_item.setIcon(0, QIcon(QPixmap(":/plugins/lm2/parcel_red.png")))
             main_parcel_item.setData(0, Qt.UserRole, parcel_id)
             main_parcel_item.setData(0, Qt.UserRole + 1, Constants.CASE_PARCEL_IDENTIFIER)
-            main_parcel_item.setData(0, Qt.UserRole + 1, Constants.CASE_PARCEL_IDENTIFIER)
+            main_parcel_item.setData(0, Qt.UserRole + 3, Constants.CASE_PARCEL_BASE)
             self.result_twidget.addTopLevelItem(main_parcel_item)
 
             try:
@@ -574,6 +575,7 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
                 touch_item.setIcon(0, QIcon(QPixmap(":/plugins/lm2/parcel_grey.png")))
                 touch_item.setData(0, Qt.UserRole, touching_parcel.parcel_id)
                 touch_item.setData(0, Qt.UserRole + 1, Constants.CASE_PARCEL_IDENTIFIER)
+                touch_item.setData(0, Qt.UserRole + 3, Constants.CASE_PARCEL_BASE)
                 self.result_twidget.addTopLevelItem(touch_item)
 
                 self.maintenance_parcels.append(touching_parcel.parcel_id)
@@ -968,6 +970,7 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
             main_parcel_item.setIcon(0, QIcon(QPixmap(":/plugins/lm2/parcel_red.png")))
             main_parcel_item.setData(0, Qt.UserRole, new_parcel.parcel_id)
             main_parcel_item.setData(0, Qt.UserRole + 1, Constants.CASE_PARCEL_IDENTIFIER)
+            main_parcel_item.setData(0, Qt.UserRole + 2, Constants.CASE_PARCEL_BASE)
             self.parcels_item.addChild(main_parcel_item)
         if is_out_parcel:
             self.apply_button.setEnabled(False)
@@ -1209,6 +1212,21 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
     @pyqtSlot()
     def on_apply_button_clicked(self):
 
+        print self.result_twidget.topLevelItem(1)
+
+        root = self.result_twidget.invisibleRootItem()
+        child_count = root.childCount()
+        print child_count
+
+        for aa in self.parcels_item:
+            print aa
+
+        for i in range(child_count):
+            print self.result_twidget.topLevelItem(i).text(0)
+
+            # print self.result_twidget.topLevelItem(i).item(Qt.UserRole)
+            # print self.result_twidget.topLevelItem(i).item(Qt.UserRole + 3)
+
         # try:
         # root = self.result_twidget.invisibleRootItem()
         # self.result_twidget.topLevelItemCount()
@@ -1326,7 +1344,7 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
             #         self.session.query(CaMaintenanceCase).\
             #             filter(CaMaintenanceCase.id == case.id).delete()
         # else:
-        self.commit()
+        # self.commit()
 
     def __set_visible_layers(self):
 
@@ -1911,6 +1929,7 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
                 main_parcel_item.setData(0, Qt.UserRole, feature_id)
                 main_parcel_item.setData(0, Qt.UserRole + 1, APPROVED)
                 main_parcel_item.setData(0, Qt.UserRole + 2, feature_id)
+                main_parcel_item.setData(0, Qt.UserRole + 3, Constants.CASE_PARCEL_BASE)
                 main_parcel_item.setToolTip(0, header)
                 self.approved_item.addChild(main_parcel_item)
                 approved_count += 1
@@ -1921,6 +1940,7 @@ class CreateCaseDialog(QDialog, Ui_CreateCaseDialog, DatabaseHelper):
                 main_parcel_item.setData(0, Qt.UserRole, feature_id)
                 main_parcel_item.setData(0, Qt.UserRole + 1, REFUSED)
                 main_parcel_item.setData(0, Qt.UserRole + 2, feature_id)
+                main_parcel_item.setData(0, Qt.UserRole + 3, Constants.CASE_PARCEL_BASE)
                 main_parcel_item.setToolTip(0, header)
                 self.refused_item.addChild(main_parcel_item)
                 refused_count += 1
