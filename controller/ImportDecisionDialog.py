@@ -377,6 +377,7 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
                 if not validaty_result[0]:
                     log_measage = validaty_result[1]
                     PluginUtils.show_error(self, self.tr("Invalid parcel info"), log_measage)
+                    return
                 else:
                     self.__write_changes(maintenance_case_id, tmp_parcel_id, app_no)
                     self.decision.results.append(decision_app)
@@ -1121,6 +1122,7 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
                 if not validaty_result[0]:
                     log_measage = validaty_result[1]
                     PluginUtils.show_error(self, self.tr("Invalid parcel info"), log_measage)
+                    return
                 else:
                     self.__write_changes(maintenance_case_id, tmp_parcel_id, application.app_id)
                     self.decision.results.append(decision_app)
@@ -1549,17 +1551,6 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
             PluginUtils.show_message(self, self.tr("Application Type"), self.tr("This application type do not match."))
             return
 
-        selected_row = self.result_app_twidget.currentRow()
-        self.result_app_twidget.removeRow(selected_row)
-
-        item = QTableWidgetItem(str(app_instance.app_no))
-        item.setIcon(QIcon(QPixmap(":/plugins/lm2/application.png")))
-        item.setData(Qt.UserRole, app_instance.app_no)
-        item.setData(Qt.UserRole + 1, app_instance.app_id)
-        row = self.join_app_twidget.rowCount()
-        self.join_app_twidget.insertRow(row)
-        self.join_app_twidget.setItem(row, 0, item)
-
         decision_app_count = self.session.query(CtDecisionApplication). \
             filter(CtDecisionApplication.application == app_instance.app_id). \
             filter(CtDecisionApplication.decision == self.decision.decision_id).all()
@@ -1573,8 +1564,8 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
             if not validaty_result[0]:
                 log_measage = validaty_result[1]
                 PluginUtils.show_error(self, self.tr("Invalid parcel info"), log_measage)
+                return
             else:
-
                 try:
                     # decision_app = self.session.query(CtDecisionApplication).filter(CtDecisionApplication.decision == self.decision.decision_no).all()
                     decision_app = CtDecisionApplication()
@@ -1597,6 +1588,17 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
                 PluginUtils.show_error(self, self.tr("Database Query Error"),
                                        self.tr("Could not execute: {0}").format(e.message))
                 return
+
+        selected_row = self.result_app_twidget.currentRow()
+        self.result_app_twidget.removeRow(selected_row)
+
+        item = QTableWidgetItem(str(app_instance.app_no))
+        item.setIcon(QIcon(QPixmap(":/plugins/lm2/application.png")))
+        item.setData(Qt.UserRole, app_instance.app_no)
+        item.setData(Qt.UserRole + 1, app_instance.app_id)
+        row = self.join_app_twidget.rowCount()
+        self.join_app_twidget.insertRow(row)
+        self.join_app_twidget.setItem(row, 0, item)
 
     @pyqtSlot()
     def on_app_cancel_button_clicked(self):
@@ -1688,6 +1690,7 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
                     if not validaty_result[0]:
                         log_measage = validaty_result[1]
                         PluginUtils.show_error(self, self.tr("Invalid parcel info"), log_measage)
+                        return
                     else:
                         self.__write_changes(maintenance_case_id,tmp_parcel_id, application.app_id)
 

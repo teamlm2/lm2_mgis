@@ -1,4 +1,4 @@
-﻿﻿-- Function: base.check_cadastre_case_overlapas(geometry, text)
+﻿-- Function: base.check_cadastre_case_overlapas(geometry, text)
 
 -- DROP FUNCTION base.check_cadastre_case_overlapas(geometry, text);
 
@@ -39,6 +39,9 @@ BEGIN
 			input_polgyon_geometry as geom
 			)xxx) dd on st_overlaps(cpt.geometry, dd.geom) or st_covers(cpt.geometry, dd.geom) or st_covers(dd.geom, cpt.geometry) 
 			where (now() between cpt.valid_from and cpt.valid_till or cpt.valid_till is null) and cpt.parcel_id not in (select replace(unnest(string_to_array(input_parcels_p, ',')), ' ', ''))
+			and cpt.parcel_id not in (select cpmc.parcel from data_soums_union.ca_parcel_maintenance_case cpmc
+			join data_soums_union.ca_maintenance_case cmc on cpmc.maintenance = cmc.id 
+			where cmc.completion_date is null)
 			union all
 			select 'ГЗБТ-н мэдээллийн сан' ||' ('|| ss.short_name ||')' as mc_type_txt, 2 as mc_type, aa.code ||':'|| aa.name as plan_zone_type, cpt.is_active, dd.geom, cpt.polygon_geom, cpt.parcel_id::text, cpt.au2, base.calculate_area_utm_decimal(st_intersection(dd.geom, cpt.polygon_geom)) from data_plan.pl_project_parcel cpt 
 			left join data_plan.cl_plan_zone aa on cpt.plan_zone_id = aa.plan_zone_id
