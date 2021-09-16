@@ -381,68 +381,69 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
                     self.__write_changes(maintenance_case_id, tmp_parcel_id, app_no)
                     self.decision.results.append(decision_app)
 
-                if decision_app.decision_result == Constants.DECISION_RESULT_APPROVED:
+                    if decision_app.decision_result == Constants.DECISION_RESULT_APPROVED:
 
-                    if parcel.parcel_id in parcel_ids.values() and application.app_type in parcel_ids.keys():
-                        PluginUtils.show_error(self, self.tr("Import error"),
-                                               self.tr("There are two approved applications of the same type for the parcel {0}. ").format(parcel.parcel_id))
+                        if parcel.parcel_id in parcel_ids.values() and application.app_type in parcel_ids.keys():
+                            PluginUtils.show_error(self, self.tr("Import error"),
+                                                   self.tr("There are two approved applications of the same type for the parcel {0}. ").format(parcel.parcel_id))
 
-                        item = QTreeWidgetItem()
-                        item.setText(0, app.app_no)
-                        self.item_skipped.addChild(item)
-                        self.import_button.setEnabled(False)
-                        self.error_details_button.setEnabled(True)
-                        self.error_list[app_no + " # " + str(count)] = self.tr("There are two approved applications of the same type for the parcel {0}. ").format(parcel.parcel_id)
-                        continue
-                    if application.app_type != ApplicationType.transfer_possession_right \
-                            and application.app_type != ApplicationType.possession_right_use_right \
-                            and application.app_type != ApplicationType.change_ownership:
+                            item = QTreeWidgetItem()
+                            item.setText(0, app.app_no)
+                            self.item_skipped.addChild(item)
+                            self.import_button.setEnabled(False)
+                            self.error_details_button.setEnabled(True)
+                            self.error_list[app_no + " # " + str(count)] = self.tr("There are two approved applications of the same type for the parcel {0}. ").format(parcel.parcel_id)
+                            continue
+                        if application.app_type != ApplicationType.transfer_possession_right \
+                                and application.app_type != ApplicationType.possession_right_use_right \
+                                and application.app_type != ApplicationType.change_ownership:
 
-                        parcel_ids[application.app_type] = parcel.parcel_id
+                            parcel_ids[application.app_type] = parcel.parcel_id
 
-                    count = application.statuses\
-                        .filter(CtApplicationStatus.status == Constants.APP_STATUS_APPROVED).count()
-                    if count > 0:
-                        application_result_exists = True
-                else:
-                    count = application.statuses\
-                        .filter(CtApplicationStatus.status == Constants.APP_STATUS_REFUSED).count()
-                    if count > 0:
-                        application_result_exists = True
-                sd_user = self.session.query(SdUser).filter(SdUser.gis_user_real == current_employee.user_name_real).first()
-                if not application_result_exists:
-
-                    app_status = CtApplicationStatus()
-                    user = DatabaseUtils.current_user()
-                    app_status.next_officer_in_charge = sd_user.user_id
-                    app_status.officer_in_charge = sd_user.user_id
-                    app_status.application = app_no
-                    app_status.status_date = self.decision.decision_date
-
-                    if decision_app.decision_result == Constants.DECISION_RESULT_APPROVED or decision_app.decision_result == '10':
-                        app_status.status = Constants.APP_STATUS_APPROVED
+                        count = application.statuses\
+                            .filter(CtApplicationStatus.status == Constants.APP_STATUS_APPROVED).count()
+                        if count > 0:
+                            application_result_exists = True
                     else:
-                        app_status.status = Constants.APP_STATUS_REFUSED
+                        count = application.statuses\
+                            .filter(CtApplicationStatus.status == Constants.APP_STATUS_REFUSED).count()
+                        if count > 0:
+                            application_result_exists = True
+                    sd_user = self.session.query(SdUser).filter(SdUser.gis_user_real == current_employee.user_name_real).first()
+                    if not application_result_exists:
 
-                        #rollback: set date of parcel that isn't approved to NULL
-                        #set valid_till of parcels back to infinity
-                        application = self.session.query(CtApplication).get(app_no)
-                        if application.maintenance_case not in maintenance_cases and application.maintenance_case is not None:
-                            maintenance_cases.append(application.maintenance_case)
+                        app_status = CtApplicationStatus()
+                        user = DatabaseUtils.current_user()
+                        app_status.next_officer_in_charge = sd_user.user_id
+                        app_status.officer_in_charge = sd_user.user_id
+                        app_status.application = app_no
+                        app_status.status_date = self.decision.decision_date
 
-                    self.session.add(app_status)
+                        if decision_app.decision_result == Constants.DECISION_RESULT_APPROVED or decision_app.decision_result == '10':
+                            app_status.status = Constants.APP_STATUS_APPROVED
+                        else:
+                            app_status.status = Constants.APP_STATUS_REFUSED
 
-                if application.app_type in Constants.APPLICATION_TYPE_WITH_DURATION:
-                    approved_duration = int(duration)
-                    application.approved_duration = approved_duration
+                            #rollback: set date of parcel that isn't approved to NULL
+                            #set valid_till of parcels back to infinity
+                            application = self.session.query(CtApplication).get(app_no)
+                            if application.maintenance_case not in maintenance_cases and application.maintenance_case is not None:
+                                maintenance_cases.append(application.maintenance_case)
 
-                item = QTreeWidgetItem()
-                item.setText(0, app.app_no)
-                if int(decision_app.decision_result) == int(Constants.DECISION_RESULT_APPROVED):
-                    self.item_approved.addChild(item)
-                else:
-                    self.item_refused.addChild(item)
+                        self.session.add(app_status)
+
+                    if application.app_type in Constants.APPLICATION_TYPE_WITH_DURATION:
+                        approved_duration = int(duration)
+                        application.approved_duration = approved_duration
+
+                    item = QTreeWidgetItem()
+                    item.setText(0, app.app_no)
+                    if int(decision_app.decision_result) == int(Constants.DECISION_RESULT_APPROVED):
+                        self.item_approved.addChild(item)
+                    else:
+                        self.item_refused.addChild(item)
             else:
+                self.decision.results.append(decision_app)
                 parcel = self.session.query(CaParcel).filter(CaParcel.parcel_id == application.parcel).one()
                 parcel.landuse = landuse
 
@@ -1124,7 +1125,9 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
                     self.__write_changes(maintenance_case_id, tmp_parcel_id, application.app_id)
                     self.decision.results.append(decision_app)
                     self.session.add(app_status)
-
+            else:
+                self.decision.results.append(decision_app)
+                self.session.add(app_status)
         # except SQLAlchemyError, e:
         #     self.rollback()
         #     PluginUtils.show_error(self, self.tr("Query Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
@@ -1546,6 +1549,21 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
             PluginUtils.show_message(self, self.tr("Application Type"), self.tr("This application type do not match."))
             return
 
+        selected_row = self.result_app_twidget.currentRow()
+        self.result_app_twidget.removeRow(selected_row)
+
+        item = QTableWidgetItem(str(app_instance.app_no))
+        item.setIcon(QIcon(QPixmap(":/plugins/lm2/application.png")))
+        item.setData(Qt.UserRole, app_instance.app_no)
+        item.setData(Qt.UserRole + 1, app_instance.app_id)
+        row = self.join_app_twidget.rowCount()
+        self.join_app_twidget.insertRow(row)
+        self.join_app_twidget.setItem(row, 0, item)
+
+        decision_app_count = self.session.query(CtDecisionApplication). \
+            filter(CtDecisionApplication.application == app_instance.app_id). \
+            filter(CtDecisionApplication.decision == self.decision.decision_id).all()
+
         if app_instance.tmp_parcel != None:
             parcel = self.session.query(CaTmpParcel).filter(CaTmpParcel.parcel_id == app_instance.tmp_parcel).one()
             tmp_parcel_id = parcel.parcel_id
@@ -1556,20 +1574,7 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
                 log_measage = validaty_result[1]
                 PluginUtils.show_error(self, self.tr("Invalid parcel info"), log_measage)
             else:
-                selected_row = self.result_app_twidget.currentRow()
-                self.result_app_twidget.removeRow(selected_row)
 
-                item = QTableWidgetItem(str(app_instance.app_no))
-                item.setIcon(QIcon(QPixmap(":/plugins/lm2/application.png")))
-                item.setData(Qt.UserRole, app_instance.app_no)
-                item.setData(Qt.UserRole+1, app_instance.app_id)
-                row = self.join_app_twidget.rowCount()
-                self.join_app_twidget.insertRow(row)
-                self.join_app_twidget.setItem(row, 0, item)
-
-                decision_app_count = self.session.query(CtDecisionApplication).\
-                    filter(CtDecisionApplication.application == app_instance.app_id).\
-                    filter(CtDecisionApplication.decision == self.decision.decision_id).all()
                 try:
                     # decision_app = self.session.query(CtDecisionApplication).filter(CtDecisionApplication.decision == self.decision.decision_no).all()
                     decision_app = CtDecisionApplication()
@@ -1580,6 +1585,18 @@ class ImportDecisionDialog(QDialog, Ui_ImportDecisionDialog, DatabaseHelper):
                 except SQLAlchemyError, e:
                     PluginUtils.show_error(self, self.tr("Database Query Error"), self.tr("Could not execute: {0}").format(e.message))
                     return
+        else:
+            try:
+                # decision_app = self.session.query(CtDecisionApplication).filter(CtDecisionApplication.decision == self.decision.decision_no).all()
+                decision_app = CtDecisionApplication()
+                decision_app.decision = self.decision.decision_id
+                decision_app.application = app_instance.app_id
+                decision_app.decision_result = 10
+                self.session.add(decision_app)
+            except SQLAlchemyError, e:
+                PluginUtils.show_error(self, self.tr("Database Query Error"),
+                                       self.tr("Could not execute: {0}").format(e.message))
+                return
 
     @pyqtSlot()
     def on_app_cancel_button_clicked(self):
