@@ -162,7 +162,7 @@ class PrintPointExtractMapTool(QgsMapTool):
         QgsMapLayerRegistry.instance().addMapLayer(map_layer,  False)
 
         root = QgsProject.instance().layerTreeRoot()
-        mygroup = root.findGroup("PUG")
+        mygroup = root.findGroup(u"Малчдын бүлэг, нөхөрлөл")
         mygroup.insertLayer(0, map_layer)
 
     def __is_active_boundary_points(self):

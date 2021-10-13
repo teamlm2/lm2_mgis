@@ -706,9 +706,9 @@ class SpaParcelWidget(QDockWidget, Ui_SpaParcelWidget, DatabaseHelper):
 
     def __tnc_group_layers(self, root):
 
-        mygroup = root.findGroup(u'Байгалын нөөц')
+        mygroup = root.findGroup(u'Малчдын бүлэг, нөхөрлөл')
         if mygroup is None:
-            mygroup = root.insertGroup(8, u'Байгалын нөөц')
+            mygroup = root.insertGroup(8, u'Малчдын бүлэг, нөхөрлөл')
 
         is_person_group_layer = False
         layers = self.plugin.iface.legendInterface().layers()
@@ -726,9 +726,9 @@ class SpaParcelWidget(QDockWidget, Ui_SpaParcelWidget, DatabaseHelper):
 
     def __pug_group_layers(self, root):
 
-        mygroup = root.findGroup("PUG")
+        mygroup = root.findGroup(u"БАХ, бэлчээр")
         if mygroup is None:
-            mygroup = root.insertGroup(7, "PUG")
+            mygroup = root.insertGroup(7, u"БАХ, бэлчээр")
         is_layer = False
         is_eco_layer = False
         is_pug_parcel = False
@@ -736,24 +736,23 @@ class SpaParcelWidget(QDockWidget, Ui_SpaParcelWidget, DatabaseHelper):
         is_monitoring_layer = False
         is_natural_zone_layer = False
 
-        monitoring_layer = LayerUtils.load_layer_by_name_pasture_monitoring("ca_pasture_monitoring", "point_id")
+        monitoring_layer = LayerUtils.load_layer_by_name_pasture_monitoring("view_ca_pasture_monitoring", "point_id")
         natural_zone_layaer = LayerUtils.load_layer_by_name_pasture_monitoring("au_natural_zone", "code")
         vlayer = LayerUtils.load_union_layer_by_name("ca_pug_boundary", "code")
         vlayer_eco = LayerUtils.load_union_layer_by_name("ca_pug_eco", "code")
         vlayer_parcel = LayerUtils.load_union_layer_by_name("ca_pasture_parcel", "parcel_id")
-        vlayer_building = LayerUtils.load_union_layer_by_name("ca_pasture_building", "building_id")
-        # vlayer_monitoring_point = LayerUtils.load_layer_by_name_report("ca_pasture_monitoring", "point_id", restrictions)
+        # vlayer_building = LayerUtils.load_union_layer_by_name("ca_pasture_building", "building_id")
 
         layers = self.plugin.iface.legendInterface().layers()
 
-        for layer in layers:
-            if layer.name() == "PUGBuilding" or layer.name() == u"БАХ байшин":
-                is_pug_building = True
-        if not is_pug_building:
-            mygroup.addLayer(vlayer_building)
+        # for layer in layers:
+        #     if layer.name() == "PUGBuilding" or layer.name() == u"БАХ байшин":
+        #         is_pug_building = True
+        # if not is_pug_building:
+        #     mygroup.addLayer(vlayer_building)
 
         for layer in layers:
-            if layer.name() == "PUGParcel" or layer.name() == u"БАХ нэгж талбар":
+            if layer.name() == "PUGParcel" or layer.name() == u"БАХ, улирлын бэлчээр":
                 is_pug_parcel = True
         if not is_pug_parcel:
             mygroup.addLayer(vlayer_parcel)
@@ -791,7 +790,7 @@ class SpaParcelWidget(QDockWidget, Ui_SpaParcelWidget, DatabaseHelper):
         vlayer_parcel.setLayerName(QApplication.translate("Plugin", "PUGParcel"))
         vlayer_parcel.loadNamedStyle(
             str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "template\style/pug_parcel.qml")
-        vlayer_building.setLayerName(QApplication.translate("Plugin", "PUGBuilding"))
+        # vlayer_building.setLayerName(QApplication.translate("Plugin", "PUGBuilding"))
 
         monitoring_layer.setLayerName(QApplication.translate("Plugin", "PastureMonitoringPoint"))
         monitoring_layer.loadNamedStyle(

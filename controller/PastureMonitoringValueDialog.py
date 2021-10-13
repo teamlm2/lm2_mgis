@@ -493,7 +493,7 @@ class PastureMonitoringValueDialog(QDialog, Ui_PastureMonitoringValueDialog, Dat
 
         feature_ids = []
 
-        layer = LayerUtils.layer_by_data_source("pasture", "ca_pasture_monitoring")
+        layer = LayerUtils.layer_by_data_source("pasture", "view_ca_pasture_monitoring")
 
         exp_string = "point_id = \'" + point_id + "\'"
 
@@ -550,7 +550,7 @@ class PastureMonitoringValueDialog(QDialog, Ui_PastureMonitoringValueDialog, Dat
         point_id = point_item.data(Qt.UserRole)
 
         layer = LayerUtils.layer_by_data_source("pasture",
-                                                "ca_pasture_monitoring")
+                                                "view_ca_pasture_monitoring")
 
         restrictions = DatabaseUtils.working_l2_code()
         if not restrictions:
@@ -558,11 +558,11 @@ class PastureMonitoringValueDialog(QDialog, Ui_PastureMonitoringValueDialog, Dat
                                      self.tr("Please connect to database!!!"))
             return
         if layer is None:
-            layer = LayerUtils.load_layer_by_name("ca_pasture_monitoring", "point_id", restrictions)
+            layer = LayerUtils.load_layer_by_name("view_ca_pasture_monitoring", "point_id", restrictions)
 
         feature_ids = []
 
-        layer = LayerUtils.layer_by_data_source("pasture", "ca_pasture_monitoring")
+        layer = LayerUtils.layer_by_data_source("pasture", "view_ca_pasture_monitoring")
 
         exp_string = "point_id = \'" + point_id + "\'"
 
@@ -614,7 +614,7 @@ class PastureMonitoringValueDialog(QDialog, Ui_PastureMonitoringValueDialog, Dat
         point_detail_id = self.point_detail_id
 
         layer = LayerUtils.layer_by_data_source("pasture",
-                                                "ca_pasture_monitoring")
+                                                "view_ca_pasture_monitoring")
 
         restrictions = DatabaseUtils.working_l2_code()
         if not restrictions:
@@ -622,7 +622,7 @@ class PastureMonitoringValueDialog(QDialog, Ui_PastureMonitoringValueDialog, Dat
                                      self.tr("Please connect to database!!!"))
             return
         if layer is None:
-            layer = LayerUtils.load_layer_by_name("ca_pasture_monitoring", "point_id", restrictions)
+            layer = LayerUtils.load_layer_by_name("view_ca_pasture_monitoring", "point_id", restrictions)
 
         feature_ids = []
 
@@ -632,7 +632,7 @@ class PastureMonitoringValueDialog(QDialog, Ui_PastureMonitoringValueDialog, Dat
         for point_detail_point in point_detail_points:
             point_id = point_detail_point.point_id
 
-            layer = LayerUtils.layer_by_data_source("pasture", "ca_pasture_monitoring")
+            layer = LayerUtils.layer_by_data_source("pasture", "view_ca_pasture_monitoring")
 
             exp_string = "point_id = \'" + point_id + "\'"
 
@@ -676,7 +676,7 @@ class PastureMonitoringValueDialog(QDialog, Ui_PastureMonitoringValueDialog, Dat
 
     def __setup_coord_transform(self):
 
-        line_layer = LayerUtils.layer_by_name('ca_pasture_monitoring')
+        line_layer = LayerUtils.layer_by_name('view_ca_pasture_monitoring')
         if line_layer is None:
             return
 
@@ -848,7 +848,7 @@ class PastureMonitoringValueDialog(QDialog, Ui_PastureMonitoringValueDialog, Dat
                                          self.tr("Please connect to database!!!"))
                 return
 
-            layer = LayerUtils.layer_by_data_source("pasture", "ca_pasture_monitoring")
+            layer = LayerUtils.layer_by_data_source("pasture", "view_ca_pasture_monitoring")
 
             exp_string = "point_id = \'" + monitoring_point.point_id + "\'"
 
@@ -916,7 +916,7 @@ class PastureMonitoringValueDialog(QDialog, Ui_PastureMonitoringValueDialog, Dat
                                          self.tr("Please connect to database!!!"))
                 return
 
-            layer = LayerUtils.layer_by_data_source("pasture", "ca_pasture_monitoring")
+            layer = LayerUtils.layer_by_data_source("pasture", "view_ca_pasture_monitoring")
 
             exp_string = "point_id = \'" + monitoring_point.point_id + "\'"
 
@@ -1258,7 +1258,7 @@ class PastureMonitoringValueDialog(QDialog, Ui_PastureMonitoringValueDialog, Dat
                 PluginUtils.show_message(self, self.tr("Connection Error"),
                                          self.tr("Please connect to database!!!"))
                 return
-            layer = LayerUtils.layer_by_data_source("pasture", "ca_pasture_monitoring")
+            layer = LayerUtils.layer_by_data_source("pasture", "view_ca_pasture_monitoring")
 
             exp_string = "point_id = \'" + point_id + "\'"
 

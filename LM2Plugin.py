@@ -1369,7 +1369,7 @@ class LM2Plugin:
             layer = LayerUtils.layer_by_data_source("data_soums_union", 'ca_parcel')
         elif layer_name == u'БН-н Нэгж талбар' or layer_name == 'Reserve Parcel':
             layer = LayerUtils.layer_by_data_source("data_soums_union", 'ca_person_group_parcel')
-        elif layer_name == u'БАХ нэгж талбар' or layer_name == 'PUGParcel':
+        elif layer_name == u'БАХ, улирлын бэлчээр' or layer_name == 'PUGParcel':
             layer = LayerUtils.layer_by_data_source("data_soums_union", 'ca_pasture_parcel')
         else:
             layer = LayerUtils.layer_by_data_source("data_soums_union", 'ca_parcel')
@@ -1399,7 +1399,7 @@ class LM2Plugin:
         elif layer_name == u'БН-н Нэгж талбар' or layer_name == 'Reserve Person Parcel':
             table_name = 'ca_person_group_parcel'
             mapTool = PrintCadastreExtractMapTool(self, table_name, True)
-        elif layer_name == u'БАХ нэгж талбар' or layer_name == 'PUGParcel':
+        elif layer_name == u'БАХ, улирлын бэлчээр' or layer_name == 'PUGParcel':
             table_name = 'ca_pasture_parcel'
             mapTool = PrintCadastreExtractMapTool(self, table_name, True)
         elif layer_name == u'ТХ нэгж талбар' or layer_name == 'SPA Parcel':

@@ -400,38 +400,44 @@ class LayerUtils(object):
 
         mygroup = root.findGroup(u"2020 оны ГНСТайлан")
         if mygroup is None:
-            group = root.insertGroup(2, u"2020 оны ГНСТайлан")
+            group = root.insertGroup(3, u"2020 оны ГНСТайлан")
 
         mygroup = root.findGroup(u"Кадастр")
         if mygroup is None:
-            group = root.insertGroup(3, u"Кадастр")
+            group = root.insertGroup(4, u"Кадастр")
             group.setExpanded(False)
             myNewGroup = group.addGroup(u"Кадастрын өөрчлөлт")
 
         mygroup = root.findGroup(u"Тусгай хэрэгцээний газар")
         if mygroup is None:
-            group = root.insertGroup(4, u"Тусгай хэрэгцээний газар")
+            group = root.insertGroup(5, u"Тусгай хэрэгцээний газар")
             group.setExpanded(False)
 
         mygroup = root.findGroup(u"Үнэлгээ, төлбөрийн бүс")
         if mygroup is None:
-            group = root.insertGroup(5, u"Үнэлгээ, төлбөрийн бүс")
+            group = root.insertGroup(6, u"Үнэлгээ, төлбөрийн бүс")
             group.setExpanded(False)
-        mygroup = root.findGroup(U"Хилийн цэс, бүсчлэл")
+        mygroup = root.findGroup(u"Хилийн цэс, бүсчлэл")
         if mygroup is None:
-            group = root.insertGroup(6, u"Хилийн цэс, бүсчлэл")
+            group = root.insertGroup(7, u"Хилийн цэс, бүсчлэл")
             group.setExpanded(False)
-        mygroup = root.findGroup(U"CAMA")
+        mygroup = root.findGroup(u"CAMA")
         if mygroup is None:
-            group = root.insertGroup(7, u"CAMA")
+            group = root.insertGroup(8, u"CAMA")
             group.setExpanded(False)
-        mygroup = root.findGroup(U"Хаяг")
+        mygroup = root.findGroup(u"Хаяг")
         if mygroup is None:
-            group = root.insertGroup(8, u"Хаяг")
+            group = root.insertGroup(9, u"Хаяг")
             group.setExpanded(False)
             myNewGroup = group.addGroup(u"Хаяг засварлалт")
             myNewGroup = group.addGroup(u"Хаягийн нэгж талбар")
             myNewGroup = group.addGroup(u"Хаягийн барилга")
+        mygroup = root.findGroup(u"Малчдын бүлэг, нөхөрлөл")
+        if mygroup is None:
+            group = root.insertGroup(10, u"Малчдын бүлэг, нөхөрлөл")
+            group.setExpanded(False)
+            myNewGroup = group.addGroup(u"БАХ, бэлчээр")
+            myNewGroup = group.addGroup(u"Малчин өрх, бүлэг")
 
     @staticmethod
     def refresh_layer1():

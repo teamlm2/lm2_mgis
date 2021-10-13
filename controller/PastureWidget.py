@@ -850,9 +850,9 @@ class PastureWidget(QDockWidget, Ui_PastureWidget, DatabaseHelper):
 
     def __tnc_group_layers(self, root):
 
-        mygroup = root.findGroup(u'Байгалын нөөц')
+        mygroup = root.findGroup(u'Малчдын бүлэг, нөхөрлөл')
         if mygroup is None:
-            mygroup = root.insertGroup(8, u'Байгалын нөөц')
+            mygroup = root.insertGroup(8, u'Малчдын бүлэг, нөхөрлөл')
 
         is_person_group_layer = False
         layers = self.plugin.iface.legendInterface().layers()
@@ -860,6 +860,7 @@ class PastureWidget(QDockWidget, Ui_PastureWidget, DatabaseHelper):
         for layer in layers:
             if layer.name() == u"Байгалын нөөцийн хил" or layer.name() == "Reserve Parcel":
                 is_person_group_layer = True
+
         if not is_person_group_layer:
             mygroup.addLayer(vlayer_parcel)
 
@@ -870,9 +871,67 @@ class PastureWidget(QDockWidget, Ui_PastureWidget, DatabaseHelper):
 
     def __pug_group_layers(self, root):
 
-        mygroup = root.findGroup("PUG")
+        layers = self.plugin.iface.legendInterface().layers()
+
+        p_mygroup = root.findGroup(u"Малчдын бүлэг, нөхөрлөл")
+        if p_mygroup is None:
+            p_mygroup = root.insertGroup(10, u"Малчдын бүлэг, нөхөрлөл")
+            p_mygroup.setExpanded(False)
+            myNewGroup = p_mygroup.addGroup(u"БАХ, бэлчээр")
+            myNewGroup = p_mygroup.addGroup(u"Малчин өрх, бүлэг")
+
+        mygroup = root.findGroup(u"Малчин өрх, бүлэг")
         if mygroup is None:
-            mygroup = root.insertGroup(7, "PUG")
+            mygroup = p_mygroup.addGroup(u"Малчин өрх, бүлэг")
+            # mygroup = root.insertGroup(12, u"Малчин өрх, бүлэг")
+
+        table_name = "view_ca_herder_location"
+        vlayer = LayerUtils.layer_by_data_source("pasture", table_name)
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer(table_name, "gid", "pasture")
+        # vlayer.loadNamedStyle(
+        #     str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/pug_parcel.qml")
+        vlayer.setLayerName(self.tr("HerderLocation"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            mygroup.addLayer(vlayer)
+
+        table_name = "view_ps_livestock_sick"
+        vlayer = LayerUtils.layer_by_data_source("pasture", table_name)
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer(table_name, "id", "pasture")
+        # vlayer.loadNamedStyle(
+        #     str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/pug_parcel.qml")
+        vlayer.setLayerName(self.tr("LiveStockSickLocation"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            mygroup.addLayer(vlayer)
+
+        table_name = "ca_farmer_group_parcel"
+        vlayer = LayerUtils.layer_by_data_source("data_soums_union", table_name)
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer(table_name, "parcel_id", "data_soums_union")
+        vlayer.loadNamedStyle(
+            str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/pug_parcel.qml")
+        vlayer.setLayerName(self.tr("HerderGroupParcel"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            mygroup.addLayer(vlayer)
+
+        table_name = "view_ca_herder_boundary"
+        vlayer = LayerUtils.layer_by_data_source("data_soums_union", table_name)
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer(table_name, "code", "data_soums_union")
+        vlayer.loadNamedStyle(
+            str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/pug_boundary.qml")
+        vlayer.setLayerName(self.tr("HerderGroupBoundary"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            mygroup.addLayer(vlayer)
+
+        mygroup = root.findGroup(u"БАХ, бэлчээр")
+        if mygroup is None:
+            mygroup = p_mygroup.addGroup(u"БАХ, бэлчээр")
         is_layer = False
         is_eco_layer = False
         is_pug_parcel = False
@@ -880,24 +939,21 @@ class PastureWidget(QDockWidget, Ui_PastureWidget, DatabaseHelper):
         is_monitoring_layer = False
         is_natural_zone_layer = False
 
-        monitoring_layer = LayerUtils.load_layer_by_name_pasture_monitoring("ca_pasture_monitoring", "point_id")
+        monitoring_layer = LayerUtils.load_layer_by_name_pasture_monitoring("view_ca_pasture_monitoring", "point_id")
         natural_zone_layaer = LayerUtils.load_layer_by_name_pasture_monitoring("au_natural_zone", "code")
-        vlayer = LayerUtils.load_union_layer_by_name("ca_pug_boundary", "code")
+        vlayer = LayerUtils.load_union_layer_by_name("view_ca_pug_boundary", "code")
         vlayer_eco = LayerUtils.load_union_layer_by_name("ca_pug_eco", "code")
         vlayer_parcel = LayerUtils.load_union_layer_by_name("ca_pasture_parcel", "parcel_id")
-        vlayer_building = LayerUtils.load_union_layer_by_name("ca_pasture_building", "building_id")
-        # vlayer_monitoring_point = LayerUtils.load_layer_by_name_report("ca_pasture_monitoring", "point_id", restrictions)
+        # vlayer_building = LayerUtils.load_union_layer_by_name("ca_pasture_building", "building_id")
 
-        layers = self.plugin.iface.legendInterface().layers()
-
-        for layer in layers:
-            if layer.name() == "PUGBuilding" or layer.name() == u"БАХ байшин":
-                is_pug_building = True
-        if not is_pug_building:
-            mygroup.addLayer(vlayer_building)
+        # for layer in layers:
+        #     if layer.name() == "PUGBuilding" or layer.name() == u"БАХ байшин":
+        #         is_pug_building = True
+        # if not is_pug_building:
+        #     mygroup.addLayer(vlayer_building)
 
         for layer in layers:
-            if layer.name() == "PUGParcel" or layer.name() == u"БАХ нэгж талбар":
+            if layer.name() == "PUGParcel" or layer.name() == u"БАХ, улирлын бэлчээр":
                 is_pug_parcel = True
         if not is_pug_parcel:
             mygroup.addLayer(vlayer_parcel)
@@ -935,7 +991,7 @@ class PastureWidget(QDockWidget, Ui_PastureWidget, DatabaseHelper):
         vlayer_parcel.setLayerName(QApplication.translate("Plugin", "PUGParcel"))
         vlayer_parcel.loadNamedStyle(
             str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "template\style/pug_parcel.qml")
-        vlayer_building.setLayerName(QApplication.translate("Plugin", "PUGBuilding"))
+        # vlayer_building.setLayerName(QApplication.translate("Plugin", "PUGBuilding"))
 
         monitoring_layer.setLayerName(QApplication.translate("Plugin", "PastureMonitoringPoint"))
         monitoring_layer.loadNamedStyle(
