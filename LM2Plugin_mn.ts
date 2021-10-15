@@ -13479,7 +13479,7 @@
         <translation>Нэгж талбар холбогдоогүй байна</translation>
     </message>
     <message>
-        <location filename="controller/PastureWidget.py" line="1041"/>
+        <location filename="controller/PastureWidget.py" line="1067"/>
         <source>Sql Error</source>
         <translation>Sql алдаа</translation>
     </message>
@@ -13495,12 +13495,12 @@
         <translation>Эхлээд хайх утгыг зааж өгнө үү.</translation>
     </message>
     <message>
-        <location filename="controller/PastureWidget.py" line="1566"/>
+        <location filename="controller/PastureWidget.py" line="1592"/>
         <source>Results: </source>
         <translation>Үр дүн:</translation>
     </message>
     <message>
-        <location filename="controller/PastureWidget.py" line="1729"/>
+        <location filename="controller/PastureWidget.py" line="1755"/>
         <source>Only single selection allowed.</source>
         <translation>Зөвхөн нэгийг сонгох боломжтой.</translation>
     </message>
@@ -13635,27 +13635,27 @@
         <translation>Отрын газар</translation>
     </message>
     <message>
-        <location filename="controller/PastureWidget.py" line="1646"/>
+        <location filename="controller/PastureWidget.py" line="1672"/>
         <source>success</source>
         <translation>амжилттай</translation>
     </message>
     <message>
-        <location filename="controller/PastureWidget.py" line="1646"/>
+        <location filename="controller/PastureWidget.py" line="1672"/>
         <source>Successfully</source>
         <translation>Амжилттай</translation>
     </message>
     <message>
-        <location filename="controller/PastureWidget.py" line="1649"/>
+        <location filename="controller/PastureWidget.py" line="1675"/>
         <source>Do you want to edit the information for daats ?</source>
         <translation>Даацын мэдээллийг өөрчилөх үү?</translation>
     </message>
     <message>
-        <location filename="controller/PastureWidget.py" line="1651"/>
+        <location filename="controller/PastureWidget.py" line="1677"/>
         <source>Update</source>
         <translation>Шинэчлэх</translation>
     </message>
     <message>
-        <location filename="controller/PastureWidget.py" line="1740"/>
+        <location filename="controller/PastureWidget.py" line="1766"/>
         <source>Cancel</source>
         <translation>Цуцлах</translation>
     </message>
@@ -13690,12 +13690,12 @@
         <translation>Био масс %</translation>
     </message>
     <message>
-        <location filename="controller/PastureWidget.py" line="1739"/>
+        <location filename="controller/PastureWidget.py" line="1765"/>
         <source>Delete</source>
         <translation>Устгах</translation>
     </message>
     <message>
-        <location filename="controller/PastureWidget.py" line="1737"/>
+        <location filename="controller/PastureWidget.py" line="1763"/>
         <source>Do you want to delete the all information for application ?</source>
         <translation>Та энэ өргөдлийн бүх мэдээллийг устгахдаа итгэлтэй байна уу?</translation>
     </message>
@@ -13715,14 +13715,24 @@
         <translation></translation>
     </message>
     <message>
-        <location filename="controller/PastureWidget.py" line="892"/>
+        <location filename="controller/PastureWidget.py" line="922"/>
         <source>HerderGroupParcel</source>
-        <translation type="unfinished"></translation>
+        <translation>Улирлын бэлчээрийн зааг</translation>
     </message>
     <message>
-        <location filename="controller/PastureWidget.py" line="903"/>
+        <location filename="controller/PastureWidget.py" line="933"/>
         <source>HerderGroupBoundary</source>
-        <translation type="unfinished"></translation>
+        <translation>Малчдын бүлгийн зааг</translation>
+    </message>
+    <message>
+        <location filename="controller/PastureWidget.py" line="900"/>
+        <source>HerderLocation</source>
+        <translation>Малчин өрхийн байршил</translation>
+    </message>
+    <message>
+        <location filename="controller/PastureWidget.py" line="911"/>
+        <source>LiveStockSickLocation</source>
+        <translation>Малын өвчлөлийн байршил</translation>
     </message>
 </context>
 <context>
@@ -15126,17 +15136,17 @@
         <translation>&lt;ub_parcel&gt; давхаргыг эхлээд давхаргын хэсэгт оруулна уу!</translation>
     </message>
     <message>
-        <location filename="controller/PastureWidget.py" line="966"/>
+        <location filename="controller/PastureWidget.py" line="992"/>
         <source>PUGBoundary</source>
         <translation>БАХ-ийн хил</translation>
     </message>
     <message>
-        <location filename="controller/PastureWidget.py" line="969"/>
+        <location filename="controller/PastureWidget.py" line="995"/>
         <source>PUGEcological</source>
         <translation>БАХ экологийн чадавхи</translation>
     </message>
     <message>
-        <location filename="controller/PastureWidget.py" line="971"/>
+        <location filename="controller/PastureWidget.py" line="997"/>
         <source>PUGParcel</source>
         <translation>БАХ, улирлын бэлчээр </translation>
     </message>
@@ -15151,12 +15161,12 @@
         <translation>Мэдээллийн сангийн холболт салсан байна!</translation>
     </message>
     <message>
-        <location filename="controller/PastureWidget.py" line="976"/>
+        <location filename="controller/PastureWidget.py" line="1002"/>
         <source>PastureMonitoringPoint</source>
         <translation>Мониторингийн Цэг</translation>
     </message>
     <message>
-        <location filename="controller/PastureWidget.py" line="980"/>
+        <location filename="controller/PastureWidget.py" line="1006"/>
         <source>NaturalZone</source>
         <translation>Байгалийн бүс, бүслүүр</translation>
     </message>

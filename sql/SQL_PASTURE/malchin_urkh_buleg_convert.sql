@@ -101,8 +101,38 @@ select aa.group_no::int, aa.person_id, 10, aa.person_register from public.view_m
 insert into pasture.ps_person_group_location (person_group, pasture_type, current_year, geometry, created_by, created_at, au1, au2, au3)
 select aa.group_no::integer, aa.pasture_ty::int, 2021, aa.geom, 999, now(), aa.au1, au2, aa.au3 from public.view_malchid_urkh aa
 
-
-
+----------------
+with new_numbers as (
+select id, current_year, pasture_type, cpt.description, 
+case 
+	when pasture_type = 17 then (current_year::text ||'-'||'05' || '-20')::Date
+	when pasture_type = 18 then (current_year::text ||'-'||'09' || '-15')::Date
+	when pasture_type = 19 then (current_year::text ||'-'||'11' || '-01')::Date
+	when pasture_type = 20 then (current_year::text ||'-'||'04' || '-01')::Date
+	when pasture_type = 21 then (current_year::text ||'-'||'11' || '-01')::Date
+	when pasture_type = 22 then (current_year::text ||'-'||'05' || '-20')::Date
+	when pasture_type = 23 then (current_year::text ||'-'||'04' || '-01')::Date
+	when pasture_type = 24 then (current_year::text ||'-'||'09' || '-15')::Date
+	else null
+end as start_date,
+case 
+	when pasture_type = 17 then (current_year::text ||'-'||'09' || '-15')::Date
+	when pasture_type = 18 then (current_year::text ||'-'||'11' || '-01')::Date
+	when pasture_type = 19 then (current_year::text ||'-'||'04' || '-01')::Date
+	when pasture_type = 20 then (current_year::text ||'-'||'05' || '-20')::Date
+	when pasture_type = 21 then (current_year::text ||'-'||'05' || '-20')::Date
+	when pasture_type = 22 then (current_year::text ||'-'||'09' || '-15')::Date
+	when pasture_type = 23 then (current_year::text ||'-'||'09' || '-15')::Date
+	when pasture_type = 24 then (current_year::text ||'-'||'04' || '-01')::Date
+	else null
+end as end_date
+from pasture.ps_person_group_location aa
+join codelists.cl_pasture_type cpt on aa.pasture_type = cpt.code 
+)
+update pasture.ps_person_group_location
+  set start_date = s.start_date, end_date = s.end_date
+from new_numbers s
+where pasture.ps_person_group_location.id = s.id;
 
 
 
@@ -125,3 +155,4 @@ order by cpb.group_no
 
 select * from data_soums_union.ct_person_group
 where group_no = 640437
+

@@ -1,0 +1,38 @@
+select cpb.code, cpb.area_ga, cpb.group_name area_name, cpb.group_type, cpgt.description group_type_desc, cpb.au2, cpg.group_no, 
+cpg.group_name, cpg.is_contract, cd.decision_no, cd.decision_date, cd.decision_level, cdl.description decision_level_desc, cpg.citizen_count, cpb.geometry,
+cpg.au1, au1.name as au1_name, cpg.au2, au2."name" as au2_name, cpg.au3, au3.name as au3_name from data_soums_union.ct_person_group cpg
+left join data_soums_union.ca_pug_boundary cpb on cpg.boundary_code = cpb.code
+left join codelists.cl_person_group_type cpgt on cpg.group_type = cpgt.code 
+left join data_soums_union.ct_contract cc on cpg.is_contract = cc.contract_no 
+left join data_soums_union.ct_contract_application_role ccar on cc.contract_id = ccar.contract 
+left join data_soums_union.ct_decision_application cda on ccar.application = cda.application 
+left join data_soums_union.ct_decision cd on cda.decision = cd.decision_id 
+left join codelists.cl_decision_level cdl on cd.decision_level = cdl.code 
+left join admin_units.au_level3 au3 on cpg.au3 = au3.code 
+left join admin_units.au_level2 au2 on cpg.au2 = au2.code 
+left join admin_units.au_level1 au1 on cpg.au1 = au1.code 
+where cpg.au2 = '06419' and cpg.group_type = 4
+
+------------
+
+select cpg.group_no, cpg.group_name, ppgl.start_date, ppgl.end_date, ppgl.pasture_type, cpt.description pasture_type_desc, bp."name", bp.first_name, bp.person_register, cpg.created_date, cpg.citizen_count, cpg.au1, au1.name as au1_name, cpg.au2, au2."name" au2_name, cpg.au3, au3."name" au3_name, 
+ppgl.id, ppgl.current_year, ppgl.geometry
+--(select gs."text" from data_address_import.gn_soft gs order by st_distance(gs.geo_data, ppgl.geometry) asc limit 1)
+from data_soums_union.ct_person_group cpg 
+left join pasture.ps_person_group_location ppgl on cpg.group_no = ppgl.person_group 
+left join codelists.cl_pasture_type cpt on ppgl.pasture_type = cpt.code 
+left join data_soums_union.ct_group_member cgm on cpg.group_no = cgm.group_no 
+left join base.bs_person bp on cgm.person = bp.person_id 
+left join admin_units.au_level3 au3 on cpg.au3 = au3.code 
+left join admin_units.au_level2 au2 on cpg.au2 = au2.code 
+left join admin_units.au_level1 au1 on cpg.au1 = au1.code 
+where cpg.group_type = 3 and cgm."role" = 10 and cpg.au2 = '04510'
+and cpg.group_no = 45101 and ppgl.current_year = 2020
+order by cpg.group_no, ppgl.start_date 
+
+select (select count(id) from pasture.ps_person_group_location ppgl where ppgl.person_group = cpg.group_no and current_year = 2021), * from data_soums_union.ct_person_group cpg 
+where cpg.group_type = 3 and cpg.au2 = '06419'
+
+select count(id) from pasture.ps_person_group_location ppgl where ppgl.person_group = 45101 and current_year = 2021
+
+select * from data_address_import.gn_soft

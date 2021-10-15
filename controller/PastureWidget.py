@@ -896,17 +896,6 @@ class PastureWidget(QDockWidget, Ui_PastureWidget, DatabaseHelper):
         if myalayer is None:
             mygroup.addLayer(vlayer)
 
-        table_name = "view_ps_livestock_sick"
-        vlayer = LayerUtils.layer_by_data_source("pasture", table_name)
-        if vlayer is None:
-            vlayer = LayerUtils.load_layer_base_layer(table_name, "id", "pasture")
-        # vlayer.loadNamedStyle(
-        #     str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/pug_parcel.qml")
-        vlayer.setLayerName(self.tr("LiveStockSickLocation"))
-        myalayer = root.findLayer(vlayer.id())
-        if myalayer is None:
-            mygroup.addLayer(vlayer)
-
         table_name = "ca_farmer_group_parcel"
         vlayer = LayerUtils.layer_by_data_source("data_soums_union", table_name)
         if vlayer is None:
@@ -1001,6 +990,16 @@ class PastureWidget(QDockWidget, Ui_PastureWidget, DatabaseHelper):
         natural_zone_layaer.loadNamedStyle(
             str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "template\style/ca_nat_zone_marged.qml")
 
+        table_name = "view_ps_livestock_sick"
+        vlayer = LayerUtils.layer_by_data_source("pasture", table_name)
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer(table_name, "id", "pasture")
+        # vlayer.loadNamedStyle(
+        #     str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/pug_parcel.qml")
+        vlayer.setLayerName(self.tr("LiveStockSickLocation"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            p_mygroup.addLayer(vlayer)
         # legend = self.plugin.iface.legendInterface()  # access the legend
         # legend.setLayerVisible(vlayer, False)
         # legend.setLayerVisible(vlayer_eco, False)
