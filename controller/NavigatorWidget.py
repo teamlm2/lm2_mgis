@@ -13956,3 +13956,17 @@ class NavigatorWidget(QDockWidget, Ui_NavigatorWidget, DatabaseHelper):
         myalayer = root.findLayer(vlayer.id())
         if myalayer is None:
             mygroup.addLayer(vlayer)
+
+    @pyqtSlot()
+    def on_secret_parcel_button_clicked(self):
+
+        root = QgsProject.instance().layerTreeRoot()
+        mygroup = root.findGroup(U"Хилийн цэс, бүсчлэл")
+        vlayer = LayerUtils.layer_by_data_source("data_soums_union", "secret_parcel_view")
+        if vlayer is None:
+            vlayer = LayerUtils.load_layer_base_layer("secret_parcel_view", "parcel_id", "data_soums_union")
+        vlayer.loadNamedStyle(str(os.path.dirname(os.path.realpath(__file__))[:-10]) + "/template\style/secret_parcel.qml")
+        vlayer.setLayerName(self.tr("Secret Parcel"))
+        myalayer = root.findLayer(vlayer.id())
+        if myalayer is None:
+            mygroup.addLayer(vlayer)

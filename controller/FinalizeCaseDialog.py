@@ -1,7 +1,7 @@
 # coding=utf8
 __author__ = 'Ankhaa'
 from inspect import currentframe
-from geoalchemy2.elements import WKTElement
+
 from ..view.Ui_FinalizeCaseDialog import *
 from ..model.CaTmpParcel import *
 from ..model.CaBuilding import *
@@ -200,57 +200,33 @@ class FinalizeCaseDialog(QDialog, Ui_FinalizeCaseDialog, DatabaseHelper):
         message_box.exec_()
         is_street_name_validator = True
         if message_box.clickedButton() == yes_button:
-            # try:
-            num_rows = self.parcels_item.childCount()
+            try:
+                num_rows = self.parcels_item.childCount()
+                for row in range(num_rows):
+                    item = self.parcels_item.child(row)
+                    object_id = item.data(0, Qt.UserRole)
+                    if object_id != None:
+                        if len(object_id) == 12:
+                            tmp_parcel = self.session.query(CaTmpParcel).filter(CaTmpParcel.parcel_id == object_id).one()
+                            street_name_text = tmp_parcel.address_streetname
 
-            valid = True
-            error_message = u'Дараах давхцалтай тул зөвшөөрөх боломжгүй!!!'
-            error_message = error_message + "\n \n"
+                            first_letter = ''
 
-            for row in range(num_rows):
-                item = self.parcels_item.child(row)
-                object_id = item.data(0, Qt.UserRole)
-                if object_id != None:
-                    # if len(object_id) == 12:
-                    tmp_parcel = self.session.query(CaTmpParcel).filter(CaTmpParcel.parcel_id == object_id).one()
-                    geom =  "st_setsrid(" + "'" + str(tmp_parcel.geometry) + "'::geometry" + ", 4326)"
+                            if street_name_text != None and street_name_text != '':
+                                first_letter = street_name_text[0]
+                                if tmp_parcel.address_streetname != '':
+                                    first_letter = street_name_text[0]
 
-                    sql = "select * from base.check_cadastre_case_overlapas(" + str(geom) + ", null);"
+                                if len(street_name_text) <= 0:
+                                    is_street_name_validator = False
+                            if first_letter not in Constants.CAPITAL_MONGOLIAN:
+                                is_street_name_validator = False
+                            if is_street_name_validator == False:
+                                PluginUtils.show_message(self, self.tr("Street Name"), self.tr(object_id + " parcel street name is incorrect.You want to continue?"))
 
-                    result = self.session.execute(sql)
-
-                    for item_row in result:
-                        aaa = item_row[0]
-
-                        valid = False
-                        if item_row[1] == 4:
-                            parcel_error = unicode(object_id) + u' нэгж талбар нь ' + unicode(item_row[0]) + u' '
-                            error_message = error_message + "\n \n" + parcel_error
-                        else:
-                            parcel_error = unicode(object_id) + u' нэгж талбар нь ' + unicode(item_row[0]) + ' (' + unicode(item_row[6]) + ')' + unicode(item_row[2])
-                            error_message = error_message + "\n \n" + parcel_error
-
-                        # street_name_text = tmp_parcel.address_streetname
-                        #
-                        # first_letter = ''
-                        #
-                        # if street_name_text != None and street_name_text != '':
-                        #     first_letter = street_name_text[0]
-                        #     if tmp_parcel.address_streetname != '':
-                        #         first_letter = street_name_text[0]
-                        #
-                        #     if len(street_name_text) <= 0:
-                        #         is_street_name_validator = False
-                        # if first_letter not in Constants.CAPITAL_MONGOLIAN:
-                        #     is_street_name_validator = False
-                        # if is_street_name_validator == False:
-                        #     PluginUtils.show_message(self, self.tr("Street Name"), self.tr(object_id + " parcel street name is incorrect.You want to continue?"))
-            if not valid:
-                PluginUtils.show_error(self, self.tr("Invalid parcel info"), error_message)
+            except SQLAlchemyError, e:
+                PluginUtils.show_error(self, self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
                 return
-            # except SQLAlchemyError, e:
-            #     PluginUtils.show_error(self, self.tr("File Error"), self.tr("Error in line {0}: {1}").format(currentframe().f_lineno, e.message))
-            #     return
         else:
             return
 
@@ -270,8 +246,8 @@ class FinalizeCaseDialog(QDialog, Ui_FinalizeCaseDialog, DatabaseHelper):
             idx = self.surveyor_cbox.currentIndex()
             self.maintenance_case.surveyed_by_surveyor = self.surveyor_cbox.itemData(idx)
 
-        # self.__write_changes()
-        # self.commit()
+        self.__write_changes()
+        self.commit()
         self.reject()
 
     def __valid_case(self):
